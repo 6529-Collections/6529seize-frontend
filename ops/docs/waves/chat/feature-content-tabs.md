@@ -64,6 +64,9 @@ restores it whenever that wave is opened again and the tab is still available.
 - Polls can allow every reader to respond or limit responses to people who can
   chat. Readers who cannot respond still see poll results, but vote controls are
   hidden.
+- Eligible readers can use `View results` on an open unanswered poll to inspect
+  counts and percentages before voting, then return to `Vote` while the poll is
+  still open.
 
 ## Edge Cases
 

@@ -9,9 +9,12 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useMemo, useState } from "react";
 import {
   ALL_GROUP_MENTION,
-  getAllDropsTooltip,
   type NotificationLoadingTarget,
 } from "./waveNotificationSettings.helpers";
+import {
+  formatWaveNotificationSettingsInteger,
+  waveNotificationSettingsMessage,
+} from "./waveNotificationSettings.messages";
 
 export function useWavePreferenceSettings(wave: ApiWave) {
   const { seizeSettings } = useSeizeSettings();
@@ -67,8 +70,12 @@ export function useWavePreferenceSettings(wave: ApiWave) {
       } catch (error) {
         setToast({
           type: "error",
-          title: "Couldn't update notification settings.",
-          description: "Please try again.",
+          title: waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.updateTitle"
+          ),
+          description: waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.description"
+          ),
           details: getToastErrorDetails(error, errorMessage),
         });
       } finally {
@@ -88,8 +95,12 @@ export function useWavePreferenceSettings(wave: ApiWave) {
           : [ALL_GROUP_MENTION],
       },
       errorMessage: allGroupNotificationsEnabled
-        ? "Unable to disable @ALL notifications"
-        : "Unable to enable @ALL notifications",
+        ? waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.disableAllMentions"
+          )
+        : waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.enableAllMentions"
+          ),
     });
   }, [
     allGroupNotificationsEnabled,
@@ -109,8 +120,12 @@ export function useWavePreferenceSettings(wave: ApiWave) {
         enabled_group_notifications: enabledGroupNotifications,
       },
       errorMessage: subscribedToAllDrops
-        ? "Unable to disable all-message notifications"
-        : "Unable to enable all-message notifications",
+        ? waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.disableAllMessages"
+          )
+        : waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.enableAllMessages"
+          ),
     });
   }, [
     disableAllDropsSelection,
@@ -131,20 +146,21 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     void refetch();
   }, [refetch]);
 
-  const allGroupTooltip = allGroupNotificationsEnabled
-    ? "Click to disable @ALL notifications"
-    : "Click to enable @ALL notifications";
-  const allDropsTooltip = getAllDropsTooltip({
-    disableAllDropsSelection,
-    subscribedToAllDrops,
-    subscribersLimit: allDropsNotificationsSubscribersLimit,
-  });
+  const allDropsLimitDescription = waveNotificationSettingsMessage(
+    subscribedToAllDrops
+      ? "waves.notificationSettings.allMessages.limit.reenableDescription"
+      : "waves.notificationSettings.allMessages.limit.unavailableDescription",
+    {
+      count: formatWaveNotificationSettingsInteger(
+        allDropsNotificationsSubscribersLimit
+      ),
+    }
+  );
 
   return {
     allDropsEnabled,
     allGroupNotificationsEnabled,
-    allDropsTooltip,
-    allGroupTooltip,
+    allDropsLimitDescription,
     disableAllDropsSelection,
     loading,
     loadingTarget,

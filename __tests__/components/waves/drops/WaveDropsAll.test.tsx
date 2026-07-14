@@ -37,6 +37,9 @@ jest.mock("@/hooks/useWaveIsTyping");
 jest.mock("@/hooks/useWaveBoostedDrops");
 jest.mock("@/components/notifications/NotificationsContext");
 jest.mock("@/components/auth/Auth");
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  markMobileLaunchStep: jest.fn(),
+}));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));

@@ -118,9 +118,15 @@ describe("mixpanel analytics wrapper", () => {
     analytics.disableAnalytics();
     analytics.trackPageView("/blocked");
     analytics.initAnalytics();
+    analytics.trackAnalyticsEvent("Product Event", {
+      product_failure: false,
+    });
     analytics.trackPageView("/allowed");
 
-    expect(trackMock).toHaveBeenCalledTimes(1);
+    expect(trackMock).toHaveBeenCalledTimes(2);
+    expect(trackMock).toHaveBeenCalledWith("Product Event", {
+      product_failure: false,
+    });
     expect(trackMock).toHaveBeenCalledWith("Page Viewed", {
       path: "/allowed",
     });
@@ -142,6 +148,36 @@ describe("mixpanel analytics wrapper", () => {
     expect(trackMock).toHaveBeenCalledWith("Page Viewed", {
       has_connected_profile: true,
       path: "/waves",
+    });
+  });
+
+  it("tracks auth refresh impact events with sanitized low-cardinality properties", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+
+    analytics.initAnalytics();
+    analytics.trackAuthImpactEvent("Auth Session Refresh Recovered", {
+      auth_state_after: "authenticated",
+      auth_state_before: "refresh_needed",
+      client_type: "web",
+      endpoint_family: "auth_session_refresh",
+      product_failure: false,
+      reason: "session_refresh",
+      refresh_outcome: "success",
+      status_bucket: "2xx",
+    });
+
+    expect(trackMock).toHaveBeenCalledWith("Auth Session Refresh Recovered", {
+      auth_state_after: "authenticated",
+      auth_state_before: "refresh_needed",
+      client_type: "web",
+      endpoint_family: "auth_session_refresh",
+      product_failure: false,
+      reason: "session_refresh",
+      refresh_outcome: "success",
+      status_bucket: "2xx",
     });
   });
 });

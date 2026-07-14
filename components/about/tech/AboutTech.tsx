@@ -15,15 +15,15 @@ export default function AboutTech() {
   const locale = DEFAULT_LOCALE;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-10 tw-px-4 tw-text-iron-200 sm:tw-px-6 lg:tw-px-8">
+    <div className="tw-flex tw-w-full tw-flex-col tw-gap-10 tw-px-4 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8">
       <section className="tw-pb-2">
-        <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+        <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
           About / Tech
         </p>
         <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
           Tech Updates
         </h1>
-        <div className="tw-flex tw-max-w-4xl tw-flex-col tw-gap-5 tw-text-base tw-leading-7 tw-text-iron-300">
+        <div className="tw-flex tw-w-full tw-flex-col tw-gap-5 tw-text-base tw-leading-7 tw-text-iron-50">
           <p className="tw-mb-0">
             This is a current casual area for longer 6529 tech updates: repo
             work, bot notes, release context, and build reports that are too
@@ -50,7 +50,7 @@ export default function AboutTech() {
         </div>
       </section>
 
-      <section className="tw-max-w-6xl" aria-labelledby="tech-notes-heading">
+      <section className="tw-w-full" aria-labelledby="tech-notes-heading">
         <h2
           id="tech-notes-heading"
           className="tw-mb-5 tw-text-2xl tw-font-semibold tw-text-iron-50"
@@ -65,23 +65,23 @@ export default function AboutTech() {
             "about.tech.notes.walletAuthentication.ariaLabel"
           )}
         >
-          <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+          <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
             Auth changes
           </p>
           <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
             Wallet authentication upgrade
           </h3>
-          <p className="tw-mb-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-50">
             What is changing with the new secure session, why users may be asked
             to upgrade, and what to expect during rollout.
           </p>
         </Link>
       </section>
 
-      <section className="tw-max-w-6xl" aria-labelledby="tech-reports-heading">
+      <section className="tw-w-full" aria-labelledby="tech-reports-heading">
         <div className="tw-mb-5 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
-            <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+            <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
               Index
             </p>
             <h2
@@ -107,7 +107,7 @@ export default function AboutTech() {
               <li key={report.slug}>
                 <div className="tw-grid tw-gap-0 md:tw-grid-cols-[minmax(0,1fr)_12rem]">
                   <div className="tw-p-5">
-                    <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+                    <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
                       {report.dateLabel}
                     </p>
                     <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
@@ -118,7 +118,7 @@ export default function AboutTech() {
                         {report.title}
                       </Link>
                     </h3>
-                    <p className="tw-mb-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+                    <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-50">
                       {report.description}
                     </p>
                   </div>
@@ -126,7 +126,7 @@ export default function AboutTech() {
                     <p className="tw-mb-1 tw-text-3xl tw-font-semibold tw-leading-none tw-text-iron-50">
                       {formatInteger(locale, getTechReportTotal(report))}
                     </p>
-                    <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+                    <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
                       {t(locale, "about.tech.index.prsCovered")}
                     </p>
                   </div>

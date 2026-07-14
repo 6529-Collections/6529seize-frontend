@@ -19,6 +19,8 @@ const mockApproveLabels = {
 
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useApproveWaveCustomTabLabels: () => mockApproveLabels,
+  useWaveSubmissionButtonLabel: () => "Drop",
+  useWaveSubmissionButtonLabelOverride: () => null,
 }));
 
 let mockCompleted = false;

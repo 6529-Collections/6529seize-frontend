@@ -4,6 +4,10 @@ import {
   fetchLightWaveMessages,
 } from "@/contexts/wave/utils/wave-messages-utils";
 import {
+  WAVE_DROPS_NATIVE_INITIAL_PARAMS,
+  WAVE_DROPS_PARAMS,
+} from "@/components/react-query-wrapper/utils/query-utils";
+import {
   commonApiFetch,
   commonApiFetchWithRetry,
 } from "@/services/api/common-api";
@@ -76,9 +80,28 @@ describe("wave-messages-utils additional", () => {
     mockFetch.mockResolvedValue({ drops: [drop], wave });
     const res = await fetchWaveMessages("w", null);
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.objectContaining({ endpoint: "v2/waves/w/drops" })
+      expect.objectContaining({
+        endpoint: "v2/waves/w/drops",
+        params: { limit: WAVE_DROPS_PARAMS.limit.toString() },
+      })
     );
     expect(res?.[0]?.wave).toEqual(expect.objectContaining({ id: "w" }));
+  });
+
+  it("fetchWaveMessages accepts an initial limit override", async () => {
+    mockFetch.mockResolvedValue({ drops: [drop], wave });
+    await fetchWaveMessages("w", null, undefined, undefined, {
+      limit: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/waves/w/drops",
+        params: {
+          limit: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit.toString(),
+        },
+      })
+    );
   });
 
   it("fetchWaveMessages rethrows abort errors", async () => {
@@ -87,10 +110,34 @@ describe("wave-messages-utils additional", () => {
     await expect(fetchWaveMessages("w", null)).rejects.toBe(err);
   });
 
+  it("fetchWaveMessages reports non-abort failures before returning null", async () => {
+    const err = Object.assign(new Error("Service unavailable"), {
+      status: 503,
+    });
+    const onFailure = jest.fn();
+    mockFetch.mockRejectedValue(err);
+
+    const result = await fetchWaveMessages("w", null, undefined, undefined, {
+      onFailure,
+    });
+
+    expect(result).toBeNull();
+    expect(onFailure).toHaveBeenCalledWith(err);
+  });
+
   it("fetchAroundSerialNoWaveMessages uses retry fetch", async () => {
     mockFetchRetry.mockResolvedValue({ drops: [drop], wave });
     const res = await fetchAroundSerialNoWaveMessages("w", 5);
-    expect(mockFetchRetry).toHaveBeenCalled();
+    expect(mockFetchRetry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/waves/w/drops",
+        params: expect.objectContaining({
+          limit: WAVE_DROPS_PARAMS.limit.toString(),
+          serial_no_limit: "5",
+          search_strategy: "FIND_BOTH",
+        }),
+      })
+    );
     expect(res?.[0]?.serial_no).toBe(1);
   });
 
@@ -126,8 +173,7 @@ describe("wave-messages-utils additional", () => {
     expect(mockFetchRetry).toHaveBeenCalledWith(
       expect.objectContaining({ endpoint: "drop-ids" })
     );
-    expect(result).not.toBeNull();
-    expect(result!.length).toBe(9996);
+    expect(result).toHaveLength(9996);
     expect(result![0]?.serial_no).toBe(10000);
     expect(result![result!.length - 1]?.serial_no).toBe(5);
     expect(result!.find((d) => d.serial_no === 5)).toMatchObject({

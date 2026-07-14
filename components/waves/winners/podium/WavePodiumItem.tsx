@@ -367,11 +367,11 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                       <Link
                         href={getIdentityHref(identityDisplay.profileUser)}
                         onClick={(e) => e.stopPropagation()}
-                        className={`tw-relative tw-block tw-max-w-full tw-text-center tw-no-underline tw-transition-all ${hoverTextColorClass} tw-group/link`}
+                        className={`tw-relative tw-block tw-min-w-0 tw-max-w-full tw-text-center tw-no-underline tw-transition-all ${hoverTextColorClass} tw-group/link`}
                       >
                         <span
                           title={primaryLabel}
-                          className={`${styles.autorFontSize} tw-block tw-max-w-full tw-truncate tw-font-semibold tw-text-iron-100 ${hoverTextColorClass} tw-transition-colors`}
+                          className={`${styles.autorFontSize} tw-line-clamp-2 tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-font-semibold tw-leading-tight tw-text-iron-100 ${hoverTextColorClass} tw-transition-colors`}
                         >
                           {primaryLabel}
                         </span>
@@ -395,7 +395,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   ) : (
                     <span
                       title={primaryLabel}
-                      className={`${styles.autorFontSize} tw-block tw-max-w-full tw-truncate tw-text-center tw-font-semibold tw-text-iron-100`}
+                      className={`${styles.autorFontSize} tw-line-clamp-2 tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-100`}
                     >
                       {primaryLabel}
                     </span>
@@ -435,28 +435,28 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   <Link
                     href={authorProfileHref}
                     onClick={(e) => e.stopPropagation()}
-                    className={`tw-relative tw-mb-2 tw-mt-2 tw-text-center tw-no-underline tw-transition-all sm:tw-mt-4 ${hoverTextColorClass} tw-group/link`}
+                    className={`tw-relative tw-mb-2 tw-mt-2 tw-block tw-min-w-0 tw-max-w-full tw-text-center tw-no-underline tw-transition-all sm:tw-mt-4 ${hoverTextColorClass} tw-group/link`}
                   >
                     <span
-                      className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 ${hoverTextColorClass} tw-inline-flex tw-items-center tw-transition-colors`}
+                      className={`${styles.autorFontSize} tw-line-clamp-2 tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-200 ${hoverTextColorClass} tw-transition-colors`}
                     >
                       {authorProfileLabel}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100`}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
-                        />
-                      </svg>
                     </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100`}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                      />
+                    </svg>
                   </Link>
                 </UserProfileTooltipWrapper>
               )}

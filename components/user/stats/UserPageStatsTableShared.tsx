@@ -38,7 +38,7 @@ export function UserPageStatsTableHead({
             <th
               key={label}
               scope="col"
-              className="text-right !tw-text-[#93939f]"
+              className="tw-text-right !tw-text-[#93939f]"
             >
               {label}
             </th>

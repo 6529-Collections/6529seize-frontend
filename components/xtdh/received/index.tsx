@@ -66,10 +66,13 @@ export default function XtdhReceivedSection({
     }
     const normalized = selectedContract.trim().toLowerCase();
     return (
-      collections.find(
-        (collection) =>
-          (collection.contract?.trim().toLowerCase() ?? "") === normalized
-      ) ?? null
+      collections.find((collection) => {
+        const contract: unknown = collection.contract;
+        return (
+          typeof contract === "string" &&
+          contract.trim().toLowerCase() === normalized
+        );
+      }) ?? null
     );
   }, [collections, selectedContract]);
 
@@ -142,6 +145,7 @@ export default function XtdhReceivedSection({
             selectedContract={selectedContract}
             onSelectCollection={handleCollectionSelect}
             isIdentityScoped={isIdentityScoped}
+            searchTerm={searchTerm}
           />
           {showLoadMore ? (
             <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">

@@ -1,4 +1,6 @@
+import type React from "react";
 import { render, screen } from "@testing-library/react";
+import { LazyMotion, domAnimation } from "framer-motion";
 import BrainContentInput from "@/components/brain/content/input/BrainContentInput";
 
 const useWaveDataMock = jest.fn();
@@ -23,6 +25,16 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
 }));
 
+function renderInput(ui: React.ReactElement) {
+  return render(<LazyMotion features={domAnimation}>{ui}</LazyMotion>);
+}
+
+function getComposerSurface() {
+  const surface = screen.getByTestId("creator").closest(".tw-sticky");
+  expect(surface).not.toBeNull();
+  return surface as HTMLElement;
+}
+
 describe("BrainContentInput", () => {
   beforeEach(() => {
     useWaveDataMock.mockReset();
@@ -32,7 +44,7 @@ describe("BrainContentInput", () => {
   it("returns null when wave is missing", () => {
     capacitorMock.mockReturnValue({ isCapacitor: false });
     useWaveDataMock.mockReturnValue({ data: null });
-    const { container } = render(
+    const { container } = renderInput(
       <BrainContentInput activeDrop={null} onCancelReplyQuote={jest.fn()} />
     );
     expect(container.firstChild).toBeNull();
@@ -41,7 +53,7 @@ describe("BrainContentInput", () => {
   it("renders creator and passes wave id", () => {
     capacitorMock.mockReturnValue({ isCapacitor: false });
     useWaveDataMock.mockReturnValue({ data: { id: "w1" } });
-    render(
+    renderInput(
       <BrainContentInput
         activeDrop={{ drop: { wave: { id: "w1" } } } as any}
         onCancelReplyQuote={jest.fn()}
@@ -53,7 +65,7 @@ describe("BrainContentInput", () => {
     });
     expect(screen.getByTestId("creator")).toHaveTextContent("w1");
     expect(screen.getByTestId("creator")).toHaveAttribute("data-mode", "CHAT");
-    expect(screen.getByTestId("creator").parentElement?.className).toContain(
+    expect(getComposerSurface().className).toContain(
       "tw-max-h-[calc(100vh-20rem)]"
     );
   });
@@ -66,13 +78,13 @@ describe("BrainContentInput", () => {
       onWaveNotFound = args.onWaveNotFound;
       return { data: { id: "w2" } };
     });
-    render(
+    renderInput(
       <BrainContentInput
         activeDrop={{ drop: { wave: { id: "w2" } } } as any}
         onCancelReplyQuote={onCancel}
       />
     );
-    expect(screen.getByTestId("creator").parentElement?.className).toContain(
+    expect(getComposerSurface().className).toContain(
       "tw-max-h-[calc(100vh-14.7rem)]"
     );
     if (onWaveNotFound) {

@@ -55,6 +55,7 @@ describe("create-wave.validation", () => {
     display: {
       customRules: null,
       outcomesVisible: true,
+      submissionButtonLabel: null,
       approve: {
         approvalsTabLabel: "",
         approvedTabLabel: "",
@@ -76,6 +77,115 @@ describe("create-wave.validation", () => {
       config,
     });
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
+  });
+
+  it("requires outcomes for scheduled rank waves", () => {
+    const config = {
+      ...baseConfig,
+      outcomes: [],
+      dates: { ...baseConfig.dates, ongoingRanking: false },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OUTCOMES,
+      config,
+    });
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED);
+  });
+
+  it("does not require outcomes for ongoing rank waves", () => {
+    const config = {
+      ...baseConfig,
+      outcomes: [],
+      dates: { ...baseConfig.dates, ongoingRanking: true },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OUTCOMES,
+      config,
+    });
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED
+    );
+  });
+
+  it("still requires outcomes for approve waves with a stray ongoing flag", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      outcomes: [],
+      dates: { ...baseConfig.dates, ongoingRanking: true },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OUTCOMES,
+      config,
+    });
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED);
+  });
+
+  it("rejects the after-a-win duplicates rule for ongoing rank waves", () => {
+    const config = {
+      ...baseConfig,
+      dates: { ...baseConfig.dates, ongoingRanking: true },
+      drops: {
+        ...baseConfig.drops,
+        submissionStrategy: {
+          type: "IDENTITY",
+          config: {
+            duplicates: "ALLOW_AFTER_WIN",
+            who_can_be_submitted: "EVERYONE",
+          },
+        },
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DROPS,
+      config,
+    });
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.IDENTITY_DUPLICATES_REQUIRE_WINNERS
+    );
+  });
+
+  it("allows the after-a-win duplicates rule for scheduled rank waves", () => {
+    const config = {
+      ...baseConfig,
+      dates: { ...baseConfig.dates, ongoingRanking: false },
+      drops: {
+        ...baseConfig.drops,
+        submissionStrategy: {
+          type: "IDENTITY",
+          config: {
+            duplicates: "ALLOW_AFTER_WIN",
+            who_can_be_submitted: "EVERYONE",
+          },
+        },
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DROPS,
+      config,
+    });
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.IDENTITY_DUPLICATES_REQUIRE_WINNERS
+    );
+  });
+
+  it("still validates start-date ordering for ongoing rank waves", () => {
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 10,
+        votingStartDate: 5,
+        ongoingRanking: true,
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
+    );
   });
 
   it("allows approve display labels under the limit", () => {
@@ -127,6 +237,45 @@ describe("create-wave.validation", () => {
 
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
+    );
+  });
+
+  it("rejects submission button labels over the limit after trimming", () => {
+    const config = {
+      ...baseConfig,
+      display: {
+        ...baseConfig.display,
+        submissionButtonLabel: ` ${"A".repeat(25)} `,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
+    );
+  });
+
+  it("ignores submission button labels for chat waves", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Chat },
+      display: {
+        ...baseConfig.display,
+        submissionButtonLabel: "A".repeat(25),
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
     );
   });
 
@@ -224,6 +373,38 @@ describe("create-wave.validation", () => {
 
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
+  it("skips decision-time validation for ongoing rank waves", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        // Would normally fail the "must be in the future" check, but an ongoing
+        // wave has no decision schedule to validate.
+        firstDecisionTime: now,
+        endDate: null,
+        subsequentDecisions: [],
+        isRolling: false,
+        ongoingRanking: true,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
     );
   });
 

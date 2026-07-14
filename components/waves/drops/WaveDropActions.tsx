@@ -23,6 +23,14 @@ interface WaveDropActionsProps {
   readonly onReply: () => void;
   readonly onEdit?: (() => void) | undefined;
   readonly suppressed?: boolean | undefined;
+  /**
+   * Pointer-driven reveal from the drop row. Browsers that internally
+   * classify all input as touch never activate CSS :hover, so the
+   * group-hover reveal stays invisible even while a real cursor (delivering
+   * pointer events) is on the row. The row tracks pointerenter/leave and
+   * forces visibility here; CSS :hover remains as the no-JS fallback.
+   */
+  readonly forceVisible?: boolean | undefined;
   readonly style?: CSSProperties | undefined;
 }
 
@@ -33,6 +41,7 @@ export default function WaveDropActions({
   onReply,
   onEdit,
   suppressed = false,
+  forceVisible = false,
   style,
 }: WaveDropActionsProps) {
   const { isMemesWave } = useSeizeSettings();
@@ -55,6 +64,8 @@ export default function WaveDropActions({
     visibilityClasses = "tw-pointer-events-auto tw-opacity-100";
   } else if (suppressed) {
     visibilityClasses = "tw-pointer-events-none tw-opacity-0";
+  } else if (forceVisible) {
+    visibilityClasses = "tw-pointer-events-auto tw-opacity-100";
   }
 
   return (

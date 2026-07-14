@@ -2,6 +2,9 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { SingleWaveDropAuthor } from "@/components/waves/drop/SingleWaveDropAuthor";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+
+const mockDropAuthorBadges = jest.fn();
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -21,7 +24,10 @@ jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
 }));
 
 jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
-  DropAuthorBadges: () => <div data-testid="drop-author-badges" />,
+  DropAuthorBadges: (props: unknown) => {
+    mockDropAuthorBadges(props);
+    return <div data-testid="drop-author-badges" />;
+  },
 }));
 
 jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
@@ -37,7 +43,8 @@ describe("SingleWaveDropAuthor", () => {
   const createDrop = (
     handle: string | null,
     primaryAddress: string,
-    classification: ApiProfileClassification = ApiProfileClassification.Pseudonym
+    classification: ApiProfileClassification = ApiProfileClassification.Pseudonym,
+    dropType: ApiDropType = ApiDropType.Chat
   ) =>
     ({
       id: "drop-1",
@@ -48,6 +55,8 @@ describe("SingleWaveDropAuthor", () => {
         level: 3,
         classification,
       },
+      drop_type: dropType,
+      wave: { id: "wave-1", name: "Cool Comp" },
     }) as any;
 
   it("renders the handle when present and uses it for the tooltip lookup", () => {
@@ -88,4 +97,35 @@ describe("SingleWaveDropAuthor", () => {
       screen.getByRole("link", { name: /ai profile ai-bot/i })
     ).toBeInTheDocument();
   });
+
+  it("keeps interactive badges outside the profile link", () => {
+    render(<SingleWaveDropAuthor drop={createDrop("alice", "0xabc")} />);
+
+    const profileLink = screen.getByRole("link", { name: "alice" });
+    expect(profileLink).not.toContainElement(
+      screen.getByTestId("drop-author-badges")
+    );
+  });
+
+  it.each([ApiDropType.Chat, ApiDropType.Participatory, ApiDropType.Winner])(
+    "passes the current wave to %s author badges",
+    (dropType) => {
+      render(
+        <SingleWaveDropAuthor
+          drop={createDrop(
+            "alice",
+            "0xabc",
+            ApiProfileClassification.Pseudonym,
+            dropType
+          )}
+        />
+      );
+
+      expect(mockDropAuthorBadges).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          wave: expect.objectContaining({ id: "wave-1" }),
+        })
+      );
+    }
+  );
 });

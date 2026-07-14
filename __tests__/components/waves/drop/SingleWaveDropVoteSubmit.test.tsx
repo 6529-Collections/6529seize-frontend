@@ -402,6 +402,28 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
   });
 
+  it("closes background submissions when onVoteApplied never settles", async () => {
+    const onVoteRequestStarted = jest.fn();
+    const onVoteApplied = jest.fn(() => new Promise<void>(() => undefined));
+
+    renderComponent({
+      onVoteApplied,
+      onVoteRequestStarted,
+      submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+    await advanceTimers(300);
+
+    await waitFor(() => {
+      expect(onVoteApplied).toHaveBeenCalledWith(mockDrop);
+    });
+
+    await advanceTimers(backgroundModalCloseDelayMs);
+
+    expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps background submissions open when the API fails before close", async () => {
     const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
     const onVoteRequestStarted = jest.fn();

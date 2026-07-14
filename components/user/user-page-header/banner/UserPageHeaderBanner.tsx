@@ -65,7 +65,7 @@ export default function UserPageHeaderBanner({
             { name: profileLabel }
           )}
         >
-          <div className="edit-profile tw-absolute tw-inset-0 tw-bg-black/30">
+          <div className="tw-absolute tw-inset-0 tw-bg-black/30 tw-opacity-0 tw-transition-opacity tw-duration-300 tw-ease-out hover:tw-opacity-100">
             <div
               aria-hidden="true"
               className="tw-absolute tw-bottom-4 tw-right-4"

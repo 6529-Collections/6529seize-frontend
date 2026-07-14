@@ -16,23 +16,35 @@
         "coming",
         "discover",
         "mission",
-        "subscriptions"
+        "subscriptions",
+        "start",
+        "connect",
+        "onboarding"
       ],
       "facts": [
         "The home page is the main 6529.io entry point.",
+        "Logged-out visitors see a prominent Start here link to /join-6529 and a visible Connect wallet action before home activity.",
+        "Visitors can browse the public home activity without connecting a wallet.",
+        "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
       "canonical_path": "/",
       "related_paths": [
+        "/join-6529",
         "/the-memes",
         "/waves",
         "/about/subscriptions",
         "/{user}/subscriptions"
       ],
       "tags": ["home", "navigation"],
-      "source_refs": ["ops/docs/home/README.md"]
+      "source_refs": [
+        "components/home/newcomer/HomeNewcomerIntro.tsx",
+        "ops/docs/home/README.md",
+        "ops/docs/home/feature-home-header-and-mission.md",
+        "ops/docs/home/flow-home-landing-and-section-navigation.md"
+      ]
     },
     {
       "id": "navigation.sidebar",
@@ -48,7 +60,7 @@
         "expand"
       ],
       "facts": [
-        "The primary navigation concepts are NFTs, Waves, DMs, and About.",
+        "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
@@ -60,6 +72,7 @@
         "/the-memes",
         "/waves",
         "/messages",
+        "/join-6529",
         "/about",
         "/drop-forge",
         "/discover",
@@ -94,28 +107,32 @@
         "getting-started",
         "wallet",
         "profile",
-        "pfp",
         "waves",
-        "first",
-        "message"
+        "collecting",
+        "subscription"
       ],
       "facts": [
-        "The Join 6529 page lives at /join.",
-        "It is a state-aware onboarding guide that adapts to the user's current state across wallet connection, wallet auth, profile setup, profile image, public Waves, and first public message.",
-        "The profile-image step remains incomplete until an image is uploaded, but it does not block public Waves or messaging steps.",
-        "Create Wave links from the guide use the web create URL /waves?create=wave.",
-        "Join 6529 lives at /join but is not shown as a primary sidebar or app drawer menu item."
+        "The Join 6529 page lives at /join-6529.",
+        "/join redirects to /join-6529 for compatibility.",
+        "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
+        "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
+        "The focus area links to The Memes Main Stage Wave, Waves, the current user's subscriptions route when available, delegation, and @help6529."
       ],
-      "canonical_path": "/join",
+      "canonical_path": "/join-6529",
       "related_paths": [
+        "/join",
         "/waves",
-        "/waves?create=wave",
+        "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077?divider=1167698",
+        "/the-memes",
+        "/{user}/subscriptions",
         "/open-data/meme-subscriptions",
         "/delegation/delegation-center"
       ],
       "tags": ["join", "navigation", "getting-started", "waves"],
       "source_refs": [
+        "app/join-6529/page.tsx",
         "app/join/page.tsx",
+        "app/join/page.content.ts",
         "ops/docs/navigation/feature-join-6529-journey.md"
       ]
     },
@@ -183,6 +200,48 @@
         "app/about/page.tsx",
         "components/about/AboutIndex.tsx",
         "components/about/about.routes.ts"
+      ]
+    },
+    {
+      "id": "about.6529-apps",
+      "kind": "route",
+      "title": "6529 Apps",
+      "aliases": [
+        "6529 apps",
+        "apps page",
+        "6529 mobile download",
+        "6529 desktop download",
+        "download 6529 app",
+        "mobile app",
+        "desktop app"
+      ],
+      "keywords": [
+        "apps",
+        "mobile",
+        "desktop",
+        "ios",
+        "android",
+        "windows",
+        "macos",
+        "linux",
+        "download",
+        "footer"
+      ],
+      "facts": [
+        "The 6529 Apps page lives at /about/6529-apps.",
+        "Open it from About > About 6529 > 6529 Apps, the About contents menu, site-wide page search, or the site footer's second text-link row.",
+        "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
+        "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
+        "Use this page to find official app downloads; the footer does not link directly to a platform download."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "related_paths": ["/about", "/open-mobile"],
+      "tags": ["about", "apps", "navigation", "mobile", "desktop"],
+      "source_refs": [
+        "app/about/6529-apps/page.tsx",
+        "components/apps/AppsPage.tsx",
+        "components/footer/Footer.tsx",
+        "ops/docs/navigation/feature-6529-apps-page.md"
       ]
     },
     {
@@ -546,7 +605,11 @@
         "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
       ],
       "canonical_path": "/about/tech",
-      "related_paths": ["/about/tech/wallet-authentication", "/about/faq"],
+      "related_paths": [
+        "/about/tech/wallet-authentication",
+        "/tools/api/authentication",
+        "/about/faq"
+      ],
       "tags": ["about", "tech", "reports"],
       "source_refs": ["components/about/tech/AboutTech.tsx"]
     },
@@ -556,16 +619,29 @@
       "title": "Header search",
       "aliases": [
         "search",
+        "search 6529",
+        "search messages",
         "find a user",
         "find a profile",
         "search modal",
         "header search"
       ],
-      "keywords": ["search", "header", "modal", "profile", "route", "find"],
+      "keywords": [
+        "search",
+        "header",
+        "modal",
+        "profile",
+        "NFT",
+        "Wave",
+        "message",
+        "route",
+        "find"
+      ],
       "facts": [
-        "Header search opens a modal for finding app targets such as profiles and navigable entities.",
-        "Use the search control in the app header when users ask how to find people or pages.",
-        "Search and direct route navigation are separate from Waves feed filtering."
+        "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
+        "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
+        "Arrow keys move through site results and Enter opens the selected result.",
+        "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
       "canonical_path": "/",
       "related_paths": ["/network"],
@@ -1581,6 +1657,30 @@
       "tags": ["waves", "drop", "glossary", "concept"]
     },
     {
+      "id": "waves.subwaves.unread-count",
+      "kind": "ui_affordance",
+      "title": "Parent wave unread subwave count",
+      "aliases": [
+        "subwave unread count",
+        "new subwave messages",
+        "hide subwaves new badge",
+        "parent wave new badge"
+      ],
+      "keywords": ["waves", "subwaves", "unread", "new", "badge", "sidebar"],
+      "facts": [
+        "The new badge beside a parent wave's subwave control totals unread drops across visible, unmuted subwaves where read state is available.",
+        "A subwave contributes to the parent badge whether or not the viewer has joined or followed it.",
+        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "subwaves", "unread", "sidebar"],
+      "source_refs": [
+        "ops/docs/waves/sidebars/feature-brain-list-last-drop-indicator.md",
+        "ops/docs/wave-subwave-interaction-model.md"
+      ]
+    },
+    {
       "id": "waves.create.entrypoint.sidebar",
       "kind": "ui_affordance",
       "title": "Create a wave from the Waves panel",
@@ -1641,6 +1741,8 @@
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
+        "In the Groups step, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
+        "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
@@ -1699,9 +1801,10 @@
       ],
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
-        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
+        "On the Overview step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
+        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, and Description; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
-        "Leaderboards, winners, and voting state are part of rank-wave participation."
+        "Leaderboards, winners, and voting state are part of rank-wave participation; perpetual ranking waves keep a live leaderboard but never announce winners or award outcomes."
       ],
       "canonical_path": "/waves?create=wave",
       "related_paths": ["/waves", "/waves/create"],
@@ -1739,6 +1842,50 @@
         "ops/docs/waves/create/feature-rules-step.md",
         "ops/docs/waves/create/feature-voting-step.md",
         "ops/docs/waves/create/feature-outcomes-step.md"
+      ]
+    },
+    {
+      "id": "waves.about-sections",
+      "kind": "workflow",
+      "title": "Wave About sections",
+      "aliases": [
+        "wave about",
+        "wave overview",
+        "overview tab",
+        "wave information",
+        "wave settings",
+        "wave activity",
+        "top voters"
+      ],
+      "keywords": [
+        "wave",
+        "about",
+        "overview",
+        "rules",
+        "rep",
+        "settings",
+        "voters",
+        "top voters",
+        "activity",
+        "mobile",
+        "sidebar"
+      ],
+      "facts": [
+        "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
+        "For Rank and Approve waves, the desktop right sidebar also includes Voters and Activity.",
+        "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
+        "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
+        "In the native app, More contains Settings and, for Rank and Approve waves, Voters and Activity.",
+        "Selecting a section switches information for the active wave without navigating away from the thread."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "about", "navigation", "mobile", "sidebar"],
+      "source_refs": [
+        "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md",
+        "components/brain/BrainMobile.tsx",
+        "components/brain/mobile/BrainMobileAbout.tsx",
+        "components/brain/right-sidebar/WaveContent.tsx"
       ]
     },
     {
@@ -1876,8 +2023,12 @@
       "facts": [
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
+        "Reaction controls are disabled while a proxy profile is active.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
+        "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
+        "When Vote with reply is enabled, removing all rationale text blocks submission until text is added or the switch is turned off.",
+        "If an optional rationale reply fails after a successful vote, the vote stays saved and the user is told that the reply failed.",
         "Boosting is a per-user flame toggle on full drop cards and boosted cards in wave and direct-message threads.",
         "Wave creator badges and drop state indicators explain context around submitted drops."
       ],
@@ -1888,6 +2039,44 @@
         "ops/docs/waves/drop-actions/feature-reactions-and-ratings.md",
         "ops/docs/waves/drop-actions/feature-vote-slider.md",
         "ops/docs/waves/drop-actions/feature-drop-boosting.md"
+      ]
+    },
+    {
+      "id": "waves.competition-badges",
+      "kind": "ui_affordance",
+      "title": "Wave competition participant and winner badges",
+      "aliases": [
+        "competition badge",
+        "participant badge",
+        "winner badge",
+        "wave winner medal",
+        "wave participant flag",
+        "competition entries badge"
+      ],
+      "keywords": [
+        "waves",
+        "competition",
+        "participant",
+        "winner",
+        "badge",
+        "entries",
+        "chat",
+        "vote"
+      ],
+      "facts": [
+        "A circular violet flag beside a drop author means that author has an active participatory entry in the current wave.",
+        "A circular emerald medal beside a drop author means that author has a winning entry in the current wave.",
+        "Competition badges can appear on chat, participatory, and winner drops and are scoped to the current wave.",
+        "Competition badges do not appear in other waves unless the author also qualifies there.",
+        "The wave competition badges are hidden in The Memes Main Stage, which keeps its existing artist badges.",
+        "Selecting either badge loads and opens that author's full entries for the current wave; users can switch active and winning sections when both exist.",
+        "The entry viewer offers voting only for participatory entries while voting is open, and normal voting eligibility and credit rules still apply."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "competition", "badges", "voting"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-wave-competition-badges.md"
       ]
     },
     {
@@ -1927,6 +2116,47 @@
         "components/waves/specs/WaveSlowMode.tsx",
         "components/waves/SlowModeChatNotice.tsx",
         "generated/models/ApiWaveChatConfig.ts"
+      ]
+    },
+    {
+      "id": "waves.chat-status-settings",
+      "kind": "ui_affordance",
+      "title": "Wave chat status settings",
+      "aliases": [
+        "enable chat",
+        "disable chat",
+        "re-enable chat",
+        "chat disabled",
+        "who can chat",
+        "chat access"
+      ],
+      "keywords": [
+        "waves",
+        "chat",
+        "settings",
+        "enabled",
+        "disabled",
+        "access",
+        "group",
+        "anyone"
+      ],
+      "facts": [
+        "Wave chat has two separate settings for Rank and Approve waves: chat.enabled controls whether chat is on, and chat.scope controls who can chat when chat is enabled.",
+        "Chat waves require chat to stay enabled, so their Settings and Rules panels do not show a Chat status enable/disable row.",
+        "Rank and Approve wave Settings show Chat status as Enabled or Disabled, and wave admins can edit that row to enable or disable chat.",
+        "The Access row uses Chat access wording; `Anyone when enabled` means no chat access group is attached, not that chat is currently enabled.",
+        "The Rank and Approve Rules panels also show Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
+        "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "chat", "settings", "groups"],
+      "source_refs": [
+        "components/waves/specs/WaveChatStatus.tsx",
+        "helpers/waves/wave-rules.helpers.ts",
+        "components/waves/specs/groups/group/WaveGroup.tsx",
+        "ops/docs/waves/chat/feature-chat-composer-availability.md",
+        "ops/docs/waves/sidebars/feature-right-sidebar-group-management.md"
       ]
     },
     {
@@ -2096,10 +2326,16 @@
         "membership",
         "filters",
         "network",
-        "profile"
+        "profile",
+        "xtdh",
+        "grant"
       ],
       "facts": [
         "Group create/edit flows define group details and membership rules.",
+        "For selected internal NFTs such as Memes, Meme Lab, Gradients, and NextGen, group creators can require members to own any selected token or all selected tokens.",
+        "xTDH grant beneficiary group rules can use typed grant IDs or the grant picker.",
+        "For token-specific xTDH grants, group creators can require members to own any specified token or all specified tokens.",
+        "For full-collection xTDH grants, group membership requires ownership of at least one collection token.",
         "Group creation requires the relevant connected profile permissions.",
         "Groups can be used later in workflows such as wave access or participation settings."
       ],
@@ -2703,18 +2939,26 @@
         "minting",
         "airdrop",
         "balance",
+        "report",
         "top",
         "up"
       ],
       "facts": [
-        "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
+        "The Memes subscriptions are an optional way to mint eligible Meme Cards remotely without being online at mint time, with estimated gas savings of about 80% for one card and up to 98% for ten cards funded by one ETH transfer.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
-        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab."
+        "The setup path is: connect a wallet, open the profile Subscriptions tab, add a completely non-refundable ETH balance, choose Automatic or Manual mode, and select or skip upcoming eligible cards.",
+        "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
+        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
+        "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
-      "related_paths": ["/{user}/subscriptions"],
+      "related_paths": ["/{user}/subscriptions", "/tools/subscriptions-report"],
       "tags": ["subscriptions", "memes", "glossary"],
       "source_refs": [
+        "components/about/AboutSubscriptions.tsx",
+        "components/about/AboutSubscriptionsReference.tsx",
         "ops/docs/open-data/feature-meme-subscriptions.md",
         "ops/docs/profiles/tabs/feature-subscriptions-tab.md"
       ]
@@ -2751,12 +2995,17 @@
       "facts": [
         "Subscriptions do not create extra eligibility.",
         "A subscription can only mint within the phase and allowlist access the profile would otherwise have.",
+        "Phase 0 subscription mints are guaranteed because Phase 0 is underallocated; Phase 1 and Phase 2 mints depend on card availability.",
+        "When a phase has more subscription mints than available cards, cards are airdropped in the order subscription payments were received.",
         "Top-ups must be received by 00:00 UTC the day before a Meme Card mint to be eligible for that mint."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": ["/{user}/subscriptions"],
       "tags": ["subscriptions", "eligibility"],
-      "source_refs": ["ops/docs/open-data/feature-meme-subscriptions.md"]
+      "source_refs": [
+        "components/about/AboutSubscriptionsReference.tsx",
+        "ops/docs/open-data/feature-meme-subscriptions.md"
+      ]
     },
     {
       "id": "subscriptions.top-up-troubleshooting",
@@ -2828,16 +3077,21 @@
       "keywords": [
         "subscriptions",
         "report",
+        "active",
         "upcoming",
         "redeemed",
+        "subscribed",
+        "airdropped",
         "download",
         "csv",
         "season"
       ],
       "facts": [
-        "The Subscriptions Report shows upcoming and redeemed Meme Card subscription counts.",
+        "The Subscriptions Report shows active, upcoming, and redeemed Meme Card subscription counts.",
+        "On a mint day, the Active Drop section compares subscribed counts with airdropped counts and keeps that card out of Upcoming Drops and Past Drops.",
+        "Active, Upcoming, and Past rows link to the matching /the-memes/{token_id} card route.",
         "It includes download actions for redeemed subscription count reports.",
-        "It links users to their own Subscriptions tab when a connected profile is available."
+        "Its Manage or Connect to Subscribe action uses the same profile-subscriptions navigation and authentication handoff as the About Subscriptions page."
       ],
       "canonical_path": "/tools/subscriptions-report",
       "related_paths": ["/about/subscriptions"],
@@ -2958,6 +3212,7 @@
       ],
       "facts": [
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
+        "Unresolved upcoming /the-memes/{id} pages show the next-mint calendar panel plus subscription awareness for that card.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
       ],
@@ -3275,11 +3530,28 @@
       "id": "navigation.back-button",
       "kind": "ui_affordance",
       "title": "Back button behavior",
-      "aliases": ["back button", "go back", "return", "previous page"],
-      "keywords": ["back", "button", "navigation", "history", "return"],
+      "aliases": [
+        "back button",
+        "go back",
+        "return",
+        "previous page",
+        "swipe back",
+        "swipe right"
+      ],
+      "keywords": [
+        "back",
+        "button",
+        "navigation",
+        "history",
+        "return",
+        "swipe",
+        "gesture",
+        "mobile"
+      ],
       "facts": [
         "Back button behavior is documented as shared navigation behavior.",
         "It depends on route history and app shell context.",
+        "In the native app, swiping right from the left edge of a standard wave detail returns to the Waves list; the shortcut is disabled for direct messages and focused drop or create overlays.",
         "Use it when users ask why a back control returns to a prior app surface."
       ],
       "canonical_path": "/waves",
@@ -3409,6 +3681,8 @@
         "The notifications feed lives at /notifications.",
         "It supports feed filters, row actions, read state, paging, and navigation to related app content.",
         "Cause filters include Mentions, Replies, Identity, Reactions, and Invites.",
+        "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
+        "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
       ],
@@ -3967,12 +4241,28 @@
       "id": "waves.content-tabs",
       "kind": "ui_affordance",
       "title": "Wave content tabs",
-      "aliases": ["wave tabs", "content tabs", "chat tabs", "gallery tab"],
-      "keywords": ["waves", "tabs", "content", "chat", "gallery"],
+      "aliases": [
+        "wave tabs",
+        "content tabs",
+        "chat tabs",
+        "gallery tab",
+        "polls tab",
+        "poll results"
+      ],
+      "keywords": [
+        "waves",
+        "tabs",
+        "content",
+        "chat",
+        "gallery",
+        "polls",
+        "results"
+      ],
       "facts": [
         "Wave content tabs organize the visible wave content area.",
         "Some waves can switch between chat and gallery-style views.",
-        "Available tabs depend on wave type, state, and content."
+        "Available tabs depend on wave type, state, and content.",
+        "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -4267,9 +4557,9 @@
         "wave mute",
         "mute wave",
         "unmute wave",
-        "bell slash",
-        "crossed out bell",
-        "speaker button",
+        "bell button",
+        "speaker muted",
+        "speaker mute button",
         "all message notifications"
       ],
       "keywords": [
@@ -4284,12 +4574,12 @@
         "ALL"
       ],
       "facts": [
-        "The speaker button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "The speaker menu has an @ALL option for @ALL mention notifications.",
-        "The speaker menu has a Notify for all messages option for every-message notifications.",
-        "When all-message notifications are unavailable and not already enabled, the speaker menu keeps that option visible but disabled.",
-        "The bell-slash button mutes waves before or after joining.",
-        "When a wave is muted, the bell-slash Muted control unmutes it.",
+        "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
+        "The notification menu has an ALL mentions option with an @ icon for @ALL mention notifications.",
+        "The notification menu has an All messages option for every-message notifications.",
+        "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
+        "The speaker control mutes waves before or after joining.",
+        "When a wave is muted, the red speaker-muted Muted control unmutes it.",
         "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually."
       ],
       "canonical_path": "/waves",
@@ -4342,11 +4632,29 @@
       "id": "waves.drop.content-display",
       "kind": "ui_affordance",
       "title": "Wave drop content display",
-      "aliases": ["drop content", "read drop", "drop display", "drop media"],
-      "keywords": ["waves", "drop", "content", "display", "media", "text"],
+      "aliases": [
+        "drop content",
+        "read drop",
+        "drop display",
+        "drop media",
+        "ordered list",
+        "numbered list"
+      ],
+      "keywords": [
+        "waves",
+        "drop",
+        "content",
+        "display",
+        "media",
+        "text",
+        "markdown",
+        "list",
+        "numbered"
+      ],
       "facts": [
         "Wave drop content display docs explain how posted drop content is rendered.",
         "Content display is separate from composer submission behavior.",
+        "Ordered lists accept both 1. and 1) markers and preserve the chosen delimiter when rendered.",
         "Media, quote links, replies, and selection copy have additional drop-action records."
       ],
       "canonical_path": "/waves",
@@ -4518,7 +4826,8 @@
       "facts": [
         "The My Votes tab is documented under wave leaderboard features.",
         "It helps a user inspect their own voting activity where the wave supports it.",
-        "Availability depends on wave type, eligibility, and voting state."
+        "Availability depends on wave type, eligibility, and voting state.",
+        "Rows can include an Explain action that opens a normal drop reply prefilled with a vote rationale prefix without submitting or changing the vote."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -4817,6 +5126,7 @@
         "Individual Meme Card pages live at /the-memes/{id}.",
         "Use /the-memes/{id} for a specific Meme Card number such as Meme #1 or The Memes #1.",
         "Meme Card preview/data surfaces expose fields such as edition size, TDH rate, season, mint date, and supply when available.",
+        "Upcoming unresolved Meme Card pages show mint timing and subscription awareness; positive card ids also show a Distribution Plan link for that card.",
         "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
         "Card tabs and focus links are documented for deep-linking into card page sections.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."
@@ -4844,6 +5154,7 @@
       "keywords": ["memes", "distribution", "card", "holders", "route"],
       "facts": [
         "Meme Card distribution pages live at /the-memes/{id}/distribution.",
+        "Unpublished Meme Card distribution pages can show the upcoming mint panel plus a centered message that the Distribution Plan will be made available soon.",
         "Use distribution routes when users ask where card distribution details are shown.",
         "Meme Lab cards have a separate distribution route under /meme-lab/{id}/distribution."
       ],
@@ -5385,6 +5696,43 @@
       "source_refs": ["app/emma/page.tsx", "app/emma/plans/page.tsx"]
     },
     {
+      "id": "tools.api-authentication",
+      "kind": "workflow",
+      "title": "API authentication for external clients",
+      "aliases": [
+        "api authentication",
+        "external api auth",
+        "session v2 auth",
+        "wallet api auth",
+        "bearer token api"
+      ],
+      "keywords": [
+        "api",
+        "authentication",
+        "session",
+        "v2",
+        "wallet",
+        "nonce",
+        "bearer",
+        "refresh"
+      ],
+      "facts": [
+        "The external-client API authentication guide lives at /tools/api/authentication.",
+        "New external clients should use session-v2 wallet authentication with client_type=native.",
+        "The flow is session-nonce, sign signable_message exactly, submit client_address, client_signature, and server_signature to session-login, then Authorization: Bearer <access_token>.",
+        "Long-running external clients can use session-refresh and session-logout with the current native_refresh_token."
+      ],
+      "canonical_path": "/tools/api/authentication",
+      "related_paths": ["/tools/api", "/about/tech/wallet-authentication"],
+      "tags": ["tools", "api", "authentication"],
+      "source_refs": [
+        "app/tools/api/authentication/page.tsx",
+        "app/tools/api/page.tsx",
+        "app/about/tech/wallet-authentication/page.tsx",
+        "ops/docs/api-tool/feature-api-authentication.md"
+      ]
+    },
+    {
       "id": "tools.api-auth-media-drop",
       "kind": "workflow",
       "title": "API authentication and media drop flow",
@@ -5404,14 +5752,17 @@
       ],
       "facts": [
         "The API tool page lives at /tools/api.",
-        "API authentication and media-drop example flows are documented in the API tool docs.",
+        "The full external-client API authentication guide lives at /tools/api/authentication.",
+        "The API tool page includes a native/script authentication quickstart and media-drop example flow.",
         "This is separate from regular wave composer posting."
       ],
       "canonical_path": "/tools/api",
-      "related_paths": ["/tools/6529bot/admin"],
+      "related_paths": ["/tools/api/authentication", "/tools/6529bot/admin"],
       "tags": ["tools", "api"],
       "source_refs": [
         "app/tools/api/page.tsx",
+        "app/tools/api/authentication/page.tsx",
+        "ops/docs/api-tool/feature-api-authentication.md",
         "ops/docs/api-tool/feature-api-authentication-and-media-drop-flow.md"
       ]
     },

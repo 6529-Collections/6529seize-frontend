@@ -94,6 +94,7 @@ describe("useWaveConfig", () => {
       });
       expect(result.current.config.display).toEqual({
         customRules: null,
+        submissionButtonLabel: null,
         approve: {
           approvalsTabLabel: "",
           approvedTabLabel: "",
@@ -988,6 +989,45 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.endDateConfig).toEqual(newEndDateConfig);
+    });
+
+    it("preserves the outcomes-visibility preference across perpetual toggles", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Rank,
+          name: "Rank wave",
+          image: null,
+        });
+      });
+
+      act(() => {
+        result.current.setDisplay({
+          ...result.current.config.display,
+          outcomesVisible: false,
+        });
+      });
+
+      // Entering and leaving perpetual mode never rewrites the stored display
+      // preference; the submit path treats perpetual as visible instead.
+      act(() => {
+        result.current.setDates({
+          ...result.current.config.dates,
+          ongoingRanking: true,
+        });
+      });
+
+      expect(result.current.config.display.outcomesVisible).toBe(false);
+
+      act(() => {
+        result.current.setDates({
+          ...result.current.config.dates,
+          ongoingRanking: false,
+        });
+      });
+
+      expect(result.current.config.display.outcomesVisible).toBe(false);
     });
   });
 

@@ -16,7 +16,8 @@ export default function CreateWaveTypeInputs({
   ];
   const waveTypeDescriptions: Record<ApiWaveType, string> = {
     [ApiWaveType.Chat]: "Create a social hub for community discussions.",
-    [ApiWaveType.Rank]: "Top-voted submissions win at a set time.",
+    [ApiWaveType.Rank]:
+      "Rank submissions by votes — scheduled winners or a perpetual leaderboard.",
     [ApiWaveType.Approve]: "Submissions win once they reach a vote threshold.",
   };
 

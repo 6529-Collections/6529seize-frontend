@@ -3,74 +3,20 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.css";
+import clsx from "clsx";
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
+  ABOUT_TEXT_PAGE_CONTAINER_CLASS,
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
 } from "@/components/about/AboutLayout";
 
 const API_PAGE_LOCALE = DEFAULT_LOCALE;
+const API_AUTHENTICATION_PATH = "/tools/api/authentication";
 
-export default function AboutApi() {
-  const nodeJsAuthExample = `import { Wallet } from 'ethers';
-import fetch from 'node-fetch';
-
-export async function loginAndFetchFeed() {
-  const clientAddress = '0x...';
-  const clientPrivateKey = '0x...'; // ⚠️ Do not hardcode private keys in production!
-
-  // Rebuild wallet from private key
-  const wallet = new Wallet(clientPrivateKey);
-
-  // 1. Get the session-v2 signable message from the server
-  const nonceResp = await fetch(
-    \`https://api.6529.io/api/auth/session-nonce?signer_address=\${clientAddress}&client_type=native&chain_id=1\`,
-    {
-      headers: { accept: 'application/json' },
-      method: 'GET'
-    }
-  );
-
-  const { signable_message, server_signature } = await nonceResp.json();
-
-  // 2. Sign signable_message exactly as returned
-  const clientSignature = await wallet.signMessage(signable_message);
-
-  // 3. Send the signed message back to the session-v2 login endpoint
-  const loginResp = await fetch(
-    'https://api.6529.io/api/auth/session-login',
-    {
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json'
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        client_type: 'native',
-        client_address: clientAddress,
-        client_signature: clientSignature,
-        server_signature
-      })
-    }
-  );
-
-  const { access_token } = await loginResp.json();
-
-  // 4. Fetch feed with the received authorization token
-  const feedResp = await fetch('https://api.6529.io/api/feed', {
-    headers: {
-      accept: 'application/json',
-      authorization: \`Bearer \${access_token}\`
-    },
-    method: 'GET'
-  });
-
-  const feed = await feedResp.json();
-  console.log('Feed:', feed);
-}`;
-
-  const nodeJsMediaDropExample = `import fetch from "node-fetch";
+const nodeJsMediaDropExample = `import fetch from "node-fetch";
 import {readFile} from "fs/promises";
 import {extname} from "path";
 import mime from "mime-types";
@@ -243,9 +189,11 @@ run().catch((err) => {
     console.error("Error:", err);
     process.exit(1);
 });`;
+
+export default function AboutApi() {
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
-      <Container className="tw-pb-4 tw-pt-4">
+    <main className={clsx(styles["main"], "tailwind-scope")}>
+      <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
             <h1>6529.io API</h1>
@@ -288,6 +236,31 @@ run().catch((err) => {
               ℹ️ Some routes are still undocumented. We plan to expand the
               documentation over time.
             </div>
+          </Col>
+        </Row>
+
+        <Row className="tw-pt-2">
+          <Col>
+            <section
+              aria-labelledby="api-authentication-guide-heading"
+              className="tw-mb-4 tw-rounded tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-4"
+            >
+              <h2
+                id="api-authentication-guide-heading"
+                className="tw-mb-2 tw-text-lg tw-font-bold tw-text-iron-50"
+              >
+                {t(API_PAGE_LOCALE, "tools.api.authCallout.title")}
+              </h2>
+              <p className="tw-mb-3">
+                {t(API_PAGE_LOCALE, "tools.api.authCallout.description")}
+              </p>
+              <Link
+                href={API_AUTHENTICATION_PATH}
+                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline"
+              >
+                {t(API_PAGE_LOCALE, "tools.api.authCallout.link")}
+              </Link>
+            </section>
           </Col>
         </Row>
 
@@ -359,6 +332,15 @@ run().catch((err) => {
             <p>
               {t(API_PAGE_LOCALE, "tools.api.authentication.basedOnSignatures")}
             </p>
+            <p>
+              {t(API_PAGE_LOCALE, "tools.api.authentication.externalNote")}{" "}
+              <Link
+                href={API_AUTHENTICATION_PATH}
+                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline"
+              >
+                {t(API_PAGE_LOCALE, "tools.api.authentication.fullGuideLink")}
+              </Link>
+            </p>
 
             <p>{t(API_PAGE_LOCALE, "tools.api.authentication.flowIntro")}</p>
 
@@ -379,9 +361,6 @@ run().catch((err) => {
                 {t(API_PAGE_LOCALE, "tools.api.authentication.receiveToken")}
               </li>
             </ol>
-            <p>{t(API_PAGE_LOCALE, "tools.api.authentication.nodeExample")}</p>
-
-            <CodeExample code={nodeJsAuthExample} />
           </Col>
         </Row>
         <Row className="tw-pt-2">
@@ -408,7 +387,7 @@ run().catch((err) => {
                 previous steps and keep the ETags from responses
               </li>
               <li>
-                When all parts have finished uploading, complete the upload bt
+                When all parts have finished uploading, complete the upload by
                 supplying the ETags to our API
               </li>
               <li>
@@ -426,6 +405,6 @@ run().catch((err) => {
   );
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
   return getAppMetadata({ title: "API", description: "API" });
 }

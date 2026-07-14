@@ -4,12 +4,20 @@ import os from "node:os";
 import path from "node:path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { countImportStatements, countLines, countMatches } = require(
-  path.join(process.cwd(), "scripts", "debt-ratchet.cjs")
-) as {
+const {
+  countAnyCasts,
+  countImportStatements,
+  countLines,
+  countMatches,
+  isLegacyWordPressRuntimeSource,
+  isWordPressMigratedSource,
+} = require(path.join(process.cwd(), "scripts", "debt-ratchet.cjs")) as {
+  countAnyCasts: (content: string, filePath?: string) => number;
   countImportStatements: (content: string, packages: string[]) => number;
   countLines: (content: string) => number;
   countMatches: (content: string, pattern: RegExp) => number;
+  isLegacyWordPressRuntimeSource: (content: string) => boolean;
+  isWordPressMigratedSource: (content: string) => boolean;
 };
 
 const SCRIPT_PATH = path.join(process.cwd(), "scripts", "debt-ratchet.cjs");
@@ -26,14 +34,33 @@ describe("debt-ratchet counting helpers", () => {
       "const a: any = 1;",
       "const b = value as any;",
       "const c: any[] = [];",
+      "const d: readonly any[] = [];",
+      "let parenthesized: (any);",
+      "let union: string | any;",
+      "function f(input: any): any { return input; }",
+      "type Shape = { field: any; generic: Record<string, any> };",
       "const inner: Record<string, any> = {}; // generic arg is not counted",
+      "type Alias = any; // type aliases are outside this metric",
+      'const text = "value as any";',
+      "// value as any",
+      "<span>connect deeply to an audience as powerfully as",
+      "any great art can.</span>",
       "const many = anything; // not a match",
       "function f(x: number): number { return x; }",
     ].join("\n");
-    // ": any" direct annotations and "as any" casts count; an "any" buried in
-    // a generic argument list (Record<string, any>) does not carry a ": any"
-    // or "as any" token, so it is intentionally outside this metric.
-    expect(countMatches(content, /:\s*any\b|\bas\s+any\b/g)).toBe(3);
+    // Direct annotations and casts count. Strings, comments, JSX prose, type
+    // aliases, and generic arguments stay outside this metric.
+    expect(countAnyCasts(content, "Sample.tsx")).toBe(9);
+  });
+
+  it("counts TypeScript angle-bracket any assertions", () => {
+    expect(countAnyCasts("const value = <any>input;\n", "Sample.ts")).toBe(1);
+  });
+
+  it("throws on invalid TSX syntax instead of undercounting", () => {
+    expect(() =>
+      countAnyCasts("const value = <any>input;\n", "Sample.tsx")
+    ).toThrow(/Unable to parse Sample\.tsx while counting any_casts/);
   });
 
   it("counts TODO markers without matching longer words", () => {
@@ -67,6 +94,37 @@ describe("debt-ratchet counting helpers", () => {
     expect(countLines("one\ntwo\n")).toBe(2);
     expect(countLines("one\ntwo")).toBe(2);
   });
+
+  it("detects WordPress migrated source markers", () => {
+    expect(
+      isWordPressMigratedSource(
+        [
+          'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
+          '<WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/810" />',
+          '<div className="fusion-wrapper" />',
+        ].join("\n")
+      )
+    ).toBe(true);
+    expect(isWordPressMigratedSource("export const normal = true;\n")).toBe(
+      false
+    );
+  });
+
+  it("detects old live WordPress runtime markers", () => {
+    expect(
+      isLegacyWordPressRuntimeSource(
+        [
+          'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
+          '<WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/810" />',
+        ].join("\n")
+      )
+    ).toBe(true);
+    expect(
+      isLegacyWordPressRuntimeSource(
+        'const image = "https://cdn.example/wp-content/uploads/file.jpg";\n'
+      )
+    ).toBe(false);
+  });
 });
 
 describe("debt-ratchet check mode", () => {
@@ -83,6 +141,10 @@ describe("debt-ratchet check mode", () => {
     writeFixture(
       "components/Sample.tsx",
       'const a: any = 1;\n// TODO tidy\nimport { useSelector } from "react-redux";\n'
+    );
+    writeFixture(
+      "components/Article.tsx",
+      "<span>connect deeply to an audience as powerfully as\nany great art can.</span>\n"
     );
     writeFixture(
       "components/__tests__/Ignored.test.tsx",
@@ -115,6 +177,19 @@ describe("debt-ratchet check mode", () => {
     const check = runRatchet(root);
     expect(check.status).toBe(0);
     expect(check.stdout).toContain("Debt ratchet passed.");
+
+    const reportLines = check.stdout.split("\n");
+    const anyCastsLine = reportLines.find((line) =>
+      line.startsWith("any_casts")
+    );
+    const legacyWordPressLine = reportLines.find((line) =>
+      line.startsWith("legacy_wordpress_runtime")
+    );
+    expect(anyCastsLine).toBeDefined();
+    expect(legacyWordPressLine).toBeDefined();
+    expect(anyCastsLine?.indexOf("baseline")).toBe(
+      legacyWordPressLine?.indexOf("baseline")
+    );
   });
 
   it("fails when a count rises above the baseline", () => {
@@ -173,11 +248,29 @@ describe("debt-ratchet check mode", () => {
     expect(Object.keys(parsed.counts).sort()).toEqual([
       "any_casts",
       "bootstrap_imports",
+      "legacy_wordpress_runtime",
       "oversized_files",
       "pages_router_files",
       "redux_imports",
       "todo_comments",
     ]);
+  });
+
+  it("fails when old live WordPress runtime markers are introduced", () => {
+    expect(runRatchet(root, ["--update"]).status).toBe(0);
+    writeFixture(
+      "app/legacy/page.tsx",
+      [
+        'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
+        "export default function LegacyPage() {",
+        '  return <WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/1" />;',
+        "}",
+      ].join("\n")
+    );
+
+    const check = runRatchet(root);
+    expect(check.status).toBe(1);
+    expect(check.stderr).toContain("legacy_wordpress_runtime rose from 0 to 1");
   });
 
   it("prints per-file counts from --details", () => {
@@ -189,5 +282,59 @@ describe("debt-ratchet check mode", () => {
     const unknown = runRatchet(root, ["--details", "nope"]);
     expect(unknown.status).toBe(1);
     expect(unknown.stderr).toContain('Unknown metric "nope"');
+  });
+
+  it("can hide WordPress migrated files from details output", () => {
+    writeFixture(
+      "app/migrated/page.tsx",
+      [
+        'import WordPressLegacyAssets from "@/components/legacy-wordpress/WordPressLegacyAssets";',
+        "export default function MigratedPage() {",
+        '  return <WordPressLegacyAssets postJsonHref="/wp-json/wp/v2/pages/1" />;',
+        "}",
+        ...Array.from({ length: 810 }, (_, index) => `// migrated ${index}`),
+      ].join("\n")
+    );
+    writeFixture(
+      "components/Large.tsx",
+      "export const line = 1;\n".repeat(810)
+    );
+
+    expect(runRatchet(root, ["--update"]).status).toBe(0);
+    const check = runRatchet(root);
+    expect(check.status).toBe(0);
+    expect(check.stdout).toMatch(
+      /^oversized_files\s+baseline\s+2\s+actual\s+2\s+ok$/m
+    );
+    expect(check.stdout).toMatch(/^\s+breakdown:$/m);
+    expect(check.stdout).toMatch(
+      /^\s+app_source\s+baseline\s+1\s+actual\s+1$/m
+    );
+    expect(check.stdout).toMatch(
+      /^\s+wp_migrated\s+baseline\s+1\s+actual\s+1$/m
+    );
+
+    const unfiltered = runRatchet(root, ["--details", "oversized_files"]);
+    expect(unfiltered.status).toBe(0);
+    expect(unfiltered.stdout).toContain("app/migrated/page.tsx");
+    expect(unfiltered.stdout).toContain("components/Large.tsx");
+
+    const filtered = runRatchet(root, [
+      "--details",
+      "oversized_files",
+      "--ignore-wordpress-migrated",
+    ]);
+    expect(filtered.status).toBe(0);
+    expect(filtered.stdout).not.toContain("app/migrated/page.tsx");
+    expect(filtered.stdout).toContain("components/Large.tsx");
+
+    const alias = runRatchet(root, [
+      "--details",
+      "oversized_files",
+      "--ignore-wp-migrated",
+    ]);
+    expect(alias.status).toBe(0);
+    expect(alias.stdout).not.toContain("app/migrated/page.tsx");
+    expect(alias.stdout).toContain("components/Large.tsx");
   });
 });

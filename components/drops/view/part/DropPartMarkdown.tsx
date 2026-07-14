@@ -45,6 +45,7 @@ import {
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
 import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
+import { rehypePreserveOrderedListDelimiter } from "./dropPartMarkdown/orderedListDelimiter";
 
 const BreakComponent = () => <br />;
 
@@ -425,6 +426,8 @@ function DropPartMarkdown({
           },
         },
       ],
+      // This trusted plugin only adds one static renderer-owned class.
+      rehypePreserveOrderedListDelimiter,
     ],
     []
   );

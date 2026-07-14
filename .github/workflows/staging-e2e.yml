@@ -4,13 +4,35 @@ on:
   workflow_run:
     workflows: ["Web Deploy - STAGING"]
     types: [completed]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      pack:
+        description: Staging E2E pack to run
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - smoke
+          - core
+          - social-readonly
+          - public-groups-tools-readonly
+          - delegation-readonly
+          - collections-readonly
+          - admin-guards-readonly
+          - public-content-readonly
+          - profile-deep-links-readonly
+          - search-waves-readonly
+          - media-readonly
+          - network-open-data-readonly
 
 permissions:
   contents: read
 
 concurrency:
   group: staging-e2e
+  # Staging is a single mutable environment. Cancel superseded runs so an
+  # older deployed SHA does not keep testing after a newer staging deploy lands.
   cancel-in-progress: true
 
 jobs:
@@ -32,6 +54,7 @@ jobs:
     timeout-minutes: 90
     env:
       PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
+      SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
     steps:
       # workflow_run: the exact SHA the staging deploy shipped. Manual
       # dispatch falls back to the branch tip, which may differ from what is
@@ -89,27 +112,105 @@ jobs:
             test:e2e:staging:media-readonly
             test:e2e:staging:network-open-data-readonly
           )
+          selected_pack="${SELECTED_PACK:-all}"
+          case "$selected_pack" in
+            all)
+              ;;
+            smoke)
+              packs=(test:e2e:staging:smoke)
+              ;;
+            core)
+              packs=(test:e2e:staging)
+              ;;
+            social-readonly)
+              packs=(test:e2e:staging:social-readonly)
+              ;;
+            public-groups-tools-readonly)
+              packs=(test:e2e:staging:public-groups-tools-readonly)
+              ;;
+            delegation-readonly)
+              packs=(test:e2e:staging:delegation-readonly)
+              ;;
+            collections-readonly)
+              packs=(test:e2e:staging:collections-readonly)
+              ;;
+            admin-guards-readonly)
+              packs=(test:e2e:staging:admin-guards-readonly)
+              ;;
+            public-content-readonly)
+              packs=(test:e2e:staging:public-content-readonly)
+              ;;
+            profile-deep-links-readonly)
+              packs=(test:e2e:staging:profile-deep-links-readonly)
+              ;;
+            search-waves-readonly)
+              packs=(test:e2e:staging:search-waves-readonly)
+              ;;
+            media-readonly)
+              packs=(test:e2e:staging:media-readonly)
+              ;;
+            network-open-data-readonly)
+              packs=(test:e2e:staging:network-open-data-readonly)
+              ;;
+            *)
+              echo "::error::Unsupported staging E2E pack: $selected_pack"
+              exit 1
+              ;;
+          esac
+
+          artifact_root="staging-e2e-artifacts"
+          rm -rf "$artifact_root"
+          mkdir -p "$artifact_root"
           failed=0
           echo "## Staging E2E packs" >> "$GITHUB_STEP_SUMMARY"
+          echo "Selected pack: \`$selected_pack\`" >> "$GITHUB_STEP_SUMMARY"
           for pack in "${packs[@]}"; do
-            log="$(mktemp)"
-            if ./bin/6529 run "$pack" 2>&1 | tee "$log"; then
-              echo "- :white_check_mark: \`$pack\`" >> "$GITHUB_STEP_SUMMARY"
+            pack_slug="${pack//:/-}"
+            pack_artifacts="$artifact_root/$pack_slug"
+            pack_log="$pack_artifacts/output.log"
+            mkdir -p "$pack_artifacts"
+            if ! rm -rf test-results playwright-report; then
+              failed=1
+              echo "::error::Failed to clean previous Playwright output for $pack"
+              {
+                echo "- :warning: \`$pack\` cleanup failed before execution"
+                echo "  - Artifacts: \`$pack_artifacts/\`"
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
+
+            if ./bin/6529 run "$pack" 2>&1 | tee "$pack_log"; then
+              {
+                echo "- :white_check_mark: \`$pack\`"
+                echo "  - Artifacts: \`$pack_artifacts/\`"
+              } >> "$GITHUB_STEP_SUMMARY"
             else
               failed=1
               {
                 echo "- :x: \`$pack\`"
+                echo "  - Artifacts: \`$pack_artifacts/\`"
                 echo ""
                 echo "<details><summary>Last 25 log lines for \`$pack\`</summary>"
                 echo ""
                 echo '```'
-                tail -25 "$log"
+                tail -25 "$pack_log"
                 echo '```'
                 echo ""
                 echo "</details>"
               } >> "$GITHUB_STEP_SUMMARY"
             fi
-            rm -f "$log"
+
+            for path in test-results playwright-report; do
+              if [ -e "$path" ]; then
+                if ! cp -R "$path" "$pack_artifacts/"; then
+                  failed=1
+                  echo "::error::Failed to preserve $path for $pack"
+                  {
+                    echo "- :warning: \`$pack\` artifact copy failed for \`$path\`"
+                    echo "  - Artifacts: \`$pack_artifacts/\`"
+                  } >> "$GITHUB_STEP_SUMMARY"
+                fi
+              fi
+            done
           done
           exit "$failed"
 
@@ -118,8 +219,6 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: staging-e2e-artifacts
-          path: |
-            test-results/
-            playwright-report/
+          path: staging-e2e-artifacts/
           retention-days: 7
           if-no-files-found: ignore
