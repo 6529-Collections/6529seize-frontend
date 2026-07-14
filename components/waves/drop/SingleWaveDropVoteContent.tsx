@@ -185,7 +185,6 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     submitBlockReason,
     handleSliderValueAccepted,
     handleVoteApplied,
-    handleBackgroundVoteApplied,
   } = useSingleWaveDropVoteState({ drop });
   const [uncontrolledVoteMode, setUncontrolledVoteMode] =
     useState<SingleWaveDropVoteMode>(() => getInitialVoteMode(size));
@@ -238,9 +237,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   const isBackgroundSubmission =
     submissionMode === SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH;
   const handleSubmitVoteApplied = (updatedDrop: ApiDrop) => {
-    if (isBackgroundSubmission) {
-      handleBackgroundVoteApplied();
-    } else {
+    if (!isBackgroundSubmission) {
       handleVoteApplied(updatedDrop);
     }
 

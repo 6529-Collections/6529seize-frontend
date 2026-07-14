@@ -42,8 +42,8 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
       className={`tw-relative tw-min-w-0 tw-overflow-hidden tw-bg-iron-950 ${ringClasses}`}
     >
       <div className="tw-pb-4">
-        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-6">
-          <h2 className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.1em] !tw-text-iron-400">
+        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-4">
+          <h2 className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
             {waveRightPanelText("waves.sidebar.rightPanel.specs.overview")}
           </h2>
         </div>

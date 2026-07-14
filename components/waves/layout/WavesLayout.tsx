@@ -194,6 +194,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     }
 
     markMobileLaunchStep("waves_first_content_visible");
+    markMobileLaunchStep("route_first_useful_content");
     scheduleMobileLaunchFlush("waves_content_visible", 250);
   }, [hasVisibleLaunchContent]);
 
