@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -12,6 +13,10 @@ import React, {
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import useCapacitor from "@/hooks/useCapacitor";
 import type { ReactNode } from "react";
+import {
+  LAYOUT_VIEWPORT_HEIGHT,
+  useViewportLayoutLock,
+} from "./useViewportLayoutLock";
 
 // Define the different spaces that need to be measured
 interface LayoutSpaces {
@@ -61,8 +66,7 @@ const calculateHeightStyle = (
   spaces: LayoutSpaces,
   bottomInset: number | string
 ): React.CSSProperties => {
-  // Use dynamic viewport height to avoid extra space on mobile browsers
-  const heightCalc = `calc(100dvh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${formatCssLength(bottomInset)})`;
+  const heightCalc = `calc(${LAYOUT_VIEWPORT_HEIGHT} - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${formatCssLength(bottomInset)})`;
   return {
     height: heightCalc,
     maxHeight: heightCalc,
@@ -179,6 +183,11 @@ interface LayoutContextType {
 
   // Style for mobile about view
   mobileAboutViewStyle: React.CSSProperties;
+
+  // Keeps the background layout stable while a keyboard-owning overlay is open.
+  acquireViewportLock: () => () => void;
+
+  isViewportLocked: boolean;
 }
 
 // Default context values
@@ -214,6 +223,8 @@ const LayoutContext = createContext<LayoutContextType>({
   smallScreenFeedStyle: {}, // Empty style object as default
   mobileWavesViewStyle: {}, // Empty style object as default
   mobileAboutViewStyle: {}, // Empty style object as default
+  acquireViewportLock: () => () => {},
+  isViewportLocked: false,
 });
 
 // Provider component
@@ -238,6 +249,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   // State for calculated spaces
   const [spaces, setSpaces] = useState<LayoutSpaces>(defaultSpaces);
+  const {
+    acquire: acquireViewportLock,
+    isLocked: isViewportLocked,
+    lockedValue: lockedSpaces,
+  } = useViewportLayoutLock(spaces);
 
   // Create refs for callback functions to solve circular dependency
   const calculateSpacesRef = useRef<() => void>(() => {});
@@ -338,39 +354,40 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     calculateSpacesRef.current = calculateSpaces;
   }, [calculateSpaces]);
 
+  const effectiveSpaces = lockedSpaces ?? spaces;
+  const isNavHiddenForKeyboard = isKeyboardVisible && !isViewportLocked;
+
   // Calculate the content container style based on header space
   const contentContainerStyle = useMemo(() => {
-    const styleSpaces = getStyleSpaces(spaces);
+    const styleSpaces = getStyleSpaces(effectiveSpaces);
 
     return {
-      height: `calc(100dvh - ${styleSpaces.headerSpace}px - ${styleSpaces.spacerSpace}px)`,
+      height: `calc(${LAYOUT_VIEWPORT_HEIGHT} - ${styleSpaces.headerSpace}px - ${styleSpaces.spacerSpace}px)`,
       display: "flex",
     };
-  }, [spaces]);
-
-  const isNavHiddenForKeyboard = isKeyboardVisible;
+  }, [effectiveSpaces]);
 
   const navAdjustedSpaces = useMemo(() => {
-    const styleSpaces = getStyleSpaces(spaces);
+    const styleSpaces = getStyleSpaces(effectiveSpaces);
     return isNavHiddenForKeyboard
       ? { ...styleSpaces, mobileNavSpace: 0 }
       : styleSpaces;
-  }, [spaces, isNavHiddenForKeyboard]);
+  }, [effectiveSpaces, isNavHiddenForKeyboard]);
 
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
     const style = calculateHeightStyle(
       navAdjustedSpaces,
-      isCapacitor ? NATIVE_KEYBOARD_INSET : 0
+      isCapacitor && !isViewportLocked ? NATIVE_KEYBOARD_INSET : 0
     );
 
-    if (isCapacitor) {
+    if (isCapacitor && !isViewportLocked) {
       return {
         ...style,
         transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
       };
     }
     return style;
-  }, [navAdjustedSpaces, isCapacitor]);
+  }, [navAdjustedSpaces, isCapacitor, isViewportLocked]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     return calculateHeightStyle(navAdjustedSpaces, 0);
@@ -399,17 +416,17 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
     const style = calculateHeightStyle(
       { ...navAdjustedSpaces, mobileNavSpace: 0 },
-      isCapacitor ? NATIVE_KEYBOARD_INSET : 0
+      isCapacitor && !isViewportLocked ? NATIVE_KEYBOARD_INSET : 0
     );
 
-    if (isCapacitor) {
+    if (isCapacitor && !isViewportLocked) {
       return {
         ...style,
         transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
       };
     }
     return style;
-  }, [navAdjustedSpaces, isCapacitor]);
+  }, [navAdjustedSpaces, isCapacitor, isViewportLocked]);
 
   const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {
     return calculateHeightStyle(navAdjustedSpaces, 0);
@@ -435,7 +452,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       navAdjustedSpaces.spacerSpace +
       navAdjustedSpaces.mobileTabsSpace +
       navAdjustedSpaces.mobileNavSpace;
-    const heightCalc = `calc(100dvh - ${totalOffset}px)`;
+    const heightCalc = `calc(${LAYOUT_VIEWPORT_HEIGHT} - ${totalOffset}px)`;
     return {
       height: heightCalc,
       maxHeight: heightCalc,
@@ -453,7 +470,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo<LayoutContextType>(
     () => ({
-      spaces,
+      spaces: effectiveSpaces,
       registerRef,
       contentContainerStyle,
       waveViewStyle,
@@ -469,9 +486,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       smallScreenFeedStyle,
       mobileWavesViewStyle,
       mobileAboutViewStyle,
+      acquireViewportLock,
+      isViewportLocked,
     }),
     [
-      spaces,
+      effectiveSpaces,
       registerRef,
       contentContainerStyle,
       waveViewStyle,
@@ -487,6 +506,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       smallScreenFeedStyle,
       mobileWavesViewStyle,
       mobileAboutViewStyle,
+      acquireViewportLock,
+      isViewportLocked,
     ]
   );
 
@@ -499,3 +520,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
 // Custom hook to use the layout context
 export const useLayout = () => useContext(LayoutContext);
+
+export const useLayoutViewportLock = (isLocked: boolean) => {
+  const { acquireViewportLock } = useLayout();
+
+  useLayoutEffect(() => {
+    if (!isLocked) return;
+    return acquireViewportLock();
+  }, [acquireViewportLock, isLocked]);
+};
