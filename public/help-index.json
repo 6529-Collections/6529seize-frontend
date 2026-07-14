@@ -203,6 +203,48 @@
       ]
     },
     {
+      "id": "about.6529-apps",
+      "kind": "route",
+      "title": "6529 Apps",
+      "aliases": [
+        "6529 apps",
+        "apps page",
+        "6529 mobile download",
+        "6529 desktop download",
+        "download 6529 app",
+        "mobile app",
+        "desktop app"
+      ],
+      "keywords": [
+        "apps",
+        "mobile",
+        "desktop",
+        "ios",
+        "android",
+        "windows",
+        "macos",
+        "linux",
+        "download",
+        "footer"
+      ],
+      "facts": [
+        "The 6529 Apps page lives at /about/6529-apps.",
+        "Open it from About > About 6529 > 6529 Apps, the About contents menu, site-wide page search, or the site footer's second text-link row.",
+        "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
+        "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
+        "Use this page to find official app downloads; the footer does not link directly to a platform download."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "related_paths": ["/about", "/open-mobile"],
+      "tags": ["about", "apps", "navigation", "mobile", "desktop"],
+      "source_refs": [
+        "app/about/6529-apps/page.tsx",
+        "components/apps/AppsPage.tsx",
+        "components/footer/Footer.tsx",
+        "ops/docs/navigation/feature-6529-apps-page.md"
+      ]
+    },
+    {
       "id": "about.faq",
       "kind": "route",
       "title": "6529 FAQ",
@@ -1997,6 +2039,44 @@
         "ops/docs/waves/drop-actions/feature-reactions-and-ratings.md",
         "ops/docs/waves/drop-actions/feature-vote-slider.md",
         "ops/docs/waves/drop-actions/feature-drop-boosting.md"
+      ]
+    },
+    {
+      "id": "waves.competition-badges",
+      "kind": "ui_affordance",
+      "title": "Wave competition participant and winner badges",
+      "aliases": [
+        "competition badge",
+        "participant badge",
+        "winner badge",
+        "wave winner medal",
+        "wave participant flag",
+        "competition entries badge"
+      ],
+      "keywords": [
+        "waves",
+        "competition",
+        "participant",
+        "winner",
+        "badge",
+        "entries",
+        "chat",
+        "vote"
+      ],
+      "facts": [
+        "A circular violet flag beside a drop author means that author has an active participatory entry in the current wave.",
+        "A circular emerald medal beside a drop author means that author has a winning entry in the current wave.",
+        "Competition badges can appear on chat, participatory, and winner drops and are scoped to the current wave.",
+        "Competition badges do not appear in other waves unless the author also qualifies there.",
+        "The wave competition badges are hidden in The Memes Main Stage, which keeps its existing artist badges.",
+        "Selecting either badge loads and opens that author's full entries for the current wave; users can switch active and winning sections when both exist.",
+        "The entry viewer offers voting only for participatory entries while voting is open, and normal voting eligibility and credit rules still apply."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "competition", "badges", "voting"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-wave-competition-badges.md"
       ]
     },
     {

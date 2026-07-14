@@ -9460,6 +9460,70 @@ paths:
           description: User cannot manage wave metadata
         "404":
           description: Wave metadata not found
+  /v2/waves/{id}/competition-drops:
+    get:
+      tags:
+        - WavesV2
+      summary: Get one author's competition drops in a wave
+      description: >-
+        Lazily returns full participatory or winner drops for one author after
+        a wave-scoped competition badge is opened.
+      operationId: getWaveCompetitionDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetWaveCompetitionDropsV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: author_id
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: drop_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - PARTICIPATORY
+              - WINNER
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+        "400":
+          description: Invalid competition drop query params
+        "404":
+          description: Wave not found or not visible
   /v2/waves/{id}/drops:
     get:
       tags:
@@ -14632,6 +14696,8 @@ components:
           $ref: "#/components/schemas/ApiIdentityOverviewContextProfileContext"
         badges:
           $ref: "#/components/schemas/ApiIdentityOverviewBadges"
+        wave_participation:
+          $ref: "#/components/schemas/ApiIdentityWaveParticipation"
     ApiIdentityOverviewBadges:
       type: object
       required:
@@ -14657,6 +14723,16 @@ components:
         - subscribed
       properties:
         subscribed:
+          type: boolean
+    ApiIdentityWaveParticipation:
+      type: object
+      required:
+        - is_participant
+        - is_winner
+      properties:
+        is_participant:
+          type: boolean
+        is_winner:
           type: boolean
     ApiIdentitySubscriptionActions:
       type: object
