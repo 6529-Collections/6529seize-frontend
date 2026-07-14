@@ -420,15 +420,13 @@ export default function MemeSubscriptionRow(
             onChange={submit}
             aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
           />
-          {subscribed && (
-            <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-              {renderCountSelector({
-                selectClassName:
-                  "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
-                disableWhenSingleOption: true,
-              })}
-            </span>
-          )}
+          <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
+            {renderCountSelector({
+              selectClassName:
+                "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
+              disableWhenSingleOption: true,
+            })}
+          </span>
         </div>
       </div>
     </div>

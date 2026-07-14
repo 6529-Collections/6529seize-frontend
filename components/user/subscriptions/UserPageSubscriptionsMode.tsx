@@ -98,7 +98,12 @@ export default function UserPageSubscriptionsMode(
         )}
       </div>
       <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <span className="tw-font-semibold tw-text-white">Manual</span>
+        <label
+          htmlFor="subscription-mode"
+          className="tw-cursor-pointer tw-font-semibold tw-text-white"
+        >
+          Manual
+        </label>
         <Toggle
           disabled={props.readonly || isUpdating}
           id={"subscription-mode"}
@@ -108,7 +113,12 @@ export default function UserPageSubscriptionsMode(
           aria-label="Automatic subscription mode"
           aria-describedby={props.readonly ? undefined : descriptionId}
         />
-        <span className="tw-font-semibold tw-text-white">Automatic</span>
+        <label
+          htmlFor="subscription-mode"
+          className="tw-cursor-pointer tw-font-semibold tw-text-white"
+        >
+          Automatic
+        </label>
         {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
       </div>
       {!props.readonly && (
