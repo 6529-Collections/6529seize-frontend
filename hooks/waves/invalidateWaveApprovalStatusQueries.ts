@@ -46,12 +46,13 @@ export function invalidateWaveApprovalStatusQueries(
 export function applyWaveDropVoteUpdate(
   queryClient: QueryClient,
   updatedDrop: ApiDrop,
+  waveId: string,
   options: { readonly invalidateWaveSummary?: boolean } = {}
 ): void {
   updateDropInCachedDrops(queryClient, updatedDrop);
 
   if (options.invalidateWaveSummary !== false) {
-    invalidateWaveApprovalSummaryQueries(queryClient, updatedDrop.wave.id);
+    invalidateWaveApprovalSummaryQueries(queryClient, waveId);
   }
 
   // Keep the updated leaderboard data in place. Mark its ordering stale so a
@@ -60,7 +61,7 @@ export function applyWaveDropVoteUpdate(
   void queryClient.invalidateQueries({
     queryKey: [
       QueryKey.DROPS_LEADERBOARD,
-      { waveId: updatedDrop.wave.id },
+      { waveId },
     ],
     refetchType: "none",
   });

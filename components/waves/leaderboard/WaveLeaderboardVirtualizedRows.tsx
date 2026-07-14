@@ -2,6 +2,8 @@
 
 import type { WaveDropsLeaderboardPageMetadata } from "@/hooks/useWaveDropsLeaderboard";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Virtualizer } from "@tanstack/react-virtual";
 import type { RefObject, ReactNode } from "react";
@@ -207,6 +209,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   isFetchPreviousPageError,
   autoLoadNext = false,
 }: WaveLeaderboardVirtualizedRowsProps<TItem>) {
+  const locale = useBrowserLocale();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<VisibleAnchor | null>(null);
   const previousTriggerKeyRef = useRef<string | null>(null);
@@ -407,7 +410,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     onChange: handleVirtualizerChange,
   });
   const virtualRows = virtualizer.getVirtualItems();
-  const firstVirtualRowIndex = virtualRows.at(0)?.index ?? 0;
+  const previousRetryRowIndex = virtualRows.find(
+    (virtualRow) => virtualRow.index * columns < leadingItemCount
+  )?.index;
 
   useLayoutEffect(() => {
     const anchor = anchorRef.current;
@@ -451,7 +456,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     virtualizer,
   ]);
 
-  const ariaSetSize = hasNextPage ? -1 : logicalItemCount;
+  const ariaSetSize = hasNextPage || hasPreviousPage ? -1 : items.length;
   const rowGapClassName = getRowGapClassName(layout);
   const gridColumnsClassName = getGridColumnsClassName(columns);
 
@@ -459,13 +464,13 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     <div ref={rootRef} className="tw-w-full tw-min-w-0 tw-@container">
       {isFetchingPreviousPage ? (
         <span className="tw-sr-only" role="status" aria-live="polite">
-          Loading earlier drops
+          {t(locale, "waves.leaderboard.loadingEarlier")}
         </span>
       ) : null}
 
       <div
         role="list"
-        aria-label="Leaderboard drops"
+        aria-label={t(locale, "waves.leaderboard.listLabel")}
         className="tw-relative tw-w-full tw-min-w-0"
         style={{ height: virtualizer.getTotalSize() }}
       >
@@ -478,6 +483,16 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
           const hasLoadedItem = logicalIndexes.some(
             (logicalIndex) => logicalIndex >= leadingItemCount
           );
+          const placeholderLogicalIndexes = logicalIndexes.filter(
+            (logicalIndex) => logicalIndex < leadingItemCount
+          );
+          const loadedLogicalIndexes = logicalIndexes.filter(
+            (logicalIndex) => logicalIndex >= leadingItemCount
+          );
+          const showPreviousRetry =
+            isFetchPreviousPageError &&
+            virtualRow.index === previousRetryRowIndex &&
+            placeholderLogicalIndexes.length > 0;
 
           return (
             <div
@@ -490,35 +505,44 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
                 transform: `translateY(${virtualRow.start - scrollMargin}px)`,
               }}
             >
-              {logicalIndexes.map((logicalIndex) => {
+              {showPreviousRetry ? (
+                <div
+                  role="listitem"
+                  className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
+                  style={{
+                    gridColumn: `span ${placeholderLogicalIndexes.length}`,
+                  }}
+                >
+                  <span className="tw-sr-only" role="alert">
+                    {t(locale, "waves.leaderboard.previousLoadError")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      previousTriggerKeyRef.current = null;
+                      loadPreviousPage();
+                    }}
+                    className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  >
+                    {t(locale, "waves.leaderboard.retryEarlier")}
+                  </button>
+                </div>
+              ) : (
+                placeholderLogicalIndexes.map((logicalIndex) => (
+                  <div
+                    key={`placeholder-${logicalIndex}`}
+                    aria-hidden="true"
+                    className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
+                  >
+                    <div className="tw-h-full tw-min-h-[24rem] tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-iron-900/50" />
+                  </div>
+                ))
+              )}
+              {loadedLogicalIndexes.map((logicalIndex) => {
                 const itemIndex = logicalIndex - leadingItemCount;
                 const item = items[itemIndex];
                 if (item === undefined) {
-                  const showRetry =
-                    isFetchPreviousPageError &&
-                    logicalIndex === firstVirtualRowIndex * columns;
-                  return (
-                    <div
-                      key={`placeholder-${logicalIndex}`}
-                      aria-hidden={!showRetry}
-                      className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
-                    >
-                      {showRetry ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            previousTriggerKeyRef.current = null;
-                            loadPreviousPage();
-                          }}
-                          className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                        >
-                          Retry loading earlier drops
-                        </button>
-                      ) : (
-                        <div className="tw-h-full tw-min-h-[24rem] tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-iron-900/50" />
-                      )}
-                    </div>
-                  );
+                  return null;
                 }
 
                 const itemId = getItemId(item);
@@ -526,7 +550,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
                   <div
                     key={itemId}
                     role="listitem"
-                    aria-posinset={logicalIndex + 1}
+                    aria-posinset={itemIndex + 1}
                     aria-setsize={ariaSetSize}
                     data-leaderboard-drop-id={itemId}
                     data-leaderboard-logical-index={logicalIndex}
@@ -544,12 +568,17 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       {isFetchingNextPage ? (
         <div className="tw-py-4" role="status" aria-live="polite">
           <div className="tw-h-1 tw-w-full tw-animate-pulse tw-rounded-full tw-bg-iron-800" />
-          <span className="tw-sr-only">Loading more drops</span>
+          <span className="tw-sr-only">
+            {t(locale, "waves.leaderboard.loadingMore")}
+          </span>
         </div>
       ) : null}
 
       {isFetchNextPageError ? (
         <div className="tw-flex tw-justify-center tw-py-4">
+          <span className="tw-sr-only" role="alert">
+            {t(locale, "waves.leaderboard.nextLoadError")}
+          </span>
           <button
             type="button"
             onClick={() => {
@@ -558,7 +587,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
             }}
             className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
-            Retry loading more drops
+            {t(locale, "waves.leaderboard.retryMore")}
           </button>
         </div>
       ) : null}
@@ -571,7 +600,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
             disabled={isFetchingNextPage}
             className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
           >
-            {isFetchingNextPage ? "Loading more..." : "Load more drops"}
+            {isFetchingNextPage
+              ? t(locale, "waves.leaderboard.loadingMoreButton")
+              : t(locale, "waves.leaderboard.loadMore")}
           </button>
         </div>
       ) : null}

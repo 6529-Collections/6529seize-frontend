@@ -31,6 +31,11 @@ const drop = {
   wave: { id: "wave-1" },
   parts: [{ part_id: 7 }],
 } as ApiDrop;
+const createdReply = {
+  id: "reply-1",
+  wave: { id: "wave-1" },
+  parts: [{ part_id: 8 }],
+} as ApiDrop;
 
 describe("useSingleWaveDropVoteRationale", () => {
   let queryClient: QueryClient;
@@ -62,7 +67,7 @@ describe("useSingleWaveDropVoteRationale", () => {
       address: "0x123",
       isSafeWallet: false,
     } as ReturnType<typeof useSeizeConnectContext>);
-    commonApiPostMock.mockResolvedValue(drop);
+    commonApiPostMock.mockResolvedValue(createdReply);
   });
 
   afterEach(() => {
@@ -220,6 +225,6 @@ describe("useSingleWaveDropVoteRationale", () => {
         signer_address: "0x123",
       },
     });
-    expect(addOptimisticDrop).toHaveBeenCalledWith({ drop });
+    expect(addOptimisticDrop).toHaveBeenCalledWith({ drop: createdReply });
   });
 });

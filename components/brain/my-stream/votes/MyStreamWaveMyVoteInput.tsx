@@ -183,7 +183,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         message: "Vote updated.",
         type: "success",
       });
-      applyWaveDropVoteUpdate(queryClient, response);
+      applyWaveDropVoteUpdate(queryClient, response, drop.wave.id);
     },
     onError: (error) => {
       setToast({

@@ -129,7 +129,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           },
         }),
       onSuccess: (updatedDrop) => {
-        applyWaveDropVoteUpdate(queryClient, updatedDrop);
+        applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id);
       },
       onError: (error) => {
         setToast({

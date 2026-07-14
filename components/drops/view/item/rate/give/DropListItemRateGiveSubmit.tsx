@@ -68,7 +68,7 @@ export default function DropListItemRateGiveSubmit({
       }),
     onSuccess: (updatedDrop) => {
       onSuccessfulRateChange();
-      applyWaveDropVoteUpdate(queryClient, updatedDrop);
+      applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id);
       optimisticRollbackRef.current = null;
     },
     onError: (error) => {

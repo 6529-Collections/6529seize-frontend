@@ -1,5 +1,6 @@
 import { act, render, renderHook, screen } from "@testing-library/react";
 import { useRef } from "react";
+import type { Virtualizer } from "@tanstack/react-virtual";
 
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import {
@@ -9,16 +10,26 @@ import {
 import { useWaveLeaderboardVotingModal } from "@/components/waves/leaderboard/WaveLeaderboardVotingModal";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
+const mockVirtualizer = {
+  getVirtualItems: () => [
+    { index: 0, key: "row-0", size: 100, start: 0 },
+    { index: 1, key: "row-1", size: 100, start: 100 },
+  ],
+  getTotalSize: () => 500,
+  measureElement: jest.fn(),
+  scrollToIndex: jest.fn(),
+} as unknown as Virtualizer<HTMLDivElement, Element>;
+let mockOnVirtualizerChange:
+  | ((instance: Virtualizer<HTMLDivElement, Element>) => void)
+  | undefined;
+
 jest.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: () => ({
-    getVirtualItems: () => [
-      { index: 0, key: "row-0", size: 100, start: 0 },
-      { index: 1, key: "row-1", size: 100, start: 100 },
-    ],
-    getTotalSize: () => 500,
-    measureElement: jest.fn(),
-    scrollToIndex: jest.fn(),
-  }),
+  useVirtualizer: (options: {
+    onChange?: (instance: Virtualizer<HTMLDivElement, Element>) => void;
+  }) => {
+    mockOnVirtualizerChange = options.onChange;
+    return mockVirtualizer;
+  },
 }));
 
 describe("useLeaderboardLeadingItemCount", () => {
@@ -133,6 +144,11 @@ describe("useWaveLeaderboardVotingModal", () => {
 });
 
 describe("WaveLeaderboardVirtualizedRows", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockOnVirtualizerChange = undefined;
+  });
+
   it("mounts only rows selected by the virtualizer", () => {
     const fetchPage = jest.fn().mockResolvedValue(undefined);
 
@@ -168,5 +184,56 @@ describe("WaveLeaderboardVirtualizedRows", () => {
     expect(screen.queryByText("drop-3")).not.toBeInTheDocument();
     expect(screen.queryByText("drop-4")).not.toBeInTheDocument();
     expect(screen.queryByText("drop-5")).not.toBeInTheDocument();
+    expect(screen.getByText("drop-1").parentElement).toHaveAttribute(
+      "aria-posinset",
+      "1"
+    );
+    expect(screen.getByText("drop-2").parentElement).toHaveAttribute(
+      "aria-posinset",
+      "2"
+    );
+  });
+
+  it("prefetches each newly available previous page", () => {
+    const fetchPreviousPage = jest.fn().mockResolvedValue(undefined);
+
+    function Harness({
+      leadingItemCount,
+    }: {
+      readonly leadingItemCount: number;
+    }) {
+      const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+      return (
+        <div ref={scrollContainerRef}>
+          <WaveLeaderboardVirtualizedRows
+            items={["drop-1", "drop-2"]}
+            getItemId={(item) => item}
+            leadingItemCount={leadingItemCount}
+            windowKey="wave-1:rank"
+            layout="list"
+            scrollContainerRef={scrollContainerRef}
+            renderItem={(item) => <div>{item}</div>}
+            fetchNextPage={jest.fn().mockResolvedValue(undefined)}
+            fetchPreviousPage={fetchPreviousPage}
+            hasNextPage={true}
+            hasPreviousPage={true}
+            isFetchingNextPage={false}
+            isFetchingPreviousPage={false}
+            isFetchNextPageError={false}
+            isFetchPreviousPageError={false}
+          />
+        </div>
+      );
+    }
+
+    const { rerender } = render(<Harness leadingItemCount={100} />);
+
+    act(() => mockOnVirtualizerChange?.(mockVirtualizer));
+    expect(fetchPreviousPage).toHaveBeenCalledTimes(1);
+
+    rerender(<Harness leadingItemCount={50} />);
+    act(() => mockOnVirtualizerChange?.(mockVirtualizer));
+
+    expect(fetchPreviousPage).toHaveBeenCalledTimes(2);
   });
 });

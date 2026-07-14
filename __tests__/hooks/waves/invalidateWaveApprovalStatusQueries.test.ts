@@ -139,11 +139,15 @@ describe("invalidateWaveApprovalStatusQueries", () => {
     });
     queryClient.setQueryData(otherVotersKey, { pages: [] });
 
-    applyWaveDropVoteUpdate(queryClient, {
-      id: "drop-1",
-      rating: 99,
-      wave: { id: "wave-1" },
-    } as any);
+    applyWaveDropVoteUpdate(
+      queryClient,
+      {
+        id: "drop-1",
+        rating: 99,
+        wave: { id: "wave-from-response" },
+      } as any,
+      "wave-1"
+    );
 
     expect(
       queryClient.getQueryData<any>(leaderboardKey).pages[0].drops

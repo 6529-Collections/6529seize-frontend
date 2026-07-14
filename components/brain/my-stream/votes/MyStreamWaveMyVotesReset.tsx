@@ -58,7 +58,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
         },
       }),
     onSuccess: (response: ApiDrop) => {
-      applyWaveDropVoteUpdate(queryClient, response, {
+      applyWaveDropVoteUpdate(queryClient, response, waveId, {
         invalidateWaveSummary: false,
       });
       removeSelected(response.id);
