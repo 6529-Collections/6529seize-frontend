@@ -6,7 +6,6 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { AdditionalDetailsSection } from "./MemePageAdditionalDetails";
 import { ArrowUpRightIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -70,20 +69,28 @@ export default function MemePageMainStageSubmissionLink({
   }
 
   return (
-    <AdditionalDetailsSection
-      title={t(locale, "theMemes.detail.mainStageSubmission.title")}
-      icon={TrophyIcon}
+    <Link
+      href={href}
+      className="tw-group tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/70 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900"
     >
-      <Link
-        href={href}
-        className="tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-md tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-text-sm"
+      <span
+        aria-hidden="true"
+        className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 tw-transition-colors desktop-hover:group-hover:tw-bg-iron-700 desktop-hover:group-hover:tw-text-white"
       >
-        <span>{t(locale, "theMemes.detail.mainStageSubmission.viewLink")}</span>
-        <ArrowUpRightIcon
-          aria-hidden="true"
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
-        />
-      </Link>
-    </AdditionalDetailsSection>
+        <TrophyIcon className="tw-size-5" />
+      </span>
+      <span className="tw-min-w-0 tw-flex-1">
+        <span className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 sm:tw-text-base">
+          {t(locale, "theMemes.detail.mainStageSubmission.title")}
+        </span>
+        <span className="tw-mt-0.5 tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
+          {t(locale, "theMemes.detail.mainStageSubmission.description")}
+        </span>
+      </span>
+      <ArrowUpRightIcon
+        aria-hidden="true"
+        className="tw-size-5 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors desktop-hover:group-hover:tw-text-iron-200"
+      />
+    </Link>
   );
 }

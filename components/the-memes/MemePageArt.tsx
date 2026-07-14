@@ -239,6 +239,8 @@ export function MemePageArt(props: {
 
   return (
     <div className="tw-space-y-14 tw-pb-8 tw-pt-8">
+      <MemePageMainStageSubmissionLink memeCardId={nft.id} locale={locale} />
+
       {mediaRows.length > 0 && (
         <AdditionalDetailsSection
           title={t(locale, "theMemes.detail.art.sections.arweaveLinks")}
@@ -251,8 +253,6 @@ export function MemePageArt(props: {
           </div>
         </AdditionalDetailsSection>
       )}
-
-      <MemePageMainStageSubmissionLink memeCardId={nft.id} locale={locale} />
 
       <AdditionalDetailsSection
         title={t(locale, "theMemes.detail.art.sections.properties")}

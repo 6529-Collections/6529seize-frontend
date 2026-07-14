@@ -36,6 +36,7 @@ export function MemesDropSummarySection({
   onVoteClick,
 }: MemesDropSummarySectionProps) {
   const memeCardId = drop.submission_context?.meme_card_id;
+  const hasMemeCard = isValidMemeCardId(memeCardId);
 
   return (
     <div className="tw-mt-4 tw-px-4 sm:tw-px-6 md:tw-mt-6 xl:tw-px-20">
@@ -72,7 +73,7 @@ export function MemesDropSummarySection({
               <AdditionalActionPromiseBadge />
             </>
           )}
-          {manualOutcomes.length > 0 && (
+          {!hasMemeCard && manualOutcomes.length > 0 && (
             <>
               <span className="tw-text-white/40">·</span>
               {manualOutcomes.map((outcome) => (
@@ -80,12 +81,6 @@ export function MemesDropSummarySection({
                   {outcome}
                 </span>
               ))}
-            </>
-          )}
-          {isValidMemeCardId(memeCardId) && (
-            <>
-              <span className="tw-text-white/40">·</span>
-              <MainStageMemeCardLink memeCardId={memeCardId} />
             </>
           )}
           {!!nicTotal && (
@@ -113,6 +108,23 @@ export function MemesDropSummarySection({
             </>
           )}
         </WaveDropMetaRow>
+
+        {hasMemeCard && (
+          <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+            {manualOutcomes.map((outcome) => (
+              <span
+                key={outcome}
+                className="tw-text-base tw-font-medium tw-text-amber-400/80"
+              >
+                {outcome}
+              </span>
+            ))}
+            <MainStageMemeCardLink
+              memeCardId={memeCardId}
+              variant="prominent"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

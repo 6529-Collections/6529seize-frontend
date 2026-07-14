@@ -30,9 +30,10 @@ describe("MemePageMainStageSubmissionLink", () => {
     render(<MemePageMainStageSubmissionLink memeCardId={521} locale="en-US" />);
 
     const link = await screen.findByRole("link", {
-      name: "View winning submission",
+      name: "Main Stage winning submission View the submission selected for this Meme",
     });
     expect(link).toHaveAttribute("href", "/waves/main-stage-wave?drop=drop-1");
+    expect(link).toHaveClass("tw-w-full", "tw-rounded-xl", "tw-p-4");
     expect(commonApiFetchMock).toHaveBeenCalledWith(
       expect.objectContaining({
         endpoint: "meme-cards/521/drop",
@@ -49,7 +50,7 @@ describe("MemePageMainStageSubmissionLink", () => {
 
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalled());
     expect(
-      screen.queryByRole("link", { name: "View winning submission" })
+      screen.queryByRole("link", { name: /Main Stage winning submission/ })
     ).not.toBeInTheDocument();
   });
 });
