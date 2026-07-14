@@ -2,12 +2,9 @@ openapi: 3.0.3
 info:
   title: 6529.io API
   description: >-
-    JSON REST API for 6529.io. New here? A terminology overview and a
-    step-by-step authentication walkthrough (guides &amp; auth) live at <a
-    href="https://6529.io/tools/api">https://6529.io/tools/api</a>. The raw
-    machine-readable spec is downloadable at <a
-    href="/openapi.yaml">/openapi.yaml</a> and <a
-    href="/openapi.json">/openapi.json</a>.
+    This is the API interface description. Brief terminology overview and an
+    authentication example can be found at <a
+    href="https://6529.io/about/api">https://6529.io/about/api</a>.
   version: 1.0.0
 servers:
   - url: /api
@@ -3545,6 +3542,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMemesExtendedDataPage"
+  /meme-cards/{meme_card_id}/drop:
+    get:
+      tags:
+        - Memes
+      summary: Get the Main Stage drop mapped to a Meme card
+      description: >-
+        Returns the explicit one-to-one mapping between a minted Meme card and
+        the winning Memes Main Stage submission that produced it.
+      operationId: getMemeCardDropMapping
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/memes/meme-card-drop-mappings.handlers"
+          name: handleGetMemeCardDropMapping
+      parameters:
+        - name: meme_card_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCardDropMapping"
+        "400":
+          description: Invalid Meme card ID
+        "404":
+          description: No Main Stage drop mapping exists for this Meme card
   /memes-mint-stats:
     get:
       tags:
@@ -12186,13 +12218,6 @@ components:
             $ref: "#/components/schemas/ApiDropGroupMention"
         poll:
           $ref: "#/components/schemas/ApiCreateDropPollRequest"
-        hide_link_preview:
-          type: boolean
-          description: >-
-            When true, create the drop with generated external link previews
-            hidden. Omit or set to false to leave previews visible.
-            Signature-required drops must include this field in the signed
-            payload when present.
     ApiCreateGroup:
       type: object
       required:
@@ -13882,14 +13907,6 @@ components:
         sale_price_currency:
           type: string
           nullable: true
-        meme_card_id:
-          description: >-
-            The Memes card ID assigned to this winning Main Stage submission.
-            Omitted for winners outside the configured Main Stage wave and
-            legacy winners whose relationship is unavailable.
-          type: integer
-          format: int64
-          minimum: 1
     ApiDropWithoutWave:
       type: object
       required:
@@ -14345,6 +14362,11 @@ components:
       enum:
         - ANY_TOKEN
         - ALL_TOKENS
+    ApiGroupNftOwnershipMatchMode:
+      type: string
+      enum:
+        - ANY_TOKEN
+        - ALL_TOKENS
     ApiGroupCicFilter:
       type: object
       required:
@@ -14469,11 +14491,6 @@ components:
           type: number
           format: int64
           nullable: true
-    ApiGroupNftOwnershipMatchMode:
-      type: string
-      enum:
-        - ANY_TOKEN
-        - ALL_TOKENS
     ApiGroupOwnsNft:
       type: object
       required:
@@ -14929,6 +14946,18 @@ components:
         - model/gltf-binary
         - video/quicktime
         - image/webp
+    ApiMemeCardDropMapping:
+      type: object
+      required:
+        - meme_card_id
+        - drop_id
+      properties:
+        meme_card_id:
+          type: integer
+          format: int64
+          minimum: 1
+        drop_id:
+          type: string
     ApiMemesExtendedData:
       type: object
       description: >-

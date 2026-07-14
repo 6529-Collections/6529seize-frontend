@@ -1,6 +1,7 @@
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
 import { sha256 } from "ethereum-cryptography/sha256.js";
@@ -14,7 +15,7 @@ export enum DropSize {
 
 export type Drop = ExtendedDrop | ExtendedLightDrop;
 
-export interface ExtendedDrop extends ApiDrop {
+export interface ExtendedDrop extends ApiDropV2View {
   type: DropSize.FULL;
   stableKey: string;
   stableHash: string;

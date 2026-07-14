@@ -194,7 +194,7 @@ describe("MemesWaveWinnersDrop", () => {
             ...winner,
             drop: {
               ...winner.drop,
-              winning_context: { place: 1, meme_card_id: 521 },
+              submission_context: { meme_card_id: 521 },
             },
           } as ApiWaveDecisionWinner
         }
@@ -203,13 +203,26 @@ describe("MemesWaveWinnersDrop", () => {
       />
     );
 
-    await user.click(screen.getByRole("link", { name: "Meme #521" }));
+    await user.click(screen.getByRole("link", { name: "The Memes #521" }));
 
     expect(onDropClick).not.toHaveBeenCalled();
-    expect(screen.getByRole("link", { name: "Meme #521" })).toHaveAttribute(
-      "href",
-      "/the-memes/521"
+    expect(
+      screen.getByRole("link", { name: "The Memes #521" })
+    ).toHaveAttribute("href", "/the-memes/521");
+  });
+
+  it("does not infer a Meme card link when the mapping is absent", () => {
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
     );
+
+    expect(
+      screen.queryByRole("link", { name: /The Memes #/ })
+    ).not.toBeInTheDocument();
   });
 
   it("keeps native tap behavior for touch long-press handlers", () => {

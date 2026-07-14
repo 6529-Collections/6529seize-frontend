@@ -17,6 +17,7 @@ import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -38,7 +39,9 @@ import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 import MainStageMemeCardLink from "@/components/memes/drops/MainStageMemeCardLink";
 
 interface MemesWaveWinnersDropProps {
-  readonly winner: ApiWaveDecisionWinner;
+  readonly winner: Omit<ApiWaveDecisionWinner, "drop"> & {
+    readonly drop: ApiDropV2View;
+  };
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
@@ -248,7 +251,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                   {title}
                 </h3>
                 <MainStageMemeCardLink
-                  memeCardId={winner.drop.winning_context?.meme_card_id}
+                  memeCardId={winner.drop.submission_context?.meme_card_id}
                 />
               </div>
               <p className="tw-mb-0 tw-line-clamp-2 tw-text-sm tw-text-iron-400">

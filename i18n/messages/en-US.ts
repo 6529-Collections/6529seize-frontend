@@ -1368,6 +1368,8 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
+  "theMemes.detail.mainStageSubmission.title": "Main Stage submission",
+  "theMemes.detail.mainStageSubmission.viewLink": "View winning submission",
   "theMemes.detail.sections.ariaLabel": "Meme page sections",
   "theMemes.detail.history.ariaLabel": "Meme history sections",
   "theMemes.detail.tabs.overview": "Overview",

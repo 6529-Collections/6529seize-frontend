@@ -145,17 +145,32 @@ test("renders vote details through meme vote stats", () => {
 test("links a mapped Main Stage winner to its Meme card", () => {
   render(
     <MemeWinnerDrop
-      drop={{ ...drop, winning_context: { place: 1, meme_card_id: 521 } }}
+      drop={{ ...drop, submission_context: { meme_card_id: 521 } }}
       showReplyAndQuote
       onReply={jest.fn()}
       onQuote={jest.fn()}
     />
   );
 
-  expect(screen.getByRole("link", { name: "Meme #521" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "The Memes #521" })).toHaveAttribute(
     "href",
     "/the-memes/521"
   );
+});
+
+test("does not infer a Meme card link when the mapping is absent", () => {
+  render(
+    <MemeWinnerDrop
+      drop={{ ...drop, submission_context: {} }}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    />
+  );
+
+  expect(
+    screen.queryByRole("link", { name: /The Memes #/ })
+  ).not.toBeInTheDocument();
 });
 
 test("does not trigger the mobile menu wrapper when vote details is clicked", () => {

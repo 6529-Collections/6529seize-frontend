@@ -27,6 +27,7 @@ import {
   LinkIcon,
   SwatchIcon,
 } from "@heroicons/react/24/outline";
+import MemePageMainStageSubmissionLink from "./MemePageMainStageSubmissionLink";
 
 const PROPERTY_EXCLUDED_TRAITS = new Set([
   "Type - Season",
@@ -250,6 +251,8 @@ export function MemePageArt(props: {
           </div>
         </AdditionalDetailsSection>
       )}
+
+      <MemePageMainStageSubmissionLink memeCardId={nft.id} locale={locale} />
 
       <AdditionalDetailsSection
         title={t(locale, "theMemes.detail.art.sections.properties")}

@@ -54,8 +54,6 @@ export const getWinningContext = (drop: ApiDropV2) => {
     return undefined;
   }
 
-  const memeCardId = drop.submission_context.meme_card_id;
-
   return {
     place: voting?.place ?? 0,
     awards: [],
@@ -63,7 +61,6 @@ export const getWinningContext = (drop: ApiDropV2) => {
     sale_time: null,
     sale_price: null,
     sale_price_currency: null,
-    ...(memeCardId !== undefined ? { meme_card_id: memeCardId } : {}),
   };
 };
 

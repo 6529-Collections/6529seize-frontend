@@ -77,7 +77,9 @@ export default function MemeWinnerDrop({
   const headerContent = (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
       <MemeWinnerHeader title={title} />
-      <MainStageMemeCardLink memeCardId={drop.winning_context?.meme_card_id} />
+      <MainStageMemeCardLink
+        memeCardId={drop.submission_context?.meme_card_id}
+      />
       {drop.is_additional_action_promised === true && (
         <AdditionalActionPromiseBadge />
       )}
