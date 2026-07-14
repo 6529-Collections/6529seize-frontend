@@ -48,7 +48,7 @@ export default function UserPageSubscriptionsBalance(
         ) : (
           <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-iron-100">
             <span className="tw-flex tw-items-center tw-gap-1.5">
-              <b className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight">
+              <b className="tw-text-4xl tw-font-semibold tw-leading-none tw-tracking-tight">
                 {balance > 0
                   ? numberWithCommas(Math.round(balance * 1000000) / 1000000)
                   : 0}

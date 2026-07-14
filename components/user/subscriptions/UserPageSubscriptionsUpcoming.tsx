@@ -47,13 +47,13 @@ export default function UserPageSubscriptionsUpcoming(
   let content: ReactNode;
   if (props.loading) {
     content = (
-      <div aria-busy="true" className="tw-space-y-2">
+      <div aria-busy="true" className="tw-space-y-2 tw-p-2">
         <output className="tw-sr-only">Loading upcoming drops</output>
         {UPCOMING_SKELETON_ROWS.map((row) => (
           <div
             key={row}
             aria-hidden="true"
-            className="tw-h-[4.5rem] tw-animate-pulse tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60"
+            className="tw-h-[4.5rem] tw-animate-pulse tw-rounded-lg tw-bg-iron-900/70"
           />
         ))}
       </div>
@@ -61,7 +61,7 @@ export default function UserPageSubscriptionsUpcoming(
   } else if (subscriptions.length > 0) {
     content = (
       <>
-        <div className="tw-space-y-2">
+        <div className="tw-space-y-1 tw-p-2">
           {subscriptions.map((subscription, index) => (
             <MemeSubscriptionRow
               key={subscription.token_id}
@@ -80,7 +80,7 @@ export default function UserPageSubscriptionsUpcoming(
           ))}
         </div>
         {props.memes_subscriptions.length > 3 && (
-          <div className="tw-mt-3 tw-text-center">
+          <div className="tw-mt-3 tw-pb-3 tw-text-center">
             <ShowMoreButton expanded={expanded} setExpanded={setExpanded} />
           </div>
         )}
@@ -88,7 +88,7 @@ export default function UserPageSubscriptionsUpcoming(
     );
   } else {
     content = (
-      <div className="tw-flex tw-min-h-24 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-800 tw-bg-iron-900/30 tw-p-4 tw-text-center">
+      <div className="tw-flex tw-min-h-24 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-900/40 tw-p-4 tw-text-center">
         <CalendarDaysIcon
           className="tw-size-6 tw-text-iron-500"
           aria-hidden="true"
@@ -105,7 +105,9 @@ export default function UserPageSubscriptionsUpcoming(
       id="profile-subscriptions-upcoming"
       title="Upcoming Drops"
     >
-      {content}
+      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-shadow-[0_14px_36px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.025)]">
+        {content}
+      </div>
     </UserPageSubscriptionsSection>
   );
 }

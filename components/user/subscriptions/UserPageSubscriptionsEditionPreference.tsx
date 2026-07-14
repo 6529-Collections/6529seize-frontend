@@ -79,7 +79,7 @@ export default function UserPageSubscriptionsEditionPreference(
   };
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-5">
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 sm:tw-gap-5">
       <div className="tw-min-w-0">
         <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
           <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
@@ -89,45 +89,35 @@ export default function UserPageSubscriptionsEditionPreference(
             Eligibility x{subscriptionEligibilityCount}
           </span>
         </div>
-        {!props.readonly && (
-          <p
-            id={descriptionId}
-            className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-leading-5 tw-text-iron-400"
-          >
-            {isAllEditions
-              ? "You will receive all editions you are eligible for"
-              : "You will receive only one edition"}
-          </p>
-        )}
-      </div>
-      <div className="tw-grid tw-w-full tw-flex-shrink-0 tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] tw-items-center tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[auto_auto_auto]">
-        <span
-          className={`tw-text-right tw-text-sm tw-font-semibold tw-transition-colors ${
-            isAllEditions ? "tw-text-iron-400" : "tw-text-iron-50"
-          }`}
+        <p
+          id={descriptionId}
+          className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-leading-5 tw-text-iron-400"
         >
-          One edition
-        </span>
-        <span className="tw-flex tw-items-center tw-gap-2">
-          <UserPageSubscriptionsToggle
-            disabled={isDisabled}
-            id="subscription-all-editions-mode"
-            checked={isAllEditions}
-            onChange={toggleAllEditions}
-            ariaLabel="All eligible editions"
-            describedBy={props.readonly ? undefined : descriptionId}
-          />
-          {isUpdatingAllEditions && (
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
+          <span className="tw-font-medium tw-text-iron-200">
+            {isAllEditions ? "All eligible" : "One edition"}
+          </span>
+          {!props.readonly && (
+            <>
+              <span aria-hidden="true"> · </span>
+              {isAllEditions
+                ? "Receive all editions you are eligible for"
+                : "Receive only one edition"}
+            </>
           )}
-        </span>
-        <span
-          className={`tw-text-sm tw-font-semibold tw-transition-colors ${
-            isAllEditions ? "tw-text-iron-50" : "tw-text-iron-400"
-          }`}
-        >
-          All eligible
-        </span>
+        </p>
+      </div>
+      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+        <UserPageSubscriptionsToggle
+          disabled={isDisabled}
+          id="subscription-all-editions-mode"
+          checked={isAllEditions}
+          onChange={toggleAllEditions}
+          ariaLabel="All eligible editions"
+          describedBy={descriptionId}
+        />
+        {isUpdatingAllEditions && (
+          <CircleLoader size={CircleLoaderSize.MEDIUM} />
+        )}
       </div>
     </div>
   );

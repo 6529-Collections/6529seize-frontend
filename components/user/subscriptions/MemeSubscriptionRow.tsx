@@ -355,7 +355,7 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/20 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.025] motion-reduce:tw-transition-none">
+    <div className="tw-rounded-lg tw-px-3 tw-py-3 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-white/[0.025] motion-reduce:tw-transition-none sm:tw-px-4">
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">

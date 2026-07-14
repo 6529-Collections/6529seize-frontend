@@ -19,7 +19,7 @@ import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 const HISTORY_PAGE_SIZE = 10;
 const HISTORY_ENTRY_CLASS =
-  "tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.025] tw-p-4";
+  "tw-min-w-0 tw-rounded-lg tw-bg-iron-900/50 tw-p-4 tw-transition-colors desktop-hover:hover:tw-bg-iron-900/70";
 
 function getSubscriptionLogKey(log: SubscriptionLog, index: number): string {
   return log.id === undefined
@@ -45,7 +45,7 @@ export default function UserPageSubscriptionsHistory(
       id="profile-subscriptions-history"
       title="Subscription History"
     >
-      <div className="tw-space-y-3">
+      <div className="tw-divide-y tw-divide-solid tw-divide-white/[0.07] tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-px-4 tw-shadow-[0_14px_36px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.025)] sm:tw-px-5">
         <HistoryDisclosure
           title="Redeemed Subscriptions"
           loading={props.redeemedLoading === true}
@@ -127,11 +127,7 @@ function HistoryDisclosure({
   }
 
   return (
-    <details
-      className="tw-group tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/20 tw-px-4 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]"
-      aria-busy={loading}
-      open
-    >
+    <details className="tw-group" aria-busy={loading} open>
       <summary className="tw-flex tw-min-h-14 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-white [&::-webkit-details-marker]:tw-hidden">
         {title}
         <ChevronDownIcon

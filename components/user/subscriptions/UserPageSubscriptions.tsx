@@ -15,7 +15,10 @@ import {
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { AirdropAddressResult } from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropAddress";
@@ -29,7 +32,7 @@ import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 
 const HISTORY_PAGE_SIZE = 10;
 const SUBSCRIBE_GROUP_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/25 tw-p-4 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] sm:tw-p-5";
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-5 tw-shadow-[0_14px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.025)] sm:tw-p-6";
 
 function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
@@ -242,7 +245,7 @@ export default function UserPageSubscriptions(
   }
 
   return (
-    <div className="tw-space-y-5 tw-pb-5 sm:tw-space-y-6">
+    <div className="tw-space-y-8 tw-pb-6 sm:tw-space-y-10">
       <UserPageSubscriptionsSection
         id="profile-subscriptions-overview"
         title="Subscribe"
@@ -272,6 +275,13 @@ export default function UserPageSubscriptions(
             />
           </div>
           <div className={SUBSCRIBE_GROUP_CLASS}>
+            <div className="tw-mb-5 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-400">
+              <AdjustmentsHorizontalIcon
+                className="tw-size-4"
+                aria-hidden="true"
+              />
+              Subscription Configuration
+            </div>
             <UserPageSubscriptionsMode
               profileKey={profileKey}
               details={details}

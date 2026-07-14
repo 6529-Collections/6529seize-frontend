@@ -62,7 +62,7 @@ function getTopUpModalEmoji(
 }
 
 const TOP_UP_OPTION_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3";
+  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-grid-cols-4";
 const TOP_UP_ACTION_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end";
 const TOP_UP_OPTION_CLASS =
@@ -71,8 +71,8 @@ const TOP_UP_OPTION_CLASS =
 function getTopUpOptionClass(selected: boolean): string {
   return `${TOP_UP_OPTION_CLASS} ${
     selected
-      ? "tw-border-primary-400/50 tw-bg-iron-900 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-      : "tw-border-white/[0.07] tw-bg-black/20 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/[0.03]"
+      ? "tw-border-primary-400/50 tw-bg-iron-900 tw-shadow-[0_12px_28px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.05)]"
+      : "tw-border-white/[0.07] tw-bg-iron-950 tw-shadow-[0_10px_24px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.02)] desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-iron-900/70"
   }`;
 }
 
@@ -471,7 +471,7 @@ export default function UserPageSubscriptionsTopUp() {
         <div className="tw-flex tw-items-center tw-justify-center tw-pt-2 sm:tw-pt-0">
           <button
             type="button"
-            className="tw-inline-flex tw-min-h-11 tw-w-full tw-min-w-32 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-8 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-primary-600 sm:tw-w-auto"
+            className="tw-inline-flex tw-min-h-11 tw-w-full tw-min-w-32 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-8 tw-py-2.5 tw-text-base tw-font-semibold tw-text-iron-950 tw-shadow-[0_8px_20px_rgba(0,0,0,0.2)] tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-white sm:tw-w-auto"
             onClick={handleSend}
             disabled={
               sendTransaction.isPending ||
