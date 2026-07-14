@@ -14,7 +14,13 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type RefObject,
+} from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater, WaveMessages } from "./types";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
@@ -446,19 +452,26 @@ const useNewestMessagesSync = ({
   return initiateFetchNewestCycle;
 };
 
-const useActiveWaveReadMarker = ({
-  activeWaveId,
-  removeWaveDeliveredNotifications,
-}: Pick<
-  UseWaveRealtimeUpdaterProps,
-  "activeWaveId" | "removeWaveDeliveredNotifications"
->): ((waveId: string) => void) => {
+const useLatestActiveWaveIdRef = (
+  activeWaveId: string | null
+): RefObject<string | null> => {
   const activeWaveIdRef = useRef(activeWaveId);
-  const pendingDeliveredNotificationsRef = useRef<Promise<void> | null>(null);
-  const pendingReadNotificationsRef = useRef<Promise<void> | null>(null);
+
   useLayoutEffect(() => {
     activeWaveIdRef.current = activeWaveId;
   }, [activeWaveId]);
+
+  return activeWaveIdRef;
+};
+
+const useActiveWaveReadMarker = ({
+  activeWaveIdRef,
+  removeWaveDeliveredNotifications,
+}: Pick<UseWaveRealtimeUpdaterProps, "removeWaveDeliveredNotifications"> & {
+  readonly activeWaveIdRef: RefObject<string | null>;
+}): ((waveId: string) => void) => {
+  const pendingDeliveredNotificationsRef = useRef<Promise<void> | null>(null);
+  const pendingReadNotificationsRef = useRef<Promise<void> | null>(null);
 
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const canSendReadForWave = useCallback((waveId: string): boolean => {
@@ -497,7 +510,10 @@ const useActiveWaveReadMarker = ({
 
   return useCallback(
     (waveId: string) => {
-      if (activeWaveId !== waveId || document.visibilityState !== "visible") {
+      if (
+        activeWaveIdRef.current !== waveId ||
+        document.visibilityState !== "visible"
+      ) {
         return;
       }
 
@@ -505,7 +521,7 @@ const useActiveWaveReadMarker = ({
         removeDeliveredNotifications(waveId);
       pendingReadNotificationsRef.current = markNotificationsRead(waveId);
     },
-    [activeWaveId, removeDeliveredNotifications, markNotificationsRead]
+    [activeWaveIdRef, removeDeliveredNotifications, markNotificationsRead]
   );
 };
 
@@ -643,8 +659,9 @@ const useProcessIncomingDrop = ({
     updateData,
     syncNewestMessages,
   });
+  const activeWaveIdRef = useLatestActiveWaveIdRef(activeWaveId);
   const markActiveWaveAsRead = useActiveWaveReadMarker({
-    activeWaveId,
+    activeWaveIdRef,
     removeWaveDeliveredNotifications,
   });
   const refreshEligibilityAfterVisibilityChange =
@@ -670,12 +687,19 @@ const useProcessIncomingDrop = ({
 
       updateCachedDrop({ drop, options, queryClient, type });
 
+      const shouldSkipMutedWave = () =>
+        isWaveMuted(waveId) && activeWaveIdRef.current !== waveId;
+
       // Mute suppresses inactive-Wave processing, not live content in the open Wave.
-      if (isWaveMuted(waveId) && activeWaveId !== waveId) {
+      if (shouldSkipMutedWave()) {
         return;
       }
 
       await refreshEligibilityAfterVisibilityChange(waveId);
+
+      if (shouldSkipMutedWave()) {
+        return;
+      }
 
       const currentData = getData(waveId);
       if (!currentData) {
@@ -741,7 +765,7 @@ const useProcessIncomingDrop = ({
       markActiveWaveAsRead(waveId);
     },
     [
-      activeWaveId,
+      activeWaveIdRef,
       getData,
       updateData,
       registerWave,
