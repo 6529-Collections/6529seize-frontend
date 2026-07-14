@@ -81,7 +81,7 @@ export default function WaveHeader({
   const showOptions = showOwnerOptions;
   const showPinAction = !isSubwave;
   const showTrustStats = !isDirectMessage;
-  const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
+  const titleActionAlignmentClass = isSubwave ? "tw-mt-3.5" : "";
   const createdDate = formatDate(
     WAVE_HEADER_LOCALE,
     Time.millis(wave.created_at).toDate()
