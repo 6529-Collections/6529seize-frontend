@@ -19,26 +19,18 @@ export const WAVE_DROPS_PARAMS = {
   limit: 50,
 };
 
+export const WAVE_DROPS_NATIVE_INITIAL_PARAMS = {
+  limit: 20,
+};
+
+export const getWaveDropsInitialLimit = (isNative: boolean): number =>
+  isNative ? WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit : WAVE_DROPS_PARAMS.limit;
+
 export const WAVE_DEFAULT_SUBSCRIPTION_ACTIONS = Object.values(
   ApiWaveSubscriptionTargetAction
 );
 export const WAVE_LOGS_PARAMS = {
   limit: 20,
-};
-
-export const getDefaultQueryRetry = (errorCallback?: () => void) => {
-  return {
-    retry: (failureCount: number) => {
-      if (failureCount >= 3) {
-        errorCallback?.();
-        return false;
-      }
-      return true;
-    },
-    retryDelay: (failureCount: number) => {
-      return failureCount * 1000;
-    },
-  };
 };
 
 type QueryErrorWithStatus = {
@@ -63,6 +55,40 @@ const getQueryErrorStatus = (error: unknown): number | null => {
     statusError.cause?.status;
 
   return typeof status === "number" ? status : null;
+};
+
+export const isRateLimitQueryError = (error: unknown): boolean => {
+  return getQueryErrorStatus(error) === 429;
+};
+
+export const shouldStopPollingRetry = (error: unknown): boolean => {
+  return isUnauthorizedQueryError(error) || isRateLimitQueryError(error);
+};
+
+type DefaultQueryRetryPolicy<TError> = {
+  readonly retry: (failureCount: number, error: TError) => boolean;
+  readonly retryDelay: (failureCount: number) => number;
+};
+
+export const getDefaultQueryRetry = <TError = Error>(
+  errorCallback?: () => void
+): DefaultQueryRetryPolicy<TError> => {
+  return {
+    retry: (failureCount: number, error: TError) => {
+      if (isRateLimitQueryError(error)) {
+        errorCallback?.();
+        return false;
+      }
+      if (failureCount >= 3) {
+        errorCallback?.();
+        return false;
+      }
+      return true;
+    },
+    retryDelay: (failureCount: number) => {
+      return failureCount * 1000;
+    },
+  };
 };
 
 export const isUnauthorizedQueryError = (error: unknown): boolean => {

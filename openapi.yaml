@@ -3460,6 +3460,88 @@ paths:
                 $ref: "#/components/schemas/ApiMediaResolveResponse"
         "400":
           description: Invalid request shape
+  /memes_extended_data:
+    get:
+      tags:
+        - Memes
+      summary: Get paginated Memes extended data
+      description: >-
+        Returns Meme Card metadata joined with the card's NFT market and TDH
+        fields. `collection_size` is the total Meme Cards collection size.
+        `ranked_collection_size`, when present, is the denominator for rank
+        fields on rows included in TDH ranking. Rows not yet included in TDH
+        calculations can return `recorded_in_tdh: false`, `-1` rank values, and
+        `ranked_collection_size: null`. During migration or transient TDH lookup
+        fallback, `recorded_in_tdh` and `ranked_collection_size` can be `null`
+        or absent, and clients should treat that as legacy/transitional state.
+      operationId: getMemesExtendedData
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 101
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 101
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: id
+          in: query
+          description: Comma-separated Meme Card IDs
+          required: false
+          schema:
+            type: string
+        - name: season
+          in: query
+          description: Comma-separated Meme seasons
+          required: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Default is age
+          required: false
+          schema:
+            type: string
+            enum:
+              - age
+              - edition_size
+              - meme
+              - hodlers
+              - tdh
+              - percent_unique
+              - percent_unique_cleaned
+              - floor_price
+              - market_cap
+              - total_volume_last_24_hours
+              - total_volume_last_7_days
+              - total_volume_last_1_month
+              - total_volume
+              - highest_offer
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemesExtendedDataPage"
   /memes-mint-stats:
     get:
       tags:
@@ -3550,89 +3632,6 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
-  /memes_extended_data:
-    get:
-      tags:
-        - Memes
-      summary: Get paginated Memes extended data
-      description: >-
-        Returns Meme Card metadata joined with the card's NFT market and TDH
-        fields. `collection_size` is the total Meme Cards collection size.
-        `ranked_collection_size`, when present, is the denominator for
-        rank fields on rows included in TDH ranking. Rows not yet included in
-        TDH calculations can return `recorded_in_tdh: false`, `-1` rank values,
-        and `ranked_collection_size: null`. During migration or transient TDH
-        lookup fallback, `recorded_in_tdh` and `ranked_collection_size` can be
-        `null` or absent, and clients should treat that as legacy/transitional
-        state.
-      operationId: getMemesExtendedData
-      parameters:
-        - name: page_size
-          in: query
-          description: Default is 101
-          required: false
-          schema:
-            type: number
-            format: int64
-            minimum: 1
-            maximum: 101
-        - name: page
-          in: query
-          description: Default is 1
-          required: false
-          schema:
-            type: number
-            format: int64
-            minimum: 1
-        - name: id
-          in: query
-          description: Comma-separated Meme Card IDs
-          required: false
-          schema:
-            type: string
-        - name: season
-          in: query
-          description: Comma-separated Meme seasons
-          required: false
-          schema:
-            type: string
-        - name: sort
-          in: query
-          description: Default is age
-          required: false
-          schema:
-            type: string
-            enum:
-              - age
-              - edition_size
-              - meme
-              - hodlers
-              - tdh
-              - percent_unique
-              - percent_unique_cleaned
-              - floor_price
-              - market_cap
-              - total_volume_last_24_hours
-              - total_volume_last_7_days
-              - total_volume_last_1_month
-              - total_volume
-              - highest_offer
-        - name: sort_direction
-          in: query
-          description: Default is DESC
-          required: false
-          schema:
-            type: string
-            enum:
-              - ASC
-              - DESC
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiMemesExtendedDataPage"
   /minting-claims/{contract}/{card_id}/{merkle_root}/proofs/{address}:
     get:
       tags:
@@ -9461,6 +9460,70 @@ paths:
           description: User cannot manage wave metadata
         "404":
           description: Wave metadata not found
+  /v2/waves/{id}/competition-drops:
+    get:
+      tags:
+        - WavesV2
+      summary: Get one author's competition drops in a wave
+      description: >-
+        Lazily returns full participatory or winner drops for one author after
+        a wave-scoped competition badge is opened.
+      operationId: getWaveCompetitionDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetWaveCompetitionDropsV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: author_id
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: drop_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - PARTICIPATORY
+              - WINNER
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+        "400":
+          description: Invalid competition drop query params
+        "404":
+          description: Wave not found or not visible
   /v2/waves/{id}/drops:
     get:
       tags:
@@ -12174,6 +12237,8 @@ components:
         is_beneficiary_of_grant_id:
           type: string
           nullable: true
+        is_beneficiary_of_grant_match_mode:
+          $ref: "#/components/schemas/ApiGroupBeneficiaryGrantMatchMode"
     ApiCreateLegacyDesktopConnectionShareRequest:
       type: object
       properties:
@@ -14257,6 +14322,16 @@ components:
           type: boolean
         is_direct_message:
           type: boolean
+    ApiGroupBeneficiaryGrantMatchMode:
+      type: string
+      enum:
+        - ANY_TOKEN
+        - ALL_TOKENS
+    ApiGroupNftOwnershipMatchMode:
+      type: string
+      enum:
+        - ANY_TOKEN
+        - ALL_TOKENS
     ApiGroupCicFilter:
       type: object
       required:
@@ -14296,6 +14371,7 @@ components:
         - excluded_identity_group_id
         - excluded_identity_group_identities_count
         - is_beneficiary_of_grant_id
+        - is_beneficiary_of_grant_match_mode
         - is_beneficiary_of_grant
       properties:
         tdh:
@@ -14327,6 +14403,8 @@ components:
         is_beneficiary_of_grant_id:
           type: string
           nullable: true
+        is_beneficiary_of_grant_match_mode:
+          $ref: "#/components/schemas/ApiGroupBeneficiaryGrantMatchMode"
         is_beneficiary_of_grant:
           oneOf:
             - type: "null"
@@ -14395,6 +14473,8 @@ components:
           type: array
           items:
             type: string
+        match_mode:
+          $ref: "#/components/schemas/ApiGroupNftOwnershipMatchMode"
     ApiGroupRepFilter:
       type: object
       required:
@@ -14583,6 +14663,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
+    ApiIdentityMuteState:
+      type: object
+      required:
+        - muted
+      properties:
+        muted:
+          type: boolean
     ApiIdentityOverview:
       type: object
       required:
@@ -14609,6 +14696,8 @@ components:
           $ref: "#/components/schemas/ApiIdentityOverviewContextProfileContext"
         badges:
           $ref: "#/components/schemas/ApiIdentityOverviewBadges"
+        wave_participation:
+          $ref: "#/components/schemas/ApiIdentityWaveParticipation"
     ApiIdentityOverviewBadges:
       type: object
       required:
@@ -14635,12 +14724,15 @@ components:
       properties:
         subscribed:
           type: boolean
-    ApiIdentityMuteState:
+    ApiIdentityWaveParticipation:
       type: object
       required:
-        - muted
+        - is_participant
+        - is_winner
       properties:
-        muted:
+        is_participant:
+          type: boolean
+        is_winner:
           type: boolean
     ApiIdentitySubscriptionActions:
       type: object
@@ -19276,6 +19368,12 @@ components:
         first_unread_drop_serial_no:
           type: integer
           format: int64
+        subwave_unread_drops:
+          type: integer
+          format: int64
+          description: >-
+            Unread drops across all visible subwaves, independent of whether
+            the authenticated profile follows each subwave.
         followed_subwaves_count:
           type: integer
           format: int64
@@ -20179,6 +20277,8 @@ components:
           $ref: "#/components/schemas/ApiXTdhGrantTargetChain"
         target_contract:
           type: string
+        target_token_mode:
+          $ref: "#/components/schemas/ApiXTdhGrantTargetTokenMode"
         target_tokens_count:
           type: number
           format: int64
@@ -20269,6 +20369,11 @@ components:
       type: string
       enum:
         - ETHEREUM_MAINNET
+    ApiXTdhGrantTargetTokenMode:
+      type: string
+      enum:
+        - ALL
+        - INCLUDE
     ApiXTdhGrantToken:
       type: object
       required:

@@ -55,7 +55,10 @@ describe("MyStreamWaveMyVoteInput", () => {
     jest.clearAllMocks();
     useQueryClientMock.mockReturnValue({ invalidateQueries });
     useMutationMock.mockImplementation((config: any) => ({
-      mutateAsync: async (variables: { rate: number }) => {
+      mutateAsync: async (variables: {
+        rate: number;
+        previousRate: number;
+      }) => {
         mutateAsync(variables);
         const response = {
           id: "d1",
@@ -181,7 +184,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
-    expect(mutateAsync).toHaveBeenCalledWith({ rate: 0 });
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 0, previousRate: -5 });
   });
 
   it("submits zero when a legacy negative vote is manually changed to zero", async () => {
@@ -205,7 +208,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
-    expect(mutateAsync).toHaveBeenCalledWith({ rate: 0 });
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 0, previousRate: -5 });
   });
 
   it("clamps typed negative values to zero when negative votes are forbidden", () => {
@@ -246,7 +249,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
-    expect(mutateAsync).toHaveBeenCalledWith({ rate: 10 });
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 20 });
   });
 
   it("clamps vote value within limits and submits on click", async () => {
@@ -257,7 +260,7 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
-    expect(mutateAsync).toHaveBeenCalledWith({ rate: 10 });
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 0 });
   });
 
   it("does not submit when voting is closed", () => {
@@ -323,7 +326,10 @@ describe("MyStreamWaveMyVoteInput", () => {
 
   it("does not invalidate approval status when the vote update fails", async () => {
     useMutationMock.mockImplementation((config: any) => ({
-      mutateAsync: async (variables: { rate: number }) => {
+      mutateAsync: async (variables: {
+        rate: number;
+        previousRate: number;
+      }) => {
         mutateAsync(variables);
         const error = new Error("API Error");
         config.onError?.(error);
@@ -337,14 +343,19 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.change(input, { target: { value: "5" } });
     fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
 
-    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith({ rate: 5 }));
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith({ rate: 5, previousRate: 0 })
+    );
 
     expect(invalidateQueries).not.toHaveBeenCalled();
   });
 
   it("falls back to submitted value when response context is missing", async () => {
     useMutationMock.mockImplementation((config: any) => ({
-      mutateAsync: async (variables: { rate: number }) => {
+      mutateAsync: async (variables: {
+        rate: number;
+        previousRate: number;
+      }) => {
         mutateAsync(variables);
         config.onSuccess?.({ id: "d1" }, variables);
         return { id: "d1" };
@@ -429,5 +440,92 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("6");
     expectMaxVotes("9");
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
+  });
+
+  it("explains an unchanged existing vote with zero change", () => {
+    const onExplainVote = jest.fn();
+    const dropWithRating = {
+      ...drop,
+      context_profile_context: { rating: 4, min_rating: 0, max_rating: 10 },
+    };
+
+    render(
+      <MyStreamWaveMyVoteInput
+        drop={dropWithRating}
+        onExplainVote={onExplainVote}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reply with vote rationale" })
+    );
+
+    expect(onExplainVote).toHaveBeenCalledWith(4, 0);
+  });
+
+  it("explains a newly updated vote with its applied change", async () => {
+    const onExplainVote = jest.fn();
+    const dropWithRating = {
+      ...drop,
+      context_profile_context: { rating: 2, min_rating: 0, max_rating: 10 },
+    };
+
+    render(
+      <MyStreamWaveMyVoteInput
+        drop={dropWithRating}
+        onExplainVote={onExplainVote}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "5" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+
+    await waitFor(() =>
+      expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("5")
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reply with vote rationale" })
+    );
+
+    expect(onExplainVote).toHaveBeenCalledWith(5, 3);
+  });
+
+  it("explains only the latest change after sequential votes", async () => {
+    const onExplainVote = jest.fn();
+    const dropWithRating = {
+      ...drop,
+      context_profile_context: { rating: 5, min_rating: 0, max_rating: 10 },
+    };
+
+    render(
+      <MyStreamWaveMyVoteInput
+        drop={dropWithRating}
+        onExplainVote={onExplainVote}
+      />,
+      { wrapper }
+    );
+
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    await waitFor(() =>
+      expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("8")
+    );
+
+    fireEvent.change(input, { target: { value: "10" } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    await waitFor(() =>
+      expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("10")
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reply with vote rationale" })
+    );
+
+    expect(onExplainVote).toHaveBeenCalledWith(10, 2);
   });
 });

@@ -132,9 +132,9 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
       { timeout: 30000 }
     );
     await openGroupFilters(page);
-    await expect(
-      page.getByLabel(/^(By )?Group [Nn]ame$/).first()
-    ).toBeVisible({ timeout: 30000 });
+    await expect(page.getByLabel(/^(By )?Group [Nn]ame$/).first()).toBeVisible({
+      timeout: 30000,
+    });
     const groupsResponse = await groupsResponsePromise;
     const groupsPayload = (await groupsResponse.json()) as
       | { readonly id?: string; readonly name?: string }[]
@@ -150,16 +150,16 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
 
     // Deep-link the group: the URL param hydrates the active-group state.
     await gotoReady(page, `/network?group=${groupId}`);
-    await expect(page).toHaveURL((url) =>
-      url.searchParams.get("group") === groupId
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("group") === groupId
     );
     await openGroupFilters(page);
 
     // The active-group block is required: "Members:" in the desktop sidebar,
     // "Active filter" in the mobile sheet.
-    await expect(
-      page.getByText(/Members:|Active filter/).first()
-    ).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText(/Members:|Active filter/).first()).toBeVisible({
+      timeout: 30000,
+    });
 
     // Clearing the group exercises the state transition back to null and
     // must drop the URL param.
@@ -205,21 +205,17 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     const pastDrops = page.getByTestId("subscriptions-report-past-drops");
     await expectAnyVisible(
       [
-        upcomingDrops.getByText(
-          "Table listing upcoming meme card subscriptions"
-        ),
-        upcomingDrops.getByText("No Subscriptions Found"),
+        upcomingDrops.getByRole("link", { name: /^View The Memes card #/ }),
+        upcomingDrops.getByText("No Subscriptions Found", { exact: true }),
       ],
-      "upcoming subscriptions table or empty state"
+      "upcoming subscription rows or empty state"
     );
     await expectAnyVisible(
       [
-        pastDrops.getByText(
-          "Table listing past meme card subscription redemptions"
-        ),
-        pastDrops.getByText("No Subscriptions Found"),
+        pastDrops.getByRole("link", { name: /^View The Memes card #/ }),
+        pastDrops.getByText("No Subscriptions Found", { exact: true }),
       ],
-      "past subscriptions table or empty state"
+      "past subscription rows or empty state"
     );
     await expect(
       page.getByRole("button", { name: /^Download$/ })

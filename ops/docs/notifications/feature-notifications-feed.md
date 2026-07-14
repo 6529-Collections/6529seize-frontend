@@ -51,7 +51,8 @@ with cause filters, grouped reactions, and inline drop previews.
   - `Replies`: reply notifications.
   - `Identity`: new followers and REP/NIC updates.
   - `Reactions`: voted, reacted, and boosted drop notifications.
-  - `Invites`: wave invite notifications.
+  - `Invites`: wave-created notifications, including standard waves the user
+    can access and direct-message waves started with the user.
 
 ## Row and Action Behavior
 
@@ -64,7 +65,10 @@ with cause filters, grouped reactions, and inline drop previews.
 - Priority alerts show `sent a priority alert 🚨` as:
   - header-only rows (no related drop), or
   - header plus first related drop preview.
-- Invite rows can include both identity follow and wave follow controls.
+- Standard wave-created rows say the creator made a wave the user can access
+  and can include `Join wave` plus `Follow creator` controls.
+- Direct-message wave-created rows say the creator started a DM with the user
+  and expose `Open DM` instead of the wave join control.
 - Unknown causes render a generic row (formatted cause/context) instead of
   failing feed render.
 

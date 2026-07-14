@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import BrainMobile from "@/components/brain/BrainMobile";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
+import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -38,6 +39,26 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: () => ({ isApp }),
 }));
 
+let mockActiveWaveId: string | null = null;
+const mockSetActiveWave = jest.fn();
+const mockRequestMainWavesList = jest.fn(() => jest.fn());
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => ({
+    activeWave: {
+      id: mockActiveWaveId,
+      set: mockSetActiveWave,
+    },
+    requestMainWavesList: mockRequestMainWavesList,
+  }),
+}));
+
+const mockClearLastVisited = jest.fn();
+jest.mock("@/components/navigation/ViewContext", () => ({
+  useViewContext: () => ({
+    clearLastVisited: mockClearLastVisited,
+  }),
+}));
+
 let dropData: any = null;
 let waveData: any = null;
 let mockIsCompleted = false;
@@ -66,7 +87,17 @@ jest.mock("@/hooks/useWaveTimers", () => ({
 
 let mockOutcomesVisible = true;
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveMetadata: () => ({ isPending: false }),
   useWaveOutcomeVisibility: () => mockOutcomesVisible,
+  useWaveSubmissionButtonLabelOverride: () => null,
+}));
+
+jest.mock("@/hooks/useWaveHasPolls", () => ({
+  useWavePollSummary: () => ({
+    hasPolls: false,
+    unansweredPolls: 0,
+    isPending: false,
+  }),
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -97,6 +128,20 @@ const mockMobileWaveSubwavesBar = jest.fn(() => (
 jest.mock("@/components/brain/mobile/MobileWaveSubwavesBar", () => ({
   __esModule: true,
   default: (props: any) => mockMobileWaveSubwavesBar(props),
+}));
+
+const mockWaveContentTabs = jest.fn((props: any) => (
+  <button
+    type="button"
+    data-testid="about-sections-bar"
+    onClick={() => props.setActiveTab(SidebarTab.RULES)}
+  >
+    {props.activeTab}
+  </button>
+));
+jest.mock("@/components/brain/right-sidebar/WaveContent", () => ({
+  __esModule: true,
+  WaveContentTabs: (props: any) => mockWaveContentTabs(props),
 }));
 
 jest.mock("@/components/brain/mobile/BrainMobileAbout", () => ({
@@ -289,6 +334,10 @@ describe("BrainMobile", () => {
     dropData = null;
     waveData = null;
     isApp = true;
+    mockActiveWaveId = null;
+    mockSetActiveWave.mockClear();
+    mockRequestMainWavesList.mockClear();
+    mockClearLastVisited.mockClear();
     mockIsCompleted = false;
     mockFirstDecisionDone = true;
     mockOutcomesVisible = true;
@@ -297,6 +346,7 @@ describe("BrainMobile", () => {
     mockCreateWaveModal.mockClear();
     mockCreateDirectMessageModal.mockClear();
     mockMobileWaveSubwavesBar.mockClear();
+    mockWaveContentTabs.mockClear();
     globalThis.history.replaceState(null, "", "/");
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "alice" },
@@ -378,6 +428,141 @@ describe("BrainMobile", () => {
       wave: waveData,
     });
   });
+
+  it("switches the secondary bar between subwaves and About sections", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("mobile-subwaves-bar")).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("about-sections-bar")).toBeNull();
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.ABOUT);
+    });
+
+    const aboutSectionsBar = await screen.findByTestId("about-sections-bar");
+    expect(screen.queryByTestId("mobile-subwaves-bar")).toBeNull();
+    expect(aboutSectionsBar).toHaveTextContent(SidebarTab.ABOUT);
+
+    fireEvent.click(aboutSectionsBar);
+    expect(aboutSectionsBar).toHaveTextContent(SidebarTab.RULES);
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.DEFAULT);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("mobile-subwaves-bar")).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("about-sections-bar")).toBeNull();
+
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.ABOUT);
+    });
+
+    expect(await screen.findByTestId("about-sections-bar")).toHaveTextContent(
+      SidebarTab.RULES
+    );
+
+    mockSearchParams.set("wave", "2");
+    waveData = { ...createWave(false), id: "2" };
+    rerender(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.ABOUT);
+    });
+
+    expect(await screen.findByTestId("about-sections-bar")).toHaveTextContent(
+      SidebarTab.ABOUT
+    );
+  });
+
+  it("returns from an app wave detail to the waves list on edge swipe", async () => {
+    mockPathname = "/waves/1";
+    mockActiveWaveId = "1";
+    waveData = createWave(false);
+
+    render(<BrainMobile>child</BrainMobile>);
+
+    const waveContent = await screen.findByText("child");
+    fireEvent.touchStart(waveContent, {
+      touches: [{ clientX: 10, clientY: 100 }],
+    });
+    fireEvent.touchMove(waveContent, {
+      touches: [{ clientX: 60, clientY: 104 }],
+    });
+    fireEvent.touchEnd(waveContent, {
+      changedTouches: [{ clientX: 100, clientY: 106 }],
+    });
+
+    expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
+    expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
+    expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
+      isDirectMessage: false,
+    });
+  });
+
+  it("enables wave-list swipe when the active wave comes from the URL", async () => {
+    mockPathname = "/waves/1";
+    mockActiveWaveId = null;
+    waveData = createWave(false);
+
+    render(<BrainMobile>child</BrainMobile>);
+
+    const waveContent = await screen.findByText("child");
+    fireEvent.touchStart(waveContent, {
+      touches: [{ clientX: 10, clientY: 100 }],
+    });
+    fireEvent.touchMove(waveContent, {
+      touches: [{ clientX: 60, clientY: 104 }],
+    });
+    fireEvent.touchEnd(waveContent, {
+      changedTouches: [{ clientX: 100, clientY: 106 }],
+    });
+
+    expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
+    expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
+    expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
+      isDirectMessage: false,
+    });
+  });
+
+  it.each([
+    { app: false, pathname: "/waves/1", query: "" },
+    { app: true, pathname: "/messages/1", query: "" },
+    { app: true, pathname: "/waves/1", query: "drop=drop-1" },
+    { app: true, pathname: "/waves/1", query: "create=wave" },
+  ])(
+    "does not enable wave-list swipe for app=$app path=$pathname query=$query",
+    async ({ app, pathname, query }) => {
+      isApp = app;
+      mockPathname = pathname;
+      mockSearchParams = new URLSearchParams(query);
+      mockActiveWaveId = "1";
+      waveData = createWave(pathname.startsWith("/messages/"));
+
+      render(<BrainMobile>child</BrainMobile>);
+
+      const waveContent = await screen.findByText("child");
+      fireEvent.touchStart(waveContent, {
+        touches: [{ clientX: 10, clientY: 100 }],
+      });
+      fireEvent.touchEnd(waveContent, {
+        changedTouches: [{ clientX: 100, clientY: 100 }],
+      });
+
+      expect(mockRequestMainWavesList).not.toHaveBeenCalled();
+      expect(mockClearLastVisited).not.toHaveBeenCalled();
+      expect(mockSetActiveWave).not.toHaveBeenCalled();
+    }
+  );
 
   it("keeps My Votes unavailable for guests on memes waves", async () => {
     mockSearchParams.set("wave", "1");

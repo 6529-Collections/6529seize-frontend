@@ -141,7 +141,7 @@ export default function CommonTabs<T, U = unknown>(
         role="tablist"
         aria-label={filterLabel ?? "Filter options"}
         aria-orientation="horizontal"
-        className="horizontal-menu-hide-scrollbar tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
+        className="tw-no-scrollbar tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
       >
         <div
           className={clsx(

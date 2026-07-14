@@ -82,6 +82,8 @@ export default function Footer() {
         {printSeparator()}
         {printLink(`/about/${AboutSection.LICENSE}`, "License")}
         {printSeparator()}
+        {printLink("/about/6529-apps", "6529 Apps")}
+        {printSeparator()}
         {printLink(`/tools/api`, "API")}
         {printSeparator()}
         {printLink(`/about/${AboutSection.CONTACT_US}`, "Contact Us")}

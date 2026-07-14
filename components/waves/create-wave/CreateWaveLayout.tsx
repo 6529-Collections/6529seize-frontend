@@ -34,6 +34,7 @@ export default function CreateWaveLayout({
         <CreateWavesMainSteps
           activeStep={step}
           waveType={config.overview.type}
+          ongoingRanking={config.dates?.ongoingRanking ?? false}
           onStep={(targetStep) => setStep(targetStep, "backward")}
         />
       </div>
@@ -45,7 +46,7 @@ export default function CreateWaveLayout({
         <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">
           <div className="tw-w-full tw-flex-1 tw-p-4 lg:tw-p-8">{children}</div>
           {showActions ? (
-            <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/95 tw-px-4 tw-pb-[calc(1rem+env(safe-area-inset-bottom,0px))] tw-pt-4 lg:tw-pl-8 lg:tw-pr-28 lg:tw-pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] lg:tw-pt-5">
+            <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/95 tw-px-4 tw-pb-[calc(1rem+env(safe-area-inset-bottom,0px))] tw-pt-4 lg:tw-pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] lg:tw-pl-8 lg:tw-pr-28 lg:tw-pt-5">
               <CreateWaveActions
                 setStep={setStep}
                 step={step}

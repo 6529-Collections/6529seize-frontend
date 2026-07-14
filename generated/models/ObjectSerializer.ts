@@ -185,11 +185,13 @@ export * from '../models/ApiGlobalRepCategoryWaveOverview';
 export * from '../models/ApiGlobalRepCategoryWaveRef';
 export * from '../models/ApiGlobalRepCategoryWavesPage';
 export * from '../models/ApiGroup';
+export * from '../models/ApiGroupBeneficiaryGrantMatchMode';
 export * from '../models/ApiGroupCicFilter';
 export * from '../models/ApiGroupDescription';
 export * from '../models/ApiGroupFilterDirection';
 export * from '../models/ApiGroupFull';
 export * from '../models/ApiGroupLevelFilter';
+export * from '../models/ApiGroupNftOwnershipMatchMode';
 export * from '../models/ApiGroupOwnsNft';
 export * from '../models/ApiGroupRepFilter';
 export * from '../models/ApiGroupTdhFilter';
@@ -204,6 +206,7 @@ export * from '../models/ApiIdentityOverviewContextProfileContext';
 export * from '../models/ApiIdentitySubscriptionActions';
 export * from '../models/ApiIdentitySubscriptionTargetAction';
 export * from '../models/ApiIdentitySubscriptionTargetType';
+export * from '../models/ApiIdentityWaveParticipation';
 export * from '../models/ApiIncomingIdentitySubscriptionsPage';
 export * from '../models/ApiIntRange';
 export * from '../models/ApiLightDrop';
@@ -449,6 +452,7 @@ export * from '../models/ApiXTdhGlobalStats';
 export * from '../models/ApiXTdhGrant';
 export * from '../models/ApiXTdhGrantStatus';
 export * from '../models/ApiXTdhGrantTargetChain';
+export * from '../models/ApiXTdhGrantTargetTokenMode';
 export * from '../models/ApiXTdhGrantToken';
 export * from '../models/ApiXTdhGrantTokensPage';
 export * from '../models/ApiXTdhGrantUpdateRequest';
@@ -585,7 +589,7 @@ import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
 import { ApiCreateDropRequest                 } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
-import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
+import { ApiCreateGroupDescription          } from '../models/ApiCreateGroupDescription';
 import { ApiCreateLegacyDesktopConnectionShareRequest , ApiCreateLegacyDesktopConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateLegacyDesktopConnectionShareRequest';
 import { ApiCreateLegacyDesktopConnectionShareResponse } from '../models/ApiCreateLegacyDesktopConnectionShareResponse';
 import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
@@ -658,7 +662,7 @@ import { ApiDropReactionCounter } from '../models/ApiDropReactionCounter';
 import { ApiDropReactionV2 } from '../models/ApiDropReactionV2';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropResolvedIdentityProfile                         } from '../models/ApiDropResolvedIdentityProfile';
-import { ApiDropResolvedIdentityProfileV2           } from '../models/ApiDropResolvedIdentityProfileV2';
+import { ApiDropResolvedIdentityProfileV2            } from '../models/ApiDropResolvedIdentityProfileV2';
 import { ApiDropSearchStrategy } from '../models/ApiDropSearchStrategy';
 import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
@@ -695,12 +699,14 @@ import { ApiGlobalRepCategoryWaveOverview } from '../models/ApiGlobalRepCategory
 import { ApiGlobalRepCategoryWaveRef } from '../models/ApiGlobalRepCategoryWaveRef';
 import { ApiGlobalRepCategoryWavesPage } from '../models/ApiGlobalRepCategoryWavesPage';
 import { ApiGroup } from '../models/ApiGroup';
+import { ApiGroupBeneficiaryGrantMatchMode } from '../models/ApiGroupBeneficiaryGrantMatchMode';
 import { ApiGroupCicFilter     } from '../models/ApiGroupCicFilter';
-import { ApiGroupDescription } from '../models/ApiGroupDescription';
+import { ApiGroupDescription             } from '../models/ApiGroupDescription';
 import { ApiGroupFilterDirection } from '../models/ApiGroupFilterDirection';
 import { ApiGroupFull } from '../models/ApiGroupFull';
 import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
-import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum    } from '../models/ApiGroupOwnsNft';
+import { ApiGroupNftOwnershipMatchMode } from '../models/ApiGroupNftOwnershipMatchMode';
+import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum     } from '../models/ApiGroupOwnsNft';
 import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter    } from '../models/ApiGroupTdhFilter';
 import { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStrategy';
@@ -708,12 +714,13 @@ import { ApiIdentity                          } from '../models/ApiIdentity';
 import { ApiIdentityActivity } from '../models/ApiIdentityActivity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentityMuteState } from '../models/ApiIdentityMuteState';
-import { ApiIdentityOverview         } from '../models/ApiIdentityOverview';
+import { ApiIdentityOverview          } from '../models/ApiIdentityOverview';
 import { ApiIdentityOverviewBadges } from '../models/ApiIdentityOverviewBadges';
 import { ApiIdentityOverviewContextProfileContext } from '../models/ApiIdentityOverviewContextProfileContext';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
 import { ApiIdentitySubscriptionTargetType } from '../models/ApiIdentitySubscriptionTargetType';
+import { ApiIdentityWaveParticipation } from '../models/ApiIdentityWaveParticipation';
 import { ApiIncomingIdentitySubscriptionsPage } from '../models/ApiIncomingIdentitySubscriptionsPage';
 import { ApiIntRange } from '../models/ApiIntRange';
 import { ApiLightDrop             } from '../models/ApiLightDrop';
@@ -956,9 +963,10 @@ import { ApiXTdhContribution } from '../models/ApiXTdhContribution';
 import { ApiXTdhContributionsPage } from '../models/ApiXTdhContributionsPage';
 import { ApiXTdhCreateGrant       } from '../models/ApiXTdhCreateGrant';
 import { ApiXTdhGlobalStats } from '../models/ApiXTdhGlobalStats';
-import { ApiXTdhGrant                } from '../models/ApiXTdhGrant';
+import { ApiXTdhGrant                 } from '../models/ApiXTdhGrant';
 import { ApiXTdhGrantStatus } from '../models/ApiXTdhGrantStatus';
 import { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
+import { ApiXTdhGrantTargetTokenMode } from '../models/ApiXTdhGrantTargetTokenMode';
 import { ApiXTdhGrantToken } from '../models/ApiXTdhGrantToken';
 import { ApiXTdhGrantTokensPage } from '../models/ApiXTdhGrantTokensPage';
 import { ApiXTdhGrantUpdateRequest } from '../models/ApiXTdhGrantUpdateRequest';
@@ -1059,7 +1067,9 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiDropSubscriptionTargetAction",
     "ApiDropType",
     "ApiFeedItemType",
+    "ApiGroupBeneficiaryGrantMatchMode",
     "ApiGroupFilterDirection",
+    "ApiGroupNftOwnershipMatchMode",
     "ApiGroupOwnsNftNameEnum",
     "ApiGroupTdhInclusionStrategy",
     "ApiIdentitySubscriptionTargetAction",
@@ -1129,6 +1139,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWavesV2ListType",
     "ApiXTdhGrantStatus",
     "ApiXTdhGrantTargetChain",
+    "ApiXTdhGrantTargetTokenMode",
     "CreateWalletAuthSession201ResponseClientTypeEnum",
     "LogoutWalletAuthSessionRequestClientTypeEnum",
     "MintingClaimAnimationDetailsFormatEnum",
@@ -1320,6 +1331,7 @@ let typeMap: {[index: string]: any} = {
     "ApiIdentityOverviewBadges": ApiIdentityOverviewBadges,
     "ApiIdentityOverviewContextProfileContext": ApiIdentityOverviewContextProfileContext,
     "ApiIdentitySubscriptionActions": ApiIdentitySubscriptionActions,
+    "ApiIdentityWaveParticipation": ApiIdentityWaveParticipation,
     "ApiIncomingIdentitySubscriptionsPage": ApiIncomingIdentitySubscriptionsPage,
     "ApiIntRange": ApiIntRange,
     "ApiLightDrop": ApiLightDrop,

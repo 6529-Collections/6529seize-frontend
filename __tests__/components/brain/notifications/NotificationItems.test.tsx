@@ -1,19 +1,39 @@
-import { render } from '@testing-library/react';
-const NotificationItem = jest.fn((_props: unknown) => <div data-testid="item" />);
+import { render } from "@testing-library/react";
+const NotificationItem = jest.fn((_props: unknown) => (
+  <div data-testid="item" />
+));
 
-jest.mock('@/components/brain/notifications/NotificationItem', () => ({ __esModule: true, default: NotificationItem }));
+jest.mock("@/components/brain/notifications/NotificationItem", () => ({
+  __esModule: true,
+  default: NotificationItem,
+}));
 
-import NotificationItems from '@/components/brain/notifications/NotificationItems';
-import React from 'react';
+import NotificationItems from "@/components/brain/notifications/NotificationItems";
+import React from "react";
 
-describe('NotificationItems', () => {
-  it('renders all notifications with props', () => {
-    const items = [{ id: '1', cause: 'DROP_REPLIED' }, { id: '2', cause: 'DROP_VOTED' }] as unknown[];
-    const active = { id: 'active' } as unknown;
+describe("NotificationItems", () => {
+  it("passes activeDrop only to the related notification row", () => {
+    const active = { drop: { id: "active" } } as unknown;
+    const items = [
+      {
+        id: "1",
+        cause: "DROP_REPLIED",
+        related_drops: [{ id: "active" }],
+      },
+      {
+        id: "2",
+        cause: "DROP_VOTED",
+        related_drops: [{ id: "other" }],
+      },
+      {
+        cause: "DROP_QUOTED",
+        related_drops: [],
+      },
+    ] as unknown[];
     const onReply = jest.fn();
     const onClick = jest.fn();
 
-    render(
+    const { container } = render(
       <NotificationItems
         items={items as never[]}
         activeDrop={active as never}
@@ -22,12 +42,22 @@ describe('NotificationItems', () => {
       />
     );
 
-    expect(NotificationItem).toHaveBeenCalledTimes(2);
+    expect(NotificationItem).toHaveBeenCalledTimes(3);
+    expect(container.querySelector("#feed-item-fallback-2")).not.toBeNull();
     const firstCall = NotificationItem.mock.calls.at(0);
+    const secondCall = NotificationItem.mock.calls.at(1);
     expect(firstCall?.[0]).toEqual(
       expect.objectContaining({
         notification: items[0],
         activeDrop: active,
+        onReply,
+        onDropContentClick: onClick,
+      })
+    );
+    expect(secondCall?.[0]).toEqual(
+      expect.objectContaining({
+        notification: items[1],
+        activeDrop: null,
         onReply,
         onDropContentClick: onClick,
       })

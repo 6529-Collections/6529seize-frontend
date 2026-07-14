@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
@@ -12,8 +12,12 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 
 jest.mock("@headlessui/react", () => ({
-  Dialog: ({ children, onClose: _onClose, ...props }: any) => (
-    <div data-testid="dialog" {...props}>
+  Dialog: ({ children, onClose, ...props }: any) => (
+    <div
+      data-testid="dialog"
+      onKeyDown={(event) => event.key === "Escape" && onClose()}
+      {...props}
+    >
       {children}
     </div>
   ),
@@ -21,6 +25,9 @@ jest.mock("@headlessui/react", () => ({
     <div data-testid="dialog-panel" {...props}>
       {children}
     </div>
+  ),
+  DialogBackdrop: (props: any) => (
+    <div data-testid="dialog-backdrop" {...props} />
   ),
   Transition: ({ children, show }: any) => (show ? <>{children}</> : null),
   TransitionChild: ({ children }: any) => <>{children}</>,
@@ -122,5 +129,13 @@ describe("ArtistPreviewModal", () => {
 
     expect(screen.queryByTestId("dialog")).not.toBeInTheDocument();
     expect(screen.queryByTestId("app-wrapper")).not.toBeInTheDocument();
+  });
+
+  it("closes when Escape is pressed on desktop", () => {
+    render(<ArtistPreviewModal {...defaultProps} />);
+
+    fireEvent.keyDown(screen.getByTestId("dialog"), { key: "Escape" });
+
+    expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
   });
 });

@@ -47,6 +47,34 @@ const createWrapper =
     </AuthContext.Provider>
   );
 
+function renderContentState({
+  authContext = {},
+  walletContext = {
+    address: "0xabc",
+    hasValidWalletAuth: true,
+  },
+  measurementsComplete = true,
+}: {
+  readonly authContext?: Partial<AuthContextValue>;
+  readonly walletContext?: {
+    readonly address: string | null;
+    readonly hasValidWalletAuth: boolean;
+  };
+  readonly measurementsComplete?: boolean;
+}) {
+  mockUseLayout.mockReturnValue({ spaces: { measurementsComplete } });
+  mockUseSeizeConnectContext.mockReturnValue(walletContext);
+
+  const { result, unmount } = renderHook(() => useAuthenticatedContent(), {
+    wrapper: createWrapper(authContext),
+  });
+
+  const contentState = result.current.contentState;
+  unmount();
+
+  return contentState;
+}
+
 describe("useAuthenticatedContent", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -111,5 +139,88 @@ describe("useAuthenticatedContent", () => {
     });
 
     expect(result.current.contentState).toBe("loading");
+  });
+
+  it("keeps auth and availability gates ahead of layout measurement", () => {
+    const readyProfileContext: Partial<AuthContextValue> = {
+      connectedProfile: createConnectedProfile("alice"),
+      fetchingProfile: false,
+      isAuthenticated: true,
+      showWaves: true,
+    };
+
+    expect(
+      renderContentState({
+        authContext: readyProfileContext,
+        walletContext: { address: null, hasValidWalletAuth: false },
+        measurementsComplete: false,
+      })
+    ).toBe("not-authenticated");
+
+    expect(
+      renderContentState({
+        authContext: readyProfileContext,
+        walletContext: { address: "0xabc", hasValidWalletAuth: false },
+        measurementsComplete: false,
+      })
+    ).toBe("not-authenticated");
+
+    expect(
+      renderContentState({
+        authContext: {
+          connectedProfile: null,
+          fetchingProfile: true,
+          isAuthenticated: false,
+          showWaves: false,
+        },
+        walletContext: { address: "0xabc", hasValidWalletAuth: false },
+        measurementsComplete: false,
+      })
+    ).toBe("loading");
+
+    expect(
+      renderContentState({
+        authContext: {
+          connectedProfile: null,
+          fetchingProfile: false,
+          isAuthenticated: false,
+          showWaves: false,
+        },
+        measurementsComplete: false,
+      })
+    ).toBe("needs-profile");
+
+    expect(
+      renderContentState({
+        authContext: {
+          ...readyProfileContext,
+          showWaves: false,
+        },
+        measurementsComplete: false,
+      })
+    ).toBe("not-available");
+  });
+
+  it("returns measuring only after authenticated Waves content is allowed", () => {
+    const authContext: Partial<AuthContextValue> = {
+      connectedProfile: createConnectedProfile("alice"),
+      fetchingProfile: false,
+      isAuthenticated: true,
+      showWaves: true,
+    };
+
+    expect(
+      renderContentState({
+        authContext,
+        measurementsComplete: false,
+      })
+    ).toBe("measuring");
+
+    expect(
+      renderContentState({
+        authContext,
+        measurementsComplete: true,
+      })
+    ).toBe("ready");
   });
 });

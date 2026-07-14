@@ -13,6 +13,7 @@ import {
   normalizeLocale,
 } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
 
 const NEW_VERSION_TOAST_LOCALE_MESSAGES = [
   {
@@ -390,6 +391,19 @@ describe("frontend i18n helpers", () => {
     );
   });
 
+  it("falls back consistently for wave voter connect copy", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(t(locale, "waves.sidebar.rightPanel.voters.connectTitle")).toBe(
+        t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.voters.connectTitle")
+      );
+      expect(
+        t(locale, "waves.sidebar.rightPanel.voters.connectDescription")
+      ).toBe(
+        t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.voters.connectDescription")
+      );
+    }
+  });
+
   it("formats locale-sensitive values through Intl helpers", () => {
     expect(formatNumber("de-DE", 1234.5, { maximumFractionDigits: 1 })).toBe(
       "1.234,5"
@@ -418,6 +432,22 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "waves.drop.actions.copyFailed")).toBe(
       "Kopieren fehlgeschlagen"
     );
+  });
+
+  it("keeps shared search control copy namespaced", () => {
+    expect(EN_US_MESSAGES["headerSearch.clear"]).toBe("Clear search");
+    expect(EN_US_MESSAGES["headerSearch.clearShort"]).toBe("Clear");
+    expect(EN_US_MESSAGES["headerSearch.close"]).toBe("Close search");
+    expect(EN_US_MESSAGES["waves.drops.searchModal.clear"]).toBe(
+      "Clear search"
+    );
+    expect(EN_US_MESSAGES["waves.drops.searchModal.clearShort"]).toBe("Clear");
+    expect(EN_US_MESSAGES["waves.drops.searchModal.close"]).toBe(
+      "Close search"
+    );
+    expect(EN_US_MESSAGES).not.toHaveProperty("clear");
+    expect(EN_US_MESSAGES).not.toHaveProperty("clearShort");
+    expect(EN_US_MESSAGES).not.toHaveProperty("close");
   });
 
   it("keeps file-kind labels distinguishable within each locale", () => {

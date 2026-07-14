@@ -60,7 +60,7 @@ describe("WaveContent", () => {
   const wave = { wave: { type: ApiWaveType.Chat }, name: "Wave" } as any;
 
   it("renders normal wave with about and settings tabs", () => {
-    render(
+    const { container } = render(
       <WaveContent
         wave={wave}
         mode={Mode.CONTENT}
@@ -73,6 +73,25 @@ describe("WaveContent", () => {
     expect(screen.getByTestId("tabs")).toHaveTextContent(
       "ABOUT-About,Rules,REP,Settings"
     );
+    expect(screen.getByText("content")).toBeInTheDocument();
+    expect(container.querySelector(".tw-divide-y")).toHaveClass(
+      "tw-divide-white/5"
+    );
+  });
+
+  it("can render content without its own tab row", () => {
+    render(
+      <WaveContent
+        wave={wave}
+        mode={Mode.CONTENT}
+        setMode={jest.fn()}
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={jest.fn()}
+        showTabs={false}
+      />
+    );
+
+    expect(screen.queryByTestId("tabs")).toBeNull();
     expect(screen.getByText("content")).toBeInTheDocument();
   });
 

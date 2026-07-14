@@ -14,6 +14,8 @@ Wave and DM rows in the left list control which thread is open.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
 - Browser back/forward keeps the active row and URL in sync.
+- In the native app, swipe right from the left edge of a standard wave detail
+  view to return to the Waves list.
 
 ## Location in the Site
 
@@ -28,6 +30,8 @@ Wave and DM rows in the left list control which thread is open.
 - From the expanded web Waves panel header, open `Discover Waves` for the
   `/discover` route.
 - Select an inactive wave or DM row from the list by clicking the row body.
+- In the native app, open a standard wave and swipe right from the left edge of
+  the main content.
 - Use browser back/forward after navigating between rows.
 
 ## User Journey
@@ -37,7 +41,9 @@ Wave and DM rows in the left list control which thread is open.
 3. The app updates the active highlight and URL together.
 4. Select the active row body again to clear selection and return to section
    home.
-5. Use browser back/forward to revisit row selections while keeping the list
+5. In the native app, an edge swipe right from a standard wave also clears the
+   active wave and restores the Waves list at its saved scroll position.
+6. Use browser back/forward to revisit row selections while keeping the list
    and URL in sync.
 
 ## Common Scenarios
@@ -45,6 +51,7 @@ Wave and DM rows in the left list control which thread is open.
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages/{waveId}`.
 - Active-row re-click returns to `/waves` or `/messages`.
+- Native-app edge swipe from `/waves/{waveId}` returns to `/waves`.
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
   place and keep row highlight aligned.
 - On signed-out desktop web `/waves`, clearing the active row returns to
@@ -63,6 +70,12 @@ Wave and DM rows in the left list control which thread is open.
   idle desktop rows do not reserve the hidden pin width.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
+- Edge-swipe navigation applies only to native-app standard wave details. It is
+  disabled on web, direct messages, list routes, create overlays, and focused
+  drop views.
+- The gesture starts from the left edge and ignores sliders, editors, media
+  controls, and horizontally scrollable content so those interactions keep
+  their normal touch behavior.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
   Shift/Alt-click, middle-click, and right-click/context menu.
 
@@ -76,6 +89,8 @@ Wave and DM rows in the left list control which thread is open.
 ## Limitations / Notes
 
 - This page owns row selection/navigation only.
+- The visible app-header `Back` control remains available as the non-gesture
+  way to return to the Waves list.
 - Row metadata (`Last drop`, badges, tooltips) is owned by the row-metadata
   page.
 - Pin and mute controls are owned by their sidebar control pages.

@@ -436,7 +436,7 @@ collect_all_inputs() {
   # Required / optional keys
   prompt_input_required ALCHEMY_API_KEY "Enter ALCHEMY_API_KEY"
   exec 3</dev/tty || true
-  read -u 3 -r -p "Enter TENOR_API_KEY (optional, can be empty): " TENOR_API_KEY || true
+  read -u 3 -r -p "Enter GIPHY_API_KEY (optional, can be empty): " GIPHY_API_KEY || true
   exec 3<&- || true
 
   prompt_choice NEXTGEN_CHAIN_ID \
@@ -494,8 +494,8 @@ BASE_ENDPOINT=$base_endpoint
 # API KEYS
 ALCHEMY_API_KEY=$ALCHEMY_API_KEY
 
-# TENOR API KEY (optional)
-TENOR_API_KEY=$TENOR_API_KEY
+# GIPHY API KEY (optional)
+GIPHY_API_KEY=$GIPHY_API_KEY
 
 # NEXTGEN CHAIN ID: 1 (mainnet) or 11155111 (sepolia)
 NEXTGEN_CHAIN_ID=$NEXTGEN_CHAIN_ID

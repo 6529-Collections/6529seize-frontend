@@ -56,8 +56,6 @@ export const WaveLeaderboardGridItem: React.FC<
 }) => {
   const isCompactMode = mode === "compact";
   const isContentOnlyMode = mode === "content_only";
-  const isCuratable = drop.context_profile_context?.curatable ?? false;
-  const isCurated = drop.context_profile_context?.curated ?? false;
   const canOpenDrop = drop.drop_type !== ApiDropType.Chat;
   const isMobileScreen = useIsMobileScreen();
   const { hasTouchScreen } = useDeviceInfo();
@@ -74,8 +72,7 @@ export const WaveLeaderboardGridItem: React.FC<
   const { canShowVote } = useDropInteractionRules(drop);
   const canShowVotingAction = canShowVote && !isVotingActionLocked;
   const canCopyLink = !drop.id.startsWith("temp-");
-  const hasDesktopContentOnlyActions =
-    canOpenDrop || isCuratable || canShowVotingAction;
+  const hasDesktopContentOnlyActions = canOpenDrop || canShowVotingAction;
   const hasMobileContentOnlyActions =
     hasDesktopContentOnlyActions || canCopyLink;
   const showDesktopContentOnlyActions =
@@ -145,8 +142,6 @@ export const WaveLeaderboardGridItem: React.FC<
         isContentOnlyMode={isContentOnlyMode}
         showDesktopContentOnlyActions={showDesktopContentOnlyActions}
         canOpenDrop={canOpenDrop}
-        isCuratable={isCuratable}
-        isCurated={isCurated}
         canShowVotingAction={canShowVotingAction}
         onOpenDrop={openDrop}
         onVoteButtonClick={handleVoteButtonClick}
@@ -188,8 +183,6 @@ export const WaveLeaderboardGridItem: React.FC<
           isOpen={isActive}
           setIsActive={setIsActive}
           canOpenDrop={canOpenDrop}
-          isCuratable={isCuratable}
-          isCurated={isCurated}
           canShowVotingAction={canShowVotingAction}
           onVoteClick={handleVoteButtonClick}
         />

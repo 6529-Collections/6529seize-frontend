@@ -174,6 +174,10 @@ describe("MemesWaveWinnersDrop", () => {
     ).toHaveBeenCalledWith(winner.drop);
     await user.click(container.firstElementChild as HTMLElement);
     expect(onClick).toHaveBeenCalledWith({ id: "ext" });
+    expect(screen.getByRole("heading", { name: "T" })).toHaveClass(
+      "tw-mt-0",
+      "tw-leading-tight"
+    );
     expect(screen.getByText("5")).toBeInTheDocument();
     expect(screen.getByTestId("author-badges")).toBeInTheDocument();
     expect(screen.getByTestId("identity")).toBeInTheDocument();

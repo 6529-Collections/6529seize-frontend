@@ -9,6 +9,7 @@ import type { ExtraProps } from "react-markdown";
 import emojiRegex from "emoji-regex";
 
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { ApiDropGroupMention as ApiDropGroupMentionValue } from "@/generated/models/ApiDropGroupMention";
@@ -26,6 +27,7 @@ import {
 } from "@/helpers/waves/drop-group-mentions";
 import { isDirectImageUrl } from "./linkUtils";
 import { normalizeDropMarkdownContent } from "./normalizeContent";
+import { isPreviewableHrefSource } from "./sourcePositions";
 import {
   DropPartMarkdownImageGroup,
   type DropPartMarkdownImageLayout,
@@ -50,6 +52,7 @@ interface CustomEmojiImageProps {
 interface MarkdownElementProps {
   readonly children?: ReactNode | undefined;
   readonly href?: unknown;
+  readonly node?: unknown;
   readonly src?: unknown;
 }
 
@@ -82,6 +85,7 @@ type MarkdownImageElement = ReactElement<{
 }>;
 
 type MarkdownLinkElement = ReactElement<{
+  readonly children?: ReactNode | undefined;
   readonly href: string;
 }>;
 
@@ -132,11 +136,31 @@ const getSmartHref = (
 ): string | null =>
   typeof elementProps?.href === "string" ? elementProps.href : null;
 
+const isBareHrefLabel = (
+  children: ReactNode | undefined,
+  href: string
+): boolean => {
+  const linkText = getTextFromChildren(children)?.trim();
+  if (linkText === null) {
+    return false;
+  }
+
+  const trimmedHref = href.trim();
+  return (
+    linkText === trimmedHref ||
+    linkText === ensureStableSeizeLink(trimmedHref).trim()
+  );
+};
+
 const getBareImageHref = (
   elementProps: MarkdownElementProps | null
 ): string | null => {
   const href = getSmartHref(elementProps);
   if (!href || !isDirectImageUrl(href)) {
+    return null;
+  }
+
+  if (!isPreviewableHrefSource(elementProps?.node)) {
     return null;
   }
 
@@ -172,8 +196,16 @@ const isSmartLinkElement = (
   node: ReactNode,
   isSmartLink: (href: string) => boolean
 ): node is MarkdownLinkElement => {
-  const href = getSmartHref(getMarkdownElementProps(node));
-  return href !== null && href.length > 0 && isSmartLink(href);
+  const elementProps = getMarkdownElementProps(node);
+  const href = getSmartHref(elementProps);
+
+  return (
+    href !== null &&
+    href.length > 0 &&
+    isBareHrefLabel(elementProps?.children, href) &&
+    isPreviewableHrefSource(elementProps?.node) &&
+    isSmartLink(href)
+  );
 };
 
 const containsOnlyNativeEmojis = (str: string): boolean => {

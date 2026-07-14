@@ -6,16 +6,19 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import WaveApprovalThresholds from "@/components/waves/specs/WaveApprovalThresholds";
 import WaveApproveTabLabels from "@/components/waves/specs/WaveApproveTabLabels";
 import WaveBindingRules from "@/components/waves/specs/WaveBindingRules";
+import WaveChatStatus from "@/components/waves/specs/WaveChatStatus";
 import WaveCustomRules from "@/components/waves/specs/WaveCustomRules";
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveGroup from "@/components/waves/specs/groups/group/WaveGroup";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import WaveOutcomesVisibility from "@/components/waves/specs/WaveOutcomesVisibility";
+import WaveSubmissionButtonLabel from "@/components/waves/specs/WaveSubmissionButtonLabel";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
 import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
 import BoostedDropsDisplayPreference from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveSettingsSectionsProps {
   readonly wave: ApiWave;
@@ -28,13 +31,13 @@ const SettingsSection = ({
   readonly children: ReactNode;
   readonly title: string;
 }) => (
-  <section>
-    <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-6">
-      <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
+  <section className="tw-px-4 tw-py-4">
+    <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6">
+      <h2 className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.1em] !tw-text-iron-400">
         {title}
-      </p>
+      </h2>
     </div>
-    <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-0.5 tw-px-2">
+    <div className="tw--mx-2 tw-mt-2 tw-flex tw-flex-col tw-gap-y-0.5">
       {children}
     </div>
   </section>
@@ -48,13 +51,17 @@ export default function WaveSettingsSections({
     wave.wave.type === ApiWaveType.Rank ||
     wave.wave.type === ApiWaveType.Approve;
   const supportsAcceptanceRules = wave.wave.type !== ApiWaveType.Chat;
+  const showChatStatus = wave.wave.type !== ApiWaveType.Chat;
   const showChatSettings = wave.chat.enabled;
+  const showChatSection = showChatStatus || showChatSettings;
 
   return (
-    <div className="tw-pb-4">
+    <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-pb-4">
       <WaveActiveCurationSection wave={wave} />
 
-      <SettingsSection title="Rules">
+      <SettingsSection
+        title={waveRightPanelText("waves.sidebar.rightPanel.settings.rules")}
+      >
         <WaveCustomRules wave={wave} />
         {supportsAcceptanceRules && <WaveBindingRules wave={wave} />}
       </SettingsSection>
@@ -71,31 +78,53 @@ export default function WaveSettingsSections({
       )}
 
       {isDisplaySettingsWave && (
-        <SettingsSection title="Display">
+        <SettingsSection
+          title={waveRightPanelText(
+            "waves.sidebar.rightPanel.settings.display"
+          )}
+        >
+          <WaveSubmissionButtonLabel wave={wave} />
           <WaveOutcomesVisibility wave={wave} />
         </SettingsSection>
       )}
 
       {isApproveWave && (
         <>
-          <SettingsSection title="Approval tabs">
+          <SettingsSection
+            title={waveRightPanelText(
+              "waves.sidebar.rightPanel.settings.approvalTabs"
+            )}
+          >
             <WaveApproveTabLabels wave={wave} />
           </SettingsSection>
 
-          <SettingsSection title="Approval rule">
+          <SettingsSection
+            title={waveRightPanelText(
+              "waves.sidebar.rightPanel.settings.approvalRule"
+            )}
+          >
             <WaveApprovalThresholds wave={wave} />
           </SettingsSection>
         </>
       )}
 
-      {showChatSettings && (
-        <SettingsSection title="Chat">
-          <WaveSlowMode wave={wave} />
-          <WaveDisableLinks wave={wave} />
+      {showChatSection && (
+        <SettingsSection
+          title={waveRightPanelText("waves.sidebar.rightPanel.settings.chat")}
+        >
+          {showChatStatus && <WaveChatStatus wave={wave} />}
+          {showChatSettings && (
+            <>
+              <WaveSlowMode wave={wave} />
+              <WaveDisableLinks wave={wave} />
+            </>
+          )}
         </SettingsSection>
       )}
 
-      <SettingsSection title="Access">
+      <SettingsSection
+        title={waveRightPanelText("waves.sidebar.rightPanel.settings.access")}
+      >
         <WaveGroup
           scope={wave.visibility.scope}
           type={WaveGroupType.VIEW}

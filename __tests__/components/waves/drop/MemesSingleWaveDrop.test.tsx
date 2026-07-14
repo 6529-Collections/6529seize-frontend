@@ -36,6 +36,7 @@ jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
 
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useWaveOutcomeVisibility: () => true,
+  useWaveSubmissionButtonLabelOverride: () => null,
 }));
 
 describe("MemesSingleWaveDrop", () => {

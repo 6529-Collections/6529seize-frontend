@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { useNotificationsQuery, usePrefetchNotifications } from '@/hooks/useNotificationsQuery';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiNotificationCause } from '@/generated/models/ApiNotificationCause';
+import { getIdentityNotificationsQueryKey } from '@/services/api/notifications-query';
 
 jest.mock('@tanstack/react-query');
 
@@ -45,6 +46,26 @@ describe('useNotificationsQuery', () => {
     const { result } = renderHook(() => useNotificationsQuery({ identity: 'id' }));
     expect(result.current.items).toEqual([]);
     expect(result.current.isInitialQueryDone).toBe(false);
+  });
+
+  it('uses the shared normalized Notifications query key', () => {
+    useInfiniteQueryMock.mockReturnValue({
+      data: undefined,
+      isSuccess: false,
+      isError: false
+    });
+
+    renderHook(() => useNotificationsQuery({ identity: ' Alice ' }));
+
+    expect(useInfiniteQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: getIdentityNotificationsQueryKey({
+          identity: ' Alice ',
+          limit: '30',
+          cause: null
+        })
+      })
+    );
   });
 
   it('resets when identity changes', async () => {

@@ -11,6 +11,9 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { formatAddress } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import styles from "./SearchModal.module.css";
 
 interface Props {
@@ -30,7 +33,7 @@ const searchModalInputClass =
   "tw-form-input tw-block tw-min-w-0 tw-flex-1 tw-rounded-l-lg tw-rounded-r-none tw-border-0 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-text-iron-950 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-300 tw-transition placeholder:tw-text-iron-500 focus:tw-bg-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-iron-950";
 
 const searchModalAddButtonClass =
-  "tw-inline-flex tw-w-12 tw-items-center tw-justify-center tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-lg tw-font-semibold tw-leading-none tw-text-white tw-transition hover:tw-bg-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-black";
+  "tw-inline-flex tw-min-w-20 tw-items-center tw-justify-center tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-transition hover:tw-bg-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-black disabled:tw-cursor-not-allowed disabled:tw-bg-iron-300 disabled:tw-text-iron-500";
 
 const searchModalSecondaryButtonClass =
   "tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-600 tw-transition hover:tw-border-iron-950 hover:tw-bg-white hover:tw-text-iron-950 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-border-iron-200 disabled:tw-bg-iron-100 disabled:tw-text-iron-500 disabled:tw-opacity-100";
@@ -54,6 +57,7 @@ function SearchModal(props: Readonly<Props>) {
   const titleId = useId();
   const inputId = useId();
   const isDark = props.variant === "dark";
+  const locale = useBrowserLocale();
 
   const closeModal = () => {
     props.setShow(false);
@@ -86,8 +90,16 @@ function SearchModal(props: Readonly<Props>) {
   }, [props.show]);
 
   function addSearchWallet(): void {
-    if (!props.searchWallets.some((sw) => sw === searchValue)) {
-      props.addSearchWallet(searchValue);
+    const normalizedSearchValue = searchValue.trim();
+    if (!normalizedSearchValue) return;
+    if (
+      !props.searchWallets.some(
+        (wallet) =>
+          wallet.toLocaleLowerCase(locale) ===
+          normalizedSearchValue.toLocaleLowerCase(locale)
+      )
+    ) {
+      props.addSearchWallet(normalizedSearchValue);
       setSearchValue("");
     } else {
       setInvalidWalletAdded(true);
@@ -119,13 +131,16 @@ function SearchModal(props: Readonly<Props>) {
                 isDark ? "tw-text-3xl" : "tw-text-2xl"
               }`}
             >
-              Search
+              {t(locale, "identityFilter.title")}
             </h2>
+            <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-500">
+              {t(locale, "identityFilter.description")}
+            </p>
           </div>
           <div className="tw-px-6 tw-pb-6 tw-pt-4">
             <form
               className={`tw-mb-3 tw-flex tw-w-full tw-items-stretch ${
-                invalidWalletAdded ? styles["shakeWalletInput"] : ""
+                invalidWalletAdded ? (styles["shakeWalletInput"] ?? "") : ""
               }`}
               onSubmit={(event) => {
                 event.preventDefault();
@@ -133,7 +148,7 @@ function SearchModal(props: Readonly<Props>) {
               }}
             >
               <label className="tw-sr-only" htmlFor={inputId}>
-                Search for address, ENS or username
+                {t(locale, "identityFilter.inputLabel")}
               </label>
               <input
                 id={inputId}
@@ -145,7 +160,7 @@ function SearchModal(props: Readonly<Props>) {
                 className={`${searchModalInputClass} ${
                   invalidWalletAdded ? "tw-ring-error" : ""
                 }`}
-                placeholder="Search for address, ENS or username"
+                placeholder={t(locale, "identityFilter.placeholder")}
                 type="text"
               />
               <button
@@ -153,20 +168,44 @@ function SearchModal(props: Readonly<Props>) {
                   invalidWalletAdded ? "tw-bg-error hover:tw-bg-error" : ""
                 }`}
                 type="submit"
-                aria-label="Add search wallet"
+                aria-label={t(locale, "identityFilter.addAriaLabel")}
+                disabled={!searchValue.trim()}
               >
-                +
+                {t(locale, "identityFilter.add")}
               </button>
             </form>
+            {invalidWalletAdded && (
+              <p
+                role="alert"
+                className="-tw-mt-1 tw-mb-3 tw-text-sm tw-text-error"
+              >
+                {t(locale, "identityFilter.duplicate")}
+              </p>
+            )}
+            {props.searchWallets.length > 0 && (
+              <p className="tw-mb-2 tw-mt-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+                {t(
+                  locale,
+                  props.searchWallets.length === 1
+                    ? "identityFilter.selected.one"
+                    : "identityFilter.selected.other",
+                  {
+                    count: formatInteger(locale, props.searchWallets.length),
+                  }
+                )}
+              </p>
+            )}
             <div className="tw-space-y-1">
               {props.searchWallets.map((w) => (
                 <div
                   key={w}
-                  className="tw-flex tw-items-center tw-gap-2 tw-py-1 tw-text-sm tw-text-iron-950"
+                  className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-950"
                 >
                   <>
                     <button
-                      aria-label={`Remove ${w} from search`}
+                      aria-label={t(locale, "identityFilter.remove", {
+                        identity: w,
+                      })}
                       onClick={() => {
                         props.removeSearchWallet(w);
                       }}
@@ -195,7 +234,7 @@ function SearchModal(props: Readonly<Props>) {
             </div>
             {props.searchWallets.length === 0 && (
               <div className="tw-text-sm tw-text-iron-500">
-                No search queries added
+                {t(locale, "identityFilter.empty")}
               </div>
             )}
             <div className="tw-mb-2 tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
@@ -207,14 +246,14 @@ function SearchModal(props: Readonly<Props>) {
                 }}
                 type="button"
               >
-                Clear All
+                {t(locale, "identityFilter.clearAll")}
               </button>
               <button
                 className={searchModalPrimaryButtonClass}
                 onClick={closeModal}
                 type="button"
               >
-                Done
+                {t(locale, "identityFilter.apply")}
               </button>
             </div>
           </div>
@@ -235,6 +274,7 @@ export function SearchWalletsDisplay(
 ) {
   const { searchWallets, setSearchWallets, setShowSearchModal, variant } =
     props;
+  const locale = useBrowserLocale();
   const isDark = variant === "dark";
   const hasSearchWallets = searchWallets.length > 0;
   const searchButtonClass = hasSearchWallets
@@ -264,7 +304,7 @@ export function SearchWalletsDisplay(
                 }`}
                 aria-label={`Remove ${sw} from search`}
                 onClick={() =>
-                  setSearchWallets(searchWallets.filter((s) => s != sw))
+                  setSearchWallets(searchWallets.filter((s) => s !== sw))
                 }
                 data-tooltip-id={`clear-wallet-display-${sw}`}
                 type="button"
@@ -321,7 +361,7 @@ export function SearchWalletsDisplay(
         </>
       )}
       <button
-        aria-label="Open search modal"
+        aria-label={t(locale, "identityFilter.open")}
         onClick={() => setShowSearchModal(true)}
         className={`tw-inline-flex ${
           isDark ? "tw-size-9" : "tw-size-10"
@@ -363,7 +403,7 @@ export function SearchModalDisplay(
         setSearchWallets([...searchWallets, newW]);
       }}
       removeSearchWallet={function (removeW: string) {
-        setSearchWallets([...searchWallets].filter((sw) => sw != removeW));
+        setSearchWallets([...searchWallets].filter((sw) => sw !== removeW));
       }}
       clearSearchWallets={function () {
         setSearchWallets([]);
