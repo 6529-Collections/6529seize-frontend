@@ -158,6 +158,36 @@ describe("getReactionErrorMessage", () => {
     ).toBe("Unauthorized");
   });
 
+  it("maps the exact disabled-wave capability response", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({
+            error: "Chatting and reacting is not enabled in this wave",
+          }),
+          message: "Chatting and reacting is not enabled in this wave",
+          status: 403,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Reactions are disabled for this wave.");
+  });
+
+  it("maps a 504 to clear reconciliation guidance", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({ error: "Endpoint request timed out" }),
+          message: "Endpoint request timed out",
+          status: 504,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe(
+      "The reaction request timed out. Refreshing the latest reaction state; wait before trying again."
+    );
+  });
+
   it("maps rate-limit status when the structured body is blank", () => {
     expect(
       getReactionErrorMessage(
