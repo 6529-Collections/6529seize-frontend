@@ -205,7 +205,7 @@ export default function CreateDropLayout({
 }: CreateDropLayoutProps) {
   const submitWithResolvedAliases = async () => {
     const expansion =
-      await createDropInputRef.current?.expandMentionAliases();
+      await createDropInputRef.current?.expandMentionAliases?.();
     if (expansion && !expansion.completed) return;
     await onDrop(expansion?.editorState);
   };
