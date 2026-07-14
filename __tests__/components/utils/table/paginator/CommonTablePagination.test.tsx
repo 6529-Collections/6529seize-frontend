@@ -36,4 +36,18 @@ describe('CommonTablePagination', () => {
     const nextButton = screen.getByRole('button', { name: /next/i });
     expect(nextButton).toBeDisabled();
   });
+
+  it('formats the current and total page counts', () => {
+    render(
+      <CommonTablePagination
+        small={false}
+        currentPage={12345}
+        setCurrentPage={jest.fn()}
+        totalPages={20598}
+        haveNextPage={true}
+      />
+    );
+
+    expect(screen.getByText('Page 12,345 of 20,598')).toBeInTheDocument();
+  });
 });
