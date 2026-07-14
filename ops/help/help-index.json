@@ -203,6 +203,48 @@
       ]
     },
     {
+      "id": "about.6529-apps",
+      "kind": "route",
+      "title": "6529 Apps",
+      "aliases": [
+        "6529 apps",
+        "apps page",
+        "6529 mobile download",
+        "6529 desktop download",
+        "download 6529 app",
+        "mobile app",
+        "desktop app"
+      ],
+      "keywords": [
+        "apps",
+        "mobile",
+        "desktop",
+        "ios",
+        "android",
+        "windows",
+        "macos",
+        "linux",
+        "download",
+        "footer"
+      ],
+      "facts": [
+        "The 6529 Apps page lives at /about/6529-apps.",
+        "Open it from About > About 6529 > 6529 Apps, the About contents menu, site-wide page search, or the site footer's second text-link row.",
+        "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
+        "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
+        "Use this page to find official app downloads; the footer does not link directly to a platform download."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "related_paths": ["/about", "/open-mobile"],
+      "tags": ["about", "apps", "navigation", "mobile", "desktop"],
+      "source_refs": [
+        "app/about/6529-apps/page.tsx",
+        "components/apps/AppsPage.tsx",
+        "components/footer/Footer.tsx",
+        "ops/docs/navigation/feature-6529-apps-page.md"
+      ]
+    },
+    {
       "id": "about.faq",
       "kind": "route",
       "title": "6529 FAQ",

@@ -15,11 +15,14 @@ hidden behind tabs.
 - About contents menu: `About 6529 -> 6529 Apps`
 - Site-wide page search: `6529 Apps`, `6529 Mobile`, `6529 Desktop`, `apps`,
   `mobile`, and `desktop` all find the page.
+- Site footer: `6529 Apps` appears between `License` and `API` in the second
+  text-link row.
 
 ## Entry Points
 
 - Open `6529 Apps` from the `About 6529` group in navigation.
 - Search for an app or platform term in the header search modal.
+- Open `6529 Apps` from the site footer.
 - Open `/about/6529-apps` directly.
 
 ## User Journey
@@ -58,6 +61,8 @@ hidden behind tabs.
   release manifest.
 - Download and store destinations are external and can have their own regional
   or device restrictions.
+- The site footer opens this page in the same tab; it does not link directly to
+  platform-specific downloads.
 - The Share modal handles route and connection sharing only; app installation
   belongs on this page.
 
