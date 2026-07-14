@@ -8,6 +8,7 @@ import { getProfileHref, getProfileRouteIdentity } from "./journeyIdentity";
 import { SUBSCRIPTIONS_INFO_HREF, WAVES_HREF } from "./page.content";
 import type { CurrentPanelAction, JoinPageState } from "./page.types";
 import { m } from "./page.utils";
+import { useJoin6529Facts } from "./useJoin6529Facts";
 import { useJoin6529Progress } from "./useJoin6529Progress";
 
 export function useJoin6529Journey(locale: SupportedLocale) {
@@ -22,6 +23,7 @@ export function useJoin6529Journey(locale: SupportedLocale) {
   const [authActionPending, setAuthActionPending] = useState(false);
 
   const profileHref = getProfileHref(connectedProfile, address);
+  const profileIdentity = getProfileRouteIdentity(connectedProfile, address);
   const subscriptionProfileIdentity = getProfileRouteIdentity(
     connectedProfile,
     undefined
@@ -34,7 +36,11 @@ export function useJoin6529Journey(locale: SupportedLocale) {
     hasActiveWalletAddress,
     hasProfile: Boolean(connectedProfile),
   });
-  const timelineProgress = useJoin6529Progress({ pageState });
+  const facts = useJoin6529Facts({
+    enabled: pageState === "loggedIn",
+    identity: profileIdentity,
+  });
+  const timelineProgress = useJoin6529Progress({ facts, pageState });
 
   const handleConnectWallet = useCallback(() => {
     setWalletActionPending(true);
