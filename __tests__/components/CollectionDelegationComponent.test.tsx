@@ -10,7 +10,7 @@ jest.mock("react", () => {
 import CollectionDelegationComponent from "@/components/delegation/CollectionDelegation";
 import { MEMES_COLLECTION } from "@/components/delegation/delegation-constants";
 import { DelegationCenterSection } from "@/types/enums";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   useReadContract,
   useReadContracts,
@@ -39,6 +39,15 @@ jest.mock("wagmi", () => {
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0x0", isConnected: true }),
+}));
+
+jest.mock("@/components/delegation/UpdateDelegation", () => ({
+  __esModule: true,
+  default: (props: { onHide: () => void }) => (
+    <button type="button" onClick={props.onHide}>
+      Cancel Update
+    </button>
+  ),
 }));
 
 const mockUseReadContract = useReadContract as jest.Mock;
@@ -135,6 +144,79 @@ describe("CollectionDelegationComponent", () => {
       screen.getByRole("button", { name: /Outgoing Delegations/i })
     );
     expect(screen.getAllByText(/Fetching outgoing/i)[0]).toBeInTheDocument();
+  });
+
+  it("preserves disclosure state across the update form transition", async () => {
+    const outgoingRead: {
+      data: undefined | { result: [string[], number[], boolean[], number[]] }[];
+      refetch: jest.Mock;
+    } = {
+      data: undefined,
+      refetch: jest.fn(),
+    };
+    const incomingRead = { data: [], refetch: jest.fn() };
+    const emptyRead = { data: undefined, refetch: jest.fn() };
+
+    mockUseReadContracts.mockImplementation(
+      (params?: { contracts?: { functionName?: string }[] }) => {
+        const functionName = params?.contracts?.[0]?.functionName;
+        if (
+          functionName === "retrieveDelegationAddressesTokensIDsandExpiredDates"
+        ) {
+          return outgoingRead;
+        }
+        if (functionName === "retrieveDelegatorsTokensIDsandExpiredDates") {
+          return incomingRead;
+        }
+        return emptyRead;
+      }
+    );
+
+    const { container, rerender } = render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    outgoingRead.data = [
+      {
+        result: [["0x2"], [0], [true], [0]],
+      },
+    ];
+    rerender(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    const outgoingDisclosure = screen.getByRole("button", {
+      name: /Outgoing Delegations/i,
+    });
+    const incomingDisclosure = screen.getByRole("button", {
+      name: /Incoming Delegations/i,
+    });
+
+    await waitFor(() =>
+      expect(outgoingDisclosure).toHaveAttribute("aria-expanded", "true")
+    );
+    fireEvent.click(incomingDisclosure);
+    expect(incomingDisclosure).toHaveAttribute("aria-expanded", "true");
+
+    const editAction = container.querySelector<SVGElement>(
+      '[data-tooltip-id^="edit-"]'
+    );
+    if (!editAction) {
+      throw new Error("Expected an edit action for the outgoing delegation");
+    }
+    fireEvent.click(editAction);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel Update" }));
+
+    expect(
+      screen.getByRole("button", { name: /Incoming Delegations/i })
+    ).toHaveAttribute("aria-expanded", "true");
   });
 
   it("keys collection scope descriptions from the contract address", () => {
