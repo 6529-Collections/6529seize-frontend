@@ -575,4 +575,5 @@ jobs:
           CI_PIPELINES_DESCRIPTION: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
+          CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
         run: node scripts/notify-ci-wave.mjs
