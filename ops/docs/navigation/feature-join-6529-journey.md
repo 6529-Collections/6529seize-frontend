@@ -19,9 +19,16 @@ to choose a lightweight onboarding state.
   back to public Waves at `/waves` so the complete state keeps the journey
   focused on exploration.
 
-The Join page does not add a separate progress API endpoint. It intentionally
-keeps progress lightweight and avoids collection, drop, or subscription data
-fetches for this onboarding surface.
+The Join page does not add a separate progress API endpoint. For logged-in
+profiles, it reuses identity activity and collected stats to complete two
+optional steps:
+
+- Participate is complete when the identity has at least one public Wave drop
+  in the 365-day activity window.
+- Collect is complete when the identity has a positive Memes, NextGen, or
+  Gradients balance.
+
+If either fact is unavailable, that optional step remains pending.
 
 ## Progress
 
