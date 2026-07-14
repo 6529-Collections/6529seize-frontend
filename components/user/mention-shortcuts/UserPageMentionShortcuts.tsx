@@ -25,6 +25,70 @@ import { useContext, useMemo, useState } from "react";
 
 const MAX_MEMBERS = 25;
 
+const getAvailableIdentities = (
+  identities: ApiIdentity[],
+  members: MentionAliasMember[]
+) => {
+  const selectedProfileIds = new Set(
+    members.map((member) => member.profile_id)
+  );
+  return identities.filter(
+    (identity) =>
+      !!identity.id && !!identity.handle && !selectedProfileIds.has(identity.id)
+  );
+};
+
+function DeleteShortcutDialog({
+  alias,
+  isPending,
+  onCancel,
+  onConfirm,
+}: {
+  readonly alias: MentionAlias;
+  readonly isPending: boolean;
+  readonly onCancel: () => void;
+  readonly onConfirm: () => void;
+}) {
+  return (
+    <dialog
+      open
+      aria-labelledby="delete-mention-shortcut-title"
+      onCancel={onCancel}
+      className="tw-fixed tw-inset-0 tw-z-[1100] tw-m-0 tw-flex tw-h-full tw-max-h-none tw-w-full tw-max-w-none tw-items-center tw-justify-center tw-border-0 tw-bg-black/70 tw-p-4"
+    >
+      <div className="tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-900 tw-p-5 tw-shadow-xl tw-ring-1 tw-ring-iron-700">
+        <h2
+          id="delete-mention-shortcut-title"
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white"
+        >
+          Delete @{alias.alias}?
+        </h2>
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+          This cannot be undone.
+        </p>
+        <div className="tw-mt-5 tw-flex tw-justify-end tw-gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            aria-busy={isPending}
+            onClick={onConfirm}
+            className="tw-rounded-lg tw-border-0 tw-bg-red tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white disabled:tw-opacity-50"
+          >
+            Delete shortcut
+          </button>
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
 function AliasEditor({
   initialAlias,
   onClose,
@@ -58,7 +122,9 @@ function AliasEditor({
         ? updateMentionAlias(initialAlias.id, input)
         : createMentionAlias(input),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: [QueryKey.MENTION_ALIASES] });
+      await queryClient.invalidateQueries({
+        queryKey: [QueryKey.MENTION_ALIASES],
+      });
       setToast({
         type: "success",
         message: initialAlias
@@ -76,12 +142,7 @@ function AliasEditor({
     },
   });
 
-  const availableIdentities = identities.filter(
-    (identity) =>
-      !!identity.id &&
-      !!identity.handle &&
-      !members.some((member) => member.profile_id === identity.id)
-  );
+  const availableIdentities = getAvailableIdentities(identities, members);
   let searchStatus = "Enter at least 3 characters to search profiles.";
   if (search.length >= 3) {
     const resultLabel = availableIdentities.length === 1 ? "result" : "results";
@@ -108,6 +169,12 @@ function AliasEditor({
       alias: normalizedAlias,
       member_profile_ids: members.map((member) => member.profile_id),
     });
+  };
+
+  const removeMember = (profileId: string) => {
+    setMembers((current) =>
+      current.filter((item) => item.profile_id !== profileId)
+    );
   };
 
   return (
@@ -217,11 +284,7 @@ function AliasEditor({
           <button
             type="button"
             key={member.profile_id}
-            onClick={() =>
-              setMembers((current) =>
-                current.filter((item) => item.profile_id !== member.profile_id)
-              )
-            }
+            onClick={() => removeMember(member.profile_id)}
             aria-label={`Remove @${member.handle}`}
             className="tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-text-iron-100"
           >
@@ -251,22 +314,33 @@ export default function UserPageMentionShortcuts({
     useContext(AuthContext);
   const queryClient = useQueryClient();
   const { aliases, isPending, isError } = useMentionAliases();
-  const [editorAlias, setEditorAlias] = useState<MentionAlias | null | undefined>();
+  const [editorAlias, setEditorAlias] = useState<
+    MentionAlias | null | undefined
+  >();
   const [aliasToDelete, setAliasToDelete] = useState<MentionAlias | null>(null);
   const isOwner =
     !!profile.id && connectedProfile?.id === profile.id && !activeProfileProxy;
 
   const deleteMutation = useMutation({
     mutationFn: deleteMentionAlias,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: [QueryKey.MENTION_ALIASES] });
+    onSuccess: async (_, deletedId) => {
+      await queryClient.invalidateQueries({
+        queryKey: [QueryKey.MENTION_ALIASES],
+      });
       setToast({ type: "success", message: "Mention shortcut deleted." });
+      setAliasToDelete(null);
+      setEditorAlias((current) =>
+        current?.id === deletedId ? undefined : current
+      );
     },
     onError: (error) =>
       setToast({
         type: "error",
         title: "Couldn't delete mention shortcut.",
-        details: getToastErrorDetails(error, "Unable to delete mention shortcut"),
+        details: getToastErrorDetails(
+          error,
+          "Unable to delete mention shortcut"
+        ),
       }),
   });
 
@@ -286,46 +360,12 @@ export default function UserPageMentionShortcuts({
   return (
     <div className="tailwind-scope tw-mx-auto tw-max-w-3xl tw-py-6">
       {aliasToDelete && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delete-mention-shortcut-title"
-          className="tw-fixed tw-inset-0 tw-z-[1100] tw-flex tw-items-center tw-justify-center tw-bg-black/70 tw-p-4"
-        >
-          <div className="tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-900 tw-p-5 tw-shadow-xl tw-ring-1 tw-ring-iron-700">
-            <h2
-              id="delete-mention-shortcut-title"
-              className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white"
-            >
-              Delete @{aliasToDelete.alias}?
-            </h2>
-            <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
-              This cannot be undone.
-            </p>
-            <div className="tw-mt-5 tw-flex tw-justify-end tw-gap-2">
-              <button
-                type="button"
-                onClick={() => setAliasToDelete(null)}
-                className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={deleteMutation.isPending}
-                aria-busy={deleteMutation.isPending}
-                onClick={() => {
-                  deleteMutation.mutate(aliasToDelete.id, {
-                    onSuccess: () => setAliasToDelete(null),
-                  });
-                }}
-                className="tw-rounded-lg tw-border-0 tw-bg-red tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white disabled:tw-opacity-50"
-              >
-                Delete shortcut
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteShortcutDialog
+          alias={aliasToDelete}
+          isPending={deleteMutation.isPending}
+          onCancel={() => setAliasToDelete(null)}
+          onConfirm={() => deleteMutation.mutate(aliasToDelete.id)}
+        />
       )}
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
         <div>

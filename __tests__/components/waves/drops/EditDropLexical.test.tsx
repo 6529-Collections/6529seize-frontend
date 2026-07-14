@@ -31,6 +31,10 @@ const editorMock = {
 };
 
 let mentionSelectHandler: MentionSelectHandler | null = null;
+const expandMentionAliasesMock = jest.fn(async () => ({
+  completed: true,
+  editorState: editorMock.getEditorState(),
+}));
 
 jest.mock("@lexical/list", () => ({
   ListNode: class MockListNode {},
@@ -142,6 +146,7 @@ jest.mock(
         mentionSelectHandler = onSelect;
         React.useImperativeHandle(ref, () => ({
           isMentionsOpen: jest.fn(() => false),
+          expandMentionAliases: expandMentionAliasesMock,
         }));
         return <div data-testid="mentions-plugin" />;
       }),
@@ -166,6 +171,7 @@ jest.mock(
 jest.mock("@/components/drops/create/lexical/nodes/MentionNode", () => ({
   MentionNode: class MockMentionNode {},
   $createMentionNode: jest.fn(() => ({ type: "mention" })),
+  $isMentionNode: jest.fn((node) => node?.type === "mention"),
 }));
 jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
   GroupMentionNode: class MockGroupMentionNode {},
@@ -294,6 +300,10 @@ describe("EditDropLexical", () => {
     convertFromMarkdownStringMock.mockReset();
     rootMock.getChildren.mockReturnValue([]);
     rootMock.getAllTextNodes.mockReturnValue([]);
+    expandMentionAliasesMock.mockResolvedValue({
+      completed: true,
+      editorState: editorMock.getEditorState(),
+    });
     mentionSelectHandler = null;
     mockContainsDisallowedLink.mockReturnValue(false);
     useDeviceInfoMock.mockReturnValue({
@@ -313,6 +323,9 @@ describe("EditDropLexical", () => {
     const onSave = jest.fn();
     const onCancel = jest.fn();
     exportDropMarkdownMock.mockReturnValue("updated markdown");
+    rootMock.getAllTextNodes.mockReturnValue([
+      { type: "mention", getTextContent: () => "@user1" },
+    ]);
 
     render(
       <EditDropLexical {...defaultProps} onSave={onSave} onCancel={onCancel} />
@@ -339,6 +352,63 @@ describe("EditDropLexical", () => {
       []
     );
     expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("removes stale mention metadata when its mention node was deleted", async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    exportDropMarkdownMock.mockReturnValue("updated markdown");
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        initialMentions={[
+          {
+            mentioned_profile_id: "profile-1",
+            handle_in_content: "user1",
+          },
+        ]}
+        onSave={onSave}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(onSave).toHaveBeenCalledWith("updated markdown", [], [], []);
+  });
+
+  it("ignores a second save while alias expansion is in progress", async () => {
+    const onSave = jest.fn();
+    exportDropMarkdownMock.mockReturnValue("updated markdown");
+    let finishExpansion:
+      | ((value: {
+          completed: true;
+          editorState: ReturnType<typeof editorMock.getEditorState>;
+        }) => void)
+      | null = null;
+    expandMentionAliasesMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishExpansion = resolve;
+        })
+    );
+
+    render(<EditDropLexical {...defaultProps} onSave={onSave} />);
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    saveButton.click();
+    saveButton.click();
+
+    expect(expandMentionAliasesMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      finishExpansion?.({
+        completed: true,
+        editorState: editorMock.getEditorState(),
+      });
+    });
+
+    expect(onSave).toHaveBeenCalledTimes(1);
   });
 
   it("does not create group mention metadata from raw markdown text", async () => {

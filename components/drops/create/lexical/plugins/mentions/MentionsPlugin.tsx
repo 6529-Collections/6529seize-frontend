@@ -41,6 +41,8 @@ import {
 } from "@/hooks/useIdentitiesSearch";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 import { useMentionAliases } from "@/hooks/useMentionAliases";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type {
   MentionAlias,
   MentionAliasMember,
@@ -190,8 +192,8 @@ export interface MentionAliasExpansionResult {
   readonly editorState: EditorState;
 }
 
-const ALIAS_TOKEN_PATTERN =
-  /(^|[^A-Za-z0-9_@])@([A-Za-z0-9_]{3,15})(?=$|[^A-Za-z0-9_@])/g;
+const ALIAS_TOKEN_PATTERN = /(^|[^\w@])@(\w{3,15})(?=$|[^\w@])/g;
+const ALIAS_TOKEN_TEST_PATTERN = /(^|[^\w@])@\w{3,15}(?=$|[^\w@])/;
 
 const isInsideCodeOrLink = (node: LexicalNode): boolean => {
   let parent = node.getParent();
@@ -209,7 +211,52 @@ const toMentionedUser = (member: MentionAliasMember) => ({
   handle_in_content: member.handle,
 });
 
-const insertAliasMembers = ({
+const getExistingMentionHandles = (): Set<string> =>
+  new Set(
+    $getRoot()
+      .getAllTextNodes()
+      .filter($isMentionNode)
+      .map((node) => node.getTextContent().replace(/^@/, "").toLowerCase())
+  );
+
+const createAliasMemberNodes = ({
+  members,
+  existingHandles,
+  onSelect,
+}: {
+  readonly members: MentionAliasMember[];
+  readonly existingHandles: Set<string>;
+  readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
+}): TextNode[] => {
+  const nodes: TextNode[] = [];
+  for (const member of members) {
+    const normalizedHandle = member.handle.toLowerCase();
+    if (existingHandles.has(normalizedHandle)) continue;
+    if (nodes.length > 0) nodes.push($createTextNode(" "));
+    nodes.push($createMentionNode(`@${member.handle}`));
+    existingHandles.add(normalizedHandle);
+    onSelect(toMentionedUser(member));
+  }
+  return nodes;
+};
+
+const replaceTextNode = (
+  nodeToReplace: TextNode,
+  replacementNodes: TextNode[]
+): TextNode => {
+  const nodes = replacementNodes.length
+    ? replacementNodes
+    : [$createTextNode(nodeToReplace.getTextContent())];
+  nodeToReplace.replace(nodes[0]!);
+  let lastNode = nodes[0]!;
+  for (const node of nodes.slice(1)) {
+    lastNode.insertAfter(node);
+    lastNode = node;
+  }
+  return lastNode;
+};
+
+export const insertAliasMembers = ({
   nodeToReplace,
   members,
   existingHandles,
@@ -219,27 +266,83 @@ const insertAliasMembers = ({
   readonly members: MentionAliasMember[];
   readonly existingHandles: Set<string>;
   readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
-}): TextNode | null => {
-  const insertableMembers = members.filter(
-    (member) => !existingHandles.has(member.handle.toLowerCase())
+}): TextNode =>
+  replaceTextNode(
+    nodeToReplace,
+    createAliasMemberNodes({ members, existingHandles, onSelect })
   );
-  if (!insertableMembers.length) {
-    return null;
+
+const buildAliasReplacementNodes = ({
+  text,
+  aliasesByName,
+  existingHandles,
+  onSelect,
+}: {
+  readonly text: string;
+  readonly aliasesByName: ReadonlyMap<string, MentionAlias>;
+  readonly existingHandles: Set<string>;
+  readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
+}): TextNode[] => {
+  const replacementNodes: TextNode[] = [];
+  let cursor = 0;
+  for (const match of text.matchAll(ALIAS_TOKEN_PATTERN)) {
+    const fullMatch = match[0];
+    const prefix = match[1] ?? "";
+    const aliasName = (match[2] ?? "").toLowerCase();
+    const alias = aliasesByName.get(aliasName);
+    const matchStart = match.index;
+    const tokenStart = matchStart + prefix.length;
+    if (tokenStart > cursor) {
+      replacementNodes.push($createTextNode(text.slice(cursor, tokenStart)));
+    }
+    const memberNodes = alias
+      ? createAliasMemberNodes({
+          members: alias.members,
+          existingHandles,
+          onSelect,
+        })
+      : [];
+    replacementNodes.push(
+      ...(memberNodes.length
+        ? memberNodes
+        : [$createTextNode(fullMatch.slice(prefix.length))])
+    );
+    cursor = matchStart + fullMatch.length;
   }
-  const nodes: TextNode[] = [];
-  insertableMembers.forEach((member, index) => {
-    if (index > 0) nodes.push($createTextNode(" "));
-    nodes.push($createMentionNode(`@${member.handle}`));
-    existingHandles.add(member.handle.toLowerCase());
-    onSelect(toMentionedUser(member));
-  });
-  nodeToReplace.replace(nodes[0]!);
-  let lastNode = nodes[0]!;
-  nodes.slice(1).forEach((node) => {
-    lastNode.insertAfter(node);
-    lastNode = node;
-  });
-  return lastNode;
+  if (cursor < text.length) {
+    replacementNodes.push($createTextNode(text.slice(cursor)));
+  }
+  return replacementNodes;
+};
+
+const expandAliasTextNodes = ({
+  aliasesByName,
+  existingHandles,
+  onSelect,
+}: {
+  readonly aliasesByName: ReadonlyMap<string, MentionAlias>;
+  readonly existingHandles: Set<string>;
+  readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
+}) => {
+  const textNodes = $getRoot()
+    .getAllTextNodes()
+    .filter(
+      (node) =>
+        $isTextNode(node) && !$isMentionNode(node) && !isInsideCodeOrLink(node)
+    );
+  for (const textNode of textNodes) {
+    const text = textNode.getTextContent();
+    if (!ALIAS_TOKEN_TEST_PATTERN.test(text)) continue;
+    replaceTextNode(
+      textNode,
+      buildAliasReplacementNodes({
+        text,
+        aliasesByName,
+        existingHandles,
+        onSelect,
+      })
+    );
+  }
 };
 
 export const expandPlainAliasTokens = ({
@@ -261,68 +364,10 @@ export const expandPlainAliasTokens = ({
     );
     editor.update(
       () => {
-        const existingHandles = new Set(
-          $getRoot()
-            .getAllTextNodes()
-            .filter($isMentionNode)
-            .map((node) => node.getTextContent().replace(/^@/, "").toLowerCase())
-        );
-        const textNodes = $getRoot()
-          .getAllTextNodes()
-          .filter(
-            (node) =>
-              $isTextNode(node) &&
-              !$isMentionNode(node) &&
-              !isInsideCodeOrLink(node)
-          );
-        textNodes.forEach((textNode) => {
-          const text = textNode.getTextContent();
-          const matches = Array.from(text.matchAll(ALIAS_TOKEN_PATTERN));
-          if (!matches.length) return;
-          const replacementNodes: TextNode[] = [];
-          let cursor = 0;
-          matches.forEach((match) => {
-            const fullMatch = match[0];
-            const prefix = match[1] ?? "";
-            const aliasName = (match[2] ?? "").toLowerCase();
-            const alias = aliasesByName.get(aliasName);
-            const matchStart = match.index;
-            const tokenStart = matchStart + prefix.length;
-            if (tokenStart > cursor) {
-              replacementNodes.push(
-                $createTextNode(text.slice(cursor, tokenStart))
-              );
-            }
-            if (!alias) {
-              replacementNodes.push($createTextNode(fullMatch.slice(prefix.length)));
-            } else {
-              const members = alias.members.filter(
-                (member) => !existingHandles.has(member.handle.toLowerCase())
-              );
-              members.forEach((member, index) => {
-                if (index > 0) replacementNodes.push($createTextNode(" "));
-                replacementNodes.push($createMentionNode(`@${member.handle}`));
-                existingHandles.add(member.handle.toLowerCase());
-                onSelect(toMentionedUser(member));
-              });
-              if (!members.length) {
-                replacementNodes.push(
-                  $createTextNode(fullMatch.slice(prefix.length))
-                );
-              }
-            }
-            cursor = matchStart + fullMatch.length;
-          });
-          if (cursor < text.length) {
-            replacementNodes.push($createTextNode(text.slice(cursor)));
-          }
-          if (!replacementNodes.length) return;
-          textNode.replace(replacementNodes[0]!);
-          let lastNode = replacementNodes[0]!;
-          replacementNodes.slice(1).forEach((node) => {
-            lastNode.insertAfter(node);
-            lastNode = node;
-          });
+        expandAliasTextNodes({
+          aliasesByName,
+          existingHandles: getExistingMentionHandles(),
+          onSelect,
         });
       },
       { onUpdate: () => resolve(editor.getEditorState()) }
@@ -341,14 +386,14 @@ const NewMentionsPlugin = forwardRef<
   }
 >(({ waveId, onSelect, canMentionAll = false, onSelectGroupMention }, ref) => {
   const [editor] = useLexicalComposerContext();
+  const locale = useBrowserLocale();
   const [queryString, setQueryString] = useState<string | null>(null);
   const { identities } = useIdentitiesSearch({
     handle: queryString ?? "",
     waveId,
   });
   const { setToast } = useContext(AuthContext);
-  const { aliases, enabled, isFetched, isError, refetch } =
-    useMentionAliases();
+  const { aliases, enabled, isFetched, isError, refetch } = useMentionAliases();
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -379,9 +424,12 @@ const NewMentionsPlugin = forwardRef<
           new MentionTypeaheadOption({
             id: alias.id,
             handle: `@${alias.alias}`,
-            display: `Mention shortcut · ${alias.members.length} profile${
-              alias.members.length === 1 ? "" : "s"
-            }`,
+            display:
+              alias.members.length === 1
+                ? t(locale, "waves.composer.mentionShortcuts.optionOne")
+                : t(locale, "waves.composer.mentionShortcuts.optionMany", {
+                    count: alias.members.length,
+                  }),
             picture: null,
             type: "alias",
             members: alias.members,
@@ -407,7 +455,7 @@ const NewMentionsPlugin = forwardRef<
       0,
       SUGGESTION_LIST_LENGTH_LIMIT
     );
-  }, [aliases, canMentionAll, identities, queryString]);
+  }, [aliases, canMentionAll, identities, locale, queryString]);
 
   useImperativeHandle(
     ref,
@@ -420,8 +468,14 @@ const NewMentionsPlugin = forwardRef<
           if (result.error) {
             setToast({
               type: "error",
-              title: "Mention shortcuts couldn't be loaded.",
-              message: "Try again before sending this message.",
+              title: t(
+                locale,
+                "waves.composer.mentionShortcuts.loadErrorTitle"
+              ),
+              message: t(
+                locale,
+                "waves.composer.mentionShortcuts.loadErrorMessage"
+              ),
             });
             return {
               completed: false,
@@ -447,6 +501,7 @@ const NewMentionsPlugin = forwardRef<
       isError,
       isFetched,
       isOpen,
+      locale,
       onSelect,
       options.length,
       refetch,
@@ -474,21 +529,14 @@ const NewMentionsPlugin = forwardRef<
 
         if (selectedOption.type === "alias") {
           if (nodeToReplace) {
-            const existingHandles = new Set(
-              $getRoot()
-                .getAllTextNodes()
-                .filter($isMentionNode)
-                .map((node) =>
-                  node.getTextContent().replace(/^@/, "").toLowerCase()
-                )
-            );
+            const existingHandles = getExistingMentionHandles();
             const lastNode = insertAliasMembers({
               nodeToReplace,
               members: selectedOption.members,
               existingHandles,
               onSelect,
             });
-            lastNode?.select();
+            lastNode.select();
           }
           closeMenu();
           return;

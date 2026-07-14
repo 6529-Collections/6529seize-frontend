@@ -525,6 +525,16 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   "badges.beta": "Beta",
 } as const);
 
+const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.mentionShortcuts",
+  {
+    optionOne: "Mention shortcut · 1 profile",
+    optionMany: "Mention shortcut · {count} profiles",
+    loadErrorTitle: "Mention shortcuts couldn't be loaded.",
+    loadErrorMessage: "Try again before sending this message.",
+  } as const
+);
+
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
   "dm.createFailed.title": "Couldn't create this direct message.",
@@ -1853,6 +1863,7 @@ export const EN_US_MESSAGES = {
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,

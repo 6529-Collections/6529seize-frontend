@@ -80,6 +80,10 @@ jest.mock("@/components/waves/CreateDropInput", () => {
     default: ReactLib.forwardRef((props: any, ref: any) => {
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: mockInputClear,
+        expandMentionAliases: async () => ({
+          completed: true,
+          editorState: undefined,
+        }),
         focus: mockInputFocus,
       }));
       return (

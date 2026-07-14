@@ -13,7 +13,10 @@ import {
   $isMentionNode,
   MentionNode,
 } from "@/components/drops/create/lexical/nodes/MentionNode";
-import { expandPlainAliasTokens } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import {
+  expandPlainAliasTokens,
+  insertAliasMembers,
+} from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 import type { MentionAlias } from "@/entities/IMentionAlias";
 
 const alias: MentionAlias = {
@@ -96,5 +99,37 @@ describe("expandPlainAliasTokens", () => {
       handle_in_content: "bob",
     });
     expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("replaces a selected alias with plain text when every member already exists", () => {
+    const editor = createTestEditor();
+    const onSelect = jest.fn();
+
+    editor.update(
+      () => {
+        const aliasNode = $createTextNode("@frens");
+        $getRoot().append(
+          $createParagraphNode().append(
+            $createMentionNode("@alice"),
+            $createTextNode(" "),
+            $createMentionNode("@bob"),
+            $createTextNode(" "),
+            aliasNode
+          )
+        );
+
+        const fallbackNode = insertAliasMembers({
+          nodeToReplace: aliasNode,
+          members: alias.members,
+          existingHandles: new Set(["alice", "bob"]),
+          onSelect,
+        });
+
+        expect($isMentionNode(fallbackNode)).toBe(false);
+        expect(fallbackNode.getTextContent()).toBe("@frens");
+      },
+      { discrete: true }
+    );
+    expect(onSelect).not.toHaveBeenCalled();
   });
 });

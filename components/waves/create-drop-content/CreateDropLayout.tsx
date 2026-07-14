@@ -4,6 +4,7 @@ import type {
   MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
+import { useAuth } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -11,6 +12,8 @@ import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restric
 import type { MissingRequirements } from "@/components/waves/utils/getMissingRequirements";
 import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import type { EditorState } from "lexical";
 import dynamic from "next/dynamic";
@@ -203,11 +206,25 @@ export default function CreateDropLayout({
   termsSignatureFlowEnabled,
   suppressInitialHeightAnimation = false,
 }: CreateDropLayoutProps) {
+  const { setToast } = useAuth();
+  const locale = useBrowserLocale();
   const submitWithResolvedAliases = async () => {
-    const expansion =
-      await createDropInputRef.current?.expandMentionAliases?.();
-    if (expansion && !expansion.completed) return;
-    await onDrop(expansion?.editorState);
+    try {
+      const expandMentionAliases =
+        createDropInputRef.current?.expandMentionAliases;
+      if (!expandMentionAliases) {
+        throw new Error("Mention shortcuts are not ready yet.");
+      }
+      const expansion = await expandMentionAliases();
+      if (!expansion.completed) return;
+      await onDrop(expansion.editorState);
+    } catch {
+      setToast({
+        type: "error",
+        title: t(locale, "waves.composer.mentionShortcuts.loadErrorTitle"),
+        message: t(locale, "waves.composer.mentionShortcuts.loadErrorMessage"),
+      });
+    }
   };
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;

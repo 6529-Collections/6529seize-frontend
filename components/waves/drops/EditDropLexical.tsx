@@ -51,6 +51,7 @@ import {
 } from "@/components/drops/create/lexical/nodes/WaveMentionNode";
 import {
   $createMentionNode,
+  $isMentionNode,
   MentionNode,
 } from "@/components/drops/create/lexical/nodes/MentionNode";
 import { GroupMentionNode } from "@/components/drops/create/lexical/nodes/GroupMentionNode";
@@ -124,8 +125,26 @@ const areMentionedUsersEqual = (
           `${mention.mentioned_profile_id}:${mention.handle_in_content.toLowerCase()}`
       )
       .sort();
-  return JSON.stringify(toComparable(left)) === JSON.stringify(toComparable(right));
+  return (
+    JSON.stringify(toComparable(left)) === JSON.stringify(toComparable(right))
+  );
 };
+
+const getMentionedUsersFromEditorState = (
+  editorState: EditorState,
+  candidates: ApiDropMentionedUser[]
+): ApiDropMentionedUser[] =>
+  editorState.read(() => {
+    const handlesInEditor = new Set(
+      $getRoot()
+        .getAllTextNodes()
+        .filter($isMentionNode)
+        .map((node) => node.getTextContent().replace(/^@/, "").toLowerCase())
+    );
+    return candidates.filter((mention) =>
+      handlesInEditor.has(mention.handle_in_content.toLowerCase())
+    );
+  });
 
 const convertCodeNodesToFences = (root: RootNode) => {
   const stack: LexicalNode[] = [...root.getChildren()];
@@ -476,6 +495,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const editorStateRef = useRef<EditorState | null>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
+  const saveInProgressRef = useRef(false);
   const waveMentionsRef = useRef<NewWaveMentionsPluginHandles>(null);
   const { isApp, isMobileDevice } = useDeviceInfo();
   const isMobileOrApp = isMobileDevice || isApp;
@@ -582,35 +602,49 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const expansion = await mentionsRef.current?.expandMentionAliases?.();
-    if (expansion && !expansion.completed) return;
-    const latestEditorState = editorStateRef.current ?? editorState;
-    if (!latestEditorState) return;
-    if (isSaveBlockedByLinks) return;
+    if (saveInProgressRef.current || isSaving || isSaveBlockedByLinks) return;
+    saveInProgressRef.current = true;
+    try {
+      const expansion = await mentionsRef.current?.expandMentionAliases();
+      if (expansion && !expansion.completed) return;
+      const latestEditorState =
+        expansion?.editorState ?? editorStateRef.current ?? editorState;
+      if (!latestEditorState) return;
 
-    const sanitizedMarkdown = removeBlankLinePlaceholders(
-      exportDropMarkdown(latestEditorState, exportMarkdownTransformers)
-    );
-    const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
-      latestEditorState,
-      canResolveAllGroupMention
-    );
+      const sanitizedMarkdown = removeBlankLinePlaceholders(
+        exportDropMarkdown(latestEditorState, exportMarkdownTransformers)
+      );
+      const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
+        latestEditorState,
+        canResolveAllGroupMention
+      );
+      const currentMentionedUsers = getMentionedUsersFromEditorState(
+        latestEditorState,
+        mentionedUsersRef.current
+      );
+      mentionedUsersRef.current = currentMentionedUsers;
 
-    if (
-      sanitizedMarkdown.trim() === normalizedInitialContent.trim() &&
-      areMentionedGroupsEqual(sanitizedMentionedGroups, initialGroupMentions) &&
-      areMentionedUsersEqual(mentionedUsersRef.current, initialMentions)
-    ) {
-      onCancel();
-      return;
+      if (
+        sanitizedMarkdown.trim() === normalizedInitialContent.trim() &&
+        areMentionedGroupsEqual(
+          sanitizedMentionedGroups,
+          initialGroupMentions
+        ) &&
+        areMentionedUsersEqual(currentMentionedUsers, initialMentions)
+      ) {
+        onCancel();
+        return;
+      }
+
+      onSave(
+        normalizeTypedEmojiShortcuts(sanitizedMarkdown),
+        currentMentionedUsers,
+        sanitizedMentionedGroups,
+        mentionedWaves
+      );
+    } finally {
+      saveInProgressRef.current = false;
     }
-
-    onSave(
-      normalizeTypedEmojiShortcuts(sanitizedMarkdown),
-      mentionedUsersRef.current,
-      sanitizedMentionedGroups,
-      mentionedWaves
-    );
   }, [
     editorState,
     exportMarkdownTransformers,
@@ -618,7 +652,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     canResolveAllGroupMention,
     initialGroupMentions,
     initialMentions,
-    currentMarkdown,
+    isSaving,
     isSaveBlockedByLinks,
     onSave,
     normalizedInitialContent,
