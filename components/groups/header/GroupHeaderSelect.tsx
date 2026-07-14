@@ -82,7 +82,7 @@ export default function GroupHeaderSelect({
           ></path>
         </svg>
         <div className="tw-ml-3 tw-self-center">
-          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-primary-300">
+          <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-primary-300">
             {noProfileTitle}
           </p>
         </div>

@@ -28,6 +28,10 @@ export class ApiSubmissionDropContext {
     * Unix timestamp in milliseconds when this submission won. Omitted unless the submission has won.
     */
     'won_at'?: number;
+    /**
+    * The Memes card ID assigned to this winning Main Stage submission. Omitted for active submissions, winners outside the configured Main Stage wave, and legacy winners whose relationship is unavailable.
+    */
+    'meme_card_id'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -69,6 +73,12 @@ export class ApiSubmissionDropContext {
             "baseName": "won_at",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "meme_card_id",
+            "baseName": "meme_card_id",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
@@ -78,5 +88,4 @@ export class ApiSubmissionDropContext {
     public constructor() {
     }
 }
-
 

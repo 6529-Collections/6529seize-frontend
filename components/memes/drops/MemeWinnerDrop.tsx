@@ -23,6 +23,7 @@ import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandle
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropContext } from "@/components/waves/drops/DropContext";
 import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
+import MainStageMemeCardLink from "./MainStageMemeCardLink";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -76,6 +77,9 @@ export default function MemeWinnerDrop({
   const headerContent = (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
       <MemeWinnerHeader title={title} />
+      <MainStageMemeCardLink
+        memeCardId={drop.submission_context?.meme_card_id}
+      />
       {drop.is_additional_action_promised === true && (
         <AdditionalActionPromiseBadge />
       )}

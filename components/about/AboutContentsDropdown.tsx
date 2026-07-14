@@ -1,6 +1,7 @@
 "use client";
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
@@ -36,6 +37,7 @@ export function AboutContentsDropdown({
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
   const { appWalletsSupported } = useAppWallets();
+  const { spaces } = useLayout();
   const hideSubscriptions =
     cookieConsent === undefined
       ? false
@@ -104,8 +106,9 @@ export function AboutContentsDropdown({
 
   return (
     <div
+      style={{ top: spaces.headerSpace }}
       className={clsx(
-        "tw-sticky tw-top-16 tw-z-30 tw-mb-4 tw-flex tw-flex-col tw-gap-2 tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm md:tw-top-0",
+        "tw-sticky tw-z-30 tw-mb-4 tw-flex tw-flex-col tw-gap-2 tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm",
         leadingAction
           ? "sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
           : "tw-items-end sm:tw-flex-row sm:tw-justify-end",

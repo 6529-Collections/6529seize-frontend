@@ -57,7 +57,7 @@ function NetworkHeaderActionButton({
   readonly onClick: () => void;
 }) {
   const buttonClassName = [
-    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40 sm:tw-text-xs",
+    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-xs tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40",
     compact
       ? "tw-h-9 tw-w-9 tw-px-0 sm:tw-h-8 sm:tw-w-8"
       : "tw-h-9 tw-min-w-9 tw-px-2.5 sm:tw-h-8 sm:tw-min-w-8 sm:tw-px-2",
@@ -331,7 +331,7 @@ export default function CommunityMembers() {
   } else if (members) {
     membersContent = (
       <>
-        <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
+        <div className="sm:tw-overflow-x-auto">
           <CommunityMembersTable
             members={members.data}
             activeSort={params.sort}
@@ -360,7 +360,7 @@ export default function CommunityMembers() {
     <div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
-          <h1 className="tw-mb-0 tw-flex-shrink-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+          <h1 className="tw-m-0 tw-flex-shrink-0 tw-text-xl tw-font-semibold tw-text-iron-50">
             Network
           </h1>
           <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
@@ -411,7 +411,7 @@ export default function CommunityMembers() {
         tall
         fixedHeight
         noPadding
-        showDragHandle
+        enableDragToClose
         showHeaderCloseButton
         surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
         titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
@@ -426,7 +426,7 @@ export default function CommunityMembers() {
         isOpen={mobileSortOpen}
         onClose={() => setMobileSortOpen(false)}
         noPadding
-        showDragHandle
+        enableDragToClose
         showHeaderCloseButton
         surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
         titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
