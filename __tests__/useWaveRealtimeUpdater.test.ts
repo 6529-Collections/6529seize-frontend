@@ -929,7 +929,7 @@ describe("useWaveRealtimeUpdater", () => {
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 
-  it("skips processing when wave is muted", async () => {
+  it("skips processing when an inactive wave is muted", async () => {
     const store = {
       wave1: { drops: [], latestFetchedSerialNo: 10 },
     };
@@ -950,5 +950,38 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.updateData).not.toHaveBeenCalled();
     expect(props.registerWave).not.toHaveBeenCalled();
     expect(props.syncNewestMessages).not.toHaveBeenCalled();
+  });
+
+  it("processes realtime drops when the active wave is muted", async () => {
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    props.isWaveMuted = jest.fn().mockReturnValue(true);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = { id: "d12", wave: { id: "wave1" }, author: {} };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(props.isWaveMuted).toHaveBeenCalledWith("wave1");
+    expect(props.updateData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "wave1",
+        drops: [expect.objectContaining({ id: "d12" })],
+      })
+    );
+    expect(props.registerWave).not.toHaveBeenCalled();
+    expect(props.syncNewestMessages).toHaveBeenCalledWith(
+      "wave1",
+      10,
+      expect.any(AbortSignal)
+    );
   });
 });

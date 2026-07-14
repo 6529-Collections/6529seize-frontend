@@ -670,7 +670,8 @@ const useProcessIncomingDrop = ({
 
       updateCachedDrop({ drop, options, queryClient, type });
 
-      if (isWaveMuted(waveId)) {
+      // Mute suppresses inactive-Wave processing, not live content in the open Wave.
+      if (isWaveMuted(waveId) && activeWaveId !== waveId) {
         return;
       }
 
@@ -740,6 +741,7 @@ const useProcessIncomingDrop = ({
       markActiveWaveAsRead(waveId);
     },
     [
+      activeWaveId,
       getData,
       updateData,
       registerWave,
