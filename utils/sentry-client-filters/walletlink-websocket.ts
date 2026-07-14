@@ -3,6 +3,8 @@ import {
   coinbaseWalletLinkWebSocketCloseFunction,
   coinbaseWalletLinkWebSocketFile,
   coinbaseWalletLinkWebSocket1006MessagePrefix,
+  coinbaseWalletRequestRelayCloseFunction,
+  coinbaseWalletRequestRelayPath,
   coinbaseWalletSdkPathTokens,
   nextStaticFramePathToken,
   walletWebSocketAppKitBootstrapBreadcrumbTokens,
@@ -53,6 +55,26 @@ function isCoinbaseWalletLinkWebSocketFrame(frame: SentryStackFrame): boolean {
   );
 }
 
+function isCoinbaseWalletRequestRelayFrame(frame: SentryStackFrame): boolean {
+  if (frame.function !== coinbaseWalletRequestRelayCloseFunction) {
+    return false;
+  }
+
+  const paths = [frame.filename, frame.abs_path].filter(
+    (path): path is string => typeof path === "string" && path.length > 0
+  );
+  return (
+    paths.length > 0 &&
+    paths.every((path) => path === coinbaseWalletRequestRelayPath)
+  );
+}
+
+export function hasCoinbaseWalletRequestRelayFrame(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return Array.isArray(frames) && frames.some(isCoinbaseWalletRequestRelayFrame);
+}
+
 export function hasCoinbaseWalletLinkWebSocketFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
@@ -101,6 +123,7 @@ function hasAppOwnedWalletLinkWebSocketInAppFrame(
       (frame) =>
         frame.in_app === true &&
         !isCoinbaseWalletLinkWebSocketFrame(frame) &&
+        !isCoinbaseWalletRequestRelayFrame(frame) &&
         !isCoinbaseWalletLinkWebSocketCloseFrame(frame) &&
         !isRawNextStaticFrame(frame)
     )
@@ -256,6 +279,7 @@ export function hasThirdPartyWalletLinkWebSocket1006Evidence(
 ): boolean {
   return (
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
+    hasCoinbaseWalletRequestRelayFrame(value?.stacktrace?.frames) ||
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
     hasCoinbaseWalletLinkWebSocketSerializedStack(event) ||
     hasThirdPartyWalletAppKitBreadcrumbSignature(event)

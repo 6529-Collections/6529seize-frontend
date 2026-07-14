@@ -45,6 +45,7 @@ const KEYBOARD_EVENT_LAYOUT_TRANSITION_MS = 250;
 const VIEWPORT_KEYBOARD_HEIGHT_TOLERANCE_PX = 8;
 const VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX = 24;
 const FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS = 180;
+const NATIVE_KEYBOARD_HIDE_FALLBACK_MS = 500;
 
 function readPlatformState(): Pick<
   NativeKeyboardState,
@@ -373,6 +374,9 @@ function syncKeyboardVisibilityFromViewport(): void {
 
 function scheduleFocusoutKeyboardHideFallback(): void {
   clearHiddenFallbackTimeout();
+  const fallbackDelay = nativeKeyboardLifecycleActive
+    ? NATIVE_KEYBOARD_HIDE_FALLBACK_MS
+    : FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS;
 
   hiddenFallbackTimeout = setTimeout(() => {
     hiddenFallbackTimeout = null;
@@ -381,7 +385,7 @@ function scheduleFocusoutKeyboardHideFallback(): void {
     }
 
     markKeyboardHiddenFromFallback();
-  }, FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS);
+  }, fallbackDelay);
 }
 
 function setupBrowserKeyboardFallbackListeners(): void {
