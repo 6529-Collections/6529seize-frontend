@@ -3,13 +3,14 @@ import type { HeaderSearchModalItemType } from "@/components/header/header-searc
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
 let clickAwayCb: () => void;
 let escapeCb: () => void;
-let enterCb: () => void;
+let autoFlushDebounce = true;
+let pendingDebounce: (() => void) | null = null;
 
 const useQueryMock = jest.fn();
 const useRouter = jest.fn();
@@ -24,6 +25,7 @@ const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
 const mockUseMyStreamOptional = jest.fn();
+const useAuthMock = jest.fn();
 type HeaderSearchModalItemProps = {
   readonly isSelected: boolean;
   readonly searchValue: string;
@@ -33,9 +35,22 @@ type HeaderSearchModalItemProps = {
   readonly onWaveSelect?: ((wave: ApiWave) => void) | undefined;
 };
 const mockHeaderSearchModalItem = jest.fn(
-  (props: HeaderSearchModalItemProps) => (
-    <div data-testid="item">{JSON.stringify(props)}</div>
-  )
+  (props: HeaderSearchModalItemProps) => {
+    const page =
+      (props.content as { readonly type?: unknown }).type === "PAGE"
+        ? (props.content as {
+            readonly title: string;
+            readonly href: string;
+          })
+        : null;
+
+    return (
+      <div data-testid="item">
+        {page && <a href={page.href}>{page.title}</a>}
+        {JSON.stringify(props)}
+      </div>
+    );
+  }
 );
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 const originalHtmlScrollIntoView = HTMLElement.prototype.scrollIntoView;
@@ -59,12 +74,13 @@ jest.mock("react-use", () => {
     useKeyPressEvent: (key: string, cb: () => void) => {
       if (key === "Escape") {
         escapeCb = cb;
-      } else if (key === "Enter") {
-        enterCb = cb;
       }
     },
     useDebounce: (fn: () => void, _delay: number, deps: any[]) => {
-      React.useEffect(fn, deps);
+      React.useEffect(() => {
+        if (autoFlushDebounce) fn();
+        else pendingDebounce = fn;
+      }, deps);
     },
   };
 });
@@ -102,6 +118,9 @@ jest.mock(
 );
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: () => useAppWalletsMock(),
+}));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => useAuthMock(),
 }));
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => useCookieConsentMock(),
@@ -330,23 +349,71 @@ function setup(options: SetupOptions = {}) {
       };
     });
   }
-  render(<HeaderSearchModal onClose={onClose} wave={null} />);
-  return { onClose, push, profilesRefetch, nftsRefetch, wavesRefetch };
+  const renderResult = render(
+    <HeaderSearchModal onClose={onClose} wave={null} />
+  );
+  return {
+    onClose,
+    push,
+    profilesRefetch,
+    nftsRefetch,
+    wavesRefetch,
+    ...renderResult,
+  };
 }
+
+const getSearchInput = () =>
+  screen.getByRole("combobox", { name: "Search 6529" });
 
 describe("HeaderSearchModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
+    autoFlushDebounce = true;
+    pendingDebounce = null;
     mockUseMyStreamOptional.mockReturnValue(null);
+    useAuthMock.mockReturnValue({ connectedProfile: null });
   });
 
   it("associates the search input with an accessible label", () => {
     setup();
-    expect(
-      screen.getByRole("textbox", {
-        name: "Search",
-      })
-    ).toBeInTheDocument();
+    expect(getSearchInput()).toHaveAttribute("aria-expanded", "false");
+    expect(getSearchInput()).not.toHaveAttribute("aria-controls");
+  });
+
+  it("restores session queries within the active profile scope", () => {
+    sessionStorage.setItem("headerSearchLastQuery:profile-a", "alpha");
+    sessionStorage.setItem("headerSearchLastQuery:profile-b", "beta");
+    useAuthMock.mockReturnValue({
+      connectedProfile: { id: "profile-a", primary_wallet: "0xA" },
+    });
+    const { onClose, rerender } = setup();
+
+    expect(getSearchInput()).toHaveValue("alpha");
+
+    useAuthMock.mockReturnValue({
+      connectedProfile: { id: "profile-b", primary_wallet: "0xB" },
+    });
+    rerender(<HeaderSearchModal onClose={onClose} wave={null} />);
+
+    expect(getSearchInput()).toHaveValue("beta");
+    expect(sessionStorage.getItem("headerSearchLastQuery:profile-a")).toBe(
+      "alpha"
+    );
+    expect(sessionStorage.getItem("headerSearchLastQuery:profile-b")).toBe(
+      "beta"
+    );
+  });
+
+  it("falls back to anonymous storage for an incomplete profile payload", () => {
+    sessionStorage.setItem("headerSearchLastQuery:anonymous", "public query");
+    useAuthMock.mockReturnValue({
+      connectedProfile: { id: null, primary_wallet: null },
+    });
+
+    setup();
+
+    expect(getSearchInput()).toHaveValue("public query");
   });
 
   it("calls onClose when escape is pressed", () => {
@@ -357,12 +424,33 @@ describe("HeaderSearchModal", () => {
 
   it("renders search results when query returns items", () => {
     setup();
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "abc" } });
     expect(
       screen.getByRole("heading", { name: "Profiles" })
     ).toBeInTheDocument();
-    expect(screen.getByTestId("item")).toBeInTheDocument();
+    expect(screen.getAllByTestId("item").length).toBeGreaterThan(0);
+    expect(input).toHaveAttribute(
+      "aria-controls",
+      "header-search-results-listbox"
+    );
+    expect(
+      screen.getByRole("tabpanel", { name: "All results" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).not.toHaveAttribute("aria-label");
+  });
+
+  it("keeps the modal header stable when results load", () => {
+    const scrollIntoViewMock = HTMLElement.prototype
+      .scrollIntoView as jest.Mock;
+    scrollIntoViewMock.mockClear();
+    setup();
+    const input = getSearchInput();
+
+    fireEvent.change(input, { target: { value: "abc" } });
+
+    expect(screen.getAllByTestId("item").length).toBeGreaterThan(0);
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
   });
 
   it("opens the selected wave result instead of toggling it off", () => {
@@ -394,7 +482,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "wave" } });
     const waveItemCall = mockHeaderSearchModalItem.mock.calls.find(
       ([props]) => props.content === wave
@@ -409,7 +497,7 @@ describe("HeaderSearchModal", () => {
 
   it("clears search input when the clear button is pressed", () => {
     setup();
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "faq" } });
 
     const clearButton = screen.getByRole("button", { name: "Clear search" });
@@ -420,7 +508,7 @@ describe("HeaderSearchModal", () => {
 
   it("includes navigation pages in search results when query matches", () => {
     setup();
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "Delegation" } });
 
     expect(screen.getByRole("heading", { name: "Pages" })).toBeInTheDocument();
@@ -450,7 +538,7 @@ describe("HeaderSearchModal", () => {
         },
       ],
     });
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "tech" } });
 
     const renderedItems = screen
@@ -466,9 +554,37 @@ describe("HeaderSearchModal", () => {
     ).toBe(true);
   });
 
+  it.each([
+    "6529 Apps",
+    "6529 Desktop",
+    "6529 Mobile",
+    "apps",
+    "desktop",
+    "mobile",
+  ])("finds the 6529 Apps page for %s", async (query) => {
+    setup({
+      selectedCategory: "PAGES",
+      useActualSidebarSections: true,
+      queryImpl: () => ({
+        isFetching: false,
+        data: [],
+        error: undefined,
+        refetch: jest.fn(() => Promise.resolve()),
+      }),
+    });
+
+    fireEvent.change(getSearchInput(), {
+      target: { value: query },
+    });
+
+    expect(
+      await screen.findByRole("link", { name: "6529 Apps" })
+    ).toHaveAttribute("href", "/about/6529-apps");
+  });
+
   it("finds the Network Wave Score page by formula aliases", () => {
     setup();
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "wave rep formula" } });
 
     const renderedItems = screen
@@ -496,7 +612,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "interactions leaderboard" } });
 
     const renderedItems = (await screen.findAllByTestId("item")).map(
@@ -539,7 +655,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "meme calendar" } });
 
     const items = await screen.findAllByTestId("item");
@@ -572,7 +688,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "memes calendar" } });
 
     const items = await screen.findAllByTestId("item");
@@ -605,7 +721,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "meme cal" } });
 
     const items = await screen.findAllByTestId("item");
@@ -643,7 +759,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "network reputation health" } });
 
     const items = await screen.findAllByTestId("item");
@@ -681,7 +797,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "/network/health" } });
 
     const items = await screen.findAllByTestId("item");
@@ -713,7 +829,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "/network/he" } });
 
     const items = await screen.findAllByTestId("item");
@@ -742,7 +858,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "drop forge" } });
 
     const renderedItems = screen
@@ -793,7 +909,7 @@ describe("HeaderSearchModal", () => {
       }),
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "faq" } });
 
     const items = await screen.findAllByTestId("item");
@@ -858,7 +974,7 @@ describe("HeaderSearchModal", () => {
       },
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "faq" } });
 
     const headings = await screen.findAllByRole("heading", { level: 3 });
@@ -878,10 +994,84 @@ describe("HeaderSearchModal", () => {
 
   it("navigates on enter key", () => {
     const { push } = setup();
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "alice" } });
-    enterCb();
+    fireEvent.keyDown(input, { key: "Enter" });
     expect(push).toHaveBeenCalled();
+  });
+
+  it("does not open a result when Enter is pressed on the clear button", () => {
+    const { push } = setup();
+    const input = getSearchInput();
+    fireEvent.change(input, { target: { value: "alice" } });
+
+    const clearButton = screen.getByRole("button", { name: "Clear search" });
+    clearButton.focus();
+    fireEvent.keyDown(clearButton, { key: "Enter" });
+
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("keeps every result type visible before and after searching", () => {
+    setup();
+    for (const label of ["All", "Pages", "NFTs", "Profiles", "Waves"]) {
+      expect(
+        screen.getAllByRole("tab", { name: new RegExp(`^${label} 0$`) })
+      ).toHaveLength(2);
+    }
+  });
+
+  it("hides results from the previous query while the new query is settling", () => {
+    autoFlushDebounce = false;
+    setup({
+      queryImpl: ({ queryKey, profilesRefetch, nftsRefetch }) => ({
+        isFetching: false,
+        data:
+          queryKey[0] === QueryKey.PROFILE_SEARCH && queryKey[1] === "meme"
+            ? [profile]
+            : [],
+        error: undefined,
+        refetch:
+          queryKey[0] === QueryKey.PROFILE_SEARCH
+            ? profilesRefetch
+            : nftsRefetch,
+      }),
+    });
+    const input = getSearchInput();
+    fireEvent.change(input, { target: { value: "meme" } });
+    act(() => pendingDebounce?.());
+    expect(screen.getAllByTestId("item").length).toBeGreaterThan(0);
+
+    fireEvent.change(input, { target: { value: "wallet" } });
+
+    expect(screen.queryByTestId("item")).not.toBeInTheDocument();
+    expect(screen.getByText('Searching for "wallet"')).toBeInTheDocument();
+  });
+
+  it("shows partial category failures without hiding successful results", () => {
+    const wavesRefetch = jest.fn(() => Promise.resolve());
+    const profilesRefetch = jest.fn(() => Promise.resolve());
+    const nftsRefetch = jest.fn(() => Promise.resolve());
+    setup({
+      profilesRefetch,
+      nftsRefetch,
+      wavesReturn: {
+        waves: [],
+        isFetching: false,
+        error: new Error("Wave search failed"),
+        refetch: wavesRefetch,
+      },
+    });
+    fireEvent.change(getSearchInput(), { target: { value: "alice" } });
+
+    expect(screen.getByTestId("item")).toBeInTheDocument();
+    expect(
+      screen.getByText("Waves results could not be loaded.")
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+    expect(wavesRefetch).toHaveBeenCalledTimes(1);
+    expect(profilesRefetch).not.toHaveBeenCalled();
+    expect(nftsRefetch).not.toHaveBeenCalled();
   });
 
   it("shows an error message and allows retry when a search fails", async () => {
@@ -908,7 +1098,7 @@ describe("HeaderSearchModal", () => {
       },
     });
 
-    const input = screen.getByRole("textbox", { name: "Search" });
+    const input = getSearchInput();
     fireEvent.change(input, { target: { value: "alice" } });
 
     expect(
@@ -923,6 +1113,6 @@ describe("HeaderSearchModal", () => {
     fireEvent.click(retryButton);
 
     expect(profilesRefetch).toHaveBeenCalled();
-    expect(wavesRefetchMock).toHaveBeenCalled();
+    expect(wavesRefetchMock).not.toHaveBeenCalled();
   });
 });

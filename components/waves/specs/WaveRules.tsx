@@ -9,9 +9,14 @@ import WaveRulesPanel from "./WaveRulesPanel";
 interface WaveRulesProps {
   readonly wave: ApiWave;
   readonly useRing?: boolean | undefined;
+  readonly showTitle?: boolean | undefined;
 }
 
-export default function WaveRules({ wave, useRing = true }: WaveRulesProps) {
+export default function WaveRules({
+  wave,
+  useRing = true,
+  showTitle = true,
+}: WaveRulesProps) {
   const metadataQuery = useWaveMetadata(wave.id, {
     enabled: true,
   });
@@ -24,5 +29,7 @@ export default function WaveRules({ wave, useRing = true }: WaveRulesProps) {
     [metadataQuery.data, wave]
   );
 
-  return <WaveRulesPanel rules={rules} useRing={useRing} />;
+  return (
+    <WaveRulesPanel rules={rules} useRing={useRing} showTitle={showTitle} />
+  );
 }

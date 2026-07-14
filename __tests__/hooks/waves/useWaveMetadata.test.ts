@@ -3,7 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { WAVE_DISPLAY_METADATA_KEYS } from "@/helpers/waves/wave-metadata.helpers";
-import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
+import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
+import {
+  useWaveOutcomeVisibility,
+  useWaveSubmissionButtonLabel,
+  useWaveSubmissionButtonLabelOverride,
+} from "@/hooks/waves/useWaveMetadata";
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
@@ -124,5 +129,91 @@ describe("useWaveOutcomeVisibility", () => {
     );
 
     expect(result.current).toBe(false);
+  });
+});
+
+describe("wave submission button label hooks", () => {
+  beforeEach(() => {
+    useQueryMock.mockReturnValue({
+      data: undefined,
+      isError: false,
+      isLoading: false,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("uses the default label while metadata is not loaded", () => {
+    const { result } = renderHook(() =>
+      useWaveSubmissionButtonLabel({
+        submissionExperience: WaveSubmissionExperience.DEFAULT,
+        waveId: "wave-1",
+      })
+    );
+
+    expect(result.current).toBe("Drop");
+  });
+
+  it("uses the custom label from metadata", () => {
+    useQueryMock.mockReturnValue({
+      data: [
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "Apply",
+        },
+      ],
+      isError: false,
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useWaveSubmissionButtonLabel({
+        submissionExperience: WaveSubmissionExperience.QUORUM_PROPOSAL,
+        waveId: "wave-1",
+      })
+    );
+
+    expect(result.current).toBe("Apply");
+  });
+
+  it("returns only the custom override for override consumers", () => {
+    useQueryMock.mockReturnValue({
+      data: [
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.submissionButtonLabel,
+          data_value: "Apply",
+        },
+      ],
+      isError: false,
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useWaveSubmissionButtonLabelOverride({
+        waveId: "wave-1",
+      })
+    );
+
+    expect(result.current).toBe("Apply");
+  });
+
+  it("returns null when no override is configured", () => {
+    useQueryMock.mockReturnValue({
+      data: [],
+      isError: false,
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useWaveSubmissionButtonLabelOverride({
+        waveId: "wave-1",
+      })
+    );
+
+    expect(result.current).toBeNull();
   });
 });

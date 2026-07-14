@@ -6,7 +6,7 @@ The right-sidebar `About` content lets users manage wave access groups in place.
 
 Users can:
 
-- review `View`, `Drop`, `Vote`, `Chat`, and `Admin` scopes
+- review `View`, `Drop`, `Vote`, `Chat access`, and `Admin` scopes
 - add, change, or remove scope groups from row menus
 - include or exclude one identity from a scoped group
 - manage non-chat `Curation Groups` without leaving the thread
@@ -32,6 +32,7 @@ Users can:
 2. Review the `General` rows.
 3. Check current scope value:
    - no group: `Anyone`
+   - no chat access group: `Anyone when enabled`
    - hidden group: `Hidden`
    - visible group: linked name to `/network?page=1&group={groupId}`
 4. Open `Group options` on the row to update.
@@ -56,7 +57,12 @@ Users can:
 
 ## Edge Cases
 
-- Chat waves show only `View`, `Chat`, and `Admin`.
+- Chat waves show only `View`, `Chat access`, and `Admin`.
+- `Chat access` controls who can chat only when chat is enabled; it does not
+  show whether chat is currently enabled or disabled.
+- Chat waves require chat to stay enabled, so their Settings and Rules panels
+  do not show a chat-status enable/disable row. Rank and Approve waves show
+  `Chat status` separately from `Chat access`.
 - Chat waves do not show `Curation Groups`.
 - General-row edit controls are hidden for direct-message groups.
 - `Admin` does not show `Remove group`.
@@ -82,8 +88,8 @@ Users can:
 ## Limitations / Notes
 
 - Editing controls require a non-proxy profile with wave edit permission.
-- Curation-group actions are separate from `View`/`Drop`/`Vote`/`Chat`/`Admin`
-  access scope rows.
+- Curation-group actions are separate from `View`/`Drop`/`Vote`/`Chat access`/
+  `Admin` access scope rows.
 - Include/exclude limits are enforced per group:
   - include list max: `10,000`
   - exclude list max: `1,000`

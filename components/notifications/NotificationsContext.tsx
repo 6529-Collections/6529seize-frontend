@@ -27,6 +27,7 @@ import {
   getAuthJwt,
   isAuthJwtUsable,
 } from "@/services/auth/auth.utils";
+import { extractErrorStatusCode as extractSharedErrorStatusCode } from "@/utils/errorStatus";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { getStableDeviceId } from "./stable-device-id";
@@ -180,45 +181,8 @@ const toErrorMessage = (
   return fallbackMessage;
 };
 
-const parseStatusCode = (status: unknown): number | null => {
-  if (typeof status === "number" && Number.isFinite(status)) {
-    return status;
-  }
-  if (typeof status === "string") {
-    const parsed = Number.parseInt(status, 10);
-    return Number.isNaN(parsed) ? null : parsed;
-  }
-  return null;
-};
-
-const extractErrorStatusCode = (error: unknown): number | null => {
-  if (error === null || error === undefined || typeof error !== "object") {
-    return null;
-  }
-  const typedError = error as {
-    status?: unknown;
-    code?: unknown;
-    response?: {
-      status?: unknown;
-    };
-    cause?: {
-      status?: unknown;
-      code?: unknown;
-      response?: {
-        status?: unknown;
-      };
-    };
-  };
-
-  return (
-    parseStatusCode(typedError.status) ??
-    parseStatusCode(typedError.response?.status) ??
-    parseStatusCode(typedError.code) ??
-    parseStatusCode(typedError.cause?.status) ??
-    parseStatusCode(typedError.cause?.response?.status) ??
-    parseStatusCode(typedError.cause?.code)
-  );
-};
+const extractErrorStatusCode = (error: unknown): number | null =>
+  extractSharedErrorStatusCode(error, { allowPartialStringStatus: true });
 
 const parseRetryAfterHeaderValue = (value: string): number | null => {
   const seconds = Number.parseFloat(value);
@@ -427,6 +391,16 @@ const toCaptureExceptionInput = (
   return new Error(toErrorMessage(error, fallbackMessage));
 };
 
+const getUsableProfileId = (profile?: ApiIdentity): string | null => {
+  const profileId = profile?.id;
+  if (typeof profileId !== "string") {
+    return null;
+  }
+
+  const trimmedProfileId = profileId.trim();
+  return trimmedProfileId.length > 0 ? trimmedProfileId : null;
+};
+
 const createPushRegistrationFingerprint = ({
   deviceId,
   token,
@@ -438,7 +412,7 @@ const createPushRegistrationFingerprint = ({
 }): PushRegistrationFingerprint => ({
   deviceId,
   token,
-  profileId: profile?.id ?? null,
+  profileId: getUsableProfileId(profile),
 });
 
 const isSamePushRegistrationFingerprint = (
@@ -773,10 +747,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       deviceId: string,
       deviceInfo: DeviceInfo,
       token: string,
-      profile?: ApiIdentity
+      profileId: string
     ): Promise<boolean> => {
-      const profileId = profile?.id ?? null;
-
       for (
         let attempt = 0;
         attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS;
@@ -802,7 +774,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
               operation: "registerPushNotification",
               attempt: attempt + 1,
               max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-              profile_id: profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
             },
           });
@@ -816,7 +788,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
               device_id: deviceId,
               token,
               platform: deviceInfo.platform,
-              profile_id: profile?.id,
+              profile_id: profileId,
             },
             errorMode: "structured",
           });
@@ -863,7 +835,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 delay_ms: delayMs,
                 rate_limited: rateLimited,
                 ...errorExtra,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -892,7 +864,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 attempt: attemptNumber,
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
                 status_code: statusCode ?? undefined,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -918,7 +890,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
                 delay_ms: retryAfterMs ?? undefined,
                 ...errorExtra,
-                profile_id: profileId ?? undefined,
+                profile_id: profileId,
                 platform: deviceInfo.platform,
               },
             });
@@ -934,7 +906,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             extra: {
               attempt: attemptNumber,
               max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-              profile_id: profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
               ...errorExtra,
             },
@@ -968,6 +940,24 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const fingerprint = createPushRegistrationFingerprint(fingerprintInput);
+      const profileId = fingerprint.profileId;
+      if (profileId === null) {
+        console.warn("Skipping push registration: profile id is unavailable", {
+          platform: deviceInfo.platform,
+        });
+        Sentry.addBreadcrumb({
+          category: "notifications",
+          level: "warning",
+          message: "Push registration skipped (profile id unavailable).",
+          data: {
+            component: "NotificationsProvider",
+            operation: "registerPushNotification",
+            platform: deviceInfo.platform,
+          },
+        });
+        return;
+      }
+
       const previousSuccess = lastSuccessfulRegistrationRef.current;
 
       if (
@@ -981,7 +971,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           data: {
             component: "NotificationsProvider",
             operation: "registerPushNotification",
-            profile_id: fingerprint.profileId ?? undefined,
+            profile_id: profileId,
             platform: deviceInfo.platform,
           },
         });
@@ -1003,7 +993,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             data: {
               component: "NotificationsProvider",
               operation: "registerPushNotification",
-              profile_id: fingerprint.profileId ?? undefined,
+              profile_id: profileId,
               platform: deviceInfo.platform,
             },
           });
@@ -1016,7 +1006,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           deviceId,
           deviceInfo,
           token,
-          profile
+          profileId
         );
         if (didRegister) {
           lastSuccessfulRegistrationRef.current = fingerprint;

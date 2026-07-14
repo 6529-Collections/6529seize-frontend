@@ -5,6 +5,11 @@ import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { EditingDropProvider } from "@/contexts/EditingDropContext";
 import {
+  WsMessageType,
+  type WsDropDeleteMessage,
+} from "@/helpers/Types";
+import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
+import {
   act,
   fireEvent,
   render,
@@ -26,6 +31,8 @@ const invalidateNotificationsMock = jest.fn();
 const mockUseAuth = jest.fn();
 const mockApprovalStatus = jest.fn();
 const mockFetchAroundSerialNo = jest.fn();
+const mockSetToast = jest.fn();
+const mockUseWebSocketMessage = jest.fn();
 
 let documentVisibilityState: DocumentVisibilityState = "visible";
 
@@ -198,6 +205,10 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
+  useWebSocketMessage: (...args: unknown[]) => mockUseWebSocketMessage(...args),
+}));
+
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0xAAA" }),
 }));
@@ -248,6 +259,9 @@ describe("MyStreamWaveChat", () => {
     mockRemoveAllDeliveredNotifications.mockClear();
     invalidateNotificationsMock.mockClear();
     mockFetchAroundSerialNo.mockClear();
+    mockSetToast.mockClear();
+    mockUseWebSocketMessage.mockReset();
+    mockUseWebSocketMessage.mockReturnValue({ isConnected: true });
     mockApprovalStatus.mockReset();
     mockApprovalStatus.mockReturnValue({
       winningThreshold: null,
@@ -258,6 +272,7 @@ describe("MyStreamWaveChat", () => {
     mockUseAuth.mockReturnValue({
       connectedProfile: { handle: "tester" },
       activeProfileProxy: null,
+      setToast: mockSetToast,
     });
     (
       commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
@@ -286,6 +301,16 @@ describe("MyStreamWaveChat", () => {
     );
     expect(props).toBeDefined();
     return props as any;
+  };
+
+  const getDropDeleteCallback = () => {
+    const dropDeleteSubscription = mockUseWebSocketMessage.mock.calls.find(
+      ([messageType]) => messageType === WsMessageType.DROP_DELETE
+    );
+    expect(dropDeleteSubscription).toBeDefined();
+    return dropDeleteSubscription?.[1] as (
+      messageData: WsDropDeleteMessage["data"]
+    ) => void;
   };
 
   it("handles serialNo param without rendering a memes chat shortcut", async () => {
@@ -697,6 +722,49 @@ describe("MyStreamWaveChat", () => {
     expect(capturedPropsHolder.current.isVotingClosed).toBe(false);
     expect(capturedPropsHolder.current.isVotingControlsLocked).toBe(true);
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
+  });
+
+  it("clears an active reply when the reply target is deleted", async () => {
+    const repliedDrop = { id: "deleted-drop" } as any;
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    act(() => {
+      capturedPropsHolder.current.onReply({ drop: repliedDrop, partId: 0 });
+    });
+
+    await waitFor(() => {
+      expect(capturedCreatorPropsHolder.current.activeDrop?.drop.id).toBe(
+        "deleted-drop"
+      );
+    });
+
+    act(() => {
+      getDropDeleteCallback()({
+        wave_id: wave.id,
+        drop_id: "deleted-drop",
+        drop_serial: 1,
+      });
+    });
+
+    await waitFor(() => {
+      expect(capturedCreatorPropsHolder.current.activeDrop).toBeNull();
+    });
+    expect(mockSetToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "warning",
+        toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
+      })
+    );
   });
 
   it("keeps serialNo until chat view renders", async () => {

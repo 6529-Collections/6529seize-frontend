@@ -637,12 +637,6 @@ const getContentBlock = ({
   handleEditCancel,
   allowLongPress,
   handleLinkCardActionsActiveChange,
-  canUseDesktopHoverActions,
-  showInteractions,
-  showReplyAndQuote,
-  handleOnReply,
-  handleOnEdit,
-  hasActiveLinkCardActions,
   inlineAuthorOnDesktop,
   mediaImageScale,
   fullWidthMedia,
@@ -651,8 +645,6 @@ const getContentBlock = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
-  groupedTimestampSwipeOffset,
-  isRowPointerHovered,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -682,12 +674,6 @@ const getContentBlock = ({
     actionId: string,
     active: boolean
   ) => void;
-  readonly canUseDesktopHoverActions: boolean;
-  readonly showInteractions: boolean;
-  readonly showReplyAndQuote: boolean;
-  readonly handleOnReply: () => void;
-  readonly handleOnEdit: () => void;
-  readonly hasActiveLinkCardActions: boolean;
   readonly inlineAuthorOnDesktop: boolean;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia: boolean;
@@ -696,8 +682,6 @@ const getContentBlock = ({
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
-  readonly groupedTimestampSwipeOffset: number;
-  readonly isRowPointerHovered: boolean;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -775,20 +759,6 @@ const getContentBlock = ({
         </div>
       </div>
     </div>
-    {canUseDesktopHoverActions &&
-      showInteractions &&
-      showReplyAndQuote &&
-      !isEditing && (
-        <WaveDropActions
-          drop={drop}
-          activePartIndex={activePartIndex}
-          onReply={handleOnReply}
-          onEdit={handleOnEdit}
-          suppressed={hasActiveLinkCardActions}
-          forceVisible={isRowPointerHovered}
-          style={getGroupedTimestampActionStyle(groupedTimestampSwipeOffset)}
-        />
-      )}
   </>
 );
 
@@ -1421,12 +1391,6 @@ const WaveDropInner = ({
     handleEditCancel,
     allowLongPress,
     handleLinkCardActionsActiveChange,
-    canUseDesktopHoverActions,
-    showInteractions,
-    showReplyAndQuote,
-    handleOnReply,
-    handleOnEdit,
-    hasActiveLinkCardActions,
     inlineAuthorOnDesktop,
     mediaImageScale,
     fullWidthMedia,
@@ -1435,8 +1399,6 @@ const WaveDropInner = ({
     quotePath,
     embedDepth,
     maxEmbedDepth,
-    groupedTimestampSwipeOffset: timestampSwipeOffset,
-    isRowPointerHovered,
   });
 
   const contentOffsetClass = inlineAuthorOnDesktop
@@ -1514,6 +1476,20 @@ const WaveDropInner = ({
           style={swipeableContentStyle}
         >
           {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
+          {canUseDesktopHoverActions &&
+            showInteractions &&
+            showReplyAndQuote &&
+            !isEditing && (
+              <WaveDropActions
+                drop={drop}
+                activePartIndex={activePartIndex}
+                onReply={handleOnReply}
+                onEdit={handleOnEdit}
+                suppressed={hasActiveLinkCardActions}
+                forceVisible={isRowPointerHovered}
+                style={getGroupedTimestampActionStyle(timestampSwipeOffset)}
+              />
+            )}
           {reactionsRow}
           {footerRow}
         </div>

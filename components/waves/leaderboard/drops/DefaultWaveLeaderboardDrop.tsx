@@ -6,7 +6,6 @@ import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
-import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -171,9 +170,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 <WaveLeaderboardDropRaters
                   drop={drop}
                   winningThreshold={winningThreshold}
-                  winningThresholdMinDurationMs={
-                    winningThresholdMinDurationMs
-                  }
+                  winningThresholdMinDurationMs={winningThresholdMinDurationMs}
                   isVotingClosed={isVotingClosed}
                 />
               </div>
@@ -181,12 +178,6 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 className="tw-flex tw-w-full tw-items-center tw-justify-end tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
                 onClick={(e) => e.stopPropagation()}
               >
-                <DropCurationButton
-                  waveId={drop.wave.id}
-                  dropId={drop.id}
-                  isCuratable={drop.context_profile_context?.curatable ?? false}
-                  isCurated={drop.context_profile_context?.curated ?? false}
-                />
                 {canShowVotingAction && (
                   <VotingModalButton
                     drop={drop}

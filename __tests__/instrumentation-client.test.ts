@@ -42,8 +42,19 @@ describe("instrumentation-client", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const observedSentryE7WasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Refused to compile or instantiate",
+    "WebAssembly module because 'unsafe-eval' is not an allowed source of script in the",
+    "following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'",
+    "https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
+    'https://dataplane.rum.us-east-1.amazonaws.com\").',
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
   const observedWasmModuleCspUnsafeEvalMessage =
     "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
+  const anonymousUnsafeEvalCspMessage =
+    "Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com https://dataplane.rum.us-east-1.amazonaws.com\".";
   const sentryRouteParameterizationMessage =
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
@@ -178,6 +189,26 @@ describe("instrumentation-client", () => {
           },
         ],
       },
+    },
+  ];
+  const createObservedAppKitBootstrapBreadcrumbs = () => [
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_appkit_init_start",
+      data: { offset_ms: 181 },
+    },
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_appkit_init_ok",
+      data: { offset_ms: 181 },
+    },
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_adapter_created",
+      data: { offset_ms: 187 },
     },
   ];
 
@@ -329,14 +360,28 @@ describe("instrumentation-client", () => {
   it("drops observed Sentry E7 WebAssembly CSP unsafe-eval errors from injected static chunks", () => {
     const beforeSend = loadBeforeSend();
     const event = {
-      transaction: "/waves",
+      transaction: "/the-memes/:id",
       exception: {
         values: [
           {
             type: "RuntimeError",
-            value: wasmCspUnsafeEvalMessage,
+            value: observedSentryE7WasmCspUnsafeEvalMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///chunks/utils-DNoBWR8F.js",
+                  abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                  in_app: true,
+                },
                 {
                   filename: "app:///chunks/utils-DNoBWR8F.js",
                   abs_path: "app:///chunks/utils-DNoBWR8F.js",
@@ -350,8 +395,62 @@ describe("instrumentation-client", () => {
       },
       tags: {
         environment: "production",
-        transaction: "/waves",
-        url: "/waves",
+        transaction: "/the-memes/:id",
+        url: "/the-memes/447",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops observed anonymous EvalError CSP unsafe-eval errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      transaction: "/",
+      exception: {
+        values: [
+          {
+            type: "EvalError",
+            value: anonymousUnsafeEvalCspMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                  abs_path:
+                    "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                  function: "n",
+                },
+                {
+                  filename: "<anonymous>:234:30",
+                  abs_path: "<anonymous>:234:30",
+                  function: "next",
+                },
+                {
+                  filename: "<anonymous>:234:30",
+                  abs_path: "<anonymous>:234:30",
+                  function: "predicate",
+                },
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "eval",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tags: {
+        environment: "production",
+        transaction: "/",
+        url: "/",
       },
     };
 
@@ -683,6 +782,39 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops observed AppKit bootstrap websocket 1006 unhandled rejections", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "e",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createObservedAppKitBootstrapBreadcrumbs(),
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("keeps exact Talisman onboarding errors with app-owned frames", () => {
     const beforeSend = loadBeforeSend();
     const event = {
@@ -780,6 +912,55 @@ describe("instrumentation-client", () => {
   it("drops Sentry route parameterization cyclic JSON errors", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops iOS WKWebView route parameterization cyclic JSON errors without app context", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent(
+      [
+        {
+          filename:
+            "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+          function: "n",
+        },
+        nativeJsonStringifyFrame,
+      ],
+      {
+        transaction: "/waves",
+        request: {
+          url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        },
+        contexts: {
+          browser: {
+            name: "Mobile Safari UI/WKWebView",
+          },
+          os: {
+            name: "iOS",
+            version: "18.7",
+          },
+        },
+        tags: {
+          browser: "Mobile Safari UI/WKWebView",
+          "browser.name": "Mobile Safari UI/WKWebView",
+          "os.name": "iOS",
+          url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          transaction: "/waves",
+        },
+        breadcrumbs: [
+          {
+            category: "navigation",
+            data: {
+              from: "/waves",
+              to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+            },
+          },
+        ],
+      }
+    );
 
     const result = beforeSend(event);
 

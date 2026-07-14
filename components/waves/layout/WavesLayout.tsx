@@ -155,7 +155,8 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const hasUsefulWavesContent =
     contentState === WAVES_CONTENT_STATE_READY ||
     contentState === WAVES_CONTENT_STATE_PUBLIC ||
-    contentState === WAVES_CONTENT_STATE_NEEDS_PROFILE;
+    contentState === WAVES_CONTENT_STATE_NEEDS_PROFILE ||
+    contentState === WAVES_CONTENT_STATE_MEASURING;
   const hasVisibleLaunchContent =
     hasUsefulWavesContent || connectPrompt !== null;
 
@@ -164,8 +165,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   if (shouldRenderWavesContent) {
     content = getWavesContent({
       children:
-        contentState === WAVES_CONTENT_STATE_LOADING ||
-        contentState === WAVES_CONTENT_STATE_MEASURING ? (
+        contentState === WAVES_CONTENT_STATE_LOADING ? (
           <WavesContentLoadingFallback />
         ) : (
           children

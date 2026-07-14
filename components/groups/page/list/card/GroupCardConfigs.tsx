@@ -3,11 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import { GroupDescriptionType } from "@/entities/IGroup";
 import type { ApiGroupDescription } from "@/generated/models/ApiGroupDescription";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
 import { toShortGrantId } from "@/components/groups/page/create/config/xtdh-grant/utils";
+import { getGroupNftOwnershipCardSummary } from "@/helpers/groups/group-nft-ownership";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {
@@ -29,6 +34,26 @@ const GRANT_STATUS_LABELS: Record<ApiXTdhGrantStatus, string> = {
   [ApiXTdhGrantStatus.Failed]: "FAILED",
   [ApiXTdhGrantStatus.Disabled]: "REVOKED",
   [ApiXTdhGrantStatus.Granted]: "GRANTED",
+};
+
+const getGrantModeLabel = (
+  groupDescription: ApiGroupDescription
+): string | null => {
+  if (
+    groupDescription.is_beneficiary_of_grant_match_mode ===
+    ApiGroupBeneficiaryGrantMatchMode.AllTokens
+  ) {
+    return "All specified tokens";
+  }
+
+  const grant = groupDescription.is_beneficiary_of_grant;
+  if (!grant) {
+    return null;
+  }
+
+  return grant.target_token_mode === ApiXTdhGrantTargetTokenMode.All
+    ? "Any collection token"
+    : "Any specified token";
 };
 
 export default function GroupCardConfigs({
@@ -151,6 +176,24 @@ export default function GroupCardConfigs({
     };
   };
 
+  const getNftsConfig = (
+    owns_nfts: ApiGroupDescription["owns_nfts"]
+  ): GroupCardConfigProps | null => {
+    if (!owns_nfts.length) {
+      return null;
+    }
+
+    const value = owns_nfts
+      .map((nft) => getGroupNftOwnershipCardSummary(nft))
+      .join(", ");
+
+    return {
+      key: GroupDescriptionType.OWNS_NFTS,
+      value,
+      tooltip: t(DEFAULT_LOCALE, "groups.nftOwnership.card.tooltip"),
+    };
+  };
+
   const getWalletsConfig = (
     wallet_group_wallets_count: ApiGroupDescription["identity_group_identities_count"]
   ): GroupCardConfigProps => {
@@ -200,9 +243,13 @@ export default function GroupCardConfigs({
       groupDescription.is_beneficiary_of_grant
     );
     const shortGrantId = toShortGrantId(grantId);
-    const value = statusLabel
+    const grantModeLabel = getGrantModeLabel(groupDescription);
+    const grantValue = statusLabel
       ? `${statusLabel} (${shortGrantId})`
       : shortGrantId;
+    const value = grantModeLabel
+      ? `${grantValue} · ${grantModeLabel}`
+      : grantValue;
 
     return {
       key: GroupDescriptionType.XTDH_GRANT,
@@ -225,18 +272,20 @@ export default function GroupCardConfigs({
       ];
     }
     const configs: GroupCardConfigProps[] = [];
-    const { tdh, rep, cic, level, identity_group_identities_count } =
+    const { tdh, rep, cic, level, owns_nfts, identity_group_identities_count } =
       group.group;
     const tdhConfig = getTdhConfig(tdh);
     const repConfig = getRepConfig(rep);
     const cicConfig = getCicConfig(cic);
     const levelConfig = getLevelConfig(level);
+    const nftsConfig = getNftsConfig(owns_nfts);
     const grantConfig = getGrantConfig(group.group);
     const walletsConfig = getWalletsConfig(identity_group_identities_count);
     if (tdhConfig) configs.push(tdhConfig);
     if (repConfig) configs.push(repConfig);
     if (cicConfig) configs.push(cicConfig);
     if (levelConfig) configs.push(levelConfig);
+    if (nftsConfig) configs.push(nftsConfig);
     if (grantConfig) configs.push(grantConfig);
     configs.push(walletsConfig);
 
@@ -323,7 +372,7 @@ export default function GroupCardConfigs({
           </button>
         )}
         <div
-          className="horizontal-menu-hide-scrollbar tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-overflow-x-auto tw-py-0.5"
+          className="tw-no-scrollbar tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-overflow-x-auto tw-py-0.5"
           ref={containerRef}
           onScroll={checkForHiddenContent}
         >

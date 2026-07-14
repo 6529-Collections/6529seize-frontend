@@ -16,6 +16,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import type { SetActiveContentTab } from "@/components/brain/ContentTabContext";
+import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
@@ -34,6 +35,7 @@ import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
 
 const TRUNCATION_EPSILON_PX = 1;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
+type OpenSearch = "site" | "wave" | null;
 
 export interface MyStreamWaveTabsHeaderActionContext {
   readonly activeContentTab: MyStreamWaveTab;
@@ -264,7 +266,7 @@ export default function MyStreamWaveTabsHeader({
   });
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
   const descriptionPreviewRef = useRef<HTMLSpanElement>(null);
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
@@ -481,13 +483,13 @@ export default function MyStreamWaveTabsHeader({
           )}
           <button
             type="button"
-            onClick={() => setIsSearchOpen(true)}
+            onClick={() => setOpenSearch("wave")}
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
-            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+            className="tw-text-primary-200 tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-transition tw-duration-150 hover:tw-border-primary-400/50 hover:tw-bg-primary-500/20 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
-            <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+            <MagnifyingGlassIcon className="tw-size-4.5 tw-flex-shrink-0" />
           </button>
           {!isCompact && (
             <button
@@ -527,11 +529,15 @@ export default function MyStreamWaveTabsHeader({
       </div>
       <MyStreamActionTooltip id={headerActionsTooltipId} />
       <WaveDropsSearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
+        isOpen={openSearch === "wave"}
+        onClose={() => setOpenSearch(null)}
         wave={wave}
         onSelectSerialNo={handleSearchSelect}
+        onSearchAll={() => setOpenSearch("site")}
       />
+      {openSearch === "site" && (
+        <HeaderSearchModal onClose={() => setOpenSearch(null)} wave={null} />
+      )}
     </>
   );
 }

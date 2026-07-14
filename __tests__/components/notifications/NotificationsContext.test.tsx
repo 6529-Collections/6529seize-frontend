@@ -8,7 +8,8 @@ import React from "react";
 const push = jest.fn();
 const mockUseRouter = jest.fn(() => ({ push }));
 const mockSeizeSwitchConnectedAccount = jest.fn();
-let mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
+let mockConnectedProfile: { id: string | null; handle: string | null } | null =
+  { id: "test-profile-id", handle: "owner" };
 const mockSeizeConnectContext = {
   address: "0xaaa",
   connectedAccounts: [
@@ -276,6 +277,7 @@ describe("push registration behavior", () => {
 
     jest.clearAllMocks();
     PushNotifications.addListener.mockClear();
+    mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
     commonApiPost.mockReset();
     commonApiPost.mockResolvedValue({});
     getAuthJwt.mockReturnValue("test-jwt");
@@ -318,6 +320,36 @@ describe("push registration behavior", () => {
       })
     );
   });
+
+  it.each([null, "   "])(
+    "skips registration when profile id is unavailable (%p)",
+    async (profileId) => {
+      const { commonApiPost } = require("@/services/api/common-api");
+      const sentry = require("@sentry/nextjs");
+
+      mockConnectedProfile = { id: profileId, handle: "owner" };
+
+      const { registrationCallback } = await setupRegistrationCallback();
+
+      await act(async () => {
+        await registrationCallback({ value: "test-token" });
+      });
+
+      expect(commonApiPost).not.toHaveBeenCalled();
+      expect(sentry.captureException).not.toHaveBeenCalled();
+      expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: "warning",
+          message: "Push registration skipped (profile id unavailable).",
+          data: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "registerPushNotification",
+            platform: "ios",
+          }),
+        })
+      );
+    }
+  );
 
   it("reinitializes registration when auth becomes usable", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");

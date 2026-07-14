@@ -4,6 +4,7 @@ import { UserPageXtdhGrantListItem } from "@/components/user/xtdh/granted-list/s
 import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
+import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
 import type { ContractOverview } from "@/types/nft";
 
@@ -74,7 +75,9 @@ describe("UserPageXtdhGrantListItem", () => {
       error_details: "Token grant failed because the snapshot already expired.",
     });
 
-    renderWithProviders(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
+    renderWithProviders(
+      <UserPageXtdhGrantListItem grant={grant} isSelf={true} />
+    );
 
     expect(screen.getByText("Error details")).toBeInTheDocument();
     expect(
@@ -89,7 +92,9 @@ describe("UserPageXtdhGrantListItem", () => {
       error_details: "   ",
     });
 
-    renderWithProviders(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
+    renderWithProviders(
+      <UserPageXtdhGrantListItem grant={grant} isSelf={true} />
+    );
 
     expect(screen.queryByText("Error details")).not.toBeInTheDocument();
   });
@@ -100,7 +105,9 @@ describe("UserPageXtdhGrantListItem", () => {
       valid_to: null,
     });
 
-    renderWithProviders(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
+    renderWithProviders(
+      <UserPageXtdhGrantListItem grant={grant} isSelf={true} />
+    );
 
     expect(screen.getByText("Valid from")).toBeInTheDocument();
     expect(screen.getByText("Immediately")).toBeInTheDocument();
@@ -115,7 +122,9 @@ describe("UserPageXtdhGrantListItem", () => {
       valid_to: validTo,
     });
 
-    renderWithProviders(<UserPageXtdhGrantListItem grant={grant} isSelf={true} />);
+    renderWithProviders(
+      <UserPageXtdhGrantListItem grant={grant} isSelf={true} />
+    );
 
     // Should show "Last grant"
     expect(screen.getByText("Last grant")).toBeInTheDocument();
@@ -128,6 +137,7 @@ function createGrant(overrides: Partial<Grant> = {}): Grant {
     grantor: createGrantor(),
     target_chain: ApiXTdhGrantTargetChain.EthereumMainnet,
     target_contract: "0x1234567890abcdef1234567890abcdef12345678",
+    target_token_mode: ApiXTdhGrantTargetTokenMode.Include,
     target_tokens_count: 0,
     target_collection_name: null,
     created_at: Date.now(),

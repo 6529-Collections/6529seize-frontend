@@ -4,6 +4,7 @@ import {
   getLowValueNetworkErrorTargetUrl,
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
+  shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -99,8 +100,19 @@ describe("sentry-client-filters", () => {
     "Content Security Policy directive: \"script-src 'self' 'unsafe-inline'\".).",
     "Build with -sASSERTIONS for more info.",
   ].join(" ");
+  const observedSentryE7WasmCspUnsafeEvalMessage = [
+    "Aborted(CompileError: WebAssembly.instantiate(): Refused to compile or instantiate",
+    "WebAssembly module because 'unsafe-eval' is not an allowed source of script in the",
+    "following Content Security Policy directive: \"script-src 'self' 'unsafe-inline'",
+    "https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
+    'https://dataplane.rum.us-east-1.amazonaws.com\").',
+    "Build with -sASSERTIONS for more info.",
+  ].join(" ");
   const observedWasmModuleCspUnsafeEvalMessage =
     "CompileError: WebAssembly.Module(): Compiling or instantiating WebAssembly module violates CSP because unsafe-eval is not allowed";
+  const anonymousUnsafeEvalCspMessage =
+    "Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com https://dataplane.rum.us-east-1.amazonaws.com\".";
   const injectedProviderProxyStartsWithMessage =
     "t?.startsWith is not a function";
   const walletConnectStaleSessionTopicMessage =
@@ -287,6 +299,28 @@ describe("sentry-client-filters", () => {
       },
     ],
   });
+  const createObservedAppKitBootstrapBreadcrumbs = (): NonNullable<
+    SentryClientEvent["breadcrumbs"]
+  > => [
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_appkit_init_start",
+      data: { offset_ms: 181 },
+    },
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_appkit_init_ok",
+      data: { offset_ms: 181 },
+    },
+    {
+      category: "mobile_launch",
+      level: "info",
+      message: "wagmi_adapter_created",
+      data: { offset_ms: 187 },
+    },
+  ];
 
   const createMetaMaskUpdateUrlCircularEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -408,17 +442,80 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createObservedAnonymousUnsafeEvalCspEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/",
+    exception: {
+      values: [
+        {
+          type: "EvalError",
+          value: anonymousUnsafeEvalCspMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                abs_path:
+                  "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                function: "n",
+              },
+              {
+                filename: "<anonymous>:234:30",
+                abs_path: "<anonymous>:234:30",
+                function: "next",
+              },
+              {
+                filename: "<anonymous>:234:30",
+                abs_path: "<anonymous>:234:30",
+                function: "predicate",
+              },
+              {
+                filename: "<anonymous>",
+                abs_path: "<anonymous>",
+                function: "eval",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    tags: {
+      transaction: "/",
+      url: "/",
+    },
+    ...overrides,
+  });
+
   const createObservedSentryE7WasmCspUnsafeEvalEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
-    transaction: "/waves",
+    transaction: "/the-memes/:id",
     exception: {
       values: [
         {
           type: "RuntimeError",
-          value: wasmCspUnsafeEvalMessage,
+          value: observedSentryE7WasmCspUnsafeEvalMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
           stacktrace: {
             frames: [
+              {
+                filename: "app:///chunks/utils-DNoBWR8F.js",
+                abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                in_app: true,
+              },
+              {
+                filename: "app:///chunks/utils-DNoBWR8F.js",
+                abs_path: "app:///chunks/utils-DNoBWR8F.js",
+                in_app: true,
+              },
               {
                 filename: "app:///chunks/utils-DNoBWR8F.js",
                 abs_path: "app:///chunks/utils-DNoBWR8F.js",
@@ -432,8 +529,8 @@ describe("sentry-client-filters", () => {
     },
     contexts: {
       browser: {
-        name: "Chrome",
-        version: "150",
+        name: "Edge",
+        version: "125.0.0",
       },
       os: {
         name: "Windows",
@@ -441,8 +538,8 @@ describe("sentry-client-filters", () => {
     },
     tags: {
       environment: "production",
-      transaction: "/waves",
-      url: "/waves",
+      transaction: "/the-memes/:id",
+      url: "/the-memes/447",
     },
     ...overrides,
   });
@@ -663,6 +760,144 @@ describe("sentry-client-filters", () => {
       ...overrides,
     });
 
+  const createObservedIosWkWebViewWaveRouteParameterizationEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    createSentryRouteParameterizationEvent({
+      transaction: "/waves",
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+      },
+      contexts: {
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+        os: {
+          name: "iOS",
+          version: "18.7",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+        "os.name": "iOS",
+        url: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+        transaction: "/waves",
+      },
+      breadcrumbs: [
+        {
+          category: "navigation",
+          data: {
+            from: "/waves",
+            to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          },
+        },
+      ],
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                },
+                {
+                  filename: "[native code]",
+                  function: "stringify",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      ...overrides,
+    });
+
+  const observedSentryCpNotificationsFrames: SentryStackFrame[] = [
+    {
+      filename:
+        "node_modules/.pnpm/@sentry+nextjs@10.45.0_@opentelemetry+context-async-hooks@2.7.1_@opentelemetry+api@1.9._9f030f10fd79c9d796c635bb51c5a1cc/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+      function: "n",
+      in_app: true,
+      lineno: 94,
+      colno: 19,
+      context_line: "  routeResultCache.clear();",
+    },
+    {
+      filename: "[native code]",
+      function: "stringify",
+      in_app: false,
+    },
+  ];
+
+  const createObservedSentryCpNotificationsEvent = (
+    overrides: TestSentryClientEventOverrides = {},
+    frames: SentryStackFrame[] = observedSentryCpNotificationsFrames
+  ): TestSentryClientEvent => ({
+    transaction: "/notifications",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: __testing.sentryRouteParameterizationMessage,
+          mechanism: {
+            type: __testing.sentryRouteParameterizationMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+    contexts: {
+      browser: {
+        browser: "Mobile Safari UI/WKWebView",
+        name: "Mobile Safari UI/WKWebView",
+      },
+      device: {
+        family: "iPhone",
+        model: "iPhone",
+        brand: "Apple",
+      },
+      os: {
+        os: "iOS 18.7",
+        name: "iOS",
+        version: "18.7",
+      },
+    },
+    extra: {
+      arguments: [],
+    },
+    tags: {
+      browser: "Mobile Safari UI/WKWebView",
+      "browser.name": "Mobile Safari UI/WKWebView",
+      device: "iPhone",
+      "device.family": "iPhone",
+      environment: "production",
+      handled: "no",
+      interface_type: "exception",
+      level: "error",
+      mechanism: __testing.sentryRouteParameterizationMechanismType,
+      os: "iOS 18.7",
+      "os.name": "iOS",
+      release: "c7d1ee2cdf4f09d9e5c88dddf342fdbd145ad093",
+      transaction: "/notifications",
+      turbopack: "True",
+      url: "/notifications",
+    },
+    ...overrides,
+  });
+
   const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
@@ -759,6 +994,96 @@ describe("sentry-client-filters", () => {
         },
       },
     ],
+    ...overrides,
+  });
+
+  const observedFrameAntNetworkFrames: SentryStackFrame[] = [
+    {
+      filename: "app:///frame_ant/frame_ant.js",
+      abs_path: "app:///frame_ant/frame_ant.js",
+      function: "o",
+      in_app: true,
+    },
+    {
+      filename: "app:///frame_ant/frame_ant.js",
+      abs_path: "app:///frame_ant/frame_ant.js",
+      function: "window.fetch",
+      in_app: true,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/@sentry+core@10.45.0/node_modules/@sentry/core/src/instrument/fetch.ts",
+      function: "<anonymous>",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/sessions/VirtualPageLoadTimer.js",
+      function: "i.fetch",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/sessions/VirtualPageLoadTimer.js",
+      function: "<anonymous>",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/plugins/event-plugins/FetchPlugin.js",
+      function: "n.fetch",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/plugins/event-plugins/FetchPlugin.js",
+      function: "<anonymous>",
+      in_app: false,
+    },
+    {
+      filename: "<anonymous>",
+      function: "_t",
+      in_app: false,
+    },
+    {
+      filename: "<anonymous>",
+      function: "<anonymous>",
+      in_app: false,
+    },
+  ];
+
+  const createObservedFrameAntNetworkException = (
+    value: string = coinbaseMetricsNetworkMessage,
+    frames: SentryStackFrame[] = observedFrameAntNetworkFrames
+  ): NonNullable<TestSentryClientEvent["exception"]> => ({
+    values: [
+      {
+        type: "TypeError",
+        value,
+        mechanism: {
+          type: "auto.browser.global_handlers.onunhandledrejection",
+          handled: false,
+        },
+        stacktrace: {
+          frames,
+        },
+      },
+    ],
+  });
+
+  const createObservedFrameAntMetricsNetworkErrorEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    event_id: "frame-ant-metrics-network-error",
+    transaction: "/:user",
+    exception: createObservedFrameAntNetworkException(),
+    tags: {
+      environment: "production",
+      errorType: "network",
+      handled: "no",
+      transaction: "/:user",
+      url: "/example",
+    },
     ...overrides,
   });
 
@@ -1478,6 +1803,38 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the observed frame_ant metrics network error", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent()
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("preserves frame_ant network errors for other targets", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent({
+        exception: createObservedFrameAntNetworkException(
+          "Network request failed. Please check your connection and try again. (/messages)"
+        ),
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("preserves non-network metrics messages from frame_ant", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent({
+        exception: createObservedFrameAntNetworkException(
+          "Telemetry request rejected. (/metrics)"
+        ),
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
   it("does not filter first-party spans", () => {
     const result = shouldFilterThirdPartyTelemetrySpan(
       buildSpan({
@@ -1517,6 +1874,49 @@ describe("sentry-client-filters", () => {
             },
           ],
         },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("preserves the observed frame_ant metrics error with an app-owned frame", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent({
+        exception: createObservedFrameAntNetworkException(
+          coinbaseMetricsNetworkMessage,
+          [
+            ...observedFrameAntNetworkFrames,
+            {
+              filename: "services/api/common-api.ts",
+              abs_path: "services/api/common-api.ts",
+              function: "fetchUrl",
+              in_app: true,
+            },
+          ]
+        ),
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("preserves the same metrics message for a matching first-party failure", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createObservedFrameAntMetricsNetworkErrorEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            level: "error",
+            data: {
+              url: "https://api.6529.io/metrics",
+              status_code: 0,
+              "url.is_first_party": true,
+              "url.is_first_party_api": true,
+            },
+          },
+        ],
       })
     );
 
@@ -2957,6 +3357,61 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed iOS WKWebView wave route parameterization cyclic JSON errors without app context", () => {
+    // Arrange
+    const event = createObservedIosWkWebViewWaveRouteParameterizationEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the observed Sentry CP notifications event when the SDK frame is marked in-app", () => {
+    // Arrange
+    const event = createObservedSentryCpNotificationsEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("preserves the observed Sentry CP event when a real app-owned frame is present", () => {
+    // Arrange
+    const event = createObservedSentryCpNotificationsEvent({}, [
+      ...observedSentryCpNotificationsFrames,
+      {
+        filename: "services/api/common-api.ts",
+        abs_path: "services/api/common-api.ts",
+        function: "fetchUrl",
+        in_app: true,
+      },
+    ]);
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters the observed Sentry CP event when native stringify is marked in-app", () => {
+    // Arrange
+    const frames = observedSentryCpNotificationsFrames.map((frame) =>
+      frame.function === "stringify" ? { ...frame, in_app: true } : frame
+    );
+    const event = createObservedSentryCpNotificationsEvent({}, frames);
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Sentry route parameterization errors with the Sentry parameterization frame outside route bounds", () => {
     // Arrange
     const event = createObservedSentryRouteParameterizationEvent();
@@ -3229,7 +3684,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("does not filter WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
+  it("filters WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
     // Arrange
     const event =
       createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent({
@@ -3246,7 +3701,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
   it("does not filter MetaMaskMobile route parameterization errors without route evidence", () => {
@@ -3751,6 +4206,41 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed AppKit bootstrap websocket 1006 unhandled rejections before source-map symbolication", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Error: websocket error 1006:",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://dnclu2fna0b2b.cloudfront.net/_next/static/chunks/app/layout-123.js",
+                  function: "e",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createObservedAppKitBootstrapBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters Coinbase WalletLink websocket 1006 errors from serialized raw stacks", () => {
     // Arrange
     const event = createCoinbaseWalletLinkWebSocketEvent({
@@ -3913,6 +4403,37 @@ describe("sentry-client-filters", () => {
         ],
       },
       breadcrumbs: createAppKitCoinbaseBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter app-owned websocket 1006 errors with observed AppKit bootstrap breadcrumbs", () => {
+    // Arrange
+    const event = createCoinbaseWalletLinkWebSocketEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "websocket error 1006:",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "services/websocket/WebSocketProvider.tsx",
+                  abs_path:
+                    "webpack-internal:///(app-pages-browser)/./services/websocket/WebSocketProvider.tsx",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      breadcrumbs: createObservedAppKitBootstrapBreadcrumbs(),
     });
 
     // Act
@@ -4970,6 +5491,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters observed anonymous EvalError CSP unsafe-eval errors", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent();
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters observed Sentry E7 WebAssembly CSP unsafe-eval errors from injected static chunks", () => {
     // Arrange
     const event = createObservedSentryE7WasmCspUnsafeEvalEvent();
@@ -4995,6 +5527,46 @@ describe("sentry-client-filters", () => {
   it("filters observed extension messaging failures from injected script frames", () => {
     // Arrange
     const event = createBrowserExtensionMessagingConnectionEvent();
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the observed Sentry 6V content-script messaging failure", () => {
+    // Arrange
+    const event: TestSentryClientEvent = {
+      transaction: "/waves/:wave",
+      tags: {
+        browser: "Chrome 147.0.0",
+        environment: "production",
+      },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///content-scripts/content.js",
+                  function: "R",
+                  in_app: true,
+                  lineno: 1,
+                  colno: 14440,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
 
     // Act
     const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
@@ -5045,15 +5617,44 @@ describe("sentry-client-filters", () => {
             stacktrace: {
               frames: [
                 {
-                  filename: "app:///injectedScript.bundle.js",
-                  abs_path: "app:///injectedScript.bundle.js",
-                  function: "n",
+                  filename: "app:///content-scripts/content.js",
+                  function: "R",
+                  in_app: true,
                 },
                 {
                   filename:
                     "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
                   abs_path:
                     "webpack-internal:///(app-pages-browser)/./utils/browser-extension.ts",
+                  function: "sendBrowserExtensionMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unobserved content-script-like app paths", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///content-scripts/application.js",
                   function: "sendBrowserExtensionMessage",
                   in_app: true,
                 },
@@ -5627,6 +6228,131 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterInjectedWasmCspUnsafeEval(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter anonymous EvalError CSP unsafe-eval errors with app frames", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent({
+      exception: {
+        values: [
+          {
+            type: "EvalError",
+            value: anonymousUnsafeEvalCspMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "https://6529.io/_next/static/chunks/app/page-1234567890abcdef.js",
+                  abs_path:
+                    "https://6529.io/_next/static/chunks/app/page-1234567890abcdef.js",
+                  function: "runTemplate",
+                },
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "eval",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter anonymous EvalError CSP unsafe-eval errors with app source stacks", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent();
+    const error = new EvalError(anonymousUnsafeEvalCspMessage);
+    error.stack = [
+      `EvalError: ${anonymousUnsafeEvalCspMessage}`,
+      "    at runTemplate (webpack-internal:///(app-pages-browser)/./utils/eval-template.ts:10:1)",
+      "    at eval (<anonymous>)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter anonymous EvalError CSP errors without eval frames", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent({
+      exception: {
+        values: [
+          {
+            type: "EvalError",
+            value: anonymousUnsafeEvalCspMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "<anonymous>:234:30",
+                  abs_path: "<anonymous>:234:30",
+                  function: "predicate",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unrelated anonymous EvalError unsafe-eval errors", () => {
+    // Arrange
+    const event = createObservedAnonymousUnsafeEvalCspEvent({
+      exception: {
+        values: [
+          {
+            type: "EvalError",
+            value: "Refused to evaluate a string as JavaScript.",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "<anonymous>",
+                  abs_path: "<anonymous>",
+                  function: "eval",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
 
     // Assert
     expect(result).toBe(false);

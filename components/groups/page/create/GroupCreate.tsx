@@ -8,6 +8,7 @@ import GroupCreateName from "./GroupCreateName";
 import GroupCreateWrapper from "./GroupCreateWrapper";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -15,6 +16,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import GroupCreateIncludeMeAndPrivate from "./config/include-me-and-private/GroupCreateIncludeMeAndPrivate";
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { normalizeGroupNftOwnerships } from "@/helpers/groups/group-nft-ownership";
 
 export default function GroupCreate({
   edit,
@@ -73,22 +75,11 @@ export default function GroupCreate({
       !!originalGroup?.id && !!originalGroup?.group.excluded_identity_group_id,
   });
 
-  const [isFetching, setIsFetching] = useState(
-    loadingOriginalGroup ||
-      loadingOriginalGroupWallets ||
-      loadingOriginalGroupExcludedWallets
-  );
-  useEffect(() => {
-    setIsFetching(
-      loadingOriginalGroup ||
-        loadingOriginalGroupWallets ||
-        loadingOriginalGroupExcludedWallets
-    );
-  }, [
+  const isFetching = [
     loadingOriginalGroup,
     loadingOriginalGroupWallets,
     loadingOriginalGroupExcludedWallets,
-  ]);
+  ].some(Boolean);
 
   const [groupConfig, setGroupConfig] = useState<ApiCreateGroup>({
     name: "",
@@ -116,6 +107,8 @@ export default function GroupCreate({
       identity_addresses: null,
       excluded_identity_addresses: null,
       is_beneficiary_of_grant_id: null,
+      is_beneficiary_of_grant_match_mode:
+        ApiGroupBeneficiaryGrantMatchMode.AnyToken,
     },
     is_private: false,
   });
@@ -153,11 +146,14 @@ export default function GroupCreate({
           min: originalGroup.group.level?.min,
           max: originalGroup.group.level?.max,
         },
-        owns_nfts: originalGroup.group.owns_nfts,
+        owns_nfts: normalizeGroupNftOwnerships(originalGroup.group.owns_nfts),
         identity_addresses: originalGroupWallets ?? [],
         excluded_identity_addresses: originalGroupExcludedWallets ?? [],
         is_beneficiary_of_grant_id:
           originalGroup.group.is_beneficiary_of_grant_id ?? null,
+        is_beneficiary_of_grant_match_mode:
+          originalGroup.group.is_beneficiary_of_grant_match_mode ??
+          ApiGroupBeneficiaryGrantMatchMode.AnyToken,
       },
       is_private: originalGroup.is_private ?? false,
     });
@@ -248,6 +244,9 @@ export default function GroupCreate({
               excludeWallets={groupConfig.group.excluded_identity_addresses}
               nfts={groupConfig.group.owns_nfts}
               beneficiaryGrantId={groupConfig.group.is_beneficiary_of_grant_id}
+              beneficiaryGrantMatchMode={
+                groupConfig.group.is_beneficiary_of_grant_match_mode
+              }
               iAmIncluded={iAmIncluded}
               setLevel={(level) =>
                 setGroupConfig((prev) => ({
@@ -303,6 +302,22 @@ export default function GroupCreate({
                   group: {
                     ...prev.group,
                     is_beneficiary_of_grant_id: grantId ?? null,
+                    ...(grantId
+                      ? {}
+                      : {
+                          is_beneficiary_of_grant_match_mode:
+                            ApiGroupBeneficiaryGrantMatchMode.AnyToken,
+                        }),
+                  },
+                }))
+              }
+              setBeneficiaryGrantMatchMode={(matchMode) =>
+                setGroupConfig((prev) => ({
+                  ...prev,
+                  group: {
+                    ...prev.group,
+                    is_beneficiary_of_grant_match_mode:
+                      matchMode ?? ApiGroupBeneficiaryGrantMatchMode.AnyToken,
                   },
                 }))
               }

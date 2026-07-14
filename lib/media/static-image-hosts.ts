@@ -1,0 +1,15 @@
+export const STATIC_ALLOWED_IMAGE_HOSTNAMES = [
+  "6529.io",
+  "seize.io",
+  "staging.6529.io",
+  "media.generator.seize.io",
+  "d3lqz0a4bldqgf.cloudfront.net",
+  "img.youtube.com",
+  "i.seadn.io",
+  "i2.seadn.io",
+  "i2c.seadn.io",
+  "i.ytimg.com",
+  "res.cloudinary.com",
+  "ipfs.6529.io",
+  "ipfs.io",
+] as const;
