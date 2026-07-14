@@ -203,13 +203,12 @@ describe("MemesWaveWinnersDrop", () => {
       />
     );
 
-    await user.click(screen.getByRole("link", { name: "Meme #521" }));
+    await user.click(screen.getByRole("link", { name: "The Memes #521" }));
 
     expect(onDropClick).not.toHaveBeenCalled();
-    expect(screen.getByRole("link", { name: "Meme #521" })).toHaveAttribute(
-      "href",
-      "/the-memes/521"
-    );
+    expect(
+      screen.getByRole("link", { name: "The Memes #521" })
+    ).toHaveAttribute("href", "/the-memes/521");
   });
 
   it("does not infer a Meme card link when the mapping is absent", () => {
@@ -222,7 +221,7 @@ describe("MemesWaveWinnersDrop", () => {
     );
 
     expect(
-      screen.queryByRole("link", { name: /Meme #/ })
+      screen.queryByRole("link", { name: /The Memes #/ })
     ).not.toBeInTheDocument();
   });
 

@@ -4774,7 +4774,8 @@
         "Wave Winners tab behavior is documented under leaderboard features.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
         "Single-decision and multi-decision waves have different winner display behavior.",
-        "Mapped winners in The Memes Main Stage show a Meme #N link in the Winners tab and on the open winning drop; the frontend never guesses a Meme ID when the backend mapping is absent."
+        "Mapped winners in The Memes Main Stage show a The Memes #N link in the Winners tab and beside the Minted on The Memes outcome on the dedicated drop view; the frontend never guesses a Meme ID when the backend mapping is absent.",
+        "Mapped Meme card pages show a Main Stage submission section under Additional Details, after Arweave links and before Properties; older unmapped cards omit the section."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

@@ -152,7 +152,7 @@ test("links a mapped Main Stage winner to its Meme card", () => {
     />
   );
 
-  expect(screen.getByRole("link", { name: "Meme #521" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "The Memes #521" })).toHaveAttribute(
     "href",
     "/the-memes/521"
   );
@@ -169,7 +169,7 @@ test("does not infer a Meme card link when the mapping is absent", () => {
   );
 
   expect(
-    screen.queryByRole("link", { name: /Meme #/ })
+    screen.queryByRole("link", { name: /The Memes #/ })
   ).not.toBeInTheDocument();
 });
 
