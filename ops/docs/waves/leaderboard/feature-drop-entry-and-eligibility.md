@@ -32,6 +32,8 @@ Entry behavior differs by wave type:
 - Memes waves:
   - Desktop (non-compact header mode): use `Submit Work to The Memes` in the
     meme tabs header.
+  - Native app wave header: use the icon-only submit action; when it becomes a
+    lock, select it to see the restriction reason.
   - Mobile leaderboard: use header `Drop` when logged in and eligible.
 
 ## User Journey
@@ -46,7 +48,7 @@ Entry behavior differs by wave type:
 3. The app renders the wave-specific entry control.
 4. If blocked, the UI uses one of these states:
    - hidden controls
-   - disabled button states
+   - restriction controls that reveal why submission is unavailable
    - empty-state restriction message
 
 ## Common Scenarios
@@ -65,9 +67,11 @@ Entry behavior differs by wave type:
   card can show:
   - `Curation wave submissions require at least Level 10.`
   - `Learn more about Network Levels` link
-- Memes entry on desktop can show disabled submit states (for example
-  `Not Eligible to Submit`, `Submission Limit Reached`, or closed/open timing
-  states).
+- Memes entry on desktop can show submit restriction states (for example
+  `How to Submit`, `Submission Limit Reached`, or closed/open timing states).
+  Select the restriction control to open the full explanation; the same
+  explanation is available from keyboard focus and pointer hover. `How to
+  Submit` also shows MemesNominee REP progress and a nomination action.
 - Memes desktop submit labels are responsive:
   - compact desktop widths can show short labels (for example `Submit Work`,
     `Closed`, `Opens {countdown}`, `Not Eligible`, `Limit Reached`)
@@ -89,16 +93,19 @@ Entry behavior differs by wave type:
 - In non-empty leaderboards, blocked users may see no restriction text; the
   entry controls can simply be absent.
 - Memes entry surfaces differ by viewport (`Submit Work to The Memes` on
-  desktop tabs header vs leaderboard `Drop` on mobile).
+  desktop tabs, an icon-only action in the native app header, and leaderboard
+  `Drop` on mobile).
 - Memes desktop urgency/remaining badges are visible only on extra-wide desktop;
-  compact desktop still keeps submit-state tooltip guidance.
+  compact desktop and app headers keep submit-state guidance behind the
+  restriction icon or short label.
 - Memes leaderboard empty state does not show a submit button; submission starts
   from the header/tabs controls.
 
 ## Failure and Recovery
 
-- If entry is blocked, use the restriction message to recover (log in, disable
-  proxy, wait for submission window, or free submission capacity).
+- If entry is blocked, select or focus the restriction control to read the
+  reason, then recover by logging in, disabling proxy mode, waiting for the
+  submission window, or freeing submission capacity.
 - If curation `Drop Artwork` modal closes accidentally, reopen from header
   `Drop Art` or empty-state `Drop`.
 - If a create panel/modal opens but submit fails, retry from the same surface.

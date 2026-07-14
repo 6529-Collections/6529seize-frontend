@@ -231,6 +231,7 @@ export default function MainStageNominationPopover({
       delayHide={0}
       offset={12}
       openOnClick={true}
+      triggerDisplay="inline-flex"
     >
       {children}
     </HoverCard>

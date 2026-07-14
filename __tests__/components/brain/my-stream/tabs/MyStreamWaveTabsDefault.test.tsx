@@ -664,7 +664,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(screen.queryByText("Create proposal")).not.toBeInTheDocument();
   });
 
-  it("shows a disabled Submit drop reason", () => {
+  it("keeps a restricted Submit drop reason keyboard-focusable", () => {
     const restrictionMessage = "Please log in to make submissions";
 
     useContentTab.mockReturnValue({
@@ -689,12 +689,10 @@ describe("MyStreamWaveTabsDefault", () => {
 
     const button = screen.getByRole("button", { name: "Submit drop" });
 
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute("title", restrictionMessage);
-    expect(button.parentElement).toHaveAttribute(
-      "data-tooltip-content",
-      restrictionMessage
-    );
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute("aria-haspopup", "dialog");
+    expect(button).toHaveAccessibleDescription(restrictionMessage);
+    expect(button).toHaveTextContent(restrictionMessage);
   });
 
   it("copies in mobile right action cluster when share is unavailable", () => {

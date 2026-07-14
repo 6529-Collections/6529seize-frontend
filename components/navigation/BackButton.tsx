@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Spinner from "../utils/Spinner";
@@ -117,7 +117,10 @@ export default function BackButton() {
       {loading ? (
         <Spinner />
       ) : (
-        <ArrowLeftIcon className="tw-size-6 tw-flex-shrink-0 tw-text-iron-50" />
+        <ChevronLeftIcon
+          strokeWidth={2}
+          className="tw-size-6 tw-flex-shrink-0 tw-text-iron-50"
+        />
       )}
     </button>
   );
