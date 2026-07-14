@@ -135,15 +135,28 @@ const getMentionedUsersFromEditorState = (
   candidates: ApiDropMentionedUser[]
 ): ApiDropMentionedUser[] =>
   editorState.read(() => {
-    const handlesInEditor = new Set(
-      $getRoot()
-        .getAllTextNodes()
-        .filter($isMentionNode)
-        .map((node) => node.getTextContent().replace(/^@/, "").toLowerCase())
-    );
-    return candidates.filter((mention) =>
-      handlesInEditor.has(mention.handle_in_content.toLowerCase())
-    );
+    const handlesByProfileId = new Map<string, string>();
+    const legacyHandles = new Set<string>();
+    for (const node of $getRoot().getAllTextNodes().filter($isMentionNode)) {
+      const handle = node.getTextContent().replace(/^@/, "");
+      const profileId = node.getMentionedProfileId();
+      if (profileId) {
+        handlesByProfileId.set(profileId, handle);
+      } else {
+        legacyHandles.add(handle.toLowerCase());
+      }
+    }
+    return candidates.flatMap((mention) => {
+      const currentHandle = handlesByProfileId.get(
+        mention.mentioned_profile_id
+      );
+      if (currentHandle) {
+        return [{ ...mention, handle_in_content: currentHandle }];
+      }
+      return legacyHandles.has(mention.handle_in_content.toLowerCase())
+        ? [mention]
+        : [];
+    });
   });
 
 const convertCodeNodesToFences = (root: RootNode) => {

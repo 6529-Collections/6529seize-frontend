@@ -324,7 +324,11 @@ describe("EditDropLexical", () => {
     const onCancel = jest.fn();
     exportDropMarkdownMock.mockReturnValue("updated markdown");
     rootMock.getAllTextNodes.mockReturnValue([
-      { type: "mention", getTextContent: () => "@user1" },
+      {
+        type: "mention",
+        getTextContent: () => "@user1",
+        getMentionedProfileId: () => "profile-1",
+      },
     ]);
 
     render(
@@ -352,6 +356,46 @@ describe("EditDropLexical", () => {
       []
     );
     expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("keeps mention metadata by profile id when its rendered handle changes", async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    exportDropMarkdownMock.mockReturnValue("updated markdown");
+    rootMock.getAllTextNodes.mockReturnValue([
+      {
+        type: "mention",
+        getTextContent: () => "@renamed-user",
+        getMentionedProfileId: () => "profile-1",
+      },
+    ]);
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        initialMentions={[
+          {
+            mentioned_profile_id: "profile-1",
+            handle_in_content: "old-user",
+          },
+        ]}
+        onSave={onSave}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /save/i }));
+
+    expect(onSave).toHaveBeenCalledWith(
+      "updated markdown",
+      [
+        {
+          mentioned_profile_id: "profile-1",
+          handle_in_content: "renamed-user",
+        },
+      ],
+      [],
+      []
+    );
   });
 
   it("removes stale mention metadata when its mention node was deleted", async () => {

@@ -233,7 +233,7 @@ const createAliasMemberNodes = ({
     const normalizedHandle = member.handle.toLowerCase();
     if (existingHandles.has(normalizedHandle)) continue;
     if (nodes.length > 0) nodes.push($createTextNode(" "));
-    nodes.push($createMentionNode(`@${member.handle}`));
+    nodes.push($createMentionNode(`@${member.handle}`, member.profile_id));
     existingHandles.add(normalizedHandle);
     onSelect(toMentionedUser(member));
   }
@@ -551,7 +551,10 @@ const NewMentionsPlugin = forwardRef<
           return;
         }
 
-        const mentionNode = $createMentionNode(`@${selectedOption.handle}`);
+        const mentionNode = $createMentionNode(
+          `@${selectedOption.handle}`,
+          selectedOption.id
+        );
         if (nodeToReplace) {
           nodeToReplace.replace(mentionNode);
         }

@@ -87,7 +87,10 @@ describe("MentionsPlugin", () => {
     act(() => {
       capturedProps.onSelectOption(option, null, close);
     });
-    expect($createMentionNode).toHaveBeenCalledWith(`@${option.handle}`);
+    expect($createMentionNode).toHaveBeenCalledWith(
+      `@${option.handle}`,
+      option.id
+    );
     expect(onSelect).toHaveBeenCalledWith({
       mentioned_profile_id: option.id,
       handle_in_content: option.handle,

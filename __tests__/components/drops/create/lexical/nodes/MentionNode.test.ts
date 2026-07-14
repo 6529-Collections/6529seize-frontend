@@ -29,17 +29,19 @@ const applyMock = $applyNodeReplacement as jest.Mock;
 
 describe('MentionNode', () => {
   it('creates and exports correctly', () => {
-    const node = $createMentionNode('@bob');
+    const node = $createMentionNode('@bob', 'profile-bob');
     expect(applyMock).toHaveBeenCalledWith(node);
     expect(node).toBeInstanceOf(MentionNode);
     expect($isMentionNode(node)).toBe(true);
 
     const json = node.exportJSON();
     expect(json.mentionName).toBe('@bob');
+    expect(json.mentionedProfileId).toBe('profile-bob');
     expect(json.type).toBe('mention');
 
     const { element } = node.exportDOM();
     expect(element.getAttribute('data-lexical-mention')).toBe('true');
+    expect(element.getAttribute('data-mentioned-profile-id')).toBe('profile-bob');
     expect(element.textContent).toBe('@bob');
 
     const mapping = MentionNode.importDOM()!;
