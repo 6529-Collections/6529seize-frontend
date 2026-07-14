@@ -291,7 +291,7 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
                   {item.label}
                 </span>
                 {showUnreadBadge && (
-                  <span className="tw-ml-0.5 tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-px-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-white">
+                  <span className="tw-ml-0.5 tw-flex tw-h-[18px] tw-min-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1.5 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-white tw-shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_4px_10px_rgba(0,0,0,0.3)]">
                     {item.unreadDropsCount > 99 ? "99+" : item.unreadDropsCount}
                   </span>
                 )}
