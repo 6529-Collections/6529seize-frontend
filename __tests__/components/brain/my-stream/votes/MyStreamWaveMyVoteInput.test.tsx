@@ -18,7 +18,7 @@ jest.mock("@tanstack/react-query", () => ({
 const useMutationMock = useMutation as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
 const mutateAsync = jest.fn();
-const invalidateQueries = jest.fn();
+const invalidateQueries = jest.fn().mockResolvedValue(undefined);
 const setQueriesData = jest.fn();
 
 const auth = {

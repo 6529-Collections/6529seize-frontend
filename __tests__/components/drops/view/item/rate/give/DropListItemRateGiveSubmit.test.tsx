@@ -51,7 +51,7 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 const mutateAsync = jest.fn();
 const useMutationMock = useMutation as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
-const invalidateQueries = jest.fn();
+const invalidateQueries = jest.fn().mockResolvedValue(undefined);
 const setQueriesData = jest.fn();
 (useDropInteractionRules as jest.Mock).mockReturnValue({
   voteState: DropVoteState.CAN_VOTE,

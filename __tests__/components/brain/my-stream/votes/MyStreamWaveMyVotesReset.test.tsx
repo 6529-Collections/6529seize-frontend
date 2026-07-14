@@ -34,7 +34,7 @@ jest.mock("@/services/api/common-api", () => ({
 
 const useMutationMock = useMutation as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
-const invalidateQueries = jest.fn();
+const invalidateQueries = jest.fn().mockResolvedValue(undefined);
 const setQueriesData = jest.fn();
 
 const auth = { setToast: jest.fn(), connectedProfile: { handle: "me" } } as any;
