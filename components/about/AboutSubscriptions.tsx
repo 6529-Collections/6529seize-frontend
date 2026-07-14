@@ -1,312 +1,219 @@
-import Link from "next/link";
+"use client";
 
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
-  AboutCol as Col,
-  AboutContainer as Container,
-  AboutRow as Row,
-} from "./AboutLayout";
+  faArrowRight,
+  faChartLine,
+  faEarthAmericas,
+  faGasPump,
+  faSliders,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+
+import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
+import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
+import {
+  SUBSCRIPTIONS_PANEL_CLASS,
+  SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
+  SUBSCRIPTIONS_SECTION_HEADING_CLASS,
+} from "./aboutSubscriptionsStyles";
+
+type SubscriptionMessageKey = Extract<
+  MessageKey,
+  `about.subscriptions.${string}`
+>;
+
+interface OverviewBenefit {
+  readonly icon: IconDefinition;
+  readonly iconClassName: string;
+  readonly iconWrapperClassName: string;
+  readonly messageKey: SubscriptionMessageKey;
+}
+
+const OVERVIEW_BENEFITS: readonly OverviewBenefit[] = [
+  {
+    icon: faGasPump,
+    iconClassName: "tw-text-[#00f0ff]",
+    iconWrapperClassName: "tw-bg-[#00f0ff]/10",
+    messageKey: "about.subscriptions.overview.gasSavings",
+  },
+  {
+    icon: faEarthAmericas,
+    iconClassName: "tw-text-[#8f5cff]",
+    iconWrapperClassName: "tw-bg-[#7000ff]/20",
+    messageKey: "about.subscriptions.overview.awayFromComputer",
+  },
+  {
+    icon: faSliders,
+    iconClassName: "tw-text-iron-300",
+    iconWrapperClassName: "tw-bg-iron-900",
+    messageKey: "about.subscriptions.overview.setAndForget",
+  },
+] as const;
+
+const m = (
+  locale: SupportedLocale,
+  key: SubscriptionMessageKey,
+  params: Parameters<typeof t>[2] = {}
+) => t(locale, key, params);
 
 export default function AboutSubscriptions() {
+  const locale = useBrowserLocale();
+
   return (
-    <Container className="!tw-px-0">
-      <Row>
-        <Col>
-          <h1>Subscription Minting</h1>
-          <div className="tw-mt-3 tw-flex tw-justify-start empty:tw-hidden">
-            <AboutSubscriptionsProfileButton />
+    <article
+      className={`tw-w-full tw-pb-12 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
+    >
+      <SubscriptionHeader locale={locale} />
+      <Overview locale={locale} />
+      <AboutSubscriptionsReference locale={locale} />
+    </article>
+  );
+}
+
+function SubscriptionHeader({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <header className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
+      <div className="tw-max-w-4xl">
+        <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+          {m(locale, "about.subscriptions.hero.title")}
+        </h1>
+        <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-3">
+          <div className="tw-flex tw-justify-start empty:tw-hidden">
+            <AboutSubscriptionsProfileButton variant="white" />
           </div>
-        </Col>
-      </Row>
-      <Row className="tw-pt-2">
-        <Col>
-          <p className="tw-text-lg tw-font-bold">Overview</p>
-          <ul>
-            <li className="tw-mt-2">
-              Subscription Minting is another way to mint Meme Cards
-              <ul>
-                <li className="tw-mt-1">
-                  With up to 98% significant gas savings and/or
-                </li>
-                <li className="tw-mt-1">
-                  While being away from your computer at the time of mint and/or
-                </li>
-                <li className="tw-mt-1">
-                  On a &quot;set it and forget it&quot; basis for whole SZNs
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Subscriptions are not a mintpass:
-              <ul>
-                <li className="tw-mt-1">
-                  You can decide to mint or not mint any specific Meme Card
-                </li>
-                <li className="tw-mt-1">
-                  Subscriptions respect the allowlist and phase process: A
-                  subscription only allows you to mint within the Phase you
-                  would otherwise be eligible for
-                </li>
-                <li className="tw-mt-1">
-                  It is better to think about subscriptions as &quot;remote
-                  minting&quot;
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Subscriptions are not a replacement for the regular minting
-              process:
-              <ul>
-                <li className="tw-mt-1">
-                  You can still mint in the normal manner if you don&apos;t
-                  subscribe
-                </li>
-                <li className="tw-mt-1">
-                  Subscriptions are an alternative method of minting for those
-                  who choose to use them
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              You can monitor aggregate projected and redeemed subscription
-              counts in the{" "}
-              <Link
-                href="/tools/subscriptions-report"
-                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-transition-colors"
+          <Link
+            className="tw-group/report -tw-ml-1 tw-inline-flex tw-max-w-full tw-items-start tw-gap-2 tw-rounded-md tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-items-center lg:tw-whitespace-nowrap"
+            href="/tools/subscriptions-report"
+          >
+            <FontAwesomeIcon
+              aria-hidden="true"
+              className="tw-mt-1 tw-shrink-0 tw-text-iron-600 tw-transition-colors group-hover/report:tw-text-[#00f0ff] sm:tw-mt-0"
+              icon={faChartLine}
+            />
+            <span>
+              {m(locale, "about.subscriptions.reference.reportLead")}{" "}
+              <span className="tw-font-medium tw-text-iron-200 tw-transition-colors group-hover/report:tw-text-iron-50">
+                {m(locale, "about.subscriptions.reference.reportLink")}
+              </span>
+            </span>
+            <FontAwesomeIcon
+              aria-hidden="true"
+              className="tw-mt-1 tw-hidden tw-shrink-0 tw-text-[10px] tw-text-iron-600 tw-transition-all group-hover/report:tw-translate-x-1 group-hover/report:tw-text-iron-200 motion-reduce:tw-transform-none sm:tw-mt-0 sm:tw-block"
+              icon={faArrowRight}
+            />
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function Overview({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <section
+      aria-labelledby="subscription-overview-heading"
+      className="tw-px-1 tw-pb-8 sm:tw-px-2 sm:tw-pb-12"
+    >
+      <div className="tw-max-w-3xl">
+        <h2
+          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          id="subscription-overview-heading"
+        >
+          {m(locale, "about.subscriptions.overview.title")}
+        </h2>
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+          {m(locale, "about.subscriptions.overview.intro")}
+        </p>
+      </div>
+
+      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 md:tw-grid-cols-3 md:tw-gap-6">
+        {OVERVIEW_BENEFITS.map((benefit) => {
+          return (
+            <li
+              className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-flex tw-flex-row tw-items-center tw-gap-4 tw-p-4 md:tw-flex-col md:tw-items-start md:tw-gap-0 md:tw-p-6`}
+              key={benefit.messageKey}
+            >
+              <span
+                className={`tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full md:tw-size-12 ${benefit.iconWrapperClassName}`}
               >
-                Subscriptions Report
-              </Link>
+                <FontAwesomeIcon
+                  aria-hidden="true"
+                  className={`tw-text-xl ${benefit.iconClassName}`}
+                  icon={benefit.icon}
+                />
+              </span>
+              <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-mt-5">
+                {m(locale, benefit.messageKey)}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-mt-6 lg:tw-grid-cols-2 lg:tw-gap-6">
+        <OverviewRule
+          title={m(locale, "about.subscriptions.overview.notMintpass.title")}
+        >
+          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+            <li>
+              {m(locale, "about.subscriptions.overview.notMintpass.choice")}
+            </li>
+            <li>
+              {m(
+                locale,
+                "about.subscriptions.overview.notMintpass.eligibility"
+              )}
+            </li>
+            <li>
+              {m(
+                locale,
+                "about.subscriptions.overview.notMintpass.remoteMinting"
+              )}
             </li>
           </ul>
-        </Col>
-      </Row>
-      <Row className="tw-pt-3">
-        <Col>
-          <p className="tw-text-lg tw-font-bold">How it Works</p>
-          <ul>
-            <li className="tw-mt-2">
-              Fill Balance
-              <ul>
-                <li className="tw-mt-1">
-                  You can top up your minting balance at any time by sending ETH
-                  to: seize.6529.eth from any wallet of your consolidation
-                </li>
-                <li className="tw-mt-1">
-                  Any amount sent to seize.6529.eth is{" "}
-                  <b>completely non-refundable</b>: you can choose which cards
-                  to mint but we do not have the capacity to send ETH back
-                </li>
-                <li className="tw-mt-1">
-                  The calculator on your profile will calculate the correct
-                  amount to send for any number of cards, with options for the
-                  remainder of the SZN and remainder of the year
-                </li>
-                <li className="tw-mt-1">
-                  The balance will appear on the site profile associated with
-                  the sending ETH address
-                </li>
-                <li className="tw-mt-1">
-                  Top ups must be received by 00:00 UTC (eg, 19:00 EST) the day
-                  before the Meme Card mint to be eligible for the mint;
-                  otherwise they will roll over to the next mint
-                </li>
-              </ul>
+        </OverviewRule>
+
+        <OverviewRule
+          title={m(locale, "about.subscriptions.overview.regularMinting.title")}
+        >
+          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+            <li>
+              {m(locale, "about.subscriptions.overview.regularMinting.normal")}
             </li>
-            <li className="tw-mt-2">
-              Minting
-              <ul>
-                <li className="tw-mt-1">
-                  Automatic Mode: By default, you will auto-mint (get airdrop
-                  for) as many Meme Cards as you are eligible for, until your
-                  balance is used
-                </li>
-                <li className="tw-mt-1">
-                  You can choose to opt-out of any Meme Card mint:
-                  <ul>
-                    <li className="tw-mt-1">
-                      You must turn off minting for that specific drop before
-                      00:00 UTC (eg, 19:00 EST) the day before the mint
-                    </li>
-                    <li className="tw-mt-1">
-                      The card reveal will move forward one day so that you can
-                      see the card before making a decision to mint it or not
-                    </li>
-                    <li className="tw-mt-1">
-                      This means that you can opt out on Sunday (for
-                      Monday&apos;s card), Tuesday (for Wednesday&apos;s card)
-                      and Thursday (for Friday&apos;s card)
-                    </li>
-                  </ul>
-                </li>
-                <li className="tw-mt-1">
-                  You can choose to move your whole profile to
-                  &quot;manual&quot; as opposed to &quot;automatic&quot;: in
-                  this case, you will not mint any cards unless you manully
-                  opt-in to the specific cards you want to selectively mint
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Delegation
-              <ul>
-                <li className="tw-mt-1">
-                  Your card will be airdropped according on the following
-                  criteria:
-                </li>
-                <li className="tw-mt-1">
-                  If no delegation, to the primary address of a consolidation
-                </li>
-                <li className="tw-mt-1">
-                  If no consolidation, to the address you send the ETH from
-                </li>
-                <li className="tw-mt-1">
-                  If there is a delegation, in this order:
-                  <ul>
-                    <li className="tw-mt-1">
-                      The delegated address for The Memes for use case
-                      &quot;Airdrop&quot;
-                    </li>
-                    <li className="tw-mt-1">
-                      The delegated address for The Memes for use case
-                      &quot;All&quot;
-                    </li>
-                    <li className="tw-mt-1">
-                      The delegated address for Any Collection for use case
-                      &quot;Airdrop&quot;
-                    </li>
-                    <li className="tw-mt-1">
-                      The delegated address for Any Collection for use case
-                      &quot;All&quot;
-                    </li>
-                  </ul>
-                </li>
-                <li className="tw-mt-1">
-                  If you have the suggested TAP configuration with a
-                  vault/warm/hot consolidation with your vault delegating ALL to
-                  warm or hot, and you would like your airdrops directly to your
-                  vault, we recommend:
-                  <ul>
-                    <li className="tw-mt-1">
-                      sending ETH to seize.6529.eth from warm or hot address
-                    </li>
-                    <li className="tw-mt-1">
-                      adding delegation use-case &quot;Airdrop&quot; for the
-                      &quot;The Memes&quot; from that address to your vault
-                    </li>
-                  </ul>
-                </li>
-                <li className="tw-mt-1">
-                  If you have a single address (not consolidated) that has
-                  delegated &quot;All&quot; to a minting address and you want to
-                  send ETH from the original address and have the airdrop
-                  received by that same address, then you should change your
-                  delegation to &quot;Minting&quot; otherwise the airdrop will
-                  go to your minting address
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              Allowlists and Phases
-              <ul>
-                <li className="tw-mt-1">
-                  Subscription Minting respects the same Allowlist and Phases as
-                  regular minting
-                </li>
-                <li className="tw-mt-1">
-                  If you are in Phase 0, subscription minting will automatically
-                  airdrop you the card at the beginning of Phase 0: since Phase
-                  0 is underallocated, you are guaranteed a mint
-                </li>
-                <li className="tw-mt-1">
-                  If you are eligible for Phase 1 or Phase 2, you will be
-                  airdropped the card at the beginning of Phase 1 or Phase 2
-                  <ul>
-                    <li className="tw-mt-1">
-                      In the event that no cards are available to mint in that
-                      phase, you will not be airdropped the card and your
-                      balance will remain available
-                    </li>
-                    <li className="tw-mt-1">
-                      In the event that at the beginning of a Phase, there are
-                      more subscription mints than available cards, the cards
-                      will be airdropped in order of when the subscription
-                      payment was received
-                    </li>
-                  </ul>
-                </li>
-                <li className="tw-mt-1">
-                  As with regular minting methods, you are only guaranteed a
-                  mint in Phase 0
-                </li>
-                <li className="tw-mt-1">
-                  For popular mints, your opportunity will be determined by your
-                  phase, how many other subscription mints are in place for that
-                  mint, and when you subscribed relative to other subscribers
-                </li>
-              </ul>
+            <li>
+              {m(
+                locale,
+                "about.subscriptions.overview.regularMinting.alternative"
+              )}
             </li>
           </ul>
-        </Col>
-      </Row>
-      <Row className="tw-pt-3">
-        <Col>
-          <p className="tw-text-lg tw-font-bold">Gas Savings</p>
-          <ul>
-            <li className="tw-mt-2">
-              Meme Cards are relatively inexpensive (0.06529 ETH) so in periods
-              of high Ethereum gas, minting costs can become a substantial % of
-              the card&apos;s cost
-              <ul>
-                <li className="tw-mt-1">
-                  At gwei of 20, they make up 3.4% of the card&apos;s cost
-                </li>
-                <li className="tw-mt-1">
-                  At gwei of 200, they make up 33.7% of the card&apos;s cost
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              ETH transfers are the lowest cost transaction on the Ethereum
-              network
-              <ul>
-                <li className="tw-mt-1">
-                  Someone who subscription-mints 1 card at a time will save
-                  approximately 80% in gas costs
-                </li>
-                <li className="tw-mt-1">
-                  Someone who subscription-mints 10 cards at a time (with one
-                  ETH transfer) will save approximately 98% in gas costs
-                </li>
-              </ul>
-            </li>
-            <li className="tw-mt-2">
-              The Memes will absorb the gas cost of the airdrop internally, so
-              it will not be charged to the collector
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      <Row className="tw-pt-3">
-        <Col>
-          <p className="tw-text-lg tw-font-bold">Remote Minting</p>
-          <ul>
-            <li className="tw-mt-2">
-              Many collectors have busy schedules and may not be able to be
-              available three times per week at the time of the mint, due to
-              personal or professional commitments
-            </li>
-            <li className="tw-mt-2">
-              Subscription minting allows them to separate the decision of if
-              they should mint a series of Meme Cards or a specific Meme Card
-              from the specific time of the mint
-            </li>
-            <li className="tw-mt-2">
-              This is a benefit to all collectors, but especially to those who
-              live in time zones that do not overlap well with the minting time
-            </li>
-          </ul>
-        </Col>
-      </Row>
-    </Container>
+        </OverviewRule>
+      </div>
+    </section>
+  );
+}
+
+function OverviewRule({
+  children,
+  title,
+}: {
+  readonly children: ReactNode;
+  readonly title: string;
+}) {
+  return (
+    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-6`}>
+      <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
+        {title}
+      </h3>
+      <div className="tw-mt-3">{children}</div>
+    </div>
   );
 }

@@ -189,7 +189,7 @@ async function firstVisible(locator: Locator) {
 
 async function openHeaderSearch(page: Page) {
   const searchButton = await firstVisible(
-    page.getByRole("button", { exact: true, name: "Search" })
+    page.getByRole("button", { name: /^Search(?: 6529)?$/ })
   );
   await searchButton.click();
   const searchInput = page.locator("#header-search-input");
@@ -365,7 +365,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
 
     await searchInput.fill(GLOBAL_SEARCH_QUERY);
     const waveScoreResult = page
-      .getByRole("link", { name: GLOBAL_SEARCH_RESULT })
+      .getByRole("option", { name: GLOBAL_SEARCH_RESULT })
       .first();
     await expect(waveScoreResult).toBeVisible({
       timeout: NAVIGATION_TIMEOUT_MS,
@@ -380,7 +380,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(reopenedInput).toBeVisible();
     await reopenedInput.fill(GLOBAL_SEARCH_QUERY);
     await page
-      .getByRole("link", { name: GLOBAL_SEARCH_RESULT })
+      .getByRole("option", { name: GLOBAL_SEARCH_RESULT })
       .first()
       .click();
 

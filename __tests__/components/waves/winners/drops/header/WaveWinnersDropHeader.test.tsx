@@ -2,6 +2,8 @@ import { render, fireEvent } from "@testing-library/react";
 import React from "react";
 import { WaveWinnersDropHeader } from "@/components/waves/winners/drops/header/WaveWinnersDropHeader";
 
+const mockDropAuthorBadges = jest.fn();
+
 jest.mock(
   "@/components/waves/winners/drops/header/WaveWinnersDropHeaderTotalVotes",
   () => () => <div data-testid="votes" />
@@ -29,7 +31,10 @@ jest.mock("@/components/waves/drops/time/WaveDropTime", () => () => (
   <div data-testid="time" />
 ));
 jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
-  DropAuthorBadges: () => <div data-testid="author-badges" />,
+  DropAuthorBadges: (props: any) => {
+    mockDropAuthorBadges(props);
+    return <div data-testid="author-badges" />;
+  },
 }));
 
 const winner = {
@@ -37,6 +42,7 @@ const winner = {
   drop: {
     id: "drop-1",
     author: { id: "author-1" },
+    wave: { id: "wave-1", name: "Wave One" },
     created_at: 1,
     winning_context: {},
   },
@@ -47,6 +53,12 @@ describe("WaveWinnersDropHeader", () => {
     const { getByTestId } = render(<WaveWinnersDropHeader winner={winner} />);
     expect(getByTestId("author")).toBeInTheDocument();
     expect(getByTestId("author-badges")).toBeInTheDocument();
+    expect(mockDropAuthorBadges).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        profile: winner.drop.author,
+        wave: winner.drop.wave,
+      })
+    );
     expect(getByTestId("badge")).toBeInTheDocument();
     expect(getByTestId("votes")).toBeInTheDocument();
     expect(getByTestId("voters")).toBeInTheDocument();
@@ -73,8 +85,6 @@ describe("WaveWinnersDropHeader", () => {
 
     expect(getByTestId("approval-badge")).toBeInTheDocument();
     expect(queryByTestId("badge")).toBeNull();
-    expect(getByTestId("voters")).not.toHaveAttribute(
-      "data-is-approval-wave"
-    );
+    expect(getByTestId("voters")).not.toHaveAttribute("data-is-approval-wave");
   });
 });

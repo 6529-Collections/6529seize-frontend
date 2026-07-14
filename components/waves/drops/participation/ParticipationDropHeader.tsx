@@ -8,6 +8,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { DropTimestampLayout } from "../drop.types";
+import { DropAuthorBadges } from "../DropAuthorBadges";
 import WaveDropTime from "../time/WaveDropTime";
 import WinnerDropBadge from "../winner/WinnerDropBadge";
 
@@ -71,6 +72,11 @@ export default function ParticipationDropHeader({
           <UserCICAndLevel
             level={drop.author.level}
             size={UserCICAndLevelSize.SMALL}
+          />
+          <DropAuthorBadges
+            profile={drop.author}
+            wave={drop.wave}
+            tooltipIdPrefix={`participation-author-badges-${drop.id}`}
           />
           {statusBadge}
           {!isStackedTimestamp && (
