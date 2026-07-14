@@ -277,7 +277,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   if (!canSubmit) {
     return (
       <WaveHeaderRestrictionButton
-        label={activeLabelFull}
+        label="Submission Unavailable"
         reason={tooltipText}
         className={RESTRICTED_HEADER_BUTTON_CLASS}
       >

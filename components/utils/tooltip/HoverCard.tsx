@@ -21,6 +21,7 @@ import {
   type TooltipCoordinates,
   type TooltipPlacement,
 } from "./tooltipPositioning";
+import { useTooltipReposition } from "./useTooltipReposition";
 
 interface HoverCardProps {
   readonly children: React.ReactElement;
@@ -375,36 +376,7 @@ export default function HoverCard({
     stopClickPropagation,
   ]);
 
-  useEffect(() => {
-    if (!isVisible) return;
-    const browserWindow = getTooltipWindow();
-    if (browserWindow === null) return;
-
-    let rafId: number | null = null;
-    const handleReposition = () => {
-      if (rafId !== null) return;
-      rafId = browserWindow.requestAnimationFrame(() => {
-        rafId = null;
-        calculatePosition();
-      });
-    };
-
-    const visualViewport = browserWindow.visualViewport;
-    browserWindow.addEventListener("resize", handleReposition);
-    browserWindow.addEventListener("scroll", handleReposition, true);
-    visualViewport?.addEventListener("resize", handleReposition);
-    visualViewport?.addEventListener("scroll", handleReposition);
-
-    return () => {
-      browserWindow.removeEventListener("resize", handleReposition);
-      browserWindow.removeEventListener("scroll", handleReposition, true);
-      visualViewport?.removeEventListener("resize", handleReposition);
-      visualViewport?.removeEventListener("scroll", handleReposition);
-      if (rafId !== null) {
-        browserWindow.cancelAnimationFrame(rafId);
-      }
-    };
-  }, [calculatePosition, isVisible]);
+  useTooltipReposition(isVisible, calculatePosition);
 
   useEffect(() => {
     if (!isVisible) return;

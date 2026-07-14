@@ -379,6 +379,7 @@ export default function MyStreamWaveTabsHeader({
           label: rightSidebarCompactLabel,
           icon: (
             <ChevronDoubleLeftIcon
+              strokeWidth={2}
               className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition ${
                 isRightSidebarOpen ? "tw-rotate-180" : "tw-rotate-0"
               }`}
@@ -500,6 +501,7 @@ export default function MyStreamWaveTabsHeader({
               aria-label={rightSidebarActionLabel}
             >
               <ChevronDoubleLeftIcon
+                strokeWidth={2}
                 className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
                   isRightSidebarOpen
                     ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"

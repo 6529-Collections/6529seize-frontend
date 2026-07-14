@@ -149,6 +149,26 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     ).toBeInTheDocument();
   });
 
+  it("labels an unavailable active submission as restricted", () => {
+    renderComponent({
+      ...baseInfo,
+      participation: {
+        status: SubmissionStatus.ACTIVE,
+        isEligible: true,
+        hasReachedLimit: false,
+        remainingSubmissions: null,
+        canSubmitNow: false,
+        isWithinPeriod: true,
+        startTime: 0,
+        endTime: 0,
+      },
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Submission Unavailable" })
+    ).toHaveAccessibleDescription("You cannot submit at this time");
+  });
+
   it("renders active state with urgency and remaining badge", () => {
     const now = Date.now();
     useCountdown.mockReturnValueOnce("3h").mockReturnValueOnce("3h");

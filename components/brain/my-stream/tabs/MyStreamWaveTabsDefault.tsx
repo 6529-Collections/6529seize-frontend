@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import React from "react";
 import {
   ChatBubbleLeftIcon,
   LockClosedIcon,
@@ -46,7 +46,6 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const breakpoint = useBreakpoint();
   const showBackButton = breakpoint !== "LG";
   const isCompact = breakpoint === "S";
-  const submitRestrictionDescriptionId = useId();
   const [boostedDropsDisplayPreference, setBoostedDropsDisplayPreference] =
     useBoostedDropsDisplayPreference();
   const headerActionsTooltipId = `my-stream-wave-header-actions-${wave.id}`;
@@ -81,29 +80,16 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           </WaveHeaderRestrictionButton>
         )}
         {showChatSubmitDropAction && !action.canOpen && !headerIsCompact && (
-          <span
-            className="tw-inline-flex tw-min-w-0"
-            title={chatSubmitDropTitle}
-            data-tooltip-id={tooltipId}
-            data-tooltip-content={chatSubmitDropTooltip}
+          <WaveHeaderRestrictionButton
+            label={action.label}
+            reason={chatSubmitDropTooltip ?? action.label}
+            className="tw-h-8 tw-min-w-0 tw-max-w-[10rem] tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 lg:tw-max-w-[14rem]"
           >
-            <button
-              type="button"
-              disabled
-              aria-label={action.label}
-              aria-describedby={submitRestrictionDescriptionId}
-              title={chatSubmitDropTitle}
-              className="tw-flex tw-h-8 tw-min-w-0 tw-max-w-[10rem] tw-cursor-not-allowed tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 lg:tw-max-w-[14rem]"
-            >
-              <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-              <span
-                id={submitRestrictionDescriptionId}
-                className="tw-min-w-0 tw-truncate"
-              >
-                {chatSubmitDropTooltip}
-              </span>
-            </button>
-          </span>
+            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+            <span className="tw-min-w-0 tw-truncate">
+              {chatSubmitDropTooltip}
+            </span>
+          </WaveHeaderRestrictionButton>
         )}
         {showChatSubmitDropAction && action.canOpen && (
           <span
