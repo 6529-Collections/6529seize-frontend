@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -153,6 +154,7 @@ export default function WaveDropsSearchModal({
   readonly onSelectSerialNo: (serialNo: number) => void;
   readonly onSearchAll?: (() => void) | undefined;
 }) {
+  useLayoutViewportLock(isOpen);
   const modalRef = useRef<HTMLDivElement>(null);
   const locale = useBrowserLocale();
   useClickAway(modalRef, () => {

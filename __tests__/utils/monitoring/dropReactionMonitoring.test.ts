@@ -214,6 +214,93 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
+  it("breadcrumbs the exact disabled-wave capability 403 without capturing it", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-disabled",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-disabled/reaction",
+      method: "POST",
+    });
+
+    const error = Object.assign(
+      new Error("Chatting and reacting is not enabled in this wave"),
+      {
+        name: "ApiError",
+        status: 403,
+        response: { status: 403 },
+      }
+    );
+
+    dateNowSpy.mockReturnValue(1_200);
+    recordReactionRequestFailed(mutation, error);
+
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.wave_capability_disabled",
+        data: expect.objectContaining({
+          status_code: 403,
+          error_kind: "auth",
+          error_message: "Chatting and reacting is not enabled in this wave",
+          captured: false,
+        }),
+      })
+    );
+    expect(withScopeMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      caseName: "the disabled-wave message returned as 401",
+      message: "Chatting and reacting is not enabled in this wave",
+      status: 401,
+    },
+    {
+      caseName: "a different disabled-wave 403 message",
+      message: "Forbidden",
+      status: 403,
+    },
+  ])("captures $caseName", ({ message, status }) => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-disabled-unexpected",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-disabled-unexpected/reaction",
+      method: "POST",
+    });
+
+    const error = Object.assign(new Error(message), {
+      name: "ApiError",
+      status,
+      response: { status },
+    });
+
+    dateNowSpy.mockReturnValue(1_200);
+    recordReactionRequestFailed(mutation, error);
+
+    expect(withScopeMock).toHaveBeenCalled();
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+  });
+
   it.each(
     [
       {
