@@ -38,6 +38,22 @@ const CURRENT_PAGE_TOKEN = "__CURRENT_PAGE__";
 const TOTAL_PAGE_TOKEN = "__TOTAL_PAGE__";
 const PAGE_TOKEN_PATTERN = /(__CURRENT_PAGE__|__TOTAL_PAGE__)/;
 
+function getPageLabelParts(locale: ReturnType<typeof useBrowserLocale>) {
+  const localizedLabel = t(locale, "common.pagination.currentOfTotal", {
+    current: CURRENT_PAGE_TOKEN,
+    total: TOTAL_PAGE_TOKEN,
+  });
+  const hasBothPageTokens =
+    localizedLabel.includes(CURRENT_PAGE_TOKEN) &&
+    localizedLabel.includes(TOTAL_PAGE_TOKEN);
+
+  return (
+    hasBothPageTokens
+      ? localizedLabel
+      : `${CURRENT_PAGE_TOKEN} / ${TOTAL_PAGE_TOKEN}`
+  ).split(PAGE_TOKEN_PATTERN);
+}
+
 export default function Pagination(props: Readonly<Props>) {
   const locale = useBrowserLocale();
   const [inputPage, setInputPage] = useState<string>(props.page.toString());
@@ -91,10 +107,7 @@ export default function Pagination(props: Readonly<Props>) {
   }
 
   const lastPage = getLastPage();
-  const pageLabelParts = t(locale, "common.pagination.currentOfTotal", {
-    current: CURRENT_PAGE_TOKEN,
-    total: TOTAL_PAGE_TOKEN,
-  }).split(PAGE_TOKEN_PATTERN);
+  const pageLabelParts = getPageLabelParts(locale);
 
   return (
     <>
