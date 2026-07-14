@@ -1459,7 +1459,22 @@ describe("WaveDropsAll", () => {
       expect(scrollTo).not.toHaveBeenCalled();
       expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 100, 100);
 
+      const staleTargetElement = document.createElement("div");
+      Object.defineProperty(staleTargetElement, "getBoundingClientRect", {
+        configurable: true,
+        value: () => ({
+          top: 300,
+          bottom: 360,
+          height: 60,
+          left: 0,
+          right: 300,
+          width: 300,
+        }),
+      });
+      dropsProps.targetDropRef.current = staleTargetElement;
+
       const targetElement = document.createElement("div");
+      targetElement.id = "drop-10";
       Object.defineProperty(targetElement, "getBoundingClientRect", {
         configurable: true,
         value: () => ({
@@ -1471,7 +1486,7 @@ describe("WaveDropsAll", () => {
           width: 300,
         }),
       });
-      dropsProps.targetDropRef.current = targetElement;
+      mockScrollContainerRef.current.appendChild(targetElement);
 
       await act(async () => {
         await jest.advanceTimersByTimeAsync(100);

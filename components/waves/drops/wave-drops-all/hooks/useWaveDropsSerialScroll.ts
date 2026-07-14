@@ -230,11 +230,13 @@ export const useWaveDropsSerialScroll = ({
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior, targetSerialNo?: number) => {
       const container = scrollContainerRef.current;
-      const target =
-        targetDropRef.current ??
-        (targetSerialNo !== undefined
-          ? container?.querySelector<HTMLDivElement>(`#drop-${targetSerialNo}`)
-          : null);
+      const resolveTarget = (targetContainer: HTMLDivElement | null) =>
+        targetSerialNo !== undefined
+          ? (targetContainer?.querySelector<HTMLDivElement>(
+              `#drop-${targetSerialNo}`
+            ) ?? targetDropRef.current)
+          : targetDropRef.current;
+      const target = resolveTarget(container);
 
       if (target && container) {
         scrollElementIntoContainerCenter({
@@ -245,13 +247,7 @@ export const useWaveDropsSerialScroll = ({
 
         setTimeout(() => {
           const retryContainer = scrollContainerRef.current;
-          const retryTarget =
-            targetDropRef.current ??
-            (targetSerialNo !== undefined
-              ? retryContainer?.querySelector<HTMLDivElement>(
-                  `#drop-${targetSerialNo}`
-                )
-              : null);
+          const retryTarget = resolveTarget(retryContainer);
           const isInContainer =
             retryTarget &&
             retryContainer &&
@@ -269,13 +265,7 @@ export const useWaveDropsSerialScroll = ({
 
             setTimeout(() => {
               const finalContainer = scrollContainerRef.current;
-              const finalTarget =
-                targetDropRef.current ??
-                (targetSerialNo !== undefined
-                  ? finalContainer?.querySelector<HTMLDivElement>(
-                      `#drop-${targetSerialNo}`
-                    )
-                  : null);
+              const finalTarget = resolveTarget(finalContainer);
               const stillInContainer =
                 finalTarget &&
                 finalContainer &&
@@ -314,6 +304,7 @@ export const useWaveDropsSerialScroll = ({
           return true;
         }
 
+        // Re-run revealDrop each interval as placeholder batches shift the target index.
         await waitAndRevealDrop(targetSerialNo, pollIntervalMs, pollIntervalMs);
         await delay(pollIntervalMs);
       }
