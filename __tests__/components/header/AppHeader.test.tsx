@@ -367,10 +367,7 @@ describe("AppHeader", () => {
     ).not.toBeInTheDocument();
 
     const shareWaveButton = screen.getByRole("button", { name: "Share wave" });
-    expect(shareWaveButton.querySelector("svg")).toHaveClass(
-      "tw-h-6",
-      "tw-w-6"
-    );
+    expect(shareWaveButton.querySelector("svg")).toHaveClass("tw-size-5");
 
     fireEvent.click(shareWaveButton);
 
