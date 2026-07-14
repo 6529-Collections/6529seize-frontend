@@ -128,7 +128,7 @@ function AppLayoutFallback({ children }: Props) {
 
 function AppLayoutContent({ children }: Props) {
   useDeepLinkNavigation();
-  const { registerRef, spaces } = useLayout();
+  const { isViewportLocked, registerRef, spaces } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const headerRef = useRef<HTMLDivElement | null>(null);
   const pullContentRef = useRef<HTMLDivElement | null>(null);
@@ -148,7 +148,9 @@ function AppLayoutContent({ children }: Props) {
   const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const isEditingOnMobile = isApp && editingDropId !== null;
-  const shouldHideBottomNav = isKeyboardVisible || shouldHideBottomNavForRoute;
+  const isLayoutKeyboardVisible = isKeyboardVisible && !isViewportLocked;
+  const shouldHideBottomNav =
+    isLayoutKeyboardVisible || shouldHideBottomNavForRoute;
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -181,7 +183,7 @@ function AppLayoutContent({ children }: Props) {
       [isNavVisible, routeLoadingHeaderReserve, shouldUseContentBottomClearance]
     );
   const safeAreaClass =
-    !isNavVisible && !isKeyboardVisible
+    !isNavVisible && !isLayoutKeyboardVisible
       ? "tw-pb-[env(safe-area-inset-bottom,0px)]"
       : "";
   let activeContent: ReactNode;
