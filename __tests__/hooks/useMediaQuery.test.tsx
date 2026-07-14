@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -109,17 +110,26 @@ describe("useMediaQuery", () => {
     }
   );
 
-  it("uses false as the server and hydration snapshot", () => {
+  it("uses false during SSR and updates to the browser snapshot after hydration", async () => {
     const mediaQuery = createMediaQueryListMock({ matches: true });
     installMatchMedia(mediaQuery.mediaQueryList);
 
     const Probe = () => <span>{String(useMediaQuery(QUERY))}</span>;
+    const container = document.createElement("div");
 
-    expect(renderToString(<Probe />)).toContain("<span>false</span>");
+    container.innerHTML = renderToString(<Probe />);
+    expect(container).toHaveTextContent("false");
     expect(mediaQuery.addEventListener).not.toHaveBeenCalled();
 
-    const { result } = renderHook(() => useMediaQuery(QUERY));
-    expect(result.current).toBe(true);
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    await act(async () => {
+      root = hydrateRoot(container, <Probe />);
+    });
+
+    expect(container).toHaveTextContent("true");
+    expect(mediaQuery.addEventListener).toHaveBeenCalledTimes(1);
+
+    act(() => root?.unmount());
   });
 
   it("updates when the media query snapshot changes", () => {
