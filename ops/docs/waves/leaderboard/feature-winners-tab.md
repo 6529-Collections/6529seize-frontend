@@ -72,10 +72,10 @@ right sidebar, and what users see for loading and empty states.
   link use their own row below the drop metadata. The frontend uses only the
   explicit mapping returned in the V2 submission context; it never infers a
   Meme ID from winner order. The link is omitted when no mapping is known.
-- A mapped Meme card page also shows a fully clickable
-  `Main Stage winning submission` card as the first item under Additional
-  Details, before the Arweave links. It opens the winning drop in The Memes
-  Main Stage. Older cards without an explicit mapping do not show the card.
+- A mapped Meme card page also shows a `Main Stage Submission` action beside
+  `Distribution Plan` in the market overview panel to the right of the artwork.
+  It opens the winning drop in The Memes Main Stage. Older cards without an
+  explicit mapping do not show the action.
 - Non-memes waves show compact winner rows with rank, vote totals, voter
   counts, and outcome summaries.
 - Winner rank labels use ordinal place formatting (`1st`, `2nd`, `3rd`,
