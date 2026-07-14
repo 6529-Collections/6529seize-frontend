@@ -32,11 +32,6 @@ jest.mock("@/components/download/Download", () => ({
   ),
 }));
 
-jest.mock("@/components/the-memes/MemePageMainStageSubmissionLink", () => ({
-  __esModule: true,
-  default: () => <div data-testid="main-stage-submission-link" />,
-}));
-
 jest.mock("@/helpers/Helpers", () => ({
   numberWithCommas: (n: number) => String(n),
 }));
@@ -139,14 +134,6 @@ describe("MemePageArt", () => {
     expect(screen.getByText("Boosts")).toBeInTheDocument();
     expect(screen.getByText("+10%")).toBeInTheDocument();
 
-    const submissionLink = screen.getByTestId("main-stage-submission-link");
-    const arweaveHeading = screen.getByRole("heading", {
-      name: /Arweave links/i,
-    });
-    expect(
-      submissionLink.compareDocumentPosition(arweaveHeading) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
   });
 
   it("uses locale-backed labels and number formatting", () => {

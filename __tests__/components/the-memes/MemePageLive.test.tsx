@@ -49,6 +49,11 @@ jest.mock("@/components/the-memes/MemePageArt", () => ({
   __esModule: true,
   MemePageArt: (...args: unknown[]) => mockMemePageArt(...args),
 }));
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettings: () => ({
+    seizeSettings: { memes_wave_id: "main-stage-wave" },
+  }),
+}));
 jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
   default: () => <div data-testid="rememe-image" />,
@@ -93,6 +98,9 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn((opts: { endpoint: string }) => {
     if (opts.endpoint === "policies/country-check") {
       return Promise.resolve({ is_eu: false, country: "US" });
+    }
+    if (opts.endpoint === "meme-cards/5/drop") {
+      return Promise.resolve({ meme_card_id: 5, drop_id: "drop-5" });
     }
     return Promise.reject(new Error("Unknown endpoint"));
   }),
@@ -595,6 +603,14 @@ describe("MemePageLiveRightMenu distribution link", () => {
     });
     const link = screen.getByRole("link", { name: /distribution plan/i });
     expect(link).toHaveAttribute("href", `/the-memes/5/distribution`);
+    const submissionLink = await screen.findByRole("link", {
+      name: "Main Stage Submission",
+    });
+    expect(submissionLink).toHaveAttribute(
+      "href",
+      "/waves/main-stage-wave?drop=drop-5"
+    );
+    expect(submissionLink.parentElement).toBe(link.parentElement);
   });
 
   it("preserves locale in distribution plan links", async () => {

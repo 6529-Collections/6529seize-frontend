@@ -6,7 +6,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ArrowUpRightIcon, TrophyIcon } from "@heroicons/react/24/outline";
+import { ArrowUpRightIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -15,21 +15,24 @@ interface MemePageMainStageSubmissionLinkProps {
   readonly locale: SupportedLocale;
 }
 
+interface MemeCardDropState {
+  readonly memeCardId: number;
+  readonly dropId: string;
+}
+
 export default function MemePageMainStageSubmissionLink({
   memeCardId,
   locale,
 }: MemePageMainStageSubmissionLinkProps) {
   const { seizeSettings } = useSeizeSettings();
-  const [dropId, setDropId] = useState<string | null>(null);
+  const [mapping, setMapping] = useState<MemeCardDropState | null>(null);
 
   useEffect(() => {
     if (!Number.isSafeInteger(memeCardId) || memeCardId < 1) {
-      setDropId(null);
       return;
     }
 
     const controller = new AbortController();
-    setDropId(null);
 
     commonApiFetch<ApiMemeCardDropMapping>({
       endpoint: `meme-cards/${memeCardId}/drop`,
@@ -39,20 +42,17 @@ export default function MemePageMainStageSubmissionLink({
     })
       .then((mapping) => {
         if (!controller.signal.aborted) {
-          setDropId(mapping.drop_id);
+          setMapping({ memeCardId, dropId: mapping.drop_id });
         }
       })
-      .catch(() => {
-        if (!controller.signal.aborted) {
-          setDropId(null);
-        }
-      });
+      .catch(() => undefined);
 
     return () => controller.abort();
   }, [memeCardId]);
 
   const href = useMemo(() => {
     const waveId = seizeSettings.memes_wave_id?.trim();
+    const dropId = mapping?.memeCardId === memeCardId ? mapping.dropId : null;
     if (!waveId || !dropId) {
       return null;
     }
@@ -62,7 +62,7 @@ export default function MemePageMainStageSubmissionLink({
       isDirectMessage: false,
       isApp: false,
     });
-  }, [dropId, seizeSettings.memes_wave_id]);
+  }, [mapping, memeCardId, seizeSettings.memes_wave_id]);
 
   if (!href) {
     return null;
@@ -71,25 +71,12 @@ export default function MemePageMainStageSubmissionLink({
   return (
     <Link
       href={href}
-      className="tw-group tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/70 tw-p-4 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900"
+      className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 hover:tw-bg-iron-800 hover:tw-text-white"
     >
-      <span
-        aria-hidden="true"
-        className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 tw-transition-colors desktop-hover:group-hover:tw-bg-iron-700 desktop-hover:group-hover:tw-text-white"
-      >
-        <TrophyIcon className="tw-size-5" />
-      </span>
-      <span className="tw-min-w-0 tw-flex-1">
-        <span className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 sm:tw-text-base">
-          {t(locale, "theMemes.detail.mainStageSubmission.title")}
-        </span>
-        <span className="tw-mt-0.5 tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
-          {t(locale, "theMemes.detail.mainStageSubmission.description")}
-        </span>
-      </span>
+      <span>{t(locale, "theMemes.detail.mainStageSubmission.title")}</span>
       <ArrowUpRightIcon
         aria-hidden="true"
-        className="tw-size-5 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors desktop-hover:group-hover:tw-text-iron-200"
+        className="-tw-mr-1 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
       />
     </Link>
   );
