@@ -468,8 +468,8 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
         </span>
       ) : null}
 
-      <div
-        role={"list" /* NOSONAR -- virtual row wrappers require ARIA roles. */}
+      <div // NOSONAR -- native list tags cannot wrap virtual grid rows.
+        role="list"
         aria-label={t(locale, "waves.leaderboard.listLabel")}
         className="tw-relative tw-w-full tw-min-w-0"
         style={{ height: virtualizer.getTotalSize() }}
@@ -506,10 +506,8 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
               }}
             >
               {showPreviousRetry ? (
-                <div
-                  role={
-                    "listitem" /* NOSONAR -- this retry is a virtual list entry. */
-                  }
+                <div // NOSONAR -- the retry is one virtual list entry.
+                  role="listitem"
                   className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
                   style={{
                     gridColumn: `span ${placeholderLogicalIndexes.length}`,
@@ -549,11 +547,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
 
                 const itemId = getItemId(item);
                 return (
-                  <div
+                  <div // NOSONAR -- each card is one virtual list entry.
                     key={itemId}
-                    role={
-                      "listitem" /* NOSONAR -- cards are virtual list entries. */
-                    }
+                    role="listitem"
                     aria-posinset={itemIndex + 1}
                     aria-setsize={ariaSetSize}
                     data-leaderboard-drop-id={itemId}
