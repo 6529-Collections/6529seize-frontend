@@ -149,7 +149,7 @@ describe("useWaveLeaderboardVotingModal", () => {
     expect(result.current.votingDrop).toBe(updatedDrop);
 
     rerender({ drops: [] });
-    expect(result.current.votingDrop).toBe(originalDrop);
+    expect(result.current.votingDrop).toBe(updatedDrop);
   });
 });
 

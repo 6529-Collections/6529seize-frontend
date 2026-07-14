@@ -4,7 +4,7 @@ import { MobileVotingModal, VotingModal } from "@/components/voting";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { FC, RefObject } from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface ActiveVotingDrop {
   readonly id: string;
@@ -47,16 +47,34 @@ export function useWaveLeaderboardVotingModal(
     }
   }, [fallbackFocusRef]);
 
-  const votingDrop = useMemo(() => {
-    if (!activeVotingDrop) {
+  const activeVotingDropId = activeVotingDrop?.id ?? null;
+  const liveVotingDrop = useMemo(() => {
+    if (activeVotingDropId === null) {
       return null;
     }
 
-    return (
-      drops.find((drop) => drop.id === activeVotingDrop.id) ??
-      activeVotingDrop.snapshot
-    );
-  }, [activeVotingDrop, drops]);
+    return drops.find((drop) => drop.id === activeVotingDropId) ?? null;
+  }, [activeVotingDropId, drops]);
+
+  useEffect(() => {
+    if (!liveVotingDrop) {
+      return;
+    }
+
+    setActiveVotingDrop((current) => {
+      if (
+        !current ||
+        current.id !== liveVotingDrop.id ||
+        current.snapshot === liveVotingDrop
+      ) {
+        return current;
+      }
+
+      return { ...current, snapshot: liveVotingDrop };
+    });
+  }, [liveVotingDrop]);
+
+  const votingDrop = liveVotingDrop ?? activeVotingDrop?.snapshot ?? null;
 
   return {
     votingDrop,
