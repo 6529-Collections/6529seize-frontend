@@ -1872,7 +1872,7 @@
       ],
       "facts": [
         "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
-        "For Rank and Approve waves, the desktop right sidebar also includes Voters and Activity.",
+        "For Rank and Approve waves, the desktop right sidebar exposes Voters and Activity from More after the four base sections.",
         "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
         "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
         "In the native app, More contains Settings and, for Rank and Approve waves, Voters and Activity.",

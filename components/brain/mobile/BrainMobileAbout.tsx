@@ -36,7 +36,10 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   const { mobileAboutViewStyle } = useLayout();
 
   return (
-    <div className="tw-min-h-0 tw-overflow-hidden" style={mobileAboutViewStyle}>
+    <div
+      className="tw-min-h-0 tw-overflow-hidden tw-bg-iron-950"
+      style={mobileAboutViewStyle}
+    >
       {wave && (
         <WaveContent
           wave={wave}
