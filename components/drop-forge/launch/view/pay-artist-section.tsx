@@ -178,7 +178,7 @@ function DropForgePayArtistAmountField({
           value={payArtistAmountEth}
           onChange={(e) => onPayArtistAmountChange(e.target.value)}
           placeholder="Enter ETH Amount"
-          className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
+          className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
         />
       )}
     </DropForgeFieldBox>
@@ -221,7 +221,7 @@ function DropForgePayArtistAddressField({
             onAddressChange={onPayArtistResolvedAddressChange}
             onLoadingChange={onPayArtistAddressLoadingChange}
             onError={onPayArtistAddressEnsErrorChange}
-            className="tw-h-auto tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white tw-placeholder-iron-500 tw-shadow-none [color-scheme:dark] focus:tw-bg-transparent focus:tw-text-white focus:tw-shadow-none focus:tw-outline-none focus:tw-ring-0"
+            className="tw-h-auto tw-w-full !tw-rounded-none !tw-border-0 !tw-bg-transparent !tw-p-0 !tw-text-white !tw-shadow-none [color-scheme:dark] placeholder:!tw-text-iron-500 focus:!tw-border-0 focus:!tw-bg-transparent focus:!tw-text-white focus:!tw-shadow-none focus:!tw-outline-none focus:!tw-ring-0"
           />
         )}
       </DropForgeFieldBox>
