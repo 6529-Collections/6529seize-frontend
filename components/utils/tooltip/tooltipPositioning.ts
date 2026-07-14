@@ -4,7 +4,7 @@ export type ResolvedTooltipPlacement = Exclude<TooltipPlacement, "auto">;
 
 export type TooltipCoordinates = { x: number; y: number };
 
-export type TooltipSize = { width: number; height: number };
+type TooltipSize = { width: number; height: number };
 
 type TooltipLayout = {
   position: TooltipCoordinates;
