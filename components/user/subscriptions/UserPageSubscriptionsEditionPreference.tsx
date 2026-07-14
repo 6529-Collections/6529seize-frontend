@@ -99,7 +99,6 @@ export default function UserPageSubscriptionsEditionPreference(
           {!props.readonly && (
             <>
               <span aria-hidden="true"> · </span>
-              <span className="tw-sr-only">. </span>
               {isAllEditions
                 ? "Receive all editions you are eligible for"
                 : "Receive only one edition"}
@@ -114,7 +113,7 @@ export default function UserPageSubscriptionsEditionPreference(
           checked={isAllEditions}
           onChange={toggleAllEditions}
           ariaLabel="All eligible editions"
-          describedBy={descriptionId}
+          describedBy={props.readonly ? undefined : descriptionId}
         />
         {isUpdatingAllEditions && (
           <CircleLoader size={CircleLoaderSize.MEDIUM} />

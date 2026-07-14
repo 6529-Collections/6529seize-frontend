@@ -109,7 +109,6 @@ export default function UserPageSubscriptionsMode(
           {!props.readonly && (
             <>
               <span aria-hidden="true"> · </span>
-              <span className="tw-sr-only">. </span>
               {isAuto
                 ? "Airdrops all eligible drops unless you opt out"
                 : "Opt in to each specific drop"}
@@ -124,7 +123,7 @@ export default function UserPageSubscriptionsMode(
           checked={isAuto}
           onChange={toggleMode}
           ariaLabel="Automatic subscription mode"
-          describedBy={descriptionId}
+          describedBy={props.readonly ? undefined : descriptionId}
         />
         {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
       </div>
