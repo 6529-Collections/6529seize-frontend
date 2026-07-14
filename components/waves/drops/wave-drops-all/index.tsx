@@ -189,54 +189,18 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       ? boostedDrops
       : undefined;
 
-  const {
-    serialTarget,
-    queueSerialTarget,
-    targetDropRef,
-    isScrolling,
-    scrollBaselineSerials,
-    frozenAutoCollapseSerials,
-  } = useWaveDropsSerialScroll({
-    waveId,
-    dropId,
-    initialDrop,
-    waveMessages,
-    renderedWaveMessages,
-    fetchNextPage,
-    waitAndRevealDrop,
-    scrollContainerRef,
-    shouldPinToBottom,
-    scrollToVisualBottom,
-  });
-
-  const autoCollapseSerials = useMemo(() => {
-    if (!isScrolling || !scrollBaselineSerials) {
-      return frozenAutoCollapseSerials;
-    }
-
-    const drops = renderedWaveMessages?.drops;
-    if (!drops || drops.length === 0) {
-      return frozenAutoCollapseSerials;
-    }
-
-    const next = new Set(frozenAutoCollapseSerials);
-    for (const drop of drops) {
-      const serialNo = drop.serial_no;
-      if (typeof serialNo !== "number") {
-        continue;
-      }
-      if (!scrollBaselineSerials.has(serialNo) && !next.has(serialNo)) {
-        next.add(serialNo);
-      }
-    }
-
-    return next;
-  }, [
-    isScrolling,
-    scrollBaselineSerials,
-    renderedWaveMessages?.drops,
-    frozenAutoCollapseSerials,
-  ]);
+  const { serialTarget, queueSerialTarget, targetDropRef, isScrolling } =
+    useWaveDropsSerialScroll({
+      waveId,
+      dropId,
+      initialDrop,
+      waveMessages,
+      fetchNextPage,
+      waitAndRevealDrop,
+      scrollContainerRef,
+      shouldPinToBottom,
+      scrollToVisualBottom,
+    });
 
   const waveChatScroll = useWaveChatScrollOptional();
   useEffect(() => {
@@ -339,7 +303,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         onBoostedDropClick={queueSerialTarget}
         onScrollToUnread={queueSerialTarget}
         unreadCount={unreadCount}
-        autoCollapseSerials={autoCollapseSerials}
         suspendLightDropHydration={isScrolling || serialTarget !== null}
         winningThreshold={winningThreshold}
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
