@@ -604,6 +604,7 @@ describe("push registration behavior", () => {
     }
 
     expect(commonApiPost).toHaveBeenCalledTimes(3);
+    expect(sentry.addBreadcrumb).toHaveBeenCalledTimes(2);
     expect(sentry.addBreadcrumb).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
