@@ -246,6 +246,7 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
     ["market.marketCap", "Market cap"],
     ["market.tdhRate", "TDH rate"],
     ["market.highestOffer", "Highest offer"],
+    ["market.marketplaces", "Marketplaces"],
     ["market.unavailable", "N/A"],
     ["market.pending", "Pending"],
     ["market.ethUnit", "ETH"],

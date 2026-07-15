@@ -37,7 +37,7 @@ const SECTION_HEADER_TITLE_CLASS =
 const TOP_LABEL_CLASS =
   "tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-500";
 const CREATOR_NAME_CLASS =
-  "tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
+  "tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
 const INLINE_METRIC_LABEL_CLASS =
   "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
 const MARKET_METRIC_LABEL_BASE_CLASS =
@@ -53,7 +53,7 @@ const INLINE_STATS_ROW_CLASS =
 const EDITION_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
 const MARKET_OVERVIEW_ROW_CLASS =
-  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
+  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-5 xl:tw-gap-x-8";
 const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   day: "numeric",
   month: "short",
@@ -161,7 +161,6 @@ export function MemeEditionSizeStats({
               value={formatInteger(locale, nftMeta.edition_size_not_burnt)}
               rank={nftMeta.edition_size_not_burnt_rank}
               total={rankTotal}
-              unranked={unranked}
               locale={locale}
             />
           </>
@@ -171,7 +170,6 @@ export function MemeEditionSizeStats({
           value={formatInteger(locale, nftMeta.edition_size_cleaned)}
           rank={nftMeta.edition_size_cleaned_rank}
           total={rankTotal}
-          unranked={unranked}
           locale={locale}
         />
         <InlineStatsMetric
@@ -179,7 +177,6 @@ export function MemeEditionSizeStats({
           value={formatInteger(locale, nftMeta.hodlers)}
           rank={nftMeta.hodlers_rank}
           total={rankTotal}
-          unranked={unranked}
           locale={locale}
         />
       </div>
@@ -455,7 +452,7 @@ function CreatorProfileIdentity({
   );
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-2.5">
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5">
       <ProfileAvatar
         pfpUrl={profile?.pfp}
         size={ProfileBadgeSize.SMALL}
@@ -574,7 +571,13 @@ export function MemeCardFileType({ nft }: { readonly nft: NFT }) {
   );
 }
 
-function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
+function MemeMarketplaceLinks({
+  nft,
+  locale,
+}: {
+  readonly nft: NFT;
+  readonly locale: SupportedLocale;
+}) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const showMarketplaceLinks = !capacitor.isIos || country === "US";
@@ -584,7 +587,10 @@ function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
   }
 
   return (
-    <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
+    <div className="tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
+      <span className={INLINE_METRIC_LABEL_CLASS}>
+        {t(locale, "theMemes.detail.live.market.marketplaces")}
+      </span>
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
     </div>
   );
@@ -643,9 +649,9 @@ export function MemeNftLivePanel({
           unit={t(locale, "theMemes.detail.live.market.ethUnit")}
           locale={locale}
         />
-        <MemeMarketplaceLinks nft={nft} />
       </div>
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-pt-6">
+      <MemeMarketplaceLinks nft={nft} locale={locale} />
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-pt-5">
         <MemeDistributionPlanLink nft={nft} locale={locale} />
         <MemePageMainStageSubmissionLink memeCardId={nft.id} locale={locale} />
       </div>
@@ -679,12 +685,20 @@ function MarketMetric({
       : unavailableLabel);
 
   return (
-    <div className="tw-min-w-[8.5rem]">
+    <div className="tw-min-w-0 tw-basis-[calc(50%-0.75rem)] xl:tw-basis-[calc(33.333%-1.334rem)]">
       <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
         {label}
       </div>
-      <div className="tw-flex tw-items-baseline">
-        <span className={MARKET_METRIC_VALUE_CLASS}>{formattedValue}</span>
+      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline">
+        <span
+          className={
+            displayValue !== undefined || formattedValue === unavailableLabel
+              ? "tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500"
+              : `${MARKET_METRIC_VALUE_CLASS} tw-break-words`
+          }
+        >
+          {formattedValue}
+        </span>
         {unit && !displayValue && formattedValue !== unavailableLabel && (
           <span className="tw-ml-1.5 tw-text-sm tw-font-medium tw-leading-none tw-text-iron-400">
             {unit}
