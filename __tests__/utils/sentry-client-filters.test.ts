@@ -5,6 +5,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
   shouldFilterAnonymousUnsafeEvalCspError,
+  shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -31,6 +32,21 @@ import {
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
 type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
+type AppleWebKitSortedTrackListOverrides = {
+  type?: string | undefined;
+  value?: string | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  filename?: string | undefined;
+  functionName?: string | undefined;
+  includeAbsPath?: boolean | undefined;
+  absPath?: string | undefined;
+  includeStacktrace?: boolean | undefined;
+  additionalFrame?: SentryStackFrame | undefined;
+  includeAdditionalException?: boolean | undefined;
+  browserName?: string | undefined;
+  transaction?: string | undefined;
+};
 
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
@@ -627,6 +643,101 @@ describe("sentry-client-filters", () => {
     ],
     ...overrides,
   });
+
+  const createAppleWebKitSortedTrackListEvent = ({
+    type = "TypeError",
+    value = "Type error",
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+    filename = "[native code]",
+    functionName = "sortedTrackListForMenu",
+    includeAbsPath = false,
+    absPath = "[native code]",
+    includeStacktrace = true,
+    additionalFrame,
+    includeAdditionalException = false,
+    browserName = "Mobile Safari UI/WKWebView",
+    transaction = "/waves/:wave",
+  }: AppleWebKitSortedTrackListOverrides = {}): TestSentryClientEvent => {
+    const frame: SentryStackFrame = {
+      filename,
+      function: functionName,
+    };
+    if (includeAbsPath) {
+      frame.abs_path = absPath;
+    }
+
+    const frames = additionalFrame ? [frame, additionalFrame] : [frame];
+    const stacktrace = includeStacktrace ? { stacktrace: { frames } } : {};
+    const additionalValues = includeAdditionalException
+      ? [{ type: "Error", value: "Nearby application error" }]
+      : [];
+
+    return {
+      transaction,
+      contexts: {
+        browser: {
+          name: browserName,
+        },
+      },
+      exception: {
+        values: [
+          {
+            type,
+            value,
+            mechanism: {
+              type: mechanismType,
+              handled,
+            },
+            ...stacktrace,
+          },
+          ...additionalValues,
+        ],
+      },
+    };
+  };
+
+  const appleWebKitSortedTrackListNearMisses: Array<
+    [string, AppleWebKitSortedTrackListOverrides]
+  > = [
+    ["a changed exception type", { type: "Error" }],
+    ["a changed exception value", { value: "Type Error" }],
+    [
+      "a changed mechanism",
+      { mechanismType: "auto.browser.global_handlers.onunhandledrejection" },
+    ],
+    ["a handled exception", { handled: true }],
+    ["a changed function", { functionName: "sortedTrackList" }],
+    ["a changed filename", { filename: "https://example.test/app.js" }],
+    [
+      "a conflicting absolute path",
+      {
+        includeAbsPath: true,
+        absPath: "https://example.test/native.js",
+      },
+    ],
+    ["no stacktrace", { includeStacktrace: false }],
+    ["another exception value", { includeAdditionalException: true }],
+    [
+      "another native frame",
+      {
+        additionalFrame: {
+          filename: "[native code]",
+          function: "dispatchEvent",
+        },
+      },
+    ],
+    [
+      "an application-owned frame",
+      {
+        additionalFrame: {
+          filename: "webpack-internal:///(app-pages-browser)/./app/page.tsx",
+          function: "renderPage",
+          in_app: true,
+        },
+      },
+    ],
+  ];
 
   const createSentryRouteParameterizationEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -3488,6 +3599,46 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(true);
   });
+
+  it("filters the observed WKWebView native track-list TypeError before abs_path normalization", () => {
+    // Arrange
+    const event = createAppleWebKitSortedTrackListEvent();
+
+    // Act
+    const result = shouldFilterAppleWebKitSortedTrackListTypeError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the observed Apple Mail native track-list TypeError after abs_path normalization", () => {
+    // Arrange
+    const event = createAppleWebKitSortedTrackListEvent({
+      includeAbsPath: true,
+      browserName: "Apple Mail",
+      transaction: "/notifications",
+    });
+
+    // Act
+    const result = shouldFilterAppleWebKitSortedTrackListTypeError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each(appleWebKitSortedTrackListNearMisses)(
+    "does not filter the native track-list TypeError with %s",
+    (_caseName, overrides) => {
+      // Arrange
+      const event = createAppleWebKitSortedTrackListEvent(overrides);
+
+      // Act
+      const result = shouldFilterAppleWebKitSortedTrackListTypeError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
 
   it("filters Sentry route parameterization cyclic JSON errors", () => {
     // Arrange

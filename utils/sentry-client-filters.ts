@@ -17,6 +17,7 @@ export {
 } from "./sentry-client-filters/network";
 export {
   shouldFilterAnonymousUnsafeEvalCspError,
+  shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterByFilenameExceptions,
   shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWasmCspUnsafeEval,
