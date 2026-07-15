@@ -1,8 +1,15 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import NextGenCollectionHeader, {
   NextGenBackToCollectionPageLink,
+  NextGenCountdown,
 } from '@/components/nextGen/collections/collectionParts/NextGenCollectionHeader';
+import { fetchUrl } from '@/services/6529api';
+import { usePathname } from 'next/navigation';
+import {
+  AllowlistType,
+  type CollectionWithMerkle,
+} from '@/components/nextGen/nextgen_entities';
 
 jest.mock('@/services/6529api', () => ({ fetchUrl: jest.fn(() => Promise.resolve({})) }));
 jest.mock('@/components/cookies/CookieConsentContext', () => ({ 
@@ -59,6 +66,11 @@ const collection: any = {
 };
 
 describe('NextGenCollectionHeader', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(usePathname).mockReturnValue('/test/path');
+  });
+
   it('renders back link text depending on path', () => {
     window.history.pushState({}, '', '/x/art');
     render(<NextGenBackToCollectionPageLink collection={collection} />);
@@ -70,5 +82,54 @@ describe('NextGenCollectionHeader', () => {
     expect(screen.getByText(collection.name)).toBeInTheDocument();
     // countdown from allowlist_start should render
     expect(screen.getByText(/Allowlist Starting/)).toBeInTheDocument();
+  });
+
+  it('does not load the Merkle response after all mint phases complete', () => {
+    const completedCollection = {
+      ...collection,
+      allowlist_start: 1,
+      allowlist_end: 2,
+      public_start: 3,
+      public_end: 4,
+    };
+
+    render(<NextGenCountdown collection={completedCollection} />);
+
+    expect(fetchUrl).not.toHaveBeenCalled();
+  });
+
+  it('loads the Merkle response when a mint countdown is visible', async () => {
+    render(<NextGenCountdown collection={collection} />);
+
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
+    expect(await screen.findByRole('button', { name: 'MINT' })).toBeInTheDocument();
+  });
+
+  it('keeps the burn-to-mint label for active external burn collections', async () => {
+    jest.mocked(fetchUrl).mockResolvedValueOnce({
+      collection_id: collection.id,
+      merkle_root: collection.merkle_root,
+      merkle_tree: [],
+      al_type: AllowlistType.EXTERNAL_BURN,
+      phase: 'allowlist',
+      burn_collection: '',
+      burn_collection_id: 0,
+      min_token_index: 0,
+      max_token_index: 0,
+      burn_address: '',
+      status: true,
+    } satisfies CollectionWithMerkle);
+
+    render(<NextGenCountdown collection={collection} />);
+
+    expect(await screen.findByRole('button', { name: 'BURN TO MINT' })).toBeInTheDocument();
+  });
+
+  it('does not load the Merkle response on the mint route', () => {
+    jest.mocked(usePathname).mockReturnValue('/nextgen/collection/my-collection/mint');
+
+    render(<NextGenCountdown collection={collection} />);
+
+    expect(fetchUrl).not.toHaveBeenCalled();
   });
 });

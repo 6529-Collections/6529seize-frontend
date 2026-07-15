@@ -85,11 +85,22 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
     props.collection.public_start,
     props.collection.public_end
   );
+  const isMintRoute = pathname.split("/").at(-1) === "mint";
+  const hasActiveCountdown =
+    alStatus === Status.UPCOMING ||
+    alStatus === Status.LIVE ||
+    publicStatus === Status.UPCOMING ||
+    publicStatus === Status.LIVE;
+  const shouldLoadMintLabel = hasActiveCountdown && !isMintRoute;
 
   const [collection, setCollection] = useState<CollectionWithMerkle>();
   const [collectionLoaded, setCollectionLoaded] = useState(false);
 
   useEffect(() => {
+    if (!shouldLoadMintLabel) {
+      return;
+    }
+
     const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
     fetchUrl<CollectionWithMerkle>(url).then(
       (response: CollectionWithMerkle) => {
@@ -99,7 +110,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
         setCollectionLoaded(true);
       }
     );
-  }, [props.collection]);
+  }, [props.collection.merkle_root, shouldLoadMintLabel]);
 
   function getButtonLabel() {
     if (collectionLoaded) {
@@ -112,13 +123,10 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   }
 
   function printCountdown(title: string, date: number) {
-    const pathParts = pathname.split("/");
-    const hideMintBtn = pathParts[pathParts.length - 1] === "mint";
-
     return (
       <span className={styles["countdownContainer"]}>
         <DateCountdown title={`${title} in`} date={new Date(date * 1000)} />
-        {!hideMintBtn && (
+        {!isMintRoute && (
           <Link
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
