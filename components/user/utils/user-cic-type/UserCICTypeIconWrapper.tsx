@@ -14,11 +14,11 @@ const getServerRenderSnapshot = () => false;
 
 export default function UserCICTypeIconWrapper({
   profile,
-  ariaLabel,
+  ariaHidden = false,
   className = "",
 }: {
   readonly profile: ApiIdentity;
-  readonly ariaLabel?: string | undefined;
+  readonly ariaHidden?: boolean | undefined;
   readonly className?: string | undefined;
 }) {
   const tooltipId = `user-cic-type-tooltip-${profile.id ?? "unknown"}`;
@@ -32,10 +32,8 @@ export default function UserCICTypeIconWrapper({
     <>
       <div
         data-tooltip-id={tooltipId}
-        className={`tw-cursor-help tw-rounded-full focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${className}`}
-        role={ariaLabel ? "img" : undefined}
-        aria-label={ariaLabel}
-        tabIndex={ariaLabel ? 0 : undefined}
+        className={`tw-cursor-help tw-rounded-full ${className}`}
+        aria-hidden={ariaHidden || undefined}
       >
         <UserCICTypeIcon cic={profile.cic} />
       </div>

@@ -28,7 +28,9 @@ jest.mock(
   "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="cic-icon" />,
+    default: (props: any) => (
+      <div data-testid="cic-icon" aria-hidden={props.ariaHidden} />
+    ),
   })
 );
 
@@ -163,7 +165,12 @@ describe("UserPageHeaderName", () => {
   it("labels the NIC status and level as profile credentials", () => {
     renderComponent({ handle: "Alice", cic: 2500, level: 42 });
 
+    expect(screen.getByText("NIC: Probably Accurate")).toBeInTheDocument();
     expect(screen.getByText("Level 42")).toBeInTheDocument();
     expect(screen.getByLabelText("Profile credentials")).toBeInTheDocument();
+    expect(screen.getByTestId("cic-icon")).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
   });
 });

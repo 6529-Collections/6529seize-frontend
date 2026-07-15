@@ -1,8 +1,10 @@
-import { CIC_TO_TEXT, CLASSIFICATIONS } from "@/entities/IProfile";
+import { CICType, CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
 import { cicToType } from "@/helpers/Helpers";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 import ProfileCurationBadge from "./ProfileCurationBadge";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
@@ -11,6 +13,19 @@ import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
 } from "../user-page-header.messages";
+
+const NIC_STATUS_MESSAGE_KEY_BY_TYPE = {
+  [CICType.INACCURATE]: "user.profileHeader.badges.nicStatus.inaccurate",
+  [CICType.UNKNOWN]: "user.profileHeader.badges.nicStatus.unknown",
+  [CICType.PROBABLY_ACCURATE]:
+    "user.profileHeader.badges.nicStatus.probablyAccurate",
+  [CICType.ACCURATE]: "user.profileHeader.badges.nicStatus.accurate",
+  [CICType.HIGHLY_ACCURATE]:
+    "user.profileHeader.badges.nicStatus.highlyAccurate",
+} as const satisfies Record<
+  CICType,
+  Parameters<typeof getUserProfileHeaderMessage>[0]
+>;
 
 export default function UserPageHeaderName({
   profile,
@@ -29,7 +44,13 @@ export default function UserPageHeaderName({
   const profileEnabledLabel = profileEnabledAt
     ? formatUserProfileHeaderMonthYear(profileEnabledAt)
     : null;
-  const nicStatus = CIC_TO_TEXT[cicToType(profile.cic)];
+  const nicStatus = getUserProfileHeaderMessage(
+    NIC_STATUS_MESSAGE_KEY_BY_TYPE[cicToType(profile.cic)]
+  );
+  const nicStatusLabel = getUserProfileHeaderMessage(
+    "user.profileHeader.badges.nicStatus",
+    { status: nicStatus }
+  );
 
   return (
     <div className="tw-min-w-0">
@@ -63,18 +84,15 @@ export default function UserPageHeaderName({
           <div className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-normal tw-text-iron-400">
             <UserCICTypeIconWrapper
               profile={profile}
-              ariaLabel={getUserProfileHeaderMessage(
-                "user.profileHeader.badges.nicStatus",
-                { status: nicStatus }
-              )}
+              ariaHidden={true}
               className="tw-inline-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center [&>div]:tw-size-4 [&_svg]:tw-size-full"
             />
-            <span>{nicStatus}</span>
+            <span>{nicStatusLabel}</span>
           </div>
         ) : null}
         <span className="tw-text-sm tw-font-normal tw-text-iron-500">
           {getUserProfileHeaderMessage("user.profileHeader.badges.level", {
-            level,
+            level: formatInteger(DEFAULT_LOCALE, level),
           })}
         </span>
         <ProfileCurationBadge profile={profile} />
