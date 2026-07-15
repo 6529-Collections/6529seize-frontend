@@ -25,9 +25,31 @@ on:
           - search-waves-readonly
           - media-readonly
           - network-open-data-readonly
+      release_train_id:
+        description: Release Bus train id
+        type: string
+        required: false
+      release_train_revision:
+        description: Release Bus train revision
+        type: string
+        required: false
+      operation_key:
+        description: Release Bus idempotency key
+        type: string
+        required: false
+      source_ref:
+        description: Immutable Release Bus source ref
+        type: string
+        required: false
+      expected_sha:
+        description: Immutable deployed SHA
+        type: string
+        required: false
 
 permissions:
   contents: read
+
+run-name: Staging E2E [${{ inputs.operation_key || 'automatic' }}]
 
 concurrency:
   group: staging-e2e
@@ -56,6 +78,39 @@ jobs:
       PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
       SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
     steps:
+      - name: Validate Release Bus inputs
+        if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          SOURCE_REF: ${{ inputs.source_ref }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
+
+      - name: Authorize Release Bus E2E operation
+        if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+
       # workflow_run: the exact SHA the staging deploy shipped. Manual
       # dispatch falls back to the branch tip, which may differ from what is
       # currently deployed to staging — fine for ad-hoc reruns, but prefer
@@ -63,38 +118,60 @@ jobs:
       - name: Check out the deployed ref
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ inputs.expected_sha || github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
 
+      - name: Verify Release Bus immutable source
+        if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Detect Release Bus follow-up push
+        id: release-bus-marker
+        run: |
+          skip=false
+          if [ '${{ github.event_name }}' = workflow_run ] && git show -s --format=%B HEAD | grep -q '^Release-Bus-Train:'; then
+            skip=true
+          fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+
       - name: Install Node.js
+        if: steps.release-bus-marker.outputs.skip != 'true'
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
 
       - name: Activate pinned pnpm
+        if: steps.release-bus-marker.outputs.skip != 'true'
         run: |
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
 
       - name: Install Socket Firewall
+        if: steps.release-bus-marker.outputs.skip != 'true'
         id: socket_firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with:
           mode: firewall
 
       - name: Assert npm lockfile is absent
+        if: steps.release-bus-marker.outputs.skip != 'true'
         run: ./bin/6529 guard:no-package-lock
 
       - name: Install dependencies
+        if: steps.release-bus-marker.outputs.skip != 'true'
         env:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
 
       - name: Install Playwright browser
+        if: steps.release-bus-marker.outputs.skip != 'true'
         run: ./bin/6529 exec playwright install --with-deps chromium
 
       - name: Run staging packs against staging.6529.io
+        if: steps.release-bus-marker.outputs.skip != 'true'
         run: |
           set -uo pipefail
           packs=(
@@ -214,7 +291,7 @@ jobs:
           exit "$failed"
 
       - name: Upload Playwright artifacts on failure
-        if: failure()
+        if: failure() && steps.release-bus-marker.outputs.skip != 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: staging-e2e-artifacts

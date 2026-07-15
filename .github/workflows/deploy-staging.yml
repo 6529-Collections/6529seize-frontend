@@ -5,6 +5,11 @@ on:
     branches:
       - 1a-staging
   workflow_dispatch:
+    inputs:
+      break_glass_reason:
+        type: string
+        description: Operator-only reason for a manual staging deploy after bus enforcement
+        required: false
 
 permissions:
   contents: read
@@ -21,6 +26,7 @@ env:
 
 jobs:
   deploy-staging:
+    if: github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'Release-Bus-Train:')
     runs-on: ubuntu-latest
     timeout-minutes: 75
     permissions:
@@ -28,6 +34,33 @@ jobs:
       deployments: write
 
     steps:
+      - name: Authorize operator break glass
+        if: vars.RELEASE_BUS_ENFORCEMENT == 'true'
+        env:
+          BREAK_GLASS_REASON: ${{ github.event_name == 'workflow_dispatch' && inputs.break_glass_reason || 'Direct 1a-staging branch update' }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$RELEASE_BUS_API_URL"
+          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN"
+          test -n "$BREAK_GLASS_REASON" || {
+            echo 'A break-glass reason is required while Release Bus enforcement is enabled.' >&2
+            exit 1
+          }
+          payload="$(jq -n \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg repository frontend \
+            --arg environment staging \
+            --arg expected_sha "$GITHUB_SHA" \
+            --arg reason "$BREAK_GLASS_REASON" \
+            '{workflow_run_id:$workflow_run_id,repository:$repository,environment:$environment,service:null,expected_sha:$expected_sha,reason:$reason}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize-break-glass"
+
       - name: Checkout staging branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
