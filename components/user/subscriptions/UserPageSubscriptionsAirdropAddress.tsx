@@ -69,18 +69,18 @@ export default function UserPageSubscriptionsAirdropAddress(
                     {airdropAddress.ens}
                   </span>
                 )}
-                <span
+                <button
+                  type="button"
                   data-tooltip-id={addressTooltipId}
                   aria-describedby={addressTooltipId}
-                  tabIndex={0}
                   className={
                     airdropAddress.ens
-                      ? "tw-block tw-text-xs tw-leading-5 tw-text-iron-500"
-                      : "tw-block tw-text-sm tw-leading-5 tw-text-iron-200"
+                      ? "tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xs tw-leading-5 tw-text-iron-500"
+                      : "tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-leading-5 tw-text-iron-200"
                   }
                 >
                   {airdropAddress.address}
-                </span>
+                </button>
                 <Tooltip
                   id={addressTooltipId}
                   place="top"

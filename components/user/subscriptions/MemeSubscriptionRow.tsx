@@ -43,11 +43,11 @@ function MintingTodayLabel({
 
   return (
     <>
-      <span
-        className={`tw-inline-flex tw-items-center tw-gap-1 ${className}`}
+      <button
+        type="button"
+        className={`tw-inline-flex tw-items-center tw-gap-1 tw-border-0 tw-bg-transparent tw-p-0 ${className}`}
         data-tooltip-id={tooltipId}
         aria-describedby={tooltipId}
-        tabIndex={0}
       >
         {t(locale, "profile.subscriptions.mintingToday.label")}
         <FontAwesomeIcon
@@ -55,7 +55,7 @@ function MintingTodayLabel({
           className="tw-size-4"
           aria-hidden="true"
         />
-      </span>
+      </button>
       <Tooltip
         id={tooltipId}
         place="top"
