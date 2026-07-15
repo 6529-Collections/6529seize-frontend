@@ -39,9 +39,7 @@ export default function DynamicHeadTitle() {
         previousObservation !== null &&
         previousObservation.pathname === pathname &&
         previousObservation.title !== normalizedTitle;
-      const isStreamIndex = STREAM_INDEX_ROUTES.some(
-        (route) => pathname === route
-      );
+      const isStreamIndex = STREAM_INDEX_ROUTES.includes(pathname);
       const isStreamDeselectionTransition =
         isTitleForCurrentRoute &&
         isStreamIndex &&

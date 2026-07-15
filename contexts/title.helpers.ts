@@ -1,4 +1,4 @@
-export const STREAM_INDEX_ROUTES = ["/waves", "/messages"] as const;
+export const STREAM_INDEX_ROUTES: readonly string[] = ["/waves", "/messages"];
 
 export const isTitleUpdateCurrent = (
   currentPathname: string | null,
