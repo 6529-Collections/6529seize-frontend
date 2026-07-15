@@ -2274,7 +2274,8 @@
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
-        "If the submit control is hidden or disabled, use the shown restriction message to recover: log in, disable proxy mode, wait for the submission window, or free submission capacity.",
+        "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
+        "On The Memes Main Stage, the native app lock explains the current 50,000 MemesNominee REP eligibility requirement; the desktop How to Submit panel also shows live REP progress and a Get nominated action.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",
@@ -3217,7 +3218,7 @@
       "facts": [
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
         "Home uses explicit Main Stage mappings for its submission and Meme-card links and omits those links when a mapping is unavailable.",
-        "Unresolved upcoming /the-memes/{id} pages show the next-mint calendar panel plus subscription awareness for that card.",
+        "When an unresolved /the-memes/{id} route is the explicitly mapped next Meme and home is in Next Drop mode, it shows the same winning artwork panel with Mint Date and subscription awareness above the calendar; other upcoming Meme routes keep the standalone subscription and calendar view.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
       ],
