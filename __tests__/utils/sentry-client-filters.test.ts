@@ -1545,6 +1545,23 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it.each(["/6529-gradient", "/6529-gradient/42"])(
+    "filters exact React DOM removeChild NotFoundError events on gradient route %s with only runtime frames",
+    (route) => {
+      const result = shouldFilterReactDomRemoveChildNotFoundError(
+        createReactDomRemoveChildEvent({
+          transaction: route,
+          tags: {
+            transaction: route,
+            url: route,
+          },
+        })
+      );
+
+      expect(result).toBe(true);
+    }
+  );
+
   it("filters React DOM removeChild NotFoundError events when request URL identifies a waves route", () => {
     const result = shouldFilterReactDomRemoveChildNotFoundError(
       createReactDomRemoveChildEvent({
