@@ -13,8 +13,7 @@ on:
       failure_reason: { type: string, required: true }
       expected_sha: { type: string, required: true }
 
-permissions:
-  contents: read
+permissions: {}
 
 run-name: Isolate frontend candidate ${{ inputs.candidate_id }} [${{ inputs.operation_key }}]
 
@@ -59,6 +58,8 @@ jobs:
 
   reproduce:
     needs: authorize
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -79,7 +80,7 @@ jobs:
           CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-          ALCHEMY_API_KEY: release-bus-isolation
+          ISOLATION_ALCHEMY_PLACEHOLDER: release-bus-isolation
           GIPHY_API_KEY: release-bus-isolation
           AWS_RUM_APP_ID: release-bus-isolation
           AWS_RUM_REGION: us-east-1
@@ -89,6 +90,7 @@ jobs:
           SENTRY_DSN: ''
         run: |
           set -o pipefail
+          export ALCHEMY_API_KEY="$ISOLATION_ALCHEMY_PLACEHOLDER"
           {
             set -euo pipefail
             git config user.name '6529 Release Bus Isolation'
