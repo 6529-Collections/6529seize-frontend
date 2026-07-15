@@ -11,12 +11,19 @@ jest.useFakeTimers();
 const observe = jest.fn();
 const unobserve = jest.fn();
 const disconnect = jest.fn();
+const resizeObserve = jest.fn();
+const resizeUnobserve = jest.fn();
+const resizeDisconnect = jest.fn();
 let intersectionCb: (entries: any[]) => void = () => {};
 let intersectionObserverOptions: any = null;
+let intersectionObserverInstances = 0;
+let resizeCb: (entries: ResizeObserverEntry[]) => void = () => {};
+let resizeObserverInstances = 0;
 
 beforeAll(() => {
   (global as any).IntersectionObserver = class {
     constructor(cb: any, options: any) {
+      intersectionObserverInstances += 1;
       intersectionCb = cb;
       intersectionObserverOptions = options;
     }
@@ -24,15 +31,37 @@ beforeAll(() => {
     unobserve = unobserve;
     disconnect = disconnect;
   };
+
+  (global as any).ResizeObserver = class {
+    constructor(cb: (entries: ResizeObserverEntry[]) => void) {
+      resizeObserverInstances += 1;
+      resizeCb = cb;
+    }
+    observe = resizeObserve;
+    unobserve = resizeUnobserve;
+    disconnect = resizeDisconnect;
+  };
+});
+
+beforeEach(() => {
+  const module = require("@/contexts/wave/MyStreamContext");
+  (module.useMyStream as jest.Mock).mockReturnValue({
+    fetchAroundSerialNo: jest.fn(),
+  });
 });
 
 afterEach(() => {
+  cleanup();
   observe.mockClear();
   unobserve.mockClear();
   disconnect.mockClear();
+  resizeObserve.mockClear();
+  resizeUnobserve.mockClear();
+  resizeDisconnect.mockClear();
   intersectionObserverOptions = null;
+  intersectionObserverInstances = 0;
+  resizeObserverInstances = 0;
   clearWaveDropNearViewport("wave", "drop-1");
-  cleanup();
 });
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -48,22 +77,30 @@ function setup(size: DropSize, dropId?: string) {
       dropId={dropId}
       dropSerialNo={1}
       waveId="wave"
-      type={size}>
+      type={size}
+    >
       <div data-testid="child">content</div>
     </VirtualScrollWrapper>
   );
   return { container, scrollRef };
 }
 
+function emitResize(element: Element, height: number) {
+  resizeCb([
+    {
+      target: element,
+      borderBoxSize: [{ blockSize: height }],
+      contentRect: { height },
+    } as unknown as ResizeObserverEntry,
+  ]);
+}
+
 test("renders placeholder when out of view", () => {
   const { container } = setup(DropSize.FULL);
   const div = container.firstChild as HTMLElement;
-  Object.defineProperty(div, "getBoundingClientRect", {
-    value: () => ({ height: 123 }),
-  });
 
   act(() => {
-    jest.advanceTimersByTime(1000);
+    emitResize(div, 123);
   });
 
   act(() => {
@@ -123,6 +160,19 @@ describe("IntersectionObserver Configuration", () => {
 
     expect(isWaveDropNearViewport("wave", "drop-1")).toBe(true);
   });
+
+  test("keeps one observer across viewport state changes", () => {
+    setup(DropSize.FULL);
+
+    act(() => {
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+    act(() => {
+      intersectionCb([{ isIntersecting: true } as any]);
+    });
+
+    expect(intersectionObserverInstances).toBe(1);
+  });
 });
 
 describe("Drop Size Behavior", () => {
@@ -180,6 +230,15 @@ describe("Drop Size Behavior", () => {
 });
 
 describe("Height Measurement and Placeholder", () => {
+  test("shares one resize observer across mounted FULL drops", () => {
+    const first = setup(DropSize.FULL);
+    const second = setup(DropSize.FULL);
+
+    expect(resizeObserverInstances).toBe(1);
+    expect(resizeObserve).toHaveBeenCalledWith(first.container.firstChild);
+    expect(resizeObserve).toHaveBeenCalledWith(second.container.firstChild);
+  });
+
   test("renders children when height not measured yet", () => {
     const { container } = setup(DropSize.FULL);
     const testChild = container.querySelector('[data-testid="child"]');
@@ -207,7 +266,7 @@ describe("Height Measurement and Placeholder", () => {
     expect(testChild).toBeInTheDocument();
   });
 
-  test("measures height again when leaving viewport for FULL drops", () => {
+  test("falls back to measuring when a FULL drop leaves before resize data arrives", () => {
     const { container } = setup(DropSize.FULL);
     const div = container.firstChild as HTMLElement;
     const measureSpy = jest.fn(() => ({ height: 175 }));
@@ -220,6 +279,36 @@ describe("Height Measurement and Placeholder", () => {
     });
 
     expect(measureSpy).toHaveBeenCalled();
+  });
+
+  test("does not force a layout read when resize data is already available", () => {
+    const { container } = setup(DropSize.FULL);
+    const div = container.firstChild as HTMLElement;
+    const measureSpy = jest.spyOn(div, "getBoundingClientRect");
+
+    act(() => {
+      emitResize(div, 175);
+    });
+    act(() => {
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+
+    expect(measureSpy).not.toHaveBeenCalled();
+  });
+
+  test("tracks height changes without forcing layout", () => {
+    const { container } = setup(DropSize.FULL);
+    const div = container.firstChild as HTMLElement;
+    const measureSpy = jest.spyOn(div, "getBoundingClientRect");
+
+    act(() => {
+      emitResize(div, 120);
+      emitResize(div, 240);
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+
+    expect((div.firstChild as HTMLElement).style.height).toBe("240px");
+    expect(measureSpy).not.toHaveBeenCalled();
   });
 
   test("does not remeasure height when leaving viewport for LIGHT drops", () => {
@@ -263,7 +352,8 @@ describe("Custom Delay", () => {
         delay={2000}
         dropSerialNo={1}
         waveId="wave"
-        type={DropSize.FULL}>
+        type={DropSize.FULL}
+      >
         <div data-testid="child">content</div>
       </VirtualScrollWrapper>
     );

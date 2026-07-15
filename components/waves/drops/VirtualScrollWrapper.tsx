@@ -9,6 +9,58 @@ import {
   setWaveDropNearViewport,
 } from "@/contexts/wave/drop-visibility";
 
+interface ResizeSubscription {
+  readonly updateHeight: (height: number) => void;
+}
+
+const resizeSubscriptions = new Map<Element, ResizeSubscription>();
+let sharedResizeObserver: ResizeObserver | null = null;
+
+function getSharedResizeObserver(): ResizeObserver | null {
+  if (typeof ResizeObserver === "undefined") {
+    return null;
+  }
+
+  sharedResizeObserver ??= new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const subscription = resizeSubscriptions.get(entry.target);
+      if (!subscription) {
+        continue;
+      }
+
+      const borderBoxSize = entry.borderBoxSize[0];
+      subscription.updateHeight(
+        borderBoxSize?.blockSize ?? entry.contentRect.height
+      );
+    }
+  });
+
+  return sharedResizeObserver;
+}
+
+function observeHeight(
+  element: HTMLElement,
+  subscription: ResizeSubscription
+): (() => void) | undefined {
+  const observer = getSharedResizeObserver();
+  if (!observer) {
+    return undefined;
+  }
+
+  resizeSubscriptions.set(element, subscription);
+  observer.observe(element);
+
+  return () => {
+    observer.unobserve(element);
+    resizeSubscriptions.delete(element);
+
+    if (resizeSubscriptions.size === 0) {
+      observer.disconnect();
+      sharedResizeObserver = null;
+    }
+  };
+}
+
 /**
  * Props for VirtualScrollWrapper
  */
@@ -77,6 +129,8 @@ export default function VirtualScrollWrapper({
    */
   const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
 
+  const hasMeasuredHeightRef = useRef(false);
+
   /**
    * containerRef: Reference to the top-level container element
    * to measure size, observe media, and attach an IntersectionObserver.
@@ -87,12 +141,22 @@ export default function VirtualScrollWrapper({
    * measureHeight: Uses getBoundingClientRect to measure the
    * rendered height of the container element.
    */
+  const updateMeasuredHeight = useCallback((height: number) => {
+    if (!Number.isFinite(height) || height <= 0) {
+      return;
+    }
+
+    hasMeasuredHeightRef.current = true;
+    setMeasuredHeight((currentHeight) =>
+      currentHeight === height ? currentHeight : height
+    );
+  }, []);
+
   const measureHeight = useCallback(() => {
     if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setMeasuredHeight(rect.height);
+      updateMeasuredHeight(containerRef.current.getBoundingClientRect().height);
     }
-  }, []);
+  }, [updateMeasuredHeight]);
 
   /**
    * Once all media are loaded, optionally wait the provided `delay`
@@ -101,12 +165,23 @@ export default function VirtualScrollWrapper({
    */
   useEffect(() => {
     if (type === DropSize.LIGHT) return;
+    const element = containerRef.current;
+    if (!element) return;
+
+    const stopObservingHeight = observeHeight(element, {
+      updateHeight: updateMeasuredHeight,
+    });
     const timer = setTimeout(() => {
-      measureHeight();
+      if (!hasMeasuredHeightRef.current) {
+        measureHeight();
+      }
     }, delay);
 
-    return () => clearTimeout(timer);
-  }, [delay, measureHeight]);
+    return () => {
+      clearTimeout(timer);
+      stopObservingHeight?.();
+    };
+  }, [delay, measureHeight, type, updateMeasuredHeight]);
 
   /**
    * Intersection Observer to track if the element is in the viewport.
@@ -128,13 +203,19 @@ export default function VirtualScrollWrapper({
             isNearViewport: inView,
           });
         }
-        if (!inView && containerRef.current && type !== DropSize.LIGHT) {
-          // If leaving viewport, measure height in case content changed
+        if (
+          !inView &&
+          containerRef.current &&
+          type !== DropSize.LIGHT &&
+          !hasMeasuredHeightRef.current
+        ) {
+          // Fall back to a synchronous measurement only if ResizeObserver has
+          // not supplied a height yet.
           measureHeight();
         }
-        if (inView !== isInView) {
-          setIsInView(inView);
-        }
+        setIsInView((currentValue) =>
+          currentValue === inView ? currentValue : inView
+        );
         if (inView && type === DropSize.LIGHT && !suspendLightDropHydration) {
           fetchAroundSerialNo(waveId, dropSerialNo);
         }
@@ -149,21 +230,22 @@ export default function VirtualScrollWrapper({
       }
     );
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const observedElement = containerRef.current;
+    if (observedElement) {
+      observer.observe(observedElement);
     }
 
     // Cleanup observer on unmount
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
+      if (observedElement) {
+        observer.unobserve(observedElement);
       }
+      observer.disconnect();
     };
   }, [
     dropId,
     dropSerialNo,
     fetchAroundSerialNo,
-    isInView,
     measureHeight,
     scrollContainerRef,
     suspendLightDropHydration,
