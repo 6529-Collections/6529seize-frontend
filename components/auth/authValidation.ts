@@ -55,6 +55,30 @@ export const getAuthTerminalTransitionScope = ({
     ].join(":")
   );
 
+export const getCurrentAuthTerminalTransitionScope = ({
+  activeProfileProxy,
+  authRolloutSettings,
+  canSignActiveWallet,
+  currentAddress,
+  hasActiveWalletAddress,
+}: Pick<
+  RunImmediateAuthValidationParams,
+  | "activeProfileProxy"
+  | "authRolloutSettings"
+  | "canSignActiveWallet"
+  | "currentAddress"
+  | "hasActiveWalletAddress"
+>): string =>
+  getAuthTerminalTransitionScope({
+    activeProfileProxyId: activeProfileProxy?.id ?? null,
+    authJwt: getAuthJwt(),
+    authRolloutSettings,
+    canSignActiveWallet,
+    currentAddress,
+    hasActiveWalletAddress,
+    hasSessionV2Auth: hasActiveSessionV2Auth({ address: currentAddress }),
+  });
+
 const isCurrentValidationOperation = ({
   latestAddressRef,
   activeValidationOperationIdRef,
@@ -215,7 +239,9 @@ export const runImmediateAuthValidation = async ({
   const telemetryDedupeScope = terminalAuthTransitionScope;
 
   const beginTerminalAuthTransition = (): boolean => {
-    if (terminalAuthTransitionScopeRef.current === terminalAuthTransitionScope) {
+    if (
+      terminalAuthTransitionScopeRef.current === terminalAuthTransitionScope
+    ) {
       return false;
     }
     terminalAuthTransitionScopeRef.current = terminalAuthTransitionScope;

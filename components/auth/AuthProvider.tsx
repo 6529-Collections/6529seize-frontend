@@ -71,7 +71,7 @@ import type {
   SignModalReason,
 } from "./authTypes";
 import {
-  getAuthTerminalTransitionScope,
+  getCurrentAuthTerminalTransitionScope,
   runImmediateAuthValidation,
 } from "./authValidation";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
@@ -428,17 +428,13 @@ export default function Auth({
       setActiveWalletAccount(address);
     }
 
-    // Capture current address at validation time to prevent race conditions
     const currentAddress = address;
-    const currentAuthJwt = getAuthJwt();
-    const terminalAuthTransitionScope = getAuthTerminalTransitionScope({
-      activeProfileProxyId: activeProfileProxy?.id ?? null,
-      authJwt: currentAuthJwt,
+    const terminalAuthTransitionScope = getCurrentAuthTerminalTransitionScope({
+      activeProfileProxy,
       authRolloutSettings,
       canSignActiveWallet,
       currentAddress,
       hasActiveWalletAddress,
-      hasSessionV2Auth: hasActiveSessionV2Auth({ address: currentAddress }),
     });
     if (
       terminalAuthTransitionScopeRef.current === terminalAuthTransitionScope
