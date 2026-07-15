@@ -264,7 +264,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Update wave data in title context
   useSetWaveData(
-    wave ? { name: wave.name, newItemsCount: newDropsCount } : null
+    wave ? { id: wave.id, name: wave.name, newItemsCount: newDropsCount } : null
   );
 
   // Create a stable key for proper remounting

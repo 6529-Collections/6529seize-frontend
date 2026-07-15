@@ -26,7 +26,13 @@ type TitleContextType = {
   setTitle: (title: string) => void;
   notificationCount: number;
   setNotificationCount: (count: number) => void;
-  setWaveData: (data: { name: string; newItemsCount: number } | null) => void;
+  setWaveData: (data: WaveTitleData | null) => void;
+};
+
+type WaveTitleData = {
+  id: string;
+  name: string;
+  newItemsCount: number;
 };
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
@@ -97,20 +103,17 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     string | null
   >(null);
   const [notificationCount, setNotificationCount] = useState<number>(0);
-  const [waveData, setWaveData] = useState<{
-    name: string;
-    newItemsCount: number;
-  } | null>(null);
+  const [waveData, setWaveData] = useState<WaveTitleData | null>(null);
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
   const isWaveRoute =
     pathname?.startsWith("/waves") ||
     pathname?.startsWith("/messages") ||
     (pathname === "/" && searchParams?.get("view") === "waves");
+  const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
   const waveParam = isWaveRoute
-    ? (myStream?.activeWave.id ??
-      getActiveWaveIdFromUrl({ pathname, searchParams }) ??
-      null)
+    ? (waveInUrl ??
+      (pathname === "/" ? (myStream?.activeWave.id ?? null) : null))
     : null;
 
   useEffect(() => {
@@ -130,12 +133,16 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       setTitle(getDefaultTitleForRoute(pathname));
       setTitlePathname(pathname);
       setExplicitTitlePathname(null);
-      setWaveData(null);
+      setWaveData((current) =>
+        current?.id === currentWaveInUrl ? current : null
+      );
       return;
     }
 
     if (!isWaveRoute) {
-      setWaveData(null);
+      setWaveData((current) =>
+        current?.id === currentWaveInUrl ? current : null
+      );
       return;
     }
 
@@ -146,7 +153,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       setTitle(getDefaultTitleForRoute(pathname));
       setTitlePathname(pathname);
       setExplicitTitlePathname(null);
-      setWaveData(null);
+      setWaveData((current) =>
+        current?.id === currentWaveInUrl ? current : null
+      );
     }
   }, [pathname, searchParams]);
 
@@ -161,7 +170,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   // Compute the title based on current state
   const computedTitle = useMemo(() => {
     const waveTitle = (() => {
-      if (!waveParam || !waveData) return null;
+      if (!waveParam || !waveData || waveData.id !== waveParam) return null;
       let newItemsText = "";
       if (waveData.newItemsCount > 0 && notificationCount === 0) {
         const messageText =
@@ -180,7 +189,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const isTitleOwned =
     (explicitTitlePathname !== null && explicitTitlePathname === pathname) ||
-    Boolean(isWaveRoute && waveParam && waveData);
+    Boolean(isWaveRoute && waveParam && waveData && waveData.id === waveParam);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
@@ -231,9 +240,7 @@ export const useSetTitle = (pageTitle: string) => {
 };
 
 // Hook to set wave data for title
-export const useSetWaveData = (
-  data: { name: string; newItemsCount: number } | null
-) => {
+export const useSetWaveData = (data: WaveTitleData | null) => {
   const { setWaveData } = useTitle();
 
   useEffect(() => {

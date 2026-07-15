@@ -42,8 +42,8 @@ function ExplicitTitleSetter({ pageTitle }: { readonly pageTitle: string }) {
   return null;
 }
 
-function WaveDataSetter() {
-  useSetWaveData({ name: "Wave One", newItemsCount: 0 });
+function WaveDataSetter({ waveId = "wave-1" }: { readonly waveId?: string }) {
+  useSetWaveData({ id: waveId, name: "Wave One", newItemsCount: 0 });
   return null;
 }
 
@@ -119,9 +119,7 @@ describe("TitleProvider ownership", () => {
       </TitleProvider>
     );
     expect(screen.getByTestId("owned").textContent).toBe("true");
-    expect(screen.getByTestId("title").textContent).toBe(
-      "Downloads | Network"
-    );
+    expect(screen.getByTestId("title").textContent).toBe("Downloads | Network");
     expect(screen.getByTestId("title-pathname").textContent).toBe("/network");
   });
 
@@ -135,6 +133,55 @@ describe("TitleProvider ownership", () => {
         <TitleReporter />
       </TitleProvider>
     );
+    expect(screen.getByTestId("owned").textContent).toBe("true");
+    expect(screen.getByTestId("title").textContent).toBe("Wave One | Brain");
+  });
+
+  it("does not let stale wave data own the waves index after navigation", () => {
+    mockNavigation.pathname = "/waves/wave-1";
+
+    const view = render(
+      <TitleProvider>
+        <WaveDataSetter />
+        <TitleReporter />
+      </TitleProvider>
+    );
+    expect(screen.getByTestId("owned").textContent).toBe("true");
+
+    act(() => {
+      mockNavigation.pathname = "/waves";
+    });
+    view.rerender(
+      <TitleProvider>
+        <WaveDataSetter />
+        <TitleReporter />
+      </TitleProvider>
+    );
+
+    expect(screen.getByTestId("owned").textContent).toBe("false");
+    expect(screen.getByTestId("title").textContent).toBe("Waves | Brain");
+  });
+
+  it("only lets data for the URL wave own a wave route title", () => {
+    mockNavigation.pathname = "/waves/wave-2";
+
+    const view = render(
+      <TitleProvider>
+        <WaveDataSetter waveId="wave-1" />
+        <TitleReporter />
+      </TitleProvider>
+    );
+
+    expect(screen.getByTestId("owned").textContent).toBe("false");
+    expect(screen.getByTestId("title").textContent).toBe("Waves | Brain");
+
+    view.rerender(
+      <TitleProvider>
+        <WaveDataSetter waveId="wave-2" />
+        <TitleReporter />
+      </TitleProvider>
+    );
+
     expect(screen.getByTestId("owned").textContent).toBe("true");
     expect(screen.getByTestId("title").textContent).toBe("Wave One | Brain");
   });
