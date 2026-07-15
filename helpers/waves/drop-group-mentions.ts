@@ -11,7 +11,7 @@ export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
 const createGroupMentionPattern = (group: ApiDropGroupMention) =>
   new RegExp(
     String.raw`(^|[^\p{L}\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\p{L}\p{N}_@])`,
-    "giu"
+    "iu"
   );
 
 const createGroupMentionMarkPattern = (group: ApiDropGroupMention) =>
@@ -19,6 +19,36 @@ const createGroupMentionMarkPattern = (group: ApiDropGroupMention) =>
     String.raw`(?<![\p{L}\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\p{L}\p{N}_@])`,
     "giu"
   );
+
+const GROUP_MENTION_PATTERNS: Readonly<Record<ApiDropGroupMention, RegExp>> = {
+  [ApiDropGroupMention.All]: createGroupMentionPattern(ApiDropGroupMention.All),
+  [ApiDropGroupMention.Contributors]: createGroupMentionPattern(
+    ApiDropGroupMention.Contributors
+  ),
+  [ApiDropGroupMention.Admins]: createGroupMentionPattern(
+    ApiDropGroupMention.Admins
+  ),
+  [ApiDropGroupMention.Devs6529]: createGroupMentionPattern(
+    ApiDropGroupMention.Devs6529
+  ),
+};
+
+const GROUP_MENTION_MARK_PATTERNS: Readonly<
+  Record<ApiDropGroupMention, RegExp>
+> = {
+  [ApiDropGroupMention.All]: createGroupMentionMarkPattern(
+    ApiDropGroupMention.All
+  ),
+  [ApiDropGroupMention.Contributors]: createGroupMentionMarkPattern(
+    ApiDropGroupMention.Contributors
+  ),
+  [ApiDropGroupMention.Admins]: createGroupMentionMarkPattern(
+    ApiDropGroupMention.Admins
+  ),
+  [ApiDropGroupMention.Devs6529]: createGroupMentionMarkPattern(
+    ApiDropGroupMention.Devs6529
+  ),
+};
 
 export const getMentionedGroupsFromText = (
   content: string,
@@ -30,7 +60,7 @@ export const getMentionedGroupsFromText = (
   Object.values(ApiDropGroupMention).filter(
     (group) =>
       (group !== ApiDropGroupMention.All || canMentionAll) &&
-      createGroupMentionPattern(group).test(content)
+      GROUP_MENTION_PATTERNS[group].test(content)
   );
 
 export const getMentionedGroupsFromParts = (
@@ -67,6 +97,6 @@ export const markGroupMentionTokens = ({
   readonly marker: string;
 }) =>
   content.replace(
-    createGroupMentionMarkPattern(group),
+    GROUP_MENTION_MARK_PATTERNS[group],
     (_match, token: string) => `${marker}${token}${marker}`
   );

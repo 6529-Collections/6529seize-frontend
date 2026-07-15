@@ -283,6 +283,54 @@ function reconstructSplitWaveMention(
   return true;
 }
 
+function tryReconstructSplitProfileMention(
+  currentNode: TextNode,
+  nextNode: TextNode,
+  mentionedProfileIdsByHandle: ReadonlyMap<string, string>
+): boolean {
+  const mentionStart = currentNode.getTextContent().match(/@\[\w*$/);
+  const mentionEnd = nextNode.getTextContent().match(/^\w*\]/);
+  if (!mentionStart || !mentionEnd) {
+    return false;
+  }
+
+  try {
+    return reconstructSplitMention(
+      currentNode,
+      nextNode,
+      mentionStart,
+      mentionEnd,
+      mentionedProfileIdsByHandle
+    );
+  } catch (error) {
+    console.warn("Failed to reconstruct split mention", error);
+    return false;
+  }
+}
+
+function tryReconstructSplitWaveMention(
+  currentNode: TextNode,
+  nextNode: TextNode
+): boolean {
+  const mentionStart = currentNode.getTextContent().match(/#\[[^\]]*$/);
+  const mentionEnd = nextNode.getTextContent().match(/^[^\]]*\]/);
+  if (!mentionStart || !mentionEnd) {
+    return false;
+  }
+
+  try {
+    return reconstructSplitWaveMention(
+      currentNode,
+      nextNode,
+      mentionStart,
+      mentionEnd
+    );
+  } catch (error) {
+    console.warn("Failed to reconstruct split wave mention", error);
+    return false;
+  }
+}
+
 function processSplitMentions(
   textNodes: Array<TextNode>,
   mentionedProfileIdsByHandle: ReadonlyMap<string, string>
@@ -294,46 +342,15 @@ function processSplitMentions(
       continue;
     }
 
-    const currentText = currentNode.getTextContent();
-    const nextText = nextNode.getTextContent();
-
-    const mentionStart = currentText?.match(/@\[\w*$/);
-    const mentionEnd = nextText?.match(/^\w*\]/);
-    if (mentionStart && mentionEnd) {
-      try {
-        if (
-          reconstructSplitMention(
-            currentNode,
-            nextNode,
-            mentionStart,
-            mentionEnd,
-            mentionedProfileIdsByHandle
-          )
-        ) {
-          return true;
-        }
-      } catch (error) {
-        console.warn("Failed to reconstruct split mention", error);
-      }
-    }
-
-    const waveMentionStart = currentText?.match(/#\[[^\]]*$/);
-    const waveMentionEnd = nextText?.match(/^[^\]]*\]/);
-    if (waveMentionStart && waveMentionEnd) {
-      try {
-        if (
-          reconstructSplitWaveMention(
-            currentNode,
-            nextNode,
-            waveMentionStart,
-            waveMentionEnd
-          )
-        ) {
-          return true;
-        }
-      } catch (error) {
-        console.warn("Failed to reconstruct split wave mention", error);
-      }
+    if (
+      tryReconstructSplitProfileMention(
+        currentNode,
+        nextNode,
+        mentionedProfileIdsByHandle
+      ) ||
+      tryReconstructSplitWaveMention(currentNode, nextNode)
+    ) {
+      return true;
     }
   }
 

@@ -35,6 +35,9 @@ describe("drop group mentions", () => {
       ApiDropGroupMention.Admins,
       ApiDropGroupMention.Devs6529,
     ]);
+    expect(getMentionedGroupsFromText("again @contributors", false)).toEqual([
+      ApiDropGroupMention.Contributors,
+    ]);
   });
 
   it("does not match embedded global mention names", () => {
