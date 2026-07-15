@@ -10,13 +10,13 @@ export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
 
 const createGroupMentionPattern = (group: ApiDropGroupMention) =>
   new RegExp(
-    `(^|[^\\p{L}\\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\\p{L}\\p{N}_@])`,
+    String.raw`(^|[^\p{L}\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\p{L}\p{N}_@])`,
     "giu"
   );
 
 const createGroupMentionMarkPattern = (group: ApiDropGroupMention) =>
   new RegExp(
-    `(?<![\\p{L}\\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\\p{L}\\p{N}_@])`,
+    String.raw`(?<![\p{L}\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\p{L}\p{N}_@])`,
     "giu"
   );
 

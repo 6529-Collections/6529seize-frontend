@@ -114,11 +114,12 @@ function AliasEditor({
   const aliasIsValid = /^\w{3,15}$/.test(normalizedAlias);
   const reserved = isReservedMentionAlias(normalizedAlias);
   const aliasHasError = alias.length > 0 && (!aliasIsValid || reserved);
-  const aliasErrorDescription = reserved
-    ? "mention-shortcut-reserved-error"
-    : !aliasIsValid && alias.length > 0
-      ? "mention-shortcut-name-error"
-      : undefined;
+  let aliasErrorDescription: string | undefined;
+  if (reserved) {
+    aliasErrorDescription = "mention-shortcut-reserved-error";
+  } else if (!aliasIsValid && alias.length > 0) {
+    aliasErrorDescription = "mention-shortcut-name-error";
+  }
   const canSave = aliasIsValid && !reserved && members.length > 0;
 
   const mutation = useMutation({
