@@ -1,6 +1,7 @@
 import { buildDropSubmissionMetadata } from "@/components/waves/utils/buildDropSubmissionMetadata";
 import {
   canAddDropPart,
+  canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
   handleComposerFileChange,
@@ -261,6 +262,26 @@ describe("CreateDropContent utilities", () => {
           parts: [],
         })
       ).toBe(false);
+    });
+
+    it("keeps save changes disabled when an edited part is empty", () => {
+      expect(
+        canSubmitComposerAction({
+          canAddPart: false,
+          canSubmit: true,
+          editingPartIndex: 0,
+          isStormMode: true,
+        })
+      ).toBe(false);
+
+      expect(
+        canSubmitComposerAction({
+          canAddPart: true,
+          canSubmit: true,
+          editingPartIndex: 0,
+          isStormMode: true,
+        })
+      ).toBe(true);
     });
   });
 

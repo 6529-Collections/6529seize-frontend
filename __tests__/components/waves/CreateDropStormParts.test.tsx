@@ -57,6 +57,11 @@ describe("CreateDropStormParts", () => {
     expect(
       screen.getByText("Discard every saved part and the part you are writing?")
     ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Keep draft" })).toHaveFocus();
+    await userEvent.click(screen.getByRole("button", { name: "Keep draft" }));
+    expect(screen.getByRole("button", { name: "Discard" })).toHaveFocus();
+
+    await userEvent.click(screen.getByRole("button", { name: "Discard" }));
     await userEvent.click(
       screen.getByRole("button", { name: "Discard draft" })
     );

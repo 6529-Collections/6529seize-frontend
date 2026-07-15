@@ -3,6 +3,7 @@ import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-to
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
@@ -371,37 +372,7 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
-  "waves.stormComposer.draftTitle": "Brouillon de storm",
-  "waves.stormComposer.privateDraftHint":
-    "Vous seul pouvez le voir avant sa publication.",
-  "waves.stormComposer.partsCountOne": "{count} partie",
-  "waves.stormComposer.partsCountMany": "{count} parties",
-  "waves.stormComposer.discard": "Supprimer",
-  "waves.stormComposer.discardConfirmation":
-    "Supprimer toutes les parties enregistrées et celle en cours ?",
-  "waves.stormComposer.keepDraft": "Garder le brouillon",
-  "waves.stormComposer.discardDraft": "Supprimer le brouillon",
-  "waves.stormComposer.part": "Partie {number}",
-  "waves.stormComposer.mediaOnlyPart": "Partie avec média uniquement",
-  "waves.stormComposer.edit": "Modifier",
-  "waves.stormComposer.editPart": "Modifier la partie {number}",
-  "waves.stormComposer.finishCurrentPartBeforeEditing":
-    "Ajoutez ou effacez la partie actuelle avant d’en modifier une autre",
-  "waves.stormComposer.editing": "Modification",
-  "waves.stormComposer.movePartEarlier": "Déplacer la partie {number} plus tôt",
-  "waves.stormComposer.movePartLater": "Déplacer la partie {number} plus tard",
-  "waves.stormComposer.moveEarlier": "Déplacer plus tôt",
-  "waves.stormComposer.moveLater": "Déplacer plus tard",
-  "waves.stormComposer.remove": "Retirer",
-  "waves.stormComposer.removePart": "Retirer la partie {number}",
-  "waves.stormComposer.nextPart": "Suivante : partie {number}",
-  "waves.stormComposer.editingPart": "Modification de la partie {number}",
-  "waves.stormComposer.cancelEdit": "Annuler la modification",
-  "waves.stormComposer.writePart": "Écrire la partie {number}",
-  "waves.stormComposer.breakIntoStorm": "Diviser en storm",
-  "waves.stormComposer.addPart": "Ajouter la partie",
-  "waves.stormComposer.saveChanges": "Enregistrer",
-  "waves.stormComposer.postStorm": "Publier le storm",
+  ...stormComposerFrMessages,
   "waves.loadingStatus": "Chargement des waves",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
   "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",

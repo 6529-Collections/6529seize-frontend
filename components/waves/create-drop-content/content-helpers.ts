@@ -160,6 +160,21 @@ export const canAddDropPart = ({
   !hasPendingInlineImageUpload &&
   !getIsDropLimit(drop, markdown);
 
+export const canSubmitComposerAction = ({
+  canAddPart,
+  canSubmit,
+  editingPartIndex,
+  isStormMode,
+}: {
+  readonly canAddPart: boolean;
+  readonly canSubmit: boolean;
+  readonly editingPartIndex: number | null;
+  readonly isStormMode: boolean;
+}): boolean =>
+  isStormMode && (editingPartIndex !== null || canAddPart)
+    ? canAddPart
+    : canSubmit;
+
 const ensurePartsWithFallback = (
   parts: CreateDropPart[],
   shouldAddPlaceholder: boolean

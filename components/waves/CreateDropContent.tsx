@@ -23,7 +23,6 @@ import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/W
 import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import {
-  createDefaultDropPollDraft,
   validateCreateDropPollDraft,
   type CreateDropPollDraft,
 } from "./CreateDropPoll";
@@ -54,11 +53,11 @@ import {
   areHandlesEqual,
   isChatLinkRestrictionApplicable,
 } from "@/helpers/waves/chat-link-restriction.helpers";
-import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import { useLatestEditableChatDropTarget } from "./hooks/useLatestEditableChatDropTarget";
 import CreateDropLayout from "./create-drop-content/CreateDropLayout";
 import {
   canAddDropPart,
+  canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
   hasMetadataContent,
@@ -69,6 +68,9 @@ import { useCreateDropFileHandlers } from "./create-drop-content/useCreateDropFi
 import { useCreateDropFocusBehavior } from "./create-drop-content/useCreateDropFocusBehavior";
 import { useCreateDropIdentityState } from "./create-drop-content/useCreateDropIdentityState";
 import { useCreateDropSubmission } from "./create-drop-content/useCreateDropSubmission";
+import { useCreateDropContainerWidth } from "./create-drop-content/useCreateDropContainerWidth";
+import { useCreateDropPollActions } from "./create-drop-content/useCreateDropPollActions";
+import { useStormPartActions } from "./create-drop-content/useStormPartActions";
 import type {
   CreateDropContentProps,
   ScopedValueState,
@@ -79,8 +81,6 @@ export type {
   CreateDropMetadataType,
   UploadingFile,
 } from "./create-drop-content/types";
-
-const CONTAINER_WIDTH_THRESHOLD = 500;
 
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
@@ -114,12 +114,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
-  const actionsContainerRef = useRef<HTMLDivElement>(null);
-  const [actionsContainerElement, setActionsContainerElement] =
-    useState<HTMLDivElement | null>(null);
+  const { actionsContainerRef, isWideContainer, setActionsContainerRef } =
+    useCreateDropContainerWidth();
   const shouldAnimateOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
-  const [isWideContainer, setIsWideContainer] = useState(false);
   const { editingDropId, setEditingDropId } = useEditingDrop();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useAuth();
@@ -155,36 +153,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     showOptionsState?.scopeKey === wave.id
       ? showOptionsState.value
       : isWideContainer;
-
-  const setActionsContainerRef = useCallback((node: HTMLDivElement | null) => {
-    actionsContainerRef.current = node;
-    setActionsContainerElement(node);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!actionsContainerElement) return;
-
-    const setWidthState = (width: number) => {
-      const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
-      setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
-    };
-
-    const measureWidth = () => {
-      setWidthState(actionsContainerElement.getBoundingClientRect().width);
-    };
-
-    measureWidth();
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry) {
-        setWidthState(entry.contentRect.width);
-      }
-    });
-
-    observer.observe(actionsContainerElement);
-    return () => observer.disconnect();
-  }, [actionsContainerElement]);
 
   useLayoutEffect(() => {
     if (prevIsDropModeRef.current && !isDropMode) {
@@ -499,11 +467,31 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldCollapseOptionsAfterMarkdownSyncRef,
   });
 
-  const finalizeAndAddDropPart = useCallback(() => {
-    const updatedDrop = finalizeAndAddDropPartDraft(editingPartIndex);
-    setEditingPartIndex(null);
-    return updatedDrop;
-  }, [editingPartIndex, finalizeAndAddDropPartDraft]);
+  const {
+    breakIntoStorm,
+    finalizeAndAddDropPart,
+    onCancelPartEdit,
+    onDiscardStorm,
+    onEditPart,
+    onMovePart,
+    onRemovePart,
+  } = useStormPartActions({
+    canAddPart,
+    canMentionAll,
+    collapseOptions,
+    createDropInputRef,
+    drop,
+    editingPartIndex,
+    finalizeAndAddDropPartDraft,
+    isWideContainer,
+    refreshState,
+    setDrop,
+    setEditingPartIndex,
+    setEditorState,
+    setFiles,
+    setIsStormMode,
+    submitting,
+  });
 
   useCreateDropFocusBehavior({
     activeDrop,
@@ -678,34 +666,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   }, [dropModeSessionScopeKey]);
 
-  const togglePoll = useCallback(() => {
-    if (!canCreatePoll) {
-      return;
-    }
-
-    setPollDraftState((current) =>
-      current?.scopeKey === wave.id
-        ? null
-        : {
-            scopeKey: wave.id,
-            value: createDefaultDropPollDraft(),
-          }
-    );
-  }, [canCreatePoll, wave.id]);
-
-  const updatePollDraft = useCallback(
-    (value: CreateDropPollDraft) => {
-      setPollDraftState({
-        scopeKey: wave.id,
-        value,
-      });
-    },
-    [wave.id]
-  );
-
-  const removePoll = useCallback(() => {
-    setPollDraftState(null);
-  }, []);
+  const { removePoll, togglePoll, updatePollDraft } = useCreateDropPollActions({
+    canCreatePoll,
+    setPollDraftState,
+    waveId: wave.id,
+  });
 
   const { onChangeKey, onChangeValue, onAddMetadata, onRemoveMetadata } =
     createMetadataHandlers({
@@ -713,113 +678,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setMetadata,
       generateMetadataId,
     });
-
-  const onEditPart = useCallback(
-    (partIndex: number) => {
-      if (submitting || editingPartIndex !== null || canAddPart) {
-        return;
-      }
-
-      const part = drop?.parts[partIndex];
-      if (!part) {
-        return;
-      }
-
-      setEditingPartIndex(partIndex);
-      createDropInputRef.current?.clearEditorState();
-      setEditorState(null);
-      setFiles([...part.media]);
-      if (part.content) {
-        createDropInputRef.current?.setMarkdown(part.content);
-      }
-      createDropInputRef.current?.focus();
-    },
-    [canAddPart, createDropInputRef, drop, editingPartIndex, submitting]
-  );
-
-  const onCancelPartEdit = useCallback(() => {
-    createDropInputRef.current?.clearEditorState();
-    setEditorState(null);
-    setFiles([]);
-    setEditingPartIndex(null);
-    createDropInputRef.current?.focus();
-  }, [createDropInputRef]);
-
-  const onMovePart = useCallback(
-    (partIndex: number, direction: -1 | 1) => {
-      if (submitting || editingPartIndex !== null) {
-        return;
-      }
-
-      setDrop((currentDrop) => {
-        if (!currentDrop) {
-          return null;
-        }
-
-        const destinationIndex = partIndex + direction;
-        if (
-          destinationIndex < 0 ||
-          destinationIndex >= currentDrop.parts.length
-        ) {
-          return currentDrop;
-        }
-
-        const parts = [...currentDrop.parts];
-        const currentPart = parts[partIndex];
-        const destinationPart = parts[destinationIndex];
-        if (!currentPart || !destinationPart) {
-          return currentDrop;
-        }
-
-        parts[partIndex] = destinationPart;
-        parts[destinationIndex] = currentPart;
-        return {
-          ...currentDrop,
-          parts,
-          mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
-        };
-      });
-    },
-    [canMentionAll, editingPartIndex, setDrop, submitting]
-  );
-
-  const onRemovePart = useCallback(
-    (partIndex: number) => {
-      if (submitting || editingPartIndex !== null) {
-        return;
-      }
-
-      setDrop((currentDrop) => {
-        if (!currentDrop) {
-          return null;
-        }
-
-        const parts = currentDrop.parts.filter(
-          (_, index) => index !== partIndex
-        );
-        return {
-          ...currentDrop,
-          parts,
-          mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
-        };
-      });
-    },
-    [canMentionAll, editingPartIndex, setDrop, submitting]
-  );
-
-  const onDiscardStorm = useCallback(() => {
-    refreshState();
-    setEditingPartIndex(null);
-    setIsStormMode(false);
-  }, [refreshState, setIsStormMode]);
-
-  const breakIntoStorm = () => {
-    finalizeAndAddDropPart();
-    setIsStormMode(true);
-    if (!isWideContainer) {
-      collapseOptions();
-    }
-  };
 
   // Clear active reply/quote when entering edit mode on mobile
   useEffect(() => {
@@ -882,7 +740,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       createDropInputRef={createDropInputRef}
       editorState={editorState}
       canMentionAll={canMentionAll}
-      canSubmit={isStormMode && canAddPart ? canAddPart : canSubmit}
+      canSubmit={canSubmitComposerAction({
+        canAddPart,
+        canSubmit,
+        editingPartIndex,
+        isStormMode,
+      })}
       handleEditorStateChange={handleEditorStateChange}
       handleEditorBlur={handleEditorBlur}
       onReferencedNft={onReferencedNft}
