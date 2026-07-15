@@ -63,9 +63,9 @@ describe("UserPageTab", () => {
     expect(link).toHaveClass("tw-font-medium");
     expect(link).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("Identity")).toHaveClass(
-      "tw-border-transparent",
-      "tw-font-semibold"
+      "tw-border-transparent"
     );
+    expect(screen.getByText("Identity")).not.toHaveClass("tw-font-semibold");
     rerender(
       <UserPageTab
         tab={repTab}

@@ -16,14 +16,14 @@ export default function UserPageTab({
 }: UserPageTabProps) {
   const params = useParams();
   const searchParams = useSearchParams();
-  const handleOrWallet = params["user"].toString();
+  const handleOrWallet = params["user"]?.toString() ?? "";
 
   const path = `/${handleOrWallet}/${tab.route}`;
 
   const isActive = tab.id === activeTabId;
 
   const activeClasses =
-    "tw-flex tw-items-center tw-border-transparent tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-font-semibold tw-py-4 tw-px-1";
+    "tw-flex tw-items-center tw-border-transparent tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1";
   const inActiveClasses =
     "tw-flex tw-items-center tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-1 tw-transition tw-duration-300 tw-ease-out";
 
