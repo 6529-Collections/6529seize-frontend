@@ -136,7 +136,7 @@ export default function LatestDropNextMintPanel({
     ? getMintTimelineDetails(subscriptionTokenId).instantUtc
     : null;
   const nextMintDateTime = nextMintStart
-    ? formatFullDateTime(nextMintStart, "local", locale)
+    ? formatFullDateTime(nextMintStart, "local", locale, { hour12: false })
     : "—";
   let nextMintLabel = "—";
   if (hasMappedMemeCard) {
