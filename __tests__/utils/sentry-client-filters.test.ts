@@ -1830,6 +1830,134 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters normalized Google Analytics collection errors without app frames", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createThirdPartyTelemetryNetworkErrorEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/g/collect)",
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("preserves nearby normalized collection paths", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createThirdPartyTelemetryNetworkErrorEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/g/collect-events)",
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("filters normalized Google Analytics collection errors with query strings", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createThirdPartyTelemetryNetworkErrorEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/g/collect?v=2&tid=test)",
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("filters normalized Google Analytics collection errors with non-app frames", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createThirdPartyTelemetryNetworkErrorEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/g/collect)",
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+              stacktrace: {
+                frames: [
+                  {
+                    filename: "https://example.test/telemetry.js",
+                    abs_path: "https://example.test/telemetry.js",
+                    in_app: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("preserves normalized Google Analytics collection errors with app-owned frames", () => {
+    const result = shouldFilterThirdPartyTelemetryNetworkError(
+      createThirdPartyTelemetryNetworkErrorEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/g/collect)",
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+              stacktrace: {
+                frames: [
+                  {
+                    filename: "services/api/common-api.ts",
+                    abs_path: "services/api/common-api.ts",
+                    in_app: true,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
   it("filters the observed frame_ant metrics network error", () => {
     const result = shouldFilterThirdPartyTelemetryNetworkError(
       createObservedFrameAntMetricsNetworkErrorEvent()
