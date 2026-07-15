@@ -24,7 +24,6 @@ import {
   type EditorState,
   type LexicalNode,
   type RootNode,
-  type TextNode,
 } from "lexical";
 import React, {
   useCallback,
@@ -45,12 +44,8 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
+import { WaveMentionNode } from "@/components/drops/create/lexical/nodes/WaveMentionNode";
 import {
-  $createWaveMentionNode,
-  WaveMentionNode,
-} from "@/components/drops/create/lexical/nodes/WaveMentionNode";
-import {
-  $createMentionNode,
   $isMentionNode,
   MentionNode,
 } from "@/components/drops/create/lexical/nodes/MentionNode";
@@ -86,6 +81,7 @@ import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortc
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
+import { processSplitMentions } from "./editDropMentionReconstruction";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
@@ -195,167 +191,6 @@ const convertCodeNodesToFences = (root: RootNode) => {
     }
   }
 };
-
-function reconstructSplitMention(
-  currentNode: TextNode,
-  nextNode: TextNode,
-  mentionStart: RegExpMatchArray,
-  mentionEnd: RegExpMatchArray,
-  mentionedProfileIdsByHandle: ReadonlyMap<string, string>
-) {
-  const fullMention = mentionStart[0] + mentionEnd[0];
-  const mentionRegex = /@\[(\w+)\]/;
-  const mentionMatch = mentionRegex.exec(fullMention);
-
-  if (!mentionMatch) return false;
-
-  const handle = mentionMatch[1];
-  if (!handle) return false;
-  const mentionNode = $createMentionNode(
-    `@${handle}`,
-    mentionedProfileIdsByHandle.get(handle.toLowerCase()) ?? null
-  );
-
-  const currentText = currentNode.getTextContent();
-  const nextText = nextNode.getTextContent();
-
-  const beforeMention = currentText.substring(
-    0,
-    currentText.length - mentionStart[0].length
-  );
-  const afterMention = nextText.substring(mentionEnd[0].length);
-
-  if (beforeMention) {
-    currentNode.setTextContent(beforeMention);
-    currentNode.insertAfter(mentionNode);
-  } else {
-    currentNode.remove();
-    nextNode.insertBefore(mentionNode);
-  }
-
-  if (afterMention) {
-    nextNode.setTextContent(afterMention);
-  } else {
-    nextNode.remove();
-  }
-
-  return true;
-}
-
-function reconstructSplitWaveMention(
-  currentNode: TextNode,
-  nextNode: TextNode,
-  mentionStart: RegExpMatchArray,
-  mentionEnd: RegExpMatchArray
-) {
-  const fullMention = mentionStart[0] + mentionEnd[0];
-  const mentionRegex = /#\[([^\]]+)\]/;
-  const mentionMatch = mentionRegex.exec(fullMention);
-
-  if (!mentionMatch) return false;
-
-  const waveName = mentionMatch[1];
-  const mentionNode = $createWaveMentionNode(`#${waveName}`);
-
-  const currentText = currentNode.getTextContent();
-  const nextText = nextNode.getTextContent();
-
-  const beforeMention = currentText.substring(
-    0,
-    currentText.length - mentionStart[0].length
-  );
-  const afterMention = nextText.substring(mentionEnd[0].length);
-
-  if (beforeMention) {
-    currentNode.setTextContent(beforeMention);
-    currentNode.insertAfter(mentionNode);
-  } else {
-    currentNode.remove();
-    nextNode.insertBefore(mentionNode);
-  }
-
-  if (afterMention) {
-    nextNode.setTextContent(afterMention);
-  } else {
-    nextNode.remove();
-  }
-
-  return true;
-}
-
-function tryReconstructSplitProfileMention(
-  currentNode: TextNode,
-  nextNode: TextNode,
-  mentionedProfileIdsByHandle: ReadonlyMap<string, string>
-): boolean {
-  const mentionStart = currentNode.getTextContent().match(/@\[\w*$/);
-  const mentionEnd = nextNode.getTextContent().match(/^\w*\]/);
-  if (!mentionStart || !mentionEnd) {
-    return false;
-  }
-
-  try {
-    return reconstructSplitMention(
-      currentNode,
-      nextNode,
-      mentionStart,
-      mentionEnd,
-      mentionedProfileIdsByHandle
-    );
-  } catch (error) {
-    console.warn("Failed to reconstruct split mention", error);
-    return false;
-  }
-}
-
-function tryReconstructSplitWaveMention(
-  currentNode: TextNode,
-  nextNode: TextNode
-): boolean {
-  const mentionStart = currentNode.getTextContent().match(/#\[[^\]]*$/);
-  const mentionEnd = nextNode.getTextContent().match(/^[^\]]*\]/);
-  if (!mentionStart || !mentionEnd) {
-    return false;
-  }
-
-  try {
-    return reconstructSplitWaveMention(
-      currentNode,
-      nextNode,
-      mentionStart,
-      mentionEnd
-    );
-  } catch (error) {
-    console.warn("Failed to reconstruct split wave mention", error);
-    return false;
-  }
-}
-
-function processSplitMentions(
-  textNodes: Array<TextNode>,
-  mentionedProfileIdsByHandle: ReadonlyMap<string, string>
-): boolean {
-  for (let i = 0; i < textNodes.length - 1; i++) {
-    const currentNode = textNodes[i];
-    const nextNode = textNodes[i + 1];
-    if (!currentNode || !nextNode) {
-      continue;
-    }
-
-    if (
-      tryReconstructSplitProfileMention(
-        currentNode,
-        nextNode,
-        mentionedProfileIdsByHandle
-      ) ||
-      tryReconstructSplitWaveMention(currentNode, nextNode)
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-}
 
 function InitialContentPlugin({
   initialContent,

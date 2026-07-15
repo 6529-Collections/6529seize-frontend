@@ -62,13 +62,7 @@ import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "@/hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
-import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
-import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
-import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
-import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
-import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
+import { CREATE_DROP_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
@@ -84,16 +78,6 @@ export interface CreateDropInputHandles {
 
 // Create a custom command
 const DISABLE_EDIT_COMMAND = createCommand("DISABLE_EDIT");
-
-const CREATE_DROP_MARKDOWN_TRANSFORMERS = [
-  ...SAFE_MARKDOWN_TRANSFORMERS,
-  MENTION_TRANSFORMER,
-  GROUP_MENTION_TRANSFORMER,
-  HASHTAG_TRANSFORMER,
-  WAVE_MENTION_TRANSFORMER,
-  IMAGE_TRANSFORMER,
-  EMOJI_TRANSFORMER,
-];
 
 // Create a custom plugin to handle disabling
 function DisableEditPlugin({ disabled }: { disabled: boolean }) {
