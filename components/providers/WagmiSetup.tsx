@@ -68,6 +68,11 @@ const WAGMI_APPKIT_FAST_PATH_STORE_KEY = Symbol.for(
   "6529.wagmiAppKitFastPathStore"
 );
 const INTERNAL_API_FAILED_MESSAGE = "Internal API failed";
+// A hung WalletConnect relay must settle the shared bootstrap as an error, not
+// leave every present and future connect intent in a perpetual waiting state.
+const APPKIT_READY_WAIT_TIMEOUT_MS = 15_000;
+const APPKIT_READY_TIMEOUT_MESSAGE =
+  "Timed out waiting for wallet connection services to become ready";
 
 const EMPTY_FAST_PATH_SNAPSHOT: WagmiAppKitFastPathSnapshot = Object.freeze({
   adapter: null,
@@ -185,12 +190,21 @@ async function runAppKitInitialization(
   initialize: () => Promise<void>
 ): Promise<void> {
   await Promise.resolve();
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(new Error(APPKIT_READY_TIMEOUT_MESSAGE));
+    }, APPKIT_READY_WAIT_TIMEOUT_MS);
+  });
+
   try {
-    await initialize();
+    await Promise.race([initialize(), timeoutPromise]);
     updateWagmiAppKitFastPathSnapshot({ status: "ready" });
   } catch (error) {
     updateWagmiAppKitFastPathSnapshot({ status: "error" });
     throw error;
+  } finally {
+    clearTimeout(timeoutHandle);
   }
 }
 
@@ -218,10 +232,6 @@ function startAppKitInitializationOnce(
   });
   return initializationPromise;
 }
-
-// Ceiling on how long connect-intent callers wait for AppKit readiness; a hung
-// WalletConnect relay must surface as a connect error, not a stuck busy state.
-const APPKIT_READY_WAIT_TIMEOUT_MS = 15_000;
 
 type InjectAppWalletConnectorsInput = {
   readonly currentAdapter: WagmiAdapter | null;
@@ -581,25 +591,10 @@ export default function WagmiSetup({
     );
   }, [bootstrapConfigurationKey, chains, currentAdapter, isCapacitor]);
 
-  const waitForAppKitReady = useCallback(async () => {
-    const readyPromise = startAppKitInitialization();
-    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-    const timeoutPromise = new Promise<never>((_resolve, reject) => {
-      timeoutHandle = setTimeout(() => {
-        reject(
-          new Error(
-            "Timed out waiting for wallet connection services to become ready"
-          )
-        );
-      }, APPKIT_READY_WAIT_TIMEOUT_MS);
-    });
-
-    try {
-      await Promise.race([readyPromise, timeoutPromise]);
-    } finally {
-      clearTimeout(timeoutHandle);
-    }
-  }, [startAppKitInitialization]);
+  const waitForAppKitReady = useCallback(
+    () => startAppKitInitialization(),
+    [startAppKitInitialization]
+  );
 
   const appKitBootstrapValue = useMemo(
     (): AppKitBootstrapContextValue => ({
@@ -659,7 +654,7 @@ export default function WagmiSetup({
     }
 
     const timeoutHandle = setTimeout(() => {
-      void startAppKitInitialization().catch(() => undefined);
+      startAppKitInitialization().catch(() => undefined);
     }, 0);
 
     return () => {

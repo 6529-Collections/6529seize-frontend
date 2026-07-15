@@ -1103,6 +1103,50 @@ describe("WagmiSetup Security Tests", () => {
       );
     });
 
+    it("moves a hung background AppKit initialization to a terminal error", async () => {
+      jest.useFakeTimers();
+      const ready = new Promise<void>(() => {
+        // Intentionally never settles to simulate a hung WalletConnect relay.
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
+      });
+
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+        </WagmiSetup>
+      );
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("initializing");
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(15_000);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("error");
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+    });
+
     it("rejects connect-intent waiters when AppKit ready hangs past the timeout", async () => {
       jest.useFakeTimers();
       const ready = new Promise<void>(() => {
@@ -1139,6 +1183,7 @@ describe("WagmiSetup Security Tests", () => {
 
       const { container } = render(
         <WagmiSetup>
+          <AppKitBootstrapProbe />
           <WaitForReadyProbe />
         </WagmiSetup>
       );
@@ -1156,6 +1201,10 @@ describe("WagmiSetup Security Tests", () => {
       expect(
         container.querySelector('[data-testid="wait-for-ready-state"]')
       ).toHaveTextContent("rejected");
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("error");
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
     });
   });
 
