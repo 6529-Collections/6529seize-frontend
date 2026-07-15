@@ -74,6 +74,23 @@ describe("LatestDropNextMintSection", () => {
     expect(screen.getByText("Mint date")).toBeInTheDocument();
   });
 
+  it("shows submitted and rating before the mint date", () => {
+    render(<LatestDropNextMintSection drop={createDrop(488)} />);
+
+    const submitted = screen.getByText("Submitted");
+    const rating = screen.getByText("Rating");
+    const mintDate = screen.getByText("Mint date");
+
+    expect(
+      submitted.compareDocumentPosition(mintDate) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      rating.compareDocumentPosition(mintDate) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it("keeps the schedule label and does not infer a card link when unmapped", () => {
     render(<LatestDropNextMintSection drop={createDrop()} />);
 

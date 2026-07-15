@@ -265,13 +265,6 @@ export default function LatestDropNextMintPanel({
                   }
                 />
               </div>
-              <div className="tw-col-span-2">
-                <NowMintingStatsItem
-                  label={t(locale, "theMemes.detail.live.artwork.mintDate")}
-                  value={nextMintDateTime}
-                  allowWrap
-                />
-              </div>
               <NowMintingStatsItem
                 label={t(locale, "home.nextMint.stats.submitted")}
                 value={submittedAt ?? "—"}
@@ -280,6 +273,13 @@ export default function LatestDropNextMintPanel({
                 label={t(locale, "home.nextMint.stats.rating")}
                 value={`${formatInteger(locale, drop.rating)} TDH`}
               />
+              <div className="tw-col-span-2">
+                <NowMintingStatsItem
+                  label={t(locale, "theMemes.detail.live.artwork.mintDate")}
+                  value={nextMintDateTime}
+                  allowWrap
+                />
+              </div>
             </div>
           </div>
         </div>

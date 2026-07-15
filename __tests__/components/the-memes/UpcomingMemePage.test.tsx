@@ -122,6 +122,30 @@ describe("UpcomingMemePage", () => {
     ).toEqual(["revealed-next-mint-panel", "upcoming-mint-calendar"]);
   });
 
+  it("keeps the generic view when reveal presentation is disabled", () => {
+    mockGetCanonicalNextMintNumber.mockReturnValue(519);
+    mockUseNowMintingStatus.mockReturnValue({
+      isFetching: false,
+      isDropComplete: true,
+      isStatusLoading: false,
+    });
+    mockUseNextMintDrop.mockReturnValue({
+      nextMint: createDrop(519),
+      waveId: "main-stage-wave",
+      isFetching: false,
+      isSettingsLoaded: true,
+    });
+
+    render(<UpcomingMemePage id="519" showRevealedDrop={false} />);
+
+    expect(
+      screen.getByTestId("upcoming-subscription-widget")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("revealed-next-mint-panel")
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps the generic view when the revealed drop maps to another meme", () => {
     mockGetCanonicalNextMintNumber.mockReturnValue(519);
     mockUseNowMintingStatus.mockReturnValue({

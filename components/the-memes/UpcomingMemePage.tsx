@@ -101,9 +101,11 @@ function CanonicalUpcomingMemePage({
 export default function UpcomingMemePage({
   id,
   locale = DEFAULT_LOCALE,
+  showRevealedDrop = true,
 }: {
   readonly id: string;
   readonly locale?: SupportedLocale;
+  readonly showRevealedDrop?: boolean;
 }) {
   const numId = Number(id);
   const isClientHydrated = useSyncExternalStore(
@@ -113,7 +115,9 @@ export default function UpcomingMemePage({
   );
   if (Number.isInteger(numId)) {
     const content =
-      isClientHydrated && numId === getCanonicalNextMintNumber() ? (
+      showRevealedDrop &&
+      isClientHydrated &&
+      numId === getCanonicalNextMintNumber() ? (
         <CanonicalUpcomingMemePage id={numId} locale={locale} />
       ) : (
         <GenericUpcomingMemePage id={numId} locale={locale} />
