@@ -130,7 +130,11 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
         <div className="tw-flex tw-flex-none tw-items-center tw-gap-px tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.045] tw-bg-black/20 tw-p-0.5">
           <button
             type="button"
-            onClick={() => onEditPart(partIndex)}
+            onClick={() => {
+              if (!editDisabled) {
+                onEditPart(partIndex);
+              }
+            }}
             aria-disabled={editDisabled}
             aria-label={editTitle}
             title={editTitle}

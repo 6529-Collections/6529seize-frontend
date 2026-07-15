@@ -46,4 +46,32 @@ describe("CreateDropStormPart", () => {
     expect(onMove).toHaveBeenCalledWith(0, 1);
     expect(screen.getByTestId("markdown")).toBeInTheDocument();
   });
+
+  it("does not activate edit while the control is aria-disabled", async () => {
+    const onEdit = jest.fn();
+    render(
+      <CreateDropStormPart
+        partIndex={0}
+        partsCount={1}
+        part={part}
+        mentionedUsers={[]}
+        mentionedGroups={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        isEditing={false}
+        controlsDisabled={false}
+        canEdit={false}
+        onEditPart={onEdit}
+        onMovePart={jest.fn()}
+        onRemovePart={jest.fn()}
+      />
+    );
+
+    const editButton = screen.getByRole("button", {
+      name: "Add or clear the current part before editing another part",
+    });
+    expect(editButton).toHaveAttribute("aria-disabled", "true");
+    await userEvent.click(editButton);
+    expect(onEdit).not.toHaveBeenCalled();
+  });
 });
