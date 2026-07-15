@@ -68,12 +68,9 @@ function isCoinbaseWalletRequestRelayFrame(frame: SentryStackFrame): boolean {
     return false;
   }
 
-  const paths = [frame.filename, frame.abs_path].filter(
-    (path): path is string => typeof path === "string" && path.length > 0
-  );
   return (
-    paths.length > 0 &&
-    paths.every((path) => path === coinbaseWalletRequestRelayPath)
+    frame.filename === coinbaseWalletRequestRelayPath &&
+    frame.abs_path === coinbaseWalletRequestRelayPath
   );
 }
 

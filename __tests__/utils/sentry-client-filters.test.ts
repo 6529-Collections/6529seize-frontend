@@ -292,6 +292,7 @@ describe("sentry-client-filters", () => {
             frames: [
               {
                 filename: "app:///requestRelay.js",
+                abs_path: "app:///requestRelay.js",
                 module: "requestRelay",
                 function: "i.onclose",
                 lineno: 2,
@@ -4089,6 +4090,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the request relay signature with a websocket detail suffix", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "websocket error 1006: extra detail" }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(true);
+  });
+
   it.each([
     ["module", { module: "otherRelay" }],
     ["function", { function: "onclose" }],
@@ -4150,11 +4162,72 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter a request relay frame when only the event message matches", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "different exception" }
+    );
+    event.message = "websocket error 1006:";
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a request relay frame when only the hint message matches", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "different exception" }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: new Error("websocket error 1006:"),
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["missing filename", { filename: undefined }],
+    ["different filename", { filename: "app:///other.js" }],
+    ["missing abs_path", { abs_path: undefined }],
+    ["different abs_path", { abs_path: "app:///other.js" }],
+  ] as const)(
+    "does not filter a request relay signature with %s",
+    (_case, frameOverrides) => {
+      const event = createCoinbaseWalletRequestRelayEvent(frameOverrides);
+
+      const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
   it("does not filter the exact request relay signature with an app-owned frame", () => {
     const event = createCoinbaseWalletRequestRelayEvent();
     event.exception!.values![0]!.stacktrace!.frames!.push({
       filename: "services/websocket/WebSocketProvider.tsx",
       in_app: true,
+    });
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the exact request relay signature with a separate app-owned exception", () => {
+    const event = createCoinbaseWalletRequestRelayEvent();
+    event.exception!.values!.push({
+      type: "Error",
+      value: "application error",
+      stacktrace: {
+        frames: [
+          {
+            filename: "services/websocket/WebSocketProvider.tsx",
+            in_app: true,
+          },
+        ],
+      },
     });
 
     const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
