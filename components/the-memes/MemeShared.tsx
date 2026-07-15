@@ -12,6 +12,12 @@ import {
   getNftSocialCardImagePath,
 } from "../providers/metadata";
 
+/**
+ * `undefined` means no prefetch was attempted and metadata should fetch the NFT.
+ * `null` means the prefetch completed successfully and no NFT exists.
+ */
+type PrefetchedNft = BaseNFT | null | undefined;
+
 export enum MEME_FOCUS {
   LIVE = "live",
   YOUR_CARDS = "your-cards",
@@ -83,7 +89,7 @@ async function getMetadataProps(
   focus: string,
   isDistribution: boolean = false,
   locale: SupportedLocale = DEFAULT_LOCALE,
-  prefetchedNft?: BaseNFT | null
+  prefetchedNft?: PrefetchedNft
 ) {
   let urlPath = "nfts";
   const idDisplay = idStringToDisplay(id);
@@ -155,7 +161,7 @@ export async function getSharedAppServerSideProps(
   focus: string,
   isDistribution: boolean = false,
   locale: SupportedLocale = DEFAULT_LOCALE,
-  prefetchedNft?: BaseNFT | null
+  prefetchedNft?: PrefetchedNft
 ) {
   const { title, description, ogImage, ogImageAlt } = await getMetadataProps(
     contract,

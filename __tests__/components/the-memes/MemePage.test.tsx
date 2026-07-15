@@ -530,6 +530,27 @@ describe("MemePage API interactions", () => {
     expect(fetchUrl).not.toHaveBeenCalled();
   });
 
+  it("shows a retry action when the fallback card request fails", async () => {
+    (fetchUrl as jest.Mock)
+      .mockRejectedValueOnce(new Error("metadata unavailable"))
+      .mockRejectedValueOnce(new Error("NFT unavailable"));
+
+    renderPage();
+
+    expect(
+      await screen.findByText("We couldn't load this card. Please try again.")
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /card 1/i })
+      ).toBeInTheDocument();
+    });
+    expect(fetchUrl).toHaveBeenCalledTimes(4);
+  });
+
   it("fetches NFT data after metadata loads", async () => {
     renderPage();
 

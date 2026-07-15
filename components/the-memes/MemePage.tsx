@@ -19,10 +19,9 @@ import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
-import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
+import type { NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
-import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
@@ -51,6 +50,10 @@ import {
 } from "./MemeShared";
 import styles from "./TheMemes.module.css";
 import UpcomingMemePage from "./UpcomingMemePage";
+import {
+  type MemePageInitialData,
+  useMemePageFallbackData,
+} from "./useMemePageFallbackData";
 
 const MemePageActivity = dynamic(() =>
   import("./MemePageActivity").then((mod) => mod.MemePageActivity)
@@ -93,12 +96,6 @@ const MEME_HISTORY_TABS: {
 
 const MEME_TAB_BUTTON_BASE_CLASS_NAME =
   "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
-
-interface MemePageInitialData {
-  readonly nft?: NFT | undefined;
-  readonly nftMeta?: ApiMemesExtendedData | undefined;
-  readonly nftNotFound: boolean;
-}
 
 interface MemeOwnerState {
   readonly consolidationKey: string;
@@ -275,8 +272,10 @@ export default function MemePage({
     [searchParams]
   );
 
-  const [fallbackData, setFallbackData] = useState<MemePageInitialData>();
-  const pageData = initialData ?? fallbackData;
+  const { pageData, cardLoadFailed, retryCardData } = useMemePageFallbackData({
+    nftId,
+    initialData,
+  });
   const nft = pageData?.nft;
   const nftMeta = pageData?.nftMeta;
   const nftNotFound = pageData?.nftNotFound ?? false;
@@ -379,52 +378,6 @@ export default function MemePage({
     replaceRouteFocus(getRouteFocus(MEME_FOCUS.HISTORY, nextTab));
   }
 
-  useEffect(() => {
-    if (!nftId || initialData !== undefined) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    async function loadCardData() {
-      try {
-        const [metaResponse, nftResponse] = await Promise.all([
-          fetchUrl<DBResponse<ApiMemesExtendedData>>(
-            `${publicEnv.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`,
-            { signal: controller.signal }
-          ),
-          fetchUrl<DBResponse<NFT>>(
-            `${publicEnv.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`,
-            { signal: controller.signal }
-          ),
-        ]);
-        if (controller.signal.aborted) {
-          return;
-        }
-        const nftMetas = metaResponse.data;
-        if (Array.isArray(nftMetas) && nftMetas.length === 1) {
-          const nextNftMeta = nftMetas[0];
-          const nextNft = nftResponse.data[0];
-          setFallbackData({
-            nftMeta: nextNftMeta,
-            nft: nextNft,
-            nftNotFound: false,
-          });
-        } else {
-          setFallbackData({ nftNotFound: true });
-        }
-      } catch (error: unknown) {
-        if (!isAbortError(error)) {
-          setFallbackData({ nftNotFound: false });
-        }
-      }
-    }
-
-    void loadCardData();
-
-    return () => controller.abort();
-  }, [initialData, nftId]);
-
   function updateNftBalances(data: Transaction[]) {
     let countIn = 0;
     let countOut = 0;
@@ -496,11 +449,7 @@ export default function MemePage({
           if (isAbortError(error)) {
             return;
           }
-          setOwnerState((current) =>
-            current?.consolidationKey === activeConsolidationKey
-              ? undefined
-              : current
-          );
+          // Preserve already loaded metrics for this profile on transient errors.
         }
       }
 
@@ -686,7 +635,8 @@ export default function MemePage({
   }
 
   const isLastCard = nftMeta?.collection_size === nft?.id;
-  const isLoadingNft = pageData === undefined || (!nft && !nftNotFound);
+  const isLoadingNft =
+    !cardLoadFailed && (pageData === undefined || (!nft && !nftNotFound));
   const nftYear = nft === undefined ? null : getMemeYearFromMintNumber(nft.id);
   const parsedNftId = Number(nftId);
   const showUpcomingDistributionLink =
@@ -784,6 +734,23 @@ export default function MemePage({
             )}
           </div>
         </header>
+        {cardLoadFailed && (
+          <div
+            role="alert"
+            className="tw-mb-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-5 tw-text-center"
+          >
+            <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+              {t(locale, "theMemes.detail.loadError.message")}
+            </p>
+            <button
+              type="button"
+              onClick={retryCardData}
+              className="tw-mt-4 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-150 hover:tw-bg-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
+            >
+              {t(locale, "theMemes.detail.loadError.retry")}
+            </button>
+          </div>
+        )}
         {isLoadingNft && <MemePageSkeleton />}
         {nftMeta && nft && (
           <>

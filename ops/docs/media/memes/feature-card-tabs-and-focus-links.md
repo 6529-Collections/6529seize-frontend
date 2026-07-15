@@ -80,6 +80,8 @@
 ## Route States
 
 - Loading state: heading is visible while card data is still resolving; tab row is not rendered yet.
+- Load error state: if both the server seed and client fallback request fail,
+  the route replaces the loading skeleton with an inline `Try again` action.
 - Resolved card state: tab row and tab content render.
 - Unresolved numeric id state: route shows the shared next-mint fallback panel
   and subscription awareness widget for that numeric id.
