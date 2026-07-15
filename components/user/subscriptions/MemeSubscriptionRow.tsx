@@ -12,6 +12,9 @@ import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import { formatAddress } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -29,9 +32,11 @@ const SUBSCRIPTION_COUNT_SELECT_CLASS =
 
 function MintingTodayLabel({
   tokenId,
+  locale,
   className = "",
 }: {
   readonly tokenId: number;
+  readonly locale: ReturnType<typeof useBrowserLocale>;
   readonly className?: string | undefined;
 }) {
   const tooltipId = `minting-today-${tokenId}`;
@@ -44,7 +49,7 @@ function MintingTodayLabel({
         aria-describedby={tooltipId}
         tabIndex={0}
       >
-        Minting Today
+        {t(locale, "profile.subscriptions.mintingToday.label")}
         <FontAwesomeIcon
           icon={faInfoCircle}
           className="tw-size-4"
@@ -60,7 +65,7 @@ function MintingTodayLabel({
         opacity={1}
         style={TOOLTIP_STYLES}
       >
-        No changes allowed on minting day
+        {t(locale, "profile.subscriptions.mintingToday.tooltip")}
       </Tooltip>
     </>
   );
@@ -86,6 +91,7 @@ export default function MemeSubscriptionRow(
 ) {
   const id = `subscription-${props.subscription.token_id}`;
   const isCompact = props.variant === "compact";
+  const locale = useBrowserLocale();
 
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -371,15 +377,18 @@ export default function MemeSubscriptionRow(
         {finalWithMetadata && (
           <div className="tw-mt-2 tw-pr-2 tw-text-sm tw-text-iron-400">
             Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
-            {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
-            {finalWithMetadata.phaseSubscriptions.toLocaleString()} - Airdrop
-            Address: {formatAddress(finalWithMetadata.airdropAddress)} -
+            {formatInteger(locale, finalWithMetadata.phasePosition)} /{" "}
+            {formatInteger(locale, finalWithMetadata.phaseSubscriptions)} -
+            Airdrop Address: {formatAddress(finalWithMetadata.airdropAddress)} -
             Subscription Count: x{finalWithMetadata.subscribedCount}
           </div>
         )}
         {props.minting_today && (
           <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-400">
-            <MintingTodayLabel tokenId={props.subscription.token_id} />
+            <MintingTodayLabel
+              tokenId={props.subscription.token_id}
+              locale={locale}
+            />
           </div>
         )}
       </div>
@@ -405,6 +414,7 @@ export default function MemeSubscriptionRow(
                 {props.minting_today ? (
                   <MintingTodayLabel
                     tokenId={props.subscription.token_id}
+                    locale={locale}
                     className="tw-font-medium tw-text-primary-300"
                   />
                 ) : (
@@ -418,10 +428,10 @@ export default function MemeSubscriptionRow(
           {finalWithMetadata && (
             <span className="tw-break-words tw-text-xs tw-leading-5 tw-text-iron-600">
               Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
-              {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
-              {finalWithMetadata.phaseSubscriptions.toLocaleString()} - Airdrop
-              Address: {formatAddress(finalWithMetadata.airdropAddress)} -
-              Subscription Count: x{finalWithMetadata.subscribedCount}
+              {formatInteger(locale, finalWithMetadata.phasePosition)} /{" "}
+              {formatInteger(locale, finalWithMetadata.phaseSubscriptions)} -
+              Airdrop Address: {formatAddress(finalWithMetadata.airdropAddress)}{" "}
+              - Subscription Count: x{finalWithMetadata.subscribedCount}
             </span>
           )}
         </div>
