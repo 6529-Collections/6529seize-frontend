@@ -419,7 +419,7 @@ function restoreVideoPlayback(
     }
 
     if (snapshot.wasPlaying) {
-      void videoElement.play();
+      void videoElement.play().catch(() => undefined);
     }
   };
 

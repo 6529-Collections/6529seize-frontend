@@ -271,7 +271,23 @@ describe("TwitterPreviewCard", () => {
         configurable: true,
         value: HTMLMediaElement.HAVE_METADATA,
       });
+      Object.defineProperty(video, "paused", {
+        configurable: true,
+        value: false,
+      });
+      Object.defineProperty(video, "ended", {
+        configurable: true,
+        value: false,
+      });
     }
+    const playRejection = Promise.reject(
+      new DOMException("The operation was aborted.", "AbortError")
+    );
+    void playRejection.then(undefined, () => undefined);
+    const playRejectionCatch = jest.spyOn(playRejection, "catch");
+    const play = jest
+      .spyOn(HTMLMediaElement.prototype, "play")
+      .mockReturnValueOnce(playRejection);
     await userEvent.click(screen.getByRole("radio", { name: "720p" }));
     await waitFor(() =>
       expect(container.querySelector("video")).toHaveAttribute(
@@ -280,6 +296,8 @@ describe("TwitterPreviewCard", () => {
       )
     );
     expect(container.querySelector("video")?.currentTime).toBe(12);
+    expect(play).toHaveBeenCalledTimes(1);
+    expect(playRejectionCatch).toHaveBeenCalledTimes(1);
   });
 
   it("does not render a duplicate manual quality option for HLS-only video", async () => {
