@@ -92,6 +92,9 @@ export default function VirtualScrollWrapper({
   const measureHeight = useCallback(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
+      if (!Number.isFinite(rect.height) || rect.height <= 0) {
+        return;
+      }
       setMeasuredHeight((currentHeight) =>
         currentHeight === rect.height ? currentHeight : rect.height
       );

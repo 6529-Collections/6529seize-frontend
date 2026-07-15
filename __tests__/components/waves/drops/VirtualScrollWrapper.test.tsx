@@ -232,6 +232,23 @@ describe("Height Measurement and Placeholder", () => {
     expect(testChild).toBeInTheDocument();
   });
 
+  test("keeps children mounted when the measured height is zero", () => {
+    const { container } = setup(DropSize.FULL);
+    const div = container.firstChild as HTMLElement;
+    Object.defineProperty(div, "getBoundingClientRect", {
+      value: () => ({ height: 0 }),
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+
+    expect(
+      container.querySelector('[data-testid="child"]')
+    ).toBeInTheDocument();
+  });
+
   test("measures height again when leaving viewport for FULL drops", () => {
     const { container } = setup(DropSize.FULL);
     const div = container.firstChild as HTMLElement;
