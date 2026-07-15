@@ -423,7 +423,9 @@ describe("frontend i18n helpers", () => {
   it("backs title-context copy with messages and locale-formatted counts", () => {
     for (const locale of SUPPORTED_LOCALES) {
       const count = formatInteger(locale, 1234);
-      expect(t(locale, "titleContext.routes.messages")).toBe("Messages");
+      expect(t(locale, "titleContext.routes.messages")).toBe(
+        "Messages | Brain"
+      );
       expect(
         t(locale, "titleContext.wave.newMessages.other", {
           count,

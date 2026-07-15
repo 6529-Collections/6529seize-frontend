@@ -137,17 +137,17 @@ describe("DynamicHeadTitle", () => {
     mockIsTitleOwned = true;
     mockTitlePathname = "/messages";
     mockPathname = "/messages";
-    document.title = "Messages";
+    document.title = "Messages | Brain";
 
     const view = render(<DynamicHeadTitle />);
     expect(document.title).toBe("Wave One | Brain");
 
     // Leaving a wave without a pathname change: no metadata commit fires,
     // so the context's route-default reset must reach document.title.
-    mockTitle = "Messages";
+    mockTitle = "Messages | Brain";
     mockIsTitleOwned = false;
     view.rerender(<DynamicHeadTitle />);
-    expect(document.title).toBe("Messages");
+    expect(document.title).toBe("Messages | Brain");
 
     // But it is not sticky: a later external write stands.
     document.title = "External";
@@ -194,7 +194,7 @@ describe("DynamicHeadTitle", () => {
     mockIsTitleOwned = true;
     mockTitlePathname = "/messages";
     mockPathname = "/messages";
-    document.title = "Messages";
+    document.title = "Messages | Brain";
 
     render(<DynamicHeadTitle />);
     expect(document.title).toBe("Wave One | Brain");
