@@ -3218,7 +3218,7 @@
       "facts": [
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
         "Home uses explicit Main Stage mappings for its submission and Meme-card links and omits those links when a mapping is unavailable.",
-        "Unresolved upcoming /the-memes/{id} pages show the next-mint calendar panel plus subscription awareness for that card.",
+        "When an unresolved /the-memes/{id} route is the explicitly mapped next Meme and home is in Next Drop mode, it shows the same winning artwork panel with Mint Date and subscription awareness above the calendar; other upcoming Meme routes keep the standalone subscription and calendar view.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
       ],
