@@ -1,5 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 
 import { renderWavesPageContent } from "@/app/waves/waves-page.shared";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -256,7 +256,7 @@ describe("renderWavesPageContent data paths", () => {
       searchParams: {},
     });
 
-    await Promise.resolve();
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalledTimes(1));
     expect(mockFetchServerWaveFeedSeed).not.toHaveBeenCalled();
 
     resolveMetadata?.(wave);
@@ -265,5 +265,6 @@ describe("renderWavesPageContent data paths", () => {
     expect(rendered).toBeDefined();
     expect(mockFetchServerWaveFeedSeed).toHaveBeenCalledTimes(1);
     resolveFeed?.({ ok: false, waveId: wave.id });
+    await Promise.resolve();
   });
 });

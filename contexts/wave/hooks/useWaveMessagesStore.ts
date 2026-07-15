@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import {
   formatWaveMessages,
   maxOrNull,
@@ -90,9 +90,7 @@ type PendingServerFeedSeed = {
 };
 
 function useWaveMessagesStore() {
-  const [, setWaveMessages] = useState<
-    Record<string, WaveMessages>
-  >({});
+  const [, forceRender] = useReducer((version: number) => version + 1, 0);
   const waveMessagesRef = useRef<Record<string, WaveMessages>>({});
   // Use useRef to keep listeners stable across renders
   const listenersRef = useRef<KeyListeners>({});
@@ -166,12 +164,16 @@ function useWaveMessagesStore() {
       }
 
       waveMessagesRef.current = nextState;
-      setWaveMessages(nextState);
-      clearedWaveIds.forEach((waveId) => {
-        listenersRef.current[waveId]?.forEach((listener) =>
-          listener(undefined)
-        );
-      });
+      forceRender();
+      for (const waveId of clearedWaveIds) {
+        const listeners = listenersRef.current[waveId];
+        if (!listeners) {
+          continue;
+        }
+        for (const listener of listeners) {
+          listener(undefined);
+        }
+      }
     };
 
     globalThis.addEventListener(
@@ -280,7 +282,7 @@ function useWaveMessagesStore() {
       [update.key]: updatedWaveMessages,
     };
     waveMessagesRef.current = nextState as Record<string, WaveMessages>;
-    setWaveMessages(nextState);
+    forceRender();
     onApplied?.();
 
     // Notify listeners after the state update for this item
@@ -301,7 +303,7 @@ function useWaveMessagesStore() {
       // Trigger processing for the next item if queue is not empty
       globalThis.queueMicrotask(processQueueItem);
     }, 0);
-  }, []); // Dependencies: setWaveMessages (implicitly stable), listenersRef (stable)
+  }, []); // Dependencies: forceRender (stable), listenersRef (stable)
 
   // Function to add an update to the queue and trigger processing
   const updateData = useCallback(
@@ -572,7 +574,7 @@ function useWaveMessagesStore() {
     };
 
     waveMessagesRef.current = nextState;
-    setWaveMessages(nextState);
+    forceRender();
 
     const keyListeners = listenersRef.current[waveId];
     if (keyListeners) {

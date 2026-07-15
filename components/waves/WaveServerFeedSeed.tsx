@@ -9,6 +9,7 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -180,9 +181,13 @@ export function WaveServerFeedSeedGate({
     waveId,
   ]);
 
+  const contextValue = useMemo<ServerFeedSeedGateContextValue>(
+    () => ({ expectedPromise, invalidated, markTerminal, startedAtMs }),
+    [expectedPromise, invalidated, markTerminal, startedAtMs]
+  );
+
   return (
-    <ServerFeedSeedGateContext
-      value={{ expectedPromise, invalidated, markTerminal, startedAtMs }}>
+    <ServerFeedSeedGateContext value={contextValue}>
       {children}
     </ServerFeedSeedGateContext>
   );

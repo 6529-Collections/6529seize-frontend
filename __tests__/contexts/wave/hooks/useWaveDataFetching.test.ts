@@ -220,7 +220,7 @@ describe("useWaveDataFetching", () => {
     expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
       "wave1",
       1,
-      50,
+      WAVE_DROPS_PARAMS.limit,
       expect.any(Object),
       expect.any(Function)
     );

@@ -1,5 +1,5 @@
 import MessageWavePage from "@/app/messages/[wave]/page";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { redirect } from "next/navigation";
 import {
   fetchWaveContext,
@@ -142,7 +142,7 @@ describe("Message wave page", () => {
       searchParams: Promise.resolve({}),
     } as any);
 
-    await Promise.resolve();
+    await waitFor(() => expect(fetchWaveContext).toHaveBeenCalledTimes(1));
     expect(mockFetchServerWaveFeedSeed).not.toHaveBeenCalled();
 
     resolveContext?.({

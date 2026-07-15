@@ -303,6 +303,10 @@ describe("MyStreamProvider resume sync", () => {
     );
 
     expect(mockRegisterWave).toHaveBeenCalledTimes(2);
+    expect(mockRegisterWave).toHaveBeenNthCalledWith(2, "wave-1", true, {
+      skipInitialBackfill: undefined,
+    });
+    expect(mainRefetch).toHaveBeenCalledTimes(2);
   });
 
   it.each(["/waves/wave-1", "/messages/wave-1"])(

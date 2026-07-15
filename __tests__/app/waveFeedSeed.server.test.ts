@@ -80,7 +80,7 @@ describe("fetchServerWaveFeedSeed", () => {
     );
     if (result.ok) {
       expect(result.drops).toHaveLength(WAVE_DROPS_PARAMS.limit);
-      expect(result.drops[0]).not.toHaveProperty("wave");
+      expect(result.drops.every((drop) => !("wave" in drop))).toBe(true);
     }
     expect(mockTraceServerRouteData).toHaveBeenCalledWith(
       {
@@ -113,6 +113,9 @@ describe("fetchServerWaveFeedSeed", () => {
 
     expect(result).toEqual(
       expect.objectContaining({ ok: true, hasNextPage: false })
+    );
+    expect(mockFetchWaveDropsFeedV2).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: SERVER_WAVE_FEED_SEED_REQUEST_LIMIT })
     );
     expect(mockTraceServerRouteData).toHaveBeenCalledWith(
       expect.objectContaining({ routeFamily: "/messages/[wave]" }),

@@ -210,6 +210,41 @@ describe("WaveServerFeedSeed", () => {
     );
   });
 
+  it("ignores a streamed seed that resolves after gate expiry", async () => {
+    jest.useFakeTimers();
+    let resolveSeed: ((value: ServerWaveFeedSeedResult) => void) | undefined;
+    const promise = new Promise<ServerWaveFeedSeedResult>((resolve) => {
+      resolveSeed = resolve;
+    });
+
+    await act(async () => {
+      renderSeed(promise);
+      await Promise.resolve();
+    });
+    expect(jest.getTimerCount()).toBeGreaterThan(0);
+
+    act(() => {
+      jest.advanceTimersByTime(10_000);
+    });
+
+    expect(mockExpire).toHaveBeenCalledWith(wave.id, expect.any(Promise));
+    expect(mockRegisterWave).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveSeed?.({
+        ok: true,
+        waveId: wave.id,
+        drops: makeSeedDrops(1),
+        hasNextPage: false,
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(mockApply).not.toHaveBeenCalled();
+    expect(mockRegisterWave).toHaveBeenCalledTimes(1);
+  });
+
   it("releases the placeholder guard when the gated route unmounts", () => {
     const { unmount } = render(
       <WaveServerFeedSeedGate waveId={wave.id}>
