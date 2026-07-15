@@ -79,10 +79,7 @@ const repository = requireValue('GITHUB_REPOSITORY', GITHUB_REPOSITORY);
 const runId = requireValue('GITHUB_RUN_ID', GITHUB_RUN_ID);
 const status = requireValue('CI_PIPELINES_STATUS', CI_PIPELINES_STATUS);
 const title = requireValue('CI_PIPELINES_TITLE', CI_PIPELINES_TITLE);
-const triggeredByGithubLogin = requireValue(
-  'GITHUB_TRIGGERING_ACTOR or GITHUB_ACTOR',
-  GITHUB_TRIGGERING_ACTOR || GITHUB_ACTOR
-);
+const triggeredByGithubLogin = GITHUB_TRIGGERING_ACTOR || GITHUB_ACTOR || null;
 const isReleaseNotesEligible =
   status === 'success' &&
   targetEnvironment === 'prod' &&
