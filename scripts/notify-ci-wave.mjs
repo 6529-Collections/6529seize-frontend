@@ -21,7 +21,9 @@ const {
   GITHUB_RUN_NUMBER,
   GITHUB_SERVER_URL = 'https://github.com',
   GITHUB_SHA,
-  GITHUB_REF_NAME
+  GITHUB_REF_NAME,
+  GITHUB_TRIGGERING_ACTOR,
+  GITHUB_ACTOR
 } = process.env;
 
 function requireValue(name, value) {
@@ -77,6 +79,10 @@ const repository = requireValue('GITHUB_REPOSITORY', GITHUB_REPOSITORY);
 const runId = requireValue('GITHUB_RUN_ID', GITHUB_RUN_ID);
 const status = requireValue('CI_PIPELINES_STATUS', CI_PIPELINES_STATUS);
 const title = requireValue('CI_PIPELINES_TITLE', CI_PIPELINES_TITLE);
+const triggeredByGithubLogin = requireValue(
+  'GITHUB_TRIGGERING_ACTOR or GITHUB_ACTOR',
+  GITHUB_TRIGGERING_ACTOR || GITHUB_ACTOR
+);
 const isReleaseNotesEligible =
   status === 'success' &&
   targetEnvironment === 'prod' &&
@@ -104,6 +110,7 @@ const payload = {
   status,
   title,
   description: CI_PIPELINES_DESCRIPTION || null,
+  triggered_by_github_login: triggeredByGithubLogin,
   run_id: runId,
   run_number: GITHUB_RUN_NUMBER || null,
   run_url: `${GITHUB_SERVER_URL}/${repository}/actions/runs/${runId}`,
