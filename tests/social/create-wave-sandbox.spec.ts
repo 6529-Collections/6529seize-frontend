@@ -277,6 +277,84 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("defaults the announcement a week out and enforces outcomes with a11y feedback", async ({
+    page,
+  }) => {
+    await gotoCreateWave(page);
+    // The compact progress header is a small-screen stand-in; the desktop
+    // step rail owns progress here.
+    await expect(page.getByText(/Step 1 of \d+/)).toBeHidden();
+
+    await page.getByLabel(/Wave Name/).fill("Sandbox Rank Defaults Wave");
+    await page.getByText("Rank", { exact: true }).click();
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Who can vote" })
+    ).toBeVisible();
+    await nextStepButton(page).click();
+
+    // The first winners announcement defaults ONE WEEK out at 23:59 — the
+    // old same-day default produced a wave that ended within hours.
+    await expect(page.getByText("Wave Timeline")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    const expectedDefault = new Date();
+    expectedDefault.setDate(expectedDefault.getDate() + 7);
+    const expectedDateText = expectedDefault.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    await expect(
+      page.getByText(`${expectedDateText}, 11:59 PM`).first()
+    ).toBeVisible();
+    await nextStepButton(page).click();
+
+    await expect(
+      page.locator("#no-of-applications-allowed-per-participant")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Rules", level: 2, exact: true })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await nextStepButton(page).click();
+    // Voting keeps defaults; proceed to Outcomes.
+    await nextStepButton(page).click();
+
+    // The empty state explains what outcomes are before any error fires.
+    await expect(
+      page.getByText("No outcomes yet — add at least one to continue")
+    ).toBeVisible();
+    await expect(
+      page.getByText(/Outcomes define what winners receive/)
+    ).toBeVisible();
+    const outcomesAlert = page
+      .getByRole("alert")
+      .filter({ hasText: "No outcomes yet" });
+    expect(await outcomesAlert.count()).toBe(0);
+
+    // Trying to advance without an outcome announces the requirement.
+    await nextStepButton(page).click();
+    await expect(outcomesAlert).toBeVisible();
+
+    // Configuring an outcome clears the announcement and unblocks Next.
+    await page.getByRole("button", { name: "Manual" }).click();
+    await page.getByLabel("Manual action").fill("Coverage outcome");
+    await page.getByLabel(/Winning Positions/).fill("1");
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Coverage outcome").first()).toBeVisible();
+    expect(await outcomesAlert.count()).toBe(0);
+    await nextStepButton(page).click();
+
+    // The description composer speaks to its context now.
+    await expect(
+      page.getByText("Give a good description of your wave")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(page.getByText("Describe your wave").first()).toBeVisible();
+    // No submit: this walk only verifies flow feedback, so the mutation
+    // guard must stay silent throughout.
+  });
+
   test("keeps the ranking mode choice out of approve wave dates", async ({
     page,
   }) => {
@@ -339,6 +417,76 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(page.getByText(/Step 2 of \d+/)).toBeVisible();
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("tolerates a trailing slash on the create route", async ({ page }) => {
+    await installExternalDataFixtures(page);
+    await page.goto("/waves/create/", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    await expect(page.getByLabel(/Wave Name/)).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+  });
+
+  test("creates a chat wave end-to-end on mobile", async ({
+    baseURL,
+    page,
+  }) => {
+    await installExternalDataFixtures(page);
+    await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    // Overview: the progress bar carries an accessible name and a
+    // human-readable position.
+    const progressBar = page.getByRole("progressbar", {
+      name: "Wave setup progress",
+    });
+    await expect(progressBar).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(progressBar).toHaveAttribute("aria-valuenow", "1");
+    await page.getByLabel(/Wave Name/).fill(SANDBOX_CREATED_WAVE_NAME);
+    await expectNoHorizontalOverflow(page);
+    await nextStepButton(page).click();
+
+    // Groups
+    await expect(
+      page.getByRole("heading", { name: "Who can view" })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(page.getByText(/Step 2 of 4/)).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await nextStepButton(page).click();
+
+    // Rules
+    await expect(
+      page.getByRole("heading", { name: "Rules", level: 2, exact: true })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(page.getByText(/Step 3 of 4/)).toBeVisible();
+    await expect(progressBar).toHaveAttribute("aria-valuenow", "3");
+    await expectNoHorizontalOverflow(page);
+    await nextStepButton(page).click();
+
+    // Description + submit
+    await expect(
+      page.getByText("Give a good description of your wave")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(page.getByText(/Step 4 of 4/)).toBeVisible();
+    await fillDescription(page, SANDBOX_CREATED_WAVE_DESCRIPTION);
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole("button", { name: "Complete" }).click();
+
+    // The exact-body allowlist accepts the same payload regardless of
+    // viewport; landing on the wave page proves the whole mobile flow.
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    );
+    await waitForRouteReady(page);
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
   });
 });
 
