@@ -798,6 +798,7 @@ describe("createFirstParty6529Plan", () => {
               id: 509,
               name: "The Collective Synapse",
               supply: 173,
+              edition_size_floor: 150,
               artist: "elnaz555",
               artist_seize_handle: "elnaz555",
               hodl_rate: 22.7803,
@@ -833,6 +834,7 @@ describe("createFirstParty6529Plan", () => {
     );
     const { data } = await plan!.execute();
 
+    expect(mockManifoldReadContract).not.toHaveBeenCalled();
     expect(data.facts).toEqual([
       { label: "Edition size", value: "173" },
       { label: "TDH rate", value: "22.78" },
