@@ -111,7 +111,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 
   // Clear logic for when to show each part
   const hasWave = waveId !== undefined;
-  const canShowMainContent = !isMobile || hasWave;
+  // The create route has no waveId but IS the main content; without this it
+  // is unreachable on mobile (the wave list renders instead of the form).
+  const isCreateRoute = pathname === "/waves/create";
+  const canShowMainContent = !isMobile || hasWave || isCreateRoute;
   const showProfileFeedShortcut = !isMobile;
   const shouldShowLeftSidebar =
     showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
