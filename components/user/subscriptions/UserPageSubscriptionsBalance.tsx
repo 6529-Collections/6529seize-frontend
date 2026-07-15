@@ -3,6 +3,8 @@ import { MEMES_MINT_PRICE } from "@/constants/constants";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 import EthereumIcon from "../utils/icons/EthereumIcon";
@@ -15,6 +17,7 @@ export default function UserPageSubscriptionsBalance(
     refresh: () => void;
   }>
 ) {
+  const locale = useBrowserLocale();
   const balance = props.details?.balance ?? 0;
 
   return (
@@ -74,11 +77,7 @@ export default function UserPageSubscriptionsBalance(
             </span>
             {balance > 0 && (
               <span className="tw-text-sm tw-text-iron-400">
-                (
-                {(balance / MEMES_MINT_PRICE).toLocaleString(undefined, {
-                  maximumFractionDigits: 0,
-                })}{" "}
-                cards)
+                ({formatInteger(locale, balance / MEMES_MINT_PRICE)} cards)
               </span>
             )}
           </span>
