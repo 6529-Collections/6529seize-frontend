@@ -268,7 +268,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       wave?.id === waveId
         ? { id: wave.id, name: wave.name, newItemsCount: newDropsCount }
         : null,
-    [newDropsCount, wave, waveId]
+    [newDropsCount, wave?.id, wave?.name, waveId]
   );
   useSetWaveData(waveTitleData);
 

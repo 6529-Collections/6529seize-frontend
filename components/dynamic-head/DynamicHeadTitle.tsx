@@ -1,6 +1,7 @@
 "use client";
 
 import { DEFAULT_TITLE, useTitle } from "@/contexts/TitleContext";
+import { STREAM_INDEX_ROUTES } from "@/contexts/title.helpers";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
@@ -38,7 +39,9 @@ export default function DynamicHeadTitle() {
         previousObservation !== null &&
         previousObservation.pathname === pathname &&
         previousObservation.title !== normalizedTitle;
-      const isStreamIndex = pathname === "/waves" || pathname === "/messages";
+      const isStreamIndex = STREAM_INDEX_ROUTES.some(
+        (route) => pathname === route
+      );
       const isStreamDeselectionTransition =
         isTitleForCurrentRoute &&
         isStreamIndex &&

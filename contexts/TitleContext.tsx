@@ -16,7 +16,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { isTitleUpdateCurrent } from "./title.helpers";
+import { isTitleUpdateCurrent, STREAM_INDEX_ROUTES } from "./title.helpers";
 import { useMyStreamOptional } from "./wave/MyStreamContext";
 
 type TitleContextType = {
@@ -122,9 +122,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const [waveData, setWaveData] = useState<WaveTitleData | null>(null);
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
+  const localeRef = useRef(locale);
   const isWaveRoute =
-    pathname?.startsWith("/waves") ||
-    pathname?.startsWith("/messages") ||
+    STREAM_INDEX_ROUTES.some((route) => pathname?.startsWith(route)) ||
     (pathname === "/" && searchParams?.get("view") === "waves");
   const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
   const fallbackActiveWaveId =
@@ -134,7 +134,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const previousPathname = routeRef.current;
     const previousSearchParams = queryRef.current;
+    const previousLocale = localeRef.current;
     const pathnameChanged = previousPathname !== pathname;
+    const localeChanged = previousLocale !== locale;
     const currentWaveInUrl = waveInUrl;
     const previousWaveInUrl = getActiveWaveIdFromUrl({
       pathname: previousPathname,
@@ -143,6 +145,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
     routeRef.current = pathname;
     queryRef.current = searchParams;
+    localeRef.current = locale;
 
     if (pathnameChanged) {
       setTitle(getDefaultTitleForRoute(pathname, locale));
@@ -152,6 +155,14 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
         current?.id === currentWaveInUrl ? current : null
       );
       return;
+    }
+
+    if (
+      localeChanged &&
+      titlePathname === pathname &&
+      explicitTitlePathname !== pathname
+    ) {
+      setTitle(getDefaultTitleForRoute(pathname, locale));
     }
 
     if (!isWaveRoute) {
@@ -172,7 +183,15 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
         current?.id === currentWaveInUrl ? current : null
       );
     }
-  }, [isWaveRoute, locale, pathname, searchParams, waveInUrl]);
+  }, [
+    explicitTitlePathname,
+    isWaveRoute,
+    locale,
+    pathname,
+    searchParams,
+    titlePathname,
+    waveInUrl,
+  ]);
 
   const updateTitle = useCallback(
     (newTitle: string) => {
