@@ -505,8 +505,14 @@ describe("MemePageLiveRightMenu distribution link", () => {
 
     expect(screen.getAllByText("Unranked")).toHaveLength(1);
     expect(screen.getByLabelText("Edition size: Unranked")).toBeInTheDocument();
-    expect(screen.queryByLabelText("ex. 6529 museum: Unranked")).toBeNull();
-    expect(screen.queryByLabelText("Collectors: Unranked")).toBeNull();
+    const exMuseumMetric =
+      screen.getByText("ex. 6529 museum").parentElement?.parentElement;
+    const collectorsMetric =
+      screen.getByText("Collectors").parentElement?.parentElement;
+    expect(exMuseumMetric).toHaveTextContent(/ex\. 6529 museum\s*100/);
+    expect(exMuseumMetric).not.toHaveTextContent(/Rank|Unranked/);
+    expect(collectorsMetric).toHaveTextContent(/Collectors\s*0/);
+    expect(collectorsMetric).not.toHaveTextContent(/Rank|Unranked/);
     expect(screen.getByText("Pending")).toBeInTheDocument();
     expect(screen.queryByText("22.65")).not.toBeInTheDocument();
   });
