@@ -78,6 +78,8 @@ interface AuthRefreshTelemetryBase {
 }
 
 interface AuthRefreshImpactTelemetry extends AuthRefreshTelemetryBase {
+  /** Internal-only scope used to suppress repeat logs for one auth session. */
+  readonly dedupeScope?: string | undefined;
   readonly outcome:
     | "failed_without_prompt"
     | "logout_required"
@@ -87,6 +89,8 @@ interface AuthRefreshImpactTelemetry extends AuthRefreshTelemetryBase {
 }
 
 const TELEMETRY_VERSION = 1;
+const DEFAULT_AUTH_REFRESH_IMPACT_DEDUPE_SCOPE = "default";
+const authRefreshImpactDedupeKeysByScope = new Map<string, Set<string>>();
 
 const ABORT_ERROR_MESSAGES = [
   "aborterror",
@@ -389,6 +393,47 @@ function logProductImpactEvent(
   }
 }
 
+const getAuthRefreshImpactDedupeScope = (
+  dedupeScope: string | undefined
+): string => dedupeScope ?? DEFAULT_AUTH_REFRESH_IMPACT_DEDUPE_SCOPE;
+
+const getAuthRefreshImpactDedupeKey = (
+  telemetry: AuthRefreshImpactTelemetry
+): string =>
+  [
+    telemetry.clientType,
+    telemetry.hadLocalJwt,
+    telemetry.outcome,
+    telemetry.refreshOutcome,
+    telemetry.requiresReauth,
+  ].join(":");
+
+const shouldTrackAuthRefreshImpact = (
+  telemetry: AuthRefreshImpactTelemetry
+): boolean => {
+  const scope = getAuthRefreshImpactDedupeScope(telemetry.dedupeScope);
+  const dedupeKey = getAuthRefreshImpactDedupeKey(telemetry);
+  const existingKeys = authRefreshImpactDedupeKeysByScope.get(scope);
+  if (existingKeys?.has(dedupeKey)) {
+    return false;
+  }
+
+  if (existingKeys) {
+    existingKeys.add(dedupeKey);
+  } else {
+    authRefreshImpactDedupeKeysByScope.set(scope, new Set([dedupeKey]));
+  }
+  return true;
+};
+
+export function resetAuthSessionRefreshProductImpactDedupe(
+  dedupeScope?: string
+): void {
+  authRefreshImpactDedupeKeysByScope.delete(
+    getAuthRefreshImpactDedupeScope(dedupeScope)
+  );
+}
+
 function getWaveBaseProperties(
   telemetry: WaveFeedTelemetryBase
 ): ProductImpactProperties {
@@ -501,6 +546,10 @@ export function trackAuthSessionRefreshSucceeded(
 export function trackAuthSessionRefreshProductImpact(
   telemetry: AuthRefreshImpactTelemetry
 ): void {
+  if (!shouldTrackAuthRefreshImpact(telemetry)) {
+    return;
+  }
+
   logProductImpactEvent(
     "Auth Session Refresh Product Impact",
     {

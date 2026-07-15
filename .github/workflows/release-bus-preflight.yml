@@ -1,0 +1,158 @@
+name: Release Bus - Preflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_train_id: { type: string, required: true }
+      release_train_revision: { type: string, required: true }
+      operation_key: { type: string, required: true }
+      target_lane:
+        { type: choice, required: true, options: [STAGING, PRODUCTION] }
+      release_branch: { type: string, required: true }
+      deploy_units: { type: string, required: true }
+      expected_sha: { type: string, required: true }
+
+permissions: {}
+
+run-name: Preflight frontend train ${{ inputs.release_train_id }} [${{ inputs.operation_key }}]
+
+jobs:
+  authorize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate and authorize immutable inputs
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TARGET_LANE: ${{ inputs.target_lane }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          [[ "$TARGET_LANE" =~ ^(STAGING|PRODUCTION)$ ]]
+          [[ "$RELEASE_BRANCH" =~ ^release-bus/(staging|production)-train-[A-Za-z0-9._-]+$ ]]
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+  build:
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        environment: ${{ fromJSON(inputs.target_lane == 'PRODUCTION' && '["staging","production"]' || '["staging"]') }}
+    env:
+      SOURCE_SHA: ${{ inputs.expected_sha }}
+    steps:
+      - name: Check out exact train SHA
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.expected_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify immutable source
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with: { node-version: "22" }
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+      - name: Install Socket Firewall
+        id: socket-firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with: { mode: firewall }
+      - name: Install frozen dependencies
+        env:
+          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+      - name: Typecheck
+        run: ./bin/6529 run typecheck:ci
+      - name: Lint exact train
+        if: matrix.environment == 'staging'
+        run: ./bin/6529 run lint
+      - name: Run frontend unit tests
+        if: matrix.environment == 'staging'
+        run: ./bin/6529 run test:no-coverage -- --runInBand
+      - name: Verify validation did not mutate source
+        if: matrix.environment == 'staging'
+        run: git diff --exit-code
+      - name: Capture build timestamp
+        run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+      - name: Build immutable application
+        env:
+          BUILD_ENVIRONMENT: ${{ matrix.environment }}
+          NODE_ENV: production
+          API_ENDPOINT: ${{ matrix.environment == 'production' && 'https://api.6529.io' || vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
+          WS_ENDPOINT: ${{ matrix.environment == 'production' && 'wss://ws.6529.io' || vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
+          ALLOWLIST_API_ENDPOINT: ${{ matrix.environment == 'production' && 'https://allowlist-api.6529.io' || vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
+          BASE_ENDPOINT: ${{ matrix.environment == 'production' && 'https://6529.io' || 'https://staging.6529.io' }}
+          VERSION: ${{ inputs.expected_sha }}
+          VERSION_BUILD_TIMESTAMP: ${{ env.VERSION_BUILD_TIMESTAMP }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          NEXTGEN_CHAIN_ID: ${{ matrix.environment == 'production' && '1' || vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
+          MOBILE_APP_SCHEME: mobile6529
+          CORE_SCHEME: core6529
+          IPFS_API_ENDPOINT: https://api-ipfs.6529.io
+          IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+          ASSETS_FROM_S3: ${{ matrix.environment == 'production' && 'true' || 'false' }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          if [ "$BUILD_ENVIRONMENT" = production ]; then
+            export ANNOUNCED_VERSION_ENDPOINT='https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json'
+          else
+            unset ANNOUNCED_VERSION_ENDPOINT
+          fi
+          ./bin/6529 run build
+      - name: Package immutable bundle
+        env:
+          BUILD_ENVIRONMENT: ${{ matrix.environment }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$BUILD_ENVIRONMENT" =~ ^(staging|production)$ ]]
+          mkdir -p release-bus-artifact/target/_next release-bus-artifact/bundle/.next
+          cp -r .next/standalone/. release-bus-artifact/bundle/
+          cp -r .next/static release-bus-artifact/target/_next/
+          cp -r .next/static release-bus-artifact/bundle/.next/
+          cp -r public Procfile .ebextensions release-bus-artifact/bundle/
+          if [ -d .platform ]; then cp -r .platform release-bus-artifact/bundle/; fi
+          find release-bus-artifact/bundle -xtype l -delete
+          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
+            if [ -f ".next/$file" ]; then cp ".next/$file" "release-bus-artifact/bundle/.next/$file"; fi
+          done
+          (cd release-bus-artifact/bundle && zip -yr ../target/package.zip .)
+          jq -n --arg train_id "$TRAIN_ID" --arg source_sha "$EXPECTED_SHA" --arg environment "$BUILD_ENVIRONMENT" '{train_id:$train_id,source_sha:$source_sha,environment:$environment}' > release-bus-artifact/manifest.json
+          (cd release-bus-artifact && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+      - name: Upload immutable frontend artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-${{ matrix.environment }}
+          path: release-bus-artifact
+          if-no-files-found: error
+          retention-days: 90
