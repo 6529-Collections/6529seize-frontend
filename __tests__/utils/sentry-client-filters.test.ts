@@ -952,9 +952,18 @@ describe("sentry-client-filters", () => {
             stacktrace: {
               frames: [
                 {
+                  filename:
+                    "app:///_next/static/chunks/observed-rabby-webview.js",
+                  abs_path:
+                    "app:///_next/static/chunks/observed-rabby-webview.js",
+                  function: "n",
+                  in_app: true,
+                },
+                {
                   filename: "[native code]",
+                  abs_path: "[native code]",
                   function: "Promise",
-                  in_app: false,
+                  in_app: true,
                 },
               ],
             },
@@ -5612,10 +5621,50 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it("filters exact RabbyMobile RainbowKit lookup errors from the runtime user agent", () => {
+  it("filters the observed raw RainbowKit lookup error without wallet context", () => {
     // Arrange
-    setNavigatorUserAgent(rabbyMobileUserAgent);
     const event = createRabbyMobileRainbowKitNotFoundEvent();
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the symbolicated RainbowKit lookup error without app frames", () => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  abs_path:
+                    "turbopack:///[project]/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                  in_app: false,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
 
     // Act
     const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
@@ -6133,6 +6182,10 @@ describe("sentry-client-filters", () => {
           {
             type: "Error",
             value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
                 {
@@ -6163,6 +6216,10 @@ describe("sentry-client-filters", () => {
           {
             type: "Error",
             value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
                 {
@@ -6183,12 +6240,152 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("does not filter RainbowKit lookup errors without RabbyMobile context", () => {
+  it("does not filter raw Next chunk lookalikes with an app-owned function", () => {
     // Arrange
-    setNavigatorUserAgent(
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile Safari/605.1.15"
-    );
-    const event = createRabbyMobileRainbowKitNotFoundEvent();
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "app:///_next/static/chunks/application-wallet.js",
+                  function: "initializeWallet",
+                  in_app: true,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed raw frames mixed with an app-owned source frame", () => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "app:///_next/static/chunks/observed-rabby-webview.js",
+                  function: "n",
+                  in_app: true,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///components/providers/WagmiSetup.tsx",
+                  function: "initializeWallet",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed raw frames from a handled error", () => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "prefixed",
+      message: `Error: ${rainbowKitNotFoundMessage}`,
+    },
+    {
+      caseName: "suffixed",
+      message: `${rainbowKitNotFoundMessage} after retries`,
+    },
+    {
+      caseName: "case-changed",
+      message: "not found RainbowKit",
+    },
+    {
+      caseName: "unrelated",
+      message: "wallet provider unavailable",
+    },
+  ])("does not filter $caseName RainbowKit lookup messages", ({ message }) => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: message,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    });
 
     // Act
     const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
