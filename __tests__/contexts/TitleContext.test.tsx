@@ -155,12 +155,38 @@ describe("TitleContext", () => {
       <TitleProvider>
         <DynamicHeadTitle />
         <TitleHarness
-          waveData={{ id: "wave-2", name: "Wave Two", newItemsCount: 0 }}
+          waveData={{ id: "wave-2", name: "Wave Two", newItemsCount: 2 }}
         />
       </TitleProvider>
     );
 
-    await waitFor(() => expect(document.title).toBe("Wave Two | Brain"));
+    await waitFor(() =>
+      expect(document.title).toBe("(2 new messages) Wave Two | Brain")
+    );
+  });
+
+  it("clears the owned wave title when wave data becomes unavailable", async () => {
+    const view = render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness
+          waveData={{ id: "wave-1", name: "Wave One", newItemsCount: 4 }}
+        />
+      </TitleProvider>
+    );
+
+    await waitFor(() =>
+      expect(document.title).toBe("(4 new messages) Wave One | Brain")
+    );
+
+    view.rerender(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => expect(document.title).toBe("Waves | Brain"));
   });
 
   it("uses the discovery route title instead of the profile fallback", async () => {
