@@ -31,15 +31,24 @@ stable event-name list; destination ownership has one source of truth here.
 Wave feed success now adds exact `duration_ms` only to Sentry; Mixpanel keeps
 the existing bounded duration bucket and product outcome.
 
-Automatic page-view overlap is intentional for now: AWS RUM answers browser
-performance questions, Mixpanel answers product adoption questions, and the
-Google/Mixpanel product overlap remains unverified. Mixpanel's `path` property
-now carries the normalized `route_pattern` value instead of a raw pathname.
+Page-view provider overlap is intentional for now: manually normalized AWS RUM
+page views answer browser performance questions, Mixpanel answers product
+adoption questions, and the Google/Mixpanel product overlap remains unverified.
+Mixpanel's `path` property now carries the normalized `route_pattern` value
+instead of a raw pathname.
 Known Waves/profile aliases retain their existing colon-parameter contracts;
 fallback routes use the existing App Router-style bracket families. Fallback
 `logical_page` values are derived from the same safe family. This preserves the
 property names while removing handles and route identifiers; dashboards
 grouping by literal paths or raw fallback logical pages may need migration.
+
+AWS RUM page views are recorded manually by the provider because the pinned
+SDK's automatic page-view plugin uses raw browser paths. The provider keeps the
+SDK's performance, error, and HTTP telemetry enabled, but supplies allowlisted
+App Router families for the initial page and client-side navigation. Query
+strings, hashes, profile/wallet values, UUIDs, and dynamic route parameters are
+excluded. Unknown subroutes collapse to a bounded top-level family, and
+consecutive equal families are deduplicated.
 
 The AWS RUM compatibility event `drop_popup_ready` and the legacy AWS RUM-owned
 events `ab_card_impression`, `ab_card_link_out`, and `ab_card_live_open` keep
