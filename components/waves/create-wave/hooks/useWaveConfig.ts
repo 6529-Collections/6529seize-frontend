@@ -154,10 +154,26 @@ export function useWaveConfig() {
     }
   }, [config.dates.endDate]);
 
-  // Clear errors when config changes
+  // Re-validate visible errors when config changes: drop the ones the user
+  // has fixed but keep the rest on screen. Wiping all of them on any change
+  // meant fixing one field hid every other pending error message. New errors
+  // are still only introduced on a forward-step attempt, never mid-typing.
   useEffect(() => {
-    setErrors([]);
-  }, [config]);
+    setErrors((previousErrors) => {
+      if (previousErrors.length === 0) {
+        return previousErrors;
+      }
+      const currentErrors = new Set(
+        getCreateWaveValidationErrors({ config: effectiveConfig, step })
+      );
+      const remainingErrors = previousErrors.filter((error) =>
+        currentErrors.has(error)
+      );
+      return remainingErrors.length === previousErrors.length
+        ? previousErrors
+        : remainingErrors;
+    });
+  }, [effectiveConfig]);
 
   // Section state updates
   const setOverview = (overview: CreateWaveConfig["overview"]) => {

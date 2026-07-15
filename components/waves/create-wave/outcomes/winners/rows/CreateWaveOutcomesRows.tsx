@@ -1,5 +1,7 @@
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import CreateWaveOutcomesRow from "./CreateWaveOutcomesRow";
 
@@ -33,13 +35,22 @@ export default function CreateWaveOutcomesRows({
           />
         ))
       ) : (
-        <span
+        <div
           className={`${
-            showNoOutcomesError ? "tw-text-error" : "tw-text-iron-500"
-          } tw-text-sm sm:tw-text-md tw-italic tw-transition tw-duration-300 tw-ease-out`}
+            showNoOutcomesError ? "tw-border-error/40" : "tw-border-iron-800"
+          } tw-rounded-lg tw-border tw-border-dashed tw-bg-iron-900/40 tw-px-4 tw-py-5 tw-transition tw-duration-300 tw-ease-out`}
         >
-          No outcomes added
-        </span>
+          <p
+            className={`${
+              showNoOutcomesError ? "tw-text-error" : "tw-text-iron-200"
+            } tw-mb-0 tw-text-sm tw-font-semibold`}
+          >
+            {t(DEFAULT_LOCALE, "waves.create.outcomes.empty.title")}
+          </p>
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
+            {t(DEFAULT_LOCALE, "waves.create.outcomes.empty.description")}
+          </p>
+        </div>
       )}
     </div>
   );

@@ -305,6 +305,43 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
   });
 });
 
+test.describe("Create wave mobile reachability @auth @medium @local-only", () => {
+  useLocalSandboxMutationGuard(
+    test,
+    "PLAYWRIGHT_AUTH_SANDBOX",
+    "Create-wave sandbox requires the local mock API runner."
+  );
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("renders the create form with a progress header on small screens", async ({
+    page,
+  }) => {
+    // Regression guard: the mobile master-detail layout used to swallow the
+    // create route entirely, rendering the wave list instead of the form.
+    await installExternalDataFixtures(page);
+    await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    await expect(page.getByLabel(/Wave Name/)).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    // The desktop step rail is hidden below lg; the compact progress header
+    // stands in for it.
+    await expect(page.getByText(/Step 1 of \d+/)).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+
+    // Walk one step to prove the flow is actually usable, not just visible.
+    await page.getByLabel(/Wave Name/).fill("Mobile Sandbox Wave");
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Who can view" })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(page.getByText(/Step 2 of \d+/)).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+});
+
 async function gotoCreateWave(page: Page) {
   await installExternalDataFixtures(page);
   await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
