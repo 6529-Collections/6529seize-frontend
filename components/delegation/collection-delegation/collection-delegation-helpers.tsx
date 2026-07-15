@@ -78,7 +78,7 @@ export function getActiveDelegationsReadParams(
 export function getConsolidationReadParams(
   address: string | undefined,
   collection: string | undefined,
-  consolidationAddresses: ContractDelegation
+  consolidationAddresses: ContractDelegation | undefined
 ) {
   if (!consolidationAddresses) {
     return [];
