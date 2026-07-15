@@ -45,7 +45,9 @@ export default function UserCICTypeIconWrapper({
               pointerEvents: "auto",
             }}
           >
-            <UserCICTypeIconTooltip profile={profile} />
+            <div className="tailwind-scope">
+              <UserCICTypeIconTooltip profile={profile} />
+            </div>
           </Tooltip>,
           document.body
         )}

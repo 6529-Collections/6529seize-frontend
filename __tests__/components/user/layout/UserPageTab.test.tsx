@@ -53,7 +53,6 @@ describe("UserPageTab", () => {
     const { rerender } = render(
       <UserPageTab
         tab={repTab}
-        parentRef={{ current: null }}
         activeTabId={USER_PAGE_TAB_IDS.REP}
       />
     );
@@ -61,23 +60,27 @@ describe("UserPageTab", () => {
     expect(link).toHaveAttribute("href", "/bob/?address=0x1&locale=DE-de");
     expect(link).toHaveAttribute("aria-label", "Identity");
     expect(link).toHaveClass("tw-pointer-events-none");
+    expect(link).toHaveClass("tw-font-medium");
     expect(link).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText("Identity")).toHaveClass(
+      "tw-border-transparent",
+      "tw-font-semibold"
+    );
     rerender(
       <UserPageTab
         tab={repTab}
-        parentRef={{ current: null }}
         activeTabId={USER_PAGE_TAB_IDS.BRAIN}
       />
     );
     expect(link).not.toHaveClass("tw-pointer-events-none");
     expect(link).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("Identity")).not.toHaveClass("tw-font-semibold");
   });
 
   it("renders localized badges in the link name", () => {
     render(
       <UserPageTab
         tab={USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.XTDH]}
-        parentRef={{ current: null }}
         activeTabId={USER_PAGE_TAB_IDS.REP}
       />
     );
