@@ -127,10 +127,10 @@ describe("TitleContext", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Messages | Brain")).toBeInTheDocument();
+      expect(screen.getByText("Messages")).toBeInTheDocument();
     });
     await waitFor(() => {
-      expect(document.title).toBe("Messages | Brain");
+      expect(document.title).toBe("Messages");
     });
   });
 
@@ -219,6 +219,35 @@ describe("TitleContext", () => {
     );
 
     await waitFor(() => expect(document.title).toBe("Waves | Brain"));
+  });
+
+  it("restores the messages index title when the selected DM is deselected", async () => {
+    mockPathname = "/messages/dm-1";
+    mockActiveWaveId = "dm-1";
+
+    const view = render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness
+          waveData={{ id: "dm-1", name: "Alice", newItemsCount: 0 }}
+        />
+      </TitleProvider>
+    );
+
+    await waitFor(() => expect(document.title).toBe("Alice | Brain"));
+
+    mockPathname = "/messages";
+    mockSearchParams = new URLSearchParams();
+    mockActiveWaveId = null;
+
+    view.rerender(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => expect(document.title).toBe("Messages"));
   });
 
   it("uses the discovery route title instead of the profile fallback", async () => {
