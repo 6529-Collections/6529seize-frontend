@@ -127,10 +127,10 @@ describe("TitleContext", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Messages")).toBeInTheDocument();
+      expect(screen.getByText("Messages | Brain")).toBeInTheDocument();
     });
     await waitFor(() => {
-      expect(document.title).toBe("Messages");
+      expect(document.title).toBe("Messages | Brain");
     });
   });
 
@@ -247,7 +247,7 @@ describe("TitleContext", () => {
       </TitleProvider>
     );
 
-    await waitFor(() => expect(document.title).toBe("Messages"));
+    await waitFor(() => expect(document.title).toBe("Messages | Brain"));
   });
 
   it("uses the discovery route title instead of the profile fallback", async () => {
