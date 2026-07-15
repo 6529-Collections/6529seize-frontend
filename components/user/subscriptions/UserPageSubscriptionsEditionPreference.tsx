@@ -1,14 +1,11 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useState } from "react";
-import Toggle from "react-toggle";
+import { useContext, useEffect, useId, useState } from "react";
+import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 
 export default function UserPageSubscriptionsEditionPreference(
   props: Readonly<{
@@ -23,6 +20,8 @@ export default function UserPageSubscriptionsEditionPreference(
   const [isAllEditions, setIsAllEditions] = useState<boolean>(false);
   const [isUpdatingAllEditions, setIsUpdatingAllEditions] =
     useState<boolean>(false);
+  const descriptionId = useId();
+  const isDisabled = props.readonly || isUpdatingAllEditions;
 
   const subscriptionEligibilityCount =
     props.details?.subscription_eligibility_count ?? 1;
@@ -77,51 +76,52 @@ export default function UserPageSubscriptionsEditionPreference(
   };
 
   return (
-    <div>
-      <div className="tw-pb-2">
-        <div>
-          <h5 className="tw-mb-0">
-            Edition Preference{" "}
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-400">
-              Eligibility x{subscriptionEligibilityCount}
-            </span>
-          </h5>
+    <div className="tw-min-w-0 tw-p-1">
+      <div className="tw-min-w-0">
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
+          <h3 className="tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+            Edition Preference
+          </h3>
+          <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-[9px] tw-font-medium tw-uppercase tw-leading-none tw-tracking-wider tw-text-iron-400">
+            Eligibility x{subscriptionEligibilityCount}
+          </span>
         </div>
-      </div>
-      <div className="tw-pt-1">
-        <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-gap-2.5">
           <label
-            htmlFor={"subscription-all-editions-mode"}
-            className="tw-text-white"
+            htmlFor="subscription-all-editions-mode"
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
+              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+            } ${isAllEditions ? "tw-text-iron-500" : "tw-text-iron-100"}`}
           >
-            <b>One edition</b>
+            One edition
           </label>
-          <Toggle
-            disabled={props.readonly || isUpdatingAllEditions}
-            id={"subscription-all-editions-mode"}
+          <UserPageSubscriptionsToggle
+            disabled={isDisabled}
+            id="subscription-all-editions-mode"
             checked={isAllEditions}
-            icons={false}
             onChange={toggleAllEditions}
+            ariaLabel="All eligible editions"
+            describedBy={props.readonly ? undefined : descriptionId}
           />
           <label
-            htmlFor={"subscription-all-editions-mode"}
-            className="tw-text-white"
+            htmlFor="subscription-all-editions-mode"
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
+              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+            } ${isAllEditions ? "tw-text-iron-100" : "tw-text-iron-500"}`}
           >
-            <b>All eligible</b>
+            All eligible
           </label>
-          {isUpdatingAllEditions && (
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          )}
         </div>
       </div>
       {!props.readonly && (
-        <div className="tw-pt-1">
-          <div className="tw-whitespace-nowrap">
-            {isAllEditions
-              ? "You will receive all editions you are eligible for"
-              : "You will receive only one edition"}
-          </div>
-        </div>
+        <p
+          id={descriptionId}
+          className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-light tw-leading-relaxed tw-text-iron-500"
+        >
+          {isAllEditions
+            ? "You will receive all editions you are eligible for"
+            : "You will receive only one edition"}
+        </p>
       )}
     </div>
   );
