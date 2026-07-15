@@ -1,0 +1,139 @@
+name: Release Bus - Isolate Frontend Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_train_id: { type: string, required: true }
+      release_train_revision: { type: string, required: true }
+      operation_key: { type: string, required: true }
+      base_sha: { type: string, required: true }
+      candidate_id: { type: string, required: true }
+      candidate_shas: { type: string, required: true }
+      deploy_units: { type: string, required: true }
+      failure_reason: { type: string, required: true }
+      expected_sha: { type: string, required: true }
+
+permissions:
+  contents: read
+
+run-name: Isolate frontend candidate ${{ inputs.candidate_id }} [${{ inputs.operation_key }}]
+
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Validate immutable inputs
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          CANDIDATE_ID: ${{ inputs.candidate_id }}
+          CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$CANDIDATE_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          jq -e 'type == "array" and all(.[]; test("^[a-f0-9]{40}$"))' <<< "$CANDIDATE_SHAS"
+      - name: Authorize isolation before using build secrets or Codex
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+      - name: Check out exact base
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Socket Firewall
+        id: socket-firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with: { mode: firewall }
+      - name: Reproduce dependency-closed candidate subset
+        id: reproduce
+        continue-on-error: true
+        env:
+          CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
+          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          set -o pipefail
+          {
+            set -euo pipefail
+            git config user.name '6529 Release Bus Isolation'
+            git config user.email 'release-bus@users.noreply.github.com'
+            while IFS= read -r sha; do
+              git fetch --no-tags origin "$sha"
+              git merge --no-ff --no-commit "$sha"
+              git -c core.hooksPath=/dev/null commit -m "Isolation merge $sha"
+            done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
+            corepack enable pnpm
+            corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+            ./bin/6529 install:frozen
+            ./bin/6529 run lint
+            ./bin/6529 run typecheck:ci
+            ./bin/6529 run test:no-coverage -- --runInBand
+            NODE_ENV=production \
+              API_ENDPOINT='https://api.staging.6529.io' \
+              WS_ENDPOINT='wss://ws.staging.6529.io' \
+              ALLOWLIST_API_ENDPOINT='https://allowlist-api.staging.6529.io' \
+              BASE_ENDPOINT='https://staging.6529.io' \
+              MOBILE_APP_SCHEME='mobile6529' \
+              CORE_SCHEME='core6529' \
+              IPFS_API_ENDPOINT='https://api-ipfs.6529.io' \
+              IPFS_GATEWAY_ENDPOINT='https://ipfs.6529.io' \
+              VERSION='${{ inputs.expected_sha }}' \
+              VERSION_BUILD_TIMESTAMP="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+              ./bin/6529 run build
+          } > >(tee isolation.log) 2>&1
+      - name: Ask Codex for a read-only diagnostic
+        if: steps.reproduce.outcome == 'failure'
+        uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ":read-only"
+          safety-strategy: drop-sudo
+          allow-bot-users: ${{ vars.RELEASE_BUS_GITHUB_APP_BOT_LOGIN }}
+          codex-args: '["--ephemeral","--ignore-user-config"]'
+          output-file: codex-isolation-diagnostic.md
+          prompt: |
+            Read isolation.log and the current repository state. Diagnose why this deterministic dependency-closed release-candidate subset failed.
+            This is advisory only: do not edit files, merge, deploy, or recommend ejecting a different candidate without evidence.
+            Identify the first concrete failure, likely owner surface, and the smallest developer action needed.
+      - name: Upload isolation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-isolation-${{ inputs.release_train_id }}-${{ inputs.candidate_id }}
+          path: |
+            isolation.log
+            codex-isolation-diagnostic.md
+          if-no-files-found: ignore
+          retention-days: 90
+      - name: Return deterministic result
+        if: always()
+        run: test '${{ steps.reproduce.outcome }}' = success
