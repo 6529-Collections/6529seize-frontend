@@ -24,6 +24,10 @@ export default function CreateWaveMobileProgress({
   const steps = getCreateWaveMainSteps({ waveType, ongoingRanking });
   const activeStepIndex = Math.max(steps.indexOf(activeStep), 0);
   const progressPercent = ((activeStepIndex + 1) / steps.length) * 100;
+  const stepPositionText = t(DEFAULT_LOCALE, "waves.create.progress.step", {
+    current: activeStepIndex + 1,
+    total: steps.length,
+  });
 
   return (
     <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-bg-[#09090B] tw-px-4 tw-py-3 lg:tw-hidden">
@@ -32,21 +36,20 @@ export default function CreateWaveMobileProgress({
           {CREATE_WAVE_STEPS_LABELS[waveType][activeStep]}
         </span>
         <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
-          {t(DEFAULT_LOCALE, "waves.create.progress.step", {
-            current: activeStepIndex + 1,
-            total: steps.length,
-          })}
+          {stepPositionText}
         </span>
       </div>
       <div
+        aria-label={t(DEFAULT_LOCALE, "waves.create.progress.label")}
         aria-valuemax={steps.length}
         aria-valuemin={1}
         aria-valuenow={activeStepIndex + 1}
+        aria-valuetext={stepPositionText}
         className="tw-mt-2 tw-h-1 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-iron-800"
         role="progressbar"
       >
         <div
-          className="tw-h-full tw-rounded-full tw-bg-primary-500 tw-transition-all tw-duration-300"
+          className="tw-h-full tw-rounded-full tw-bg-primary-500 tw-transition-all tw-duration-300 motion-reduce:tw-transition-none"
           style={{ width: `${progressPercent}%` }}
         />
       </div>

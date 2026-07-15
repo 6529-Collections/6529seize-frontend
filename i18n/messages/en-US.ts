@@ -760,11 +760,12 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
   "empty.title": "No outcomes yet — add at least one to continue",
   "empty.description":
-    "Outcomes define what winners receive when results are announced: a manual award you fulfil yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
+    "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
 } as const);
 
 const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
   step: "Step {current} of {total}",
+  label: "Wave setup progress",
 } as const);
 
 const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
