@@ -432,13 +432,11 @@ export default function MemeSubscriptionRow(
             onChange={submit}
             ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
           />
-          {subscribed && (
-            <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-              {renderCountSelector({
-                disableWhenSingleOption: true,
-              })}
-            </span>
-          )}
+          <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
+            {renderCountSelector({
+              disableWhenSingleOption: true,
+            })}
+          </span>
         </div>
       </div>
     </div>
