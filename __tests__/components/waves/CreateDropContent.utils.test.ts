@@ -244,7 +244,7 @@ describe("CreateDropContent utilities", () => {
       ).toBe(false);
     });
 
-    it("preserves whitespace-only add-part behavior without making it submittable", () => {
+    it("rejects whitespace-only storm parts", () => {
       expect(
         canAddDropPart({
           markdown: "   ",
@@ -252,7 +252,7 @@ describe("CreateDropContent utilities", () => {
           drop: null,
           hasPendingInlineImageUpload: false,
         })
-      ).toBe(true);
+      ).toBe(false);
 
       expect(
         canSubmitDrop({

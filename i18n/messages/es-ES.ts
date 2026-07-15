@@ -364,6 +364,37 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Área de carga de archivos del chat de wave",
+  "waves.stormComposer.draftTitle": "Borrador de storm",
+  "waves.stormComposer.privateDraftHint":
+    "Solo tú puedes verlo hasta que lo publiques.",
+  "waves.stormComposer.partsCountOne": "{count} parte",
+  "waves.stormComposer.partsCountMany": "{count} partes",
+  "waves.stormComposer.discard": "Descartar",
+  "waves.stormComposer.discardConfirmation":
+    "¿Descartar todas las partes guardadas y la que estás escribiendo?",
+  "waves.stormComposer.keepDraft": "Conservar borrador",
+  "waves.stormComposer.discardDraft": "Descartar borrador",
+  "waves.stormComposer.part": "Parte {number}",
+  "waves.stormComposer.mediaOnlyPart": "Parte solo con contenido multimedia",
+  "waves.stormComposer.edit": "Editar",
+  "waves.stormComposer.editPart": "Editar la parte {number}",
+  "waves.stormComposer.finishCurrentPartBeforeEditing":
+    "Añade o borra la parte actual antes de editar otra",
+  "waves.stormComposer.editing": "Editando",
+  "waves.stormComposer.movePartEarlier": "Mover la parte {number} hacia arriba",
+  "waves.stormComposer.movePartLater": "Mover la parte {number} hacia abajo",
+  "waves.stormComposer.moveEarlier": "Mover hacia arriba",
+  "waves.stormComposer.moveLater": "Mover hacia abajo",
+  "waves.stormComposer.remove": "Eliminar",
+  "waves.stormComposer.removePart": "Eliminar la parte {number}",
+  "waves.stormComposer.nextPart": "Siguiente: parte {number}",
+  "waves.stormComposer.editingPart": "Editando la parte {number}",
+  "waves.stormComposer.cancelEdit": "Cancelar edición",
+  "waves.stormComposer.writePart": "Escribe la parte {number}",
+  "waves.stormComposer.breakIntoStorm": "Dividir en storm",
+  "waves.stormComposer.addPart": "Añadir parte",
+  "waves.stormComposer.saveChanges": "Guardar cambios",
+  "waves.stormComposer.postStorm": "Publicar storm",
   "waves.loadingStatus": "Cargando waves",
   "waves.gifPicker.dialogTitle": "Busqueda de GIF",
   "waves.gifPicker.searchPlaceholder": "Buscar GIF",
@@ -397,8 +428,7 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.loadingEarlier": "Cargando drops anteriores",
   "waves.leaderboard.previousLoadError":
     "No se pudieron cargar los drops anteriores. Selecciona Reintentar para volver a intentarlo.",
-  "waves.leaderboard.retryEarlier":
-    "Reintentar la carga de drops anteriores",
+  "waves.leaderboard.retryEarlier": "Reintentar la carga de drops anteriores",
   "waves.leaderboard.loadingMore": "Cargando más drops",
   "waves.leaderboard.nextLoadError":
     "No se pudieron cargar más drops. Selecciona Reintentar para volver a intentarlo.",

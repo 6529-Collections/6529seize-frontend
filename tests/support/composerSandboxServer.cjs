@@ -49,6 +49,8 @@ const SANDBOX_PERPETUAL_WAVE_NAME = "Sandbox Perpetual Rank Wave";
 const SANDBOX_PERPETUAL_WAVE_DESCRIPTION =
   "Local-only perpetual rank wave description for Playwright.";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_STORM_FIRST_PART = "Calm storm opening.";
+const SANDBOX_STORM_SECOND_PART = "Calm storm conclusion.";
 const SANDBOX_SIGNATURE_WAVE_NAME = "Local Signature Sandbox Wave";
 const SANDBOX_SIGNATURE_WAVE_DESCRIPTION =
   "Local-only signed drop sandbox wave for Playwright.";
@@ -902,13 +904,29 @@ function isExpectedDirectMessageBody(body) {
   );
 }
 
-function isExpectedChatDropPart(part) {
+function isExpectedChatDropPart(part, expectedContent) {
   return (
     hasOnlyKeys(part, ["content", "media", "quoted_drop"]) &&
-    part.content === SANDBOX_CHAT_DROP_CONTENT &&
+    part.content === expectedContent &&
     part.quoted_drop === null &&
     Array.isArray(part.media) &&
     part.media.length === 0
+  );
+}
+
+function isExpectedChatDropParts(parts) {
+  if (!Array.isArray(parts)) {
+    return false;
+  }
+
+  if (parts.length === 1) {
+    return isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT);
+  }
+
+  return (
+    parts.length === 2 &&
+    isExpectedChatDropPart(parts[0], SANDBOX_STORM_FIRST_PART) &&
+    isExpectedChatDropPart(parts[1], SANDBOX_STORM_SECOND_PART)
   );
 }
 
@@ -943,9 +961,7 @@ function isExpectedChatDropBody(body) {
     body.signature === null &&
     body.is_safe_signature === false &&
     isExpectedChatDropSignerAddress(body.signer_address) &&
-    Array.isArray(body.parts) &&
-    body.parts.length === 1 &&
-    isExpectedChatDropPart(body.parts[0]) &&
+    isExpectedChatDropParts(body.parts) &&
     Array.isArray(body.referenced_nfts) &&
     body.referenced_nfts.length === 0 &&
     Array.isArray(body.mentioned_users) &&
@@ -1506,6 +1522,11 @@ function loggedRequestBody(pathname, body) {
       drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
       content: isPlainObject(firstPart) ? firstPart.content : null,
       part_count: Array.isArray(body.parts) ? body.parts.length : 0,
+      part_contents: Array.isArray(body.parts)
+        ? body.parts.map((part) =>
+            isPlainObject(part) ? part.content : null
+          )
+        : [],
       part_keys: isPlainObject(firstPart) ? sortedKeys(firstPart) : [],
       media_count: Array.isArray(firstPart?.media) ? firstPart.media.length : 0,
       has_attachments:
@@ -1795,7 +1816,13 @@ const mockApiKnownPostRoutes = [
   },
 ];
 
-function handleAllowedChatDropPost(method, pathname, requestKind, res) {
+function handleAllowedChatDropPost(
+  method,
+  pathname,
+  requestKind,
+  body,
+  res
+) {
   if (method !== "POST" || pathname !== "/api/drops") {
     return false;
   }
@@ -1804,7 +1831,19 @@ function handleAllowedChatDropPost(method, pathname, requestKind, res) {
     return false;
   }
 
-  return writeJsonResponse(res, submittedChatDrop);
+  const parts = body.parts.map((part, index) => ({
+    part_id: index + 1,
+    content: part.content,
+    media: [],
+    attachments: [],
+    quoted_drop: null,
+  }));
+
+  return writeJsonResponse(res, {
+    ...submittedChatDrop,
+    parts,
+    parts_count: parts.length,
+  });
 }
 
 function handleAllowedChatDropEditPost(method, pathname, requestKind, res) {
@@ -1872,7 +1911,7 @@ function handleKnownSandboxPost(method, pathname, url, body, res) {
 function handleMockApi(method, pathname, url, body, res, requestKind) {
   return (
     handleMockApiRead(method, pathname, url, res) ||
-    handleAllowedChatDropPost(method, pathname, requestKind, res) ||
+    handleAllowedChatDropPost(method, pathname, requestKind, body, res) ||
     handleAllowedChatDropEditPost(method, pathname, requestKind, res) ||
     handleAllowedReactionMutation(method, pathname, url, body, res) ||
     handleKnownSandboxPost(method, pathname, url, body, res)

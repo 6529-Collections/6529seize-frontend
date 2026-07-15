@@ -815,6 +815,38 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
 } as const);
 
+const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
+  draftTitle: "Storm draft",
+  privateDraftHint: "Only you can see this until you post it.",
+  partsCountOne: "{count} part",
+  partsCountMany: "{count} parts",
+  discard: "Discard",
+  discardConfirmation: "Discard every saved part and the part you are writing?",
+  keepDraft: "Keep draft",
+  discardDraft: "Discard draft",
+  part: "Part {number}",
+  mediaOnlyPart: "Media-only part",
+  edit: "Edit",
+  editPart: "Edit part {number}",
+  finishCurrentPartBeforeEditing:
+    "Add or clear the current part before editing another part",
+  editing: "Editing",
+  movePartEarlier: "Move part {number} earlier",
+  movePartLater: "Move part {number} later",
+  moveEarlier: "Move earlier",
+  moveLater: "Move later",
+  remove: "Remove",
+  removePart: "Remove part {number}",
+  nextPart: "Next: Part {number}",
+  editingPart: "Editing Part {number}",
+  cancelEdit: "Cancel edit",
+  writePart: "Write part {number}",
+  breakIntoStorm: "Break into storm",
+  addPart: "Add part",
+  saveChanges: "Save changes",
+  postStorm: "Post storm",
+} as const);
+
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
   "access.anyone": "Anyone",
   "access.anyoneWhenEnabled": "Anyone when enabled",
@@ -1875,6 +1907,7 @@ export const EN_US_MESSAGES = {
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
   ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,

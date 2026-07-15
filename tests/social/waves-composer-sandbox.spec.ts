@@ -22,6 +22,9 @@ const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const PREVIEW_TITLE = "Sandbox Preview Title";
 const PREVIEW_DESCRIPTION = "Deterministic local preview served by Playwright.";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_STORM_INITIAL_PART = "Calm storm first draft.";
+const SANDBOX_STORM_FIRST_PART = "Calm storm conclusion.";
+const SANDBOX_STORM_SECOND_PART = "Calm storm opening.";
 
 test.describe.configure({ mode: "serial" });
 
@@ -182,6 +185,92 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       requests.some((request) => request.path.startsWith("/api/attachments"))
     ).toBe(false);
     await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("builds, edits, reorders, and posts a storm", async ({
+    baseURL,
+    page,
+  }) => {
+    await resetSandboxRequests(baseURL);
+    await gotoSandboxWave(page);
+
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await composer.fill(SANDBOX_STORM_INITIAL_PART);
+    await showDropActionsIfCollapsed(page);
+    await page.getByRole("button", { name: "Break into storm" }).click();
+
+    const stormDraft = page.getByRole("region", { name: "Storm draft" });
+    await expect(stormDraft).toBeVisible();
+    await expect(stormDraft.getByText("1 part")).toBeVisible();
+    await expect(
+      stormDraft.getByRole("article", { name: "Part 1" })
+    ).toContainText(SANDBOX_STORM_INITIAL_PART);
+    await expect(
+      page.getByRole("textbox", { name: "Write part 2" })
+    ).toBeVisible();
+
+    await page
+      .getByRole("textbox", { name: "Write part 2" })
+      .fill(SANDBOX_STORM_SECOND_PART);
+    await page.getByRole("button", { name: "Add part" }).click();
+    await expect(stormDraft.getByText("2 parts")).toBeVisible();
+
+    await stormDraft.getByRole("button", { name: "Edit part 1" }).click();
+    const partOneEditor = page.getByRole("textbox", { name: "Write part 1" });
+    await expect(partOneEditor).toBeVisible();
+    await partOneEditor.fill(SANDBOX_STORM_FIRST_PART);
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(
+      stormDraft.getByRole("article", { name: "Part 1" })
+    ).toContainText(SANDBOX_STORM_FIRST_PART);
+    await expect(stormDraft).not.toContainText(SANDBOX_STORM_INITIAL_PART);
+
+    await stormDraft
+      .getByRole("button", { name: "Move part 2 earlier" })
+      .click();
+    await expect(
+      stormDraft.getByRole("article", { name: "Part 1" })
+    ).toContainText(SANDBOX_STORM_SECOND_PART);
+    await expect(
+      stormDraft.getByRole("article", { name: "Part 2" })
+    ).toContainText(SANDBOX_STORM_FIRST_PART);
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole("button", { name: "Post storm" }).click();
+
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL))
+            .filter(
+              (request) =>
+                request.method === "POST" && request.path === "/api/drops"
+            )
+            .map((request) => request.body),
+        {
+          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          message: "Expected the ordered storm to reach the mock API.",
+        }
+      )
+      .toEqual([
+        expect.objectContaining({
+          part_count: 2,
+          part_contents: [SANDBOX_STORM_SECOND_PART, SANDBOX_STORM_FIRST_PART],
+        }),
+      ]);
+
+    const submittedDrop = page.locator('[data-serial-no="2"]');
+    await expect(submittedDrop).toContainText(SANDBOX_STORM_SECOND_PART, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await submittedDrop.getByRole("button", { name: "Next part" }).click();
+    await expect(submittedDrop).toContainText(SANDBOX_STORM_FIRST_PART);
+    await expectNoUnsafeSandboxMutations(baseURL);
+
+    await resetSandboxRequests(baseURL);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 

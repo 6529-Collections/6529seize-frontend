@@ -25,6 +25,7 @@ import CreateDropInput from "../CreateDropInput";
 import CreateDropMetadata from "../CreateDropMetadata";
 import CreateDropPoll, { type CreateDropPollDraft } from "../CreateDropPoll";
 import CreateDropReplyingWrapper from "../CreateDropReplyingWrapper";
+import CreateDropStormParts from "../CreateDropStormParts";
 import { CreateDropSubmit } from "../CreateDropSubmit";
 import SlowModeChatNotice from "../SlowModeChatNotice";
 import InlineIdentityPicker from "./InlineIdentityPicker";
@@ -33,6 +34,8 @@ import type {
   MutableCurrentRef,
   UploadingFile,
 } from "./types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const TermsSignatureFlow = dynamic(
   () => import("../../terms/TermsSignatureFlow"),
@@ -79,6 +82,12 @@ interface CreateDropLayoutProps {
   readonly openMetadata: () => void;
   readonly togglePoll: () => void;
   readonly breakIntoStorm: () => void;
+  readonly editingPartIndex: number | null;
+  readonly onCancelPartEdit: () => void;
+  readonly onEditPart: (partIndex: number) => void;
+  readonly onMovePart: (partIndex: number, direction: -1 | 1) => void;
+  readonly onRemovePart: (partIndex: number) => void;
+  readonly onDiscardStorm: () => void;
   readonly handleSetShowOptions: (next: boolean) => void;
   readonly onGifDrop: (gif: string) => Promise<void>;
   readonly dropEditorRefreshKey: number;
@@ -163,6 +172,12 @@ export default function CreateDropLayout({
   openMetadata,
   togglePoll,
   breakIntoStorm,
+  editingPartIndex,
+  onCancelPartEdit,
+  onEditPart,
+  onMovePart,
+  onRemovePart,
+  onDiscardStorm,
   handleSetShowOptions,
   onGifDrop,
   dropEditorRefreshKey,
@@ -203,8 +218,23 @@ export default function CreateDropLayout({
   termsSignatureFlowEnabled,
   suppressInitialHeightAnimation = false,
 }: CreateDropLayoutProps) {
+  const locale = useBrowserLocale();
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
+  const displayedStormPartNumber =
+    editingPartIndex === null
+      ? (drop?.parts.length ?? 0) + 1
+      : editingPartIndex + 1;
+  let submitLabel: string | undefined;
+  if (isStormModeActive) {
+    if (editingPartIndex !== null) {
+      submitLabel = t(locale, "waves.stormComposer.saveChanges");
+    } else if (canAddPart) {
+      submitLabel = t(locale, "waves.stormComposer.addPart");
+    } else {
+      submitLabel = t(locale, "waves.stormComposer.postStorm");
+    }
+  }
 
   if (isChatClosed) {
     return (
@@ -265,6 +295,22 @@ export default function CreateDropLayout({
       )}
       {showComposer && (
         <>
+          {isStormModeActive && (drop?.parts.length ?? 0) > 0 && (
+            <CreateDropStormParts
+              parts={drop?.parts ?? []}
+              mentionedUsers={drop?.mentioned_users ?? []}
+              mentionedGroups={drop?.mentioned_groups ?? []}
+              mentionedWaves={drop?.mentioned_waves ?? []}
+              referencedNfts={drop?.referenced_nfts ?? []}
+              editingPartIndex={editingPartIndex}
+              controlsDisabled={submitting}
+              canEditParts={!canAddPart && editingPartIndex === null}
+              onEditPart={onEditPart}
+              onMovePart={onMovePart}
+              onRemovePart={onRemovePart}
+              onDiscardStorm={onDiscardStorm}
+            />
+          )}
           <div className="tw-flex tw-w-full tw-items-end">
             <div
               ref={setActionsContainerRef}
@@ -304,6 +350,29 @@ export default function CreateDropLayout({
                 />
               </div>
               <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
+                {isStormModeActive && (
+                  <div className="tw-mb-1.5 tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-px-1">
+                    <span className="tw-truncate tw-text-xs tw-font-semibold tw-text-iron-400">
+                      {t(
+                        locale,
+                        editingPartIndex === null
+                          ? "waves.stormComposer.nextPart"
+                          : "waves.stormComposer.editingPart",
+                        { number: displayedStormPartNumber }
+                      )}
+                    </span>
+                    {editingPartIndex !== null && (
+                      <button
+                        type="button"
+                        onClick={onCancelPartEdit}
+                        disabled={submitting}
+                        className="tw-inline-flex tw-h-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-100"
+                      >
+                        {t(locale, "waves.stormComposer.cancelEdit")}
+                      </button>
+                    )}
+                  </div>
+                )}
                 <CreateDropInput
                   waveId={wave.id}
                   key={dropEditorRefreshKey}
@@ -312,6 +381,7 @@ export default function CreateDropLayout({
                   type={activeDrop?.action ?? null}
                   submitting={submitting}
                   isStormMode={isStormModeActive}
+                  stormPartNumber={displayedStormPartNumber}
                   isDropMode={isDropMode}
                   canMentionAll={canMentionAll}
                   canSubmit={canSubmit}
@@ -361,6 +431,8 @@ export default function CreateDropLayout({
                   canSubmit={canSubmit}
                   onDrop={onDrop}
                   isDropMode={isDropMode}
+                  label={submitLabel}
+                  showLabelOnMobile={isStormModeActive}
                   disabledTooltip={
                     isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
                   }
@@ -409,6 +481,10 @@ export default function CreateDropLayout({
             uploadingFiles={uploadingFiles}
             removeFile={removeFile}
             disabled={submitting}
+            showPartFiles={!isStormModeActive}
+            currentPartNumber={
+              isStormModeActive ? displayedStormPartNumber : null
+            }
           />
         </>
       )}

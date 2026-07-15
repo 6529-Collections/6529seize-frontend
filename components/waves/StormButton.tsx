@@ -1,6 +1,8 @@
 import React from "react";
 import { Tooltip } from "react-tooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface StormButtonProps {
   readonly isStormMode: boolean;
@@ -15,7 +17,13 @@ const StormButton: React.FC<StormButtonProps> = ({
   submitting,
   breakIntoStorm,
 }) => {
-  const label = isStormMode ? "Add a part" : "Break into storm";
+  const locale = useBrowserLocale();
+  const label = t(
+    locale,
+    isStormMode
+      ? "waves.stormComposer.addPart"
+      : "waves.stormComposer.breakIntoStorm"
+  );
 
   return (
     <div>

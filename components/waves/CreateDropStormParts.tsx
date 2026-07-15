@@ -1,27 +1,48 @@
 "use client";
 
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
-import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
-import type { FC } from "react";
-import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { AuthContext } from "../auth/Auth";
-import UserCICAndLevel, {
-  UserCICAndLevelSize,
-} from "../user/utils/UserCICAndLevel";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import {
+  AnimatePresence,
+  domAnimation,
+  LazyMotion,
+  m,
+  useReducedMotion,
+} from "framer-motion";
+import { memo, useId, useState, type FC } from "react";
 import CreateDropStormPart from "./CreateDropStormPart";
 
 interface CreateDropStormPartsProps {
-  parts: CreateDropPart[];
-  mentionedUsers: ApiDropMentionedUser[];
-  mentionedGroups: ApiDropGroupMention[];
-  mentionedWaves: ApiMentionedWave[];
-  referencedNfts: ReferencedNft[];
-  onRemovePart: (partIndex: number) => void;
+  readonly parts: CreateDropPart[];
+  readonly mentionedUsers: ApiDropMentionedUser[];
+  readonly mentionedGroups: ApiDropGroupMention[];
+  readonly mentionedWaves: ApiMentionedWave[];
+  readonly referencedNfts: ReferencedNft[];
+  readonly editingPartIndex: number | null;
+  readonly controlsDisabled: boolean;
+  readonly canEditParts: boolean;
+  readonly onEditPart: (partIndex: number) => void;
+  readonly onMovePart: (partIndex: number, direction: -1 | 1) => void;
+  readonly onRemovePart: (partIndex: number) => void;
+  readonly onDiscardStorm: () => void;
 }
+
+const getPartKey = (part: CreateDropPart, index: number): string => {
+  if (part.clientId) {
+    return part.clientId;
+  }
+  if (part.id !== undefined) {
+    return `${part.id}`;
+  }
+  if (part.quoted_drop) {
+    return `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`;
+  }
+  return `part-${index}`;
+};
 
 const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   parts,
@@ -29,108 +50,157 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   mentionedGroups,
   mentionedWaves,
   referencedNfts,
+  editingPartIndex,
+  controlsDisabled,
+  canEditParts,
+  onEditPart,
+  onMovePart,
   onRemovePart,
+  onDiscardStorm,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
+  const locale = useBrowserLocale();
+  const headingId = useId();
+  const prefersReducedMotion = useReducedMotion();
+  const [isConfirmingDiscard, setIsConfirmingDiscard] = useState(false);
+  const partsLabel = t(
+    locale,
+    parts.length === 1
+      ? "waves.stormComposer.partsCountOne"
+      : "waves.stormComposer.partsCountMany",
+    { count: parts.length }
+  );
 
-  const partIdCounterRef = useRef(0);
-  const [partIdsMap, setPartIdsMap] = useState<Map<number, string>>(new Map());
-
-  useEffect(() => {
-    setPartIdsMap((prevMap) => {
-      const newMap = new Map(prevMap);
-      let changed = false;
-
-      parts.forEach((part, index) => {
-        if (!part.quoted_drop) {
-          if (!newMap.has(index)) {
-            newMap.set(index, `part-${partIdCounterRef.current++}`);
-            changed = true;
-          }
-        }
-      });
-
-      const maxIndex = parts.length - 1;
-      Array.from(newMap.keys()).forEach((key) => {
-        if (key > maxIndex) {
-          newMap.delete(key);
-          changed = true;
-        }
-      });
-
-      return changed ? newMap : prevMap;
-    });
-  }, [parts]);
-
-  const partKeys = useMemo(() => {
-    return parts.map((part, index) => {
-      if (part.quoted_drop) {
-        return `quoted-${part.quoted_drop.drop_id}-${part.quoted_drop.drop_part_id}`;
-      }
-      return partIdsMap.get(index) ?? `part-fallback-${index}`;
-    });
-  }, [parts, partIdsMap]);
+  const handleDiscard = () => {
+    setIsConfirmingDiscard(false);
+    onDiscardStorm();
+  };
 
   return (
-    <div className="tw-space-y-4 tw-pb-3">
-      <div className="tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-bg-transparent tw-py-2 tw-transition-colors tw-duration-300">
-        <div className="tw-flex tw-gap-x-3">
-          <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-900">
-            {connectedProfile?.pfp ? (
-              <img
-                src={connectedProfile.pfp}
-                alt={connectedProfile.handle ?? "user"}
-                className="tw-h-full tw-w-full tw-rounded-lg tw-object-cover"
-              />
-            ) : (
-              <div className="tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-900" />
-            )}
-          </div>
-          <div className="tw-flex tw-w-full tw-flex-col">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <div className="tw-flex tw-items-center tw-gap-x-2">
-                <UserCICAndLevel
-                  level={connectedProfile?.level ?? 0}
-                  size={UserCICAndLevelSize.SMALL}
+    <LazyMotion features={domAnimation}>
+      <section
+        aria-labelledby={headingId}
+        className="tw-mb-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/75 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
+      >
+        <header className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-white/[0.025] tw-px-3 tw-py-3 sm:tw-px-4">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+            <span className="tw-hidden tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/30 tw-text-iron-300 sm:tw-flex">
+              <svg
+                className="tw-size-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6.75h16M4 12h12M4 17.25h8"
                 />
-                <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
-                  <Link
-                    href={`/${connectedProfile?.handle}`}
-                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-                  >
-                    {connectedProfile?.handle ?? "user"}
-                  </Link>
-                </p>
+                <path strokeLinecap="round" d="M19 14.75v5M16.5 17.25h5" />
+              </svg>
+            </span>
+            <div className="tw-min-w-0">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                <h2
+                  id={headingId}
+                  className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+                >
+                  {t(locale, "waves.stormComposer.draftTitle")}
+                </h2>
+                <span
+                  aria-live="polite"
+                  className="tw-rounded-full tw-bg-white/[0.06] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-iron-400"
+                >
+                  {partsLabel}
+                </span>
               </div>
-            </div>
-
-            <div className="tw-mt-4 tw-space-y-4">
-              <AnimatePresence mode="popLayout">
-                {parts.map((part, partIndex) => (
-                  <motion.div
-                    key={partKeys[partIndex]}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <CreateDropStormPart
-                      partIndex={partIndex}
-                      part={part}
-                      mentionedUsers={mentionedUsers}
-                      mentionedGroups={mentionedGroups}
-                      mentionedWaves={mentionedWaves}
-                      referencedNfts={referencedNfts}
-                      onRemovePart={onRemovePart}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-4 tw-text-iron-500">
+                {t(locale, "waves.stormComposer.privateDraftHint")}
+              </p>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+          {!isConfirmingDiscard && (
+            <button
+              type="button"
+              onClick={() => setIsConfirmingDiscard(true)}
+              disabled={controlsDisabled}
+              className="tw-inline-flex tw-h-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-border-white/5 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-100"
+            >
+              {t(locale, "waves.stormComposer.discard")}
+            </button>
+          )}
+        </header>
+
+        <AnimatePresence initial={false}>
+          {isConfirmingDiscard && (
+            <m.div
+              initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.18 }}
+              role="alert"
+              className="tw-overflow-hidden"
+            >
+              <div className="tw-flex tw-flex-col tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-error/[0.04] tw-px-3 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-px-4">
+                <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-200">
+                  {t(locale, "waves.stormComposer.discardConfirmation")}
+                </p>
+                <div className="tw-flex tw-flex-none tw-items-center tw-justify-end tw-gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingDiscard(false)}
+                    className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.06]"
+                  >
+                    {t(locale, "waves.stormComposer.keepDraft")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDiscard}
+                    className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-px-3 tw-text-xs tw-font-semibold tw-text-error tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-error desktop-hover:hover:tw-bg-error/15"
+                  >
+                    {t(locale, "waves.stormComposer.discardDraft")}
+                  </button>
+                </div>
+              </div>
+            </m.div>
+          )}
+        </AnimatePresence>
+
+        <ol className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-3 sm:tw-p-4">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {parts.map((part, partIndex) => (
+              <m.li
+                layout="position"
+                key={getPartKey(part, partIndex)}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.18 }}
+              >
+                <CreateDropStormPart
+                  partIndex={partIndex}
+                  partsCount={parts.length}
+                  part={part}
+                  mentionedUsers={mentionedUsers}
+                  mentionedGroups={mentionedGroups}
+                  mentionedWaves={mentionedWaves}
+                  referencedNfts={referencedNfts}
+                  isEditing={editingPartIndex === partIndex}
+                  controlsDisabled={
+                    controlsDisabled || editingPartIndex !== null
+                  }
+                  canEdit={canEditParts}
+                  onEditPart={onEditPart}
+                  onMovePart={onMovePart}
+                  onRemovePart={onRemovePart}
+                />
+              </m.li>
+            ))}
+          </AnimatePresence>
+        </ol>
+      </section>
+    </LazyMotion>
   );
 };
 

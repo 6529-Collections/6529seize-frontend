@@ -54,6 +54,7 @@ import {
   areHandlesEqual,
   isChatLinkRestrictionApplicable,
 } from "@/helpers/waves/chat-link-restriction.helpers";
+import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import { useLatestEditableChatDropTarget } from "./hooks/useLatestEditableChatDropTarget";
 import CreateDropLayout from "./create-drop-content/CreateDropLayout";
 import {
@@ -128,6 +129,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { signDrop } = useDropSignature();
 
   const [submitting, setSubmitting] = useState(false);
+  const [editingPartIndex, setEditingPartIndex] = useState<number | null>(null);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
@@ -392,10 +394,20 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }) &&
     !isSlowModeSubmitBlocked &&
     !isLinksSubmitBlocked;
+  const dropForPartLimit = useMemo(() => {
+    if (editingPartIndex === null || !drop) {
+      return drop;
+    }
+
+    return {
+      ...drop,
+      parts: drop.parts.filter((_, index) => index !== editingPartIndex),
+    };
+  }, [drop, editingPartIndex]);
   const canAddPart = canAddDropPart({
     markdown: getMarkdown,
     files,
-    drop,
+    drop: dropForPartLimit,
     hasPendingInlineImageUpload,
   });
   const latestEditableChatDropTarget = useLatestEditableChatDropTarget({
@@ -453,7 +465,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     restoreMentionedEntities,
     getUpdatedDrop,
     createGifDrop,
-    finalizeAndAddDropPart,
+    finalizeAndAddDropPart: finalizeAndAddDropPartDraft,
     refreshState,
   } = useCreateDropDraftState({
     metadata,
@@ -486,6 +498,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     closeOnNextInputRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,
   });
+
+  const finalizeAndAddDropPart = useCallback(() => {
+    const updatedDrop = finalizeAndAddDropPartDraft(editingPartIndex);
+    setEditingPartIndex(null);
+    return updatedDrop;
+  }, [editingPartIndex, finalizeAndAddDropPartDraft]);
 
   useCreateDropFocusBehavior({
     activeDrop,
@@ -696,9 +714,111 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       generateMetadataId,
     });
 
+  const onEditPart = useCallback(
+    (partIndex: number) => {
+      if (submitting || editingPartIndex !== null || canAddPart) {
+        return;
+      }
+
+      const part = drop?.parts[partIndex];
+      if (!part) {
+        return;
+      }
+
+      setEditingPartIndex(partIndex);
+      createDropInputRef.current?.clearEditorState();
+      setEditorState(null);
+      setFiles([...part.media]);
+      if (part.content) {
+        createDropInputRef.current?.setMarkdown(part.content);
+      }
+      createDropInputRef.current?.focus();
+    },
+    [canAddPart, createDropInputRef, drop, editingPartIndex, submitting]
+  );
+
+  const onCancelPartEdit = useCallback(() => {
+    createDropInputRef.current?.clearEditorState();
+    setEditorState(null);
+    setFiles([]);
+    setEditingPartIndex(null);
+    createDropInputRef.current?.focus();
+  }, [createDropInputRef]);
+
+  const onMovePart = useCallback(
+    (partIndex: number, direction: -1 | 1) => {
+      if (submitting || editingPartIndex !== null) {
+        return;
+      }
+
+      setDrop((currentDrop) => {
+        if (!currentDrop) {
+          return null;
+        }
+
+        const destinationIndex = partIndex + direction;
+        if (
+          destinationIndex < 0 ||
+          destinationIndex >= currentDrop.parts.length
+        ) {
+          return currentDrop;
+        }
+
+        const parts = [...currentDrop.parts];
+        const currentPart = parts[partIndex];
+        const destinationPart = parts[destinationIndex];
+        if (!currentPart || !destinationPart) {
+          return currentDrop;
+        }
+
+        parts[partIndex] = destinationPart;
+        parts[destinationIndex] = currentPart;
+        return {
+          ...currentDrop,
+          parts,
+          mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
+        };
+      });
+    },
+    [canMentionAll, editingPartIndex, setDrop, submitting]
+  );
+
+  const onRemovePart = useCallback(
+    (partIndex: number) => {
+      if (submitting || editingPartIndex !== null) {
+        return;
+      }
+
+      setDrop((currentDrop) => {
+        if (!currentDrop) {
+          return null;
+        }
+
+        const parts = currentDrop.parts.filter(
+          (_, index) => index !== partIndex
+        );
+        return {
+          ...currentDrop,
+          parts,
+          mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
+        };
+      });
+    },
+    [canMentionAll, editingPartIndex, setDrop, submitting]
+  );
+
+  const onDiscardStorm = useCallback(() => {
+    refreshState();
+    setEditingPartIndex(null);
+    setIsStormMode(false);
+  }, [refreshState, setIsStormMode]);
+
   const breakIntoStorm = () => {
     finalizeAndAddDropPart();
     setIsStormMode(true);
+    if (!isWideContainer) {
+      collapseOptions();
+    }
   };
 
   // Clear active reply/quote when entering edit mode on mobile
@@ -750,13 +870,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       openMetadata={openMetadata}
       togglePoll={togglePoll}
       breakIntoStorm={breakIntoStorm}
+      editingPartIndex={editingPartIndex}
+      onCancelPartEdit={onCancelPartEdit}
+      onEditPart={onEditPart}
+      onMovePart={onMovePart}
+      onRemovePart={onRemovePart}
+      onDiscardStorm={onDiscardStorm}
       handleSetShowOptions={handleSetShowOptions}
       onGifDrop={onGifDrop}
       dropEditorRefreshKey={dropEditorRefreshKey}
       createDropInputRef={createDropInputRef}
       editorState={editorState}
       canMentionAll={canMentionAll}
-      canSubmit={canSubmit}
+      canSubmit={isStormMode && canAddPart ? canAddPart : canSubmit}
       handleEditorStateChange={handleEditorStateChange}
       handleEditorBlur={handleEditorBlur}
       onReferencedNft={onReferencedNft}

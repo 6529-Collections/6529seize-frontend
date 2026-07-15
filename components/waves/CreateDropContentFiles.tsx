@@ -3,6 +3,8 @@ import type { CreateDropPart } from "@/entities/IDrop";
 import { AnimatePresence, motion } from "framer-motion";
 import FilePreview from "./FilePreview";
 import type { UploadingFile } from "./CreateDropContent";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 enum FileSource {
   Files,
@@ -22,6 +24,8 @@ interface CreateDropContentFilesProps {
   readonly uploadingFiles: UploadingFile[];
   readonly removeFile: (file: File, partIndex?: number) => void;
   readonly disabled: boolean;
+  readonly showPartFiles?: boolean | undefined;
+  readonly currentPartNumber?: number | null | undefined;
 }
 
 export const CreateDropContentFiles: React.FC<CreateDropContentFilesProps> = ({
@@ -30,20 +34,38 @@ export const CreateDropContentFiles: React.FC<CreateDropContentFilesProps> = ({
   uploadingFiles,
   removeFile,
   disabled,
+  showPartFiles = true,
+  currentPartNumber = null,
 }) => {
+  const locale = useBrowserLocale();
+  let currentFilesLabel: string | null = null;
+  if (currentPartNumber !== null) {
+    currentFilesLabel = t(locale, "waves.stormComposer.part", {
+      number: currentPartNumber,
+    });
+  } else if (parts.length > 0) {
+    currentFilesLabel = t(locale, "waves.stormComposer.part", {
+      number: parts.length + 1,
+    });
+  }
+
   const allFiles: FileWithSource[] = [
-    ...parts.flatMap((part, index) =>
-      part.media.map((file) => ({
-        file,
-        source: FileSource.Parts,
-        label: parts.length ? `Part ${index + 1}` : null,
-        partIndex: index,
-      }))
-    ),
+    ...(showPartFiles
+      ? parts.flatMap((part, index) =>
+          part.media.map((file) => ({
+            file,
+            source: FileSource.Parts,
+            label: parts.length
+              ? t(locale, "waves.stormComposer.part", { number: index + 1 })
+              : null,
+            partIndex: index,
+          }))
+        )
+      : []),
     ...files.map((file) => ({
       file,
       source: FileSource.Files,
-      label: parts.length ? `Part ${parts.length + 1}` : null,
+      label: currentFilesLabel,
     })),
   ];
 
