@@ -46,14 +46,17 @@ export default function UserPageHeaderName({
             canEdit={canEdit}
             profileLabel={displayName}
           >
-            <ProfileNameWithAiMarker
-              classification={profile.classification}
-              markerClassName="tw-text-base md:tw-text-lg"
+            <h1
+              id="profile-heading"
+              className="tw-m-0 tw-break-all tw-text-left tw-text-xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
             >
-              <span className="tw-break-all tw-text-left tw-text-xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-iron-50 md:tw-text-2xl">
-                {displayName}
-              </span>
-            </ProfileNameWithAiMarker>
+              <ProfileNameWithAiMarker
+                classification={profile.classification}
+                markerClassName="tw-text-base md:tw-text-lg"
+              >
+                <span>{displayName}</span>
+              </ProfileNameWithAiMarker>
+            </h1>
           </UserPageHeaderNameWrapper>
           <div className="tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center tw-gap-1.5">
             {profile.handle && (
@@ -69,7 +72,11 @@ export default function UserPageHeaderName({
 
       {showMeta && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
+          <UserPageClassificationWrapper
+            profile={profile}
+            canEdit={canEdit}
+            profileLabel={displayName}
+          >
             <div className="tw-block tw-text-[13px] tw-font-medium tw-leading-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50">
               {CLASSIFICATIONS[profile.classification].title}
             </div>

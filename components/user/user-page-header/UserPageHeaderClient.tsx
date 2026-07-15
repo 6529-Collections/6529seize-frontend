@@ -185,7 +185,10 @@ export default function UserPageHeaderClient({
 
   return (
     <div className="tailwind-scope">
-      <section className="tw-relative tw-bg-black tw-pb-4 md:tw-pb-8">
+      <section
+        aria-labelledby="profile-heading"
+        className="tw-relative tw-bg-black tw-pb-4 md:tw-pb-8"
+      >
         <div className="tw-relative tw-w-full">
           <UserPageHeaderBanner
             profile={profile}
