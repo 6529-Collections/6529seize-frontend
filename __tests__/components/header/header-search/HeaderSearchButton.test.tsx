@@ -126,7 +126,7 @@ describe("HeaderSearchButton", () => {
     useDeviceInfoMock.mockReturnValue({ isApp: true } as any);
     render(<HeaderSearchButton wave={null} />);
     const icon = screen.getByTestId("icon");
-    expect(icon).toHaveClass("tw-h-6 tw-w-6");
+    expect(icon).toHaveClass("tw-size-5");
   });
 
   it("opens the scoped message search in a wave and can switch to site search", () => {

@@ -27,8 +27,11 @@ next route.
   - Title: `/the-memes/{id}`
   - Artist pills: `/{handle}` (one or more)
   - `Edition Details` -> distribution link: `/the-memes/{id}/distribution`
+  - `Edition Details` -> mapped Main Stage submission:
+    `/waves/{mainStageWaveId}?drop={dropId}`
   - `Mint` action: `/the-memes/mint` (when countdown shows the button)
 - `Next Drop` (top slot replacement):
+  - Mapped Meme card pill: `/the-memes/{id}`
   - Title: `/waves?wave={waveId}&drop={dropId}`
   - Wave row: `/waves/{waveId}`
   - Artist: `/{handleOrPrimaryAddress}`

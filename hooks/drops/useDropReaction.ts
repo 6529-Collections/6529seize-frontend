@@ -4,9 +4,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -43,6 +45,7 @@ import {
   recordReactionRollbackApplied,
   type ReactionSource,
 } from "@/utils/monitoring/dropReactionMonitoring";
+import { isExpectedWaveReactionDisabledError } from "@/utils/monitoring/dropReactionErrorClassification";
 
 interface UseDropReactionResult {
   readonly react: (reactionCode: string) => Promise<void>;
@@ -465,6 +468,7 @@ export function useDropReaction(
 ): UseDropReactionResult {
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
+  const { getEligibility, updateEligibility } = useWaveEligibility();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
   const locale = useBrowserLocale();
@@ -473,10 +477,20 @@ export function useDropReaction(
   const onSuccess = options?.onSuccess;
   const updateCurationCache = options?.updateCurationCache ?? false;
 
-  const canReact = !activeProfileProxy && !drop.id.startsWith("temp-");
-
   const waveId = drop.wave.id;
   const dropId = drop.id;
+  const waveEligibility = getEligibility(waveId);
+  const isEligibleToChat =
+    waveEligibility?.authenticated_user_eligible_to_chat ??
+    drop.wave.authenticated_user_eligible_to_chat;
+  const isSlowModeOnlyBlock =
+    isEligibleToChat === false &&
+    waveEligibility?.authenticated_user_chat_restriction ===
+      ChatRestriction.SLOW_MODE;
+  const canReact =
+    !activeProfileProxy &&
+    !drop.id.startsWith("temp-") &&
+    (isEligibleToChat !== false || isSlowModeOnlyBlock);
   const contextProfileContext = drop.context_profile_context;
   const applyOptimisticReaction = useOptimisticStreamDropReaction({
     applyOptimisticDropUpdate,
@@ -518,6 +532,8 @@ export function useDropReaction(
 
       const isRemoving = reactionCode === contextProfileContext?.reaction;
       const intendedReaction = isRemoving ? null : reactionCode;
+      const endpoint = `drops/${drop.id}/reaction`;
+      const method = isRemoving ? "DELETE" : "POST";
 
       const mutation = beginReactionMutation({
         dropId,
@@ -551,7 +567,6 @@ export function useDropReaction(
       let succeeded = false;
 
       try {
-        const endpoint = `drops/${drop.id}/reaction`;
         await sendReactionRequest({
           endpoint,
           isRemoving,
@@ -567,6 +582,19 @@ export function useDropReaction(
         const result = recordReactionRequestFailed(mutation, error);
         if (!result.isLatestMutation) {
           return;
+        }
+
+        if (
+          isExpectedWaveReactionDisabledError({
+            dropId,
+            endpoint,
+            error,
+            method,
+          })
+        ) {
+          updateEligibility(waveId, {
+            authenticated_user_eligible_to_chat: false,
+          });
         }
 
         const errorMessage = getReactionErrorMessage(
@@ -599,6 +627,7 @@ export function useDropReaction(
       onSuccess,
       refreshCanonicalDropAfterLatestFailure,
       source,
+      updateEligibility,
       waveId,
       websocketStatus,
     ]

@@ -75,8 +75,6 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
   const buttonLabel = wave
     ? t(locale, "waves.drops.searchModal.inputLabel", { waveName: wave.name })
     : t(locale, "headerSearch.inputLabel");
-  const iconSizeClasses = isApp ? "tw-h-6 tw-w-6" : "tw-h-5 tw-w-5";
-
   return (
     <div className="tailwind-scope tw-self-center">
       <button
@@ -86,15 +84,13 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
         title={buttonLabel}
         onClick={openContextSearch}
         className={clsx(
-          "tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
+          "tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
           isApp
-            ? "tw-bg-black"
-            : "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
+            ? "tw-size-9 tw-bg-black"
+            : "tw-size-10 tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
         )}
       >
-        <MagnifyingGlassIcon
-          className={clsx("tw-flex-shrink-0", iconSizeClasses)}
-        />
+        <MagnifyingGlassIcon className="tw-size-5 tw-flex-shrink-0" />
       </button>
 
       {wave && (

@@ -19,6 +19,7 @@ import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 
@@ -332,6 +333,9 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
 } as const);
 
 const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  capabilityDisabled: "Reactions are disabled for this wave.",
+  requestTimedOut:
+    "The reaction request timed out. Refreshing the latest reaction state; wait before trying again.",
   "rateLimit.retryAfter.moment":
     "You are reacting too quickly. Try again in a moment.",
   "rateLimit.retryAfter.seconds.one":
@@ -1337,6 +1341,13 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
+  "home.nextMint.status": "Next mint",
+  "home.nextMint.noImage": "No image",
+  "home.nextMint.untitled": "Untitled",
+  "home.nextMint.anonymous": "Anonymous",
+  "home.nextMint.stats.wave": "Wave",
+  "home.nextMint.stats.submitted": "Submitted",
+  "home.nextMint.stats.rating": "Rating",
   "waveChat.boostedDrops.display.description":
     "How boosted-drop cards show in chat.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
@@ -1382,6 +1393,7 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
+  "theMemes.detail.mainStageSubmission.title": "Main Stage Submission",
   "theMemes.detail.sections.ariaLabel": "Meme page sections",
   "theMemes.detail.history.ariaLabel": "Meme history sections",
   "theMemes.detail.tabs.overview": "Overview",
@@ -1887,6 +1899,7 @@ export const EN_US_MESSAGES = {
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
+  ...EN_US_PAGINATION_MESSAGES,
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,

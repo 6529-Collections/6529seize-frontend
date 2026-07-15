@@ -27,6 +27,7 @@
         "Visitors can browse the public home activity without connecting a wallet.",
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
       ],
@@ -2027,6 +2028,8 @@
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Reaction controls are disabled while a proxy profile is active.",
+        "Reaction controls are disabled when the current wave does not allow chatting and reactions.",
+        "If a reaction request times out, the app rolls back the optimistic state, refreshes the canonical drop state, and does not automatically retry the write.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
         "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
@@ -2273,7 +2276,8 @@
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
-        "If the submit control is hidden or disabled, use the shown restriction message to recover: log in, disable proxy mode, wait for the submission window, or free submission capacity.",
+        "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
+        "On The Memes Main Stage, the native app lock explains the current 50,000 MemesNominee REP eligibility requirement; the desktop How to Submit panel also shows live REP progress and a Get nominated action.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",
@@ -3215,7 +3219,8 @@
       ],
       "facts": [
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
-        "Unresolved upcoming /the-memes/{id} pages show the next-mint calendar panel plus subscription awareness for that card.",
+        "Home uses explicit Main Stage mappings for its submission and Meme-card links and omits those links when a mapping is unavailable.",
+        "When an unresolved /the-memes/{id} route is the explicitly mapped next Meme and home is in Next Drop mode, it shows the same winning artwork panel with Mint Date and subscription awareness above the calendar; other upcoming Meme routes keep the standalone subscription and calendar view.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
       ],
@@ -4803,13 +4808,25 @@
         "winners tab",
         "wave winners",
         "winning drops",
-        "decision winners"
+        "decision winners",
+        "which meme did this submission mint"
       ],
-      "keywords": ["waves", "leaderboard", "winners", "decision", "drops"],
+      "keywords": [
+        "waves",
+        "leaderboard",
+        "winners",
+        "decision",
+        "drops",
+        "memes",
+        "main stage",
+        "minted card"
+      ],
       "facts": [
         "Wave Winners tab behavior is documented under leaderboard features.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
-        "Single-decision and multi-decision waves have different winner display behavior."
+        "Single-decision and multi-decision waves have different winner display behavior.",
+        "Mapped winners in The Memes Main Stage show a The Memes #N link in the Winners tab and beside the Minted on The Memes outcome on the dedicated drop view; the frontend never guesses a Meme ID when the backend mapping is absent.",
+        "Mapped Meme card pages show a Main Stage Submission action beside Distribution Plan in the market overview panel to the right of the artwork; older unmapped cards omit the action."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -5271,6 +5288,7 @@
       "facts": [
         "The now-minting countdown is documented under media memes docs.",
         "It helps users understand current mint timing.",
+        "For mapped Latest Drops, Edition Details ends with Main Stage Submission -> View and opens the winning drop in the configured Main Stage wave.",
         "If a mint is not active, users may need the calendar or upcoming mint surfaces instead."
       ],
       "canonical_path": "/the-memes/mint",

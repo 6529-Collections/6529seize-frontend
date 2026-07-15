@@ -70,7 +70,10 @@ import type {
   SessionUpgradePromptMode,
   SignModalReason,
 } from "./authTypes";
-import { runImmediateAuthValidation } from "./authValidation";
+import {
+  getCurrentAuthTerminalTransitionScope,
+  runImmediateAuthValidation,
+} from "./authValidation";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 
 export default function Auth({
@@ -140,6 +143,7 @@ export default function Auth({
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestAddressRef = useRef<string | undefined>(address);
   const activeValidationOperationIdRef = useRef<string | null>(null);
+  const terminalAuthTransitionScopeRef = useRef<string | null>(null);
   const validationOperationCounterRef = useRef(0);
   const [pendingProfileSwitch, setPendingProfileSwitch] = useState<{
     readonly targetAddress: string | null;
@@ -424,8 +428,19 @@ export default function Auth({
       setActiveWalletAccount(address);
     }
 
-    // Capture current address at validation time to prevent race conditions
     const currentAddress = address;
+    const terminalAuthTransitionScope = getCurrentAuthTerminalTransitionScope({
+      activeProfileProxy,
+      authRolloutSettings,
+      canSignActiveWallet,
+      currentAddress,
+      hasActiveWalletAddress,
+    });
+    if (
+      terminalAuthTransitionScopeRef.current === terminalAuthTransitionScope
+    ) {
+      return undefined;
+    }
     authPromptTrackingReasonRef.current = "auth_validation_failed";
     setSessionUpgradeRequired(false);
 
@@ -441,6 +456,7 @@ export default function Auth({
       latestAddressRef,
       activeValidationOperationIdRef,
       abortControllerRef,
+      terminalAuthTransitionScopeRef,
       activeProfileProxy,
       hasActiveWalletAddress,
       canSignActiveWallet,
