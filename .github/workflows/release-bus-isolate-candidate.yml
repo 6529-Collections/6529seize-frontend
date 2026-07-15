@@ -125,7 +125,7 @@ jobs:
         with:
           name: release-bus-isolation-${{ inputs.release_train_id }}-${{ inputs.candidate_id }}
           path: isolation.log
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
       - name: Return deterministic result
         if: always()
@@ -134,15 +134,24 @@ jobs:
         run: test "$REPRODUCE_OUTCOME" = success
 
   diagnose:
-    if: always() && needs.reproduce.result == 'failure'
+    if: always() && needs.reproduce.result != 'success'
     needs: reproduce
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Download isolation log only
+        continue-on-error: true
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: release-bus-isolation-${{ inputs.release_train_id }}-${{ inputs.candidate_id }}
+      - name: Record missing-log context
+        if: always()
+        env:
+          REPRODUCE_RESULT: ${{ needs.reproduce.result }}
+        run: |
+          if [ ! -f isolation.log ]; then
+            printf 'Reproduction job ended with result: %s. No isolation log artifact was produced.\n' "$REPRODUCE_RESULT" > isolation.log
+          fi
       - name: Ask Codex for a read-only diagnostic
         uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
         with:

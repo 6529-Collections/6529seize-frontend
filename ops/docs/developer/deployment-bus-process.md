@@ -121,6 +121,9 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   conflicts are never auto-resolved.
 - Codex is read-only during failure diagnosis. Deterministic checks decide
   whether a candidate is quarantined.
+- Isolation uses non-secret placeholder analytics and Sentry values. It helps
+  diagnose deterministic candidate failures but does not replace the real
+  preflight build or prove behavior that depends on credential value formats.
 - Reproducible composition or preflight failures enter candidate isolation. A
   clean base and every dependency-closed candidate subset are checked, plus one
   bounded combined retry. Only a subset-proven offender is quarantined; a base
