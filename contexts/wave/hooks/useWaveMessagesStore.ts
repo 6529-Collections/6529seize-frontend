@@ -1,8 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
+import {
+  formatWaveMessages,
+  maxOrNull,
+  mergeDrops,
+} from "../utils/wave-messages-utils";
+import type { ServerWaveFeedSeedResult } from "../server-wave-feed-seed";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { Drop } from "@/helpers/waves/drop.helpers";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import type { WaveMessages, WaveMessagesUpdate } from "./types";
 
 type DropChange = {
@@ -70,19 +77,113 @@ export type Listener = (data: WaveMessages | undefined) => void;
 
 type Listeners = Set<Listener>; // Keep internal types non-exported
 type KeyListeners = Record<string, Listeners>; // Keep internal types non-exported
+type QueuedWaveMessagesUpdate = {
+  readonly update: WaveMessagesUpdate;
+  readonly mergePolicy: "standard" | "preserve-existing";
+  readonly onApplied?: (() => void) | undefined;
+};
+type PendingServerFeedSeed = {
+  readonly gatePromise: Promise<ServerWaveFeedSeedResult>;
+  readonly generation: number;
+  readonly promise: Promise<ServerWaveFeedSeedResult>;
+};
 
 function useWaveMessagesStore() {
-  const [waveMessages, setWaveMessages] = useState<
+  const [, setWaveMessages] = useState<
     Record<string, WaveMessages>
   >({});
   const waveMessagesRef = useRef<Record<string, WaveMessages>>({});
   // Use useRef to keep listeners stable across renders
   const listenersRef = useRef<KeyListeners>({});
-  const updateQueueRef = useRef<WaveMessagesUpdate[]>([]);
+  const updateQueueRef = useRef<QueuedWaveMessagesUpdate[]>([]);
   const isProcessingRef = useRef<boolean>(false);
+  const pendingServerFeedSeedsRef = useRef<
+    Map<string, PendingServerFeedSeed>
+  >(new Map());
+  const activeServerFeedSeedsRef = useRef<Set<string>>(new Set());
+  const activeServerFeedSeedGatePromisesRef = useRef<
+    Map<string, Promise<ServerWaveFeedSeedResult>>
+  >(new Map());
+  const appliedServerFeedSeedWaveIdsRef = useRef<Set<string>>(new Set());
+  const completedInitialRegistrationsRef = useRef<Set<string>>(new Set());
+  const committedServerFeedSeedsRef = useRef<Set<string>>(new Set());
+  const serverFeedSeedReadyCallbacksRef = useRef<Map<string, () => void>>(
+    new Map()
+  );
+  const serverFeedSeedGenerationRef = useRef(0);
+
+  const releaseServerFeedSeedIfReady = useCallback((waveId: string): void => {
+    if (
+      !completedInitialRegistrationsRef.current.has(waveId) ||
+      !committedServerFeedSeedsRef.current.has(waveId)
+    ) {
+      return;
+    }
+
+    activeServerFeedSeedsRef.current.delete(waveId);
+    activeServerFeedSeedGatePromisesRef.current.delete(waveId);
+    completedInitialRegistrationsRef.current.delete(waveId);
+    committedServerFeedSeedsRef.current.delete(waveId);
+    const onReady = serverFeedSeedReadyCallbacksRef.current.get(waveId);
+    serverFeedSeedReadyCallbacksRef.current.delete(waveId);
+    onReady?.();
+  }, []);
+
   useEffect(() => {
-    waveMessagesRef.current = waveMessages;
-  }, [waveMessages]);
+    const invalidateServerFeedSeeds = () => {
+      const seededWaveIds = new Set([
+        ...pendingServerFeedSeedsRef.current.keys(),
+        ...activeServerFeedSeedsRef.current,
+        ...appliedServerFeedSeedWaveIdsRef.current,
+      ]);
+      serverFeedSeedGenerationRef.current += 1;
+      pendingServerFeedSeedsRef.current.clear();
+      activeServerFeedSeedsRef.current.clear();
+      activeServerFeedSeedGatePromisesRef.current.clear();
+      appliedServerFeedSeedWaveIdsRef.current.clear();
+      completedInitialRegistrationsRef.current.clear();
+      committedServerFeedSeedsRef.current.clear();
+      serverFeedSeedReadyCallbacksRef.current.clear();
+      updateQueueRef.current = updateQueueRef.current.filter(
+        ({ update }) => !seededWaveIds.has(update.key)
+      );
+
+      if (seededWaveIds.size === 0) {
+        return;
+      }
+
+      const nextState = { ...waveMessagesRef.current };
+      const clearedWaveIds: string[] = [];
+      seededWaveIds.forEach((waveId) => {
+        if (nextState[waveId] !== undefined) {
+          delete nextState[waveId];
+          clearedWaveIds.push(waveId);
+        }
+      });
+      if (clearedWaveIds.length === 0) {
+        return;
+      }
+
+      waveMessagesRef.current = nextState;
+      setWaveMessages(nextState);
+      clearedWaveIds.forEach((waveId) => {
+        listenersRef.current[waveId]?.forEach((listener) =>
+          listener(undefined)
+        );
+      });
+    };
+
+    globalThis.addEventListener(
+      PROFILE_SWITCHED_EVENT,
+      invalidateServerFeedSeeds
+    );
+    return () => {
+      globalThis.removeEventListener(
+        PROFILE_SWITCHED_EVENT,
+        invalidateServerFeedSeeds
+      );
+    };
+  }, []);
 
   // Stable function to get data for a key
   const getData = useCallback((key: string): WaveMessages | undefined => {
@@ -109,94 +210,252 @@ function useWaveMessagesStore() {
     }
   }, []); // No dependencies needed
 
-  const processQueue = useCallback(async () => {
+  const processQueue = useCallback(function processQueueItem(): void {
     if (isProcessingRef.current || updateQueueRef.current.length === 0) {
       return;
     }
 
     isProcessingRef.current = true;
-    const update = updateQueueRef.current.shift();
+    const queuedUpdate = updateQueueRef.current.shift();
 
-    if (!update) {
+    if (!queuedUpdate) {
       isProcessingRef.current = false;
       return; // Should not happen based on length check, but safety first
     }
+    const { mergePolicy, onApplied, update } = queuedUpdate;
+    const updateGeneration = serverFeedSeedGenerationRef.current;
 
-    let notifyValue: WaveMessages | undefined;
-
-    setWaveMessages((prevWaveMessages) => {
-      const newWaveMessages = { ...prevWaveMessages };
-      if (!newWaveMessages[update.key]) {
-        newWaveMessages[update.key] = {
-          id: update.key,
-          isLoading: false,
-          isLoadingNextPage: false,
-          hasNextPage: false,
-          drops: [],
-          latestFetchedSerialNo: null,
-        };
-      }
-
-      const updatedWaveMessages = {
-        ...newWaveMessages[update.key]!,
+    const newWaveMessages = { ...waveMessagesRef.current };
+    const existingWaveMessages = newWaveMessages[update.key];
+    if (!existingWaveMessages) {
+      newWaveMessages[update.key] = {
+        id: update.key,
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: false,
+        drops: [],
+        latestFetchedSerialNo: null,
       };
+    }
 
-      if (update.isLoading !== undefined) {
-        updatedWaveMessages.isLoading = update.isLoading;
-      }
-      if (update.isLoadingNextPage !== undefined) {
-        updatedWaveMessages.isLoadingNextPage = update.isLoadingNextPage;
-      }
-      if (update.hasNextPage !== undefined) {
-        updatedWaveMessages.hasNextPage = update.hasNextPage;
-      }
-      if (update.drops !== undefined) {
-        updatedWaveMessages.drops = mergeDrops(
-          updatedWaveMessages.drops!,
-          update.drops
-        );
-      }
+    const updatedWaveMessages = {
+      ...newWaveMessages[update.key]!,
+    };
 
-      if (typeof update.latestFetchedSerialNo === "number") {
-        updatedWaveMessages.latestFetchedSerialNo = maxOrNull(
-          updatedWaveMessages.latestFetchedSerialNo,
-          update.latestFetchedSerialNo
-        );
-      }
+    if (
+      update.isLoading !== undefined &&
+      (mergePolicy === "standard" || existingWaveMessages === undefined)
+    ) {
+      updatedWaveMessages.isLoading = update.isLoading;
+    }
+    if (
+      update.isLoadingNextPage !== undefined &&
+      (mergePolicy === "standard" || existingWaveMessages === undefined)
+    ) {
+      updatedWaveMessages.isLoadingNextPage = update.isLoadingNextPage;
+    }
+    if (
+      update.hasNextPage !== undefined &&
+      (mergePolicy === "standard" || existingWaveMessages === undefined)
+    ) {
+      updatedWaveMessages.hasNextPage = update.hasNextPage;
+    }
+    if (update.drops !== undefined) {
+      updatedWaveMessages.drops =
+        mergePolicy === "preserve-existing"
+          ? mergeDrops(update.drops, updatedWaveMessages.drops)
+          : mergeDrops(updatedWaveMessages.drops, update.drops);
+    }
 
-      notifyValue = updatedWaveMessages as WaveMessages; // Capture the value to notify
-      const nextState = {
-        ...newWaveMessages,
-        [update.key]: updatedWaveMessages,
-      };
-      waveMessagesRef.current = nextState as Record<string, WaveMessages>;
-      return nextState;
-    });
+    if (typeof update.latestFetchedSerialNo === "number") {
+      updatedWaveMessages.latestFetchedSerialNo = maxOrNull(
+        updatedWaveMessages.latestFetchedSerialNo,
+        update.latestFetchedSerialNo
+      );
+    }
+
+    const notifyValue = updatedWaveMessages as WaveMessages;
+    const nextState = {
+      ...newWaveMessages,
+      [update.key]: updatedWaveMessages,
+    };
+    waveMessagesRef.current = nextState as Record<string, WaveMessages>;
+    setWaveMessages(nextState);
+    onApplied?.();
 
     // Notify listeners after the state update for this item
     // Use setTimeout to ensure notification happens after the current execution context,
     // allowing React's batching to potentially complete.
     setTimeout(() => {
       const keyListeners = listenersRef.current[update.key];
-      if (keyListeners && notifyValue) {
+      if (
+        keyListeners &&
+        updateGeneration === serverFeedSeedGenerationRef.current
+      ) {
         keyListeners.forEach((listener) => listener(notifyValue));
       }
 
       // Finished processing this item, allow the next one
       isProcessingRef.current = false;
       // Trigger processing for the next item if queue is not empty
-      processQueue();
+      globalThis.queueMicrotask(processQueueItem);
     }, 0);
   }, []); // Dependencies: setWaveMessages (implicitly stable), listenersRef (stable)
 
   // Function to add an update to the queue and trigger processing
   const updateData = useCallback(
     (update: WaveMessagesUpdate) => {
-      updateQueueRef.current.push(update);
+      updateQueueRef.current.push({ update, mergePolicy: "standard" });
       // Start processing if not already running
       processQueue();
     },
     [processQueue] // Dependency: processQueue
+  );
+
+  const registerPendingServerFeedSeed = useCallback(
+    (waveId: string, promise: Promise<ServerWaveFeedSeedResult>) => {
+      activeServerFeedSeedsRef.current.delete(waveId);
+      activeServerFeedSeedGatePromisesRef.current.delete(waveId);
+      completedInitialRegistrationsRef.current.delete(waveId);
+      committedServerFeedSeedsRef.current.delete(waveId);
+      serverFeedSeedReadyCallbacksRef.current.delete(waveId);
+      pendingServerFeedSeedsRef.current.set(waveId, {
+        gatePromise: promise,
+        generation: serverFeedSeedGenerationRef.current,
+        promise,
+      });
+    },
+    []
+  );
+
+  const clearPendingServerFeedSeed = useCallback(
+    (waveId: string, promise: Promise<ServerWaveFeedSeedResult>) => {
+      if (pendingServerFeedSeedsRef.current.get(waveId)?.promise === promise) {
+        pendingServerFeedSeedsRef.current.delete(waveId);
+      }
+    },
+    []
+  );
+
+  const replacePendingServerFeedSeed = useCallback(
+    (
+      waveId: string,
+      expectedPromise: Promise<ServerWaveFeedSeedResult>,
+      promise: Promise<ServerWaveFeedSeedResult>
+    ): boolean => {
+      const pendingSeed = pendingServerFeedSeedsRef.current.get(waveId);
+      if (
+        pendingSeed?.gatePromise !== expectedPromise ||
+        pendingSeed.promise !== expectedPromise ||
+        pendingSeed.generation !== serverFeedSeedGenerationRef.current
+      ) {
+        return false;
+      }
+
+      pendingServerFeedSeedsRef.current.set(waveId, {
+        ...pendingSeed,
+        promise,
+      });
+      return true;
+    },
+    []
+  );
+
+  const expireServerFeedSeed = useCallback(
+    (
+      waveId: string,
+      expectedPromise: Promise<ServerWaveFeedSeedResult>
+    ): void => {
+      const pendingSeed = pendingServerFeedSeedsRef.current.get(waveId);
+      const ownsPendingSeed = pendingSeed?.gatePromise === expectedPromise;
+      const ownsActiveSeed =
+        activeServerFeedSeedGatePromisesRef.current.get(waveId) ===
+        expectedPromise;
+      if (!ownsPendingSeed && !ownsActiveSeed) {
+        return;
+      }
+
+      if (ownsPendingSeed) {
+        pendingServerFeedSeedsRef.current.delete(waveId);
+      }
+      if (ownsActiveSeed) {
+        activeServerFeedSeedsRef.current.delete(waveId);
+        activeServerFeedSeedGatePromisesRef.current.delete(waveId);
+      }
+      completedInitialRegistrationsRef.current.delete(waveId);
+      committedServerFeedSeedsRef.current.delete(waveId);
+      serverFeedSeedReadyCallbacksRef.current.delete(waveId);
+    },
+    []
+  );
+
+  const hasServerFeedSeed = useCallback(
+    (waveId: string): boolean =>
+      pendingServerFeedSeedsRef.current.has(waveId) ||
+      activeServerFeedSeedsRef.current.has(waveId),
+    []
+  );
+
+  const applyServerFeedSeed = useCallback(
+    ({
+      drops,
+      hasNextPage,
+      onReady,
+      promise,
+      waveId,
+    }: {
+      readonly drops: ApiDrop[];
+      readonly hasNextPage: boolean;
+      readonly onReady?: (() => void) | undefined;
+      readonly promise: Promise<ServerWaveFeedSeedResult>;
+      readonly waveId: string;
+    }): boolean => {
+      const pendingSeed = pendingServerFeedSeedsRef.current.get(waveId);
+      if (
+        pendingSeed?.promise !== promise ||
+        pendingSeed.generation !== serverFeedSeedGenerationRef.current
+      ) {
+        return false;
+      }
+      pendingServerFeedSeedsRef.current.delete(waveId);
+
+      const seedUpdate = formatWaveMessages(waveId, drops, {
+        hasNextPage,
+        isLoading: false,
+      });
+      const seedGeneration = pendingSeed.generation;
+      activeServerFeedSeedsRef.current.add(waveId);
+      activeServerFeedSeedGatePromisesRef.current.set(
+        waveId,
+        pendingSeed.gatePromise
+      );
+      appliedServerFeedSeedWaveIdsRef.current.add(waveId);
+      if (onReady) {
+        serverFeedSeedReadyCallbacksRef.current.set(waveId, onReady);
+      }
+      updateQueueRef.current.push({
+        update: seedUpdate,
+        mergePolicy: "preserve-existing",
+        onApplied: () => {
+          if (seedGeneration !== serverFeedSeedGenerationRef.current) {
+            return;
+          }
+          committedServerFeedSeedsRef.current.add(waveId);
+          releaseServerFeedSeedIfReady(waveId);
+        },
+      });
+      processQueue();
+      return true;
+    },
+    [processQueue, releaseServerFeedSeedIfReady]
+  );
+
+  const completeInitialServerFeedRegistration = useCallback(
+    (waveId: string): void => {
+      completedInitialRegistrationsRef.current.add(waveId);
+      releaseServerFeedSeedIfReady(waveId);
+    },
+    [releaseServerFeedSeedIfReady]
   );
 
   const optimisticUpdateDrop = useCallback(
@@ -324,6 +583,13 @@ function useWaveMessagesStore() {
     subscribe,
     unsubscribe,
     updateData,
+    registerPendingServerFeedSeed,
+    clearPendingServerFeedSeed,
+    replacePendingServerFeedSeed,
+    expireServerFeedSeed,
+    hasServerFeedSeed,
+    applyServerFeedSeed,
+    completeInitialServerFeedRegistration,
     removeDrop,
     optimisticUpdateDrop,
   };

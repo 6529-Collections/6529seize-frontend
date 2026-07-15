@@ -202,7 +202,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { setWaveDropAction } = useHeaderContext();
-  const { waves, directMessages, registerWave } = useMyStream();
+  const {
+    waves,
+    directMessages,
+    registerWave,
+    serverFeedSeed: { completeInitialRegistration },
+  } = useMyStream();
   const { updateEligibility } = useWaveEligibility();
   const { data: wave } = useWaveData({
     waveId,
@@ -223,7 +228,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   useEffect(() => {
     registerWave(waveId, true);
-  }, [registerWave, waveId]);
+    completeInitialRegistration(waveId);
+  }, [completeInitialRegistration, registerWave, waveId]);
 
   useEffect(() => {
     if (!metadataWaveId) {
