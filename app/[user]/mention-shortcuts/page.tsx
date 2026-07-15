@@ -10,8 +10,7 @@ function MentionShortcutsTab({ profile }: { readonly profile: ApiIdentity }) {
   return <UserPageMentionShortcuts profile={profile} />;
 }
 
-const TAB_CONFIG =
-  USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]];
+const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]];
 
 const { Page, generateMetadata } = createUserTabPage({
   subroute: TAB_CONFIG.route,

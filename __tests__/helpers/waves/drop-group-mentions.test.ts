@@ -2,6 +2,7 @@ import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import {
   getMentionedGroupsFromParts,
   getMentionedGroupsFromText,
+  markGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
 
 describe("drop group mentions", () => {
@@ -43,6 +44,16 @@ describe("drop group mentions", () => {
         true
       )
     ).toEqual([]);
+  });
+
+  it("marks adjacent mentions of the same group", () => {
+    expect(
+      markGroupMentionTokens({
+        content: "@admins @admins",
+        group: ApiDropGroupMention.Admins,
+        marker: "**",
+      })
+    ).toBe("**@admins** **@admins**");
   });
 
   it("keeps @all restricted while returning other metadata", () => {

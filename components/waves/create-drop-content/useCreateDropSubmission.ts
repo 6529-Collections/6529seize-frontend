@@ -343,7 +343,9 @@ export const useCreateDropSubmission = ({
   readonly handleDuplicateIdentitySubmissionError: (error: unknown) => void;
   readonly markIdentitySubmitAttempted: () => void;
   readonly disableIdentityPickerAutoOpen: () => void;
-  readonly getUpdatedDrop: (markdownOverride?: string | null) => CreateDropConfig;
+  readonly getUpdatedDrop: (
+    markdownOverride?: string | null
+  ) => CreateDropConfig;
   readonly createGifDrop: (gif: string) => CreateDropConfig;
   readonly finalizeAndAddDropPart: (
     markdownOverride?: string | null
@@ -581,9 +583,7 @@ export const useCreateDropSubmission = ({
         isDropMode,
       });
 
-      const handleReplyTargetUnavailableError = (
-        error: unknown
-      ): boolean => {
+      const handleReplyTargetUnavailableError = (error: unknown): boolean => {
         if (
           dropRequest.reply_to === undefined ||
           !isReplyTargetUnavailableError(error)

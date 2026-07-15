@@ -1,7 +1,4 @@
-import type {
-  MentionAlias,
-  MentionAliasInput,
-} from "@/entities/IMentionAlias";
+import type { MentionAlias, MentionAliasInput } from "@/entities/IMentionAlias";
 import {
   commonApiDelete,
   commonApiFetch,

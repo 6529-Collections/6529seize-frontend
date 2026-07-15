@@ -10,7 +10,13 @@ export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
 
 const createGroupMentionPattern = (group: ApiDropGroupMention) =>
   new RegExp(
-    `(^|[^A-Za-z0-9_@])(${GROUP_MENTION_TEXT[group]})(?![A-Za-z0-9_@])`,
+    `(^|[^A-Z0-9_@])(${GROUP_MENTION_TEXT[group]})(?![A-Z0-9_@])`,
+    "gi"
+  );
+
+const createGroupMentionMarkPattern = (group: ApiDropGroupMention) =>
+  new RegExp(
+    `(?<![A-Z0-9_@])(${GROUP_MENTION_TEXT[group]})(?![A-Z0-9_@])`,
     "gi"
   );
 
@@ -56,7 +62,6 @@ export const markGroupMentionTokens = ({
   readonly marker: string;
 }) =>
   content.replace(
-    createGroupMentionPattern(group),
-    (_match, prefix: string, token: string) =>
-      `${prefix}${marker}${token}${marker}`
+    createGroupMentionMarkPattern(group),
+    (_match, token: string) => `${marker}${token}${marker}`
   );

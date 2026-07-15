@@ -101,6 +101,33 @@ describe("expandPlainAliasTokens", () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
+  it("leaves global mention tokens in their original text node", async () => {
+    const editor = createTestEditor();
+    editor.update(
+      () => {
+        $getRoot().append(
+          $createParagraphNode().append(
+            $createTextNode("@admins @contributors @devs6529 @all")
+          )
+        );
+      },
+      { discrete: true }
+    );
+    const onSelect = jest.fn();
+
+    await expandPlainAliasTokens({ editor, aliases: [alias], onSelect });
+
+    editor.getEditorState().read(() => {
+      const textNodes = $getRoot().getAllTextNodes();
+      expect(textNodes).toHaveLength(1);
+      expect(textNodes[0]?.getTextContent()).toBe(
+        "@admins @contributors @devs6529 @all"
+      );
+      expect(textNodes.filter($isMentionNode)).toEqual([]);
+    });
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it("replaces a selected alias with plain text when every member already exists", () => {
     const editor = createTestEditor();
     const onSelect = jest.fn();

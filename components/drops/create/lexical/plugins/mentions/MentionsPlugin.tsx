@@ -291,18 +291,17 @@ const buildAliasReplacementNodes = ({
     const prefix = match[1] ?? "";
     const aliasName = (match[2] ?? "").toLowerCase();
     const alias = aliasesByName.get(aliasName);
+    if (!alias) continue;
     const matchStart = match.index;
     const tokenStart = matchStart + prefix.length;
     if (tokenStart > cursor) {
       replacementNodes.push($createTextNode(text.slice(cursor, tokenStart)));
     }
-    const memberNodes = alias
-      ? createAliasMemberNodes({
-          members: alias.members,
-          existingHandles,
-          onSelect,
-        })
-      : [];
+    const memberNodes = createAliasMemberNodes({
+      members: alias.members,
+      existingHandles,
+      onSelect,
+    });
     replacementNodes.push(
       ...(memberNodes.length
         ? memberNodes
@@ -324,7 +323,8 @@ const expandAliasTextNodes = ({
   readonly aliasesByName: ReadonlyMap<string, MentionAlias>;
   readonly existingHandles: Set<string>;
   readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
-}) => {
+}): boolean => {
+  let expanded = false;
   const textNodes = $getRoot()
     .getAllTextNodes()
     .filter(
@@ -334,6 +334,11 @@ const expandAliasTextNodes = ({
   for (const textNode of textNodes) {
     const text = textNode.getTextContent();
     if (!ALIAS_TOKEN_TEST_PATTERN.test(text)) continue;
+    const hasKnownAlias = Array.from(text.matchAll(ALIAS_TOKEN_PATTERN)).some(
+      (match) => aliasesByName.has((match[2] ?? "").toLowerCase())
+    );
+    if (!hasKnownAlias) continue;
+    expanded = true;
     replaceTextNode(
       textNode,
       buildAliasReplacementNodes({
@@ -344,6 +349,7 @@ const expandAliasTextNodes = ({
       })
     );
   }
+  return expanded;
 };
 
 export const expandPlainAliasTokens = ({
@@ -363,9 +369,10 @@ export const expandPlainAliasTokens = ({
     const aliasesByName = new Map(
       aliases.map((alias) => [alias.alias.toLowerCase(), alias])
     );
+    let expanded = false;
     editor.update(
       () => {
-        expandAliasTextNodes({
+        expanded = expandAliasTextNodes({
           aliasesByName,
           existingHandles: getExistingMentionHandles(),
           onSelect,
@@ -373,6 +380,9 @@ export const expandPlainAliasTokens = ({
       },
       { onUpdate: () => resolve(editor.getEditorState()) }
     );
+    if (!expanded) {
+      resolve(editor.getEditorState());
+    }
   });
 
 const NewMentionsPlugin = forwardRef<

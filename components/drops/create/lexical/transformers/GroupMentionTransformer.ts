@@ -11,9 +11,9 @@ import {
 } from "../nodes/GroupMentionNode";
 
 const GROUP_MENTION_IMPORT_REGEXP =
-  /(^|[^A-Za-z0-9_@])(@(?:all|contributors|admins|devs6529))(?![A-Za-z0-9_@])/i;
+  /(^|[^A-Z0-9_@])(@(?:all|contributors|admins|devs6529))(?![A-Z0-9_@])/i;
 const GROUP_MENTION_SHORTCUT_REGEXP =
-  /(^|[^A-Za-z0-9_@])(@(?:all|contributors|admins|devs6529))(?![A-Za-z0-9_@])$/i;
+  /(^|[^A-Z0-9_@])(@(?:all|contributors|admins|devs6529))(?![A-Z0-9_@])$/i;
 
 export const GROUP_MENTION_TRANSFORMER: TextMatchTransformer = {
   dependencies: [GroupMentionNode],

@@ -97,9 +97,7 @@ export const useCreateDropDraftState = ({
   readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
-  const mentionedUsersRef = useRef<
-    Omit<MentionedUser, "current_handle">[]
-  >([]);
+  const mentionedUsersRef = useRef<Omit<MentionedUser, "current_handle">[]>([]);
   const [mentionedWaves, setMentionedWaves] = useState<MentionedWave[]>([]);
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
@@ -237,7 +235,9 @@ export const useCreateDropDraftState = ({
     });
   };
 
-  const getUpdatedDrop = (markdownOverride?: string | null): CreateDropConfig => {
+  const getUpdatedDrop = (
+    markdownOverride?: string | null
+  ): CreateDropConfig => {
     const initialDrop = getInitialDrop(markdownOverride);
     if (initialDrop) {
       return initialDrop;
