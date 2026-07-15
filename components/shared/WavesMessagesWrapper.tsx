@@ -113,7 +113,9 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const hasWave = waveId !== undefined;
   // The create route has no waveId but IS the main content; without this it
   // is unreachable on mobile (the wave list renders instead of the form).
-  const isCreateRoute = pathname === "/waves/create";
+  // Trailing slashes are tolerated so a normalization change upstream cannot
+  // silently re-break mobile reachability.
+  const isCreateRoute = pathname?.replace(/\/+$/, "") === "/waves/create";
   const canShowMainContent = !isMobile || hasWave || isCreateRoute;
   const showProfileFeedShortcut = !isMobile;
   const shouldShowLeftSidebar =

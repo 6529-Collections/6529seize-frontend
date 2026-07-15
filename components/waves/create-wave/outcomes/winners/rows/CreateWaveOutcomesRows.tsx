@@ -39,6 +39,7 @@ export default function CreateWaveOutcomesRows({
           className={`${
             showNoOutcomesError ? "tw-border-error/40" : "tw-border-iron-800"
           } tw-rounded-lg tw-border tw-border-dashed tw-bg-iron-900/40 tw-px-4 tw-py-5 tw-transition tw-duration-300 tw-ease-out`}
+          role={showNoOutcomesError ? "alert" : undefined}
         >
           <p
             className={`${

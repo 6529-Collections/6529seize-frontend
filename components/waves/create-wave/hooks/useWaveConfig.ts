@@ -173,7 +173,7 @@ export function useWaveConfig() {
         ? previousErrors
         : remainingErrors;
     });
-  }, [effectiveConfig]);
+  }, [effectiveConfig, step]);
 
   // Section state updates
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
