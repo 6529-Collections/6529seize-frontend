@@ -1,0 +1,204 @@
+{
+  "cp": {
+    "transaction": "/messages/:wave",
+    "request": {
+      "url": "https://6529.io/messages/00000000-0000-4000-8000-000000000001",
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+      }
+    },
+    "exception": {
+      "values": [
+        {
+          "type": "TypeError",
+          "value": "JSON.stringify cannot serialize cyclic structures.",
+          "mechanism": {
+            "type": "auto.browser.browserapierrors.setTimeout",
+            "handled": false
+          },
+          "stacktrace": {
+            "frames": [
+              {
+                "filename": "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                "function": "n",
+                "in_app": true
+              },
+              {
+                "filename": "[native code]",
+                "function": "stringify",
+                "in_app": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "b9": {
+    "transaction": "/:user",
+    "request": {
+      "url": "https://6529.io/example-profile",
+      "headers": {
+        "User-Agent": "Twitter/12.3 (iPhone; iOS 16.7.14)"
+      }
+    },
+    "exception": {
+      "values": [
+        {
+          "type": "ReferenceError",
+          "value": "Can't find variable: CONFIG",
+          "mechanism": {
+            "type": "auto.browser.browserapierrors.addEventListener",
+            "handled": false
+          },
+          "stacktrace": {
+            "frames": [
+              {
+                "filename": "node_modules/.pnpm/@sentry+nextjs@10.45.0/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                "function": "n",
+                "in_app": false
+              },
+              {
+                "filename": "app:///waves/00000000-0000-4000-8000-000000000002",
+                "function": "updateFooterPositions",
+                "in_app": true
+              },
+              {
+                "filename": "app:///waves/00000000-0000-4000-8000-000000000002",
+                "function": "updateGapFiller",
+                "in_app": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "nineN": {
+    "transaction": "/waves/:wave",
+    "request": {
+      "url": "https://6529.io/waves/00000000-0000-4000-8000-000000000002",
+      "headers": {
+        "User-Agent": "Twitter/12.3 (iPhone; iOS 16.7.14)"
+      }
+    },
+    "exception": {
+      "values": [
+        {
+          "type": "ReferenceError",
+          "value": "Can't find variable: currentInset",
+          "mechanism": {
+            "type": "auto.browser.global_handlers.onerror",
+            "handled": false
+          },
+          "stacktrace": {
+            "frames": [
+              {
+                "filename": "app:///waves/00000000-0000-4000-8000-000000000002",
+                "function": "global code",
+                "in_app": true
+              },
+              {
+                "filename": "app:///waves/00000000-0000-4000-8000-000000000002",
+                "function": "init",
+                "in_app": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "threeV": {
+    "transaction": "/waves/:wave",
+    "request": {
+      "url": "https://6529.io/waves/00000000-0000-4000-8000-000000000003"
+    },
+    "exception": {
+      "values": [
+        {
+          "type": "Error",
+          "value": "Cannot read properties of undefined (reading 'sendMessage')",
+          "mechanism": {
+            "type": "auto.browser.global_handlers.onunhandledrejection",
+            "handled": false
+          },
+          "stacktrace": {
+            "frames": [
+              {
+                "filename": "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                "function": "n",
+                "in_app": false
+              },
+              {
+                "filename": "app:///injectedScript.bundle.js",
+                "function": "n",
+                "in_app": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "dk": {
+    "transaction": "/waves/:wave",
+    "request": {
+      "url": "https://6529.io/waves/00000000-0000-4000-8000-000000000004"
+    },
+    "exception": {
+      "values": [
+        {
+          "type": "Error",
+          "value": "websocket error 1006: ",
+          "mechanism": {
+            "type": "auto.browser.global_handlers.onunhandledrejection",
+            "handled": false
+          },
+          "stacktrace": {
+            "frames": [
+              {
+                "filename": "app:///requestRelay.js",
+                "function": "i.onclose",
+                "in_app": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "twoY": {
+    "transaction": "/:user/subscriptions",
+    "level": "warning",
+    "tags": {
+      "errorType": "network",
+      "network_failure_kind": "browser_transport",
+      "network_noise_sampled": "true"
+    },
+    "request": {
+      "url": "https://6529.io/example-profile/subscriptions"
+    },
+    "exception": {
+      "values": [
+        {
+          "type": "Error",
+          "value": "Network request failed. Please check your connection and try again. (/api/subscriptions/consolidation/upcoming-memes/sample)",
+          "mechanism": {
+            "type": "auto.browser.global_handlers.onunhandledrejection",
+            "handled": false
+          },
+          "stacktrace": {
+            "frames": [
+              {
+                "filename": "services/api/common-api.ts",
+                "function": "executeApiRequest",
+                "in_app": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

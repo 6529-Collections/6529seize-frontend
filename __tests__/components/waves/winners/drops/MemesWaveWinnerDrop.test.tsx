@@ -184,6 +184,47 @@ describe("MemesWaveWinnersDrop", () => {
     expect(screen.getByAltText("alice's profile picture")).toBeInTheDocument();
   });
 
+  it("opens the mapped Meme card without opening the winner drop", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+    render(
+      <MemesWaveWinnersDrop
+        winner={
+          {
+            ...winner,
+            drop: {
+              ...winner.drop,
+              submission_context: { meme_card_id: 521 },
+            },
+          } as ApiWaveDecisionWinner
+        }
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    await user.click(screen.getByRole("link", { name: "The Memes #521" }));
+
+    expect(onDropClick).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("link", { name: "The Memes #521" })
+    ).toHaveAttribute("href", "/the-memes/521");
+  });
+
+  it("does not infer a Meme card link when the mapping is absent", () => {
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByRole("link", { name: /The Memes #/ })
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps native tap behavior for touch long-press handlers", () => {
     useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
 

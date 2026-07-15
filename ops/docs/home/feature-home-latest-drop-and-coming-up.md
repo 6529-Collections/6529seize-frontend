@@ -16,11 +16,14 @@ Use this page for visibility rules, state switches, and route targets.
   - Drop title: `/the-memes/{id}`
   - Artist handles: `/{handle}` (can render multiple handle pills)
   - Distribution plan link (inside `Edition Details`): `/the-memes/{id}/distribution`
+  - Main Stage submission link (inside `Edition Details`, when mapped):
+    `/waves/{mainStageWaveId}?drop={dropId}`
   - Mint action: `/the-memes/mint` (countdown state only)
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Next Drop` actions (top-section replacement mode):
   - Drop title: `/waves?wave={waveId}&drop={dropId}`
+  - Mapped Meme card pill: `/the-memes/{id}`
   - Wave row link: `/waves/{waveId}`
   - Artist link: `/{handle}` (only when handle exists)
   - Subscription info link: `/about/subscriptions`
@@ -48,7 +51,9 @@ Use this page for visibility rules, state switches, and route targets.
      is available.
    - `Next Drop` when the current mint is ended and a next winner exists.
 4. `Latest Drop` shows artwork, stats, subscription awareness, edition details,
-   and countdown states: `Upcoming`, `Live`, `Mint Complete`, or `Error`.
+   and countdown states: `Upcoming`, `Live`, `Mint Complete`, or `Error`. When
+   the card has an explicit Main Stage mapping, edition details also includes
+   `Main Stage Submission` → `View`.
 5. `Coming up` resolves after app settings load and `memes_wave_id` is
    available.
 6. `Coming up` then shows:
@@ -69,6 +74,8 @@ Use this page for visibility rules, state switches, and route targets.
   - Top section switches from `Latest Drop` to `Next Drop`.
   - The `Next Drop` panel can show subscription awareness or controls for the
     canonical next mint.
+  - When the winning drop includes an explicit Meme card mapping, the panel
+    shows a `The Memes #{id}` pill linked to that card.
   - `Coming up` hides `NEXT MINT` and shows up to 3 leaders.
 - Leaderboard still loading while `NEXT MINT` is ready:
   - `Coming up` can render with only the `NEXT MINT` card.
@@ -86,6 +93,8 @@ Use this page for visibility rules, state switches, and route targets.
   are not met, the top slot is hidden.
 - If next-winner title matches current mint title (case-insensitive and
   trimmed), `Coming up` suppresses the `NEXT MINT` card.
+- Main Stage submission and Meme card links are omitted when their explicit
+  backend mapping is unavailable; home does not infer a relationship.
 - On iOS outside the US, the countdown `Mint` button is hidden.
 - On iOS outside the US, The Memes subscription row is hidden.
 - Latest Drop subscription awareness is read-only and links to subscription
@@ -125,6 +134,7 @@ Use this page for visibility rules, state switches, and route targets.
   - `/the-memes/mint`
   - `/the-memes/{id}`
   - `/the-memes/{id}/distribution`
+  - `/waves/{mainStageWaveId}?drop={dropId}`
 - If `Coming up` card links fail, open:
   - `/waves/{waveId}`
   - `/waves/{waveId}?drop={dropId}`
@@ -141,6 +151,8 @@ Use this page for visibility rules, state switches, and route targets.
 - `Next Drop` uses mixed route styles:
   - title link: `/waves?wave={waveId}&drop={dropId}` (single-drop target)
   - wave row link: `/waves/{waveId}` (canonical wave route)
+- The `Next Drop` Meme card pill uses the explicit `meme_card_id` returned in
+  the winning drop’s submission context.
 - `Coming up` cards use path-style routes (`/waves/{waveId}?drop=...`).
 - `NEXT MINT` timestamps are displayed in the viewer's local timezone/locale.
 - No auth or wallet gate is required to view these sections.

@@ -70,7 +70,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
     "--brain-content-composer-reserve": `${composerReserve}px`,
   };
   const composerMotionTransition = {
-    duration: shouldAnimateComposerEntrance ? 0.32 : 0,
+    duration: shouldAnimateComposerEntrance ? 0.24 : 0,
     ease: "easeOut",
   };
   const composerStyle = isApp

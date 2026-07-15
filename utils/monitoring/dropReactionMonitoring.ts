@@ -8,6 +8,7 @@ import {
   classifyReactionError,
   isExpectedProxyReactionPermissionDeniedError,
   isExpectedStaleDropNotFoundError,
+  isExpectedWaveReactionDisabledError,
   toCaptureExceptionInput,
   toErrorMessage,
 } from "./dropReactionErrorClassification";
@@ -386,6 +387,30 @@ export function recordReactionRequestFailed(
   }
 
   if (errorKind === "rate-limit") {
+    clearActiveIntentForContext(context);
+    return result;
+  }
+
+  if (
+    isExpectedWaveReactionDisabledError({
+      dropId: context.dropId,
+      endpoint: context.endpoint,
+      error,
+      method: context.method,
+    })
+  ) {
+    addReactionBreadcrumb(
+      "reaction.wave_capability_disabled",
+      context,
+      {
+        status_code: statusCode ?? undefined,
+        latency_ms: latencyMs,
+        error_kind: errorKind,
+        error_message: errorMessage,
+        captured: false,
+      },
+      "warning"
+    );
     clearActiveIntentForContext(context);
     return result;
   }

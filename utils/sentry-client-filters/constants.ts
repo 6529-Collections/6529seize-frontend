@@ -35,6 +35,8 @@ export const coinbaseWalletLinkWebSocketFile = "WalletLinkWebSocket.js";
 export const coinbaseWalletLinkWebSocketCloseFunction = "webSocket.onclose";
 export const browserUnhandledRejectionMechanism =
   "auto.browser.global_handlers.onunhandledrejection";
+export const browserGlobalHandlerOnErrorMechanism =
+  "auto.browser.global_handlers.onerror";
 export const coinbaseWalletLinkWebSocket1006MessagePrefix =
   "websocket error 1006";
 export const walletWebSocketBreadcrumbAppKitTokens = [
@@ -161,6 +163,7 @@ export const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
   "recursivelyTraverseMutationEffects",
 ]);
 export const WAVES_ROUTE_PATH = "/waves";
+export const GRADIENT_ROUTE_PATH = "/6529-gradient";
 export const gifPickerTenorUndefinedTagsMessage =
   "undefined is not an object (evaluating 'e.tags')";
 export const gifPickerReactPackageToken = "gif-picker-react";
@@ -177,6 +180,10 @@ export const sentryRouteParameterizationMessage =
 export const sentryRouteParameterizationPathToken =
   "client/routing/parameterization.ts";
 export const sentryPackagePathTokens = ["@sentry/nextjs", "@sentry+nextjs"];
+export const twitterInjectedWaveDocumentPathPattern =
+  /^app:\/\/\/waves\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const twitterCurrentInsetReferenceErrorMessage =
+  "Can't find variable: currentInset";
 export const metaMaskMobileContextTokens = [
   "metamaskmobile",
   "metamask mobile",
@@ -218,6 +225,15 @@ export const extensionMessagingContentScriptPaths = new Set([
   "app:///content-scripts/content.js",
 ]);
 export const injectedScriptBundlePathToken = "injectedscript.bundle.js";
+export const injectedScriptSendMessageError =
+  "Cannot read properties of undefined (reading 'sendMessage')";
+export const sentryBrowserHelperPathToken = "/helpers.ts";
+export const sentryBrowserPackagePathTokens = [
+  "@sentry/browser",
+  "@sentry+browser",
+];
+export const coinbaseWalletRequestRelayPath = "app:///requestRelay.js";
+export const coinbaseWalletRequestRelayCloseFunction = "i.onclose";
 export const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 export const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 export const FNV_OFFSET_BASIS = 2166136261;
