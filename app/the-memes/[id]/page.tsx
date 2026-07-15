@@ -6,15 +6,74 @@ import {
 } from "@/components/the-memes/MemeShared";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFT } from "@/entities/INFT";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { normalizeLocale } from "@/i18n/locales";
 import JsonLdScript from "@/lib/structured-data/json-ld";
-import {
-  buildNftPageJsonLd,
-  fetchNftForStructuredData,
-} from "@/lib/structured-data/nft";
+import { buildNftPageJsonLd } from "@/lib/structured-data/nft";
+import { fetchUrl } from "@/services/6529api";
 import type { Metadata } from "next";
+import { cache } from "react";
 
 type SearchParamValue = string | string[] | undefined;
+
+type MemePageFetchResult<T> =
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false };
+
+const fetchMemeNft = cache(
+  async (id: string): Promise<MemePageFetchResult<NFT | undefined>> => {
+    try {
+      const params = new URLSearchParams({ contract: MEMES_CONTRACT, id });
+      const response = await fetchUrl<DBResponse<NFT>>(
+        `${publicEnv.API_ENDPOINT}/api/nfts?${params.toString()}`,
+        { cache: "no-store" }
+      );
+      return { ok: true, value: response.data[0] };
+    } catch (error) {
+      console.warn("Failed to fetch The Memes card data", { id, error });
+      return { ok: false };
+    }
+  }
+);
+
+const fetchMemeMetadata = cache(
+  async (id: string): Promise<MemePageFetchResult<ApiMemesExtendedData[]>> => {
+    try {
+      const response = await fetchUrl<DBResponse<ApiMemesExtendedData>>(
+        `${publicEnv.API_ENDPOINT}/api/memes_extended_data?id=${encodeURIComponent(id)}`,
+        { cache: "no-store" }
+      );
+      return {
+        ok: true,
+        value: Array.isArray(response.data) ? response.data : [],
+      };
+    } catch (error) {
+      console.warn("Failed to fetch The Memes card metadata", { id, error });
+      return { ok: false };
+    }
+  }
+);
+
+function getInitialMemePageData(
+  nftResult: MemePageFetchResult<NFT | undefined>,
+  metadataResult: MemePageFetchResult<ApiMemesExtendedData[]>
+) {
+  if (!nftResult.ok || !metadataResult.ok) {
+    return undefined;
+  }
+
+  if (metadataResult.value.length !== 1) {
+    return { nftNotFound: true } as const;
+  }
+
+  return {
+    nft: nftResult.value,
+    nftMeta: metadataResult.value[0],
+    nftNotFound: false,
+  } as const;
+}
 
 function getSearchParamValue(value: SearchParamValue): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -43,10 +102,12 @@ export default async function MemePage({
   readonly params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const nft = await fetchNftForStructuredData({
-    contract: MEMES_CONTRACT,
-    id,
-  });
+  const [nftResult, metadataResult] = await Promise.all([
+    fetchMemeNft(id),
+    fetchMemeMetadata(id),
+  ]);
+  const nft = nftResult.ok ? (nftResult.value ?? null) : null;
+  const initialData = getInitialMemePageData(nftResult, metadataResult);
 
   return (
     <>
@@ -59,7 +120,7 @@ export default async function MemePage({
           collectionPath: "/the-memes",
         })}
       />
-      <MemePageComponent nftId={id} />
+      <MemePageComponent key={id} nftId={id} initialData={initialData} />
     </>
   );
 }
@@ -78,12 +139,14 @@ export async function generateMetadata({
   const { focus: rawFocus, locale: rawLocale } = await searchParams;
   const focus = getSearchParamValue(rawFocus);
   const locale = getSearchParamValue(rawLocale);
+  const nftResult = await fetchMemeNft(id);
   const metadata = await getSharedAppServerSideProps(
     MEMES_CONTRACT,
     id,
     focus ?? "",
     false,
-    normalizeLocale(locale)
+    normalizeLocale(locale),
+    nftResult.ok ? (nftResult.value ?? null) : undefined
   );
 
   return {

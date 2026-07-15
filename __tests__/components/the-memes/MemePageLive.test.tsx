@@ -680,6 +680,7 @@ describe("MemePageLiveSubMenu details", () => {
     expect(
       screen.getByRole("button", { name: /additional details/i })
     ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
 
     rerender(
       <MemePageLiveSubMenu
@@ -695,6 +696,7 @@ describe("MemePageLiveSubMenu details", () => {
         screen.getByRole("button", { name: /additional details/i })
       ).toHaveAttribute("aria-expanded", "true")
     );
+    expect(screen.getByTestId("meme-page-art")).toBeInTheDocument();
   });
 
   it("passes locale into additional details content", () => {

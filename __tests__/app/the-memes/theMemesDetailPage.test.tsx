@@ -1,6 +1,7 @@
 import { generateMetadata } from "@/app/the-memes/[id]/page";
 import { getSharedAppServerSideProps } from "@/components/the-memes/MemeShared";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import { fetchUrl } from "@/services/6529api";
 
 jest.mock("@/components/the-memes/MemePage", () => ({
   __esModule: true,
@@ -16,17 +17,29 @@ jest.mock("@/components/the-memes/MemeShared", () => {
   };
 });
 
+jest.mock("@/services/6529api", () => ({
+  fetchUrl: jest.fn(),
+}));
+
 jest.mock("@/config/env", () => ({
   publicEnv: {
+    API_ENDPOINT: "https://api.test.6529.io",
     BASE_ENDPOINT: "https://6529.io",
   },
 }));
 
 const mockShared = getSharedAppServerSideProps as jest.Mock;
+const mockFetchUrl = fetchUrl as jest.Mock;
+const prefetchedNft = {
+  id: 123,
+  contract: MEMES_CONTRACT,
+  name: "Meme",
+};
 
 describe("The Memes detail generateMetadata", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchUrl.mockResolvedValue({ data: [prefetchedNft] });
   });
 
   it("canonicalizes locale query variants to the focused tab URL", async () => {
@@ -52,7 +65,8 @@ describe("The Memes detail generateMetadata", () => {
       "123",
       "history",
       false,
-      "fr-FR"
+      "fr-FR",
+      prefetchedNft
     );
     expect(metadata.alternates).toMatchObject({
       canonical: "https://6529.io/the-memes/123?focus=history",

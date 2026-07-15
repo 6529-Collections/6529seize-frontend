@@ -82,7 +82,8 @@ async function getMetadataProps(
   id: string,
   focus: string,
   isDistribution: boolean = false,
-  locale: SupportedLocale = DEFAULT_LOCALE
+  locale: SupportedLocale = DEFAULT_LOCALE,
+  prefetchedNft?: BaseNFT | null
 ) {
   let urlPath = "nfts";
   const idDisplay = idStringToDisplay(id);
@@ -98,10 +99,13 @@ async function getMetadataProps(
   let artist: string | null = null;
   let image: string | null = null;
   try {
-    const response = await fetchUrl<DBResponse<BaseNFT>>(
-      `${publicEnv.API_ENDPOINT}/api/${urlPath}?${query}`
-    );
-    const nft = Array.isArray(response.data) ? response.data[0] : undefined;
+    let nft = prefetchedNft ?? undefined;
+    if (prefetchedNft === undefined) {
+      const response = await fetchUrl<DBResponse<BaseNFT>>(
+        `${publicEnv.API_ENDPOINT}/api/${urlPath}?${query}`
+      );
+      nft = Array.isArray(response.data) ? response.data[0] : undefined;
+    }
     if (nft && typeof nft.name === "string" && nft.name.trim().length > 0) {
       description = `${name} | ${description}`;
       name = nft.name;
@@ -150,14 +154,16 @@ export async function getSharedAppServerSideProps(
   id: string,
   focus: string,
   isDistribution: boolean = false,
-  locale: SupportedLocale = DEFAULT_LOCALE
+  locale: SupportedLocale = DEFAULT_LOCALE,
+  prefetchedNft?: BaseNFT | null
 ) {
   const { title, description, ogImage, ogImageAlt } = await getMetadataProps(
     contract,
     id,
     focus,
     isDistribution,
-    locale
+    locale,
+    prefetchedNft
   );
 
   return getAppMetadata(

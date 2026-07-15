@@ -4,11 +4,9 @@ import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { fetchUrl } from "@/services/6529api";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useRouter } from "next/navigation";
 import React from "react";
 
 jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
 }));
@@ -121,12 +119,12 @@ jest.mock("@/components/nft-navigation/NftNavigation", () => {
   return MockNftNavigation;
 });
 
-const mockReplace = jest.fn(
-  (url: string, _options?: { scroll?: boolean | undefined }) => {
-    const parsedUrl = new URL(url, "https://example.com");
+const mockReplaceState = jest
+  .spyOn(globalThis.history, "replaceState")
+  .mockImplementation((_data, _unused, url) => {
+    const parsedUrl = new URL(String(url), "https://example.com");
     currentFocus = parsedUrl.searchParams.get("focus");
-  }
-);
+  });
 let currentFocus: string | null = null;
 let currentLocale: string | null = null;
 const mockSearchParams = {
@@ -156,17 +154,10 @@ useSearchParamsMock.mockReturnValue(mockSearchParams);
 const usePathnameMock = require("next/navigation").usePathname;
 usePathnameMock.mockReturnValue("/the-memes/1");
 
-(useRouter as jest.Mock).mockReturnValue({
-  query: { id: "1" },
-  isReady: true,
-  push: jest.fn(),
-  replace: mockReplace,
-});
-
 beforeEach(() => {
   currentFocus = null;
   currentLocale = null;
-  mockReplace.mockClear();
+  mockReplaceState.mockClear();
   mockSearchParams.get.mockClear();
   mockSearchParams.toString.mockClear();
   mockLatestDropNextMintSubscribe.mockClear();
@@ -240,7 +231,11 @@ const nft = {
   return Promise.resolve({ data: [] });
 });
 
-function renderPage() {
+function renderPage(initialData?: {
+  readonly nft: typeof nft;
+  readonly nftMeta: typeof nftMeta;
+  readonly nftNotFound: false;
+}) {
   const mockAuthContext = {
     connectedProfile: {
       id: "test-id",
@@ -274,7 +269,7 @@ function renderPage() {
 
   const page = render(
     <AuthContext.Provider value={mockAuthContext as any}>
-      <MemePage nftId="1" />
+      <MemePage nftId="1" initialData={initialData} />
     </AuthContext.Provider>
   );
 
@@ -283,7 +278,7 @@ function renderPage() {
     rerenderPage: () =>
       page.rerender(
         <AuthContext.Provider value={mockAuthContext as any}>
-          <MemePage nftId="1" />
+          <MemePage nftId="1" initialData={initialData} />
         </AuthContext.Provider>
       ),
   };
@@ -308,7 +303,7 @@ describe("MemePage tab navigation", () => {
   beforeEach(() => {
     currentFocus = null;
     currentLocale = null;
-    mockReplace.mockClear();
+    mockReplaceState.mockClear();
   });
 
   it.each([
@@ -323,12 +318,13 @@ describe("MemePage tab navigation", () => {
         expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
       );
 
-      mockReplace.mockClear();
+      mockReplaceState.mockClear();
       await userEvent.click(screen.getByRole("button", { name: label }));
 
-      expect(mockReplace).toHaveBeenLastCalledWith(
-        `/the-memes/1?focus=${focus}`,
-        { scroll: false }
+      expect(mockReplaceState).toHaveBeenLastCalledWith(
+        null,
+        "",
+        `/the-memes/1?focus=${focus}`
       );
 
       page.rerenderPage();
@@ -351,12 +347,13 @@ describe("MemePage tab navigation", () => {
       expect(screen.getByTestId("activity")).toBeInTheDocument();
     });
 
-    mockReplace.mockClear();
+    mockReplaceState.mockClear();
     await userEvent.click(screen.getByRole("tab", { name: "Timeline" }));
 
-    expect(mockReplace).toHaveBeenLastCalledWith(
-      `/the-memes/1?focus=${MEME_FOCUS.TIMELINE}`,
-      { scroll: false }
+    expect(mockReplaceState).toHaveBeenLastCalledWith(
+      null,
+      "",
+      `/the-memes/1?focus=${MEME_FOCUS.TIMELINE}`
     );
 
     page.rerenderPage();
@@ -370,7 +367,7 @@ describe("MemePage tab navigation", () => {
 describe("MemePage search params handling", () => {
   beforeEach(() => {
     currentFocus = null;
-    mockReplace.mockClear();
+    mockReplaceState.mockClear();
     mockSearchParams.get.mockClear();
   });
 
@@ -480,9 +477,10 @@ describe("MemePage search params handling", () => {
     const referencesButton = screen.getByRole("button", { name: "References" });
     await userEvent.click(referencesButton);
 
-    expect(mockReplace).toHaveBeenCalledWith(
-      `/the-memes/1?focus=${MEME_FOCUS.REFERENCES}`,
-      { scroll: false }
+    expect(mockReplaceState).toHaveBeenCalledWith(
+      null,
+      "",
+      `/the-memes/1?focus=${MEME_FOCUS.REFERENCES}`
     );
   });
 
@@ -497,13 +495,13 @@ describe("MemePage search params handling", () => {
     expect(overviewButton).not.toBeDisabled();
     expect(overviewButton).toHaveAttribute("aria-current", "page");
 
-    mockReplace.mockClear();
+    mockReplaceState.mockClear();
     overviewButton.focus();
     expect(overviewButton).toHaveFocus();
     await userEvent.keyboard("{Enter}");
     await userEvent.click(overviewButton);
 
-    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockReplaceState).not.toHaveBeenCalled();
   });
 });
 
@@ -516,8 +514,20 @@ describe("MemePage API interactions", () => {
     renderPage();
 
     expect(fetchUrl).toHaveBeenCalledWith(
-      "https://api.test.6529.io/api/memes_extended_data?id=1"
+      "https://api.test.6529.io/api/memes_extended_data?id=1",
+      { signal: expect.any(AbortSignal) }
     );
+  });
+
+  it("uses server-provided card data without refetching it", async () => {
+    renderPage({ nft, nftMeta, nftNotFound: false });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /card 1/i })
+      ).toBeInTheDocument();
+    });
+    expect(fetchUrl).not.toHaveBeenCalled();
   });
 
   it("fetches NFT data after metadata loads", async () => {
@@ -525,7 +535,8 @@ describe("MemePage API interactions", () => {
 
     await waitFor(() => {
       expect(fetchUrl).toHaveBeenCalledWith(
-        expect.stringContaining("/api/nfts?id=1&contract=")
+        expect.stringContaining("/api/nfts?id=1&contract="),
+        { signal: expect.any(AbortSignal) }
       );
     });
   });
