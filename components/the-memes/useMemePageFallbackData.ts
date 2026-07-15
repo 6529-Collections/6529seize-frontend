@@ -17,12 +17,11 @@ type MemePageFallbackState =
   | { readonly status: "loading"; readonly attempt: number }
   | {
       readonly status: "loaded";
-      readonly attempt: number;
       readonly data: MemePageInitialData;
     }
   | { readonly status: "error"; readonly attempt: number };
 
-function isAbortError(error: unknown): boolean {
+export function isAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === "AbortError";
 }
 
@@ -37,9 +36,11 @@ export function useMemePageFallbackData({
     status: "loading",
     attempt: 0,
   });
+  const fallbackAttempt =
+    fallbackState.status === "loading" ? fallbackState.attempt : null;
 
   useEffect(() => {
-    if (!nftId || initialData !== undefined) {
+    if (!nftId || initialData !== undefined || fallbackAttempt === null) {
       return;
     }
 
@@ -63,31 +64,33 @@ export function useMemePageFallbackData({
 
         const nftMetas = metaResponse.data;
         const nft = nftResponse.data[0];
-        setFallbackState({
-          status: "loaded",
-          attempt: fallbackState.attempt,
-          data:
-            Array.isArray(nftMetas) && nftMetas.length === 1 && nft
-              ? {
-                  nftMeta: nftMetas[0],
-                  nft,
-                  nftNotFound: false,
-                }
-              : { nftNotFound: true },
-        });
+        const data: MemePageInitialData =
+          Array.isArray(nftMetas) && nftMetas.length === 1 && nft
+            ? {
+                nftMeta: nftMetas[0],
+                nft,
+                nftNotFound: false,
+              }
+            : { nftNotFound: true };
+        setFallbackState((current) =>
+          current.status === "loading" && current.attempt === fallbackAttempt
+            ? { status: "loaded", data }
+            : current
+        );
       } catch (error: unknown) {
         if (!isAbortError(error)) {
-          setFallbackState({
-            status: "error",
-            attempt: fallbackState.attempt,
-          });
+          setFallbackState((current) =>
+            current.status === "loading" && current.attempt === fallbackAttempt
+              ? { status: "error", attempt: current.attempt }
+              : current
+          );
         }
       }
     }
 
     void loadCardData();
     return () => controller.abort();
-  }, [fallbackState.attempt, initialData, nftId]);
+  }, [fallbackAttempt, initialData, nftId]);
 
   const fallbackData =
     fallbackState.status === "loaded" ? fallbackState.data : undefined;
@@ -97,9 +100,10 @@ export function useMemePageFallbackData({
     cardLoadFailed:
       initialData === undefined && fallbackState.status === "error",
     retryCardData: () =>
-      setFallbackState((current) => ({
-        status: "loading",
-        attempt: current.attempt + 1,
-      })),
+      setFallbackState((current) =>
+        current.status === "error"
+          ? { status: "loading", attempt: current.attempt + 1 }
+          : current
+      ),
   };
 }

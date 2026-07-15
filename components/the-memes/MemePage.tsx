@@ -51,6 +51,7 @@ import {
 import styles from "./TheMemes.module.css";
 import UpcomingMemePage from "./UpcomingMemePage";
 import {
+  isAbortError,
   type MemePageInitialData,
   useMemePageFallbackData,
 } from "./useMemePageFallbackData";
@@ -100,10 +101,6 @@ const MEME_TAB_BUTTON_BASE_CLASS_NAME =
 interface MemeOwnerState {
   readonly consolidationKey: string;
   readonly owner: ConsolidatedTDH;
-}
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof Error && error.name === "AbortError";
 }
 
 function getMemeHistoryTabLabel(
