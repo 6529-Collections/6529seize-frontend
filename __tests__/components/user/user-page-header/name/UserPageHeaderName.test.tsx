@@ -95,9 +95,6 @@ describe("UserPageHeaderName", () => {
     expect(
       screen.getByText(CLASSIFICATIONS[ApiProfileClassification.Bot].title)
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { level: 1, name: "Alice" })
-    ).toBeInTheDocument();
   });
 
   it("shows display when handle missing", () => {
@@ -157,13 +154,5 @@ describe("UserPageHeaderName", () => {
     expect(
       screen.getByText("Profile enabled: January 2024")
     ).toBeInTheDocument();
-    expect(screen.queryByText("•")).not.toBeInTheDocument();
-  });
-
-  it("labels the NIC status and level as profile credentials", () => {
-    renderComponent({ handle: "Alice", cic: 2500, level: 42 });
-
-    expect(screen.getByText("Level 42")).toBeInTheDocument();
-    expect(screen.getByLabelText("Profile credentials")).toBeInTheDocument();
   });
 });

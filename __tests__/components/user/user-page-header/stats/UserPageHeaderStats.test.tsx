@@ -5,14 +5,10 @@ import UserPageHeaderStats from "@/components/user/user-page-header/stats/UserPa
 let statsRowProps: any = null;
 let followersModalProps: any = null;
 
-jest.mock("@/components/user/utils/stats/UserStatsRow", () => ({
-  __esModule: true,
-  default: (props: any) => {
-    statsRowProps = props;
-    return <div data-testid="stats-row" />;
-  },
-  UserStatsRowVariant: { PROFILE_HEADER: "PROFILE_HEADER" },
-}));
+jest.mock("@/components/user/utils/stats/UserStatsRow", () => (props: any) => {
+  statsRowProps = props;
+  return <div data-testid="stats-row" />;
+});
 
 jest.mock(
   "@/components/user/followers/UserPageFollowersModal",
@@ -57,7 +53,6 @@ describe("UserPageHeaderStats", () => {
         rep: 20,
         cic: 15,
         followersCount: 4,
-        variant: "PROFILE_HEADER",
       })
     );
     expect(typeof statsRowProps.onFollowersClick).toBe("function");

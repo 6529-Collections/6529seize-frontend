@@ -21,26 +21,31 @@ export default function UserPageHeaderNameWrapper({
 }) {
   const [isEditNameOpen, setIsEditNameOpen] = useState<boolean>(false);
 
+  if (!canEdit) {
+    return <div>{children}</div>;
+  }
+
   return (
-    <div className="tw-min-w-0">
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-        <div className="tw-min-w-0">{children}</div>
-        {canEdit ? (
-          <button
-            type="button"
-            onClick={() => setIsEditNameOpen(true)}
-            aria-label={getUserProfileHeaderMessage(
-              "user.profileHeader.name.edit",
-              { name: profileLabel }
-            )}
-            className="tw-inline-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-p-0 tw-text-iron-400 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
-          >
-            <span aria-hidden="true">
-              <PencilIcon />
-            </span>
-          </button>
-        ) : null}
-      </div>
+    <div>
+      <button
+        type="button"
+        onClick={() => setIsEditNameOpen(true)}
+        aria-label={getUserProfileHeaderMessage(
+          "user.profileHeader.name.edit",
+          { name: profileLabel }
+        )}
+        className="tw-group tw-relative tw-m-0 tw-border-none tw-bg-transparent tw-p-0 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400"
+      >
+        {children}
+        <div
+          aria-hidden="true"
+          className="tw-absolute tw-inset-0 tw-hidden tw-text-iron-400 group-hover:tw-block"
+        >
+          <div className="tw-absolute -tw-left-5 tw-top-1.5 tw-z-10">
+            <PencilIcon />
+          </div>
+        </div>
+      </button>
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isEditNameOpen && (
           <CommonAnimationOpacity

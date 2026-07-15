@@ -768,42 +768,6 @@
       ]
     },
     {
-      "id": "profiles.header",
-      "kind": "ui_affordance",
-      "title": "Profile header",
-      "aliases": [
-        "profile header",
-        "profile banner",
-        "profile stats",
-        "profile followers",
-        "follow profile",
-        "message profile"
-      ],
-      "keywords": [
-        "profile",
-        "header",
-        "banner",
-        "about",
-        "tdh",
-        "xtdh",
-        "nic",
-        "rep",
-        "followers",
-        "follow",
-        "message"
-      ],
-      "facts": [
-        "The profile header shows the profile picture, display name, NIC status, level, classification, profile-enabled date when available, About statement, and profile statistics.",
-        "TDH opens Collected, xTDH opens the xTDH tab, NIC and Rep open Identity, and Followers opens the followers list without changing route.",
-        "On your own editable profile, the header offers banner, profile picture, name, classification, and About editing controls.",
-        "On another profile, signed-in users can follow or unfollow, manage profile notifications, and start a direct message when the target has a primary wallet."
-      ],
-      "canonical_path": "/{user}",
-      "related_paths": ["/{user}/collected", "/{user}/xtdh"],
-      "tags": ["profiles", "navigation", "identity"],
-      "source_refs": ["ops/docs/profiles/navigation/feature-header-summary.md"]
-    },
-    {
       "id": "profiles.tabs",
       "kind": "ui_affordance",
       "title": "Profile tabs",
