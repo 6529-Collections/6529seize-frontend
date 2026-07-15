@@ -27,7 +27,7 @@ describe('UserCICTypeIconWrapper', () => {
 
     expect(
       screen.getByRole('button', { name: 'Network ID Check details' })
-    ).toBeInTheDocument();
+    ).toHaveClass('tw-size-5');
     
     // Check that the icon is rendered
     expect(screen.getByTestId('icon')).toBeInTheDocument();

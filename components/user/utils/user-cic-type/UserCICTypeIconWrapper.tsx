@@ -32,7 +32,7 @@ export default function UserCICTypeIconWrapper({
         type="button"
         data-tooltip-id={tooltipId}
         aria-label={t(DEFAULT_LOCALE, "user.cicType.details")}
-        className="tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-cursor-help focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-cursor-help focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
       >
         <UserCICTypeIcon cic={profile.cic} />
       </button>
