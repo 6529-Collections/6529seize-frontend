@@ -420,6 +420,36 @@ describe("frontend i18n helpers", () => {
     expect(formatTime("en-US", null)).toBe("");
   });
 
+  it("backs title-context copy with messages and locale-formatted counts", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const count = formatInteger(locale, 1234);
+      expect(
+        t(locale, "titleContext.wave.newMessages.other", {
+          count,
+          waveName: "Wave One",
+        })
+      ).toBe(`(${count} new messages) Wave One | Brain`);
+      expect(
+        t(locale, "titleContext.notifications.other", {
+          count,
+          title: t(locale, "titleContext.routes.waves"),
+        })
+      ).toBe(`(${count} notifications) Waves | Brain`);
+    }
+    expect(
+      t("en-US", "titleContext.wave.newMessages.one", {
+        count: formatInteger("en-US", 1),
+        waveName: "Wave One",
+      })
+    ).toBe("(1 new message) Wave One | Brain");
+    expect(
+      t("en-US", "titleContext.notifications.one", {
+        count: formatInteger("en-US", 1),
+        title: "Waves | Brain",
+      })
+    ).toBe("(1 notification) Waves | Brain");
+  });
+
   it("translates the wave drop copy action messages", () => {
     expect(t("en-US", "waves.drop.actions.copyFailed")).toBe("Copy failed");
     expect(t("en-GB", "waves.drop.actions.copyFailed")).toBe("Copy failed");

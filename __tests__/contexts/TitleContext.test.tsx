@@ -30,7 +30,11 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 function TitleHarness({
   waveData,
 }: {
-  readonly waveData: { name: string; newItemsCount: number } | null;
+  readonly waveData: {
+    id: string;
+    name: string;
+    newItemsCount: number;
+  } | null;
 }) {
   useSetWaveData(waveData);
   const { title } = useTitle();
@@ -50,7 +54,11 @@ describe("TitleContext", () => {
       <TitleProvider>
         <DynamicHeadTitle />
         <TitleHarness
-          waveData={{ name: "6529 Dev Daily Standup", newItemsCount: 0 }}
+          waveData={{
+            id: "wave-1",
+            name: "6529 Dev Daily Standup",
+            newItemsCount: 0,
+          }}
         />
       </TitleProvider>
     );
@@ -95,7 +103,9 @@ describe("TitleContext", () => {
     const view = render(
       <TitleProvider>
         <DynamicHeadTitle />
-        <TitleHarness waveData={{ name: "Wave One", newItemsCount: 0 }} />
+        <TitleHarness
+          waveData={{ id: "wave-1", name: "Wave One", newItemsCount: 0 }}
+        />
       </TitleProvider>
     );
 
@@ -122,6 +132,61 @@ describe("TitleContext", () => {
     await waitFor(() => {
       expect(document.title).toBe("Messages | Brain");
     });
+  });
+
+  it("preserves freshly loaded title data when the wave route changes", async () => {
+    mockPathname = "/waves/wave-1";
+
+    const view = render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness
+          waveData={{ id: "wave-1", name: "Wave One", newItemsCount: 0 }}
+        />
+      </TitleProvider>
+    );
+
+    await waitFor(() => expect(document.title).toBe("Wave One | Brain"));
+
+    mockPathname = "/waves/wave-2";
+    mockActiveWaveId = "wave-2";
+
+    view.rerender(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness
+          waveData={{ id: "wave-2", name: "Wave Two", newItemsCount: 2 }}
+        />
+      </TitleProvider>
+    );
+
+    await waitFor(() =>
+      expect(document.title).toBe("(2 new messages) Wave Two | Brain")
+    );
+  });
+
+  it("clears the owned wave title when wave data becomes unavailable", async () => {
+    const view = render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness
+          waveData={{ id: "wave-1", name: "Wave One", newItemsCount: 4 }}
+        />
+      </TitleProvider>
+    );
+
+    await waitFor(() =>
+      expect(document.title).toBe("(4 new messages) Wave One | Brain")
+    );
+
+    view.rerender(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => expect(document.title).toBe("Waves | Brain"));
   });
 
   it("uses the discovery route title instead of the profile fallback", async () => {
@@ -151,7 +216,9 @@ describe("TitleContext", () => {
     const view = render(
       <TitleProvider>
         <DynamicHeadTitle />
-        <TitleHarness waveData={{ name: "Wave One", newItemsCount: 0 }} />
+        <TitleHarness
+          waveData={{ id: "wave-1", name: "Wave One", newItemsCount: 0 }}
+        />
       </TitleProvider>
     );
 

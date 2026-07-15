@@ -3,6 +3,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -11,6 +12,11 @@ import React, {
 } from "react";
 import { publicEnv } from "@/config/env";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { isTitleUpdateCurrent } from "./title.helpers";
 import { useMyStreamOptional } from "./wave/MyStreamContext";
 
 type TitleContextType = {
@@ -26,7 +32,13 @@ type TitleContextType = {
   setTitle: (title: string) => void;
   notificationCount: number;
   setNotificationCount: (count: number) => void;
-  setWaveData: (data: { name: string; newItemsCount: number } | null) => void;
+  setWaveData: (data: WaveTitleData | null) => void;
+};
+
+type WaveTitleData = {
+  id: string;
+  name: string;
+  newItemsCount: number;
 };
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
@@ -35,23 +47,32 @@ export const DEFAULT_TITLE = publicEnv.BASE_ENDPOINT?.includes("staging")
   ? "6529 Staging"
   : "6529.io";
 
+const ROUTE_TITLE_KEYS = [
+  ["/waves", "titleContext.routes.waves"],
+  ["/notifications", "titleContext.routes.notifications"],
+  ["/messages", "titleContext.routes.messages"],
+  ["/meme-calendar", "titleContext.routes.memeCalendar"],
+  ["/the-memes", "titleContext.routes.theMemes"],
+  ["/meme-lab", "titleContext.routes.memeLab"],
+  ["/network", "titleContext.routes.network"],
+  ["/6529-gradient", "titleContext.routes.gradient"],
+  ["/nextgen", "titleContext.routes.nextGen"],
+  ["/rememes", "titleContext.routes.rememes"],
+  ["/open-data", "titleContext.routes.openData"],
+  ["/discover", "titleContext.routes.discovery"],
+] as const;
+
 // Default titles for routes
-const getDefaultTitleForRoute = (pathname: string | null): string => {
+const getDefaultTitleForRoute = (
+  pathname: string | null,
+  locale: SupportedLocale
+): string => {
   if (!pathname) return DEFAULT_TITLE;
-  if (pathname === "/") return "6529.io";
-  if (pathname.startsWith("/waves")) return "Waves | Brain";
-  if (pathname.startsWith("/notifications")) return "Notifications | Brain";
-  if (pathname.startsWith("/messages")) return "Messages | Brain";
-  if (pathname.startsWith("/meme-calendar")) return "Memes Minting Calendar";
-  if (pathname.startsWith("/the-memes")) return "The Memes | Collections";
-  if (pathname.startsWith("/meme-lab")) return "Meme Lab | Collections";
-  if (pathname.startsWith("/network")) return "Network";
-  if (pathname.startsWith("/6529-gradient"))
-    return "6529 Gradient | Collections";
-  if (pathname.startsWith("/nextgen")) return "NextGen | Collections";
-  if (pathname.startsWith("/rememes")) return "Rememes | Collections";
-  if (pathname.startsWith("/open-data")) return "Open Data | Tools";
-  if (pathname.startsWith("/discover")) return "Discovery";
+  if (pathname === "/") return DEFAULT_TITLE;
+  const routeTitle = ROUTE_TITLE_KEYS.find(([prefix]) =>
+    pathname.startsWith(prefix)
+  );
+  if (routeTitle) return t(locale, routeTitle[1]);
   // Handle profile pages (e.g., /username)
   if (pathname !== "/" && pathname.split("/").length === 2) {
     const segments = pathname.split("/");
@@ -74,7 +95,7 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
       "drop-forge",
     ];
     if (!knownRoutes.includes(firstSegment!)) {
-      return `Profile | 6529.io`;
+      return t(locale, "titleContext.routes.profile");
     }
   }
   return DEFAULT_TITLE;
@@ -86,8 +107,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const myStream = useMyStreamOptional();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const locale = useBrowserLocale();
   const [title, setTitle] = useState<string>(() =>
-    getDefaultTitleForRoute(pathname)
+    getDefaultTitleForRoute(pathname, locale)
   );
   // Pathname the current title text was computed for.
   const [titlePathname, setTitlePathname] = useState<string | null>(pathname);
@@ -97,27 +119,23 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     string | null
   >(null);
   const [notificationCount, setNotificationCount] = useState<number>(0);
-  const [waveData, setWaveData] = useState<{
-    name: string;
-    newItemsCount: number;
-  } | null>(null);
+  const [waveData, setWaveData] = useState<WaveTitleData | null>(null);
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
   const isWaveRoute =
     pathname?.startsWith("/waves") ||
     pathname?.startsWith("/messages") ||
     (pathname === "/" && searchParams?.get("view") === "waves");
-  const waveParam = isWaveRoute
-    ? (myStream?.activeWave.id ??
-      getActiveWaveIdFromUrl({ pathname, searchParams }) ??
-      null)
-    : null;
+  const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const fallbackActiveWaveId =
+    pathname === "/" ? (myStream?.activeWave.id ?? null) : null;
+  const waveParam = isWaveRoute ? (waveInUrl ?? fallbackActiveWaveId) : null;
 
   useEffect(() => {
     const previousPathname = routeRef.current;
     const previousSearchParams = queryRef.current;
     const pathnameChanged = previousPathname !== pathname;
-    const currentWaveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
+    const currentWaveInUrl = waveInUrl;
     const previousWaveInUrl = getActiveWaveIdFromUrl({
       pathname: previousPathname,
       searchParams: previousSearchParams,
@@ -127,15 +145,19 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     queryRef.current = searchParams;
 
     if (pathnameChanged) {
-      setTitle(getDefaultTitleForRoute(pathname));
+      setTitle(getDefaultTitleForRoute(pathname, locale));
       setTitlePathname(pathname);
       setExplicitTitlePathname(null);
-      setWaveData(null);
+      setWaveData((current) =>
+        current?.id === currentWaveInUrl ? current : null
+      );
       return;
     }
 
     if (!isWaveRoute) {
-      setWaveData(null);
+      setWaveData((current) =>
+        current?.id === currentWaveInUrl ? current : null
+      );
       return;
     }
 
@@ -143,32 +165,46 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       previousWaveInUrl &&
       (!currentWaveInUrl || previousWaveInUrl !== currentWaveInUrl)
     ) {
-      setTitle(getDefaultTitleForRoute(pathname));
+      setTitle(getDefaultTitleForRoute(pathname, locale));
       setTitlePathname(pathname);
       setExplicitTitlePathname(null);
-      setWaveData(null);
+      setWaveData((current) =>
+        current?.id === currentWaveInUrl ? current : null
+      );
     }
-  }, [pathname, searchParams]);
+  }, [isWaveRoute, locale, pathname, searchParams, waveInUrl]);
 
-  const updateTitle = (newTitle: string) => {
-    if (routeRef.current === pathname) {
-      setTitle(newTitle);
-      setTitlePathname(pathname);
-      setExplicitTitlePathname(pathname);
-    }
-  };
+  const updateTitle = useCallback(
+    (newTitle: string) => {
+      if (isTitleUpdateCurrent(routeRef.current, titlePathname, pathname)) {
+        setTitle(newTitle);
+        setTitlePathname(pathname);
+        setExplicitTitlePathname(pathname);
+      }
+    },
+    [pathname, titlePathname]
+  );
 
   // Compute the title based on current state
   const computedTitle = useMemo(() => {
     const waveTitle = (() => {
-      if (!waveParam || !waveData) return null;
-      let newItemsText = "";
+      if (!waveParam || waveData?.id !== waveParam) return null;
       if (waveData.newItemsCount > 0 && notificationCount === 0) {
-        const messageText =
-          waveData.newItemsCount === 1 ? "message" : "messages";
-        newItemsText = `(${waveData.newItemsCount} new ${messageText}) `;
+        const pluralCategory = new Intl.PluralRules(locale).select(
+          waveData.newItemsCount
+        );
+        const messageKey =
+          pluralCategory === "one"
+            ? "titleContext.wave.newMessages.one"
+            : "titleContext.wave.newMessages.other";
+        return t(locale, messageKey, {
+          count: formatInteger(locale, waveData.newItemsCount),
+          waveName: waveData.name,
+        });
       }
-      return `${newItemsText}${waveData.name} | Brain`;
+      return t(locale, "titleContext.wave.default", {
+        waveName: waveData.name,
+      });
     })();
 
     if (isWaveRoute && waveTitle) {
@@ -176,23 +212,28 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     return title;
-  }, [isWaveRoute, waveParam, waveData, title, notificationCount]);
+  }, [isWaveRoute, locale, waveParam, waveData, title, notificationCount]);
 
   const isTitleOwned =
     (explicitTitlePathname !== null && explicitTitlePathname === pathname) ||
-    Boolean(isWaveRoute && waveParam && waveData);
+    Boolean(isWaveRoute && waveParam && waveData?.id === waveParam);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
-    let notificationText = "";
-    if (notificationCount === 1) {
-      notificationText = "1 notification";
-    } else if (notificationCount > 1) {
-      notificationText = `${notificationCount} notifications`;
-    }
-    const finalTitle = notificationText
-      ? `(${notificationText}) ${computedTitle}`
-      : computedTitle;
+    const notificationPluralCategory = new Intl.PluralRules(locale).select(
+      notificationCount
+    );
+    const notificationKey =
+      notificationPluralCategory === "one"
+        ? "titleContext.notifications.one"
+        : "titleContext.notifications.other";
+    const finalTitle =
+      notificationCount > 0
+        ? t(locale, notificationKey, {
+            count: formatInteger(locale, notificationCount),
+            title: computedTitle,
+          })
+        : computedTitle;
     return {
       title: finalTitle,
       isTitleOwned,
@@ -202,7 +243,14 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       setNotificationCount,
       setWaveData,
     };
-  }, [computedTitle, isTitleOwned, notificationCount, titlePathname]);
+  }, [
+    computedTitle,
+    isTitleOwned,
+    locale,
+    notificationCount,
+    titlePathname,
+    updateTitle,
+  ]);
 
   return (
     <TitleContext.Provider value={contextValue}>
@@ -231,9 +279,7 @@ export const useSetTitle = (pageTitle: string) => {
 };
 
 // Hook to set wave data for title
-export const useSetWaveData = (
-  data: { name: string; newItemsCount: number } | null
-) => {
+export const useSetWaveData = (data: WaveTitleData | null) => {
   const { setWaveData } = useTitle();
 
   useEffect(() => {
