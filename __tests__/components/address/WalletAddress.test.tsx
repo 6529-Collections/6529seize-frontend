@@ -174,6 +174,26 @@ describe("WalletAddress", () => {
     expect(screen.queryByLabelText(COPY_ENS_LABEL)).not.toBeInTheDocument();
   });
 
+  it("closes the ENS copy menu with Escape and restores trigger focus", async () => {
+    const user = setupUser();
+    render(
+      <WalletAddress
+        wallet="0xabc"
+        display={undefined}
+        displayEns="vitalik.eth"
+      />
+    );
+
+    const copyOptions = screen.getByLabelText(COPY_OPTIONS_LABEL);
+    await user.click(copyOptions);
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByLabelText(COPY_ENS_LABEL)).not.toBeInTheDocument();
+    expect(copyOptions).toHaveFocus();
+  });
+
   it("renders without copy controls when clipboard is unavailable", () => {
     Object.defineProperty(globalThis.navigator, "clipboard", {
       configurable: true,

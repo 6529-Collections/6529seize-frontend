@@ -10,7 +10,13 @@ import type { Delegation, WalletConsolidation } from "@/entities/IDelegation";
 import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import { useEnsName } from "wagmi";
 import {
   MINTING_USE_CASE,
@@ -40,6 +46,205 @@ function resolveConsolidationDisplay(
   return fallback;
 }
 
+function getInitialCheckedAddress(address: string) {
+  return isValidEthAddress(address) ? address : "";
+}
+
+function getCheckedWalletDisplay(
+  fetchedAddress: string,
+  resolvedEns: string | null | undefined,
+  walletInputValue: string
+) {
+  if (resolvedEns) {
+    return `${resolvedEns} - ${fetchedAddress}`;
+  }
+
+  return walletInputValue.includes(" - ") ? walletInputValue : fetchedAddress;
+}
+
+function getWalletFeedback(
+  showAddressError: boolean,
+  walletInputValue: string
+) {
+  if (showAddressError) {
+    return "Enter a valid Ethereum address or ENS name.";
+  }
+
+  return walletInputValue.trim()
+    ? ""
+    : "Enter an Ethereum address or ENS name.";
+}
+
+interface WalletCheckerViewProps {
+  fetchedAddress: string;
+  walletInputValue: string;
+  checkedWalletDisplay: string;
+  refreshing: boolean;
+  checking: boolean;
+  formDisabled: boolean;
+  showAddressError: boolean;
+  walletFeedback: string;
+  hasRequestError: boolean;
+  resultsLoaded: boolean;
+  hasAnyRecords: boolean;
+  delegationsLoaded: boolean;
+  delegations: Delegation[];
+  subDelegations: Delegation[];
+  activeDelegation: Delegation | undefined;
+  consolidationsLoaded: boolean;
+  consolidations: ConsolidationDisplay[];
+  consolidatedWallets: ConsolidatedWallet[];
+  consolidationActions: ConsolidationDisplay[];
+  onClear(): void;
+  onSubmit(): void;
+  onRefresh(): void;
+  onAddressChange(address: string): void;
+  onValueChange(value: string): void;
+  onLoadingChange(loading: boolean): void;
+  onError(hasError: boolean): void;
+}
+
+function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!props.formDisabled) {
+      props.onSubmit();
+    }
+  }
+
+  return (
+    <div className="tw-w-full">
+      <header className="tw-mb-6">
+        <h1 className="tw-mb-2 tw-mt-0 tw-text-3xl tw-font-bold tw-text-white">
+          Wallet Checker
+        </h1>
+        <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-300">
+          Check delegation, delegation manager, and consolidation records for a
+          wallet. This is read-only and does not require wallet connection.
+        </p>
+      </header>
+
+      <form onSubmit={handleSubmit}>
+        {!props.fetchedAddress ? (
+          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+            <label
+              htmlFor="wallet-checker-address"
+              className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-100"
+            >
+              Wallet address or ENS name
+            </label>
+            <EnsAddressInput
+              id="wallet-checker-address"
+              autoFocus
+              placeholder="0x... or ENS"
+              className="tw-rounded-lg tw-border-iron-600 tw-px-4 tw-py-3"
+              ariaDescribedBy="wallet-checker-feedback"
+              value={props.walletInputValue}
+              onAddressChange={(address) =>
+                props.onAddressChange(address.trim())
+              }
+              onValueChange={props.onValueChange}
+              onLoadingChange={props.onLoadingChange}
+              onError={props.onError}
+            />
+            <div
+              id="wallet-checker-feedback"
+              className={`tw-mt-2 tw-min-h-5 tw-text-sm ${
+                props.showAddressError
+                  ? "tw-font-medium tw-text-error"
+                  : "tw-text-iron-400"
+              }`}
+              role={props.showAddressError ? "alert" : undefined}
+              aria-live={props.showAddressError ? "assertive" : undefined}
+            >
+              {props.walletFeedback}
+            </div>
+            <div className="tw-mt-6 tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
+              <SecondaryButton
+                onClicked={props.onClear}
+                disabled={!props.walletInputValue.trim()}
+                className="tw-w-full sm:tw-w-auto"
+              >
+                Clear
+              </SecondaryButton>
+              <PrimaryButton
+                loading={props.checking}
+                disabled={props.formDisabled}
+                onClicked={props.onSubmit}
+                className="tw-w-full sm:tw-w-auto"
+              >
+                {props.checking ? "Checking..." : "Check Wallet"}
+              </PrimaryButton>
+            </div>
+          </section>
+        ) : (
+          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+            <div className="tw-flex tw-flex-col tw-gap-5 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+              <div className="tw-min-w-0">
+                <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+                  Viewing wallet
+                </p>
+                <p className="tw-mb-0 tw-break-all tw-text-lg tw-font-semibold tw-text-white">
+                  {props.checkedWalletDisplay}
+                </p>
+                {props.refreshing && (
+                  <output className="tw-mb-0 tw-mt-2 tw-block tw-text-sm tw-text-iron-300">
+                    Refreshing delegation records...
+                  </output>
+                )}
+                {props.hasRequestError && !props.checking && (
+                  <p
+                    className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-text-error"
+                    role="alert"
+                  >
+                    Some delegation records could not be loaded. Try refreshing.
+                  </p>
+                )}
+                {props.resultsLoaded &&
+                  !props.hasAnyRecords &&
+                  !props.hasRequestError && (
+                    <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300">
+                      No delegation, delegation manager, or consolidation
+                      records found for this wallet.
+                    </p>
+                  )}
+              </div>
+              <div className="tw-flex tw-w-full tw-flex-col-reverse tw-gap-3 sm:tw-w-auto sm:tw-flex-row">
+                <SecondaryButton
+                  onClicked={props.onClear}
+                  className="tw-w-full sm:tw-w-auto"
+                >
+                  Clear
+                </SecondaryButton>
+                <PrimaryButton
+                  loading={props.refreshing}
+                  disabled={props.refreshing}
+                  onClicked={props.onRefresh}
+                  className="tw-w-full sm:tw-w-auto"
+                >
+                  {props.refreshing ? "Refreshing..." : "Refresh"}
+                </PrimaryButton>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <WalletCheckerResults
+          fetchedAddress={props.fetchedAddress}
+          delegationsLoaded={props.delegationsLoaded}
+          delegations={props.delegations}
+          subDelegations={props.subDelegations}
+          activeDelegation={props.activeDelegation}
+          consolidationsLoaded={props.consolidationsLoaded}
+          consolidations={props.consolidations}
+          consolidatedWallets={props.consolidatedWallets}
+          consolidationActions={props.consolidationActions}
+        />
+      </form>
+    </div>
+  );
+}
+
 export default function WalletCheckerComponent(
   props: Readonly<{
     address_query: string;
@@ -49,13 +254,12 @@ export default function WalletCheckerComponent(
   const { address_query, setAddressQuery } = props;
   const initialAddressQuery = address_query;
   const initialAddressIsValid = isValidEthAddress(initialAddressQuery);
+  const initialCheckedAddress = getInitialCheckedAddress(initialAddressQuery);
 
   const [submittedAddress, setSubmittedAddress] = useState(
-    initialAddressIsValid ? initialAddressQuery : ""
+    initialCheckedAddress
   );
-  const [fetchedAddress, setFetchedAddress] = useState(
-    initialAddressIsValid ? initialAddressQuery : ""
-  );
+  const [fetchedAddress, setFetchedAddress] = useState(initialCheckedAddress);
   const [walletInputValue, setWalletInputValue] = useState(initialAddressQuery);
   const [walletAddress, setWalletAddress] = useState(initialAddressQuery);
   const [ensLoading, setEnsLoading] = useState(false);
@@ -395,12 +599,11 @@ export default function WalletCheckerComponent(
       : undefined,
     chainId: 1,
   });
-  let checkedWalletDisplay = fetchedAddress;
-  if (checkedWalletEns.data) {
-    checkedWalletDisplay = `${checkedWalletEns.data} - ${fetchedAddress}`;
-  } else if (walletInputValue.includes(" - ")) {
-    checkedWalletDisplay = walletInputValue;
-  }
+  const checkedWalletDisplay = getCheckedWalletDisplay(
+    fetchedAddress,
+    checkedWalletEns.data,
+    walletInputValue
+  );
 
   function clearWalletChecker() {
     setWalletInputValue("");
@@ -455,151 +658,39 @@ export default function WalletCheckerComponent(
     }
   }
 
-  let walletFeedback = "Enter an Ethereum address or ENS name.";
-  if (showAddressError) {
-    walletFeedback = "Enter a valid Ethereum address or ENS name.";
-  } else if (walletInputValue.trim()) {
-    walletFeedback = "";
-  }
+  const walletFeedback = getWalletFeedback(showAddressError, walletInputValue);
 
   return (
-    <div className="tw-w-full">
-      <header className="tw-mb-6">
-        <h1 className="tw-mb-2 tw-mt-0 tw-text-3xl tw-font-bold tw-text-white">
-          Wallet Checker
-        </h1>
-        <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-300">
-          Check delegation, delegation manager, and consolidation records for a
-          wallet. This is read-only and does not require wallet connection.
-        </p>
-      </header>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!formDisabled) {
-            submitWalletCheck();
-          }
-        }}
-      >
-        {!fetchedAddress ? (
-          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
-            <label
-              htmlFor="wallet-checker-address"
-              className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-100"
-            >
-              Wallet address or ENS name
-            </label>
-            <EnsAddressInput
-              id="wallet-checker-address"
-              autoFocus
-              placeholder="0x... or ENS"
-              className="tw-rounded-lg tw-border-iron-600 tw-px-4 tw-py-3"
-              ariaDescribedBy="wallet-checker-feedback"
-              value={walletInputValue}
-              onAddressChange={(addr) => {
-                setWalletAddress(addr.trim());
-                setAddressError(false);
-              }}
-              onValueChange={setWalletInputValue}
-              onLoadingChange={setEnsLoading}
-              onError={setAddressError}
-            />
-            <div
-              id="wallet-checker-feedback"
-              className={`tw-mt-2 tw-min-h-5 tw-text-sm ${
-                showAddressError
-                  ? "tw-font-medium tw-text-error"
-                  : "tw-text-iron-400"
-              }`}
-              role={showAddressError ? "alert" : undefined}
-              aria-live={showAddressError ? "assertive" : undefined}
-            >
-              {walletFeedback}
-            </div>
-            <div className="tw-mt-6 tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
-              <SecondaryButton
-                onClicked={clearWalletChecker}
-                disabled={!walletInputValue.trim()}
-                className="tw-w-full sm:tw-w-auto"
-              >
-                Clear
-              </SecondaryButton>
-              <PrimaryButton
-                loading={checking}
-                disabled={formDisabled}
-                onClicked={submitWalletCheck}
-                className="tw-w-full sm:tw-w-auto"
-              >
-                {checking ? `Checking...` : `Check Wallet`}
-              </PrimaryButton>
-            </div>
-          </section>
-        ) : (
-          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
-            <div className="tw-flex tw-flex-col tw-gap-5 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-              <div className="tw-min-w-0">
-                <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                  Viewing wallet
-                </p>
-                <p className="tw-mb-0 tw-break-all tw-text-lg tw-font-semibold tw-text-white">
-                  {checkedWalletDisplay}
-                </p>
-                {refreshing && (
-                  <p
-                    className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300"
-                    role="status"
-                  >
-                    Refreshing delegation records...
-                  </p>
-                )}
-                {hasRequestError && !checking && (
-                  <p
-                    className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-text-error"
-                    role="alert"
-                  >
-                    Some delegation records could not be loaded. Try refreshing.
-                  </p>
-                )}
-                {resultsLoaded && !hasAnyRecords && !hasRequestError && (
-                  <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300">
-                    No delegation, delegation manager, or consolidation records
-                    found for this wallet.
-                  </p>
-                )}
-              </div>
-              <div className="tw-flex tw-w-full tw-flex-col-reverse tw-gap-3 sm:tw-w-auto sm:tw-flex-row">
-                <SecondaryButton
-                  onClicked={clearWalletChecker}
-                  className="tw-w-full sm:tw-w-auto"
-                >
-                  Clear
-                </SecondaryButton>
-                <PrimaryButton
-                  loading={refreshing}
-                  disabled={refreshing}
-                  onClicked={refreshWalletChecker}
-                  className="tw-w-full sm:tw-w-auto"
-                >
-                  {refreshing ? "Refreshing..." : "Refresh"}
-                </PrimaryButton>
-              </div>
-            </div>
-          </section>
-        )}
-
-        <WalletCheckerResults
-          fetchedAddress={fetchedAddress}
-          delegationsLoaded={delegationsLoaded}
-          delegations={delegations}
-          subDelegations={subDelegations}
-          activeDelegation={activeDelegation}
-          consolidationsLoaded={consolidationsLoaded}
-          consolidations={consolidations}
-          consolidatedWallets={consolidatedWallets}
-          consolidationActions={consolidationActions}
-        />
-      </form>
-    </div>
+    <WalletCheckerView
+      fetchedAddress={fetchedAddress}
+      walletInputValue={walletInputValue}
+      checkedWalletDisplay={checkedWalletDisplay}
+      refreshing={refreshing}
+      checking={checking}
+      formDisabled={formDisabled}
+      showAddressError={showAddressError}
+      walletFeedback={walletFeedback}
+      hasRequestError={hasRequestError}
+      resultsLoaded={resultsLoaded}
+      hasAnyRecords={hasAnyRecords}
+      delegationsLoaded={delegationsLoaded}
+      delegations={delegations}
+      subDelegations={subDelegations}
+      activeDelegation={activeDelegation}
+      consolidationsLoaded={consolidationsLoaded}
+      consolidations={consolidations}
+      consolidatedWallets={consolidatedWallets}
+      consolidationActions={consolidationActions}
+      onClear={clearWalletChecker}
+      onSubmit={submitWalletCheck}
+      onRefresh={refreshWalletChecker}
+      onAddressChange={(address) => {
+        setWalletAddress(address);
+        setAddressError(false);
+      }}
+      onValueChange={setWalletInputValue}
+      onLoadingChange={setEnsLoading}
+      onError={setAddressError}
+    />
   );
 }

@@ -613,7 +613,7 @@ export function DelegationTokenSelection(
   );
 }
 
-export function DelegationCloseButton(
+function DelegationCloseButton(
   props: Readonly<{ title: string; onHide: () => void }>
 ) {
   const tooltipId = `delegation-close-button-${props.title

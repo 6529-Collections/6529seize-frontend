@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type KeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -94,6 +95,17 @@ function getServerClipboardAvailabilitySnapshot() {
   return false;
 }
 
+function getWalletEns(
+  display: string | undefined,
+  displayEns: string | undefined
+) {
+  if (display?.endsWith(".eth")) {
+    return display;
+  }
+
+  return displayEns?.endsWith(".eth") ? displayEns : null;
+}
+
 export function WalletAddress(props: {
   wallet: string;
   display: string | undefined;
@@ -134,12 +146,7 @@ export function WalletAddress(props: {
   const hideCopy = props.hideCopy === true;
   const setLinkQueryAddress = props.setLinkQueryAddress === true;
 
-  let walletEns: string | null = null;
-  if (props.display?.endsWith(".eth")) {
-    walletEns = props.display;
-  } else if (props.displayEns?.endsWith(".eth")) {
-    walletEns = props.displayEns;
-  }
+  const walletEns = getWalletEns(props.display, props.displayEns);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -317,6 +324,30 @@ export function WalletAddress(props: {
     void copy(walletEns, "ens");
   }
 
+  function handleCopyMenuKeyDown(
+    event: KeyboardEvent<HTMLButtonElement>,
+    position: "first" | "last"
+  ) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeCopyMenu(true);
+      return;
+    }
+
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    if (position === "first" && event.shiftKey) {
+      event.preventDefault();
+      closeCopyMenu(true);
+    } else if (position === "last" && !event.shiftKey) {
+      event.preventDefault();
+      closeCopyMenu();
+      focusAfterCopyMenuTrigger();
+    }
+  }
+
   const tooltipLabel = isCopied ? COPIED_TOOLTIP_LABEL : COPY_TOOLTIP_LABEL;
 
   return (
@@ -343,16 +374,7 @@ export function WalletAddress(props: {
             </span>
           )}
           {walletEns ? (
-            <span
-              ref={copyMenuRef}
-              className="tw-relative tw-inline-block"
-              onKeyDown={(event) => {
-                if (event.key === "Escape") {
-                  event.preventDefault();
-                  closeCopyMenu(true);
-                }
-              }}
-            >
+            <span ref={copyMenuRef} className="tw-relative tw-inline-block">
               <button
                 ref={copyMenuTriggerRef}
                 type="button"
@@ -364,6 +386,12 @@ export function WalletAddress(props: {
                 onMouseEnter={() => setIsCopyTooltipSuppressed(false)}
                 onFocus={() => setIsCopyTooltipSuppressed(false)}
                 onClick={() => setIsCopyMenuOpen((current) => !current)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    event.preventDefault();
+                    closeCopyMenu(true);
+                  }
+                }}
               >
                 {isUserPage && props.display && (
                   <span
@@ -385,28 +413,6 @@ export function WalletAddress(props: {
                     id={copyMenuId}
                     className="tw-fixed tw-z-[1000] tw-flex tw-w-max tw-min-w-36 tw-flex-col tw-rounded-md tw-border tw-border-black/15 tw-bg-[#dbe7ff] tw-py-1 tw-shadow-lg"
                     style={copyMenuPosition}
-                    onKeyDown={(event) => {
-                      if (event.key !== "Tab") {
-                        return;
-                      }
-
-                      const menuButtons = Array.from(
-                        event.currentTarget.querySelectorAll<HTMLButtonElement>(
-                          "button"
-                        )
-                      );
-                      if (event.shiftKey && event.target === menuButtons[0]) {
-                        event.preventDefault();
-                        closeCopyMenu(true);
-                      } else if (
-                        !event.shiftKey &&
-                        event.target === menuButtons.at(-1)
-                      ) {
-                        event.preventDefault();
-                        closeCopyMenu();
-                        focusAfterCopyMenuTrigger();
-                      }
-                    }}
                   >
                     <button
                       type="button"
@@ -414,6 +420,9 @@ export function WalletAddress(props: {
                       className={COPY_MENU_ITEM_CLASS_NAME}
                       aria-label={COPY_ENS_ARIA_LABEL}
                       onClick={copyEns}
+                      onKeyDown={(event) =>
+                        handleCopyMenuKeyDown(event, "first")
+                      }
                     >
                       <span>{resolveAddress()}</span>
                       <FontAwesomeIcon
@@ -431,6 +440,9 @@ export function WalletAddress(props: {
                       onClick={() => {
                         void copy(props.wallet, "wallet");
                       }}
+                      onKeyDown={(event) =>
+                        handleCopyMenuKeyDown(event, "last")
+                      }
                     >
                       <span>{formatAddress(props.wallet)}</span>
                       <FontAwesomeIcon
