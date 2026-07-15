@@ -46,7 +46,7 @@ function UserPageHeaderAboutContent({
   return (
     <>
       {view === AboutStatementView.STATEMENT && (
-        <div className="tw-max-w-3xl">
+        <div className="tw-max-w-2xl">
           <div
             className={[
               "tw-inline-flex tw-items-start tw-gap-2",
