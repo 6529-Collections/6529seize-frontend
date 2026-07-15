@@ -321,10 +321,11 @@ export default function UserPageSubscriptionsTopUp() {
   }
 
   const isSending = sendTransaction.isPending || waitSendTransaction.isLoading;
+  const parsedMemeCount = Number.parseInt(memeCount, 10);
   const isSendDisabled =
     selectedOption === null ||
     (selectedOption === "other" &&
-      (!memeCount || Number.parseInt(memeCount, 10) < 1));
+      (!memeCount || Number.isNaN(parsedMemeCount) || parsedMemeCount < 1));
 
   const iOsContent = mounted ? (
     <Link

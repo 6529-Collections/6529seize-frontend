@@ -345,7 +345,11 @@ export default function MemeSubscriptionRow(
               data-tooltip-id={`minting-today-${props.subscription.token_id}`}
             >
               Minting Today{" "}
-              <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
+              <FontAwesomeIcon
+                icon={faInfoCircle}
+                className="tw-size-4"
+                aria-hidden="true"
+              />
             </span>
             <Tooltip
               id={`minting-today-${props.subscription.token_id}`}
