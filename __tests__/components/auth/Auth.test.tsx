@@ -2018,6 +2018,63 @@ describe("Auth component", () => {
       ).toHaveLength(1);
     });
 
+    it("retries validation after JWT removal fails", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockRemoveAuthJwt =
+        authUtils.removeAuthJwt as jest.MockedFunction<any>;
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockGetAuthJwt.mockReturnValue("invalid-jwt");
+      mockRemoveAuthJwt.mockRejectedValueOnce(new Error("storage failure"));
+      mockValidateAuthImmediate
+        .mockImplementationOnce(async ({ callbacks }) => {
+          try {
+            await callbacks.onRemoveJwt();
+          } catch {
+            return {
+              isValid: false,
+              validationCompleted: true,
+              authRefreshOutcome: "failed",
+              wasCancelled: false,
+              shouldShowModal: true,
+            };
+          }
+          throw new Error("Expected JWT removal to fail");
+        })
+        .mockResolvedValueOnce({
+          isValid: true,
+          validationCompleted: true,
+          authRefreshOutcome: "not_attempted",
+          wasCancelled: false,
+          shouldShowModal: false,
+        });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+      });
+
+      act(() => {
+        window.dispatchEvent(new Event("6529-wallet-accounts-updated"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
+      });
+      expect(mockRemoveAuthJwt).toHaveBeenCalledTimes(1);
+    });
+
     it("tracks forced logout when the session upgrade deadline has expired", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;

@@ -127,6 +127,30 @@ describe("notification terminal auth polling", () => {
     unmount();
   });
 
+  it("uses a silently rotated token on the next poll without a rerender", async () => {
+    commonApiFetchMock.mockResolvedValue({ unread_count: 1 });
+
+    const { unmount } = renderHook(() => useUnreadNotifications("alice"), {
+      wrapper: createWrapper(queryClient),
+    });
+    await flushQueryWork();
+
+    expect(getAuthorizationHeader(commonApiFetchMock.mock.calls[0])).toBe(
+      "Bearer active-jwt-before-terminal"
+    );
+
+    activeJwt = "silently-rotated-jwt";
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(30_000);
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+    expect(getAuthorizationHeader(commonApiFetchMock.mock.calls[1])).toBe(
+      "Bearer silently-rotated-jwt"
+    );
+    unmount();
+  });
+
   it("keeps account failures isolated and retries only after that token changes", async () => {
     const accountA = {
       address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",

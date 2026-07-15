@@ -53,14 +53,15 @@ export function useUnreadNotifications(
       },
     ],
     queryFn: async () => {
-      if (!authJwt || !isAuthJwtUsable(authJwt) || getAuthJwt() !== authJwt) {
+      const requestAuthJwt = getAuthJwt();
+      if (!requestAuthJwt || !isAuthJwtUsable(requestAuthJwt)) {
         throw createMissingAuthPollingError();
       }
 
       return await commonApiFetch<ApiNotificationsResponseV2>({
         endpoint: `v2/notifications`,
         headers: {
-          Authorization: `Bearer ${authJwt}`,
+          Authorization: `Bearer ${requestAuthJwt}`,
         },
         params: {
           limit: "1",

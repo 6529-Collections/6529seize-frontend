@@ -53,6 +53,7 @@ const createConnectedAccountTerminalAuthPollingError = (
     value: true,
     enumerable: true,
   });
+  // Keep account/token fingerprints away from generic error serializers.
   Object.defineProperty(error, "terminalAuthFailures", {
     value: terminalAuthFailures,
     enumerable: false,
