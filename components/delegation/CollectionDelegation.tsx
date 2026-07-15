@@ -2,12 +2,12 @@
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useChainId, useEnsName } from "wagmi";
-import styles from "./Delegation.module.css";
 
 import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { DelegationCenterSection } from "@/types/enums";
 import { faCircleArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { CollectionDelegationLocks } from "./collection-delegation/CollectionDelegationLocks";
 import { CollectionDelegationSections } from "./collection-delegation/CollectionDelegationSections";
@@ -68,7 +68,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   function getSwitchToMessage() {
     return (
-      <span className={styles["switchNetworkMessage"]}>
+      <span className="tw-font-medium tw-text-error">
         Switch to{" "}
         {DELEGATION_CONTRACT.chain_id === 1
           ? "Ethereum Mainnet"
@@ -172,230 +172,211 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-w-full tw-p-0">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-w-full tw-px-3">
-          {props.collection && (
-            <div className="tw-mx-auto tw-w-full">
-              <div
-                className={`-tw-mx-3 tw-flex tw-flex-wrap ${styles["collectionDelegationBackRow"]}`}
-              >
-                <div className="tw-w-full tw-px-3">
-                  <button
-                    className={styles["backBtn"]}
-                    onClick={() =>
-                      props.setSection(DelegationCenterSection.CENTER)
-                    }
+    <div className="tw-w-full">
+      <div className="tw-w-full">
+        <button
+          type="button"
+          className="tw-group tw-mb-4 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition-colors hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          onClick={() => props.setSection(DelegationCenterSection.CENTER)}
+        >
+          <FontAwesomeIcon
+            icon={faCircleArrowLeft}
+            className="tw-h-5 tw-w-5 tw-flex-none"
+          />
+          <span>Back to Delegation Center</span>
+        </button>
+        <header className="tw-mb-6">
+          <div className="tw-flex tw-items-center tw-gap-4">
+            <span className="tw-relative tw-h-14 tw-w-14 tw-flex-none tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+              <Image
+                unoptimized
+                className="tw-object-cover"
+                loading="eager"
+                priority
+                fill
+                sizes="56px"
+                src={props.collection.preview}
+                alt=""
+                aria-hidden="true"
+              />
+            </span>
+            <h1 className="tw-m-0 tw-text-3xl tw-font-bold tw-text-white">
+              {props.collection.title}
+            </h1>
+          </div>
+          <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-6 tw-text-iron-300">
+            {getCollectionScopeDescription(props.collection)}
+          </p>
+        </header>
+        {!showUpdateDelegation &&
+          !showCreateNewDelegationWithSub &&
+          !showCreateNewSubDelegationWithSub &&
+          !showCreateNewConsolidationWithSub &&
+          !showAssignPrimaryAddressWithSub &&
+          !showRevokeDelegationWithSub && (
+            <>
+              {!accountResolution.isConnected ? (
+                <section
+                  className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6"
+                  aria-labelledby="collection-connect-heading"
+                >
+                  <h2
+                    id="collection-connect-heading"
+                    className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white"
                   >
-                    <FontAwesomeIcon icon={faCircleArrowLeft} />
-                    <span className="tw-text-sm">
-                      Back to Delegation Center
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <div
-                className={`-tw-mx-3 tw-flex tw-flex-wrap ${styles["collectionDelegationTitleRow"]}`}
-              >
-                <div className="tw-w-full tw-px-3">
-                  <h1 className="tw-mb-0">{props.collection.title}</h1>
-                  <p className={styles["collectionIntro"]}>
-                    {getCollectionScopeDescription(props.collection)}
+                    Connect Wallet to Manage {props.collection.title}
+                  </h2>
+                  <p className="tw-mb-4 tw-text-base tw-leading-6 tw-text-iron-300">
+                    Connect the wallet whose outgoing and incoming records you
+                    want to review.
                   </p>
-                </div>
-              </div>
-              {!showUpdateDelegation &&
-                !showCreateNewDelegationWithSub &&
-                !showCreateNewSubDelegationWithSub &&
-                !showCreateNewConsolidationWithSub &&
-                !showAssignPrimaryAddressWithSub &&
-                !showRevokeDelegationWithSub && (
-                  <>
-                    {!accountResolution.isConnected ? (
-                      <section
-                        className={styles["connectRequired"]}
-                        aria-labelledby="collection-connect-heading"
-                      >
-                        <h2 id="collection-connect-heading">
-                          Connect Wallet to Manage {props.collection.title}
-                        </h2>
-                        <p>
-                          Connect the wallet whose outgoing and incoming records
-                          you want to review.
-                        </p>
-                        <button
-                          type="button"
-                          className={styles["connectRequiredButton"]}
-                          onClick={() => {
-                            accountResolution.seizeConnect();
-                          }}
-                        >
-                          Connect Wallet
-                        </button>
-                      </section>
-                    ) : (
-                      <>
-                        <CollectionDelegationSections
-                          collection={props.collection}
-                          reads={delegationReads}
-                          revocation={revocation}
-                          chainsMatch={chainsMatch}
-                          getSwitchToMessage={getSwitchToMessage}
-                          showDelegationToast={showDelegationToast}
-                          onEditDelegation={handleEditDelegation}
-                          subDelegationOriginalDelegator={
-                            subDelegationOriginalDelegator
-                          }
-                          onSetOriginalDelegator={
-                            setSubDelegationOriginalDelegator
-                          }
-                          onShowSubForm={handleShowSubForm}
-                          disclosureState={{
-                            delegationKeys,
-                            setDelegationKeys,
-                            delegationKeysChanged,
-                            setDelegationKeysChanged,
-                            subDelegationKeys,
-                            setSubDelegationKeys,
-                            subDelegationKeysChanged,
-                            setSubDelegationKeysChanged,
-                            consolidationKeys,
-                            setConsolidationKeys,
-                            consolidationKeysChanged,
-                            setConsolidationKeysChanged,
-                          }}
-                        />
-                        <CollectionDelegationLocks
-                          collection={props.collection}
-                          locks={locks}
-                          chainsMatch={chainsMatch}
-                          getSwitchToMessage={getSwitchToMessage}
-                          showDelegationToast={showDelegationToast}
-                        />
-                        <div className="tw-w-full tw-p-0">
-                          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-3 tw-pt-5">
-                            <div className="tw-flex tw-w-full tw-items-center tw-justify-start tw-px-3">
-                              <button
-                                className={styles["backBtn"]}
-                                onClick={() =>
-                                  props.setSection(
-                                    DelegationCenterSection.CENTER
-                                  )
-                                }
-                              >
-                                <FontAwesomeIcon icon={faCircleArrowLeft} />
-                                <span className="tw-text-sm">
-                                  Back to Delegation Center
-                                </span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </>
-                )}
-              {showUpdateDelegation &&
-                updateDelegationParams &&
-                accountResolution.address && (
-                  <UpdateDelegationComponent
+                  <button
+                    type="button"
+                    className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    onClick={() => {
+                      accountResolution.seizeConnect();
+                    }}
+                  >
+                    Connect Wallet
+                  </button>
+                </section>
+              ) : (
+                <>
+                  <CollectionDelegationSections
                     collection={props.collection}
-                    address={accountResolution.address}
-                    delegation={updateDelegationParams}
-                    ens={ensResolution.data}
-                    showAddMore={true}
-                    showCancel={true}
-                    onHide={() => {
-                      setShowUpdateDelegation(false);
+                    reads={delegationReads}
+                    revocation={revocation}
+                    chainsMatch={chainsMatch}
+                    getSwitchToMessage={getSwitchToMessage}
+                    showDelegationToast={showDelegationToast}
+                    onEditDelegation={handleEditDelegation}
+                    subDelegationOriginalDelegator={
+                      subDelegationOriginalDelegator
+                    }
+                    onSetOriginalDelegator={setSubDelegationOriginalDelegator}
+                    onShowSubForm={handleShowSubForm}
+                    disclosureState={{
+                      delegationKeys,
+                      setDelegationKeys,
+                      delegationKeysChanged,
+                      setDelegationKeysChanged,
+                      subDelegationKeys,
+                      setSubDelegationKeys,
+                      subDelegationKeysChanged,
+                      setSubDelegationKeysChanged,
+                      consolidationKeys,
+                      setConsolidationKeys,
+                      consolidationKeysChanged,
+                      setConsolidationKeysChanged,
                     }}
-                    onSetToast={showDelegationToast}
                   />
-                )}
-              {showCreateNewDelegationWithSub &&
-                subDelegationOriginalDelegator && (
-                  <NewDelegationComponent
-                    subdelegation={{
-                      originalDelegator: subDelegationOriginalDelegator,
-                      collection: props.collection,
-                    }}
-                    address={accountResolution.address as string}
-                    ens={ensResolution.data}
-                    onHide={() => {
-                      setShowCreateNewDelegationWithSub(false);
-                      setSubDelegationOriginalDelegator(undefined);
-                    }}
-                    onSetToast={showDelegationToast}
-                  />
-                )}
-              {showCreateNewSubDelegationWithSub &&
-                subDelegationOriginalDelegator && (
-                  <NewSubDelegationComponent
-                    subdelegation={{
-                      originalDelegator: subDelegationOriginalDelegator,
-                      collection: props.collection,
-                    }}
-                    address={accountResolution.address as string}
-                    ens={ensResolution.data}
-                    onHide={() => {
-                      setShowCreateNewSubDelegationWithSub(false);
-                      setSubDelegationOriginalDelegator(undefined);
-                    }}
-                    onSetToast={showDelegationToast}
-                  />
-                )}
-              {showCreateNewConsolidationWithSub &&
-                subDelegationOriginalDelegator && (
-                  <NewConsolidationComponent
-                    subdelegation={{
-                      originalDelegator: subDelegationOriginalDelegator,
-                      collection: props.collection,
-                    }}
-                    address={accountResolution.address as string}
-                    ens={ensResolution.data}
-                    onHide={() => {
-                      setShowCreateNewConsolidationWithSub(false);
-                      setSubDelegationOriginalDelegator(undefined);
-                    }}
-                    onSetToast={showDelegationToast}
-                  />
-                )}
-
-              {showAssignPrimaryAddressWithSub &&
-                subDelegationOriginalDelegator && (
-                  <NewAssignPrimaryAddress
-                    subdelegation={{
-                      originalDelegator: subDelegationOriginalDelegator,
-                      collection: props.collection,
-                    }}
-                    address={accountResolution.address as string}
-                    ens={ensResolution.data}
-                    onHide={() => {
-                      setShowAssignPrimaryAddressWithSub(false);
-                      setSubDelegationOriginalDelegator(undefined);
-                    }}
-                    onSetToast={showDelegationToast}
-                  />
-                )}
-
-              {showRevokeDelegationWithSub &&
-                subDelegationOriginalDelegator &&
-                accountResolution.address && (
-                  <RevokeDelegationWithSubComponent
-                    originalDelegator={subDelegationOriginalDelegator}
+                  <CollectionDelegationLocks
                     collection={props.collection}
-                    address={accountResolution.address}
-                    ens={ensResolution.data}
-                    showAddMore={true}
-                    onHide={() => {
-                      setShowRevokeDelegationWithSub(false);
-                      setSubDelegationOriginalDelegator(undefined);
-                    }}
-                    onSetToast={showDelegationToast}
+                    locks={locks}
+                    chainsMatch={chainsMatch}
+                    getSwitchToMessage={getSwitchToMessage}
+                    showDelegationToast={showDelegationToast}
                   />
-                )}
-            </div>
+                </>
+              )}
+            </>
           )}
-        </div>
+        {showUpdateDelegation &&
+          updateDelegationParams &&
+          accountResolution.address && (
+            <UpdateDelegationComponent
+              collection={props.collection}
+              address={accountResolution.address}
+              delegation={updateDelegationParams}
+              ens={ensResolution.data}
+              showAddMore={true}
+              showCancel={true}
+              onHide={() => {
+                setShowUpdateDelegation(false);
+              }}
+              onSetToast={showDelegationToast}
+            />
+          )}
+        {showCreateNewDelegationWithSub && subDelegationOriginalDelegator && (
+          <NewDelegationComponent
+            subdelegation={{
+              originalDelegator: subDelegationOriginalDelegator,
+              collection: props.collection,
+            }}
+            address={accountResolution.address as string}
+            ens={ensResolution.data}
+            onHide={() => {
+              setShowCreateNewDelegationWithSub(false);
+              setSubDelegationOriginalDelegator(undefined);
+            }}
+            onSetToast={showDelegationToast}
+          />
+        )}
+        {showCreateNewSubDelegationWithSub &&
+          subDelegationOriginalDelegator && (
+            <NewSubDelegationComponent
+              subdelegation={{
+                originalDelegator: subDelegationOriginalDelegator,
+                collection: props.collection,
+              }}
+              address={accountResolution.address as string}
+              ens={ensResolution.data}
+              onHide={() => {
+                setShowCreateNewSubDelegationWithSub(false);
+                setSubDelegationOriginalDelegator(undefined);
+              }}
+              onSetToast={showDelegationToast}
+            />
+          )}
+        {showCreateNewConsolidationWithSub &&
+          subDelegationOriginalDelegator && (
+            <NewConsolidationComponent
+              subdelegation={{
+                originalDelegator: subDelegationOriginalDelegator,
+                collection: props.collection,
+              }}
+              address={accountResolution.address as string}
+              ens={ensResolution.data}
+              onHide={() => {
+                setShowCreateNewConsolidationWithSub(false);
+                setSubDelegationOriginalDelegator(undefined);
+              }}
+              onSetToast={showDelegationToast}
+            />
+          )}
+
+        {showAssignPrimaryAddressWithSub && subDelegationOriginalDelegator && (
+          <NewAssignPrimaryAddress
+            subdelegation={{
+              originalDelegator: subDelegationOriginalDelegator,
+              collection: props.collection,
+            }}
+            address={accountResolution.address as string}
+            ens={ensResolution.data}
+            onHide={() => {
+              setShowAssignPrimaryAddressWithSub(false);
+              setSubDelegationOriginalDelegator(undefined);
+            }}
+            onSetToast={showDelegationToast}
+          />
+        )}
+
+        {showRevokeDelegationWithSub &&
+          subDelegationOriginalDelegator &&
+          accountResolution.address && (
+            <RevokeDelegationWithSubComponent
+              originalDelegator={subDelegationOriginalDelegator}
+              collection={props.collection}
+              address={accountResolution.address}
+              ens={ensResolution.data}
+              showAddMore={true}
+              onHide={() => {
+                setShowRevokeDelegationWithSub(false);
+                setSubDelegationOriginalDelegator(undefined);
+              }}
+              onSetToast={showDelegationToast}
+            />
+          )}
       </div>
       {toast && (
         <DelegationToast

@@ -17,7 +17,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { Spinner } from "../../dotLoader/DotLoader";
-import styles from "../Delegation.module.css";
 import type { DelegationCollection } from "../delegation-constants";
 import {
   ALL_USE_CASES,
@@ -28,7 +27,11 @@ import {
   SUB_DELEGATION_USE_CASE,
 } from "../delegation-constants";
 import type { DelegationToastState } from "../DelegationToast";
-import { LOCK_SELECT_CLASS } from "./collection-delegation-helpers";
+import {
+  BUTTON_ICON_CLASS,
+  LOCK_SELECT_CLASS,
+  PRIMARY_ACTION_CLASS,
+} from "./collection-delegation-helpers";
 import type { CollectionLocks } from "./useCollectionLocks";
 
 interface CollectionDelegationLocksProps {
@@ -92,17 +95,15 @@ function CollectionWalletLockButton(
 
   return (
     <button
-      className={`${styles["lockDelegationBtn"]} ${
-        locks.collectionLockReadGlobal?.data
-          ? styles["lockDelegationBtnDisabled"]
-          : ""
-      }`}
+      type="button"
+      disabled={Boolean(locks.collectionLockReadGlobal.data)}
+      className={PRIMARY_ACTION_CLASS}
       onClick={() => {
         const title = `${
           locks.collectionLockRead.data ? `Unlocking` : `Locking`
         } Wallet`;
         let message: ReactNode = "Confirm in your wallet...";
-        locks.collectionLockToastTitleRef.current = title;
+        locks.setCollectionLockToastTitle(title);
         if (chainsMatch()) {
           locks.collectionLockWrite.writeContract({
             address: DELEGATION_CONTRACT.contract,
@@ -119,10 +120,10 @@ function CollectionWalletLockButton(
     >
       <FontAwesomeIcon
         icon={locks.collectionLockRead.data ? faLock : faLockOpen}
-        className={styles["buttonIcon"]}
+        className={BUTTON_ICON_CLASS}
       />
       {locks.collectionLockRead.data ? "Unlock" : "Lock"} Wallet
-      {locks.collectionLockReadGlobal?.data &&
+      {Boolean(locks.collectionLockReadGlobal.data) &&
       !areEqualAddresses(collection.contract, DELEGATION_ALL_ADDRESS)
         ? ` *`
         : ``}
@@ -141,163 +142,165 @@ export function CollectionDelegationLocks(
 ) {
   const { collection, locks, chainsMatch, getSwitchToMessage } = props;
   const { showDelegationToast } = props;
+  const globalUseCaseLockStatuses = locks.useCaseLockStatusesGlobal.data;
+  const canManageSelectedUseCase =
+    globalUseCaseLockStatuses === undefined ||
+    // Double cast preserves the existing comparison against the multicall
+    // envelope object (issue #3078 tracks reading `.result` here); typing it
+    // honestly would change behavior.
+    (globalUseCaseLockStatuses[
+      locks.lockUseCaseIndex
+    ] as unknown as boolean) === false;
 
   return (
-    <div className="tw-w-full tw-p-0">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-5">
-        <div className="tw-w-full tw-px-3">
-          <h4>
-            Locks{" "}
-            <>
-              <FontAwesomeIcon
-                className={styles["infoIcon"]}
-                icon={faInfoCircle}
-                data-tooltip-id="locks-info"
-              ></FontAwesomeIcon>
-              <Tooltip
-                id="locks-info"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
-              >
-                Locks only block incoming delegations for this collection scope.
-                They do not revoke outgoing records.
-              </Tooltip>
-            </>
-          </h4>
-          <p className={styles["collectionSectionIntro"]}>
-            Locks block incoming delegations for this collection scope. They do
-            not stop delegations you already made to other wallets.
-          </p>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-2">
-        <div className="tw-w-full tw-px-3">
-          <CollectionWalletLockButton {...props} />
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-3">
-        <div className="tw-w-full tw-px-3 tw-pb-2 tw-pt-2 md:tw-w-1/3">
-          <select
-            aria-label="Lock or unlock use case"
-            disabled={!!locks.collectionLockRead.data}
-            className={`${styles["formInputLockUseCase"]} ${LOCK_SELECT_CLASS} ${
-              locks.collectionLockRead.data ||
-              locks.collectionLockReadGlobal?.data
-                ? styles["formInputDisabled"]
-                : ""
-            }`}
-            value={locks.lockUseCaseValue}
-            onChange={(e) => {
-              const value = Number.parseInt(e.target.value);
-              locks.setLockUseCaseValue(value);
-              locks.setLockUseCaseIndex(getLockUseCaseIndex(value));
-              locks.useCaseLockToastTitleRef.current = "Locking Wallet";
-              locks.useCaseLockWrite.reset();
+    <section className="tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
+      <div>
+        <h2 className="tw-mb-2 tw-mt-0 tw-flex tw-items-center tw-text-xl tw-font-semibold tw-text-white">
+          Locks
+          <FontAwesomeIcon
+            className="tw-ml-2 tw-h-4 tw-w-4 tw-cursor-help tw-text-iron-400"
+            icon={faInfoCircle}
+            data-tooltip-id="locks-info"
+          />
+          <Tooltip
+            id="locks-info"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "4px 8px",
             }}
           >
-            <option value={0}>
-              Lock/Unlock Use Case
-              {locks.collectionLockRead.data ||
-              locks.collectionLockReadGlobal?.data
-                ? ` *`
-                : ``}
-            </option>
-            <CollectionLockUseCaseOptions locks={locks} />
-          </select>
+            Locks only block incoming delegations for this collection scope.
+            They do not revoke outgoing records.
+          </Tooltip>
+        </h2>
+        <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
+          Locks block incoming delegations for this collection scope. They do
+          not stop delegations you already made to other wallets.
+        </p>
+      </div>
+      <div className="tw-flex tw-flex-col tw-gap-4">
+        <div>
+          <CollectionWalletLockButton {...props} />
         </div>
-        {locks.lockUseCaseValue != 0 && (
-          <div className="tw-flex tw-w-full tw-items-center tw-px-3 tw-pb-2 tw-pt-2 md:tw-w-2/3">
-            {!locks.useCaseLockStatusesGlobal.data ||
-            (locks.useCaseLockStatusesGlobal?.data &&
-              // Double cast preserves the existing comparison against the
-              // multicall envelope object (issue #3078 tracks reading
-              // `.result` here); typing it honestly would change behavior.
-              (locks.useCaseLockStatusesGlobal?.data[
-                locks.lockUseCaseIndex
-              ] as unknown as boolean) === false) ? (
-              <button
-                className={`${styles["lockUseCaseBtn"]}`}
-                onClick={() => {
-                  const useCase = DELEGATION_USE_CASES[locks.lockUseCaseIndex];
-                  const title = `${
-                    locks.useCaseLockStatuses?.data?.[locks.lockUseCaseIndex]
-                      ? "Unlocking"
-                      : "Locking"
-                  } Wallet on Use Case #${useCase?.use_case} - ${
-                    useCase?.display
-                  }`;
-                  let message: ReactNode = "Confirm in your wallet...";
-                  locks.useCaseLockToastTitleRef.current = title;
-
-                  if (chainsMatch()) {
-                    locks.useCaseLockWrite.writeContract({
-                      address: DELEGATION_CONTRACT.contract,
-                      abi: DELEGATION_ABI,
-                      chainId: DELEGATION_CONTRACT.chain_id,
-                      args: [
-                        collection.contract,
-                        locks.lockUseCaseValue,
-                        !locks.useCaseLockStatuses.data?.[
-                          locks.lockUseCaseIndex
-                        ],
-                      ],
-                      functionName: "setCollectionUsecaseLock",
-                    });
-                  } else {
-                    message = getSwitchToMessage();
-                  }
-                  showDelegationToast({ title, message });
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={
-                    locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
-                      ? faLock
-                      : faLockOpen
-                  }
-                  className={styles["buttonIcon"]}
-                />
-                {locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
-                  ? "Unlock"
-                  : "Lock"}{" "}
-                Use Case
-                {(locks.useCaseLockWrite.isPending ||
-                  locks.waitUseCaseLockWrite.isLoading) && <Spinner />}
-              </button>
-            ) : (
-              <div>
-                <span className={styles["hint"]}>* Note:</span> Unlock use case
-                in{" "}
-                <Link href={`/delegation/${ANY_COLLECTION_PATH}`}>
-                  All Collections
-                </Link>
-              </div>
-            )}
+        <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-3">
+          <div className="md:tw-col-span-1">
+            <select
+              aria-label="Lock or unlock use case"
+              disabled={
+                Boolean(locks.collectionLockRead.data) ||
+                Boolean(locks.collectionLockReadGlobal.data)
+              }
+              className={LOCK_SELECT_CLASS}
+              value={locks.lockUseCaseValue}
+              onChange={(e) => {
+                const value = Number.parseInt(e.target.value);
+                locks.setLockUseCaseValue(value);
+                locks.setLockUseCaseIndex(getLockUseCaseIndex(value));
+                locks.setUseCaseLockToastTitle("Locking Wallet");
+                locks.useCaseLockWrite.reset();
+              }}
+            >
+              <option value={0}>
+                Lock/Unlock Use Case
+                {Boolean(locks.collectionLockRead.data) ||
+                Boolean(locks.collectionLockReadGlobal.data)
+                  ? ` *`
+                  : ``}
+              </option>
+              <CollectionLockUseCaseOptions locks={locks} />
+            </select>
           </div>
-        )}
+          {locks.lockUseCaseValue !== 0 && (
+            <div className="tw-flex tw-items-center md:tw-col-span-2">
+              {canManageSelectedUseCase ? (
+                <button
+                  type="button"
+                  className={PRIMARY_ACTION_CLASS}
+                  onClick={() => {
+                    const useCase =
+                      DELEGATION_USE_CASES[locks.lockUseCaseIndex];
+                    if (!useCase) {
+                      return;
+                    }
+                    const title = `${
+                      locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
+                        ? "Unlocking"
+                        : "Locking"
+                    } Wallet on Use Case #${useCase.use_case} - ${useCase.display}`;
+                    let message: ReactNode = "Confirm in your wallet...";
+                    locks.setUseCaseLockToastTitle(title);
+
+                    if (chainsMatch()) {
+                      locks.useCaseLockWrite.writeContract({
+                        address: DELEGATION_CONTRACT.contract,
+                        abi: DELEGATION_ABI,
+                        chainId: DELEGATION_CONTRACT.chain_id,
+                        args: [
+                          collection.contract,
+                          locks.lockUseCaseValue,
+                          !locks.useCaseLockStatuses.data?.[
+                            locks.lockUseCaseIndex
+                          ],
+                        ],
+                        functionName: "setCollectionUsecaseLock",
+                      });
+                    } else {
+                      message = getSwitchToMessage();
+                    }
+                    showDelegationToast({ title, message });
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={
+                      locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
+                        ? faLock
+                        : faLockOpen
+                    }
+                    className={BUTTON_ICON_CLASS}
+                  />
+                  {locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
+                    ? "Unlock"
+                    : "Lock"}{" "}
+                  Use Case
+                  {(locks.useCaseLockWrite.isPending ||
+                    locks.waitUseCaseLockWrite.isLoading) && <Spinner />}
+                </button>
+              ) : (
+                <div className="tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300">
+                  <span className="tw-font-semibold tw-text-white">Note:</span>{" "}
+                  Unlock use case in{" "}
+                  <Link
+                    className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
+                    href={`/delegation/${ANY_COLLECTION_PATH}`}
+                  >
+                    All Collections
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
       {locks.collectionLockRead.data ? (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-3">
-          <div className="tw-w-full tw-px-3">
-            <span className={styles["hint"]}>* Note:</span> Unlock Wallet to
-            lock/unlock specific use cases
-          </div>
+        <div className="tw-mt-4 tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300">
+          <span className="tw-font-semibold tw-text-white">Note:</span> Unlock
+          Wallet to lock/unlock specific use cases
         </div>
       ) : null}
       {locks.collectionLockReadGlobal?.data ? (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-3">
-          <div className="tw-w-full tw-px-3">
-            <span className={styles["hint"]}>* Note:</span> Unlock Wallet on{" "}
-            <Link href={`/delegation/${ANY_COLLECTION_PATH}`}>
-              All Collections
-            </Link>{" "}
-            to lock/unlock specific collections and use cases
-          </div>
+        <div className="tw-mt-4 tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300">
+          <span className="tw-font-semibold tw-text-white">Note:</span> Unlock
+          Wallet on{" "}
+          <Link
+            className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
+            href={`/delegation/${ANY_COLLECTION_PATH}`}
+          >
+            All Collections
+          </Link>{" "}
+          to lock/unlock specific collections and use cases
         </div>
       ) : null}
-    </div>
+    </section>
   );
 }

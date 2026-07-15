@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import styles from "./Delegation.module.css";
 
 export interface DelegationToastState {
   title: string;
@@ -61,39 +60,43 @@ export function DelegationToast(
     setShowToast: (show: boolean) => void;
   }>
 ) {
-  if (!props.showToast) {
+  const { toastRef, toast, showToast, setShowToast } = props;
+  const { title, message } = toast;
+  const hasMessage = Boolean(message);
+
+  if (!showToast) {
     return null;
   }
 
   return (
-    <div className={styles["toastWrapper"]}>
+    <div className="tw-fixed tw-inset-0 tw-z-[100] tw-h-full tw-w-full">
       <button
         type="button"
         aria-label="Close notification backdrop"
-        className={styles["toastBackdrop"]}
-        onClick={() => props.setShowToast(false)}
+        className="tw-fixed tw-inset-0 tw-z-[100] tw-h-full tw-w-full tw-border-0 tw-bg-black/60 tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+        onClick={() => setShowToast(false)}
       />
       <div
-        className={`${styles["toast"]} tw-w-[min(92vw,420px)] tw-overflow-hidden tw-rounded-lg tw-bg-white tw-text-black tw-shadow-xl`}
-        ref={props.toastRef}
+        className="tw-fixed tw-left-1/2 tw-top-1/2 tw-z-[101] tw-w-[min(92vw,420px)] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-overflow-hidden tw-rounded-xl tw-bg-white tw-text-black tw-shadow-2xl"
+        ref={toastRef}
         role="status"
         aria-live="polite"
       >
         <div className="tw-flex tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-black/10 tw-px-3 tw-py-2">
-          <span className="tw-mr-auto tw-font-semibold">
-            {props.toast.title}
-          </span>
+          <span className="tw-mr-auto tw-font-semibold">{title}</span>
           <button
             type="button"
             aria-label="Dismiss delegation notification"
             className="tw-border-0 tw-bg-transparent tw-p-1 tw-text-2xl tw-leading-none tw-text-black/60 hover:tw-text-black focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            onClick={() => props.setShowToast(false)}
+            onClick={() => setShowToast(false)}
           >
             &times;
           </button>
         </div>
-        {props.toast.message && (
-          <div className="tw-px-3 tw-py-3">{props.toast.message}</div>
+        {hasMessage && (
+          <div className="tw-px-4 tw-py-4 [&_a]:tw-font-semibold [&_a]:tw-text-black [&_a]:tw-underline">
+            {message}
+          </div>
         )}
       </div>
     </div>

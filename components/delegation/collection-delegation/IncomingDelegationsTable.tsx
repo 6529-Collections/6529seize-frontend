@@ -4,14 +4,18 @@ import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import styles from "../Delegation.module.css";
 import type { ContractDelegation } from "../CollectionDelegation.utils";
 import type { DelegationCollection } from "../delegation-constants";
 import {
   MEMES_COLLECTION,
   SUB_DELEGATION_USE_CASE,
 } from "../delegation-constants";
-import { CHECKBOX_CLASS } from "./collection-delegation-helpers";
+import {
+  BUTTON_ICON_CLASS,
+  CHECKBOX_CLASS,
+  DANGER_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
+} from "./collection-delegation-helpers";
 import { DelegationRowDetails } from "./DelegationRowDetails";
 import {
   DelegationsTable,
@@ -59,10 +63,10 @@ export function IncomingDelegationsTable(
       <tr
         key={`incoming-${del.useCase.use_case}-${delegationIndex}-${walletIndex}-${w.wallet}`}
       >
-        <td>
-          <div className="tw-flex tw-flex-col tw-gap-2 tw-bg-[rgb(34,34,34)] tw-px-[15px] tw-pb-2.5 tw-pt-3">
-            <span className="tw-flex tw-items-center tw-gap-3">
-              {del.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case ? (
+        <td className="tw-py-1">
+          <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4">
+            <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+              {del.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case ? (
                 <input
                   aria-label={`Select ${w.wallet} as original delegator`}
                   type="checkbox"
@@ -103,82 +107,75 @@ export function IncomingDelegationsTable(
     return (
       <tr>
         <td colSpan={2} className="tw-pt-3">
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <button
-              className={`${styles["useCaseWalletUpdate"]} ${
-                subDelegationOriginalDelegator === undefined
-                  ? styles["useCaseWalletUpdateDisabled"]
-                  : ""
-              }`}
-              onClick={() => {
-                onShowSubForm("delegation");
-              }}
-            >
-              <FontAwesomeIcon icon={faPlus} className={styles["buttonIcon"]} />
-              Register Delegation
-            </button>
-            <button
-              className={`${styles["useCaseWalletUpdate"]} ${
-                subDelegationOriginalDelegator === undefined
-                  ? styles["useCaseWalletUpdateDisabled"]
-                  : ""
-              }`}
-              onClick={() => {
-                onShowSubForm("subDelegation");
-              }}
-            >
-              <FontAwesomeIcon icon={faPlus} className={styles["buttonIcon"]} />
-              Register Delegation Manager
-            </button>
-            <button
-              className={`${styles["useCaseWalletUpdate"]} ${
-                subDelegationOriginalDelegator === undefined
-                  ? styles["useCaseWalletUpdateDisabled"]
-                  : ""
-              }`}
-              onClick={() => {
-                onShowSubForm("consolidation");
-              }}
-            >
-              <FontAwesomeIcon icon={faPlus} className={styles["buttonIcon"]} />
-              Register Consolidation
-            </button>
-            {(collection.contract === DELEGATION_ALL_ADDRESS ||
-              collection.contract === MEMES_COLLECTION.contract) && (
+          <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-3">
+            <p className="tw-mb-3 tw-text-sm tw-text-iron-300">
+              Select a delegator above, then choose an action to perform on
+              their behalf.
+            </p>
+            <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
               <button
-                className={`${styles["useCaseWalletUpdate"]} ${
-                  subDelegationOriginalDelegator === undefined
-                    ? styles["useCaseWalletUpdateDisabled"]
-                    : ""
-                }`}
+                type="button"
+                disabled={subDelegationOriginalDelegator === undefined}
+                className={PRIMARY_ACTION_CLASS}
                 onClick={() => {
-                  onShowSubForm("primaryAddress");
+                  onShowSubForm("delegation");
                 }}
               >
-                <FontAwesomeIcon
-                  icon={faPlus}
-                  className={styles["buttonIcon"]}
-                />
-                Assign Primary Address
+                <FontAwesomeIcon icon={faPlus} className={BUTTON_ICON_CLASS} />
+                Register Delegation
               </button>
-            )}
-            <button
-              className={`${styles["useCaseWalletRevoke"]} ${
-                subDelegationOriginalDelegator === undefined
-                  ? styles["useCaseWalletRevokeDisabled"]
-                  : ""
-              }`}
-              onClick={() => {
-                onShowSubForm("revocation");
-              }}
-            >
-              <FontAwesomeIcon
-                icon={faMinus}
-                className={styles["buttonIcon"]}
-              />
-              Revoke
-            </button>
-          </span>
+              <button
+                type="button"
+                disabled={subDelegationOriginalDelegator === undefined}
+                className={PRIMARY_ACTION_CLASS}
+                onClick={() => {
+                  onShowSubForm("subDelegation");
+                }}
+              >
+                <FontAwesomeIcon icon={faPlus} className={BUTTON_ICON_CLASS} />
+                Register Delegation Manager
+              </button>
+              <button
+                type="button"
+                disabled={subDelegationOriginalDelegator === undefined}
+                className={PRIMARY_ACTION_CLASS}
+                onClick={() => {
+                  onShowSubForm("consolidation");
+                }}
+              >
+                <FontAwesomeIcon icon={faPlus} className={BUTTON_ICON_CLASS} />
+                Register Consolidation
+              </button>
+              {(collection.contract === DELEGATION_ALL_ADDRESS ||
+                collection.contract === MEMES_COLLECTION.contract) && (
+                <button
+                  type="button"
+                  disabled={subDelegationOriginalDelegator === undefined}
+                  className={PRIMARY_ACTION_CLASS}
+                  onClick={() => {
+                    onShowSubForm("primaryAddress");
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    className={BUTTON_ICON_CLASS}
+                  />
+                  Assign Primary Address
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={subDelegationOriginalDelegator === undefined}
+                className={DANGER_ACTION_CLASS}
+                onClick={() => {
+                  onShowSubForm("revocation");
+                }}
+              >
+                <FontAwesomeIcon icon={faMinus} className={BUTTON_ICON_CLASS} />
+                Revoke
+              </button>
+            </span>
+          </div>
         </td>
       </tr>
     );

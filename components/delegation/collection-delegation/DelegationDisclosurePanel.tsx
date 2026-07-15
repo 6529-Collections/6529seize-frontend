@@ -57,21 +57,25 @@ export function DelegationDisclosurePanel(
 ) {
   return (
     <section
-      className={`tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 ${props.className ?? ""}`}
+      className={`tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 ${props.className ?? ""}`}
     >
       <h6 className="tw-m-0">
         <button
           type="button"
-          className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-left tw-font-bold tw-text-iron-50 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-3.5 tw-text-left tw-text-base tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
           aria-expanded={props.isOpen}
           onClick={props.onToggle}
         >
           <span>{props.title}</span>
-          <span aria-hidden="true">{props.isOpen ? "-" : "+"}</span>
+          <span className="tw-text-xl tw-leading-none" aria-hidden="true">
+            {props.isOpen ? "−" : "+"}
+          </span>
         </button>
       </h6>
       {props.isOpen && (
-        <div className="tw-bg-iron-950 tw-p-3">{props.children}</div>
+        <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 sm:tw-p-4">
+          {props.children}
+        </div>
       )}
     </section>
   );

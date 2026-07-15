@@ -140,7 +140,7 @@ describe("RevokeDelegationWithSub", () => {
     const user = userEvent.setup();
     render(<RevokeDelegationWithSub {...defaultProps} />);
 
-    await user.click(screen.getByText("close"));
+    await user.click(screen.getByRole("button", { name: "Cancel Revocation" }));
     expect(defaultProps.onHide).toHaveBeenCalledTimes(1);
   });
 

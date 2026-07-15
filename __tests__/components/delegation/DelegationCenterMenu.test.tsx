@@ -70,6 +70,22 @@ describe("DelegationCenterMenu links", () => {
     );
   });
 
+  it.each([
+    DelegationCenterSection.REGISTER_DELEGATION,
+    DelegationCenterSection.REGISTER_SUB_DELEGATION,
+    DelegationCenterSection.REGISTER_CONSOLIDATION,
+    DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+  ])("hides navigation on focused action route %s", async (section) => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+
+    render(<DelegationCenterMenu {...props} section={section} />);
+
+    expect(
+      screen.queryByRole("navigation", { name: "Delegation center" })
+    ).not.toBeInTheDocument();
+  });
+
   it("renders toast text without interpreting it as html", async () => {
     const mod = await import("@/components/delegation/DelegationToast");
     const { DelegationToast } = mod;

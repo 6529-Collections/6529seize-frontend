@@ -89,87 +89,110 @@ export default function DelegationHTML(props: Readonly<Props>) {
     );
   } else {
     return (
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-2 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-        {isFaqChildArticle && article && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
-            <div className="tw-w-full tw-px-3">
-              <nav aria-label="Breadcrumb" className={styles["breadcrumbNav"]}>
-                <Link href="/delegation/delegation-center">
-                  Delegation Center
-                </Link>
-                <span>/</span>
-                <Link href="/delegation/delegation-faq">Delegation FAQ</Link>
-                <span>/</span>
-                <span aria-current="page">{article.title}</span>
-              </nav>
-            </div>
-          </div>
+      <div className="tw-w-full">
+        {!isFaqChildArticle && pageTitle && (
+          <header className="tw-mb-6">
+            <h1 className="tw-mb-2 tw-mt-0 tw-text-3xl tw-font-bold tw-text-white">
+              {titleLighter && `${titleLighter} `}
+              {titleDarker}
+            </h1>
+          </header>
         )}
-        {pageTitle && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-            <div className="tw-w-full tw-px-3">
-              <h1>
-                {titleLighter && `${titleLighter} `}
-                {titleDarker}
-              </h1>
-            </div>
-          </div>
-        )}
-        {isFaqChildArticle && article && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
-            <div className="tw-w-full tw-px-3">
-              <p className={styles["articleSummary"]}>{article.summary}</p>
-              <Link
-                href="/delegation/delegation-faq"
-                className={styles["articleBackLink"]}
-              >
-                Back to Delegation FAQ
-              </Link>
-            </div>
-          </div>
-        )}
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3">
-          <div
-            className={`${styles["htmlContainer"]} tw-w-full tw-px-3`}
-            aria-busy={loading}
-          >
-            {loading ? (
-              <p role="status">Loading article...</p>
-            ) : (
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: html,
-                }}
-              ></div>
-            )}
-          </div>
-        </div>
-        {isFaqChildArticle &&
-          (articleNavigation.previous || articleNavigation.next) && (
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+        <div
+          className={`tw-mx-auto tw-w-full sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${
+            isFaqChildArticle ? "tw-px-3 tw-pt-2" : ""
+          }`}
+        >
+          {isFaqChildArticle && article && (
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
               <div className="tw-w-full tw-px-3">
                 <nav
-                  aria-label="Delegation FAQ article navigation"
-                  className={styles["articlePager"]}
+                  aria-label="Breadcrumb"
+                  className={styles["breadcrumbNav"]}
                 >
-                  {articleNavigation.previous ? (
-                    <Link href={articleNavigation.previous.href}>
-                      Previous: {articleNavigation.previous.title}
-                    </Link>
-                  ) : (
-                    <span></span>
-                  )}
-                  {articleNavigation.next ? (
-                    <Link href={articleNavigation.next.href}>
-                      Next: {articleNavigation.next.title}
-                    </Link>
-                  ) : (
-                    <span></span>
-                  )}
+                  <Link href="/delegation/delegation-center">
+                    Delegation Center
+                  </Link>
+                  <span>/</span>
+                  <Link href="/delegation/delegation-faq">Delegation FAQ</Link>
+                  <span>/</span>
+                  <span aria-current="page">{article.title}</span>
                 </nav>
               </div>
             </div>
           )}
+          {isFaqChildArticle && pageTitle && (
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+              <div className="tw-w-full tw-px-3">
+                <h1>
+                  {titleLighter && `${titleLighter} `}
+                  {titleDarker}
+                </h1>
+              </div>
+            </div>
+          )}
+          {isFaqChildArticle && article && (
+            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
+              <div className="tw-w-full tw-px-3">
+                <p className={styles["articleSummary"]}>{article.summary}</p>
+                <Link
+                  href="/delegation/delegation-faq"
+                  className={styles["articleBackLink"]}
+                >
+                  Back to Delegation FAQ
+                </Link>
+              </div>
+            </div>
+          )}
+          <div
+            className={`tw-flex tw-flex-wrap ${
+              isFaqChildArticle ? "-tw-mx-3 tw-pt-3" : ""
+            }`}
+          >
+            <div
+              className={`${styles["htmlContainer"] ?? ""} tw-w-full ${
+                isFaqChildArticle ? "tw-px-3" : ""
+              }`}
+              aria-busy={loading}
+            >
+              {loading ? (
+                <p role="status">Loading article...</p>
+              ) : (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: html,
+                  }}
+                ></div>
+              )}
+            </div>
+          </div>
+          {isFaqChildArticle &&
+            (articleNavigation.previous ?? articleNavigation.next) && (
+              <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+                <div className="tw-w-full tw-px-3">
+                  <nav
+                    aria-label="Delegation FAQ article navigation"
+                    className={styles["articlePager"]}
+                  >
+                    {articleNavigation.previous ? (
+                      <Link href={articleNavigation.previous.href}>
+                        Previous: {articleNavigation.previous.title}
+                      </Link>
+                    ) : (
+                      <span></span>
+                    )}
+                    {articleNavigation.next ? (
+                      <Link href={articleNavigation.next.href}>
+                        Next: {articleNavigation.next.title}
+                      </Link>
+                    ) : (
+                      <span></span>
+                    )}
+                  </nav>
+                </div>
+              </div>
+            )}
+        </div>
       </div>
     );
   }

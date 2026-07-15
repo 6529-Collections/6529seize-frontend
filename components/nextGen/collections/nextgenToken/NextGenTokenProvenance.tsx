@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "../NextGen.module.css";
 import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import Pagination from "@/components/pagination/Pagination";
@@ -85,13 +84,9 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
             <h3>Token Provenance</h3>
           </div>
         </div>
-        <div
-          className={`-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2 ${styles["logsScrollContainer"]}`}
-        >
+        <div className="tw-overflow-x-auto tw-pt-2">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <table
-              className={`tw-w-full tw-border-collapse ${styles["logsTable"]}`}
-            >
+            <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
               <tbody>
                 {transactions.map((tr) => (
                   <LatestActivityRow

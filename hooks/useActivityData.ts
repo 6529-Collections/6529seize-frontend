@@ -3,7 +3,11 @@ import {
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import { publicEnv } from "@/config/env";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
+import {
+  GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Transaction } from "@/entities/ITransaction";
 import { fetchUrl } from "@/services/6529api";
@@ -21,6 +25,7 @@ export enum TypeFilter {
 enum ContractFilter {
   ALL = "All Collections",
   MEMES = "The Memes",
+  MEMELAB = "MemeLab",
   NEXTGEN = "NextGen",
   GRADIENTS = "Gradients",
 }
@@ -95,6 +100,9 @@ export function useActivityData(
         break;
       case ContractFilter.NEXTGEN:
         url += `&contract=${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`;
+        break;
+      case ContractFilter.MEMELAB:
+        url += `&contract=${MEMELAB_CONTRACT}`;
         break;
       case ContractFilter.GRADIENTS:
         url += `&contract=${GRADIENT_CONTRACT}`;

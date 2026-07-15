@@ -8,7 +8,6 @@ import {
   type SetStateAction,
 } from "react";
 
-import styles from "../Delegation.module.css";
 import type { ContractDelegation } from "../CollectionDelegation.utils";
 import type { DelegationCollection } from "../delegation-constants";
 import {
@@ -187,9 +186,11 @@ export function CollectionDelegationSections(
 
   function printDelegations() {
     return (
-      <>
-        <h5 className="tw-pb-1 tw-pt-3">Delegations</h5>
-        <p className={styles["collectionSectionIntro"]}>
+      <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
+        <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+          Delegations
+        </h2>
+        <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
           Delegations let another wallet use NFT utility for this collection
           scope without moving the NFT.
         </p>
@@ -221,15 +222,17 @@ export function CollectionDelegationSections(
             {printIncomingDelegations("delegations", inDelegations)}
           </DelegationDisclosurePanel>
         </div>
-      </>
+      </section>
     );
   }
 
   function printSubDelegations() {
     return (
-      <>
-        <h5 className="tw-pb-1 tw-pt-4">Delegation Managers</h5>
-        <p className={styles["collectionSectionIntro"]}>
+      <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
+        <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+          Delegation Managers
+        </h2>
+        <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
           Manager rights let another wallet maintain delegations or
           consolidations for this collection scope.
         </p>
@@ -265,15 +268,17 @@ export function CollectionDelegationSections(
             )}
           </DelegationDisclosurePanel>
         </div>
-      </>
+      </section>
     );
   }
 
   function printConsolidations() {
     return (
-      <>
-        <h5 className="tw-pb-1 tw-pt-4">Consolidations</h5>
-        <p className={styles["collectionSectionIntro"]}>
+      <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
+        <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+          Consolidations
+        </h2>
+        <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
           Consolidations link wallets you control so 6529 can treat them
           together for collection metrics.
         </p>
@@ -305,15 +310,15 @@ export function CollectionDelegationSections(
             {printIncomingDelegations("consolidations", inConsolidations)}
           </DelegationDisclosurePanel>
         </div>
-      </>
+      </section>
     );
   }
 
   return (
-    <>
+    <div className="tw-space-y-6">
       {printDelegations()}
       {printConsolidations()}
       {printSubDelegations()}
-    </>
+    </div>
   );
 }
