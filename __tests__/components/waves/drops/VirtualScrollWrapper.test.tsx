@@ -11,12 +11,14 @@ jest.useFakeTimers();
 const observe = jest.fn();
 const unobserve = jest.fn();
 const disconnect = jest.fn();
+const intersectionObserverConstructor = jest.fn();
 let intersectionCb: (entries: any[]) => void = () => {};
 let intersectionObserverOptions: any = null;
 
 beforeAll(() => {
   (global as any).IntersectionObserver = class {
     constructor(cb: any, options: any) {
+      intersectionObserverConstructor();
       intersectionCb = cb;
       intersectionObserverOptions = options;
     }
@@ -30,6 +32,7 @@ afterEach(() => {
   observe.mockClear();
   unobserve.mockClear();
   disconnect.mockClear();
+  intersectionObserverConstructor.mockClear();
   intersectionObserverOptions = null;
   clearWaveDropNearViewport("wave", "drop-1");
   cleanup();
@@ -39,7 +42,7 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({ fetchAroundSerialNo: jest.fn() })),
 }));
 
-function setup(size: DropSize, dropId?: string) {
+function setup(size: DropSize, dropId?: string, rootMargin?: string) {
   const scrollRef = { current: document.createElement("div") };
   const { container } = render(
     <VirtualScrollWrapper
@@ -48,7 +51,9 @@ function setup(size: DropSize, dropId?: string) {
       dropId={dropId}
       dropSerialNo={1}
       waveId="wave"
-      type={size}>
+      type={size}
+      rootMargin={rootMargin}
+    >
       <div data-testid="child">content</div>
     </VirtualScrollWrapper>
   );
@@ -95,6 +100,26 @@ describe("IntersectionObserver Configuration", () => {
       threshold: 0.0,
       root: expect.any(HTMLDivElement),
     });
+  });
+
+  test("supports a smaller render window", () => {
+    setup(DropSize.FULL, undefined, "1200px 0px");
+    expect(intersectionObserverOptions.rootMargin).toBe("1200px 0px");
+  });
+
+  test("keeps the observer stable when visibility changes", () => {
+    const fetchAroundSerialNo = jest.fn();
+    const module = require("@/contexts/wave/MyStreamContext");
+    (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
+
+    setup(DropSize.FULL);
+    expect(intersectionObserverConstructor).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+
+    expect(intersectionObserverConstructor).toHaveBeenCalledTimes(1);
   });
 
   test("observes container element on mount", () => {
@@ -263,7 +288,8 @@ describe("Custom Delay", () => {
         delay={2000}
         dropSerialNo={1}
         waveId="wave"
-        type={DropSize.FULL}>
+        type={DropSize.FULL}
+      >
         <div data-testid="child">content</div>
       </VirtualScrollWrapper>
     );

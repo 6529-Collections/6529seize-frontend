@@ -26,6 +26,7 @@ interface VirtualScrollWrapperProps {
   readonly waveId: string;
   readonly type: DropSize;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly rootMargin?: string | undefined;
 
   /**
    * The child components to be rendered or virtualized.
@@ -63,6 +64,7 @@ export default function VirtualScrollWrapper({
   waveId,
   type,
   suspendLightDropHydration = false,
+  rootMargin = "5000px 0px 5000px 0px",
 }: VirtualScrollWrapperProps) {
   const { fetchAroundSerialNo } = useMyStream();
 
@@ -90,7 +92,9 @@ export default function VirtualScrollWrapper({
   const measureHeight = useCallback(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      setMeasuredHeight(rect.height);
+      setMeasuredHeight((currentHeight) =>
+        currentHeight === rect.height ? currentHeight : rect.height
+      );
     }
   }, []);
 
@@ -100,13 +104,13 @@ export default function VirtualScrollWrapper({
    * async changes to settle.
    */
   useEffect(() => {
-    if (type === DropSize.LIGHT) return;
+    if (type === DropSize.LIGHT || !isInView) return;
     const timer = setTimeout(() => {
       measureHeight();
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [delay, measureHeight]);
+  }, [delay, isInView, measureHeight, type]);
 
   /**
    * Intersection Observer to track if the element is in the viewport.
@@ -132,39 +136,37 @@ export default function VirtualScrollWrapper({
           // If leaving viewport, measure height in case content changed
           measureHeight();
         }
-        if (inView !== isInView) {
-          setIsInView(inView);
-        }
+        setIsInView((currentInView) =>
+          currentInView === inView ? currentInView : inView
+        );
         if (inView && type === DropSize.LIGHT && !suspendLightDropHydration) {
           fetchAroundSerialNo(waveId, dropSerialNo);
         }
       },
       {
-        // For a reversed layout, we need a large margin at both top and bottom
-        // This ensures elements are detected well before they enter/leave the viewport
-        // Using a large value for both directions ensures smooth operation in both regular and reversed layouts
-        rootMargin: "5000px 0px 5000px 0px",
+        // Keep enough content mounted around the reversed viewport to avoid
+        // visible placeholder swaps during fast scrolling.
+        rootMargin,
         threshold: 0.0,
         root: scrollContainerRef.current,
       }
     );
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const container = containerRef.current;
+    if (container) {
+      observer.observe(container);
     }
 
     // Cleanup observer on unmount
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
+      observer.disconnect();
     };
   }, [
     dropId,
     dropSerialNo,
     fetchAroundSerialNo,
-    isInView,
     measureHeight,
+    rootMargin,
     scrollContainerRef,
     suspendLightDropHydration,
     type,
@@ -202,7 +204,7 @@ export default function VirtualScrollWrapper({
       ) : (
         <div
           style={{
-            height: measuredHeight ?? "auto",
+            height: measuredHeight,
           }}
         />
       )}
