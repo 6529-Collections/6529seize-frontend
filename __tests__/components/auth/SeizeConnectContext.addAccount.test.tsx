@@ -344,6 +344,7 @@ describe("SeizeConnectProvider add-account flow", () => {
       <AppKitBootstrapContext.Provider
         value={{
           status: "initializing",
+          isCreated: true,
           isReady: false,
           isWaiting: true,
           waitForReady,

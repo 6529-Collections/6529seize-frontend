@@ -6,6 +6,7 @@ export type AppKitBootstrapStatus = "initializing" | "ready" | "error";
 
 export type AppKitBootstrapContextValue = {
   readonly status: AppKitBootstrapStatus;
+  readonly isCreated: boolean;
   readonly isReady: boolean;
   readonly isWaiting: boolean;
   readonly waitForReady: () => Promise<void>;
@@ -13,6 +14,7 @@ export type AppKitBootstrapContextValue = {
 
 const readyContextValue = {
   status: "ready",
+  isCreated: true,
   isReady: true,
   isWaiting: false,
   waitForReady: () => Promise.resolve(),

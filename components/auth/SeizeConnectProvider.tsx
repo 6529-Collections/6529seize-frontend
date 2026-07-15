@@ -1,13 +1,13 @@
 "use client";
 
-import {
-  useAppKit,
-  useAppKitAccount,
-  useAppKitState,
-  useDisconnect,
-  useWalletInfo,
-} from "@reown/appkit/react";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useAppKitAccount, useDisconnect } from "@reown/appkit/react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { getAddress, isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { getNodeEnv, publicEnv } from "@/config/env";
@@ -34,8 +34,12 @@ import {
   logError,
   logSecurityEvent,
 } from "@/utils/security-logger";
-import { isSafeWalletInfo } from "@/utils/wallet-detection";
 import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/wagmiAppWalletConnector";
+import {
+  AppKitModalBridge,
+  createAppKitModalBridgeStore,
+  useAppKitModalBridgeState,
+} from "./AppKitModalBridge";
 import { WalletErrorBoundary } from "./error-boundary";
 import { SeizeConnectContext } from "./seizeConnectContextValue";
 import {
@@ -99,12 +103,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const account = useAppKitAccount();
   const wagmiAccount = useAccount();
-  const { walletInfo } = useWalletInfo();
   const { disconnect } = useDisconnect();
-  const { open } = useAppKit();
-  const state = useAppKitState();
-  const { isReady: isAppKitReady, waitForReady: waitForAppKitReady } =
-    useAppKitBootstrap();
+  const {
+    isCreated: isAppKitCreated,
+    isReady: isAppKitReady,
+    status: appKitBootstrapStatus,
+    waitForReady: waitForAppKitReady,
+  } = useAppKitBootstrap();
+  const appKitModalBridgeStore = useMemo(createAppKitModalBridgeStore, []);
+  const appKitModalState = useAppKitModalBridgeState(appKitModalBridgeStore);
   const [storedConnectedAccounts, setStoredConnectedAccounts] = useState<
     ConnectedWalletAccount[]
   >(() => getConnectedWalletAccounts());
@@ -174,6 +181,19 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [clearConnectIntentHandoffTimeout]);
 
+  useEffect(() => {
+    if (appKitBootstrapStatus === "error") {
+      appKitModalBridgeStore.failBootstrap();
+    }
+  }, [appKitBootstrapStatus, appKitModalBridgeStore]);
+
+  useEffect(
+    () => () => {
+      appKitModalBridgeStore.dispose();
+    },
+    [appKitModalBridgeStore]
+  );
+
   const scheduleConnectIntentHandoffFallback = useCallback((): void => {
     clearConnectIntentHandoffTimeout();
     connectIntentHandoffTimeoutRef.current = setTimeout(() => {
@@ -204,7 +224,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setDisconnected,
     setIsAddingConnectedAccount,
     setIsConnectIntentWaitingForAppKit,
-    stateOpen: state.open,
+    stateOpen: appKitModalState.isOpen,
     storedConnectedAccounts,
     walletState,
   });
@@ -237,7 +257,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        await open({ view: "Connect" });
+        const openAppKit = await appKitModalBridgeStore.waitForOpen();
+
+        await openAppKit({ view: "Connect" });
 
         logSecurityEvent(
           SecurityEventType.WALLET_MODAL_OPENED,
@@ -257,8 +279,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [
       clearConnectIntentHandoffTimeout,
       clearConnectIntentWaitingForAppKit,
+      appKitModalBridgeStore,
       isAppKitReady,
-      open,
       scheduleConnectIntentHandoffFallback,
       waitForAppKitReady,
     ]
@@ -521,9 +543,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [activeAddress, refreshStoredConnectedAccounts, setConnected]
   );
 
-  const canAddConnectedAccount = useMemo(() => {
-    return storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
-  }, [storedConnectedAccounts]);
+  const canAddConnectedAccount =
+    storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
 
   const openAddConnectedAccountModal = useCallback(
     (clearAddConnectedAccountGuard: () => void): void => {
@@ -559,7 +580,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         : null;
     const addFlowOriginAddress = addFlowOriginAddressRef.current;
     const addFlowReturnedToOrigin =
-      !state.open &&
+      !appKitModalState.isOpen &&
       !isConnectIntentWaitingForAppKit &&
       !!liveConnectedWallet &&
       !!addFlowOriginAddress &&
@@ -569,7 +590,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       isAddingConnectedAccountRef.current &&
       (!isAddingConnectedAccount ||
         addFlowReturnedToOrigin ||
-        (!state.open &&
+        (!appKitModalState.isOpen &&
           !isConnectIntentWaitingForAppKit &&
           !retryConnectTimeoutRef.current &&
           !liveConnectedWallet &&
@@ -645,7 +666,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isAddingConnectedAccount,
     isConnectIntentWaitingForAppKit,
     openAddConnectedAccountModal,
-    state.open,
+    appKitModalState.isOpen,
   ]);
 
   const connectedAccounts = useMemo(() => {
@@ -754,10 +775,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({
       address: activeAddress,
-      walletName: isActiveWalletConnected ? walletInfo?.name : undefined,
-      walletIcon: isActiveWalletConnected ? walletInfo?.icon : undefined,
+      walletName: isActiveWalletConnected
+        ? appKitModalState.walletName
+        : undefined,
+      walletIcon: isActiveWalletConnected
+        ? appKitModalState.walletIcon
+        : undefined,
       isSafeWallet: isActiveWalletConnected
-        ? isSafeWalletInfo(walletInfo)
+        ? appKitModalState.isSafeWallet
         : false,
       seizeConnect,
       seizeConnectFresh,
@@ -767,7 +792,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAcceptConnection,
       seizeSwitchConnectedAccount,
       seizeAddConnectedAccount,
-      seizeConnectOpen: state.open || isConnectIntentWaitingForAppKit,
+      seizeConnectOpen:
+        appKitModalState.isOpen || isConnectIntentWaitingForAppKit,
       isConnected: isActiveWalletConnected,
       canSignActiveWallet: isActiveWalletConnected,
       hasActiveWalletAddress,
@@ -787,9 +813,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       hasValidWalletAuth,
       isActiveWalletConnected,
       connectedAccounts,
-      walletInfo?.name,
-      walletInfo?.icon,
-      walletInfo?.type,
+      appKitModalState.walletName,
+      appKitModalState.walletIcon,
+      appKitModalState.isSafeWallet,
       seizeConnect,
       seizeConnectFresh,
       seizeDisconnect,
@@ -799,7 +825,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeSwitchConnectedAccount,
       seizeAddConnectedAccount,
       isConnectIntentWaitingForAppKit,
-      state.open,
+      appKitModalState.isOpen,
       account.isConnected,
       walletState,
       hasInitializationError,
@@ -813,6 +839,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     <WalletErrorBoundary>
       <SeizeConnectContext.Provider value={contextValue}>
         {children}
+        {isAppKitCreated && (
+          <AppKitModalBridge store={appKitModalBridgeStore} />
+        )}
       </SeizeConnectContext.Provider>
     </WalletErrorBoundary>
   );
