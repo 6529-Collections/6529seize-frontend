@@ -1,35 +1,67 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import UserPageClassificationWrapper from '@/components/user/user-page-header/name/classification/UserPageClassificationWrapper';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import UserPageClassificationWrapper from "@/components/user/user-page-header/name/classification/UserPageClassificationWrapper";
 
-jest.mock('@/components/utils/icons/PencilIcon', () => ({
+jest.mock("@/components/utils/icons/PencilIcon", () => ({
   __esModule: true,
-  PencilIconSize: { SMALL: 'SMALL' },
+  PencilIconSize: { SMALL: "SMALL" },
   default: () => <span data-testid="pencil" />,
 }));
 
-jest.mock('@/components/user/user-page-header/name/classification/UserPageHeaderEditClassification', () => (props: any) => (
-  <div data-testid="edit" onClick={props.onClose} />
-));
+jest.mock(
+  "@/components/user/user-page-header/name/classification/UserPageHeaderEditClassification",
+  () => (props: any) => <div data-testid="edit" onClick={props.onClose} />
+);
 
-jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ children }: any) => <div>{children}</div>);
+jest.mock(
+  "@/components/utils/animation/CommonAnimationWrapper",
+  () =>
+    ({ children }: any) => <div>{children}</div>
+);
 
-jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ children, onClicked }: any) => (
-  <div data-testid="opacity" onClick={onClicked}>{children}</div>
-));
+jest.mock(
+  "@/components/utils/animation/CommonAnimationOpacity",
+  () =>
+    ({ children, onClicked }: any) => (
+      <div data-testid="opacity" onClick={onClicked}>
+        {children}
+      </div>
+    )
+);
 
-describe('UserPageClassificationWrapper', () => {
-  it('opens and closes edit modal when button clicked', async () => {
+describe("UserPageClassificationWrapper", () => {
+  it("opens and closes edit modal when button clicked", async () => {
     render(
-      <UserPageClassificationWrapper profile={{} as any} canEdit={true}>
+      <UserPageClassificationWrapper
+        profile={{} as any}
+        canEdit={true}
+        profileLabel="Alice"
+      >
         <span data-testid="child" />
       </UserPageClassificationWrapper>
     );
 
-    await userEvent.click(screen.getByRole('button'));
-    expect(screen.getByTestId('edit')).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Edit Alice's classification" })
+    );
+    expect(screen.getByTestId("edit")).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('edit'));
-    expect(screen.queryByTestId('edit')).toBeNull();
+    await userEvent.click(screen.getByTestId("edit"));
+    expect(screen.queryByTestId("edit")).toBeNull();
+  });
+
+  it("renders non-interactive classification when editing is unavailable", () => {
+    render(
+      <UserPageClassificationWrapper
+        profile={{} as any}
+        canEdit={false}
+        profileLabel="Alice"
+      >
+        <span data-testid="child" />
+      </UserPageClassificationWrapper>
+    );
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getByTestId("child")).toBeInTheDocument();
   });
 });

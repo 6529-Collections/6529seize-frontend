@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 
 import UserStatsRow, {
   UserStatsRowSize,
+  UserStatsRowVariant,
 } from "@/components/user/utils/stats/UserStatsRow";
 
 describe("UserStatsRow", () => {
@@ -130,5 +131,41 @@ describe("UserStatsRow", () => {
         name: "View bob's collected TDH: 1.234",
       })
     ).toHaveAttribute("href", "/bob/collected");
+  });
+
+  it("renders the profile header variant as a responsive stat grid", () => {
+    render(
+      <UserStatsRow
+        handle="bob"
+        tdh={123456789}
+        tdh_rate={5}
+        xtdh={56}
+        xtdh_rate={2}
+        cic={7}
+        rep={8}
+        followersCount={9}
+        variant={UserStatsRowVariant.PROFILE_HEADER}
+      />
+    );
+
+    const tdhLink = screen.getByRole("link", {
+      name: "View bob's collected TDH: 123,456,789, +5",
+    });
+    expect(tdhLink).toHaveClass(
+      "tw-min-h-14",
+      "tw-items-baseline",
+      "focus-visible:tw-outline-primary-400"
+    );
+    expect(screen.getByText("123,456,789")).toHaveClass(
+      "tw-tabular-nums",
+      "[overflow-wrap:anywhere]"
+    );
+    const tdhLabel = screen.getByText("TDH");
+    expect(tdhLabel).toHaveClass("tw-text-sm", "tw-leading-6");
+    expect(tdhLabel.parentElement).toHaveClass(
+      "tw-order-1",
+      "tw-items-baseline",
+      "tw-whitespace-nowrap"
+    );
   });
 });

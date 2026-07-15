@@ -27,6 +27,9 @@ describe("UserPageHeaderAbout", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Add About statement" })
     );
+    expect(
+      screen.getByRole("heading", { level: 2, name: "About" })
+    ).toBeInTheDocument();
     expect(screen.getByTestId("edit")).toBeInTheDocument();
   });
 

@@ -32,11 +32,13 @@ The profile header appears on profile routes under `/{user}` and shows:
 3. The header renders:
    - banner (image or gradient fallback)
    - profile picture (image or gradient fallback)
-   - title row (display name, CIC icon, level, optional artist badge)
+   - identity row (display name followed by labeled NIC status and level
+     credentials, plus optional profile activity badges)
    - metadata row (classification and `Profile enabled: <Month Year>` when data
-     exists)
+     exists); the fields wrap independently without a loose separator
    - About panel (when a BIO exists, or when the viewer can edit)
-   - stats row (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
+   - inline stats row (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`), with each
+     value and label sharing a baseline and positive rate beneath it
 4. Use quick stats:
    - `TDH` -> `/{user}/collected`
    - `xTDH` -> `/{user}/xtdh`
@@ -61,6 +63,11 @@ The profile header appears on profile routes under `/{user}` and shows:
    - while direct-message creation is pending, the paper-plane button shows a
      loader, stays disabled, and ignores repeated clicks until the request
      settles
+   - on smaller screens, identity appears before the action group so long names
+     and action controls can wrap without overlapping the profile picture
+   - at desktop widths, the name, About text, and first statistic share one
+     grid edge; smaller layouts align the picture, name, About text, and stats
+     to the same content edge
 
 ## Common Scenarios
 
@@ -68,6 +75,8 @@ The profile header appears on profile routes under `/{user}` and shows:
   value.
 - Long About text (`>240` chars) is clamped on mobile with `See more` /
   `See less`; desktop stays expanded.
+- Stats use a two-column small-screen layout and responsive type so large values
+  remain paired with their labels without forcing horizontal page overflow.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
 - On non-touch desktop devices, the artist badge shows a tooltip with activity
   counts.

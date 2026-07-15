@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import UserStatsRow from "../../utils/stats/UserStatsRow";
+import UserStatsRow, {
+  UserStatsRowVariant,
+} from "../../utils/stats/UserStatsRow";
 import UserPageFollowersModal from "../../followers/UserPageFollowersModal";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 const SAFE_ROUTE_SEGMENT_PATTERN = /^[a-zA-Z0-9._-]+$/;
 
@@ -39,7 +42,10 @@ export default function UserPageHeaderStats({
   }
 
   return (
-    <div className="tw-w-full">
+    <nav
+      aria-label={getUserProfileHeaderMessage("user.profileHeader.stats.label")}
+      className="tw-w-full"
+    >
       <UserStatsRow
         handle={routeHandle}
         tdh={profile.tdh}
@@ -49,6 +55,7 @@ export default function UserPageHeaderStats({
         rep={profile.rep}
         cic={profile.cic}
         followersCount={followersCount}
+        variant={UserStatsRowVariant.PROFILE_HEADER}
         onFollowersClick={() => setIsFollowersModalOpen(true)}
       />
       <UserPageFollowersModal
@@ -56,6 +63,6 @@ export default function UserPageHeaderStats({
         isOpen={isFollowersModalOpen}
         onClose={() => setIsFollowersModalOpen(false)}
       />
-    </div>
+    </nav>
   );
 }

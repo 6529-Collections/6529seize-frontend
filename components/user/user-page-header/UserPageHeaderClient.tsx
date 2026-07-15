@@ -142,6 +142,11 @@ export default function UserPageHeaderClient({
     () => aboutStatement !== null || canEdit,
     [aboutStatement, canEdit]
   );
+  const showWebsiteAction = Boolean(cmsWebsiteHref && profile.handle);
+  const showFollowActions = Boolean(
+    !isMyProfile && profile.handle && connectedProfile?.handle
+  );
+  const showProfileActions = showWebsiteAction || showFollowActions;
 
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
@@ -176,7 +181,10 @@ export default function UserPageHeaderClient({
 
   return (
     <div className="tailwind-scope">
-      <section className="tw-relative tw-pb-6 md:tw-pb-8">
+      <section
+        aria-labelledby="profile-heading"
+        className="tw-relative tw-pb-6 md:tw-pb-8"
+      >
         <div className="tw-relative tw-w-full">
           <UserPageHeaderBanner
             profile={profile}
@@ -188,9 +196,9 @@ export default function UserPageHeaderClient({
         </div>
 
         <div className="tw-relative tw-bg-black">
-          <div className="tw-relative tw-z-10 tw-px-6 md:tw-px-9">
-            <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-x-4 md:tw-pt-2">
-              <div className="tw-relative tw-order-1 -tw-mt-10 tw-flex-shrink-0 tw-self-start sm:-tw-mt-[58px]">
+          <div className="tw-relative tw-z-10 tw-px-4 sm:tw-px-6 md:tw-px-8">
+            <div className="tw-grid tw-grid-cols-1 tw-gap-y-5 lg:tw-grid-cols-[auto_minmax(0,1fr)_auto] lg:tw-gap-x-5">
+              <div className="tw-relative -tw-mt-12 tw-w-fit tw-flex-shrink-0 sm:-tw-mt-16 lg:tw-row-start-1 lg:tw-self-start">
                 <UserPageHeaderPfpWrapper
                   profile={profile}
                   canEdit={canEdit}
@@ -205,71 +213,71 @@ export default function UserPageHeaderClient({
                 </UserPageHeaderPfpWrapper>
               </div>
 
-              <div className="tw-order-3 tw-w-full tw-pt-2 md:tw-order-2 md:tw-w-auto md:tw-flex-1 md:tw-pt-1">
+              <div className="tw-min-w-0 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-self-end lg:tw-pb-1">
                 <UserPageHeaderName
                   profile={profile}
                   canEdit={canEdit}
                   mainAddress={mainAddress}
                   level={profile.level}
                   profileEnabledAt={profileEnabledAt}
-                  variant="title"
                 />
-                <div className="tw-mt-2 sm:tw-mt-0.5">
-                  <UserPageHeaderName
+              </div>
+
+              {showProfileActions ? (
+                <div
+                  role="group"
+                  aria-label={getUserProfileHeaderMessage(
+                    "user.profileHeader.actions.label"
+                  )}
+                  className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 lg:tw-col-start-3 lg:tw-row-start-1 lg:tw-justify-end lg:tw-self-end lg:tw-pb-1"
+                >
+                  {showWebsiteAction && cmsWebsiteHref && profile.handle ? (
+                    <Link
+                      className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
+                      href={cmsWebsiteHref}
+                      aria-label={t(locale, "profileCms.header.openWebsite", {
+                        handle: profile.handle,
+                      })}
+                    >
+                      <WebsiteIcon />
+                      <span>{t(locale, "profileCms.header.website")}</span>
+                    </Link>
+                  ) : null}
+                  {showFollowActions && profile.handle ? (
+                    <div className="[&_button]:tw-min-h-11 [&_button]:tw-min-w-11 [&_button]:focus-visible:tw-outline [&_button]:focus-visible:tw-outline-2 [&_button]:focus-visible:tw-outline-offset-2 [&_button]:focus-visible:tw-outline-primary-400">
+                      <UserFollowBtn
+                        handle={profile.handle}
+                        onDirectMessage={
+                          profile.primary_wallet
+                            ? () =>
+                                handleCreateDirectMessage(
+                                  profile.primary_wallet
+                                )
+                            : undefined
+                        }
+                        directMessageLoading={directMessageLoading}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+              {showAbout ? (
+                <div className="lg:tw-col-start-2 lg:tw-col-end-4">
+                  <UserPageHeaderAbout
                     profile={profile}
+                    statement={aboutStatement}
                     canEdit={canEdit}
-                    mainAddress={mainAddress}
-                    level={profile.level}
-                    profileEnabledAt={profileEnabledAt}
-                    variant="meta"
                   />
                 </div>
-              </div>
+              ) : null}
 
-              <div className="tw-order-2 tw-mb-2 tw-mt-2 tw-flex tw-items-center tw-gap-3 tw-self-start md:tw-order-3 md:tw-mb-0">
-                {cmsWebsiteHref && profile.handle ? (
-                  <Link
-                    className="tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition hover:tw-border-primary-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                    href={cmsWebsiteHref}
-                    aria-label={t(locale, "profileCms.header.openWebsite", {
-                      handle: profile.handle,
-                    })}
-                  >
-                    <WebsiteIcon />
-                    <span>{t(locale, "profileCms.header.website")}</span>
-                  </Link>
-                ) : null}
-                {!isMyProfile && profile.handle && connectedProfile?.handle ? (
-                  <UserFollowBtn
-                    handle={profile.handle}
-                    onDirectMessage={
-                      profile.primary_wallet
-                        ? () =>
-                            handleCreateDirectMessage(profile.primary_wallet)
-                        : undefined
-                    }
-                    directMessageLoading={directMessageLoading}
-                  />
-                ) : null}
-              </div>
-            </div>
-
-            {showAbout ? (
-              <div className="tw-mt-4">
-                <UserPageHeaderAbout
+              <div className="lg:tw-col-start-2 lg:tw-col-end-4">
+                <UserPageHeaderStats
                   profile={profile}
-                  statement={aboutStatement}
-                  canEdit={canEdit}
+                  handleOrWallet={normalizedHandleOrWallet}
+                  followersCount={followersCount}
                 />
               </div>
-            ) : null}
-
-            <div className="tw-mt-4 tw-flex tw-items-center tw-gap-4 tw-overflow-x-auto tw-border-b tw-border-white/5 sm:tw-overflow-visible sm:tw-border-b-0 sm:tw-pb-0">
-              <UserPageHeaderStats
-                profile={profile}
-                handleOrWallet={normalizedHandleOrWallet}
-                followersCount={followersCount}
-              />
             </div>
           </div>
         </div>

@@ -44,42 +44,51 @@ function UserPageHeaderAboutContent({
   );
 
   return (
-    <>
-      {view === AboutStatementView.STATEMENT && (
-        <div className="tw-max-w-3xl">
-          <div
-            className={[
-              "tw-inline-flex tw-items-start tw-gap-2",
-              canEdit ? "tw-group" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
+    <div className="tw-max-w-4xl">
+      <div
+        className={
+          canEdit
+            ? "tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3"
+            : ""
+        }
+      >
+        <h2
+          className={
+            canEdit
+              ? "tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-300"
+              : "tw-sr-only"
+          }
+        >
+          {getUserProfileHeaderMessage("user.profileHeader.about.label")}
+        </h2>
+        {view === AboutStatementView.STATEMENT && canEdit && statement ? (
+          <button
+            type="button"
+            onClick={onEditClick}
+            aria-label={editActionLabel}
+            className="tw-inline-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200 motion-reduce:tw-transition-none"
           >
-            {canEdit && !statement ? (
-              <button
-                type="button"
-                onClick={onEditClick}
-                aria-label={editActionLabel}
-                className="tw-flex-1 tw-border-none tw-bg-transparent tw-p-0 tw-text-left"
-              >
-                <UserPageHeaderAboutStatement statement={statement} />
-              </button>
-            ) : (
+            <span aria-hidden="true">
+              <PencilIcon />
+            </span>
+          </button>
+        ) : null}
+      </div>
+
+      {view === AboutStatementView.STATEMENT && (
+        <div className={canEdit ? "tw-mt-2" : ""}>
+          {canEdit && !statement ? (
+            <button
+              type="button"
+              onClick={onEditClick}
+              aria-label={editActionLabel}
+              className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-dashed tw-border-white/10 tw-bg-white/[0.025] tw-px-3 tw-py-2 tw-text-left tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.05] motion-reduce:tw-transition-none"
+            >
               <UserPageHeaderAboutStatement statement={statement} />
-            )}
-            {canEdit && statement && (
-              <button
-                type="button"
-                onClick={onEditClick}
-                aria-label={editActionLabel}
-                className="tw-pointer-events-none tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 group-focus-within:tw-pointer-events-auto group-focus-within:tw-opacity-100 group-hover:tw-pointer-events-auto group-hover:tw-opacity-100 hover:tw-text-iron-200"
-              >
-                <span aria-hidden="true">
-                  <PencilIcon />
-                </span>
-              </button>
-            )}
-          </div>
+            </button>
+          ) : (
+            <UserPageHeaderAboutStatement statement={statement} />
+          )}
         </div>
       )}
 
@@ -92,7 +101,7 @@ function UserPageHeaderAboutContent({
           />
         </div>
       )}
-    </>
+    </div>
   );
 }
 

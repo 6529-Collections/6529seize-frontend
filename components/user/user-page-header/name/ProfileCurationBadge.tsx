@@ -37,6 +37,7 @@ export default function ProfileCurationBadge({
     <DropAuthorBadges
       profile={profileWithWave}
       tooltipIdPrefix="profile-author-badges"
+      className="tw-inline-flex tw-min-h-6 tw-items-center tw-gap-x-1.5 [&_button]:tw-min-h-6 [&_button]:tw-min-w-6"
     />
   );
 }

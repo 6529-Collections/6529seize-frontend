@@ -13,10 +13,12 @@ export enum UserStatsRowSize {
   MEDIUM = "MEDIUM",
 }
 
-const SIZE_CLASSES: Record<
-  UserStatsRowSize,
-  { text: string; rate: string }
-> = {
+export enum UserStatsRowVariant {
+  INLINE = "INLINE",
+  PROFILE_HEADER = "PROFILE_HEADER",
+}
+
+const SIZE_CLASSES: Record<UserStatsRowSize, { text: string; rate: string }> = {
   [UserStatsRowSize.SMALL]: {
     text: "tw-text-sm",
     rate: "tw-text-xs",
@@ -38,8 +40,39 @@ interface UserStatsRowProps {
   readonly followersCount: number | null;
   readonly className?: string | undefined;
   readonly size?: UserStatsRowSize | undefined;
+  readonly variant?: UserStatsRowVariant | undefined;
   readonly onFollowersClick?: (() => void) | undefined;
   readonly locale?: SupportedLocale | undefined;
+}
+
+function StatValueAndLabel({
+  value,
+  label,
+  valueClassName,
+  labelClassName,
+  isProfileHeader,
+}: {
+  readonly value: string;
+  readonly label: string;
+  readonly valueClassName: string;
+  readonly labelClassName: string;
+  readonly isProfileHeader: boolean;
+}) {
+  if (isProfileHeader) {
+    return (
+      <span className="tw-order-1 tw-inline-flex tw-min-w-0 tw-items-baseline tw-gap-x-1.5 tw-whitespace-nowrap">
+        <span className={valueClassName}>{value}</span>
+        <span className={labelClassName}>{label}</span>
+      </span>
+    );
+  }
+
+  return (
+    <>
+      <span className={valueClassName}>{value}</span>{" "}
+      <span className={labelClassName}>{label}</span>
+    </>
+  );
 }
 
 export default function UserStatsRow({
@@ -53,6 +86,7 @@ export default function UserStatsRow({
   followersCount,
   className = "",
   size = UserStatsRowSize.MEDIUM,
+  variant = UserStatsRowVariant.INLINE,
   onFollowersClick,
   locale = DEFAULT_LOCALE,
 }: UserStatsRowProps) {
@@ -92,29 +126,46 @@ export default function UserStatsRow({
     value: followersValue,
     followersLabel: followerLabel,
   };
+  const isProfileHeader = variant === UserStatsRowVariant.PROFILE_HEADER;
+  const rowClassName = isProfileHeader
+    ? "tw-grid tw-grid-cols-2 tw-gap-x-5 lg:tw-grid-cols-5 lg:tw-gap-x-7"
+    : "tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 sm:tw-gap-y-0.5 lg:tw-gap-x-6";
+  const itemClassName = isProfileHeader
+    ? "tw-flex tw-min-h-14 tw-min-w-0 tw-flex-wrap tw-content-start tw-items-baseline tw-gap-x-1.5 tw-py-2 tw-text-left tw-no-underline tw-transition-colors tw-duration-200 last:tw-col-span-2 desktop-hover:hover:[&>span]:tw-text-white focus-visible:tw-rounded-md focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none lg:last:tw-col-span-1"
+    : "tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline";
+  const valueClassName = isProfileHeader
+    ? "tw-min-w-0 tw-text-sm tw-font-semibold tw-leading-6 tw-tabular-nums tw-text-iron-100 [overflow-wrap:anywhere] sm:tw-text-base lg:tw-text-lg"
+    : `${classes.text} tw-font-semibold tw-text-iron-300`;
+  const labelClassName = isProfileHeader
+    ? "tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-500"
+    : `${classes.text} tw-font-medium tw-text-iron-500`;
+  const rateClassName = isProfileHeader
+    ? "tw-order-2 tw-basis-full tw-text-xs tw-font-medium tw-leading-5 tw-tabular-nums tw-text-emerald-400"
+    : `${classes.rate} tw-font-semibold tw-text-emerald-500`;
 
   return (
     <div className={`@container ${className}`}>
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-1 sm:tw-gap-y-0.5 tw-gap-x-4 lg:tw-gap-x-6">
+      <div className={rowClassName}>
         <Link
           href={`/${routeHandle}/collected`}
           aria-label={tdhLinkLabel}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className={itemClassName}
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-            {tdhValue}
-          </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.tdh", {}, locale)}
-          </span>
+          <StatValueAndLabel
+            value={tdhValue}
+            label={getUserStatsRowMessage(
+              "user.statsRow.labels.tdh",
+              {},
+              locale
+            )}
+            valueClassName={valueClassName}
+            labelClassName={labelClassName}
+            isProfileHeader={isProfileHeader}
+          />
           {tdh_rate > 0 && (
             <>
               {" "}
-              <span
-                className={`${classes.rate} tw-font-semibold tw-text-emerald-500`}
-              >
-                +{tdhRateValue}
-              </span>
+              <span className={rateClassName}>+{tdhRateValue}</span>
             </>
           )}
         </Link>
@@ -122,22 +173,23 @@ export default function UserStatsRow({
         <Link
           href={`/${routeHandle}/xtdh`}
           aria-label={xtdhLinkLabel}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className={itemClassName}
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-            {xtdhValue}
-          </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.xtdh", {}, locale)}
-          </span>
+          <StatValueAndLabel
+            value={xtdhValue}
+            label={getUserStatsRowMessage(
+              "user.statsRow.labels.xtdh",
+              {},
+              locale
+            )}
+            valueClassName={valueClassName}
+            labelClassName={labelClassName}
+            isProfileHeader={isProfileHeader}
+          />
           {xtdh_rate > 0 && (
             <>
               {" "}
-              <span
-                className={`${classes.rate} tw-font-semibold tw-text-emerald-500`}
-              >
-                +{xtdhRateValue}
-              </span>
+              <span className={rateClassName}>+{xtdhRateValue}</span>
             </>
           )}
         </Link>
@@ -149,14 +201,19 @@ export default function UserStatsRow({
             { handle, value: nicValue },
             locale
           )}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className={itemClassName}
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-            {nicValue}
-          </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.nic", {}, locale)}
-          </span>
+          <StatValueAndLabel
+            value={nicValue}
+            label={getUserStatsRowMessage(
+              "user.statsRow.labels.nic",
+              {},
+              locale
+            )}
+            valueClassName={valueClassName}
+            labelClassName={labelClassName}
+            isProfileHeader={isProfileHeader}
+          />
         </Link>
 
         <Link
@@ -166,14 +223,19 @@ export default function UserStatsRow({
             { handle, value: repValue },
             locale
           )}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className={itemClassName}
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-            {repValue}
-          </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.rep", {}, locale)}
-          </span>
+          <StatValueAndLabel
+            value={repValue}
+            label={getUserStatsRowMessage(
+              "user.statsRow.labels.rep",
+              {},
+              locale
+            )}
+            valueClassName={valueClassName}
+            labelClassName={labelClassName}
+            isProfileHeader={isProfileHeader}
+          />
         </Link>
 
         {onFollowersClick ? (
@@ -185,14 +247,15 @@ export default function UserStatsRow({
               followersActionLabel,
               locale
             )}
-            className="tw-bg-transparent tw-border-none tw-p-0 tw-cursor-pointer tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+            className={`${itemClassName} tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0`}
           >
-            <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-              {followersValue}
-            </span>{" "}
-            <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-              {followerLabel}
-            </span>
+            <StatValueAndLabel
+              value={followersValue}
+              label={followerLabel}
+              valueClassName={valueClassName}
+              labelClassName={labelClassName}
+              isProfileHeader={isProfileHeader}
+            />
           </button>
         ) : (
           <Link
@@ -202,14 +265,15 @@ export default function UserStatsRow({
               followersActionLabel,
               locale
             )}
-            className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+            className={itemClassName}
           >
-            <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-              {followersValue}
-            </span>{" "}
-            <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-              {followerLabel}
-            </span>
+            <StatValueAndLabel
+              value={followersValue}
+              label={followerLabel}
+              valueClassName={valueClassName}
+              labelClassName={labelClassName}
+              isProfileHeader={isProfileHeader}
+            />
           </Link>
         )}
       </div>

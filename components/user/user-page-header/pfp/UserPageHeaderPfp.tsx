@@ -14,31 +14,31 @@ export default function UserPageHeaderPfp({
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
 }) {
-  const glassWrapperClass =
-    "tw-relative tw-z-10 tw-inline-flex tw-flex-shrink-0 tw-p-0.5 tw-rounded-xl tw-bg-white/10 tw-backdrop-blur-md tw-ring-1 tw-ring-white/20 tw-shadow-2xl";
+  const wrapperClass =
+    "tw-relative tw-z-10 tw-inline-flex tw-flex-shrink-0 tw-rounded-xl tw-bg-black tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-white/15";
 
   if (profile.pfp) {
     return (
-      <div className={glassWrapperClass}>
+      <div className={wrapperClass}>
         <Image
           unoptimized
           src={getScaledImageUri(profile.pfp, ImageScale.W_200_H_200)}
           alt={getUserProfileHeaderMessage("user.profileHeader.pfp.alt", {
             name: profileLabel,
           })}
-          width="144"
-          height="144"
-          className="tw-h-20 tw-w-auto tw-max-w-20 tw-rounded-xl tw-bg-iron-800 tw-object-contain sm:tw-h-28 sm:tw-max-w-28"
+          width="128"
+          height="128"
+          className="tw-size-24 tw-rounded-lg tw-bg-iron-800 tw-object-cover sm:tw-size-32"
         />
       </div>
     );
   }
 
   return (
-    <div className={glassWrapperClass}>
+    <div className={wrapperClass}>
       <div
         aria-hidden="true"
-        className="tw-h-20 tw-w-20 tw-rounded-xl sm:tw-h-28 sm:tw-w-28"
+        className="tw-size-24 tw-rounded-lg sm:tw-size-32"
         style={{
           background: `linear-gradient(45deg, ${defaultBanner1} 0%, ${defaultBanner2} 100%)`,
         }}

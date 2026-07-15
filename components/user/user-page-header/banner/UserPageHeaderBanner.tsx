@@ -35,7 +35,7 @@ export default function UserPageHeaderBanner({
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
 
   return (
-    <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40">
+    <div className="tw-group tw-relative tw-z-10 tw-h-32 tw-w-full tw-overflow-hidden sm:tw-h-44 md:tw-h-48">
       {scaledBannerUrl ? (
         <div
           className="tw-absolute tw-inset-0"
@@ -53,22 +53,23 @@ export default function UserPageHeaderBanner({
           }}
         />
       )}
+      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-20 tw-bg-gradient-to-t tw-from-black/30 tw-to-transparent" />
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-white/5" />
 
       {canEdit && (
         <button
           type="button"
           onClick={() => setIsEditOpen(true)}
-          className="tw-absolute tw-inset-0 tw-z-10 tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0"
+          className="tw-group/edit tw-absolute tw-inset-0 tw-z-10 tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           aria-label={getUserProfileHeaderMessage(
             "user.profileHeader.banner.edit",
             { name: profileLabel }
           )}
         >
-          <div className="tw-absolute tw-inset-0 tw-bg-black/30 tw-opacity-0 tw-transition-opacity tw-duration-300 tw-ease-out hover:tw-opacity-100">
+          <div className="tw-absolute tw-inset-0 tw-bg-black/20 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-out group-focus-visible/edit:tw-opacity-100 desktop-hover:group-hover/edit:tw-opacity-100 motion-reduce:tw-transition-none">
             <div
               aria-hidden="true"
-              className="tw-absolute tw-bottom-4 tw-right-4"
+              className="tw-absolute tw-bottom-3 tw-right-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-black/70 tw-p-2 tw-text-white tw-opacity-100 tw-shadow-lg tw-backdrop-blur-sm group-focus-visible/edit:tw-opacity-100 desktop-hover:group-hover/edit:tw-opacity-100 sm:tw-opacity-0"
             >
               <PencilIcon />
             </div>
