@@ -8,11 +8,36 @@ import {
 } from "lexical";
 import { act, renderHook } from "@testing-library/react";
 import { MentionNode } from "@/components/drops/create/lexical/nodes/MentionNode";
+import { GroupMentionNode } from "@/components/drops/create/lexical/nodes/GroupMentionNode";
+import { GROUP_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/GroupMentionTransformer";
+import { $convertFromMarkdownString } from "@lexical/markdown";
 import { expandPlainAliasTokens } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 import { useCreateDropDraftState } from "@/components/waves/create-drop-content/useCreateDropDraftState";
 import { exportComposerMarkdown } from "@/components/waves/create-drop-content/exportComposerMarkdown";
 
 describe("mention alias submission", () => {
+  it("exports global mentions regardless of @all permission", () => {
+    const editor = createEditor({
+      namespace: "global-mention-export-test",
+      nodes: [GroupMentionNode],
+      onError: (error) => {
+        throw error;
+      },
+    });
+    editor.update(
+      () => {
+        $convertFromMarkdownString("@contributors", [
+          GROUP_MENTION_TRANSFORMER,
+        ]);
+      },
+      { discrete: true }
+    );
+
+    expect(exportComposerMarkdown(editor.getEditorState())).toBe(
+      "@contributors"
+    );
+  });
+
   it("carries expanded alias members into the updated drop", async () => {
     const setDrop = jest.fn();
     const { result } = renderHook(() =>
@@ -82,7 +107,7 @@ describe("mention alias submission", () => {
       });
     });
 
-    const expandedMarkdown = exportComposerMarkdown(expandedEditorState, false);
+    const expandedMarkdown = exportComposerMarkdown(expandedEditorState);
     expect(expandedMarkdown).toBe("hello @[alice] @[bob]");
 
     const drop = result.current.getUpdatedDrop(expandedMarkdown);

@@ -280,9 +280,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     pollDraft !== null && pollValidation.error !== null;
 
   const getMarkdown = useMemo(
-    () =>
-      editorState ? exportComposerMarkdown(editorState, canMentionAll) : null,
-    [canMentionAll, editorState]
+    () => (editorState ? exportComposerMarkdown(editorState) : null),
+    [editorState]
   );
   const collapseOptions = useCallback(() => {
     shouldAnimateOptionsRef.current = true;
@@ -559,10 +558,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     (resolvedEditorState?: EditorState) =>
       onDrop(
         resolvedEditorState
-          ? exportComposerMarkdown(resolvedEditorState, canMentionAll)
+          ? exportComposerMarkdown(resolvedEditorState)
           : undefined
       ),
-    [canMentionAll, onDrop]
+    [onDrop]
   );
 
   const onSwitchToDropMode = useCallback(() => {

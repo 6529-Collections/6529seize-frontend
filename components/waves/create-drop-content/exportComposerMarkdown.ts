@@ -9,15 +9,12 @@ import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdo
 import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import type { EditorState } from "lexical";
 
-export const exportComposerMarkdown = (
-  editorState: EditorState,
-  canMentionAll: boolean
-) =>
+export const exportComposerMarkdown = (editorState: EditorState) =>
   normalizeTypedEmojiShortcuts(
     exportDropMarkdown(editorState, [
       ...SAFE_MARKDOWN_TRANSFORMERS,
       MENTION_TRANSFORMER,
-      ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
+      GROUP_MENTION_TRANSFORMER,
       HASHTAG_TRANSFORMER,
       WAVE_MENTION_TRANSFORMER,
       IMAGE_TRANSFORMER,

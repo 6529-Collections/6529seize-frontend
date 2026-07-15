@@ -85,6 +85,16 @@ export interface CreateDropInputHandles {
 // Create a custom command
 const DISABLE_EDIT_COMMAND = createCommand("DISABLE_EDIT");
 
+const CREATE_DROP_MARKDOWN_TRANSFORMERS = [
+  ...SAFE_MARKDOWN_TRANSFORMERS,
+  MENTION_TRANSFORMER,
+  GROUP_MENTION_TRANSFORMER,
+  HASHTAG_TRANSFORMER,
+  WAVE_MENTION_TRANSFORMER,
+  IMAGE_TRANSFORMER,
+  EMOJI_TRANSFORMER,
+];
+
 // Create a custom plugin to handle disabling
 function DisableEditPlugin({ disabled }: { disabled: boolean }) {
   const [editor] = useLexicalComposerContext();
@@ -111,36 +121,30 @@ interface EditorCommandsPluginHandles {
   blur: () => void;
 }
 
-const EditorCommandsPlugin = forwardRef<
-  EditorCommandsPluginHandles,
-  { readonly canMentionAll: boolean }
->(({ canMentionAll }, ref) => {
-  const [editor] = useLexicalComposerContext();
+const EditorCommandsPlugin = forwardRef<EditorCommandsPluginHandles>(
+  (_props, ref) => {
+    const [editor] = useLexicalComposerContext();
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      focus: () => editor.focus(),
-      blur: () => editor.blur(),
-      setMarkdown: (markdown: string) => {
-        editor.update(() => {
-          $convertFromMarkdownString(markdown, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-            HASHTAG_TRANSFORMER,
-            WAVE_MENTION_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ]);
-        });
-      },
-    }),
-    [canMentionAll, editor]
-  );
+    useImperativeHandle(
+      ref,
+      () => ({
+        focus: () => editor.focus(),
+        blur: () => editor.blur(),
+        setMarkdown: (markdown: string) => {
+          editor.update(() => {
+            $convertFromMarkdownString(
+              markdown,
+              CREATE_DROP_MARKDOWN_TRANSFORMERS
+            );
+          });
+        },
+      }),
+      [editor]
+    );
 
-  return null;
-});
+    return null;
+  }
+);
 EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
 
 function InitialMarkdownPlugin({
@@ -166,7 +170,10 @@ function InitialMarkdownPlugin({
     editor.update(() => {
       const root = $getRoot();
       root.clear();
-      $convertFromMarkdownString(initialMarkdown, SAFE_MARKDOWN_TRANSFORMERS);
+      $convertFromMarkdownString(
+        initialMarkdown,
+        CREATE_DROP_MARKDOWN_TRANSFORMERS
+      );
       $selectEndOfRootBlock(root);
     });
     editor.focus();
@@ -410,15 +417,12 @@ const CreateDropInput = forwardRef<
               <ListPlugin />
               <PlainTextPastePlugin />
               <MarkdownShortcutPlugin
-                transformers={SAFE_MARKDOWN_TRANSFORMERS}
+                transformers={CREATE_DROP_MARKDOWN_TRANSFORMERS}
               />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
-              <EditorCommandsPlugin
-                ref={editorCommandsRef}
-                canMentionAll={canMentionAll}
-              />
+              <EditorCommandsPlugin ref={editorCommandsRef} />
               <DisableEditPlugin disabled={submitting} />
               <InitialMarkdownPlugin
                 initialMarkdown={initialMarkdown}

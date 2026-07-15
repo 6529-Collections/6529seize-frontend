@@ -35,6 +35,7 @@ const expandMentionAliasesMock = jest.fn(async () => ({
   completed: true,
   editorState: editorMock.getEditorState(),
 }));
+let markdownShortcutTransformers: unknown[] = [];
 
 jest.mock("@lexical/list", () => ({
   ListNode: class MockListNode {},
@@ -99,7 +100,10 @@ jest.mock("@lexical/react/LexicalOnChangePlugin", () => ({
   },
 }));
 jest.mock("@lexical/react/LexicalMarkdownShortcutPlugin", () => ({
-  MarkdownShortcutPlugin: () => null,
+  MarkdownShortcutPlugin: ({ transformers }: { transformers: unknown[] }) => {
+    markdownShortcutTransformers = transformers;
+    return null;
+  },
 }));
 jest.mock("@lexical/react/LexicalListPlugin", () => ({
   ListPlugin: () => null,
@@ -128,6 +132,9 @@ jest.mock(
     default: () => null,
   })
 );
+jest.mock("@/components/drops/create/lexical/utils/rootContent", () => ({
+  $selectEndOfRootBlock: jest.fn(),
+}));
 jest.mock("@/components/waves/CreateDropEmojiPicker", () => ({
   __esModule: true,
   default: () => <div data-testid="emoji-picker" />,
@@ -173,6 +180,9 @@ jest.mock("@/components/drops/create/lexical/nodes/MentionNode", () => ({
   $createMentionNode: jest.fn(() => ({ type: "mention" })),
   $isMentionNode: jest.fn((node) => node?.type === "mention"),
 }));
+const { $createMentionNode: createMentionNodeMock } = jest.requireMock(
+  "@/components/drops/create/lexical/nodes/MentionNode"
+) as { $createMentionNode: jest.Mock };
 jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
   GroupMentionNode: class MockGroupMentionNode {},
 }));
@@ -198,6 +208,10 @@ jest.mock(
     GROUP_MENTION_TRANSFORMER: {},
   })
 );
+const { GROUP_MENTION_TRANSFORMER: groupMentionTransformerMock } =
+  jest.requireMock(
+    "@/components/drops/create/lexical/transformers/GroupMentionTransformer"
+  ) as { GROUP_MENTION_TRANSFORMER: unknown };
 jest.mock(
   "@/components/drops/create/lexical/transformers/HastagTransformer",
   () => ({
@@ -310,12 +324,62 @@ describe("EditDropLexical", () => {
       isApp: false,
       isMobileDevice: false,
     });
+    markdownShortcutTransformers = [];
   });
 
   it("renders placeholder text and emoji picker", () => {
     render(<EditDropLexical {...defaultProps} />);
     expect(screen.getByText("Edit message...")).toBeInTheDocument();
     expect(screen.getByTestId("emoji-picker")).toBeInTheDocument();
+  });
+
+  it("registers global mention tokens for non-admin editors", () => {
+    render(<EditDropLexical {...defaultProps} canMentionAll={false} />);
+
+    expect(markdownShortcutTransformers).toContain(groupMentionTransformerMock);
+    expect(exportDropMarkdownMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.arrayContaining([groupMentionTransformerMock])
+    );
+  });
+
+  it("preserves profile ids when reconstructing split initial mentions", () => {
+    const currentNode = {
+      getTextContent: jest.fn(() => "hello @["),
+      setTextContent: jest.fn(),
+      insertAfter: jest.fn(),
+      remove: jest.fn(),
+    };
+    const nextNode = {
+      getTextContent: jest.fn(() => "alice]!"),
+      setTextContent: jest.fn(),
+      insertBefore: jest.fn(),
+      remove: jest.fn(),
+    };
+    editorMock.update.mockImplementationOnce((callback: () => void) =>
+      callback()
+    );
+    rootMock.getAllTextNodes
+      .mockReturnValueOnce([currentNode, nextNode] as any)
+      .mockReturnValueOnce([]);
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        initialContent="hello @[alice]!"
+        initialMentions={[
+          {
+            mentioned_profile_id: "profile-alice",
+            handle_in_content: "Alice",
+          },
+        ]}
+      />
+    );
+
+    expect(createMentionNodeMock).toHaveBeenCalledWith(
+      "@alice",
+      "profile-alice"
+    );
   });
 
   it("saves updated markdown together with unique mentions", async () => {
