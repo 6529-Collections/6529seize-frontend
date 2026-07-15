@@ -81,6 +81,7 @@ type QueuedWaveMessagesUpdate = {
   readonly update: WaveMessagesUpdate;
   readonly mergePolicy: "standard" | "preserve-existing";
   readonly onApplied?: (() => void) | undefined;
+  readonly seedGeneration?: number | undefined;
 };
 type PendingServerFeedSeed = {
   readonly gatePromise: Promise<ServerWaveFeedSeedResult>;
@@ -222,8 +223,7 @@ function useWaveMessagesStore() {
       isProcessingRef.current = false;
       return; // Should not happen based on length check, but safety first
     }
-    const { mergePolicy, onApplied, update } = queuedUpdate;
-    const updateGeneration = serverFeedSeedGenerationRef.current;
+    const { mergePolicy, onApplied, seedGeneration, update } = queuedUpdate;
 
     const newWaveMessages = { ...waveMessagesRef.current };
     const existingWaveMessages = newWaveMessages[update.key];
@@ -290,7 +290,8 @@ function useWaveMessagesStore() {
       const keyListeners = listenersRef.current[update.key];
       if (
         keyListeners &&
-        updateGeneration === serverFeedSeedGenerationRef.current
+        (seedGeneration === undefined ||
+          seedGeneration === serverFeedSeedGenerationRef.current)
       ) {
         keyListeners.forEach((listener) => listener(notifyValue));
       }
@@ -436,6 +437,7 @@ function useWaveMessagesStore() {
       updateQueueRef.current.push({
         update: seedUpdate,
         mergePolicy: "preserve-existing",
+        seedGeneration,
         onApplied: () => {
           if (seedGeneration !== serverFeedSeedGenerationRef.current) {
             return;

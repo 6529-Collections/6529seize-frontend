@@ -35,6 +35,30 @@ describe("useWaveMessagesStore", () => {
     );
   });
 
+  it("notifies normal updates when a profile switch precedes deferred delivery", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const listener = jest.fn();
+
+    act(() => result.current.subscribe("wave1", listener));
+    listener.mockClear();
+
+    act(() => {
+      result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    expect(result.current.getData("wave1")?.drops[0]?.id).toBe("d1");
+    await waitFor(() =>
+      expect(listener).toHaveBeenCalledWith(
+        expect.objectContaining({
+          drops: expect.arrayContaining([
+            expect.objectContaining({ id: "d1" }),
+          ]),
+        })
+      )
+    );
+  });
+
   it("removes drops and exposes updated state", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();

@@ -156,6 +156,9 @@ export function WaveServerFeedSeedGate({
           startedAtMs,
         });
       }
+      // DOM event dispatch runs every profile-switch listener synchronously.
+      // Waiting for the microtask guarantees the store has invalidated its
+      // seed guard and cleared any applied data before current-auth fetching.
       globalThis.queueMicrotask(() => {
         registerWave(waveId, true);
       });

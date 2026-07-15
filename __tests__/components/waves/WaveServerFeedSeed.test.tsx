@@ -154,6 +154,7 @@ const StoreBackedSeedHarness = ({
 describe("WaveServerFeedSeed", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRegisterWave.mockReset();
     mockApply.mockReturnValue(true);
     mockReplacePending.mockReturnValue(true);
     mockIsNative = false;
@@ -294,6 +295,7 @@ describe("WaveServerFeedSeed", () => {
     await waitFor(() =>
       expect(mockRegisterWave).toHaveBeenCalledWith(wave.id, true)
     );
+    expect(mockRegisterWave).toHaveBeenCalledTimes(1);
     expect(mockApply).not.toHaveBeenCalled();
     expect(mockTrackTerminal).toHaveBeenCalledTimes(1);
   });
@@ -315,6 +317,7 @@ describe("WaveServerFeedSeed", () => {
     await waitFor(() =>
       expect(mockRegisterWave).toHaveBeenCalledWith(wave.id, true)
     );
+    expect(mockRegisterWave).toHaveBeenCalledTimes(1);
     expect(mockApply).toHaveBeenCalledTimes(1);
     expect(mockTrackTerminal).toHaveBeenCalledTimes(1);
   });
@@ -371,6 +374,11 @@ describe("WaveServerFeedSeed", () => {
       );
       expect(profileSwitchListeners.length).toBeGreaterThanOrEqual(2);
     });
+    mockRegisterWave.mockImplementation((registeredWaveId: string) => {
+      expect(registeredWaveId).toBe(wave.id);
+      expect(storeBackedSeedApi?.hasServerFeedSeed(wave.id)).toBe(false);
+      expect(storeBackedSeedApi?.getData(wave.id)).toBeUndefined();
+    });
 
     await act(async () => {
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
@@ -394,6 +402,28 @@ describe("WaveServerFeedSeed", () => {
       })
     ).toBe(false);
     addEventListenerSpy.mockRestore();
+  });
+
+  it("registers one fallback when the streamed promise loses its gate", async () => {
+    mockReplacePending.mockReturnValue(false);
+
+    await act(async () => {
+      renderSeed(
+        Promise.resolve({
+          ok: true,
+          waveId: wave.id,
+          drops: makeSeedDrops(1),
+          hasNextPage: false,
+        })
+      );
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(mockRegisterWave).toHaveBeenCalledWith(wave.id, true)
+    );
+    expect(mockRegisterWave).toHaveBeenCalledTimes(1);
+    expect(mockApply).not.toHaveBeenCalled();
   });
 
   it("clears applied seed data before a current-auth refresh after a profile switch", async () => {
