@@ -472,7 +472,8 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
 
   const hasExplicitCoinbaseWalletLinkStack =
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
-    hasCoinbaseWalletRequestRelayFrame(value?.stacktrace?.frames) ||
+    (hasBrowserUnhandledRejectionMechanism(value) &&
+      hasCoinbaseWalletRequestRelayFrame(value?.stacktrace?.frames)) ||
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
     hasCoinbaseWalletLinkWebSocketSerializedStack(event);
 

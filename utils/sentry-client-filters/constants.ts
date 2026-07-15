@@ -236,7 +236,10 @@ export const sentryBrowserPackagePathTokens = [
   "@sentry+browser",
 ];
 export const coinbaseWalletRequestRelayPath = "app:///requestRelay.js";
+export const coinbaseWalletRequestRelayModule = "requestRelay";
 export const coinbaseWalletRequestRelayCloseFunction = "i.onclose";
+export const coinbaseWalletRequestRelayLine = 2;
+export const coinbaseWalletRequestRelayColumn = 248957;
 export const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 export const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 export const FNV_OFFSET_BASIS = 2166136261;

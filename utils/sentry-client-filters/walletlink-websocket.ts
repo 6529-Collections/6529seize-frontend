@@ -4,6 +4,9 @@ import {
   coinbaseWalletLinkWebSocketFile,
   coinbaseWalletLinkWebSocket1006MessagePrefix,
   coinbaseWalletRequestRelayCloseFunction,
+  coinbaseWalletRequestRelayColumn,
+  coinbaseWalletRequestRelayLine,
+  coinbaseWalletRequestRelayModule,
   coinbaseWalletRequestRelayPath,
   coinbaseWalletSdkPathTokens,
   nextStaticFramePathToken,
@@ -56,7 +59,12 @@ function isCoinbaseWalletLinkWebSocketFrame(frame: SentryStackFrame): boolean {
 }
 
 function isCoinbaseWalletRequestRelayFrame(frame: SentryStackFrame): boolean {
-  if (frame.function !== coinbaseWalletRequestRelayCloseFunction) {
+  if (
+    frame.module !== coinbaseWalletRequestRelayModule ||
+    frame.function !== coinbaseWalletRequestRelayCloseFunction ||
+    frame.lineno !== coinbaseWalletRequestRelayLine ||
+    frame.colno !== coinbaseWalletRequestRelayColumn
+  ) {
     return false;
   }
 
@@ -72,7 +80,11 @@ function isCoinbaseWalletRequestRelayFrame(frame: SentryStackFrame): boolean {
 export function hasCoinbaseWalletRequestRelayFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
-  return Array.isArray(frames) && frames.some(isCoinbaseWalletRequestRelayFrame);
+  return (
+    Array.isArray(frames) &&
+    frames.length === 1 &&
+    isCoinbaseWalletRequestRelayFrame(frames[0]!)
+  );
 }
 
 export function hasCoinbaseWalletLinkWebSocketFrame(
