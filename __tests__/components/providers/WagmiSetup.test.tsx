@@ -284,6 +284,9 @@ describe("WagmiSetup Security Tests", () => {
     return (
       <>
         <div data-testid="appkit-bootstrap-status">{bootstrap.status}</div>
+        <div data-testid="appkit-terminal-error">
+          {String(bootstrap.hasTerminalError)}
+        </div>
         <div data-testid="appkit-created">{String(bootstrap.isCreated)}</div>
       </>
     );
@@ -1093,6 +1096,9 @@ describe("WagmiSetup Security Tests", () => {
           container.querySelector('[data-testid="appkit-bootstrap-status"]')
         ).toHaveTextContent("error");
       });
+      expect(
+        container.querySelector('[data-testid="appkit-terminal-error"]')
+      ).toHaveTextContent("true");
       expect(container.querySelector('[data-testid="children"]')).toBeTruthy();
       expect(mockLogErrorSecurely).toHaveBeenCalledWith(
         "[WagmiSetup] AppKit ready failed after adapter mount",
@@ -1103,7 +1109,7 @@ describe("WagmiSetup Security Tests", () => {
       );
     });
 
-    it("moves a hung background AppKit initialization to a terminal error", async () => {
+    it("bounds a hung background AppKit initialization without uncreating AppKit", async () => {
       jest.useFakeTimers();
       const ready = new Promise<void>(() => {
         // Intentionally never settles to simulate a hung WalletConnect relay.
@@ -1140,6 +1146,149 @@ describe("WagmiSetup Security Tests", () => {
 
       await act(async () => {
         await jest.advanceTimersByTimeAsync(15_000);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("error");
+      expect(
+        container.querySelector('[data-testid="appkit-created"]')
+      ).toHaveTextContent("true");
+      expect(
+        container.querySelector('[data-testid="appkit-terminal-error"]')
+      ).toHaveTextContent("false");
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+    });
+
+    it("recovers future waiters when AppKit becomes ready after the timeout", async () => {
+      jest.useFakeTimers();
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
+      });
+
+      const WaitForReadyProbe = () => {
+        const bootstrap = useAppKitBootstrap();
+        const [waitState, setWaitState] = React.useState("idle");
+        return (
+          <>
+            <div data-testid="late-ready-wait-state">{waitState}</div>
+            <button
+              data-testid="late-ready-wait"
+              onClick={() => {
+                bootstrap
+                  .waitForReady()
+                  .then(() => setWaitState("resolved"))
+                  .catch(() => setWaitState("rejected"));
+              }}
+            >
+              Wait
+            </button>
+          </>
+        );
+      };
+
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+          <WaitForReadyProbe />
+        </WagmiSetup>
+      );
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(15_000);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("error");
+
+      await act(async () => {
+        resolveReady();
+        await ready;
+      });
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="appkit-bootstrap-status"]')
+        ).toHaveTextContent("ready");
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-terminal-error"]')
+      ).toHaveTextContent("false");
+
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="late-ready-wait"]')
+          ?.click();
+        await Promise.resolve();
+      });
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="late-ready-wait-state"]')
+        ).toHaveTextContent("resolved");
+      });
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+    });
+
+    it("makes a timed-out bootstrap terminal if AppKit later rejects", async () => {
+      jest.useFakeTimers();
+      let rejectReady!: (error: Error) => void;
+      const ready = new Promise<void>((_resolve, reject) => {
+        rejectReady = reject;
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
+      });
+
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+        </WagmiSetup>
+      );
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(15_000);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-terminal-error"]')
+      ).toHaveTextContent("false");
+
+      const readyError = new Error("late ready failure");
+      await act(async () => {
+        rejectReady(readyError);
+        await ready.catch(() => undefined);
+      });
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="appkit-terminal-error"]')
+        ).toHaveTextContent("true");
       });
       expect(
         container.querySelector('[data-testid="appkit-bootstrap-status"]')

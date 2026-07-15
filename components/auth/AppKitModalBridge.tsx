@@ -71,8 +71,20 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
   };
 
   const fail = (error: Error): void => {
+    if (failure) {
+      return;
+    }
+
     failure = error;
+    openAppKit = null;
+    const stateChanged = snapshot !== EMPTY_APPKIT_MODAL_STATE;
+    snapshot = EMPTY_APPKIT_MODAL_STATE;
     rejectWaiters(error);
+    if (stateChanged) {
+      for (const listener of listeners) {
+        listener();
+      }
+    }
   };
 
   return {
@@ -85,6 +97,10 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
     },
     getSnapshot: () => snapshot,
     setOpen: (nextOpenAppKit) => {
+      if (failure) {
+        return;
+      }
+
       openAppKit = nextOpenAppKit;
       if (!nextOpenAppKit) {
         return;
@@ -98,6 +114,10 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
       }
     },
     setState: (nextState) => {
+      if (failure) {
+        return;
+      }
+
       if (
         snapshot.isOpen === nextState.isOpen &&
         snapshot.walletName === nextState.walletName &&
@@ -119,11 +139,11 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
       };
     },
     waitForOpen: () => {
-      if (openAppKit) {
-        return Promise.resolve(openAppKit);
-      }
       if (failure) {
         return Promise.reject(failure);
+      }
+      if (openAppKit) {
+        return Promise.resolve(openAppKit);
       }
 
       return new Promise((resolve, reject) => {

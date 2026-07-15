@@ -50,4 +50,56 @@ describe("AppKitModalBridge store", () => {
       "Wallet connection services became unavailable"
     );
   });
+
+  it("invalidates a cached handle and state on bootstrap failure", async () => {
+    const store = createAppKitModalBridgeStore();
+    const openAppKit = jest.fn().mockResolvedValue(undefined);
+    store.setOpen(openAppKit);
+    store.setState({
+      isOpen: true,
+      walletName: "Test wallet",
+      walletIcon: undefined,
+      isSafeWallet: false,
+    });
+
+    store.failBootstrap();
+
+    await expect(store.waitForOpen()).rejects.toThrow(
+      "Wallet connection services failed to initialize"
+    );
+    expect(store.getSnapshot()).toEqual({
+      isOpen: false,
+      walletName: undefined,
+      walletIcon: undefined,
+      isSafeWallet: false,
+    });
+
+    store.setOpen(openAppKit);
+    store.setState({
+      isOpen: true,
+      walletName: "Stale wallet",
+      walletIcon: undefined,
+      isSafeWallet: false,
+    });
+    await expect(store.waitForOpen()).rejects.toThrow(
+      "Wallet connection services failed to initialize"
+    );
+    expect(store.getSnapshot().isOpen).toBe(false);
+  });
+
+  it("invalidates a cached handle on disposal", async () => {
+    const store = createAppKitModalBridgeStore();
+    const openAppKit = jest.fn().mockResolvedValue(undefined);
+    store.setOpen(openAppKit);
+
+    store.dispose();
+
+    await expect(store.waitForOpen()).rejects.toThrow(
+      "Wallet connection services became unavailable"
+    );
+    store.setOpen(openAppKit);
+    await expect(store.waitForOpen()).rejects.toThrow(
+      "Wallet connection services became unavailable"
+    );
+  });
 });

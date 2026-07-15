@@ -49,6 +49,7 @@ type WagmiAppKitFastPathSnapshot = {
   readonly adapter: WagmiAdapter | null;
   readonly adapterInitializationStarted: boolean;
   readonly configurationKey: string | null;
+  readonly hasTerminalError: boolean;
   readonly initializationPromise: Promise<void> | null;
   readonly isCreated: boolean;
   readonly status: AppKitBootstrapStatus;
@@ -78,6 +79,7 @@ const EMPTY_FAST_PATH_SNAPSHOT: WagmiAppKitFastPathSnapshot = Object.freeze({
   adapter: null,
   adapterInitializationStarted: false,
   configurationKey: null,
+  hasTerminalError: false,
   initializationPromise: null,
   isCreated: false,
   status: "initializing",
@@ -89,6 +91,17 @@ function getWagmiAppKitFastPathStore(): WagmiAppKitFastPathStore {
     WAGMI_APPKIT_FAST_PATH_STORE_KEY
   ) as WagmiAppKitFastPathStore | undefined;
   if (existingStore) {
+    // Preserve the retained adapter across HMR while safely upgrading stores
+    // created by an earlier module version.
+    if (
+      typeof Reflect.get(existingStore.snapshot, "hasTerminalError") !==
+      "boolean"
+    ) {
+      existingStore.snapshot = {
+        ...existingStore.snapshot,
+        hasTerminalError: existingStore.snapshot.status === "error",
+      };
+    }
     return existingStore;
   }
 
@@ -181,7 +194,10 @@ function createWagmiAdapterOnce(
     updateWagmiAppKitFastPathSnapshot({ adapter });
     return adapter;
   } catch (error) {
-    updateWagmiAppKitFastPathSnapshot({ status: "error" });
+    updateWagmiAppKitFastPathSnapshot({
+      hasTerminalError: true,
+      status: "error",
+    });
     throw error;
   }
 }
@@ -190,18 +206,48 @@ async function runAppKitInitialization(
   initialize: () => Promise<void>
 ): Promise<void> {
   await Promise.resolve();
+  let didTimeout = false;
   let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<never>((_resolve, reject) => {
     timeoutHandle = setTimeout(() => {
+      didTimeout = true;
       reject(new Error(APPKIT_READY_TIMEOUT_MESSAGE));
     }, APPKIT_READY_WAIT_TIMEOUT_MS);
   });
 
   try {
-    await Promise.race([initialize(), timeoutPromise]);
-    updateWagmiAppKitFastPathSnapshot({ status: "ready" });
+    const sdkInitializationPromise = initialize().then(
+      () => {
+        // The caller still receives the bounded timeout rejection, but a
+        // genuine late SDK readiness signal makes future attempts usable.
+        if (didTimeout) {
+          updateWagmiAppKitFastPathSnapshot({
+            hasTerminalError: false,
+            status: "ready",
+          });
+        }
+        return undefined;
+      },
+      (error: unknown) => {
+        if (didTimeout) {
+          updateWagmiAppKitFastPathSnapshot({
+            hasTerminalError: true,
+            status: "error",
+          });
+        }
+        throw error;
+      }
+    );
+    await Promise.race([sdkInitializationPromise, timeoutPromise]);
+    updateWagmiAppKitFastPathSnapshot({
+      hasTerminalError: false,
+      status: "ready",
+    });
   } catch (error) {
-    updateWagmiAppKitFastPathSnapshot({ status: "error" });
+    updateWagmiAppKitFastPathSnapshot({
+      hasTerminalError: !didTimeout,
+      status: "error",
+    });
     throw error;
   } finally {
     clearTimeout(timeoutHandle);
@@ -219,6 +265,9 @@ function startAppKitInitializationOnce(
   }
 
   const snapshot = getWagmiAppKitFastPathSnapshot();
+  if (snapshot.status === "ready") {
+    return Promise.resolve();
+  }
   if (snapshot.initializationPromise) {
     return snapshot.initializationPromise;
   }
@@ -519,7 +568,10 @@ export default function WagmiSetup({
     }
 
     const error = new AppKitValidationError(INTERNAL_API_FAILED_MESSAGE);
-    updateWagmiAppKitFastPathSnapshot({ status: "error" });
+    updateWagmiAppKitFastPathSnapshot({
+      hasTerminalError: true,
+      status: "error",
+    });
     logErrorSecurely("[WagmiSetup] AppKit configuration changed", error);
     showAppKitToast({
       message: sanitizeErrorForUser(error),
@@ -599,6 +651,7 @@ export default function WagmiSetup({
   const appKitBootstrapValue = useMemo(
     (): AppKitBootstrapContextValue => ({
       status: fastPathSnapshot.status,
+      hasTerminalError: fastPathSnapshot.hasTerminalError,
       isCreated: fastPathSnapshot.isCreated,
       isReady: fastPathSnapshot.status === "ready",
       isWaiting: fastPathSnapshot.status === "initializing",

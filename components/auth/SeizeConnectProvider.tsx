@@ -105,6 +105,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const wagmiAccount = useAccount();
   const { disconnect } = useDisconnect();
   const {
+    hasTerminalError: hasTerminalBootstrapError,
     isCreated: isAppKitCreated,
     isReady: isAppKitReady,
     status: appKitBootstrapStatus,
@@ -182,10 +183,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [clearConnectIntentHandoffTimeout]);
 
   useEffect(() => {
-    if (appKitBootstrapStatus === "error") {
+    if (appKitBootstrapStatus === "error" && hasTerminalBootstrapError) {
       appKitModalBridgeStore.failBootstrap();
     }
-  }, [appKitBootstrapStatus, appKitModalBridgeStore]);
+  }, [
+    appKitBootstrapStatus,
+    appKitModalBridgeStore,
+    hasTerminalBootstrapError,
+  ]);
 
   useEffect(
     () => () => {

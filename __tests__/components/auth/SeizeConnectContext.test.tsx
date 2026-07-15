@@ -1573,6 +1573,7 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
       <AppKitBootstrapContext.Provider
         value={{
           status: appKitStatus,
+          hasTerminalError: false,
           isCreated: isAppKitCreated,
           isReady: appKitStatus === "ready",
           isWaiting: appKitStatus === "initializing",
@@ -1642,6 +1643,7 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
       <AppKitBootstrapContext.Provider
         value={{
           status: "initializing",
+          hasTerminalError: false,
           isCreated: isAppKitCreated,
           isReady: false,
           isWaiting: true,
@@ -1753,6 +1755,7 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
       <AppKitBootstrapContext.Provider
         value={{
           status: "ready",
+          hasTerminalError: false,
           isCreated: false,
           isReady: true,
           isWaiting: false,
