@@ -189,6 +189,38 @@ describe("TitleContext", () => {
     await waitFor(() => expect(document.title).toBe("Waves | Brain"));
   });
 
+  it("restores the waves index title when the selected wave is deselected", async () => {
+    const view = render(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness
+          waveData={{
+            id: "wave-1",
+            name: "The Memes - Main Stage",
+            newItemsCount: 0,
+          }}
+        />
+      </TitleProvider>
+    );
+
+    await waitFor(() =>
+      expect(document.title).toBe("The Memes - Main Stage | Brain")
+    );
+
+    mockPathname = "/waves";
+    mockSearchParams = new URLSearchParams();
+    mockActiveWaveId = null;
+
+    view.rerender(
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => expect(document.title).toBe("Waves | Brain"));
+  });
+
   it("uses the discovery route title instead of the profile fallback", async () => {
     mockPathname = "/discover";
     mockSearchParams = new URLSearchParams();

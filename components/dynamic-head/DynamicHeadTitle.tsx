@@ -38,7 +38,17 @@ export default function DynamicHeadTitle() {
         previousObservation !== null &&
         previousObservation.pathname === pathname &&
         previousObservation.title !== normalizedTitle;
-      if (!normalizeDocumentTitle(document.title) || isSameRouteTransition) {
+      const isWaveDeselectionTransition =
+        isTitleForCurrentRoute &&
+        pathname === "/waves" &&
+        previousObservation !== null &&
+        previousObservation.pathname?.startsWith("/waves/") === true &&
+        previousObservation.title !== normalizedTitle;
+      if (
+        !normalizeDocumentTitle(document.title) ||
+        isSameRouteTransition ||
+        isWaveDeselectionTransition
+      ) {
         document.title = normalizedTitle;
       }
       return;
