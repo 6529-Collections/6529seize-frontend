@@ -114,12 +114,11 @@ function AliasEditor({
   const aliasIsValid = /^\w{3,15}$/.test(normalizedAlias);
   const reserved = isReservedMentionAlias(normalizedAlias);
   const aliasHasError = alias.length > 0 && (!aliasIsValid || reserved);
-  const aliasErrorDescription = [
-    !aliasIsValid && alias.length > 0 ? "mention-shortcut-name-error" : null,
-    reserved ? "mention-shortcut-reserved-error" : null,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const aliasErrorDescription = reserved
+    ? "mention-shortcut-reserved-error"
+    : !aliasIsValid && alias.length > 0
+      ? "mention-shortcut-name-error"
+      : undefined;
   const canSave = aliasIsValid && !reserved && members.length > 0;
 
   const mutation = useMutation({
@@ -225,7 +224,7 @@ function AliasEditor({
             id="mention-shortcut-name"
             aria-label={t(locale, "user.mentionShortcuts.name")}
             aria-invalid={aliasHasError}
-            aria-describedby={aliasErrorDescription || undefined}
+            aria-describedby={aliasErrorDescription}
             value={alias}
             onChange={(event) => setAlias(event.target.value)}
             maxLength={15}
@@ -234,7 +233,7 @@ function AliasEditor({
           />
         </div>
       </label>
-      {!aliasIsValid && alias.length > 0 && (
+      {!reserved && !aliasIsValid && alias.length > 0 && (
         <p
           id="mention-shortcut-name-error"
           role="alert"

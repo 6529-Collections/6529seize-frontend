@@ -10,20 +10,23 @@ export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
 
 const createGroupMentionPattern = (group: ApiDropGroupMention) =>
   new RegExp(
-    `(^|[^A-Z0-9_@])(${GROUP_MENTION_TEXT[group]})(?![A-Z0-9_@])`,
-    "gi"
+    `(^|[^\\p{L}\\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\\p{L}\\p{N}_@])`,
+    "giu"
   );
 
 const createGroupMentionMarkPattern = (group: ApiDropGroupMention) =>
   new RegExp(
-    `(?<![A-Z0-9_@])(${GROUP_MENTION_TEXT[group]})(?![A-Z0-9_@])`,
-    "gi"
+    `(?<![\\p{L}\\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\\p{L}\\p{N}_@])`,
+    "giu"
   );
 
 export const getMentionedGroupsFromText = (
   content: string,
   canMentionAll: boolean
 ): ApiDropGroupMention[] =>
+  // @all keeps its creator/admin permission gate. The other platform-managed
+  // groups are intentionally available to any author who can post; the API
+  // resolves recipients against the wave's visibility and access groups.
   Object.values(ApiDropGroupMention).filter(
     (group) =>
       (group !== ApiDropGroupMention.All || canMentionAll) &&

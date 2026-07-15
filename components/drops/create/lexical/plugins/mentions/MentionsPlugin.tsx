@@ -194,7 +194,6 @@ export interface MentionAliasExpansionResult {
 }
 
 const ALIAS_TOKEN_PATTERN = /(^|[^\w@])@(\w{3,15})(?=$|[^\w@])/g;
-const ALIAS_TOKEN_TEST_PATTERN = /(^|[^\w@])@\w{3,15}(?=$|[^\w@])/;
 
 const isInsideCodeOrLink = (node: LexicalNode): boolean => {
   let parent = node.getParent();
@@ -283,8 +282,9 @@ const buildAliasReplacementNodes = ({
   readonly aliasesByName: ReadonlyMap<string, MentionAlias>;
   readonly existingHandles: Set<string>;
   readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
-}): TextNode[] => {
+}): { readonly expanded: boolean; readonly nodes: TextNode[] } => {
   const replacementNodes: TextNode[] = [];
+  let expanded = false;
   let cursor = 0;
   for (const match of text.matchAll(ALIAS_TOKEN_PATTERN)) {
     const fullMatch = match[0];
@@ -292,6 +292,7 @@ const buildAliasReplacementNodes = ({
     const aliasName = (match[2] ?? "").toLowerCase();
     const alias = aliasesByName.get(aliasName);
     if (!alias) continue;
+    expanded = true;
     const matchStart = match.index;
     const tokenStart = matchStart + prefix.length;
     if (tokenStart > cursor) {
@@ -309,10 +310,10 @@ const buildAliasReplacementNodes = ({
     );
     cursor = matchStart + fullMatch.length;
   }
-  if (cursor < text.length) {
+  if (expanded && cursor < text.length) {
     replacementNodes.push($createTextNode(text.slice(cursor)));
   }
-  return replacementNodes;
+  return { expanded, nodes: replacementNodes };
 };
 
 const expandAliasTextNodes = ({
@@ -332,22 +333,15 @@ const expandAliasTextNodes = ({
         $isTextNode(node) && !$isMentionNode(node) && !isInsideCodeOrLink(node)
     );
   for (const textNode of textNodes) {
-    const text = textNode.getTextContent();
-    if (!ALIAS_TOKEN_TEST_PATTERN.test(text)) continue;
-    const hasKnownAlias = Array.from(text.matchAll(ALIAS_TOKEN_PATTERN)).some(
-      (match) => aliasesByName.has((match[2] ?? "").toLowerCase())
-    );
-    if (!hasKnownAlias) continue;
+    const replacement = buildAliasReplacementNodes({
+      text: textNode.getTextContent(),
+      aliasesByName,
+      existingHandles,
+      onSelect,
+    });
+    if (!replacement.expanded) continue;
     expanded = true;
-    replaceTextNode(
-      textNode,
-      buildAliasReplacementNodes({
-        text,
-        aliasesByName,
-        existingHandles,
-        onSelect,
-      })
-    );
+    replaceTextNode(textNode, replacement.nodes);
   }
   return expanded;
 };

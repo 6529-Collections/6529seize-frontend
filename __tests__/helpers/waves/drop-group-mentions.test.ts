@@ -44,6 +44,7 @@ describe("drop group mentions", () => {
         true
       )
     ).toEqual([]);
+    expect(getMentionedGroupsFromText("café@admins", true)).toEqual([]);
   });
 
   it("marks adjacent mentions of the same group", () => {

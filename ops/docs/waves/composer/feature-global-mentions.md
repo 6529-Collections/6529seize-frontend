@@ -35,6 +35,9 @@ Wave creators and admins can also use `@all`.
 ## Edge Cases
 
 - Global names work with any capitalization, such as `@Contributors`.
+- Typing a complete token directly has the same effect as choosing it from the
+  suggestion menu; Chat access is the invocation requirement for
+  `@contributors`, `@admins`, and `@devs6529`.
 - A profile included by more than one mention is notified only once.
 - The message author is not notified by their own global mention.
 - Muted profiles and profiles that cannot view the Wave are excluded.
@@ -49,6 +52,8 @@ specific profiles directly.
 
 Global names are reserved and cannot be used for personal mention shortcuts.
 Personal shortcuts expand inline into profile handles; global mentions do not.
+Editing a message updates which global tokens are stored with its content, but
+does not resend permission-group notifications.
 
 ## Related Pages
 

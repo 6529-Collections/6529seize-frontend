@@ -4357,6 +4357,8 @@
         "The special @all group mention can submit mentioned_groups metadata when the current wave/drop context allows mentioning all.",
         "The case-insensitive @contributors mention targets profiles with Chat access, while @admins targets the Wave creator and profiles with Admin access.",
         "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
+        "Any profile with Chat access can invoke @contributors, @admins, or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
+        "Editing stored global-mention tokens does not resend permission-group notifications.",
         "Global mentions stay visible in posted content; personal mention shortcuts expand into individual profile mentions before submission.",
         "Profiles can create private Mention shortcuts from their own profile; a shortcut such as @frens expands inline into ordinary profile mentions.",
         "Personal mention shortcuts are case-insensitive, cannot use reserved global mention names, and are not stored in the posted drop after expansion.",
