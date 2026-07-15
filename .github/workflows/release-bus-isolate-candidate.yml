@@ -58,17 +58,20 @@ jobs:
 
   reproduce:
     needs: authorize
-    permissions:
-      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
       - name: Check out exact base
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          ref: ${{ inputs.base_sha }}
-          fetch-depth: 0
-          persist-credentials: false
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git init .
+          git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
+          git fetch --no-tags origin "$BASE_SHA"
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
       - name: Install Socket Firewall
         id: socket-firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
