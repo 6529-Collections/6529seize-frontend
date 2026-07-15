@@ -74,6 +74,22 @@ const baseTr = {
 } as any;
 
 describe("LatestActivityRow", () => {
+  it("applies striped Tailwind row styling", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LatestActivityRow tr={baseTr} />
+        </tbody>
+      </table>
+    );
+
+    expect(container.querySelector("tr")).toHaveClass(
+      "odd:tw-bg-transparent",
+      "even:tw-bg-iron-900/45",
+      "hover:tw-bg-iron-900/70"
+    );
+  });
+
   it("uses burn icon when to address is null", () => {
     render(
       <table>
