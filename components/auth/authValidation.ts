@@ -1,6 +1,12 @@
-import { getAuthJwt, removeAuthJwt } from "@/services/auth/auth.utils";
+import {
+  getAuthJwt,
+  hasActiveSessionV2Auth,
+  removeAuthJwt,
+} from "@/services/auth/auth.utils";
+import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import {
+  resetAuthSessionRefreshProductImpactDedupe,
   trackAuthSessionRefreshProductImpact,
   trackAuthSessionRefreshSucceeded,
   trackAuthValidationCancelled,
@@ -19,6 +25,36 @@ type ImmediateAuthValidationResult = Awaited<
   ReturnType<typeof validateAuthImmediate>
 >;
 
+export const getAuthTerminalTransitionScope = ({
+  activeProfileProxyId,
+  authJwt,
+  authRolloutSettings,
+  canSignActiveWallet,
+  currentAddress,
+  hasActiveWalletAddress,
+  hasSessionV2Auth,
+}: {
+  readonly activeProfileProxyId: string | null;
+  readonly authJwt: string | null;
+  readonly authRolloutSettings: RunImmediateAuthValidationParams["authRolloutSettings"];
+  readonly canSignActiveWallet: boolean;
+  readonly currentAddress: string;
+  readonly hasActiveWalletAddress: boolean;
+  readonly hasSessionV2Auth: boolean;
+}): string =>
+  getAuthTokenFingerprint(
+    [
+      currentAddress.toLowerCase(),
+      getAuthTokenFingerprint(authJwt),
+      activeProfileProxyId ?? "none",
+      authRolloutSettings.structuredSignaturesRequired,
+      authRolloutSettings.sessionV2MigrationDeadline ?? "none",
+      canSignActiveWallet,
+      hasActiveWalletAddress,
+      hasSessionV2Auth,
+    ].join(":")
+  );
+
 const isCurrentValidationOperation = ({
   latestAddressRef,
   activeValidationOperationIdRef,
@@ -35,10 +71,12 @@ const isCurrentValidationOperation = ({
 
 const trackImmediateAuthValidationTelemetry = ({
   result,
+  dedupeScope,
   hadLocalJwt,
   hasActiveWalletAddress,
 }: {
   readonly result: ImmediateAuthValidationResult;
+  readonly dedupeScope: string;
   readonly hadLocalJwt: boolean;
   readonly hasActiveWalletAddress: boolean;
 }): void => {
@@ -55,22 +93,24 @@ const trackImmediateAuthValidationTelemetry = ({
   }
 
   if (result.isValid) {
+    if (refreshOutcome === "local_valid_after_failure") {
+      trackAuthSessionRefreshProductImpact({
+        clientType,
+        dedupeScope,
+        hadLocalJwt,
+        outcome: "failed_without_prompt",
+        refreshOutcome,
+        requiresReauth: false,
+      });
+      return;
+    }
+
+    resetAuthSessionRefreshProductImpactDedupe(dedupeScope);
     if (refreshOutcome === "success") {
       trackAuthSessionRefreshSucceeded({
         clientType,
         hadLocalJwt,
         refreshOutcome,
-      });
-      return;
-    }
-
-    if (refreshOutcome === "local_valid_after_failure") {
-      trackAuthSessionRefreshProductImpact({
-        clientType,
-        hadLocalJwt,
-        outcome: "failed_without_prompt",
-        refreshOutcome,
-        requiresReauth: false,
       });
     }
     return;
@@ -79,6 +119,7 @@ const trackImmediateAuthValidationTelemetry = ({
   if (result.requiresSessionUpgrade) {
     trackAuthSessionRefreshProductImpact({
       clientType,
+      dedupeScope,
       hadLocalJwt,
       outcome: "session_upgrade_required",
       refreshOutcome,
@@ -90,6 +131,7 @@ const trackImmediateAuthValidationTelemetry = ({
   if (result.shouldShowModal) {
     trackAuthSessionRefreshProductImpact({
       clientType,
+      dedupeScope,
       hadLocalJwt,
       outcome: "reauth_required",
       refreshOutcome,
@@ -101,6 +143,7 @@ const trackImmediateAuthValidationTelemetry = ({
   if (!hasActiveWalletAddress) {
     trackAuthSessionRefreshProductImpact({
       clientType,
+      dedupeScope,
       hadLocalJwt,
       outcome: "logout_required",
       refreshOutcome,
@@ -112,6 +155,7 @@ const trackImmediateAuthValidationTelemetry = ({
   if (refreshOutcome !== "not_attempted") {
     trackAuthSessionRefreshProductImpact({
       clientType,
+      dedupeScope,
       hadLocalJwt,
       outcome: "failed_without_prompt",
       refreshOutcome,
@@ -126,6 +170,7 @@ export const runImmediateAuthValidation = async ({
   latestAddressRef,
   activeValidationOperationIdRef,
   abortControllerRef,
+  terminalAuthTransitionScopeRef,
   activeProfileProxy,
   hasActiveWalletAddress,
   canSignActiveWallet,
@@ -158,8 +203,29 @@ export const runImmediateAuthValidation = async ({
   setAuthLoadingState("validating");
   const authJwt = getAuthJwt();
   const hadLocalJwt = Boolean(authJwt);
+  const terminalAuthTransitionScope = getAuthTerminalTransitionScope({
+    activeProfileProxyId: activeProfileProxy?.id ?? null,
+    authJwt,
+    authRolloutSettings,
+    canSignActiveWallet,
+    currentAddress,
+    hasActiveWalletAddress,
+    hasSessionV2Auth: hasActiveSessionV2Auth({ address: currentAddress }),
+  });
+  const telemetryDedupeScope = terminalAuthTransitionScope;
+
+  const beginTerminalAuthTransition = (): boolean => {
+    if (terminalAuthTransitionScopeRef.current === terminalAuthTransitionScope) {
+      return false;
+    }
+    terminalAuthTransitionScopeRef.current = terminalAuthTransitionScope;
+    return true;
+  };
 
   const markSessionUpgradeRequired = () => {
+    if (!beginTerminalAuthTransition()) {
+      return;
+    }
     resetSessionUpgradeExpiryDedupe(currentAddress);
     setSessionUpgradeRequired(true);
     if (!hasSessionUpgradeRollout(authRolloutSettings)) {
@@ -199,8 +265,25 @@ export const runImmediateAuthValidation = async ({
             onShowSignModal: setShowSignModal,
             onSessionUpgradeRequired: markSessionUpgradeRequired,
             onInvalidateCache: invalidateAll,
-            onReset: reset,
-            onRemoveJwt: () => removeAuthJwt(),
+            onReset: () => {
+              if (beginTerminalAuthTransition()) {
+                reset();
+              }
+            },
+            onRemoveJwt: () => {
+              if (!beginTerminalAuthTransition()) {
+                return;
+              }
+              return removeAuthJwt().catch((error: unknown) => {
+                if (
+                  terminalAuthTransitionScopeRef.current ===
+                  terminalAuthTransitionScope
+                ) {
+                  terminalAuthTransitionScopeRef.current = null;
+                }
+                throw error;
+              });
+            },
             onLogError: logErrorSecurely,
           },
         })
@@ -209,6 +292,7 @@ export const runImmediateAuthValidation = async ({
     if (result.wasCancelled) {
       trackImmediateAuthValidationTelemetry({
         result,
+        dedupeScope: telemetryDedupeScope,
         hadLocalJwt,
         hasActiveWalletAddress,
       });
@@ -228,9 +312,16 @@ export const runImmediateAuthValidation = async ({
 
     trackImmediateAuthValidationTelemetry({
       result,
+      dedupeScope: telemetryDedupeScope,
       hadLocalJwt,
       hasActiveWalletAddress,
     });
+    if (
+      result.isValid &&
+      terminalAuthTransitionScopeRef.current === terminalAuthTransitionScope
+    ) {
+      terminalAuthTransitionScopeRef.current = null;
+    }
   } finally {
     if (
       abortControllerRef.current === abortController &&

@@ -1,6 +1,6 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 
 const useQueryMock = jest.fn();
 const getQueryDataMock = jest.fn();
@@ -94,7 +94,7 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     );
   });
 
-  it("does not retry unauthorized connected-account notification failures", () => {
+  it("does not retry terminal connected-account notification failures", () => {
     useQueryMock.mockReturnValue({ data: {} });
 
     renderHook(() =>
@@ -112,10 +112,12 @@ describe("useConnectedAccountsUnreadNotifications", () => {
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
     expect(queryOptions.retry(0, { status: 401 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 403 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 503 })).toBe(true);
   });
 
-  it("surfaces unauthorized connected-account failures instead of hiding them as successful polling", async () => {
-    commonApiFetchMock.mockRejectedValue({ status: 401 });
+  it("surfaces terminal connected-account failures instead of hiding them as successful polling", async () => {
+    commonApiFetchMock.mockRejectedValue({ status: 403 });
     useQueryMock.mockReturnValue({ data: {} });
 
     renderHook(() =>
@@ -132,7 +134,91 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     );
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(queryOptions.queryFn()).rejects.toMatchObject({ status: 401 });
+    await expect(queryOptions.queryFn()).rejects.toMatchObject({
+      status: 403,
+      terminalNotificationAuth: true,
+    });
+  });
+
+  it("keeps transient connected-account failures best-effort", async () => {
+    commonApiFetchMock.mockRejectedValue({ status: 503 });
+    getQueryDataMock.mockReturnValue({
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
+    });
+    useQueryMock.mockReturnValue({ data: {} });
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token",
+          role: null,
+          jwt: "jwt-token",
+          profileId: null,
+          profileHandle: "alice",
+        },
+      ])
+    );
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    await expect(queryOptions.queryFn()).resolves.toEqual({
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
+    });
+  });
+
+  it("blocks only the failed account until that account gets a new token", async () => {
+    const accounts = [
+      {
+        address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        refreshToken: "refresh-token-a",
+        role: null,
+        jwt: "jwt-a",
+        profileId: null,
+        profileHandle: "alice",
+      },
+      {
+        address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        refreshToken: "refresh-token-b",
+        role: null,
+        jwt: "jwt-b",
+        profileId: null,
+        profileHandle: "bob",
+      },
+    ];
+    commonApiFetchMock
+      .mockRejectedValueOnce({ status: 403 })
+      .mockResolvedValueOnce({ unread_count: 2 });
+    useQueryMock.mockReturnValue({ data: {} });
+
+    const { rerender } = renderHook(
+      ({ connectedAccounts }) =>
+        useConnectedAccountsUnreadNotifications(connectedAccounts),
+      { initialProps: { connectedAccounts: accounts } }
+    );
+
+    const firstQueryOptions = useQueryMock.mock.calls[0]?.[0];
+    const terminalError = await firstQueryOptions.queryFn().catch(
+      (error: unknown) => error
+    );
+    act(() => {
+      expect(firstQueryOptions.retry(0, terminalError)).toBe(false);
+    });
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].queryKey.at(-1)).toEqual([
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]);
+
+    rerender({
+      connectedAccounts: [
+        { ...accounts[0], jwt: "jwt-a-after-reauth" },
+        accounts[1],
+      ],
+    });
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].queryKey.at(-1)).toEqual([
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]);
   });
 
   it("blocks connected-account fetches when the JWT expires between renders", async () => {

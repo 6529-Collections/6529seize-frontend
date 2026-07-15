@@ -22,6 +22,7 @@ const mockRouterPush = jest.fn();
 const mockUsePathname = jest.fn(() => "/");
 const mockTrackAuthSessionRefreshProductImpact = jest.fn();
 const mockTrackAuthSessionRefreshSucceeded = jest.fn();
+const mockResetAuthSessionRefreshProductImpactDedupe = jest.fn();
 const mockTrackAuthValidationCancelled = jest.fn();
 const mockTrackAuthImpactEvent = jest.fn();
 
@@ -175,6 +176,11 @@ jest.mock("@/services/auth/immediate-validation.utils", () => ({
 }));
 
 jest.mock("@/services/analytics/productImpactTelemetry", () => ({
+  resetAuthSessionRefreshProductImpactDedupe: (
+    ...args: Parameters<
+      typeof mockResetAuthSessionRefreshProductImpactDedupe
+    >
+  ) => mockResetAuthSessionRefreshProductImpactDedupe(...args),
   trackAuthSessionRefreshProductImpact: (
     ...args: Parameters<typeof mockTrackAuthSessionRefreshProductImpact>
   ) => mockTrackAuthSessionRefreshProductImpact(...args),
@@ -1260,6 +1266,9 @@ describe("Auth component", () => {
         });
       });
       expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
+      expect(
+        mockResetAuthSessionRefreshProductImpactDedupe
+      ).toHaveBeenCalledWith(expect.any(String));
     });
 
     it("treats an empty local jwt as absent in auth validation telemetry", async () => {
@@ -1317,6 +1326,7 @@ describe("Auth component", () => {
       await waitFor(() => {
         expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledWith({
           clientType: "web",
+          dedupeScope: expect.any(String),
           hadLocalJwt: true,
           outcome: "reauth_required",
           refreshOutcome: "empty",
@@ -1969,6 +1979,26 @@ describe("Auth component", () => {
         reason: "session_upgrade_required",
         route_pattern: "/",
         was_connected_wallet: true,
+      });
+      expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        window.dispatchEvent(new Event("6529-wallet-accounts-updated"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+      });
+
+      const mockGetAuthJwt = require("@/services/auth/auth.utils")
+        .getAuthJwt as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("reauthenticated-jwt");
+      act(() => {
+        window.dispatchEvent(new Event("6529-auth-token-changed"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
       });
 
       rerender(
