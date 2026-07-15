@@ -18,6 +18,7 @@ const mockFetch = jest.fn();
 const mockManifoldReadContract = (
   jest.requireMock("viem") as { __mockReadContract: jest.Mock }
 ).__mockReadContract;
+const THE_MEMES_MINT_DATE = "2026-06-15T09:23:23.000Z";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return {
@@ -58,7 +59,7 @@ function setStagingApiKeyForTest(value: string | undefined): void {
   publicEnv["STAGING_API_KEY"] = value;
 }
 
-function mockFreshTheMemesLiveCountApis(): void {
+function mockLiveTheMemesApis(): void {
   mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
     const url = readFetchUrl(input);
 
@@ -69,10 +70,11 @@ function mockFreshTheMemesLiveCountApis(): void {
             id: 509,
             name: "The Collective Synapse",
             supply: 173,
+            edition_size_floor: 310,
             artist: "elnaz555",
             artist_seize_handle: "elnaz555",
             hodl_rate: 22.7803,
-            mint_date: "2026-06-15T09:23:23.000Z",
+            mint_date: THE_MEMES_MINT_DATE,
             thumbnail: "https://cdn.6529.io/memes/509.png",
             metadata: {
               attributes: [{ trait_type: "Type - Season", value: 15 }],
@@ -84,7 +86,14 @@ function mockFreshTheMemesLiveCountApis(): void {
 
     if (url.pathname === "/api/memes_extended_data") {
       return jsonResponse({
-        data: [{ id: 509, edition_size: 173, season: 15 }],
+        data: [
+          {
+            id: 509,
+            edition_size: 173,
+            season: 15,
+            recorded_in_tdh: false,
+          },
+        ],
       });
     }
 
@@ -94,7 +103,7 @@ function mockFreshTheMemesLiveCountApis(): void {
 
     if (url.pathname === "/api/memes-mint-stats/509") {
       return jsonResponse({
-        mint_date: "2026-06-15T09:23:23.000Z",
+        mint_date: THE_MEMES_MINT_DATE,
         total_count: 94,
       });
     }
@@ -111,6 +120,7 @@ function productionTheMemesResponse(url: URL): Response | null {
           id: 509,
           name: "The Collective Synapse",
           supply: 173,
+          edition_size_floor: 310,
           artist: "elnaz555",
           artist_seize_handle: "elnaz555",
           hodl_rate: 22.7803,
@@ -126,7 +136,14 @@ function productionTheMemesResponse(url: URL): Response | null {
 
   if (url.pathname === "/api/memes_extended_data") {
     return jsonResponse({
-      data: [{ id: 509, edition_size: 173, season: 15 }],
+      data: [
+        {
+          id: 509,
+          edition_size: 173,
+          season: 15,
+          recorded_in_tdh: true,
+        },
+      ],
     });
   }
 
@@ -246,8 +263,10 @@ describe("createFirstParty6529Plan", () => {
         `https://api.test/api/nfts?contract=${MEMES_CONTRACT}&id=509`,
         "https://api.test/api/memes_extended_data?id=509",
         `https://api.test/api/minting-claims/${MEMES_CONTRACT}/claims/509`,
-        "https://api.test/api/memes-mint-stats/509",
       ])
+    );
+    expect(fetchUrls).not.toContain(
+      "https://api.test/api/memes-mint-stats/509"
     );
     expect(data).toMatchObject({
       type: "6529.collection",
@@ -261,14 +280,14 @@ describe("createFirstParty6529Plan", () => {
       },
     });
     expect(data.facts).toEqual([
-      { label: "Edition size", value: "328" },
+      { label: "Edition size", value: "158" },
       { label: "TDH rate", value: "25.1" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "1 Jun 2026" },
     ]);
   });
 
-  it("uses The Memes claim edition size when the server can fetch claims", async () => {
+  it("uses actual edition size after TDH finalization instead of claim max", async () => {
     let claimAuthHeader: string | null = null;
 
     mockFetch.mockImplementation(async (input: RequestInfo | URL, init) => {
@@ -282,6 +301,7 @@ describe("createFirstParty6529Plan", () => {
               id: 509,
               name: "The Collective Synapse",
               supply: 173,
+              edition_size_floor: 310,
               artist: "elnaz555",
               artist_seize_handle: "elnaz555",
               hodl_rate: 22.7803,
@@ -297,7 +317,14 @@ describe("createFirstParty6529Plan", () => {
 
       if (url.pathname === "/api/memes_extended_data") {
         return jsonResponse({
-          data: [{ id: 509, edition_size: 173, season: 15 }],
+          data: [
+            {
+              id: 509,
+              edition_size: 173,
+              season: 15,
+              recorded_in_tdh: true,
+            },
+          ],
         });
       }
 
@@ -327,7 +354,7 @@ describe("createFirstParty6529Plan", () => {
     expect(claimAuthHeader).toBeNull();
     expect(mockManifoldReadContract).not.toHaveBeenCalled();
     expect(data.facts).toEqual([
-      { label: "Edition size", value: "328" },
+      { label: "Edition size", value: "310" },
       { label: "TDH rate", value: "22.78" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
@@ -400,7 +427,7 @@ describe("createFirstParty6529Plan", () => {
         totalMax: 328,
       },
     ]);
-    mockFreshTheMemesLiveCountApis();
+    mockLiveTheMemesApis();
 
     const plan = createFirstParty6529Plan(
       new URL("https://6529.io/the-memes/509")
@@ -415,9 +442,76 @@ describe("createFirstParty6529Plan", () => {
     );
     expect(data.facts).toEqual([
       { label: "Edition size", value: "328" },
-      { label: "TDH rate", value: "22.78" },
+      { label: "TDH rate", value: "Pending" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
+    ]);
+  });
+
+  it("does not use finalized primary-sale mint stats as edition size", async () => {
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.pathname === "/api/nfts") {
+        return jsonResponse({
+          data: [
+            {
+              id: 421,
+              name: "inception",
+              supply: 310,
+              edition_size_floor: 310,
+              artist: "akc",
+              hodl_rate: 12.7129,
+              mint_date: "2025-11-03T10:13:59.000Z",
+              thumbnail: "https://cdn.6529.io/memes/421.gif",
+              metadata: {
+                attributes: [{ trait_type: "Type - Season", value: 13 }],
+              },
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === "/api/memes_extended_data") {
+        return jsonResponse({
+          data: [
+            {
+              id: 421,
+              edition_size: 310,
+              season: 13,
+              recorded_in_tdh: true,
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/421`) {
+        return jsonResponse({ message: "Unauthorized" }, 401);
+      }
+
+      if (url.pathname === "/api/memes-mint-stats/421") {
+        return jsonResponse({ total_count: 112 });
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/421")
+    );
+    const { data } = await plan!.execute();
+
+    expect(mockManifoldReadContract).not.toHaveBeenCalled();
+    expect(
+      mockFetch.mock.calls.some(
+        (call) => readFetchUrl(call[0]).pathname === "/api/memes-mint-stats/421"
+      )
+    ).toBe(false);
+    expect(data.facts).toEqual([
+      { label: "Edition size", value: "310" },
+      { label: "TDH rate", value: "12.71" },
+      { label: "Season", value: "13" },
+      { label: "Mint date", value: "3 Nov 2025" },
     ]);
   });
 
@@ -464,7 +558,7 @@ describe("createFirstParty6529Plan", () => {
         headers: { accept: "application/json" },
       })
     );
-    expect(productionFallbackAuthHeaders).toEqual([null, null, null, null]);
+    expect(productionFallbackAuthHeaders).toEqual([null, null, null]);
     expect(data).toMatchObject({
       type: "6529.collection",
       kind: "the-memes",
@@ -472,7 +566,7 @@ describe("createFirstParty6529Plan", () => {
       kicker: "The Memes #509",
     });
     expect(data.facts).toEqual([
-      { label: "Edition size", value: "328" },
+      { label: "Edition size", value: "310" },
       { label: "TDH rate", value: "22.78" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
@@ -505,7 +599,7 @@ describe("createFirstParty6529Plan", () => {
     const { data } = await plan!.execute();
 
     expect(data.facts).toEqual([
-      { label: "Edition size", value: "328" },
+      { label: "Edition size", value: "310" },
       { label: "TDH rate", value: "22.78" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
@@ -539,7 +633,7 @@ describe("createFirstParty6529Plan", () => {
 
     expect(data.title).toBe("The Collective Synapse");
     expect(data.facts).toEqual([
-      { label: "Edition size", value: "328" },
+      { label: "Edition size", value: "310" },
       { label: "TDH rate", value: "22.78" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
@@ -598,12 +692,7 @@ describe("createFirstParty6529Plan", () => {
     const fetchHosts = mockFetch.mock.calls.map(
       (call) => readFetchUrl(call[0]).host
     );
-    expect(fetchHosts).toEqual([
-      "api.6529.io",
-      "api.6529.io",
-      "api.6529.io",
-      "api.6529.io",
-    ]);
+    expect(fetchHosts).toEqual(["api.6529.io", "api.6529.io", "api.6529.io"]);
   });
 
   it("tries the production fallback for primary server errors", async () => {
@@ -633,7 +722,7 @@ describe("createFirstParty6529Plan", () => {
 
   it("does not label live The Memes counts when Manifold fallback fails", async () => {
     mockManifoldReadContract.mockRejectedValue(new Error("RPC unavailable"));
-    mockFreshTheMemesLiveCountApis();
+    mockLiveTheMemesApis();
 
     const plan = createFirstParty6529Plan(
       new URL("https://6529.io/the-memes/509")
@@ -647,7 +736,7 @@ describe("createFirstParty6529Plan", () => {
       })
     );
     expect(data.facts).toEqual([
-      { label: "TDH rate", value: "22.78" },
+      { label: "TDH rate", value: "Pending" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
     ]);
@@ -655,7 +744,7 @@ describe("createFirstParty6529Plan", () => {
 
   it("ignores malformed Manifold edition-size responses", async () => {
     mockManifoldReadContract.mockResolvedValue({ claim: { totalMax: "soon" } });
-    mockFreshTheMemesLiveCountApis();
+    mockLiveTheMemesApis();
 
     const plan = createFirstParty6529Plan(
       new URL("https://6529.io/the-memes/509")
@@ -663,7 +752,7 @@ describe("createFirstParty6529Plan", () => {
     const { data } = await plan!.execute();
 
     expect(data.facts).toEqual([
-      { label: "TDH rate", value: "22.78" },
+      { label: "TDH rate", value: "Pending" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
     ]);
@@ -698,7 +787,7 @@ describe("createFirstParty6529Plan", () => {
     expect(stagingPlan?.cacheKey).toBe("6529:staging:the-memes:/the-memes/509");
   });
 
-  it("does not label fresh public supply as The Memes edition size", async () => {
+  it("uses actual supply when TDH lifecycle state is unavailable", async () => {
     mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
       const url = readFetchUrl(input);
 
@@ -745,6 +834,7 @@ describe("createFirstParty6529Plan", () => {
     const { data } = await plan!.execute();
 
     expect(data.facts).toEqual([
+      { label: "Edition size", value: "173" },
       { label: "TDH rate", value: "22.78" },
       { label: "Season", value: "15" },
       {

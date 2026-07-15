@@ -50,10 +50,12 @@ such as `158/328`.
   - `Season {x}`
   - `Mint date {date}` when available
 
-Edition size should prefer claim edition size, then guarded mint stats, then
-guarded public extended edition size. The card does not render live mint
-progress fractions such as `158/328`, and it does not label current minted
-supply as final edition size.
+When extended data explicitly reports `recorded_in_tdh: false`, the Meme is
+still live and the card advertises Manifold `totalMax`. Once it is recorded in
+TDH, the card mirrors the backend calculation edition size:
+`max(actual edition size, edition_size_floor)`. Legacy or unknown TDH state
+also uses that finalized calculation as the safer fallback. Mint-stat totals
+are primary-sale accounting and are not edition-size inputs.
 
 ### Meme Lab
 
