@@ -332,6 +332,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
     activeWaveId,
     getData: waveMessagesStore.getData,
+    hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
     updateData: waveMessagesStore.updateData,
     registerWave,
     syncNewestMessages,

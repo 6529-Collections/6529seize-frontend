@@ -178,6 +178,26 @@ describe("renderWavesPageContent data paths", () => {
     expect(prefetchInfiniteQuery).not.toHaveBeenCalled();
   });
 
+  it("uses the messages route family for an accessible DM feed", async () => {
+    const directMessageWave = {
+      ...wave,
+      chat: { scope: { group: { is_direct_message: true } } },
+    } as ApiWave;
+    (commonApiFetch as jest.Mock).mockResolvedValue(directMessageWave);
+
+    await renderWavesPageContent({
+      waveId: directMessageWave.id,
+      searchParams: {},
+      routeContext: "messages",
+    });
+
+    expect(mockFetchServerWaveFeedSeed).toHaveBeenCalledWith({
+      headers: { Authorization: "Bearer token" },
+      routeFamily: "/messages/[wave]",
+      waveId: directMessageWave.id,
+    });
+  });
+
   it("starts the feed for an accessible group wave only after metadata visibility is known", async () => {
     const groupWave = {
       ...wave,

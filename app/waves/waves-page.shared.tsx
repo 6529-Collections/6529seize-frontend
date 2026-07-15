@@ -266,11 +266,13 @@ export async function renderWavesPageContent({
     queryClient.setQueryData(getWaveQueryKey(context.waveId), context.wave);
   }
 
+  const initialFeedRouteFamily =
+    routeContext === "messages" ? "/messages/[wave]" : "/waves/[wave]";
   const initialFeedPromise =
     context.waveId && context.wave
       ? fetchServerWaveFeedSeed({
           headers: context.headers,
-          routeFamily: "/waves/[wave]",
+          routeFamily: initialFeedRouteFamily,
           waveId: context.waveId,
         })
       : null;

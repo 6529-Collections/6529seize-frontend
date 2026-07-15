@@ -446,6 +446,47 @@ describe("useWaveMessagesStore", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
+  it("does not replay queued old-profile updates after seed invalidation", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const seedPromise = Promise.resolve({
+      ok: false,
+      waveId: "wave1",
+    } as const);
+    const oldProfileDrop = {
+      ...baseDrop,
+      title: "old-profile update",
+    };
+    const queueSentinel = {
+      ...baseDrop,
+      id: "queue-sentinel",
+      wave: { id: "sentinel-wave" },
+    };
+
+    act(() => {
+      result.current.registerPendingServerFeedSeed("wave1", seedPromise);
+      result.current.updateData({
+        key: "queue-blocker",
+        drops: [],
+      } as any);
+      result.current.updateData({
+        key: "wave1",
+        drops: [oldProfileDrop],
+      } as any);
+      result.current.updateData({
+        key: "sentinel-wave",
+        drops: [queueSentinel],
+      } as any);
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    await waitFor(() =>
+      expect(result.current.getData("sentinel-wave")?.drops[0]?.id).toBe(
+        "queue-sentinel"
+      )
+    );
+    expect(result.current.getData("wave1")).toBeUndefined();
+  });
+
   it("clears already seeded data on profile switch before a current-auth refresh", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
