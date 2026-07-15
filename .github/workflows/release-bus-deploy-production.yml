@@ -1,0 +1,224 @@
+name: Release Bus - Deploy Frontend Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_train_id: { type: string, required: true }
+      release_train_revision: { type: string, required: true }
+      operation_key: { type: string, required: true }
+      source_ref: { type: string, required: true }
+      expected_sha: { type: string, required: true }
+      artifact_run_id: { type: string, required: true }
+
+permissions:
+  actions: read
+  contents: read
+
+run-name: Deploy frontend production train ${{ inputs.release_train_id }} [${{ inputs.operation_key }}]
+
+concurrency:
+  group: web-deploy-prod
+  cancel-in-progress: false
+
+env:
+  AWS_BUCKET: seize-web
+  AWS_REGION: us-east-1
+  BEANSTALK_APP_NAME: seize app
+  BEANSTALK_ENV_NAME: seizeapp-env-node22
+  ANNOUNCED_VERSION_OBJECT_KEY: web_build/current-production-version.json
+  ANNOUNCED_VERSION_ENDPOINT: https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    env:
+      ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+      EXPECTED_SHA: ${{ inputs.expected_sha }}
+      OPERATION_KEY: ${{ inputs.operation_key }}
+      SOURCE_REF: ${{ inputs.source_ref }}
+      TRAIN_ID: ${{ inputs.release_train_id }}
+      TRAIN_REVISION: ${{ inputs.release_train_revision }}
+    steps:
+      - name: Validate dispatch inputs before using credentials
+        env:
+          ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          SOURCE_REF: ${{ inputs.source_ref }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
+      - name: Check out exact merged train SHA
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.expected_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirm immutable source is current main
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git fetch --no-tags origin main
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+      - name: Download immutable preflight artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.artifact_run_id }}
+          name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-production
+          path: release-bus-artifact
+      - name: Verify and bind immutable artifact
+        id: artifact
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd release-bus-artifact
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          jq -e \
+            --arg train_id "$TRAIN_ID" \
+            --arg source_sha "$EXPECTED_SHA" \
+            '.train_id == $train_id and .source_sha == $source_sha and .environment == "production"' \
+            manifest.json >/dev/null
+          sha256sum -c SHA256SUMS
+          package_digest="$(sha256sum target/package.zip | cut -d' ' -f1)"
+          echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
+          payload="$(jq -n \
+            --arg train_id "$TRAIN_ID" \
+            --arg operation_key "$OPERATION_KEY" \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
+            --arg expected_sha "$EXPECTED_SHA" \
+            --arg artifact_digest "$package_digest" \
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:$artifact_run_id,repository:"frontend",environment:"prod",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Upload immutable application assets
+        run: aws s3 sync release-bus-artifact/target "s3://${AWS_BUCKET}/web_build/${EXPECTED_SHA}/"
+      - name: Ensure Elastic Beanstalk application version
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          source_key="web_build/${EXPECTED_SHA}/package.zip"
+          version_json="$(aws elasticbeanstalk describe-application-versions \
+            --application-name "$BEANSTALK_APP_NAME" \
+            --version-labels "$EXPECTED_SHA" \
+            --output json)"
+          count="$(jq '.ApplicationVersions | length' <<< "$version_json")"
+          if [ "$count" -eq 0 ]; then
+            aws elasticbeanstalk create-application-version \
+              --application-name "$BEANSTALK_APP_NAME" \
+              --source-bundle "S3Bucket=${AWS_BUCKET},S3Key=${source_key}" \
+              --version-label "$EXPECTED_SHA" \
+              --description "Release Bus train $TRAIN_ID revision $TRAIN_REVISION"
+          elif [ "$count" -eq 1 ]; then
+            test "$(jq -r '.ApplicationVersions[0].SourceBundle.S3Bucket' <<< "$version_json")" = "$AWS_BUCKET"
+            test "$(jq -r '.ApplicationVersions[0].SourceBundle.S3Key' <<< "$version_json")" = "$source_key"
+          else
+            echo 'More than one application version matched the immutable SHA.' >&2
+            exit 1
+          fi
+      - name: Deploy application version
+        env:
+          SSR_CLIENT_ID: ${{ secrets.SSR_CLIENT_ID }}
+          SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
+        run: |
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          aws elasticbeanstalk update-environment \
+            --application-name "$BEANSTALK_APP_NAME" \
+            --environment-name "$BEANSTALK_ENV_NAME" \
+            --version-label "$EXPECTED_SHA" \
+            --option-settings \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_ID,Value=${SSR_CLIENT_ID}" \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_SECRET,Value=${SSR_CLIENT_SECRET}" \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=ALCHEMY_API_KEY,Value=${ALCHEMY_API_KEY}" \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=GITHUB_LINK_STATUS_PREVIEW_TOKEN,Value=${GITHUB_LINK_STATUS_PREVIEW_TOKEN}" \
+              'Namespace=aws:elasticbeanstalk:application:environment,OptionName=SENTRY_SERVER_INSTRUMENTATION,Value=false'
+      - name: Wait for healthy exact version
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          sleep 120
+          for attempt in {1..20}; do
+            environment_json="$(aws elasticbeanstalk describe-environments --environment-names "$BEANSTALK_ENV_NAME" --output json)"
+            health="$(jq -r '.Environments[0].Health' <<< "$environment_json")"
+            status="$(jq -r '.Environments[0].Status' <<< "$environment_json")"
+            version="$(jq -r '.Environments[0].VersionLabel' <<< "$environment_json")"
+            if [ "$health" = Green ] && [ "$status" = Ready ] && [ "$version" = "$EXPECTED_SHA" ]; then
+              exit 0
+            fi
+            sleep 60
+          done
+          echo 'Elastic Beanstalk did not reach the expected healthy version.' >&2
+          exit 1
+      - name: Verify exact production version
+        run: |
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          node ops/scripts/verify-deployment-version.cjs \
+            --base-url https://6529.io \
+            --expected-version "$EXPECTED_SHA" \
+            --attempts 12 \
+            --required-matches 3 \
+            --delay-ms 10000 \
+            --timeout-ms 10000 \
+            --output deployment-version-evidence.json
+      - name: Publish announced production version
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          workflow_run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          jq -n \
+            --arg version "$EXPECTED_SHA" \
+            --arg published_at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            --arg workflow_run_url "$workflow_run_url" \
+            '{schema_version:"frontend-announced-version.v1",environment:"production",version:$version,ready:true,published_at:$published_at,workflow_run_url:$workflow_run_url}' \
+            > current-production-version.json
+          aws s3 cp current-production-version.json "s3://${AWS_BUCKET}/${ANNOUNCED_VERSION_OBJECT_KEY}" \
+            --cache-control 'no-store, max-age=0, must-revalidate' \
+            --content-type application/json
+          cdn_host="$(node -e 'process.stdout.write(new URL(process.env.ANNOUNCED_VERSION_ENDPOINT).hostname)')"
+          distribution_id="$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?DomainName=='${cdn_host}'].Id | [0]" \
+            --output text)"
+          if [ -n "$distribution_id" ] && [ "$distribution_id" != None ]; then
+            aws cloudfront create-invalidation \
+              --distribution-id "$distribution_id" \
+              --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}"
+          else
+            echo "Warning: no CloudFront distribution matched $cdn_host; announced-version invalidation was skipped." >&2
+          fi
+      - name: Upload deployment evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-production-deploy-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}
+          path: deployment-version-evidence.json
+          if-no-files-found: ignore
+          retention-days: 90

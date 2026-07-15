@@ -301,7 +301,7 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
 const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
   "routes.waves": "Waves | Brain",
   "routes.notifications": "Notifications | Brain",
-  "routes.messages": "Messages | Brain",
+  "routes.messages": "Messages",
   "routes.memeCalendar": "Memes Minting Calendar",
   "routes.theMemes": "The Memes | Collections",
   "routes.memeLab": "Meme Lab | Collections",

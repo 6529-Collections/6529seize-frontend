@@ -144,10 +144,10 @@ describe("DynamicHeadTitle", () => {
 
     // Leaving a wave without a pathname change: no metadata commit fires,
     // so the context's route-default reset must reach document.title.
-    mockTitle = "Messages | Brain";
+    mockTitle = "Messages";
     mockIsTitleOwned = false;
     view.rerender(<DynamicHeadTitle />);
-    expect(document.title).toBe("Messages | Brain");
+    expect(document.title).toBe("Messages");
 
     // But it is not sticky: a later external write stands.
     document.title = "External";

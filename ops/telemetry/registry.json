@@ -130,7 +130,7 @@
       "owner": "mixpanel",
       "producer": "services/analytics/productImpactTelemetry.ts",
       "destinations": ["mixpanel:owner", "sentry:diagnostic"],
-      "sampling": "Sentry log transport plus consented production Mixpanel sessions",
+      "sampling": "One event per auth condition and account session until recovery, sent to Sentry plus consented production Mixpanel sessions",
       "privacy": "auth outcome, client type, route family, endpoint family, and booleans only",
       "externalUsage": "repo Mixpanel runbook; live dashboard unverified",
       "lifecycle": "keep",
