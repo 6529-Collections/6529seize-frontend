@@ -306,6 +306,7 @@ export default function CreateDropLayout({
               controlsDisabled={submitting}
               canEditParts={!canAddPart && editingPartIndex === null}
               onEditPart={onEditPart}
+              onCancelPartEdit={onCancelPartEdit}
               onMovePart={onMovePart}
               onRemovePart={onRemovePart}
               onDiscardStorm={onDiscardStorm}
@@ -350,39 +351,6 @@ export default function CreateDropLayout({
                 />
               </div>
               <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
-                {isStormModeActive && (
-                  <div className="tw-mb-1.5 tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-px-1.5">
-                    <span className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2 tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-500">
-                      <span
-                        aria-hidden="true"
-                        className={`tw-size-1.5 tw-flex-none tw-rounded-full ${
-                          editingPartIndex === null
-                            ? "tw-bg-iron-600"
-                            : "tw-bg-primary-400"
-                        }`}
-                      />
-                      <span className="tw-truncate">
-                        {t(
-                          locale,
-                          editingPartIndex === null
-                            ? "waves.stormComposer.nextPart"
-                            : "waves.stormComposer.editingPart",
-                          { number: displayedStormPartNumber }
-                        )}
-                      </span>
-                    </span>
-                    {editingPartIndex !== null && (
-                      <button
-                        type="button"
-                        onClick={onCancelPartEdit}
-                        disabled={submitting}
-                        className="tw-inline-flex tw-h-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-100"
-                      >
-                        {t(locale, "waves.stormComposer.cancelEdit")}
-                      </button>
-                    )}
-                  </div>
-                )}
                 <CreateDropInput
                   waveId={wave.id}
                   key={dropEditorRefreshKey}

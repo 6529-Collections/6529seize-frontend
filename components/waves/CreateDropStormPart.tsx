@@ -100,34 +100,57 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
     ? t(locale, "waves.stormComposer.editPart", { number: partNumber })
     : t(locale, "waves.stormComposer.finishCurrentPartBeforeEditing");
   const iconButtonClass =
-    "tw-inline-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 aria-disabled:tw-cursor-not-allowed aria-disabled:tw-opacity-35 disabled:tw-cursor-not-allowed disabled:tw-opacity-35 sm:tw-size-9 desktop-hover:hover:tw-bg-white/[0.055] desktop-hover:hover:tw-text-iron-100";
+    "tw-inline-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-zinc-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 aria-disabled:tw-cursor-not-allowed aria-disabled:tw-opacity-35 disabled:tw-cursor-not-allowed disabled:tw-opacity-35 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white";
 
   return (
     <article
-      className={`tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-transition-colors ${
+      className={`tw-group tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition-colors ${
         isEditing
-          ? "tw-border-primary-400/35 tw-bg-primary-500/[0.045] tw-shadow-[inset_2px_0_0_rgba(82,139,255,0.72)]"
-          : "tw-border-white/[0.045] tw-bg-white/[0.016] desktop-hover:hover:tw-border-white/[0.08] desktop-hover:hover:tw-bg-white/[0.026]"
+          ? "tw-border-primary-400/35 tw-bg-[#0a0a0c] tw-shadow-[inset_2px_0_0_rgba(82,139,255,0.72)]"
+          : "tw-border-white/5 tw-bg-[#0a0a0c] desktop-hover:hover:tw-border-white/10"
       }`}
       aria-label={t(locale, "waves.stormComposer.part", {
         number: partNumber,
       })}
     >
-      <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-pt-1">
-          <span className="tw-inline-flex tw-size-6 tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/[0.055] tw-bg-black/25 tw-text-[10px] tw-font-semibold tw-tabular-nums tw-text-iron-300">
+      <div className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-4">
+        <div className="tw-flex tw-min-w-0 tw-gap-3">
+          <span className="tw-mt-0.5 tw-inline-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-bg-white/10 tw-text-[10px] tw-font-bold tw-tabular-nums tw-text-white">
             {partNumber}
           </span>
-          <span className="tw-hidden tw-text-[11px] tw-font-medium tw-tracking-[0.025em] tw-text-iron-500 sm:tw-inline">
-            {t(locale, "waves.stormComposer.part", { number: partNumber })}
-          </span>
-          {isEditing && (
-            <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/15 tw-bg-primary-500/10 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold">
-              {t(locale, "waves.stormComposer.editing")}
-            </span>
-          )}
+          <div className="tw-flex tw-min-w-0 tw-flex-col sm:tw-gap-2">
+            <div className="tw-hidden tw-min-w-0 tw-items-center tw-gap-2 sm:tw-flex">
+              <span className="tw-truncate tw-text-xs tw-font-bold tw-uppercase tw-tracking-wide tw-text-zinc-500">
+                {t(locale, "waves.stormComposer.part", {
+                  number: partNumber,
+                })}
+              </span>
+              {isEditing && (
+                <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/15 tw-bg-primary-500/10 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold">
+                  {t(locale, "waves.stormComposer.editing")}
+                </span>
+              )}
+            </div>
+            <div className="tw-min-w-0 tw-overflow-hidden tw-text-[15px] tw-leading-snug tw-text-white">
+              {(part.content?.trim().length ?? 0) > 0 ? (
+                <DropPartMarkdown
+                  mentionedUsers={mentionedUsers}
+                  mentionedGroups={part.mentioned_groups ?? mentionedGroups}
+                  mentionedWaves={mentionedWaves}
+                  referencedNfts={referencedNfts}
+                  partContent={part.content ?? ""}
+                  onQuoteClick={() => {}}
+                />
+              ) : (
+                <p className="tw-m-0 tw-text-sm tw-italic tw-text-zinc-500">
+                  {t(locale, "waves.stormComposer.mediaOnlyPart")}
+                </p>
+              )}
+              <StormPartMedia files={part.media} />
+            </div>
+          </div>
         </div>
-        <div className="tw-flex tw-flex-none tw-items-center tw-gap-px tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.045] tw-bg-black/20 tw-p-0.5">
+        <div className="tw-flex tw-flex-none tw-items-center tw-gap-1 tw-opacity-60 tw-transition-opacity focus-within:tw-opacity-100 group-hover:tw-opacity-100">
           <button
             type="button"
             onClick={() => {
@@ -138,10 +161,10 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
             aria-disabled={editDisabled}
             aria-label={editTitle}
             title={editTitle}
-            className={`${iconButtonClass} tw-w-10 tw-gap-1.5 tw-px-0 sm:tw-w-auto sm:tw-px-2.5`}
+            className="tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-bold tw-text-zinc-300 tw-transition-colors aria-disabled:tw-cursor-not-allowed aria-disabled:tw-opacity-35 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10"
           >
             <svg
-              className="tw-size-4"
+              className="tw-size-3.5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -154,60 +177,62 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
                 d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931ZM19.5 7.125 16.875 4.5M18 14.25v4.125c0 .621-.504 1.125-1.125 1.125H5.625A1.125 1.125 0 0 1 4.5 18.375V7.125C4.5 6.504 5.004 6 5.625 6H9.75"
               />
             </svg>
-            <span className="tw-hidden tw-text-xs tw-font-semibold sm:tw-inline">
+            <span className="tw-hidden sm:tw-inline">
               {t(locale, "waves.stormComposer.edit")}
             </span>
           </button>
-          <button
-            type="button"
-            onClick={() => onMovePart(partIndex, -1)}
-            disabled={controlsDisabled || partIndex === 0}
-            aria-label={t(locale, "waves.stormComposer.movePartEarlier", {
-              number: partNumber,
-            })}
-            title={t(locale, "waves.stormComposer.moveEarlier")}
-            className={iconButtonClass}
-          >
-            <svg
-              className="tw-size-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
+          <div className="tw-mx-1 tw-flex tw-items-center tw-border-x tw-border-y-0 tw-border-solid tw-border-white/10 tw-px-1">
+            <button
+              type="button"
+              onClick={() => onMovePart(partIndex, -1)}
+              disabled={controlsDisabled || partIndex === 0}
+              aria-label={t(locale, "waves.stormComposer.movePartEarlier", {
+                number: partNumber,
+              })}
+              title={t(locale, "waves.stormComposer.moveEarlier")}
+              className={iconButtonClass}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m5 15 7-7 7 7"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => onMovePart(partIndex, 1)}
-            disabled={controlsDisabled || partIndex === partsCount - 1}
-            aria-label={t(locale, "waves.stormComposer.movePartLater", {
-              number: partNumber,
-            })}
-            title={t(locale, "waves.stormComposer.moveLater")}
-            className={iconButtonClass}
-          >
-            <svg
-              className="tw-size-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
+              <svg
+                className="tw-size-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m5 15 7-7 7 7"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => onMovePart(partIndex, 1)}
+              disabled={controlsDisabled || partIndex === partsCount - 1}
+              aria-label={t(locale, "waves.stormComposer.movePartLater", {
+                number: partNumber,
+              })}
+              title={t(locale, "waves.stormComposer.moveLater")}
+              className={iconButtonClass}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m19 9-7 7-7-7"
-              />
-            </svg>
-          </button>
+              <svg
+                className="tw-size-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m19 9-7 7-7-7"
+                />
+              </svg>
+            </button>
+          </div>
           <button
             type="button"
             onClick={() => onRemovePart(partIndex)}
@@ -216,7 +241,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
               number: partNumber,
             })}
             title={t(locale, "waves.stormComposer.remove")}
-            className={`${iconButtonClass} disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-error/10 desktop-hover:hover:tw-text-error`}
+            className={`${iconButtonClass} desktop-hover:hover:tw-bg-red-500/20 desktop-hover:hover:tw-text-red-400 tw-ml-1 disabled:tw-text-zinc-500`}
           >
             <svg
               className="tw-size-4"
@@ -234,23 +259,6 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
             </svg>
           </button>
         </div>
-      </div>
-      <div className="tw-mt-1.5 tw-min-w-0 tw-overflow-hidden tw-pl-8 tw-pr-1 tw-text-iron-100">
-        {(part.content?.trim().length ?? 0) > 0 ? (
-          <DropPartMarkdown
-            mentionedUsers={mentionedUsers}
-            mentionedGroups={part.mentioned_groups ?? mentionedGroups}
-            mentionedWaves={mentionedWaves}
-            referencedNfts={referencedNfts}
-            partContent={part.content ?? ""}
-            onQuoteClick={() => {}}
-          />
-        ) : (
-          <p className="tw-m-0 tw-text-sm tw-italic tw-text-iron-500">
-            {t(locale, "waves.stormComposer.mediaOnlyPart")}
-          </p>
-        )}
-        <StormPartMedia files={part.media} />
       </div>
     </article>
   );

@@ -43,6 +43,7 @@ describe("CreateDropStormParts", () => {
         controlsDisabled={false}
         canEditParts={true}
         onEditPart={jest.fn()}
+        onCancelPartEdit={jest.fn()}
         onMovePart={jest.fn()}
         onRemovePart={jest.fn()}
         onDiscardStorm={onDiscardStorm}

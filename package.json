@@ -17,7 +17,6 @@
     "dev": "node scripts/require-6529-command.cjs && node scripts/dev-with-fallback.cjs",
     "dev:webpack": "node scripts/require-6529-command.cjs && USE_TURBO=false node scripts/dev-with-fallback.cjs",
     "dev:open": "node scripts/require-6529-command.cjs && node scripts/dev-open.cjs",
-    "dev:composer-sandbox": "node scripts/require-6529-command.cjs && cross-env PLAYWRIGHT_ENV=local PLAYWRIGHT_COMPOSER_SANDBOX=1 USE_DEV_AUTH=true DEV_MODE_WALLET_ADDRESS=0x0000000000000000000000000000000000000529 PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE=playwright node tests/support/composerSandboxServer.cjs",
     "generate": "node scripts/require-6529-command.cjs && node scripts/generate-openapi.cjs",
     "base-build": "node scripts/require-6529-command.cjs && cross-env NODE_OPTIONS=--max-old-space-size=7680 next build",
     "build": "node scripts/require-6529-command.cjs && pnpm run lint:quiet && pnpm run base-build",
