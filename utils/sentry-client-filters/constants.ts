@@ -166,6 +166,7 @@ export const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
   "recursivelyTraverseMutationEffects",
 ]);
 export const WAVES_ROUTE_PATH = "/waves";
+export const GRADIENT_ROUTE_PATH = "/6529-gradient";
 export const gifPickerTenorUndefinedTagsMessage =
   "undefined is not an object (evaluating 'e.tags')";
 export const gifPickerReactPackageToken = "gif-picker-react";
