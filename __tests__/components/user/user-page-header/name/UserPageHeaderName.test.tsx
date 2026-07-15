@@ -91,6 +91,9 @@ describe("UserPageHeaderName", () => {
       handle: "Alice",
       classification: ApiProfileClassification.Bot,
     });
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Alice" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(
       screen.getByText(CLASSIFICATIONS[ApiProfileClassification.Bot].title)
