@@ -527,6 +527,7 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
 
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
+  "classification.edit": "Edit {name}'s classification",
   "dm.createFailed.title": "Couldn't create this direct message.",
   "dm.createFailed.description": PLEASE_TRY_AGAIN,
   "name.profileEnabled": "Profile enabled: {date}",
@@ -561,6 +562,10 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.errors.doxxing.title": "Error: Doxxing of Another Person",
   "aboutEdit.errors.doxxing.value":
     "Your About text was not accepted because our automated checks flagged it for potentially doxxing another user of the system. We have a strong cultural value around respecting pseudonymity, so we'd appreciate it if you adjusted your text.",
+} as const);
+
+const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
+  details: "Network ID Check details",
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
@@ -1861,6 +1866,7 @@ export const EN_US_MESSAGES = {
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
+  ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...wavesRightPanelMessages,
