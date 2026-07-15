@@ -95,7 +95,11 @@ function CanonicalUpcomingMemePage({
     );
   }
 
-  return <GenericUpcomingMemePage id={id} locale={locale} />;
+  return (
+    <UpcomingMemeLayout id={id} locale={locale}>
+      <LatestDropNextMintSubscribe tokenId={id} />
+    </UpcomingMemeLayout>
+  );
 }
 
 export default function UpcomingMemePage({

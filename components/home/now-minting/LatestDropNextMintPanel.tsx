@@ -32,6 +32,8 @@ interface LatestDropNextMintPanelProps {
   readonly locale?: SupportedLocale;
 }
 
+const NEXT_MINT_DATE_LOCALE = "en-GB";
+
 const formatDropTimestamp = (
   timestamp: number,
   locale: SupportedLocale
@@ -126,24 +128,27 @@ export default function LatestDropNextMintPanel({
   );
   const fallbackNow =
     minuteClock === null ? null : new Date(minuteClock * 60_000);
-  let subscriptionTokenId: number | null = null;
+  let nextMintCardId: number | null = null;
   if (hasMappedMemeCard) {
-    subscriptionTokenId = mappedMemeCardId;
+    nextMintCardId = mappedMemeCardId;
   } else if (fallbackNow) {
-    subscriptionTokenId = getCanonicalNextMintNumber(fallbackNow);
+    nextMintCardId = getCanonicalNextMintNumber(fallbackNow);
   }
-  const nextMintStart = subscriptionTokenId
-    ? getMintTimelineDetails(subscriptionTokenId).instantUtc
+  // Once a drop is mapped, its Meme Card ID is authoritative for its mint schedule.
+  const nextMintStart = nextMintCardId
+    ? getMintTimelineDetails(nextMintCardId).instantUtc
     : null;
   const nextMintDateTime = nextMintStart
-    ? formatFullDateTime(nextMintStart, "local", locale, { hour12: false })
+    ? formatFullDateTime(nextMintStart, "local", NEXT_MINT_DATE_LOCALE, {
+        hour12: false,
+      })
     : "—";
   let nextMintLabel = "—";
   if (hasMappedMemeCard) {
     nextMintLabel = nextMintDateTime;
-  } else if (subscriptionTokenId) {
+  } else if (nextMintCardId) {
     nextMintLabel = t(locale, "home.nextMint.cardSchedule", {
-      number: formatInteger(locale, subscriptionTokenId),
+      number: formatInteger(locale, nextMintCardId),
       date: nextMintDateTime,
     });
   }
@@ -229,9 +234,9 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
 
-              {subscriptionTokenId && (
+              {nextMintCardId && (
                 <div className="tw-mt-4">
-                  <LatestDropNextMintSubscribe tokenId={subscriptionTokenId} />
+                  <LatestDropNextMintSubscribe tokenId={nextMintCardId} />
                 </div>
               )}
             </div>
