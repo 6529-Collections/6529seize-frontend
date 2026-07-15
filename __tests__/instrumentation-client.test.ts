@@ -310,7 +310,7 @@ describe("instrumentation-client", () => {
     const beforeSend = loadBeforeSend();
     const event = {
       event_id: "react-dom-remove-child-event",
-      transaction: "/the-memes/mint",
+      transaction: "/6529-gradient",
       exception: {
         values: [
           {
@@ -323,8 +323,8 @@ describe("instrumentation-client", () => {
         ],
       },
       tags: {
-        transaction: "/the-memes/mint",
-        url: "/the-memes/mint",
+        transaction: "/6529-gradient",
+        url: "/6529-gradient",
       },
     };
 

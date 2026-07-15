@@ -263,7 +263,6 @@ interface UseManifoldClaimParams {
   proxy: string;
   abi: Abi;
   identifier: number;
-  fetchMemesRoots?: boolean;
   onError?: () => void;
 }
 
@@ -274,7 +273,6 @@ function buildClaimFromReadData({
   getStatus,
   getMemePhase,
   getNextMemePhase,
-  hasExactMemePhaseData,
 }: {
   readonly data: unknown;
   readonly readMethod: ManifoldClaimReadMethod;
@@ -290,7 +288,6 @@ function buildClaimFromReadData({
     memePhase: MemePhase | undefined,
     start: number
   ) => MemePhase | undefined;
-  readonly hasExactMemePhaseData: boolean;
 }): ManifoldClaim | undefined {
   const readData = data as {
     readonly claim?: unknown;
@@ -328,13 +325,8 @@ function buildClaimFromReadData({
   const remaining = Number(claimData.totalMax) - Number(claimData.total);
   const isSoldOut = remaining <= 0;
   const isFinalized = isSoldOut || status === ManifoldClaimStatus.ENDED;
-  const hasUnresolvedAllowlistPhase =
-    !hasExactMemePhaseData && phase === ManifoldPhase.ALLOWLIST;
   const isDropComplete =
-    isSoldOut ||
-    (status === ManifoldClaimStatus.ENDED &&
-      !nextMemePhase &&
-      !hasUnresolvedAllowlistPhase);
+    isSoldOut || (status === ManifoldClaimStatus.ENDED && !nextMemePhase);
 
   return {
     identifier,
@@ -371,7 +363,6 @@ export function useManifoldClaim({
   proxy,
   abi,
   identifier,
-  fetchMemesRoots = true,
   onError,
 }: UseManifoldClaimParams): UseManifoldClaimResult {
   const readMethod: ManifoldClaimReadMethod =
@@ -474,8 +465,6 @@ export function useManifoldClaim({
 
   const shouldFetchForIdentifier =
     claim?.identifier !== identifier || !claim?.isDropComplete;
-  const hasExactMemePhaseData =
-    fetchMemesRoots || !areEqualAddresses(contract, MEMES_CONTRACT);
 
   const readContract = useReadContract({
     address: proxy as `0x${string}`,
@@ -500,11 +489,7 @@ export function useManifoldClaim({
   }, [chainId, contract, proxy, identifier, readMethod]);
 
   useEffect(() => {
-    if (
-      !fetchMemesRoots ||
-      !areEqualAddresses(contract, MEMES_CONTRACT) ||
-      identifier < 0
-    ) {
+    if (!areEqualAddresses(contract, MEMES_CONTRACT) || identifier < 0) {
       setMemesRootsState({
         status: "idle",
         roots: null,
@@ -543,7 +528,7 @@ export function useManifoldClaim({
     return () => {
       isMounted = false;
     };
-  }, [contract, fetchMemesRoots, identifier]);
+  }, [contract, identifier]);
 
   useEffect(() => {
     if (!readContract.data) {
@@ -557,7 +542,6 @@ export function useManifoldClaim({
       getStatus,
       getMemePhase,
       getNextMemePhase,
-      hasExactMemePhaseData,
     });
 
     if (!newClaim) {
@@ -577,7 +561,6 @@ export function useManifoldClaim({
     getMemePhase,
     getNextMemePhase,
     getStatus,
-    hasExactMemePhaseData,
   ]);
 
   useEffect(() => {

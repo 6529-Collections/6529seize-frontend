@@ -73,7 +73,7 @@ export function useCollectionDelegationReads(options: {
     contracts: getConsolidationReadParams(
       address as `0x${string}`,
       collection.contract,
-      outgoingDelegations[CONSOLIDATION_USE_CASE.index]!
+      outgoingDelegations[CONSOLIDATION_USE_CASE.index]
     ),
     query: {
       enabled: isConnected && outgoingDelegations.length > 0,
@@ -132,7 +132,7 @@ export function useCollectionDelegationReads(options: {
     contracts: getConsolidationReadParams(
       address as `0x${string}`,
       collection.contract,
-      incomingDelegations[CONSOLIDATION_USE_CASE.index]!
+      incomingDelegations[CONSOLIDATION_USE_CASE.index]
     ),
     query: {
       enabled: isConnected && incomingDelegations.length > 0,

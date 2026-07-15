@@ -14,6 +14,20 @@ import {
   type Revocation,
 } from "./collection-delegation-helpers";
 
+interface RevokeDelegationParams {
+  readonly collection: string;
+  readonly address: string;
+  readonly use_case: number;
+  readonly loading?: boolean;
+}
+
+interface BatchRevokeDelegationParams {
+  readonly collections: string[];
+  readonly addresses: string[];
+  readonly use_cases: number[];
+  readonly loading?: boolean;
+}
+
 /**
  * Revocation writes for the collection-delegation screen: single revocation,
  * batch revocation, and the bulk-selection state feeding the batch call.
@@ -26,9 +40,10 @@ export function useDelegationRevocation(options: {
 
   const [bulkRevocations, setBulkRevocations] = useState<Revocation[]>([]);
 
-  const [revokeDelegationParams, setRevokeDelegationParams] = useState<any>();
+  const [revokeDelegationParams, setRevokeDelegationParams] =
+    useState<RevokeDelegationParams>();
   const [batchRevokeDelegationParams, setBatchRevokeDelegationParams] =
-    useState<any>();
+    useState<BatchRevokeDelegationParams>();
 
   const contractWriteRevoke = useWriteContract();
 

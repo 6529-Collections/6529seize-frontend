@@ -5,14 +5,7 @@ import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-co
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import { useManifoldClaim } from "@/hooks/useManifoldClaim";
 
-interface UseDropForgeManifoldClaimOptions {
-  readonly fetchMemesRoots?: boolean;
-}
-
-export function useDropForgeManifoldClaim(
-  tokenId: number,
-  { fetchMemesRoots = true }: UseDropForgeManifoldClaimOptions = {}
-) {
+export function useDropForgeManifoldClaim(tokenId: number) {
   const { chain, contract } = useDropForgeMintingConfig();
 
   return useManifoldClaim({
@@ -21,6 +14,5 @@ export function useDropForgeManifoldClaim(
     proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
     abi: MEMES_MANIFOLD_PROXY_ABI,
     identifier: tokenId,
-    fetchMemesRoots,
   });
 }

@@ -323,7 +323,7 @@ function CraftClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
 
 function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
   const { claim: manifoldClaim, isFetching: isManifoldClaimFetching } =
-    useDropForgeManifoldClaim(claim.claim_id, { fetchMemesRoots: false });
+    useDropForgeManifoldClaim(claim.claim_id);
   const [researchAirdropCompleted, setResearchAirdropCompleted] =
     useState(false);
   const [payArtistCompleted, setPayArtistCompleted] = useState(false);
@@ -343,7 +343,6 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
         researchAirdropCompleted,
         payArtistCompleted,
         actionsLoaded,
-        useCoarseOnchainStatus: true,
       });
 
   useEffect(() => {

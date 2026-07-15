@@ -1,5 +1,6 @@
 import {
   FILTERED_URL_TOKENS,
+  GRADIENT_ROUTE_PATH,
   objectCapturedPromiseRejectionMessages,
   THE_MEMES_MINT_ROUTE_PATH,
   WAVES_ROUTE_PATH,
@@ -137,7 +138,12 @@ export function hasRouteParameterizationRoute(
 }
 
 export function hasReactDomRemoveChildRoute(event: SentryClientEvent): boolean {
-  return hasMatchingRoute(event, isRouteParameterizationRoutePath);
+  return hasMatchingRoute(
+    event,
+    (path) =>
+      isRouteParameterizationRoutePath(path) ||
+      isRoutePathAtOrBelow(path, GRADIENT_ROUTE_PATH)
+  );
 }
 
 export function getUrlCandidatesFromText(value: string): string[] {
