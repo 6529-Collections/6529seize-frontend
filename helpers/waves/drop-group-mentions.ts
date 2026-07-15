@@ -39,6 +39,8 @@ export const getMentionedGroupsFromParts = (
   }[],
   canMentionAll: boolean
 ): ApiDropGroupMention[] =>
+  // Part metadata describes global tokens in the current displayed content;
+  // it is not a notification-delivery or audience audit record.
   Object.values(ApiDropGroupMention).filter(
     (group) =>
       (group !== ApiDropGroupMention.All || canMentionAll) &&

@@ -26,6 +26,9 @@ Wave creators and admins can also use `@all`.
 ## Common Scenarios
 
 - `@contributors` notifies profiles with Chat access to the current Wave.
+- If Chat access is **Anyone**, there is no finite Chat-access group to expand.
+  In that case, Wave followers are the bounded `@contributors` audience;
+  muted followers and the author are still excluded from notifications.
 - `@admins` notifies the Wave creator and profiles with Admin access.
 - `@devs6529` notifies the platform-configured 6529 developer profiles that
   can view the Wave.
@@ -54,6 +57,9 @@ Global names are reserved and cannot be used for personal mention shortcuts.
 Personal shortcuts expand inline into profile handles; global mentions do not.
 Editing a message updates which global tokens are stored with its content, but
 does not resend permission-group notifications.
+The stored `mentioned_groups` value describes the global tokens in the current
+displayed content. It is not a historical record of the profiles notified when
+the message was first posted.
 
 ## Related Pages
 
