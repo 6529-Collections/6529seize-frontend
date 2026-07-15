@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import NFTHTMLRenderer from "@/components/nft-image/renderers/NFTHTMLRenderer";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import type { BaseNFT } from "@/entities/INFT";
@@ -71,6 +73,15 @@ const createDefaultProps = (
 
 describe("NFTHTMLRenderer", () => {
   describe("Basic Rendering", () => {
+    it("removes the browser default iframe border", () => {
+      const styles = readFileSync(
+        join(process.cwd(), "components/nft-image/NFTImage.module.css"),
+        "utf8"
+      );
+
+      expect(styles).toMatch(/\.nftAnimation iframe\s*\{[^}]*border:\s*0;/s);
+    });
+
     it("renders iframe with correct structure", () => {
       const props = createDefaultProps({ id: "test-iframe" });
       render(<NFTHTMLRenderer {...props} />);
@@ -332,7 +343,10 @@ describe("NFTHTMLRenderer", () => {
 
       const iframe = screen.getByTitle("test-iframe");
       expect(iframe).toBeInTheDocument();
-      expect(iframe).toHaveAttribute("src", "https://example.com/animation.html");
+      expect(iframe).toHaveAttribute(
+        "src",
+        "https://example.com/animation.html"
+      );
     });
 
     it("handles minimal NFT properties", () => {
