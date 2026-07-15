@@ -126,25 +126,27 @@ export default function LatestDropNextMintPanel({
   );
   const fallbackNow =
     minuteClock === null ? null : new Date(minuteClock * 60_000);
-  const subscriptionTokenId = hasMappedMemeCard
-    ? mappedMemeCardId
-    : fallbackNow
-      ? getCanonicalNextMintNumber(fallbackNow)
-      : null;
+  let subscriptionTokenId: number | null = null;
+  if (hasMappedMemeCard) {
+    subscriptionTokenId = mappedMemeCardId;
+  } else if (fallbackNow) {
+    subscriptionTokenId = getCanonicalNextMintNumber(fallbackNow);
+  }
   const nextMintStart = subscriptionTokenId
     ? getMintTimelineDetails(subscriptionTokenId).instantUtc
     : null;
   const nextMintDateTime = nextMintStart
     ? formatFullDateTime(nextMintStart, "local", locale)
     : "—";
-  const nextMintLabel = hasMappedMemeCard
-    ? nextMintDateTime
-    : subscriptionTokenId
-      ? t(locale, "home.nextMint.cardSchedule", {
-          number: formatInteger(locale, subscriptionTokenId),
-          date: nextMintDateTime,
-        })
-      : "—";
+  let nextMintLabel = "—";
+  if (hasMappedMemeCard) {
+    nextMintLabel = nextMintDateTime;
+  } else if (subscriptionTokenId) {
+    nextMintLabel = t(locale, "home.nextMint.cardSchedule", {
+      number: formatInteger(locale, subscriptionTokenId),
+      date: nextMintDateTime,
+    });
+  }
 
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950">

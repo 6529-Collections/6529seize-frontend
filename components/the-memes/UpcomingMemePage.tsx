@@ -4,16 +4,34 @@ import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDro
 import LatestDropNextMintPanel, {
   LatestDropNextMintPanelSkeleton,
 } from "@/components/home/now-minting/LatestDropNextMintPanel";
+import { isValidMemeCardId } from "@/components/memes/drops/MainStageMemeCardLink";
 import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helpers";
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
 import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import NotFound from "@/components/not-found/NotFound";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { useSyncExternalStore } from "react";
+import { type ReactNode, useSyncExternalStore } from "react";
 
 const subscribeToClientRender = () => () => {};
 const getClientRenderSnapshot = () => true;
 const getServerRenderSnapshot = () => false;
+
+function UpcomingMemeLayout({
+  children,
+  id,
+  locale,
+}: {
+  readonly children: ReactNode;
+  readonly id: number;
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <div className="tw-flex tw-w-full tw-flex-col tw-gap-4">
+      {children}
+      <MemeCalendarOverviewNextMint displayTz="local" id={id} locale={locale} />
+    </div>
+  );
+}
 
 function GenericUpcomingMemePage({
   id,
@@ -23,10 +41,9 @@ function GenericUpcomingMemePage({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <div className="tw-flex tw-w-full tw-flex-col tw-gap-4">
+    <UpcomingMemeLayout id={id} locale={locale}>
       <LatestDropNextMintSubscribe tokenId={id} />
-      <MemeCalendarOverviewNextMint displayTz="local" id={id} locale={locale} />
-    </div>
+    </UpcomingMemeLayout>
   );
 }
 
@@ -55,37 +72,26 @@ function CanonicalUpcomingMemePage({
   const normalizedMemeCardId = Number(mappedMemeCardId);
   const isMatchingRevealedDrop =
     shouldShowNextMint &&
-    Number.isSafeInteger(normalizedMemeCardId) &&
-    normalizedMemeCardId >= 1 &&
+    isValidMemeCardId(normalizedMemeCardId) &&
     normalizedMemeCardId === id;
 
   if (!isDecisionReady) {
     return (
-      <div className="tw-flex tw-w-full tw-flex-col tw-gap-4">
+      <UpcomingMemeLayout id={id} locale={locale}>
         <LatestDropNextMintPanelSkeleton />
-        <MemeCalendarOverviewNextMint
-          displayTz="local"
-          id={id}
-          locale={locale}
-        />
-      </div>
+      </UpcomingMemeLayout>
     );
   }
 
   if (isMatchingRevealedDrop && nextMint) {
     return (
-      <div className="tw-flex tw-w-full tw-flex-col tw-gap-4">
+      <UpcomingMemeLayout id={id} locale={locale}>
         <LatestDropNextMintPanel
           drop={nextMint}
           linkMemeCard={false}
           locale={locale}
         />
-        <MemeCalendarOverviewNextMint
-          displayTz="local"
-          id={id}
-          locale={locale}
-        />
-      </div>
+      </UpcomingMemeLayout>
     );
   }
 
