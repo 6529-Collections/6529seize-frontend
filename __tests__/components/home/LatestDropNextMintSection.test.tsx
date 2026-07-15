@@ -91,13 +91,13 @@ describe("LatestDropNextMintSection", () => {
     ).toBeTruthy();
   });
 
-  it("keeps the schedule label and does not infer a card link when unmapped", () => {
+  it("does not infer a card link when the next drop is unmapped", () => {
     render(<LatestDropNextMintSection drop={createDrop()} />);
 
     expect(
       screen.queryByRole("link", { name: /The Memes #/ })
     ).not.toBeInTheDocument();
-    expect(screen.getByText(/Card #/)).toBeInTheDocument();
+    expect(screen.queryByText(/Card #/)).not.toBeInTheDocument();
   });
 
   it("renders the mapped Meme pill as static text on its own detail page", () => {

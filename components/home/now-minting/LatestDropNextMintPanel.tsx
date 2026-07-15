@@ -143,16 +143,6 @@ export default function LatestDropNextMintPanel({
         hour12: false,
       })
     : "—";
-  let nextMintLabel = "—";
-  if (hasMappedMemeCard) {
-    nextMintLabel = nextMintDateTime;
-  } else if (nextMintCardId) {
-    nextMintLabel = t(locale, "home.nextMint.cardSchedule", {
-      number: formatInteger(locale, nextMintCardId),
-      date: nextMintDateTime,
-    });
-  }
-
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950">
       <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-6 tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9">
@@ -200,10 +190,6 @@ export default function LatestDropNextMintPanel({
                   }
                 />
               </div>
-              <span className="tw-mt-1 tw-font-mono tw-text-xs tw-text-white/50">
-                {nextMintLabel}
-              </span>
-
               <Link
                 href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
                 className="tw-mt-3 tw-text-xl tw-font-semibold tw-leading-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl"

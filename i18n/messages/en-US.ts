@@ -1342,7 +1342,6 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
   "home.nextMint.status": "Next mint",
-  "home.nextMint.cardSchedule": "Card #{number} - {date}",
   "home.nextMint.noImage": "No image",
   "home.nextMint.untitled": "Untitled",
   "home.nextMint.anonymous": "Anonymous",
