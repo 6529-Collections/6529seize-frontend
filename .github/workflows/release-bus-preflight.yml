@@ -96,6 +96,7 @@ jobs:
         run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
       - name: Build immutable application
         env:
+          BUILD_ENVIRONMENT: ${{ matrix.environment }}
           NODE_ENV: production
           API_ENDPOINT: ${{ matrix.environment == 'production' && 'https://api.6529.io' || vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
           WS_ENDPOINT: ${{ matrix.environment == 'production' && 'wss://ws.6529.io' || vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
@@ -118,15 +119,22 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
-          if [ '${{ matrix.environment }}' = production ]; then
+          if [ "$BUILD_ENVIRONMENT" = production ]; then
             export ANNOUNCED_VERSION_ENDPOINT='https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json'
           else
             unset ANNOUNCED_VERSION_ENDPOINT
           fi
           ./bin/6529 run build
       - name: Package immutable bundle
+        env:
+          BUILD_ENVIRONMENT: ${{ matrix.environment }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
         run: |
           set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$BUILD_ENVIRONMENT" =~ ^(staging|production)$ ]]
           mkdir -p release-bus-artifact/target/_next release-bus-artifact/bundle/.next
           cp -r .next/standalone/. release-bus-artifact/bundle/
           cp -r .next/static release-bus-artifact/target/_next/
@@ -138,7 +146,7 @@ jobs:
             if [ -f ".next/$file" ]; then cp ".next/$file" "release-bus-artifact/bundle/.next/$file"; fi
           done
           (cd release-bus-artifact/bundle && zip -yr ../target/package.zip .)
-          jq -n --arg train_id '${{ inputs.release_train_id }}' --arg source_sha '${{ inputs.expected_sha }}' --arg environment '${{ matrix.environment }}' '{train_id:$train_id,source_sha:$source_sha,environment:$environment}' > release-bus-artifact/manifest.json
+          jq -n --arg train_id "$TRAIN_ID" --arg source_sha "$EXPECTED_SHA" --arg environment "$BUILD_ENVIRONMENT" '{train_id:$train_id,source_sha:$source_sha,environment:$environment}' > release-bus-artifact/manifest.json
           (cd release-bus-artifact && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
       - name: Upload immutable frontend artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

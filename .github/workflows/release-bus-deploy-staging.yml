@@ -31,6 +31,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: staging
+    env:
+      ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+      EXPECTED_SHA: ${{ inputs.expected_sha }}
+      OPERATION_KEY: ${{ inputs.operation_key }}
+      SOURCE_REF: ${{ inputs.source_ref }}
+      TRAIN_ID: ${{ inputs.release_train_id }}
+      TRAIN_REVISION: ${{ inputs.release_train_revision }}
     steps:
       - name: Validate dispatch inputs before using credentials
         env:
@@ -55,7 +62,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Verify immutable source
-        run: test "$(git rev-parse HEAD)" = "${{ inputs.expected_sha }}"
+        run: |
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Download immutable preflight artifact
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
@@ -71,20 +80,24 @@ jobs:
         run: |
           set -euo pipefail
           cd release-bus-artifact
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           jq -e \
-            --arg train_id '${{ inputs.release_train_id }}' \
-            --arg source_sha '${{ inputs.expected_sha }}' \
+            --arg train_id "$TRAIN_ID" \
+            --arg source_sha "$EXPECTED_SHA" \
             '.train_id == $train_id and .source_sha == $source_sha and .environment == "staging"' \
             manifest.json >/dev/null
           sha256sum -c SHA256SUMS
           package_digest="$(sha256sum target/package.zip | cut -d' ' -f1)"
           echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
           payload="$(jq -n \
-            --arg train_id '${{ inputs.release_train_id }}' \
-            --arg operation_key '${{ inputs.operation_key }}' \
-            --arg workflow_run_id '${{ github.run_id }}' \
-            --arg artifact_run_id '${{ inputs.artifact_run_id }}' \
-            --arg expected_sha '${{ inputs.expected_sha }}' \
+            --arg train_id "$TRAIN_ID" \
+            --arg operation_key "$OPERATION_KEY" \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
+            --arg expected_sha "$EXPECTED_SHA" \
             --arg artifact_digest "$package_digest" \
             '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:$artifact_run_id,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
           curl --fail-with-body --silent --show-error \
@@ -100,11 +113,17 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - name: Stage artifact for the managed instance
         id: staged-artifact
+        env:
+          PACKAGE_DIGEST: ${{ steps.artifact.outputs.package_digest }}
         run: |
           set -euo pipefail
-          object_key="release-bus/${{ inputs.release_train_id }}/r${{ inputs.release_train_revision }}/staging/frontend/${{ inputs.expected_sha }}.zip"
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$PACKAGE_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          object_key="release-bus/${TRAIN_ID}/r${TRAIN_REVISION}/staging/frontend/${EXPECTED_SHA}.zip"
           aws s3 cp release-bus-artifact/target/package.zip "s3://${ARTIFACT_BUCKET}/${object_key}" \
-            --metadata "sha256=${{ steps.artifact.outputs.package_digest }},source-sha=${{ inputs.expected_sha }}"
+            --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
           url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" --expires-in 3600)"
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Deploy immutable bundle through SSM
@@ -171,7 +190,7 @@ jobs:
           command_id="$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name AWS-RunShellScript \
-            --comment 'Release Bus frontend staging ${{ inputs.expected_sha }}' \
+            --comment "Release Bus frontend staging $EXPECTED_SHA" \
             --parameters file://ssm-parameters.json \
             --timeout-seconds 2400 \
             --query Command.CommandId \
@@ -199,9 +218,10 @@ jobs:
         env:
           STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
         run: |
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           node ops/scripts/verify-deployment-version.cjs \
             --base-url https://staging.6529.io \
-            --expected-version '${{ inputs.expected_sha }}' \
+            --expected-version "$EXPECTED_SHA" \
             --attempts 18 \
             --delay-ms 10000 \
             --timeout-ms 10000 \
