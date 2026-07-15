@@ -34,6 +34,7 @@ import {
   useSetWaveData,
   useTitle,
 } from "@/contexts/TitleContext";
+import { isTitleUpdateCurrent } from "@/contexts/title.helpers";
 
 function TitleReporter() {
   const { title, isTitleOwned, titlePathname } = useTitle();
@@ -69,6 +70,12 @@ describe("TitleProvider ownership", () => {
     mockNavigation.pathname = "/open-data/network-metrics";
     mockNavigation.searchParams = new URLSearchParams();
     mockActiveWaveId = null;
+  });
+
+  it("allows the current title route to claim while the route ref catches up", () => {
+    expect(isTitleUpdateCurrent("/previous", "/network", "/network")).toBe(
+      true
+    );
   });
 
   it("route defaults are not owned; explicit titles are", () => {

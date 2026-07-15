@@ -16,6 +16,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { isTitleUpdateCurrent } from "./title.helpers";
 import { useMyStreamOptional } from "./wave/MyStreamContext";
 
 type TitleContextType = {
@@ -67,7 +68,7 @@ const getDefaultTitleForRoute = (
   locale: SupportedLocale
 ): string => {
   if (!pathname) return DEFAULT_TITLE;
-  if (pathname === "/") return "6529.io";
+  if (pathname === "/") return DEFAULT_TITLE;
   const routeTitle = ROUTE_TITLE_KEYS.find(([prefix]) =>
     pathname.startsWith(prefix)
   );
@@ -173,16 +174,15 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [isWaveRoute, locale, pathname, searchParams, waveInUrl]);
 
-  const isTitleRouteCurrent = titlePathname === pathname;
   const updateTitle = useCallback(
     (newTitle: string) => {
-      if (routeRef.current === pathname || isTitleRouteCurrent) {
+      if (isTitleUpdateCurrent(routeRef.current, titlePathname, pathname)) {
         setTitle(newTitle);
         setTitlePathname(pathname);
         setExplicitTitlePathname(pathname);
       }
     },
-    [isTitleRouteCurrent, pathname]
+    [pathname, titlePathname]
   );
 
   // Compute the title based on current state
