@@ -25,7 +25,7 @@ type ImmediateAuthValidationResult = Awaited<
   ReturnType<typeof validateAuthImmediate>
 >;
 
-export const getAuthTerminalTransitionScope = ({
+const getAuthTerminalTransitionScope = ({
   activeProfileProxyId,
   authJwt,
   authRolloutSettings,
