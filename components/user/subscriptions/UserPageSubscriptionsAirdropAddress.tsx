@@ -24,6 +24,7 @@ export default function UserPageSubscriptionsAirdropAddress(
   }>
 ) {
   const airdropAddress = props.airdrop?.airdrop_address;
+  const addressTooltipId = `airdrop-address-${airdropAddress?.address ?? "unavailable"}`;
   const editHref = `/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
 
   return (
@@ -69,7 +70,9 @@ export default function UserPageSubscriptionsAirdropAddress(
                   </span>
                 )}
                 <span
-                  data-tooltip-id={`airdrop-address-${airdropAddress.address}`}
+                  data-tooltip-id={addressTooltipId}
+                  aria-describedby={addressTooltipId}
+                  tabIndex={0}
                   className={
                     airdropAddress.ens
                       ? "tw-block tw-text-xs tw-leading-5 tw-text-iron-500"
@@ -79,12 +82,13 @@ export default function UserPageSubscriptionsAirdropAddress(
                   {airdropAddress.address}
                 </span>
                 <Tooltip
-                  id={`airdrop-address-${airdropAddress.address}`}
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
+                  id={addressTooltipId}
+                  place="top"
+                  positionStrategy="fixed"
+                  offset={8}
+                  delayShow={250}
+                  opacity={1}
+                  style={TOOLTIP_STYLES}
                 >
                   {airdropAddress.address}
                 </Tooltip>

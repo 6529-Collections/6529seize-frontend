@@ -10,6 +10,7 @@ import {
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import { formatAddress } from "@/helpers/Helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
@@ -25,6 +26,45 @@ import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 
 const SUBSCRIPTION_COUNT_SELECT_CLASS =
   "tw-h-10 tw-w-12 tw-appearance-none tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-5 tw-text-sm tw-leading-none tw-text-iron-200 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-text-iron-500";
+
+function MintingTodayLabel({
+  tokenId,
+  className = "",
+}: {
+  readonly tokenId: number;
+  readonly className?: string | undefined;
+}) {
+  const tooltipId = `minting-today-${tokenId}`;
+
+  return (
+    <>
+      <span
+        className={`tw-inline-flex tw-items-center tw-gap-1 ${className}`}
+        data-tooltip-id={tooltipId}
+        aria-describedby={tooltipId}
+        tabIndex={0}
+      >
+        Minting Today
+        <FontAwesomeIcon
+          icon={faInfoCircle}
+          className="tw-size-4"
+          aria-hidden="true"
+        />
+      </span>
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        positionStrategy="fixed"
+        offset={8}
+        delayShow={250}
+        opacity={1}
+        style={TOOLTIP_STYLES}
+      >
+        No changes allowed on minting day
+      </Tooltip>
+    </>
+  );
+}
 
 export default function MemeSubscriptionRow(
   props: Readonly<{
@@ -315,6 +355,9 @@ export default function MemeSubscriptionRow(
           ) : (
             <div className="tw-flex tw-items-center tw-gap-2">
               {isSubmitting && <Spinner />}
+              {renderCountSelector({
+                disableWhenSingleOption: false,
+              })}
               <UserPageSubscriptionsToggle
                 disabled={isToggleDisabled}
                 id={id}
@@ -322,11 +365,6 @@ export default function MemeSubscriptionRow(
                 onChange={submit}
                 ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
               />
-              <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-                {renderCountSelector({
-                  disableWhenSingleOption: false,
-                })}
-              </span>
             </div>
           )}
         </div>
@@ -341,27 +379,7 @@ export default function MemeSubscriptionRow(
         )}
         {props.minting_today && (
           <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-400">
-            <span
-              data-tooltip-id={`minting-today-${props.subscription.token_id}`}
-            >
-              Minting Today{" "}
-              <FontAwesomeIcon
-                icon={faInfoCircle}
-                className="tw-size-4"
-                aria-hidden="true"
-              />
-            </span>
-            <Tooltip
-              id={`minting-today-${props.subscription.token_id}`}
-              place="right"
-              style={{
-                backgroundColor: "#f8f9fa",
-                color: "#212529",
-                padding: "4px 8px",
-              }}
-            >
-              No changes allowed on minting day
-            </Tooltip>
+            <MintingTodayLabel tokenId={props.subscription.token_id} />
           </div>
         )}
       </div>
@@ -385,30 +403,10 @@ export default function MemeSubscriptionRow(
                   /
                 </span>
                 {props.minting_today ? (
-                  <>
-                    <span
-                      className="tw-inline-flex tw-items-center tw-gap-1 tw-font-medium tw-text-primary-300"
-                      data-tooltip-id={`minting-today-${props.subscription.token_id}`}
-                    >
-                      Minting Today
-                      <FontAwesomeIcon
-                        icon={faInfoCircle}
-                        className="tw-size-4"
-                        aria-hidden="true"
-                      />
-                    </span>
-                    <Tooltip
-                      id={`minting-today-${props.subscription.token_id}`}
-                      place="right"
-                      style={{
-                        backgroundColor: "#f8f9fa",
-                        color: "#212529",
-                        padding: "4px 8px",
-                      }}
-                    >
-                      No changes allowed on minting day
-                    </Tooltip>
-                  </>
+                  <MintingTodayLabel
+                    tokenId={props.subscription.token_id}
+                    className="tw-font-medium tw-text-primary-300"
+                  />
                 ) : (
                   <span className="tw-text-iron-600">
                     {formatFullDate(props.date.utcDay, "utc")}
@@ -429,6 +427,9 @@ export default function MemeSubscriptionRow(
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3">
           {isSubmitting && <Spinner />}
+          {renderCountSelector({
+            disableWhenSingleOption: true,
+          })}
           <UserPageSubscriptionsToggle
             disabled={isToggleDisabled}
             id={id}
@@ -436,11 +437,6 @@ export default function MemeSubscriptionRow(
             onChange={submit}
             ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
           />
-          <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-            {renderCountSelector({
-              disableWhenSingleOption: true,
-            })}
-          </span>
         </div>
       </div>
     </div>

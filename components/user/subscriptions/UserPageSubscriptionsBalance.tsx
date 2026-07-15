@@ -56,7 +56,7 @@ export default function UserPageSubscriptionsBalance(
             </>
           ))}
       </div>
-      <div className="tw-mt-3 tw-min-h-9 sm:tw-mt-4">
+      <div className="tw-min-h-9">
         {props.fetching ? (
           <>
             <output className="tw-sr-only">Loading balance</output>
