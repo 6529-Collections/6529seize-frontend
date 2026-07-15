@@ -1,6 +1,12 @@
 name: Web Deploy - PROD
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      break_glass_reason:
+        type: string
+        description: Operator-only reason for a manual production deploy after bus enforcement
+        required: false
 
 permissions:
   contents: read
@@ -41,6 +47,33 @@ jobs:
             echo "::error::Production deploys must be run from the main branch. Selected ref: ${GITHUB_REF_NAME} (${GITHUB_SHA})."
             exit 1
           fi
+
+      - name: Authorize operator break glass
+        if: vars.RELEASE_BUS_ENFORCEMENT == 'true'
+        env:
+          BREAK_GLASS_REASON: ${{ inputs.break_glass_reason }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$RELEASE_BUS_API_URL"
+          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN"
+          test -n "$BREAK_GLASS_REASON" || {
+            echo 'A break-glass reason is required while Release Bus enforcement is enabled.' >&2
+            exit 1
+          }
+          payload="$(jq -n \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg repository frontend \
+            --arg environment prod \
+            --arg expected_sha "$GITHUB_SHA" \
+            --arg reason "$BREAK_GLASS_REASON" \
+            '{workflow_run_id:$workflow_run_id,repository:$repository,environment:$environment,service:null,expected_sha:$expected_sha,reason:$reason}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize-break-glass"
 
   build-upload-deploy:
     needs: assert-main-ref
