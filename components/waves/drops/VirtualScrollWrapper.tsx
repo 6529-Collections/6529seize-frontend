@@ -56,7 +56,9 @@ function observeHeight(
 
     if (resizeSubscriptions.size === 0) {
       observer.disconnect();
-      sharedResizeObserver = null;
+      if (observer === sharedResizeObserver) {
+        sharedResizeObserver = null;
+      }
     }
   };
 }
@@ -168,6 +170,7 @@ export default function VirtualScrollWrapper({
     const element = containerRef.current;
     if (!element) return;
 
+    hasMeasuredHeightRef.current = false;
     const stopObservingHeight = observeHeight(element, {
       updateHeight: updateMeasuredHeight,
     });

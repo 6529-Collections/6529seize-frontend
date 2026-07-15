@@ -70,7 +70,7 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 
 function setup(size: DropSize, dropId?: string) {
   const scrollRef = { current: document.createElement("div") };
-  const { container } = render(
+  const { container, unmount } = render(
     <VirtualScrollWrapper
       scrollContainerRef={scrollRef}
       delay={1000}
@@ -82,7 +82,7 @@ function setup(size: DropSize, dropId?: string) {
       <div data-testid="child">content</div>
     </VirtualScrollWrapper>
   );
-  return { container, scrollRef };
+  return { container, scrollRef, unmount };
 }
 
 function emitResize(element: Element, height: number) {
@@ -239,6 +239,25 @@ describe("Height Measurement and Placeholder", () => {
     expect(resizeObserve).toHaveBeenCalledWith(second.container.firstChild);
   });
 
+  test("keeps observing a remaining FULL drop after a sibling unmounts", () => {
+    const first = setup(DropSize.FULL);
+    const second = setup(DropSize.FULL);
+    const firstDrop = first.container.firstChild as HTMLElement;
+    const secondDrop = second.container.firstChild as HTMLElement;
+
+    first.unmount();
+
+    expect(resizeUnobserve).toHaveBeenCalledWith(firstDrop);
+    expect(resizeDisconnect).not.toHaveBeenCalled();
+
+    act(() => {
+      emitResize(secondDrop, 260);
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+
+    expect((secondDrop.firstChild as HTMLElement).style.height).toBe("260px");
+  });
+
   test("renders children when height not measured yet", () => {
     const { container } = setup(DropSize.FULL);
     const testChild = container.querySelector('[data-testid="child"]');
@@ -294,6 +313,40 @@ describe("Height Measurement and Placeholder", () => {
     });
 
     expect(measureSpy).not.toHaveBeenCalled();
+  });
+
+  test("restores the fallback when FULL height observation restarts", () => {
+    const scrollRef = { current: document.createElement("div") };
+    const renderWrapper = (type: DropSize) => (
+      <VirtualScrollWrapper
+        scrollContainerRef={scrollRef}
+        delay={1000}
+        dropSerialNo={1}
+        waveId="wave"
+        type={type}
+      >
+        <div data-testid="child">content</div>
+      </VirtualScrollWrapper>
+    );
+    const view = render(renderWrapper(DropSize.FULL));
+    const div = view.container.firstChild as HTMLElement;
+
+    act(() => {
+      emitResize(div, 175);
+    });
+    view.rerender(renderWrapper(DropSize.LIGHT));
+    view.rerender(renderWrapper(DropSize.FULL));
+
+    const measureSpy = jest.fn(() => ({ height: 225 }));
+    Object.defineProperty(div, "getBoundingClientRect", {
+      value: measureSpy,
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(measureSpy).toHaveBeenCalled();
   });
 
   test("tracks height changes without forcing layout", () => {
