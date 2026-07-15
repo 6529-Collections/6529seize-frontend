@@ -342,10 +342,14 @@ export const runImmediateAuthValidation = async ({
       hadLocalJwt,
       hasActiveWalletAddress,
     });
-    if (
-      result.isValid &&
-      terminalAuthTransitionScopeRef.current === terminalAuthTransitionScope
-    ) {
+    if (result.isValid) {
+      const previousTerminalScope = terminalAuthTransitionScopeRef.current;
+      if (
+        previousTerminalScope &&
+        previousTerminalScope !== telemetryDedupeScope
+      ) {
+        resetAuthSessionRefreshProductImpactDedupe(previousTerminalScope);
+      }
       terminalAuthTransitionScopeRef.current = null;
     }
   } finally {
