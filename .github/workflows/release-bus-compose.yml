@@ -92,12 +92,24 @@ jobs:
               sed -i '1d' .release-bus/candidates.txt
             else
               has_conflict=true
+              printf '%s\n' "$sha" > .release-bus/conflicted-sha.txt
               git diff --name-only HEAD | sort -u > .release-bus/allowed-paths.txt
               git diff --name-only --diff-filter=U | sort -u > .release-bus/conflict-paths.txt
-              if grep -Eq '^(\.github/|AGENTS\.md$|ops/deployment-bus/|ops/skills/|bin/)' .release-bus/conflict-paths.txt; then
+              if grep -Eq '^(\.github/|AGENTS\.md$|ops/|bin/)' .release-bus/conflict-paths.txt; then
                 echo 'Codex is not allowed to resolve conflicts in deployment or instruction surfaces.' >&2
                 exit 1
               fi
+              comm -23 .release-bus/allowed-paths.txt .release-bus/conflict-paths.txt > .release-bus/non-conflict-paths.txt
+              while IFS= read -r path; do
+                if [ -L "$path" ]; then
+                  digest="symlink:$(readlink "$path")"
+                elif [ -f "$path" ]; then
+                  digest="file:$(git hash-object --no-filters "$path")"
+                else
+                  digest=missing
+                fi
+                printf '%s\t%s\n' "$path" "$digest"
+              done < .release-bus/non-conflict-paths.txt > .release-bus/non-conflict-hashes.txt
               break
             fi
           done < <(cp .release-bus/candidates.txt /tmp/release-bus-candidates && cat /tmp/release-bus-candidates)
@@ -136,6 +148,20 @@ jobs:
             unexpected="$(comm -13 .release-bus/allowed-paths.txt /tmp/actual-paths.txt)"
             test -z "$unexpected" || { echo "Codex changed unexpected paths: $unexpected" >&2; exit 1; }
             while IFS= read -r path; do
+              if [ -L "$path" ]; then
+                digest="symlink:$(readlink "$path")"
+              elif [ -f "$path" ]; then
+                digest="file:$(git hash-object --no-filters "$path")"
+              else
+                digest=missing
+              fi
+              printf '%s\t%s\n' "$path" "$digest"
+            done < .release-bus/non-conflict-paths.txt > /tmp/non-conflict-hashes.txt
+            cmp .release-bus/non-conflict-hashes.txt /tmp/non-conflict-hashes.txt || {
+              echo 'Codex changed an automatically merged non-conflict path.' >&2
+              exit 1
+            }
+            while IFS= read -r path; do
               if grep -En '^(<<<<<<<|=======|>>>>>>>)' "$path"; then
                 echo "Unresolved conflict marker in $path" >&2
                 exit 1
@@ -144,7 +170,11 @@ jobs:
             done < .release-bus/conflict-paths.txt
             test -z "$(git ls-files -u)"
             git diff --check --cached
-            current_sha="$(head -n1 .release-bus/candidates.txt)"
+            current_sha="$(cat .release-bus/conflicted-sha.txt)"
+            test "$current_sha" = "$(head -n1 .release-bus/candidates.txt)" || {
+              echo 'The recorded conflict is no longer the first pending candidate.' >&2
+              exit 1
+            }
             git config user.name "$RELEASE_BUS_GIT_NAME"
             git config user.email "$RELEASE_BUS_GIT_EMAIL"
             git -c core.hooksPath=/dev/null commit -s \
@@ -165,7 +195,7 @@ jobs:
               -m "Release-Bus-Revision: $TRAIN_REVISION"
           done < .release-bus/candidates.txt
           test -z "$(git ls-files -u)"
-          while IFS= read -r sha; do git merge-base --is-ancestor "$sha" HEAD; done < .release-bus/candidates.txt || true
+          while IFS= read -r sha; do git merge-base --is-ancestor "$sha" HEAD; done < .release-bus/candidates.txt
           git fsck --no-dangling
           git bundle create release-bus-composition.bundle HEAD "^$BASE_SHA"
       - name: Upload isolated composition

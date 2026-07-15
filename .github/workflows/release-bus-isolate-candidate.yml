@@ -90,7 +90,7 @@ jobs:
             while IFS= read -r sha; do
               git fetch --no-tags origin "$sha"
               git merge --no-ff --no-commit "$sha"
-              git -c core.hooksPath=/dev/null commit -m "Isolation merge $sha"
+              git -c core.hooksPath=/dev/null commit -s -m "Isolation merge $sha"
             done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
             corepack enable pnpm
             corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate

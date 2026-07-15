@@ -26,7 +26,7 @@ env:
 
 jobs:
   deploy-staging:
-    if: github.event_name != 'push' || !contains(github.event.head_commit.message, 'Release-Bus-Train:')
+    if: github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'Release-Bus-Train:')
     runs-on: ubuntu-latest
     timeout-minutes: 75
     permissions:
@@ -37,24 +37,24 @@ jobs:
       - name: Authorize operator break glass
         if: vars.RELEASE_BUS_ENFORCEMENT == 'true'
         env:
+          BREAK_GLASS_REASON: ${{ github.event_name == 'workflow_dispatch' && inputs.break_glass_reason || 'Direct 1a-staging branch update' }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
         run: |
           set -euo pipefail
-          reason='${{ github.event_name == 'workflow_dispatch' && inputs.break_glass_reason || 'Direct 1a-staging branch update' }}'
           test -n "$RELEASE_BUS_API_URL"
           test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN"
-          test -n "$reason" || {
+          test -n "$BREAK_GLASS_REASON" || {
             echo 'A break-glass reason is required while Release Bus enforcement is enabled.' >&2
             exit 1
           }
           payload="$(jq -n \
-            --arg actor '${{ github.actor }}' \
-            --arg workflow_run_id '${{ github.run_id }}' \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
             --arg repository frontend \
             --arg environment staging \
-            --arg reason "$reason" \
-            '{actor:$actor,workflow_run_id:$workflow_run_id,repository:$repository,environment:$environment,reason:$reason}')"
+            --arg expected_sha "$GITHUB_SHA" \
+            --arg reason "$BREAK_GLASS_REASON" \
+            '{workflow_run_id:$workflow_run_id,repository:$repository,environment:$environment,service:null,expected_sha:$expected_sha,reason:$reason}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \

@@ -124,7 +124,7 @@ jobs:
           object_key="release-bus/${TRAIN_ID}/r${TRAIN_REVISION}/staging/frontend/${EXPECTED_SHA}.zip"
           aws s3 cp release-bus-artifact/target/package.zip "s3://${ARTIFACT_BUCKET}/${object_key}" \
             --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
-          url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" --expires-in 3600)"
+          url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" --expires-in 7200)"
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Deploy immutable bundle through SSM
         id: send-command
@@ -138,32 +138,28 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$INSTANCE_ID"
-          artifact_url_q="$(printf '%q' "$ARTIFACT_URL")"
-          digest_q="$(printf '%q' "$EXPECTED_DIGEST")"
-          sha_q="$(printf '%q' "$EXPECTED_SHA")"
-          repo_q="$(printf '%q' "$REPO_DIR")"
-          run_as_q="$(printf '%q' "$RUN_AS")"
-          remote_script="$(cat <<REMOTE
+          {
+            printf 'ARTIFACT_URL=%q\n' "$ARTIFACT_URL"
+            printf 'EXPECTED_DIGEST=%q\n' "$EXPECTED_DIGEST"
+            printf 'EXPECTED_SHA=%q\n' "$EXPECTED_SHA"
+            printf 'REPO_DIR=%q\n' "$REPO_DIR"
+            printf 'RUN_AS=%q\n' "$RUN_AS"
+            cat <<'REMOTE'
           set -euo pipefail
-          ARTIFACT_URL=$artifact_url_q
-          EXPECTED_DIGEST=$digest_q
-          EXPECTED_SHA=$sha_q
-          REPO_DIR=$repo_q
-          RUN_AS=$run_as_q
-          release_root=\"\$REPO_DIR/.release-bus\"
-          release_dir=\"\$release_root/releases/\$EXPECTED_SHA\"
-          current_link=\"\$release_root/current\"
-          previous_target=\"\$(readlink \"\$current_link\" 2>/dev/null || true)\"
-          install -d -o \"\$RUN_AS\" -g \"\$RUN_AS\" \"\$release_dir\"
-          curl --fail --silent --show-error --location \"\$ARTIFACT_URL\" -o \"\$release_dir/package.zip\"
-          echo \"\$EXPECTED_DIGEST  \$release_dir/package.zip\" | sha256sum -c -
-          rm -rf \"\$release_dir/app\"
-          install -d -o \"\$RUN_AS\" -g \"\$RUN_AS\" \"\$release_dir/app\"
-          unzip -q \"\$release_dir/package.zip\" -d \"\$release_dir/app\"
-          test -f \"\$release_dir/app/server.js\"
-          chown -R \"\$RUN_AS:\$RUN_AS\" \"\$release_dir\"
-          ln -sfn \"\$release_dir/app\" \"\$current_link\"
-          cat > \"\$release_root/ecosystem.config.cjs\" <<'PM2_CONFIG'
+          release_root="$REPO_DIR/.release-bus"
+          release_dir="$release_root/releases/$EXPECTED_SHA"
+          current_link="$release_root/current"
+          previous_target="$(readlink "$current_link" 2>/dev/null || true)"
+          install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"
+          curl --fail --silent --show-error --location "$ARTIFACT_URL" -o "$release_dir/package.zip"
+          echo "$EXPECTED_DIGEST  $release_dir/package.zip" | sha256sum -c -
+          rm -rf "$release_dir/app"
+          install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir/app"
+          unzip -q "$release_dir/package.zip" -d "$release_dir/app"
+          test -f "$release_dir/app/server.js"
+          chown -R "$RUN_AS:$RUN_AS" "$release_dir"
+          ln -sfn "$release_dir/app" "$current_link"
+          cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
           module.exports = {
             apps: [{
               name: '6529seize',
@@ -175,18 +171,28 @@ jobs:
             }]
           };
           PM2_CONFIG
-          chown \"\$RUN_AS:\$RUN_AS\" \"\$release_root/ecosystem.config.cjs\"
-          if ! sudo -H -u \"\$RUN_AS\" pm2 startOrReload \"\$release_root/ecosystem.config.cjs\" --only 6529seize --update-env; then
-            if [ -n \"\$previous_target\" ]; then
-              ln -sfn \"\$previous_target\" \"\$current_link\"
-              sudo -H -u \"\$RUN_AS\" pm2 startOrReload \"\$release_root/ecosystem.config.cjs\" --only 6529seize --update-env || true
+          chown "$RUN_AS:$RUN_AS" "$release_root/ecosystem.config.cjs"
+          if ! sudo -H -u "$RUN_AS" pm2 startOrReload "$release_root/ecosystem.config.cjs" --only 6529seize --update-env; then
+            if [ -n "$previous_target" ]; then
+              ln -sfn "$previous_target" "$current_link"
+              if ! sudo -H -u "$RUN_AS" pm2 startOrReload "$release_root/ecosystem.config.cjs" --only 6529seize --update-env; then
+                echo 'CRITICAL: staging deploy and rollback reload both failed.' >&2
+                exit 2
+              fi
+            else
+              rm -f "$current_link"
+              sudo -H -u "$RUN_AS" pm2 delete 6529seize || true
+              echo 'Staging deploy failed and no prior release exists to restore.' >&2
             fi
             exit 1
           fi
-          sudo -H -u \"\$RUN_AS\" pm2 save
+          sudo -H -u "$RUN_AS" pm2 save
           REMOTE
-          )"
-          jq -n --arg command "$remote_script" '{commands:[$command],executionTimeout:["2400"]}' > ssm-parameters.json
+          } > remote-script.sh
+          bash -n remote-script.sh
+          script_base64="$(base64 < remote-script.sh | tr -d '\n')"
+          remote_command="printf '%s' '$script_base64' | base64 --decode | bash"
+          jq -n --arg command "$remote_command" '{commands:[$command],executionTimeout:["2400"]}' > ssm-parameters.json
           command_id="$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name AWS-RunShellScript \

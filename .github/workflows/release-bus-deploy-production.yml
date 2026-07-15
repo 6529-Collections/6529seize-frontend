@@ -211,6 +211,8 @@ jobs:
             aws cloudfront create-invalidation \
               --distribution-id "$distribution_id" \
               --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}"
+          else
+            echo "Warning: no CloudFront distribution matched $cdn_host; announced-version invalidation was skipped." >&2
           fi
       - name: Upload deployment evidence
         if: always()

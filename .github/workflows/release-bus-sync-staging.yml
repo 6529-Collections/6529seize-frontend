@@ -90,7 +90,7 @@ jobs:
           git config user.email "$RELEASE_BUS_GIT_EMAIL"
           git merge --no-ff --no-commit "$MAIN_SHA"
           git commit -s \
-            -m "Sync main after release train $TRAIN_ID" \
             -m "Release-Bus-Train: $TRAIN_ID" \
+            -m "Sync main after release train $TRAIN_ID" \
             -m "Release-Bus-Revision: $TRAIN_REVISION"
           git push origin HEAD:refs/heads/1a-staging

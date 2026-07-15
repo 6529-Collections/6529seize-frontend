@@ -12,8 +12,7 @@ on:
       deploy_units: { type: string, required: true }
       expected_sha: { type: string, required: true }
 
-permissions:
-  contents: read
+permissions: {}
 
 run-name: Preflight frontend train ${{ inputs.release_train_id }} [${{ inputs.operation_key }}]
 
@@ -49,6 +48,8 @@ jobs:
     needs: authorize
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
     strategy:
       fail-fast: true
       matrix:
