@@ -9,6 +9,11 @@ import { useNextMintDrop } from "@/hooks/useNextMintDrop";
 import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import NotFound from "@/components/not-found/NotFound";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { useSyncExternalStore } from "react";
+
+const subscribeToClientRender = () => () => {};
+const getClientRenderSnapshot = () => true;
+const getServerRenderSnapshot = () => false;
 
 function GenericUpcomingMemePage({
   id,
@@ -47,7 +52,12 @@ function CanonicalUpcomingMemePage({
     nextMintExists: !!nextMint,
   });
   const mappedMemeCardId = nextMint?.submission_context?.meme_card_id;
-  const isMatchingRevealedDrop = shouldShowNextMint && mappedMemeCardId === id;
+  const normalizedMemeCardId = Number(mappedMemeCardId);
+  const isMatchingRevealedDrop =
+    shouldShowNextMint &&
+    Number.isSafeInteger(normalizedMemeCardId) &&
+    normalizedMemeCardId >= 1 &&
+    normalizedMemeCardId === id;
 
   if (!isDecisionReady) {
     return (
@@ -90,9 +100,14 @@ export default function UpcomingMemePage({
   readonly locale?: SupportedLocale;
 }) {
   const numId = Number(id);
+  const isClientHydrated = useSyncExternalStore(
+    subscribeToClientRender,
+    getClientRenderSnapshot,
+    getServerRenderSnapshot
+  );
   if (Number.isInteger(numId)) {
     const content =
-      numId === getCanonicalNextMintNumber() ? (
+      isClientHydrated && numId === getCanonicalNextMintNumber() ? (
         <CanonicalUpcomingMemePage id={numId} locale={locale} />
       ) : (
         <GenericUpcomingMemePage id={numId} locale={locale} />

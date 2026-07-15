@@ -161,4 +161,21 @@ describe("UpcomingMemePage", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("upcoming-mint-calendar")).toBeInTheDocument();
   });
+
+  it("reserves the artwork panel until the Main Stage settings load", () => {
+    mockGetCanonicalNextMintNumber.mockReturnValue(519);
+    mockUseNextMintDrop.mockReturnValue({
+      nextMint: null,
+      waveId: null,
+      isFetching: false,
+      isSettingsLoaded: false,
+    });
+
+    render(<UpcomingMemePage id="519" />);
+
+    expect(
+      screen.getByTestId("revealed-next-mint-panel-skeleton")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("upcoming-mint-calendar")).toBeInTheDocument();
+  });
 });

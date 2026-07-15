@@ -9,18 +9,19 @@ import {
 import {
   formatFullDateTime,
   getCanonicalNextMintNumber,
-  getNextMintStart,
+  getMintTimelineDetails,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatDate, formatInteger, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 import ArtistPill from "./ArtistPill";
 import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 import NowMintingStatsItem from "./NowMintingStatsItem";
@@ -40,17 +41,24 @@ const formatDropTimestamp = (
     return null;
   }
 
-  const dateLabel = new Intl.DateTimeFormat(locale, {
+  const dateLabel = formatDate(locale, date, {
     month: "short",
     day: "numeric",
-  }).format(date);
-  const timeLabel = new Intl.DateTimeFormat(locale, {
+  });
+  const timeLabel = formatTime(locale, date, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  }).format(date);
+  });
 
   return `${dateLabel} · ${timeLabel}`;
+};
+
+const getMinuteClockSnapshot = () => Math.floor(Date.now() / 60_000);
+const getServerMinuteClockSnapshot = () => null;
+const subscribeToMinuteClock = (onStoreChange: () => void) => {
+  const intervalId = globalThis.setInterval(onStoreChange, 60_000);
+  return () => globalThis.clearInterval(intervalId);
 };
 
 export function LatestDropNextMintPanelSkeleton() {
@@ -69,8 +77,8 @@ export function LatestDropNextMintPanelSkeleton() {
             </div>
             <div className="tw-h-32 tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-800/50" />
             <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-              {Array.from({ length: 4 }, (_, index) => (
-                <div key={index} className="tw-space-y-2">
+              {["wave", "mint-date", "submitted", "rating"].map((stat) => (
+                <div key={stat} className="tw-space-y-2">
                   <div className="tw-h-4 tw-w-16 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
                   <div className="tw-h-6 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
                 </div>
@@ -101,26 +109,42 @@ export default function LatestDropNextMintPanel({
     drop.title ??
     drop.metadata.find((metadata) => metadata.data_key === "title")
       ?.data_value ??
-    "Untitled";
+    t(locale, "home.nextMint.untitled");
   const author = drop.author;
   const authorHandle = author.handle ?? author.primary_address;
-  const authorName = author.handle ?? "Anonymous";
+  const authorName = author.handle ?? t(locale, "home.nextMint.anonymous");
   const submittedAt = formatDropTimestamp(drop.created_at, locale);
   const description =
     drop.metadata.find((metadata) => metadata.data_key === "description")
       ?.data_value ?? null;
-  const now = new Date();
-  const nextMintStart = getNextMintStart(now);
-  const canonicalNextMintNumber = getCanonicalNextMintNumber(now);
-  const nextMintDateTime = formatFullDateTime(nextMintStart, "local", locale);
   const mappedMemeCardId = drop.submission_context?.meme_card_id;
   const hasMappedMemeCard = isValidMemeCardId(mappedMemeCardId);
+  const minuteClock = useSyncExternalStore(
+    subscribeToMinuteClock,
+    getMinuteClockSnapshot,
+    getServerMinuteClockSnapshot
+  );
+  const fallbackNow =
+    minuteClock === null ? null : new Date(minuteClock * 60_000);
   const subscriptionTokenId = hasMappedMemeCard
     ? mappedMemeCardId
-    : canonicalNextMintNumber;
+    : fallbackNow
+      ? getCanonicalNextMintNumber(fallbackNow)
+      : null;
+  const nextMintStart = subscriptionTokenId
+    ? getMintTimelineDetails(subscriptionTokenId).instantUtc
+    : null;
+  const nextMintDateTime = nextMintStart
+    ? formatFullDateTime(nextMintStart, "local", locale)
+    : "—";
   const nextMintLabel = hasMappedMemeCard
     ? nextMintDateTime
-    : `Card #${canonicalNextMintNumber} - ${nextMintDateTime}`;
+    : subscriptionTokenId
+      ? t(locale, "home.nextMint.cardSchedule", {
+          number: formatInteger(locale, subscriptionTokenId),
+          date: nextMintDateTime,
+        })
+      : "—";
 
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950">
@@ -141,7 +165,9 @@ export default function LatestDropNextMintPanel({
                 />
               ) : (
                 <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">
-                  <span className="tw-text-sm tw-text-white/40">No image</span>
+                  <span className="tw-text-sm tw-text-white/40">
+                    {t(locale, "home.nextMint.noImage")}
+                  </span>
                 </div>
               )}
             </div>
@@ -155,7 +181,7 @@ export default function LatestDropNextMintPanel({
                 <div className="tw-flex tw-items-center tw-gap-2">
                   <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
                   <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-emerald-400">
-                    NEXT MINT
+                    {t(locale, "home.nextMint.status")}
                   </span>
                 </div>
                 <MainStageMemeCardPill
@@ -201,15 +227,17 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
 
-              <div className="tw-mt-4">
-                <LatestDropNextMintSubscribe tokenId={subscriptionTokenId} />
-              </div>
+              {subscriptionTokenId && (
+                <div className="tw-mt-4">
+                  <LatestDropNextMintSubscribe tokenId={subscriptionTokenId} />
+                </div>
+              )}
             </div>
 
             <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4">
               <div className="tw-col-span-2">
                 <NowMintingStatsItem
-                  label="Wave"
+                  label={t(locale, "home.nextMint.stats.wave")}
                   allowWrap
                   value={
                     <Link
@@ -243,12 +271,12 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
               <NowMintingStatsItem
-                label="Submitted"
+                label={t(locale, "home.nextMint.stats.submitted")}
                 value={submittedAt ?? "—"}
               />
               <NowMintingStatsItem
-                label="Rating"
-                value={`${formatNumberWithCommas(drop.rating)} TDH`}
+                label={t(locale, "home.nextMint.stats.rating")}
+                value={`${formatInteger(locale, drop.rating)} TDH`}
               />
             </div>
           </div>

@@ -1341,6 +1341,14 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
+  "home.nextMint.status": "Next mint",
+  "home.nextMint.cardSchedule": "Card #{number} - {date}",
+  "home.nextMint.noImage": "No image",
+  "home.nextMint.untitled": "Untitled",
+  "home.nextMint.anonymous": "Anonymous",
+  "home.nextMint.stats.wave": "Wave",
+  "home.nextMint.stats.submitted": "Submitted",
+  "home.nextMint.stats.rating": "Rating",
   "waveChat.boostedDrops.display.description":
     "How boosted-drop cards show in chat.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
