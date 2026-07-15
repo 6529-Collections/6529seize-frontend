@@ -10,7 +10,7 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
-import { ArchiveBoxIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
@@ -19,7 +19,7 @@ import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 const HISTORY_PAGE_SIZE = 10;
 const HISTORY_ENTRY_CLASS =
-  "tw-min-w-0 tw-rounded-lg tw-bg-white/[0.02] tw-p-3 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-white/[0.04]";
+  "tw-min-w-0 tw-rounded-xl tw-px-4 tw-py-3.5 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40";
 
 function getSubscriptionLogKey(log: SubscriptionLog, index: number): string {
   return log.id === undefined
@@ -44,9 +44,9 @@ export default function UserPageSubscriptionsHistory(
     <UserPageSubscriptionsSection
       id="profile-subscriptions-history"
       title="Subscription History"
-      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-8"
     >
-      <div className="tw-divide-y tw-divide-solid tw-divide-white/5 tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-1.5 tw-shadow-lg tw-ring-1 tw-ring-white/[0.05]">
+      <div className="tw-space-y-8">
         <HistoryDisclosure
           title="Redeemed Subscriptions"
           loading={props.redeemedLoading === true}
@@ -120,7 +120,11 @@ function HistoryDisclosure({
   pagination: ReactNode;
   children: ReactNode;
 }>) {
-  let content: ReactNode = <div className="tw-space-y-2">{children}</div>;
+  let content: ReactNode = (
+    <div className="tw-flex tw-flex-col tw-rounded-xl tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-white/[0.03]">
+      {children}
+    </div>
+  );
   if (loading) {
     content = <HistoryLoadingState title={title} />;
   } else if (isEmpty) {
@@ -129,14 +133,16 @@ function HistoryDisclosure({
 
   return (
     <details className="tw-group" aria-busy={loading} open>
-      <summary className="tw-flex tw-min-h-14 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.02] desktop-hover:hover:tw-text-white [&::-webkit-details-marker]:tw-hidden">
-        {title}
+      <summary className="tw-mb-3 tw-flex tw-min-h-8 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-1 tw-py-1 tw-text-left focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 [&::-webkit-details-marker]:tw-hidden">
+        <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-500">
+          {title}
+        </h3>
         <ChevronDownIcon
-          className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-180"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-iron-600 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
           aria-hidden="true"
         />
       </summary>
-      <div className="tw-px-3 tw-pb-3">
+      <div>
         {content}
         {!loading && pagination}
       </div>
@@ -146,7 +152,7 @@ function HistoryDisclosure({
 
 function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
   return (
-    <div className="tw-flex tw-min-h-20 tw-animate-pulse tw-items-center tw-rounded-lg tw-bg-white/[0.02] tw-p-4">
+    <div className="tw-flex tw-min-h-[68px] tw-animate-pulse tw-items-center tw-rounded-xl tw-bg-iron-950/50 tw-p-6 tw-ring-1 tw-ring-white/[0.02]">
       <output className="tw-sr-only">Loading {title}</output>
       <div
         aria-hidden="true"
@@ -158,12 +164,8 @@ function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
 
 function HistoryEmptyState({ children }: { readonly children: ReactNode }) {
   return (
-    <div className="tw-flex tw-min-h-20 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-white/[0.02] tw-p-4 tw-text-center">
-      <ArchiveBoxIcon
-        className="tw-size-5 tw-text-iron-500"
-        aria-hidden="true"
-      />
-      <span className="tw-text-sm tw-text-iron-400">{children}</span>
+    <div className="tw-flex tw-min-h-[68px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-950/50 tw-p-6 tw-text-center tw-ring-1 tw-ring-white/[0.02]">
+      <span className="tw-text-sm tw-text-iron-600">{children}</span>
     </div>
   );
 }
@@ -200,20 +202,23 @@ function TopUpEntry(
 ) {
   return (
     <div className={HISTORY_ENTRY_CLASS}>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1 sm:tw-flex-row sm:tw-items-center sm:tw-gap-3">
-          <span className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+          <span className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-text-iron-200">
             <b>+ {props.topUp.amount}</b>
-            <span className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
+            <span className="tw-flex tw-h-4 tw-w-2.5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-500">
               <EthereumIcon />
             </span>
           </span>
-          <span className="tw-break-all tw-text-sm tw-text-iron-300">
+          <span className="tw-break-all tw-text-xs tw-text-iron-500">
+            <span aria-hidden="true" className="tw-hidden sm:tw-inline">
+              —{" "}
+            </span>
             from: {props.topUp.from_wallet}
           </span>
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
-          <span className="tw-text-sm tw-text-iron-400">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-600">
             {getDateDisplay(new Date(props.topUp.transaction_date))}
           </span>
           <a
@@ -240,17 +245,19 @@ function LogEntry(
 ) {
   return (
     <div className={HISTORY_ENTRY_CLASS}>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-min-w-0 tw-space-y-1">
-          <div className="tw-break-words tw-text-iron-200">{props.log.log}</div>
+          <div className="tw-break-words tw-text-sm tw-text-iron-200">
+            {props.log.log}
+          </div>
           {props.log.additional_info && (
-            <div className="tw-break-words tw-text-sm tw-text-iron-400">
+            <div className="tw-break-words tw-text-xs tw-text-iron-500">
               {props.log.additional_info}
             </div>
           )}
         </div>
         {props.log.created_at && (
-          <span className="tw-flex-shrink-0 tw-text-sm tw-text-iron-400">
+          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-sm tw-text-iron-600">
             {getDateDisplay(new Date(props.log.created_at))}
           </span>
         )}
@@ -272,20 +279,20 @@ function RedeemedEntry(
 
   return (
     <div className={HISTORY_ENTRY_CLASS}>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-min-w-0 tw-space-y-1">
-          <div className="tw-break-words tw-text-iron-200">
+          <div className="tw-break-words tw-text-sm tw-text-iron-200">
             Redeemed Subscription for {contractName} #{props.redeem.token_id} x
             {props.redeem.count}
           </div>
-          <div className="tw-break-words tw-text-sm tw-text-iron-400">
+          <div className="tw-break-words tw-text-xs tw-text-iron-500">
             Airdrop Address: {formatAddress(props.redeem.address)} - Balance
             after redemption: {props.redeem.balance_after} ETH
           </div>
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
           {transactionDate && (
-            <span className="tw-text-sm tw-text-iron-400">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-600">
               {getDateDisplay(new Date(transactionDate))}
             </span>
           )}

@@ -20,7 +20,7 @@ export default function UserPageSubscriptionsSection({
       aria-labelledby={titleId}
       className={`tw-min-w-0 ${className ?? ""}`}
     >
-      <div className="tw-mb-5 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-4">
+      <div className="tw-mb-5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
         <h2
           id={titleId}
           className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-100"
@@ -28,7 +28,7 @@ export default function UserPageSubscriptionsSection({
           {title}
         </h2>
         {action !== undefined && (
-          <div className="tw-min-w-0 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400 sm:tw-text-right">
+          <div className="tw-max-w-full tw-flex-none tw-text-right tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
             {action}
           </div>
         )}

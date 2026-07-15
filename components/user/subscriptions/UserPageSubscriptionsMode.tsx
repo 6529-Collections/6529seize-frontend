@@ -1,9 +1,6 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
@@ -78,14 +75,14 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <div className="tw-group tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 tw-p-1 sm:tw-gap-5">
-      <div className="tw-min-w-0 tw-pr-2 sm:tw-pr-6">
-        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
-          <h3 className="tw-m-0 tw-text-[15px] tw-font-medium tw-leading-5 tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
+    <div className="tw-min-w-0 tw-p-1">
+      <div className="tw-min-w-0">
+        <div className="tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3">
+          <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
             Mode
           </h3>
           {props.details && props.details.last_update > 0 && (
-            <span className="tw-text-[11px] tw-font-medium tw-text-iron-500">
+            <span className="tw-ml-auto tw-whitespace-nowrap tw-text-right tw-text-xs tw-font-normal tw-text-iron-600">
               {new Date(props.details.last_update).toLocaleString("en-US", {
                 day: "numeric",
                 month: "short",
@@ -99,34 +96,43 @@ export default function UserPageSubscriptionsMode(
             </span>
           )}
         </div>
+        <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-gap-2.5">
+          <label
+            htmlFor="subscription-mode"
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
+              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+            } ${isAuto ? "tw-text-iron-500" : "tw-text-iron-100"}`}
+          >
+            Manual
+          </label>
+          <UserPageSubscriptionsToggle
+            disabled={isDisabled}
+            id="subscription-mode"
+            checked={isAuto}
+            onChange={toggleMode}
+            ariaLabel="Automatic subscription mode"
+            describedBy={props.readonly ? undefined : descriptionId}
+          />
+          <label
+            htmlFor="subscription-mode"
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
+              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+            } ${isAuto ? "tw-text-iron-100" : "tw-text-iron-500"}`}
+          >
+            Automatic
+          </label>
+        </div>
+      </div>
+      {!props.readonly && (
         <p
           id={descriptionId}
-          className="tw-mb-0 tw-mt-1.5 tw-text-[13px] tw-font-light tw-leading-relaxed tw-text-iron-400"
+          className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-light tw-leading-relaxed tw-text-iron-500"
         >
-          <span className="tw-font-medium tw-text-iron-200">
-            {isAuto ? "Automatic" : "Manual"}
-          </span>
-          {!props.readonly && (
-            <>
-              <span aria-hidden="true"> · </span>
-              {isAuto
-                ? "Airdrops all eligible drops unless you opt out"
-                : "Opt in to each specific drop"}
-            </>
-          )}
+          {isAuto
+            ? "Automatic airdrops of all eligible drops unless you opt-out"
+            : "You have to opt-in to each specific drop"}
         </p>
-      </div>
-      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-        <UserPageSubscriptionsToggle
-          disabled={isDisabled}
-          id="subscription-mode"
-          checked={isAuto}
-          onChange={toggleMode}
-          ariaLabel="Automatic subscription mode"
-          describedBy={props.readonly ? undefined : descriptionId}
-        />
-        {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
-      </div>
+      )}
     </div>
   );
 }

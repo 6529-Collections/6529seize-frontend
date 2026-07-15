@@ -14,6 +14,7 @@ import MemeSubscriptionRow from "./MemeSubscriptionRow";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 const UPCOMING_SKELETON_ROWS = ["first", "second", "third"] as const;
+const SHOW_MORE_WRAPPER_CLASS = "tw-mt-3 tw-flex tw-justify-center tw-pb-1";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
@@ -47,44 +48,37 @@ export default function UserPageSubscriptionsUpcoming(
   let content: ReactNode;
   if (props.loading) {
     content = (
-      <div aria-busy="true" className="tw-space-y-2 tw-p-1.5">
+      <div aria-busy="true" className="tw-space-y-1 tw-p-1">
         <output className="tw-sr-only">Loading upcoming drops</output>
         {UPCOMING_SKELETON_ROWS.map((row) => (
           <div
             key={row}
             aria-hidden="true"
-            className="tw-h-[4.5rem] tw-animate-pulse tw-rounded-lg tw-bg-iron-900/70"
+            className="tw-h-[4.5rem] tw-animate-pulse tw-rounded-xl tw-bg-iron-900/70"
           />
         ))}
       </div>
     );
   } else if (subscriptions.length > 0) {
     content = (
-      <>
-        <div className="tw-space-y-1 tw-p-1.5">
-          {subscriptions.map((subscription, index) => (
-            <MemeSubscriptionRow
-              key={subscription.token_id}
-              profileKey={props.profileKey}
-              title="The Memes"
-              subscription={subscription}
-              eligibilityCount={
-                props.details?.subscription_eligibility_count ?? 1
-              }
-              readonly={props.readonly}
-              refresh={props.refresh}
-              minting_today={index === 0 && isMintingToday()}
-              first={index === 0}
-              date={rows[index] ?? null}
-            />
-          ))}
-        </div>
-        {props.memes_subscriptions.length > 3 && (
-          <div className="tw-mt-3 tw-pb-3 tw-text-center">
-            <ShowMoreButton expanded={expanded} setExpanded={setExpanded} />
-          </div>
-        )}
-      </>
+      <div className="tw-flex tw-flex-col tw-p-1">
+        {subscriptions.map((subscription, index) => (
+          <MemeSubscriptionRow
+            key={subscription.token_id}
+            profileKey={props.profileKey}
+            title="The Memes"
+            subscription={subscription}
+            eligibilityCount={
+              props.details?.subscription_eligibility_count ?? 1
+            }
+            readonly={props.readonly}
+            refresh={props.refresh}
+            minting_today={index === 0 && isMintingToday()}
+            first={index === 0}
+            date={rows[index] ?? null}
+          />
+        ))}
+      </div>
     );
   } else {
     content = (
@@ -104,11 +98,24 @@ export default function UserPageSubscriptionsUpcoming(
     <UserPageSubscriptionsSection
       id="profile-subscriptions-upcoming"
       title="Upcoming Drops"
-      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-8"
     >
-      <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.05]">
-        {content}
-      </div>
+      <>
+        <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
+          {content}
+        </div>
+        {!props.loading &&
+          subscriptions.length > 0 &&
+          props.memes_subscriptions.length > 3 && (
+            <div className={SHOW_MORE_WRAPPER_CLASS}>
+              <ShowMoreButton
+                expanded={expanded}
+                setExpanded={setExpanded}
+                variant="subtle"
+              />
+            </div>
+          )}
+      </>
     </UserPageSubscriptionsSection>
   );
 }

@@ -1,8 +1,8 @@
 import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import { faEdit } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 
@@ -28,14 +28,39 @@ export default function UserPageSubscriptionsAirdropAddress(
 
   return (
     <div className="tw-min-w-0">
-      <h3 className="tw-m-0 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
-        Airdrop Address
-      </h3>
+      <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3">
+        <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+          Airdrop Address
+        </h3>
+        {airdropAddress && props.show_edit && (
+          <>
+            <Link
+              href={editHref}
+              aria-label="Change airdrop address"
+              data-tooltip-id="subscriptions-change-airdrop-address"
+              className="tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+            >
+              <PencilSquareIcon className="tw-size-4" aria-hidden="true" />
+            </Link>
+            <Tooltip
+              id="subscriptions-change-airdrop-address"
+              place="top"
+              positionStrategy="fixed"
+              offset={8}
+              delayShow={250}
+              opacity={1}
+              style={TOOLTIP_STYLES}
+            >
+              Change airdrop address
+            </Tooltip>
+          </>
+        )}
+      </div>
       <div className="tw-mt-2 tw-min-h-8">
         {props.fetching ? (
           <DotLoader />
         ) : (
-          <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3">
+          <div className="tw-min-w-0">
             {airdropAddress && (
               <span className="tw-min-w-0 tw-break-all">
                 {airdropAddress.ens && (
@@ -64,19 +89,6 @@ export default function UserPageSubscriptionsAirdropAddress(
                   {airdropAddress.address}
                 </Tooltip>
               </span>
-            )}
-            {airdropAddress && props.show_edit && (
-              <Link
-                href={editHref}
-                aria-label="Change airdrop address"
-                className="tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-              >
-                <FontAwesomeIcon
-                  icon={faEdit}
-                  className="tw-size-4"
-                  aria-hidden="true"
-                />
-              </Link>
             )}
             {!airdropAddress && (
               <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">

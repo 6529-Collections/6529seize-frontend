@@ -14,6 +14,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -21,6 +22,9 @@ import SubscriptionHeaderLinks, {
   SubscriptionBalanceLabel,
 } from "./SubscriptionHeaderLinks";
 import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
+
+const SUBSCRIPTION_COUNT_SELECT_CLASS =
+  "tw-h-10 tw-w-12 tw-appearance-none tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-5 tw-text-sm tw-leading-none tw-text-iron-200 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-text-iron-500";
 
 export default function MemeSubscriptionRow(
   props: Readonly<{
@@ -240,41 +244,49 @@ export default function MemeSubscriptionRow(
   };
 
   const renderCountSelector = ({
-    selectClassName,
     disableWhenSingleOption,
   }: {
-    selectClassName: string;
     disableWhenSingleOption: boolean;
   }) => {
     if (!subscribed) {
       return null;
     }
 
+    const isCountSelectDisabled =
+      (disableWhenSingleOption && props.eligibilityCount <= 1) ||
+      props.readonly ||
+      isSubmitting ||
+      props.minting_today;
+
     return (
-      <>
-        <select
-          className={selectClassName}
-          value={selectedCount}
-          disabled={
-            (disableWhenSingleOption && props.eligibilityCount <= 1) ||
-            props.readonly ||
-            isSubmitting ||
-            props.minting_today
-          }
-          onChange={(e) => {
-            handleCountChange(e.target.value).catch(() => undefined);
-          }}
-          style={{ minWidth: "3ch" }}
-          aria-label={`Select subscription quantity for ${props.title}`}
-        >
-          {countOptions.map((num) => (
-            <option key={num} value={num}>
-              {num}
-            </option>
-          ))}
-        </select>
-        <span className="tw-text-iron-400">/ {props.eligibilityCount}</span>
-      </>
+      <span className="tw-inline-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-rounded-xl tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/[0.03] tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400/25">
+        <span className="tw-relative tw-inline-flex tw-items-center">
+          <select
+            className={SUBSCRIPTION_COUNT_SELECT_CLASS}
+            value={selectedCount}
+            disabled={isCountSelectDisabled}
+            onChange={(e) => {
+              handleCountChange(e.target.value).catch(() => undefined);
+            }}
+            aria-label={`Select subscription quantity for ${props.title}`}
+          >
+            {countOptions.map((num) => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
+          </select>
+          <ChevronDownIcon
+            className={`tw-pointer-events-none tw-absolute tw-right-0.5 tw-size-4 ${
+              isCountSelectDisabled ? "tw-text-iron-600" : "tw-text-iron-500"
+            }`}
+            aria-hidden="true"
+          />
+        </span>
+        <span className="tw-pl-1 tw-pr-3 tw-text-sm tw-leading-none tw-text-iron-500">
+          / {props.eligibilityCount}
+        </span>
+      </span>
     );
   };
 
@@ -312,8 +324,6 @@ export default function MemeSubscriptionRow(
               />
               <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
                 {renderCountSelector({
-                  selectClassName:
-                    "tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2 tw-py-1 tw-text-iron-300 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25",
                   disableWhenSingleOption: false,
                 })}
               </span>
@@ -355,23 +365,25 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-rounded-lg tw-p-3 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none">
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+    <div className="tw-rounded-xl tw-p-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none">
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <span className="tw-font-medium tw-text-iron-100">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+            <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
               {props.title} #{props.subscription.token_id}
             </span>
             {props.date && (
-              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-text-iron-300">
-                <span>
+              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-xs tw-leading-4">
+                <span className="tw-text-iron-500">
                   SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
                 </span>
-                <span aria-hidden="true">·</span>
+                <span className="tw-text-iron-600" aria-hidden="true">
+                  /
+                </span>
                 {props.minting_today ? (
                   <>
                     <span
-                      className="tw-inline-flex tw-items-center tw-gap-1"
+                      className="tw-inline-flex tw-items-center tw-gap-1 tw-font-medium tw-text-primary-300"
                       data-tooltip-id={`minting-today-${props.subscription.token_id}`}
                     >
                       Minting Today
@@ -394,13 +406,15 @@ export default function MemeSubscriptionRow(
                     </Tooltip>
                   </>
                 ) : (
-                  <span>{formatFullDate(props.date.utcDay, "utc")}</span>
+                  <span className="tw-text-iron-600">
+                    {formatFullDate(props.date.utcDay, "utc")}
+                  </span>
                 )}
               </span>
             )}
           </div>
           {finalWithMetadata && (
-            <span className="tw-break-words tw-text-sm tw-leading-5 tw-text-iron-400">
+            <span className="tw-break-words tw-text-xs tw-leading-5 tw-text-iron-600">
               Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
               {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
               {finalWithMetadata.phaseSubscriptions.toLocaleString()} - Airdrop
@@ -409,7 +423,7 @@ export default function MemeSubscriptionRow(
             </span>
           )}
         </div>
-        <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3 sm:tw-w-auto">
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3">
           {isSubmitting && <Spinner />}
           <UserPageSubscriptionsToggle
             disabled={isToggleDisabled}
@@ -421,8 +435,6 @@ export default function MemeSubscriptionRow(
           {subscribed && (
             <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
               {renderCountSelector({
-                selectClassName:
-                  "tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2 tw-py-1 tw-text-iron-300 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25",
                 disableWhenSingleOption: true,
               })}
             </span>

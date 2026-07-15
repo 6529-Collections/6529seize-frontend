@@ -16,6 +16,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
   displayedEonNumberFromIndex,
   displayedEpochNumberFromIndex,
@@ -66,18 +67,10 @@ const TOP_UP_OPTION_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4";
 const TOP_UP_DEEP_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-3";
-const TOP_UP_ACTION_GRID_CLASS =
-  "tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end";
-const TOP_UP_OPTION_CLASS =
-  "tw-group tw-relative tw-min-h-36 tw-w-full tw-overflow-hidden tw-rounded-xl tw-p-5 tw-text-left tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-inset tw-transition-all tw-duration-500 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none focus-within:tw-ring-2 focus-within:tw-ring-primary-400 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-shadow-2xl desktop-hover:hover:tw-shadow-black/50";
-
-function getTopUpOptionClass(selected: boolean): string {
-  return `${TOP_UP_OPTION_CLASS} ${
-    selected
-      ? "tw-bg-iron-900 tw-shadow-2xl tw-ring-white/10"
-      : "tw-bg-iron-950 tw-ring-white/[0.05]"
-  }`;
-}
+const TOP_UP_OPTION_SURFACE_CLASS =
+  "tw-group tw-relative tw-overflow-hidden tw-rounded-xl tw-text-left tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-inset";
+const TOP_UP_OPTION_CLASS = `${TOP_UP_OPTION_SURFACE_CLASS} tw-w-full tw-p-4 tw-transition-all tw-duration-500 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-shadow-2xl desktop-hover:hover:tw-shadow-black/50`;
+const TOP_UP_CUSTOM_OPTION_CLASS = `${TOP_UP_OPTION_SURFACE_CLASS} tw-w-full tw-px-3 tw-py-2`;
 
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
@@ -327,6 +320,12 @@ export default function UserPageSubscriptionsTopUp() {
     return <></>;
   }
 
+  const isSending = sendTransaction.isPending || waitSendTransaction.isLoading;
+  const isSendDisabled =
+    selectedOption === null ||
+    (selectedOption === "other" &&
+      (!memeCount || Number.parseInt(memeCount, 10) < 1));
+
   const iOsContent = mounted ? (
     <Link
       href={window.location.href}
@@ -383,49 +382,44 @@ export default function UserPageSubscriptionsTopUp() {
         {printRemainingMints(remainingMintsForYear, "Year", year, "year")}
         {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch, "epoch")}
       </div>
-      {!showDeep && (
-        <div className="tw-pt-3 tw-text-center tw-text-iron-400 sm:tw-text-left">
-          <ShowMoreButton
-            expanded={showDeep}
-            setExpanded={setShowDeep}
-            showMoreLabel="Show Deep Time Subscriptions"
-            showLessLabel="Hide Deep Time Subscriptions"
-          />
+      {showDeep && (
+        <div className={`${TOP_UP_DEEP_GRID_CLASS} tw-mt-3`}>
+          {printRemainingMints(
+            remainingMintsForPeriod,
+            "Period",
+            period,
+            "period"
+          )}
+          {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
+          {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
         </div>
       )}
-      {showDeep && (
-        <>
-          <div className={`${TOP_UP_DEEP_GRID_CLASS} tw-mt-3`}>
-            {printRemainingMints(
-              remainingMintsForPeriod,
-              "Period",
-              period,
-              "period"
-            )}
-            {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
-            {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
-          </div>
-          <div className="tw-pt-3 tw-text-center tw-text-iron-400 sm:tw-text-left">
-            <ShowMoreButton
-              expanded={showDeep}
-              setExpanded={setShowDeep}
-              showMoreLabel="Show Deep Time Subscriptions"
-              showLessLabel="Hide Deep Time Subscriptions"
-            />
-          </div>
-        </>
-      )}
-      <div className={TOP_UP_ACTION_GRID_CLASS}>
-        <div className="tw-flex tw-items-center">
-          <div className={getTopUpOptionClass(selectedOption === "other")}>
+      <div className="tw-mt-2 tw-flex tw-justify-start">
+        <ShowMoreButton
+          expanded={showDeep}
+          setExpanded={setShowDeep}
+          showMoreLabel="Show Deep Time Subscriptions"
+          showLessLabel="Hide Deep Time Subscriptions"
+          variant="inline"
+        />
+      </div>
+      <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center">
+          <div
+            className={`${TOP_UP_CUSTOM_OPTION_CLASS} ${
+              selectedOption === "other"
+                ? "tw-bg-iron-900 tw-ring-white/[0.05]"
+                : "tw-bg-iron-950 tw-ring-white/[0.03]"
+            }`}
+          >
             <label
               htmlFor="subscription-top-up-other"
               className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-xl"
             >
               <span className="tw-sr-only">Select Other card count</span>
             </label>
-            <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-min-h-24 tw-flex-col tw-justify-between tw-pr-8">
-              <span className="tw-pointer-events-auto tw-absolute tw-right-0 tw-top-0 tw-flex">
+            <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-pr-7">
+              <span className="tw-pointer-events-auto tw-absolute tw-right-0 tw-top-1/2 tw-flex -tw-translate-y-1/2">
                 <input
                   id="subscription-top-up-other"
                   type="radio"
@@ -437,10 +431,10 @@ export default function UserPageSubscriptionsTopUp() {
                   className={styles["radioInput"]}
                 />
               </span>
-              <span className="tw-text-xl tw-font-medium tw-leading-7 tw-text-iron-100">
+              <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
                 Other
               </span>
-              <div className="tw-mt-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
                 <input
                   ref={otherInputRef}
                   type="number"
@@ -448,7 +442,7 @@ export default function UserPageSubscriptionsTopUp() {
                   placeholder="count"
                   aria-label="Custom card count"
                   value={memeCount}
-                  className="tw-pointer-events-auto tw-min-h-11 tw-w-[100px] tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-1 tw-text-sm tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
+                  className="tw-pointer-events-auto tw-min-h-10 tw-w-36 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black/30 tw-px-2.5 tw-py-1 tw-text-sm tw-text-iron-100 tw-transition [color-scheme:dark] placeholder:tw-text-iron-600 placeholder:tw-opacity-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/25"
                   onFocus={() => {
                     setSelectedOption("other");
                   }}
@@ -459,7 +453,10 @@ export default function UserPageSubscriptionsTopUp() {
                     setSelectedOption("other");
                   }}
                 />
-                <span aria-live="polite" className="tw-whitespace-nowrap">
+                <span
+                  aria-live="polite"
+                  className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400"
+                >
                   {!Number.isNaN(Number.parseInt(memeCount, 10)) &&
                     Number.parseInt(memeCount, 10) > 0 && (
                       <>
@@ -471,23 +468,17 @@ export default function UserPageSubscriptionsTopUp() {
             </div>
           </div>
         </div>
-        <div className="tw-flex tw-items-center tw-justify-end tw-pt-2 sm:tw-pt-0">
-          <button
-            type="button"
-            className="tw-inline-flex tw-min-h-11 tw-w-full tw-min-w-32 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-6 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-950 tw-shadow-lg tw-shadow-white/10 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-white sm:tw-w-auto"
-            onClick={handleSend}
-            disabled={
-              sendTransaction.isPending ||
-              waitSendTransaction.isLoading ||
-              selectedOption === null ||
-              (selectedOption === "other" &&
-                (!memeCount || Number.parseInt(memeCount, 10) < 1))
-            }
-            aria-label="Send top up"
+        <div className="tw-flex tw-items-center tw-justify-end sm:tw-flex-shrink-0">
+          <PrimaryButton
+            loading={isSending}
+            disabled={isSendDisabled}
+            onClicked={handleSend}
+            ariaLabel="Send top up"
+            className="tw-min-h-11 tw-w-full sm:tw-w-auto"
           >
             <BoltIcon className="tw-size-4" aria-hidden="true" />
             Send
-          </button>
+          </PrimaryButton>
         </div>
       </div>
     </>
@@ -498,9 +489,9 @@ export default function UserPageSubscriptionsTopUp() {
       <UserPageSubscriptionsSection
         id="profile-subscriptions-top-up"
         title="Top Up"
-        className="tw-pb-4 tw-pt-6"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pb-4 tw-pt-8"
         action={
-          <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-0.5 tw-rounded-full tw-bg-white/5 tw-px-3 tw-py-1 tw-ring-1 tw-ring-white/10">
+          <span className="tw-inline-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5 tw-rounded-full tw-bg-iron-900/60 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-500 tw-ring-1 tw-ring-white/10">
             <span>Sending to</span>
             <span
               className="tw-break-all tw-text-iron-300"
@@ -598,9 +589,13 @@ function CardCountOption(
   return (
     <label
       htmlFor={props.id}
-      className={`${getTopUpOptionClass(props.selected)} tw-block tw-cursor-pointer`}
+      className={`${TOP_UP_OPTION_CLASS} ${
+        props.selected
+          ? "tw-bg-iron-900 tw-ring-white/[0.05]"
+          : "tw-bg-iron-950 tw-ring-white/[0.03]"
+      } tw-block tw-min-h-[122px] tw-cursor-pointer`}
     >
-      <span className="tw-absolute tw-right-5 tw-top-5 tw-flex">
+      <span className="tw-absolute tw-right-4 tw-top-4 tw-flex">
         <input
           id={props.id}
           type="radio"
@@ -617,25 +612,25 @@ function CardCountOption(
           className={styles["radioInput"]}
         />
       </span>
-      <div className="tw-flex tw-min-h-24 tw-min-w-0 tw-flex-col tw-justify-between tw-pr-8">
+      <div className="tw-flex tw-min-h-[90px] tw-min-w-0 tw-flex-col tw-justify-between tw-pr-8">
         {props.display && (
           <span
-            className={`tw-text-xs tw-font-medium tw-leading-5 ${
-              props.selected ? "tw-text-primary-300" : "tw-text-iron-400"
+            className={`tw-text-xs tw-font-medium tw-leading-4 ${
+              props.selected ? "tw-text-primary-300" : "tw-text-iron-500"
             }`}
           >
             {props.display}
           </span>
         )}
         <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-          <span className="tw-text-xl tw-font-medium tw-leading-7 tw-text-iron-100">
+          <span className="tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
             {props.count.toLocaleString()} Card{props.count > 1 && "s"}
           </span>
           <span className="tw-flex tw-items-center tw-gap-1.5">
             <span className="tw-text-sm tw-leading-5 tw-text-iron-400">
               {numberWithCommasFromString(getEthForCards(props.count))}
             </span>
-            <span className="tw-text-xs tw-text-iron-500">ETH</span>
+            <span className="tw-text-xs tw-text-iron-600">ETH</span>
           </span>
         </div>
       </div>
