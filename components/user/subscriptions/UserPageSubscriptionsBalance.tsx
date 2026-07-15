@@ -18,7 +18,7 @@ export default function UserPageSubscriptionsBalance(
   const balance = props.details?.balance ?? 0;
 
   return (
-    <div className="tw-min-w-0">
+    <div className="tw-min-w-0" aria-busy={props.fetching}>
       <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3">
         <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
           Current Balance
@@ -55,7 +55,10 @@ export default function UserPageSubscriptionsBalance(
       </div>
       <div className="tw-mt-3 tw-min-h-9 sm:tw-mt-4">
         {props.fetching ? (
-          <DotLoader />
+          <>
+            <output className="tw-sr-only">Loading balance</output>
+            <DotLoader />
+          </>
         ) : (
           <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-iron-100">
             <span className="tw-flex tw-items-baseline tw-gap-2">
