@@ -7,10 +7,7 @@ import {
   getResearchTargetEditionSizeLimit,
 } from "@/components/drop-forge/launch/drop-forge-launch-claim-page-client.helpers";
 import type { ClaimPrimaryStatus } from "@/components/drop-forge/drop-forge-status.helpers";
-import {
-  ManifoldClaimStatus,
-  ManifoldPhase,
-} from "@/hooks/useManifoldClaim";
+import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 
 type AutoSelectedLaunchPhaseArgs = Parameters<
   typeof getAutoSelectedLaunchPhase
@@ -233,51 +230,6 @@ describe("getLaunchListStatus", () => {
     reason: "DB, Arweave, and onchain metadata all match",
   };
 
-  it("uses generic Live for active allowlists with a mismatched scheduled phase", () => {
-    const manifoldClaim = {
-      status: ManifoldClaimStatus.ACTIVE,
-      phase: ManifoldPhase.ALLOWLIST,
-      memePhase: {
-        id: "2",
-        name: "Phase 2",
-      },
-    } as any;
-
-    expect(
-      getLaunchListStatus({
-        primaryStatus: livePrimaryStatus,
-        manifoldClaim,
-        researchAirdropCompleted: false,
-        payArtistCompleted: false,
-      })
-    ).toMatchObject({ label: "Live - Phase 2" });
-    expect(
-      getLaunchListStatus({
-        primaryStatus: livePrimaryStatus,
-        manifoldClaim,
-        researchAirdropCompleted: false,
-        payArtistCompleted: false,
-        useCoarseOnchainStatus: true,
-      })
-    ).toEqual(livePrimaryStatus);
-  });
-
-  it("keeps ended allowlists Live without an inferred next phase", () => {
-    expect(
-      getLaunchListStatus({
-        primaryStatus: livePrimaryStatus,
-        manifoldClaim: {
-          status: ManifoldClaimStatus.ENDED,
-          phase: ManifoldPhase.ALLOWLIST,
-        } as any,
-        researchAirdropCompleted: false,
-        payArtistCompleted: false,
-        actionsLoaded: true,
-        useCoarseOnchainStatus: true,
-      })
-    ).toEqual(livePrimaryStatus);
-  });
-
   it("keeps live claims live when the current manifold phase is upcoming", () => {
     expect(
       getLaunchListStatus({
@@ -356,12 +308,10 @@ describe("getLaunchListStatus", () => {
         primaryStatus: livePrimaryStatus,
         manifoldClaim: {
           status: ManifoldClaimStatus.ENDED,
-          phase: ManifoldPhase.ALLOWLIST,
         } as any,
         researchAirdropCompleted: true,
         payArtistCompleted: false,
         actionsLoaded: false,
-        useCoarseOnchainStatus: true,
       })
     ).toEqual({
       key: "live",
