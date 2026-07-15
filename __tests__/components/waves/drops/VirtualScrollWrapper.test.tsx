@@ -364,6 +364,24 @@ describe("Height Measurement and Placeholder", () => {
     expect(measureSpy).not.toHaveBeenCalled();
   });
 
+  test("uses content height when border-box size is unavailable", () => {
+    const { container } = setup(DropSize.FULL);
+    const div = container.firstChild as HTMLElement;
+
+    act(() => {
+      resizeCb([
+        {
+          target: div,
+          borderBoxSize: undefined,
+          contentRect: { height: 190 },
+        } as unknown as ResizeObserverEntry,
+      ]);
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+
+    expect((div.firstChild as HTMLElement).style.height).toBe("190px");
+  });
+
   test("does not remeasure height when leaving viewport for LIGHT drops", () => {
     const { container } = setup(DropSize.LIGHT);
     const div = container.firstChild as HTMLElement;

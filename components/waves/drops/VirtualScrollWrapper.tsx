@@ -28,7 +28,8 @@ function getSharedResizeObserver(): ResizeObserver | null {
         continue;
       }
 
-      const borderBoxSize = entry.borderBoxSize[0];
+      const borderBoxSize = (entry as Partial<ResizeObserverEntry>)
+        .borderBoxSize?.[0];
       subscription.updateHeight(
         borderBoxSize?.blockSize ?? entry.contentRect.height
       );
