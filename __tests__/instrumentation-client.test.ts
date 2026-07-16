@@ -911,16 +911,16 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops Sentry route parameterization cyclic JSON errors", () => {
+  it("keeps cyclic JSON timer errors for origin diagnostics", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
 
     const result = beforeSend(event);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
-  it("drops iOS WKWebView route parameterization cyclic JSON errors without app context", () => {
+  it("keeps iOS WKWebView cyclic JSON timer errors without app context", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent(
       [
@@ -966,7 +966,7 @@ describe("instrumentation-client", () => {
 
     const result = beforeSend(event);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
   it("keeps route parameterization cyclic JSON errors without MetaMaskMobile WKWebView context", () => {
@@ -1036,12 +1036,12 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops the raw CP route-parameterization event before browser context enrichment", () => {
+  it("keeps the raw CP event before browser context enrichment", () => {
     const beforeSend = loadBeforeSend();
 
     const result = beforeSend(noiseFilterFixtures.cp);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
   it("drops the raw B9 Twitter CONFIG event with a Sentry wrapper frame", () => {

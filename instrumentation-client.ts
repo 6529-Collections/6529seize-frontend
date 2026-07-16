@@ -9,6 +9,10 @@ import {
 } from "@/utils/error-sanitizer";
 import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
 import {
+  enrichCyclicJsonTimerEvent,
+  installCyclicJsonTimerDiagnostics,
+} from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
+import {
   sanitizeSentryBreadcrumb,
   sanitizeSentryEvent,
   sanitizeUrlString,
@@ -30,7 +34,6 @@ import {
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
-  shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -188,10 +191,6 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterGifPickerTenorError(event)) {
-    return true;
-  }
-
-  if (shouldFilterSentryRouteParameterizationError(event)) {
     return true;
   }
 
@@ -453,6 +452,8 @@ Sentry.init({
       return null;
     }
 
+    enrichCyclicJsonTimerEvent(event, hint);
+
     const error = hint?.originalException ?? hint?.syntheticException;
     const value = event.exception?.values?.[0];
     const message =
@@ -502,6 +503,17 @@ Sentry.init({
     );
   },
 });
+
+if (sentryEnabled && isProduction) {
+  try {
+    // Install after Sentry so BrowserApiErrors remains the sole event capture
+    // path. This wrapper only associates sampled scheduling provenance with
+    // the original Error and then rethrows it unchanged.
+    installCyclicJsonTimerDiagnostics();
+  } catch {
+    // Diagnostics must never affect application startup.
+  }
+}
 
 if (globalThis.window !== undefined) {
   globalThis.window.addEventListener("error", (event) => {
