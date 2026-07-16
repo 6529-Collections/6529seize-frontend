@@ -659,7 +659,7 @@ export default function MemeLabPageComponent({
     const activityIsVisible =
       activeTab === MEME_FOCUS.HISTORY &&
       activeHistoryTab === MEME_LAB_HISTORY_TAB.ACTIVITY;
-    let cancelScheduledLoad = () => undefined;
+    let cancelScheduledLoad: () => void = () => undefined;
     if (activityIsVisible) {
       loadActivity();
     } else {
@@ -720,7 +720,7 @@ export default function MemeLabPageComponent({
     const timelineIsVisible =
       activeTab === MEME_FOCUS.HISTORY &&
       activeHistoryTab === MEME_LAB_HISTORY_TAB.TIMELINE;
-    let cancelScheduledLoad = () => undefined;
+    let cancelScheduledLoad: () => void = () => undefined;
     if (timelineIsVisible) {
       loadHistory();
     } else {
