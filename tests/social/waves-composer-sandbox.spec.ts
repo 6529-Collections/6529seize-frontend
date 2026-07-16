@@ -22,10 +22,13 @@ const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const PREVIEW_TITLE = "Sandbox Preview Title";
 const PREVIEW_DESCRIPTION = "Deterministic local preview served by Playwright.";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_FIRST_POLL_OPTION =
+  "A longer poll option that stays readable on a phone";
+const SANDBOX_SECOND_POLL_OPTION = "A second poll option";
 const SANDBOX_POLL_OPTIONS = [
-  "A longer poll option that stays readable on a phone",
-  "A second poll option",
-];
+  SANDBOX_FIRST_POLL_OPTION,
+  SANDBOX_SECOND_POLL_OPTION,
+] as const;
 
 test.describe.configure({ mode: "serial" });
 
@@ -225,9 +228,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
     const firstOption = page.getByRole("textbox", { name: "Poll option 1" });
     const secondOption = page.getByRole("textbox", { name: "Poll option 2" });
-    await firstOption.fill(SANDBOX_POLL_OPTIONS[0]);
-    await secondOption.fill(SANDBOX_POLL_OPTIONS[1]);
-    await expect(firstOption).toHaveValue(SANDBOX_POLL_OPTIONS[0]);
+    await firstOption.fill(SANDBOX_FIRST_POLL_OPTION);
+    await secondOption.fill(SANDBOX_SECOND_POLL_OPTION);
+    await expect(firstOption).toHaveValue(SANDBOX_FIRST_POLL_OPTION);
     expect((await firstOption.boundingBox())?.width ?? 0).toBeGreaterThan(140);
 
     const multipleButton = page.getByRole("button", { name: "Multiple" });
@@ -299,7 +302,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(submittedPoll).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
-    await expect(submittedPoll).toContainText(SANDBOX_POLL_OPTIONS[0]);
+    await expect(submittedPoll).toContainText(SANDBOX_FIRST_POLL_OPTION);
     await expect(poll).toBeHidden();
     await expectNoUnsafeSandboxMutations(baseURL);
     await resetSandboxRequests(baseURL);
