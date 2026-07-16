@@ -1,12 +1,32 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import DelegationHTML from "@/components/delegation/html/DelegationHTML";
-import { fetchDelegationArticleHtml } from "@/components/delegation/html/delegationContent";
+import {
+  getCachedDelegationArticleHtml,
+  loadDelegationArticleHtml,
+} from "@/components/delegation/html/delegationContent";
+
+const mockRouterPush = jest.fn();
+const mockRouterPrefetch = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockRouterPush,
+    prefetch: mockRouterPrefetch,
+  }),
+}));
 
 jest.mock("@/components/delegation/html/delegationContent", () => ({
   __esModule: true,
   DELEGATION_TOP_LEVEL_ARTICLE_SLUGS: ["page"],
   delegationArticleSlugs: ["page"],
-  fetchDelegationArticleHtml: jest.fn(),
+  getCachedDelegationArticleHtml: jest.fn(() => undefined),
+  loadDelegationArticleHtml: jest.fn(),
   getDelegationArticle: jest.fn((slug: string | undefined) => {
     if (slug !== "page" && slug !== "child") {
       return undefined;
@@ -29,17 +49,25 @@ jest.mock("@/components/delegation/html/delegationContent", () => ({
   ),
 }));
 
-const mockFetchDelegationArticleHtml =
-  fetchDelegationArticleHtml as jest.MockedFunction<
-    typeof fetchDelegationArticleHtml
+const mockLoadDelegationArticleHtml =
+  loadDelegationArticleHtml as jest.MockedFunction<
+    typeof loadDelegationArticleHtml
+  >;
+const mockGetCachedDelegationArticleHtml =
+  getCachedDelegationArticleHtml as jest.MockedFunction<
+    typeof getCachedDelegationArticleHtml
   >;
 
 beforeEach(() => {
-  mockFetchDelegationArticleHtml.mockReset();
+  mockLoadDelegationArticleHtml.mockReset();
+  mockGetCachedDelegationArticleHtml.mockReset();
+  mockGetCachedDelegationArticleHtml.mockReturnValue(undefined);
+  mockRouterPush.mockReset();
+  mockRouterPrefetch.mockReset();
 });
 
 test("renders fetched html", async () => {
-  mockFetchDelegationArticleHtml.mockResolvedValue({
+  mockLoadDelegationArticleHtml.mockResolvedValue({
     article: {
       title: "Hello World",
       summary: "A test article.",
@@ -54,7 +82,7 @@ test("renders fetched html", async () => {
   });
   render(<DelegationHTML path="page" title="Hello World" />);
   await waitFor(() =>
-    expect(mockFetchDelegationArticleHtml).toHaveBeenCalledWith("page")
+    expect(mockLoadDelegationArticleHtml).toHaveBeenCalledWith("page")
   );
   const container = document.querySelector(".htmlContainer") as HTMLElement;
   await waitFor(() => expect(container.innerHTML).toContain("hi"));
@@ -64,7 +92,7 @@ test("renders fetched html", async () => {
 });
 
 test("keeps FAQ context and article hierarchy on child pages", async () => {
-  mockFetchDelegationArticleHtml.mockResolvedValue({
+  mockLoadDelegationArticleHtml.mockResolvedValue({
     article: {
       title: "Child Article",
       summary: "A test article.",
@@ -94,9 +122,14 @@ test("keeps FAQ context and article hierarchy on child pages", async () => {
   expect(
     within(breadcrumb).queryByRole("link", { name: "Delegation Center" })
   ).not.toBeInTheDocument();
-  expect(
-    within(breadcrumb).getByRole("link", { name: "Delegation FAQ" })
-  ).toHaveAttribute("href", "/delegation/delegation-faq");
+  const faqBreadcrumbLink = within(breadcrumb).getByRole("link", {
+    name: "Delegation FAQ",
+  });
+  expect(faqBreadcrumbLink).toHaveAttribute(
+    "href",
+    "/delegation/delegation-faq"
+  );
+  expect(faqBreadcrumbLink).toHaveClass("tw-text-white");
   expect(within(breadcrumb).getByText("Child Article")).toHaveAttribute(
     "aria-current",
     "page"
@@ -104,16 +137,145 @@ test("keeps FAQ context and article hierarchy on child pages", async () => {
 
   const allTopicsLink = screen.getByRole("link", { name: "All FAQ topics" });
   expect(allTopicsLink).toHaveAttribute("href", "/delegation/delegation-faq");
+  expect(allTopicsLink).toHaveClass("tw-text-white");
   expect(allTopicsLink.querySelector("svg")).toBeInTheDocument();
   expect(screen.queryByText("Back to Delegation FAQ")).not.toBeInTheDocument();
+  expect(screen.getByText("A test article.")).toHaveClass(
+    "tw-font-semibold",
+    "tw-text-white"
+  );
 
   await waitFor(() =>
     expect(screen.getByText("child content")).toBeInTheDocument()
   );
 });
 
+test("keeps the FAQ section title in the same outer shell", async () => {
+  mockLoadDelegationArticleHtml.mockResolvedValue({
+    article: {
+      title: "Hello World",
+      summary: "A test article.",
+      group: "Reference",
+      path: "html/page.html",
+      sourceUrl: "",
+      sourceUri: null,
+      sha256: "hash",
+    },
+    html: "<p>content</p>",
+    url: "/delegation-content/test/html/page.html",
+  });
+
+  const { rerender } = render(
+    <DelegationHTML path="page" title="Delegation FAQ" />
+  );
+  const indexTitle = screen.getByRole("heading", {
+    level: 1,
+    name: "Delegation FAQ",
+  });
+  const titleClasses = indexTitle.getAttribute("class");
+  expect(indexTitle.parentElement).toHaveClass("tw-mb-6");
+
+  rerender(<DelegationHTML path="child" />);
+  const childSectionTitle = screen.getByText("Delegation FAQ", {
+    selector: "p",
+  });
+  expect(childSectionTitle).toHaveAttribute("class", titleClasses);
+  expect(childSectionTitle.parentElement).toHaveClass("tw-mb-6");
+});
+
+test("uses client navigation for internal links from fetched html", async () => {
+  mockLoadDelegationArticleHtml.mockResolvedValue({
+    article: {
+      title: "Hello World",
+      summary: "A test article.",
+      group: "Reference",
+      path: "html/page.html",
+      sourceUrl: "",
+      sourceUri: null,
+      sha256: "hash",
+    },
+    html: `
+      <a href="/delegation/delegation-faq/child">Child article</a>
+      <a href="https://example.com/article">External article</a>
+      <a href="/delegation/delegation-faq/child" target="_blank">Child article in new tab</a>
+    `,
+    url: "/delegation-content/test/html/page.html",
+  });
+
+  render(<DelegationHTML path="page" title="Delegation FAQ" />);
+  const internalLink = await screen.findByRole("link", {
+    name: "Child article",
+  });
+
+  fireEvent.mouseOver(internalLink);
+  expect(mockRouterPrefetch).toHaveBeenCalledWith(
+    "/delegation/delegation-faq/child"
+  );
+  expect(mockLoadDelegationArticleHtml).toHaveBeenCalledWith("child");
+
+  fireEvent.mouseOver(screen.getByRole("link", { name: "External article" }));
+  fireEvent.mouseOver(
+    screen.getByRole("link", { name: "Child article in new tab" })
+  );
+  expect(mockRouterPrefetch).toHaveBeenCalledTimes(1);
+
+  fireEvent.click(internalLink);
+  expect(mockRouterPush).toHaveBeenCalledWith(
+    "/delegation/delegation-faq/child"
+  );
+});
+
+test("renders a prefetched article immediately on route change", async () => {
+  const cachedChild = {
+    article: {
+      title: "Child Article",
+      summary: "A test article.",
+      group: "Reference",
+      path: "html/child.html",
+      sourceUrl: "",
+      sourceUri: null,
+      sha256: "hash",
+    },
+    html: "<p>cached child content</p>",
+    url: "/delegation-content/test/html/child.html",
+  };
+  mockGetCachedDelegationArticleHtml.mockImplementation((slug) =>
+    slug === "child" ? cachedChild : undefined
+  );
+  mockLoadDelegationArticleHtml.mockResolvedValue({
+    ...cachedChild,
+    article: {
+      ...cachedChild.article,
+      title: "Hello World",
+      path: "html/page.html",
+    },
+    html: "<p>index content</p>",
+  });
+
+  const { rerender } = render(
+    <DelegationHTML path="page" title="Delegation FAQ" />
+  );
+  await screen.findByText("index content");
+
+  rerender(<DelegationHTML path="child" />);
+
+  expect(screen.getByText("cached child content")).toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(mockLoadDelegationArticleHtml).not.toHaveBeenCalledWith("child");
+});
+
+test("renders a stable loading placeholder", () => {
+  mockLoadDelegationArticleHtml.mockReturnValue(new Promise(() => undefined));
+
+  render(<DelegationHTML path="page" title="Delegation FAQ" />);
+
+  const status = screen.getByRole("status");
+  expect(status).toHaveTextContent("Loading article...");
+  expect(status).toHaveClass("tw-min-h-48");
+});
+
 test("shows 404 page when fetch fails", async () => {
-  mockFetchDelegationArticleHtml.mockRejectedValue(new Error("missing"));
+  mockLoadDelegationArticleHtml.mockRejectedValue(new Error("missing"));
   render(<DelegationHTML path="missing" title="Missing" />);
   await waitFor(() =>
     expect(screen.getByText("404 | PAGE NOT FOUND")).toBeInTheDocument()
