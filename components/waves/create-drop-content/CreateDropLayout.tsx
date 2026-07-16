@@ -375,6 +375,19 @@ export default function CreateDropLayout({
                 onDrop={onDrop}
               />
             </div>
+            <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
+              <CreateDropSubmit
+                submitting={submitting}
+                canSubmit={canSubmit}
+                onDrop={onDrop}
+                isDropMode={isDropMode}
+                label={submitLabel}
+                showLabelOnMobile={isStormModeActive}
+                disabledTooltip={
+                  isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
+                }
+              />
+            </div>
             {(pollDraft || showCurationDropModeWarning) && (
               <div className="tw-col-span-3 tw-col-start-1 tw-row-start-3 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2">
                 {pollDraft && (
@@ -404,19 +417,6 @@ export default function CreateDropLayout({
                 )}
               </div>
             )}
-            <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
-              <CreateDropSubmit
-                submitting={submitting}
-                canSubmit={canSubmit}
-                onDrop={onDrop}
-                isDropMode={isDropMode}
-                label={submitLabel}
-                showLabelOnMobile={isStormModeActive}
-                disabledTooltip={
-                  isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
-                }
-              />
-            </div>
           </div>
           {isDropMode && (
             <CreateDropContentRequirements
