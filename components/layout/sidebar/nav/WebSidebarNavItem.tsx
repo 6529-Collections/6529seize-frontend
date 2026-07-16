@@ -9,6 +9,15 @@ type IconComp = React.ComponentType<{ className?: string | undefined }>;
 interface SidebarPrimaryItemProps {
   readonly href?: string | undefined;
   readonly onClick?: ((e?: React.MouseEvent) => void) | undefined;
+  readonly onPointerEnter?:
+    | React.PointerEventHandler<HTMLButtonElement>
+    | undefined;
+  readonly onPointerLeave?:
+    | React.PointerEventHandler<HTMLButtonElement>
+    | undefined;
+  readonly onKeyDown?:
+    | React.KeyboardEventHandler<HTMLButtonElement>
+    | undefined;
   readonly icon?: IconComp | undefined;
   readonly iconSizeClass?: string | undefined;
   readonly label: string;
@@ -17,6 +26,7 @@ interface SidebarPrimaryItemProps {
   readonly collapsed?: boolean | undefined;
   readonly ariaExpanded?: boolean | undefined;
   readonly ariaControls?: string | undefined;
+  readonly ariaHasPopup?: React.AriaAttributes["aria-haspopup"] | undefined;
   readonly rightSlot?: React.ReactNode | undefined;
   readonly hasIndicator?: boolean | undefined;
   readonly "data-section"?: string | undefined;
@@ -25,6 +35,9 @@ interface SidebarPrimaryItemProps {
 function WebSidebarNavItem({
   href,
   onClick,
+  onPointerEnter,
+  onPointerLeave,
+  onKeyDown,
   icon: Icon,
   iconSizeClass,
   label,
@@ -33,6 +46,7 @@ function WebSidebarNavItem({
   collapsed,
   ariaExpanded,
   ariaControls,
+  ariaHasPopup,
   rightSlot,
   hasIndicator,
   "data-section": dataSection,
@@ -79,7 +93,7 @@ function WebSidebarNavItem({
     ...(!hasTouchScreen && {
       "data-tooltip-id": "sidebar-tooltip",
       "data-tooltip-content": label,
-      "data-tooltip-hidden": !collapsed,
+      "data-tooltip-hidden": !collapsed || ariaExpanded === true,
     }),
     ...(dataSection ? { "data-section": dataSection } : {}),
   } as const;
@@ -105,6 +119,9 @@ function WebSidebarNavItem({
     <button
       type="button"
       onClick={(e) => onClick?.(e)}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+      onKeyDown={onKeyDown}
       className={`tw-touch-action-manipulation tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
         active
           ? "tw-bg-transparent tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
@@ -112,6 +129,7 @@ function WebSidebarNavItem({
       }`}
       aria-expanded={ariaExpanded}
       aria-controls={ariaControls}
+      aria-haspopup={ariaHasPopup}
       {...commonProps}
     >
       {content}
