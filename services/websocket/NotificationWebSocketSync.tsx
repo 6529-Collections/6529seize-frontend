@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -53,6 +53,7 @@ export function NotificationWebSocketSync() {
   const { connectedAccounts } = useSeizeConnectContext();
   const { send, status } = useWebSocket();
   const [authRevision, setAuthRevision] = useState(0);
+  const previousStatusRef = useRef(status);
   const pendingProfileIdsRef = useRef(new Set<string>());
   const invalidationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -75,9 +76,19 @@ export function NotificationWebSocketSync() {
     )
     .join("|");
 
-  const accessTokens = useMemo(() => {
-    void authRevision;
-    void connectedAccountsRevision;
+  useEffect(() => {
+    const wasConnected =
+      previousStatusRef.current === WebSocketStatus.CONNECTED;
+    previousStatusRef.current = status;
+    if (status !== WebSocketStatus.CONNECTED) {
+      setNotificationRealtimeState(false);
+      return;
+    }
+    if (!wasConnected) {
+      setNotificationRealtimeState(true);
+    }
+
+    // Read tokens at send time so reconnects never reuse a memoized JWT.
     const tokens = getConnectedWalletAccounts()
       .map((account) => account.jwt)
       .filter((jwt): jwt is string => isAuthJwtUsable(jwt));
@@ -85,8 +96,10 @@ export function NotificationWebSocketSync() {
     if (typeof primaryJwt === "string" && isAuthJwtUsable(primaryJwt)) {
       tokens.unshift(primaryJwt);
     }
-    return Array.from(new Set(tokens)).slice(0, 5);
-  }, [authRevision, connectedAccountsRevision]);
+    send(WsMessageType.SYNC_NOTIFICATION_IDENTITIES, {
+      access_tokens: Array.from(new Set(tokens)).slice(0, 5),
+    });
+  }, [authRevision, connectedAccountsRevision, send, status]);
 
   const invalidateProfiles = useCallback(
     (profileIds: readonly string[]) => {
@@ -161,17 +174,6 @@ export function NotificationWebSocketSync() {
     WsMessageType.NOTIFICATION_IDENTITIES_SYNCED,
     onNotificationIdentitiesSynced
   );
-
-  useEffect(() => {
-    if (status !== WebSocketStatus.CONNECTED) {
-      setNotificationRealtimeState(false);
-      return;
-    }
-    setNotificationRealtimeState(true);
-    send(WsMessageType.SYNC_NOTIFICATION_IDENTITIES, {
-      access_tokens: accessTokens,
-    });
-  }, [accessTokens, send, status]);
 
   useEffect(
     () => () => {

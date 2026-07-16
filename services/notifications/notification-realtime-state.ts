@@ -13,6 +13,8 @@ const DISCONNECTED_STATE: NotificationRealtimeState = {
 };
 
 let state = DISCONNECTED_STATE;
+// AppWebSocketProvider mounts exactly one owner. Keeping the snapshot outside
+// React lets polling hooks consume it without coupling them to socket context.
 const listeners = new Set<() => void>();
 
 const subscribe = (listener: () => void): (() => void) => {
