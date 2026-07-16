@@ -122,12 +122,15 @@ describe("WebSidebarSubmenu", () => {
     expect(firstLink).toHaveFocus();
   });
 
-  it("moves focus to the next page control when tabbing out", () => {
+  it("moves focus to the next sidebar control when tabbing out", () => {
+    const sidebar = document.createElement("div");
+    sidebar.dataset.sidebarScroll = "true";
     const trigger = document.createElement("button");
     const nextControl = document.createElement("button");
     trigger.textContent = "Open tools";
     nextControl.textContent = "Next control";
-    document.body.prepend(trigger, nextControl);
+    sidebar.append(trigger, nextControl);
+    document.body.prepend(sidebar);
     const onClose = jest.fn();
 
     try {
@@ -149,8 +152,7 @@ describe("WebSidebarSubmenu", () => {
       expect(nextControl).toHaveFocus();
       expect(onClose).toHaveBeenCalledTimes(1);
     } finally {
-      trigger.remove();
-      nextControl.remove();
+      sidebar.remove();
     }
   });
 });
