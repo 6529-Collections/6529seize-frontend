@@ -72,7 +72,9 @@ active, so this change does not force nested automatic fetch spans to become
 children. Task failures mark the span with Sentry's error status without
 attaching the error or its message, then preserve the original route error.
 Attributes are fixed route families, fixed data-path names, a bounded request
-count, and anonymous/authenticated server cohort where known.
+count where it can be proven, and anonymous/authenticated server cohort where
+known. The initial Wave feed span omits request count because multipart drops
+can add nested part requests.
 
 `route_first_useful_content` is a cold-launch milestone. Its clock starts in
 `instrumentation-client.ts`; it does not measure later client-side navigation.
