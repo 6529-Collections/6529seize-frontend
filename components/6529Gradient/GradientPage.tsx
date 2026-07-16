@@ -299,9 +299,6 @@ function GradientDetailsPanel({
         </div>
       </section>
       <section className="tw-pt-6 md:tw-pt-8">
-        <h3 className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-          Market Overview
-        </h3>
         <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 md:tw-grid-cols-3 md:tw-gap-x-10">
           <GradientMarketMetric
             label="Floor Price"
