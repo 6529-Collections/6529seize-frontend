@@ -1,48 +1,62 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import DecisionsFirst from '@/components/waves/create-wave/dates/DecisionsFirst';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import DecisionsFirst from "@/components/waves/create-wave/dates/DecisionsFirst";
 
-jest.mock('@/components/utils/calendar/CommonCalendar', () => (props: any) => (
+jest.mock("@/components/utils/calendar/CommonCalendar", () => (props: any) => (
   <button onClick={() => props.setSelectedTimestamp(1000)}>calendar</button>
 ));
 
-jest.mock('@/components/common/TimePicker', () => (props: any) => (
+jest.mock("@/components/common/TimePicker", () => (props: any) => (
   <button onClick={() => props.onTimeChange(1, 30)}>time</button>
 ));
 
-jest.mock('@/components/common/TooltipIconButton', () => () => <div />);
+jest.mock("@/components/common/TooltipIconButton", () => () => <div />);
 
-describe('DecisionsFirst', () => {
-  it('updates date when calendar clicked', async () => {
+describe("DecisionsFirst", () => {
+  it("updates date when calendar clicked", async () => {
     const user = userEvent.setup();
     const setFirstDecisionTime = jest.fn();
     render(
-      <DecisionsFirst firstDecisionTime={0} setFirstDecisionTime={setFirstDecisionTime} minTimestamp={null} />
+      <DecisionsFirst
+        firstDecisionTime={0}
+        setFirstDecisionTime={setFirstDecisionTime}
+        minTimestamp={null}
+      />
     );
-    await user.click(screen.getByText('calendar'));
+    await user.click(screen.getByText("calendar"));
     expect(setFirstDecisionTime).toHaveBeenCalledWith(expect.any(Number));
   });
 
-  it('updates time when time picker used', async () => {
+  it("updates time when time picker used", async () => {
     const user = userEvent.setup();
     const setFirstDecisionTime = jest.fn();
     render(
-      <DecisionsFirst firstDecisionTime={0} setFirstDecisionTime={setFirstDecisionTime} minTimestamp={null} />
+      <DecisionsFirst
+        firstDecisionTime={0}
+        setFirstDecisionTime={setFirstDecisionTime}
+        minTimestamp={null}
+      />
     );
-    await user.click(screen.getByText('time'));
+    await user.click(screen.getByText("time"));
     expect(setFirstDecisionTime).toHaveBeenCalledWith(expect.any(Number));
   });
 
-  it('initializes to end of day when minTimestamp provided', async () => {
-    const user = userEvent.setup();
+  it("initializes to end of day one week out when minTimestamp provided", async () => {
     const setFirstDecisionTime = jest.fn();
-    const minTs = new Date('2023-01-01T12:00:00Z').getTime();
+    const minTs = new Date("2023-01-01T12:00:00Z").getTime();
     render(
-      <DecisionsFirst firstDecisionTime={0} setFirstDecisionTime={setFirstDecisionTime} minTimestamp={minTs} />
+      <DecisionsFirst
+        firstDecisionTime={0}
+        setFirstDecisionTime={setFirstDecisionTime}
+        minTimestamp={minTs}
+      />
     );
+    // Defaulting to the SAME day would end the whole wave within hours, so
+    // the default first announcement is a week out at 23:59.
     const expected = new Date(minTs);
+    expected.setDate(expected.getDate() + 7);
     expected.setHours(23, 59, 0, 0);
-    await screen.findByText('calendar'); // wait for render
+    await screen.findByText("calendar"); // wait for render
     expect(setFirstDecisionTime).toHaveBeenCalledWith(expected.getTime());
   });
 });

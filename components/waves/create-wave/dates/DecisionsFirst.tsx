@@ -46,8 +46,11 @@ export default function DecisionsFirst({
         firstDecisionTime === minTimestamp; // Exact match (likely coming from a prop update)
 
       if (isInitialOrChange) {
-        // Set default to same day at 11:59 PM
+        // Default to one week out at 11:59 PM. Defaulting to the SAME day
+        // made the whole wave end within hours for creators who accepted the
+        // defaults (the last announcement is the wave's end date).
         const defaultDate = new Date(minTimestamp);
+        defaultDate.setDate(defaultDate.getDate() + 7);
         defaultDate.setHours(23, 59, 0, 0);
 
         setSelectedTimestamp(defaultDate.getTime());
@@ -127,7 +130,7 @@ export default function DecisionsFirst({
 
   return (
     <div className="tw-col-span-2">
-      <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-3">
+      <div className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2">
         <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
           First Winners Announcement
         </p>
@@ -139,7 +142,7 @@ export default function DecisionsFirst({
         />
       </div>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
         {/* Date selection */}
         <div className="tw-w-full">
           <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">

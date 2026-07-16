@@ -57,13 +57,26 @@ function setup(
 }
 
 describe("CreateWaveOutcomesRows", () => {
-  it("renders no outcomes message with optional error styling", () => {
+  it("renders the empty state with error styling when outcomes are required", () => {
     setup({
       outcomes: [],
       errors: [CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED],
     });
-    const msg = screen.getByText("No outcomes added");
+    const msg = screen.getByText(
+      "No outcomes yet — add at least one to continue"
+    );
     expect(msg).toHaveClass("tw-text-error");
+    expect(
+      screen.getByText(/Outcomes define what winners receive/)
+    ).toBeInTheDocument();
+  });
+
+  it("renders the empty state without error styling before validation fires", () => {
+    setup({ outcomes: [], errors: [] });
+    const msg = screen.getByText(
+      "No outcomes yet — add at least one to continue"
+    );
+    expect(msg).not.toHaveClass("tw-text-error");
   });
 
   it("removes outcome when child triggers remove", async () => {

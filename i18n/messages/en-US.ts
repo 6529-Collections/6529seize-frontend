@@ -784,7 +784,22 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
+  "empty.title": "No outcomes yet — add at least one to continue",
+  "empty.description":
+    "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
 } as const);
+
+const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
+  step: "Step {current} of {total}",
+  label: "Wave setup progress",
+} as const);
+
+const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
+  "waves.create.description",
+  {
+    placeholder: "Describe your wave",
+  } as const
+);
 
 const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
   "waves.leaderboard.phase",
@@ -1906,6 +1921,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_CREATE_PROGRESS_MESSAGES,
+  ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,
   ...GROUP_NFT_OWNERSHIP_MESSAGES,

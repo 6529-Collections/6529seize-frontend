@@ -1032,7 +1032,7 @@ describe("useWaveConfig", () => {
   });
 
   describe("Error Management", () => {
-    it("should clear errors when config changes", () => {
+    it("keeps unfixed errors visible and clears them once validation passes", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       // First set some errors via failed validation
@@ -1048,11 +1048,24 @@ describe("useWaveConfig", () => {
 
       expect(result.current.errors).toHaveLength(1);
 
-      // Change config - should clear errors
+      // A config change that does NOT fix the error keeps it on screen.
       act(() => {
         result.current.setDates({
           ...result.current.config.dates,
           endDate: 2000000,
+        });
+      });
+
+      expect(result.current.errors).toEqual([
+        createWaveValidation.CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED,
+      ]);
+
+      // Once validation reports the issue fixed, the error clears.
+      act(() => {
+        mockGetCreateWaveValidationErrors.mockReturnValue([]);
+        result.current.setDates({
+          ...result.current.config.dates,
+          endDate: 3000000,
         });
       });
 
