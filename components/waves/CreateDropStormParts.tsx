@@ -134,6 +134,9 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
 
   return (
     <LazyMotion features={domAnimation}>
+      <span role="status" aria-live="polite" className="tw-sr-only">
+        {partsStatus}
+      </span>
       <section
         aria-labelledby={headingId}
         className="tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/80 tw-shadow-lg tw-ring-1 tw-ring-white/[0.045] tw-transition-colors tw-duration-300 sm:tw-bg-iron-900/60 sm:tw-ring-white/[0.03]"
@@ -180,10 +183,6 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
             </button>
           )}
         </header>
-        <span role="status" aria-live="polite" className="tw-sr-only">
-          {partsStatus}
-        </span>
-
         <AnimatePresence initial={false}>
           {isConfirmingDiscard && (
             <m.div
@@ -222,7 +221,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
 
         <ol
           ref={partsListRef}
-          className="tw-m-0 tw-flex tw-min-h-0 tw-max-h-[30dvh] tw-flex-1 tw-list-none tw-flex-col tw-divide-y tw-divide-white/[0.045] tw-overflow-y-auto tw-px-2 tw-py-1 sm:tw-max-h-[40vh] sm:tw-divide-white/[0.035]"
+          className="tw-m-0 tw-flex tw-max-h-[30dvh] tw-min-h-0 tw-flex-1 tw-list-none tw-flex-col tw-divide-y tw-divide-white/[0.045] tw-overflow-y-auto tw-px-2 tw-py-1 sm:tw-max-h-[40vh] sm:tw-divide-white/[0.035]"
         >
           <AnimatePresence mode="popLayout" initial={false}>
             {parts.map((part, partIndex) => (
