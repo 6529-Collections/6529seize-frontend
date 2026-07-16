@@ -60,12 +60,39 @@ describe("useIdentitiesSearch", () => {
     await waitFor(() => expect(commonApiFetch).toHaveBeenCalledTimes(1));
   });
 
+  it("keeps matching suggestions visible while the next prefix is debounced", async () => {
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <TestComponent handle="ali" waveId="1" />
+      </QueryClientProvider>
+    );
+    await screen.findByText("alice");
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <TestComponent handle="alic" waveId="1" />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByText("alice")).toBeInTheDocument();
+  });
+
   it("skips fetch when handle too short", async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <TestComponent handle="al" waveId="1" />
       </QueryClientProvider>
     );
+    await waitFor(() => expect(commonApiFetch).not.toHaveBeenCalled());
+  });
+
+  it("skips fetch when handle exceeds the API maximum", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TestComponent handle="abcdefghijklmnop" waveId="1" />
+      </QueryClientProvider>
+    );
+
     await waitFor(() => expect(commonApiFetch).not.toHaveBeenCalled());
   });
 

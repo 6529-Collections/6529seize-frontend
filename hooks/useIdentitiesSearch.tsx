@@ -10,6 +10,12 @@ interface UseIdentitiesSearchProps {
 }
 
 export const IDENTITY_SEARCH_MIN_HANDLE_LENGTH = 3;
+export const IDENTITY_SEARCH_MAX_HANDLE_LENGTH = 15;
+
+const isSearchableHandle = (handle: string) =>
+  /^\w+$/.test(handle) &&
+  handle.length >= IDENTITY_SEARCH_MIN_HANDLE_LENGTH &&
+  handle.length <= IDENTITY_SEARCH_MAX_HANDLE_LENGTH;
 
 export function useIdentitiesSearch({
   handle,
@@ -29,13 +35,27 @@ export function useIdentitiesSearch({
         signal,
       });
     },
+    placeholderData: (previousData, previousQuery) => {
+      const previousParams = previousQuery?.queryKey[1] as
+        | { waveId?: string | null }
+        | undefined;
+      return previousParams?.waveId === waveId ? previousData : undefined;
+    },
     enabled:
       !!waveId &&
-      debouncedHandle.length >= IDENTITY_SEARCH_MIN_HANDLE_LENGTH &&
+      isSearchableHandle(debouncedHandle) &&
       debouncedHandle === handle,
   });
 
+  const normalizedHandle = handle.toLowerCase();
+  const visibleIdentities =
+    waveId && isSearchableHandle(handle)
+      ? (identities ?? []).filter((identity) =>
+          identity.handle.toLowerCase().startsWith(normalizedHandle)
+        )
+      : [];
+
   return {
-    identities: debouncedHandle === handle ? (identities ?? []) : [],
+    identities: visibleIdentities,
   };
 }

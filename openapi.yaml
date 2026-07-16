@@ -9953,6 +9953,7 @@ paths:
             type: string
             minLength: 3
             maxLength: 15
+            pattern: ^\w{3,15}$
         - name: limit
           in: query
           required: false
