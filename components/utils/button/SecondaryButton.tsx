@@ -17,23 +17,21 @@ export default function SecondaryButton({
   className = "",
   loading = false,
 }: SecondaryButtonProps) {
+  const inactive = disabled || loading;
   const sizeClasses =
     size === "sm"
       ? "tw-px-3 tw-py-2 tw-text-xs"
       : "tw-px-3.5 tw-py-2.5 tw-text-sm";
+  const stateClasses = inactive
+    ? "tw-cursor-not-allowed tw-border-white/5 tw-bg-iron-950/40 tw-text-iron-600"
+    : "tw-border-white/10 tw-bg-iron-950/70 tw-text-iron-300 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 active:tw-bg-iron-800";
 
   return (
     <button
       type="button"
-      disabled={disabled || loading}
-      className={`tw-border tw-border-solid ${
-        disabled || loading
-          ? "tw-cursor-not-allowed tw-border-iron-900"
-          : "tw-border-iron-800 hover:tw-border-iron-700 hover:tw-bg-iron-700 hover:tw-ring-iron-650"
-      } tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${sizeClasses} tw-font-semibold ${
-        disabled || loading ? "tw-text-iron-600" : "tw-text-iron-300"
-      } tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 ${className}`}
-      onClick={disabled || loading ? undefined : onClicked}
+      disabled={inactive}
+      className={`tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-ring-1 tw-ring-inset tw-ring-white/5 ${stateClasses} ${sizeClasses} tw-font-semibold tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${className}`}
+      onClick={inactive ? undefined : onClicked}
     >
       {loading && <CircleLoader />}
       {children}
