@@ -66,7 +66,8 @@ export default function UserPageHeaderAboutEdit({
   const isDisabled =
     profileStatementTarget.length === 0 ||
     value.trim().length === 0 ||
-    statement?.statement_value === value;
+    statement?.statement_value === value ||
+    loading;
 
   const addStatementMutation = useMutation({
     mutationFn: async (statementValue: string) => {
