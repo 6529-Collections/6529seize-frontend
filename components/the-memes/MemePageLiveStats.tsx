@@ -52,7 +52,7 @@ const DETAIL_STATS_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-6 tw-gap-y-6 lg:tw-grid-cols-3 xl:tw-gap-x-8";
 const DETAIL_STATS_GRID_ITEM_CLASS = "tw-min-w-0";
 const MARKET_OVERVIEW_ROW_CLASS =
-  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-5 xl:tw-gap-x-8";
+  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 xl:tw-gap-x-8";
 const MARKET_GRID_ITEM_CLASS =
   "tw-min-w-0 tw-basis-[calc(50%-0.75rem)] lg:tw-basis-[calc(33.333%-1rem)] xl:tw-basis-[calc(33.333%-1.334rem)]";
 const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
