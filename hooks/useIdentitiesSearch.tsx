@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiWaveMentionSearchResult } from "@/generated/models/ApiWaveMentionSearchResult";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useWaveById } from "./useWaveById";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useDebouncedValue } from "./useDebouncedValue";
 
 interface UseIdentitiesSearchProps {
   readonly handle: string;
@@ -15,29 +15,27 @@ export function useIdentitiesSearch({
   handle,
   waveId,
 }: UseIdentitiesSearchProps) {
-  const { wave } = useWaveById(waveId);
+  const debouncedHandle = useDebouncedValue(handle, 200);
 
-  const { data: identities } = useQuery<ApiIdentity[]>({
-    queryKey: [QueryKey.IDENTITY_SEARCH, { handle, waveId }],
-    queryFn: async () => {
-      const params: Record<string, string> = {
-        handle,
-      };
-      if (waveId) {
-        if (wave?.visibility.scope.group?.id) {
-          params["group_id"] = wave.visibility.scope.group.id;
-        } else {
-          params["wave_id"] = waveId;
-        }
-        params["ignore_authenticated_user"] = "true";
+  const { data: identities } = useQuery<ApiWaveMentionSearchResult[]>({
+    queryKey: [QueryKey.IDENTITY_SEARCH, { handle: debouncedHandle, waveId }],
+    queryFn: async ({ signal }) => {
+      if (!waveId) {
+        return [];
       }
-      return await commonApiFetch<ApiIdentity[]>({
-        endpoint: `identities`,
-        params,
+      return await commonApiFetch<ApiWaveMentionSearchResult[]>({
+        endpoint: `v2/waves/${encodeURIComponent(waveId)}/mention-search`,
+        params: { handle: debouncedHandle, limit: "5" },
+        signal,
       });
     },
-    enabled: handle.length >= IDENTITY_SEARCH_MIN_HANDLE_LENGTH,
+    enabled:
+      !!waveId &&
+      debouncedHandle.length >= IDENTITY_SEARCH_MIN_HANDLE_LENGTH &&
+      debouncedHandle === handle,
   });
 
-  return { identities: identities ?? [] };
+  return {
+    identities: debouncedHandle === handle ? (identities ?? []) : [],
+  };
 }
