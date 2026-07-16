@@ -14,7 +14,15 @@ import {
   m,
   useReducedMotion,
 } from "framer-motion";
-import { memo, useEffect, useId, useRef, useState, type FC } from "react";
+import {
+  memo,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type FC,
+} from "react";
 import CreateDropStormPart from "./CreateDropStormPart";
 
 interface CreateDropStormPartsProps {
@@ -67,6 +75,8 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   const [isConfirmingDiscard, setIsConfirmingDiscard] = useState(false);
   const [partsStatus, setPartsStatus] = useState("");
   const previousPartsCountRef = useRef(parts.length);
+  const previousScrolledPartsCountRef = useRef(parts.length);
+  const partsListRef = useRef<HTMLOListElement>(null);
   const discardTriggerRef = useRef<HTMLButtonElement>(null);
   const keepDraftRef = useRef<HTMLButtonElement>(null);
   const shouldRestoreDiscardFocusRef = useRef(false);
@@ -86,6 +96,19 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
     previousPartsCountRef.current = parts.length;
     setPartsStatus(partsLabel);
   }, [parts.length, partsLabel]);
+
+  useLayoutEffect(() => {
+    const previousPartsCount = previousScrolledPartsCountRef.current;
+    previousScrolledPartsCountRef.current = parts.length;
+    if (parts.length <= previousPartsCount) {
+      return;
+    }
+
+    const partsList = partsListRef.current;
+    if (partsList) {
+      partsList.scrollTop = partsList.scrollHeight;
+    }
+  }, [parts.length]);
 
   useEffect(() => {
     if (isConfirmingDiscard) {
@@ -113,7 +136,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
     <LazyMotion features={domAnimation}>
       <section
         aria-labelledby={headingId}
-        className="tw-mb-3 tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/60 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-colors tw-duration-300"
+        className="tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/80 tw-shadow-lg tw-ring-1 tw-ring-white/[0.045] tw-transition-colors tw-duration-300 sm:tw-bg-iron-900/60 sm:tw-ring-white/[0.03]"
       >
         <header className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.035] tw-px-3 tw-py-2.5 sm:tw-items-center sm:tw-px-4 sm:tw-py-3">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
@@ -133,21 +156,16 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
                 />
               </svg>
             </span>
-            <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
-                <h2
-                  id={headingId}
-                  className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
-                >
-                  {t(locale, "waves.stormComposer.draftTitle")}
-                </h2>
-                <span className="tw-rounded-full tw-bg-white/[0.045] tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-400">
-                  {partsLabel}
-                </span>
-              </div>
-              <p className="tw-m-0 tw-text-[11px] tw-leading-4 tw-text-iron-500 sm:tw-sr-only">
-                {t(locale, "waves.stormComposer.privateDraftHint")}
-              </p>
+            <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+              <h2
+                id={headingId}
+                className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+              >
+                {t(locale, "waves.stormComposer.draftTitle")}
+              </h2>
+              <span className="tw-rounded-full tw-bg-white/[0.045] tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-400">
+                {partsLabel}
+              </span>
             </div>
           </div>
           {!isConfirmingDiscard && (
@@ -202,7 +220,10 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
           )}
         </AnimatePresence>
 
-        <ol className="tw-m-0 tw-flex tw-max-h-[34dvh] tw-list-none tw-flex-col tw-divide-y tw-divide-white/[0.035] tw-overflow-y-auto tw-px-2 tw-py-1 sm:tw-max-h-[40vh]">
+        <ol
+          ref={partsListRef}
+          className="tw-m-0 tw-flex tw-min-h-0 tw-max-h-[30dvh] tw-flex-1 tw-list-none tw-flex-col tw-divide-y tw-divide-white/[0.045] tw-overflow-y-auto tw-px-2 tw-py-1 sm:tw-max-h-[40vh] sm:tw-divide-white/[0.035]"
+        >
           <AnimatePresence mode="popLayout" initial={false}>
             {parts.map((part, partIndex) => (
               <m.li

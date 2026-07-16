@@ -245,7 +245,7 @@ export default function CreateDropLayout({
   }
 
   return (
-    <div className="tw-flex-grow">
+    <div className="tw-flex tw-min-h-0 tw-flex-grow tw-flex-col">
       <CreateDropReplyingWrapper
         activeDrop={activeDrop}
         submitting={submitting}
@@ -312,7 +312,7 @@ export default function CreateDropLayout({
               onDiscardStorm={onDiscardStorm}
             />
           )}
-          <div className="tw-flex tw-w-full tw-items-end">
+          <div className="tw-flex tw-w-full tw-flex-none tw-items-end">
             <div
               ref={setActionsContainerRef}
               className="tw-grid tw-w-full tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"

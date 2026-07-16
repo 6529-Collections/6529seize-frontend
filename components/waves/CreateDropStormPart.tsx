@@ -109,7 +109,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
 
   return (
     <article
-      className={`tw-group tw-relative tw-overflow-hidden tw-rounded-none tw-border-0 tw-bg-transparent tw-px-3 tw-py-3.5 tw-transition-colors sm:tw-p-4 ${
+      className={`tw-group tw-relative tw-overflow-hidden tw-rounded-none tw-border-0 tw-bg-transparent tw-p-2.5 tw-transition-colors sm:tw-p-4 ${
         isEditing
           ? "tw-bg-primary-500/[0.025] tw-shadow-[inset_2px_0_0_rgba(82,139,255,0.55)]"
           : "desktop-hover:hover:tw-bg-white/[0.018]"
@@ -118,9 +118,9 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
         number: partNumber,
       })}
     >
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-grid sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-start sm:tw-gap-4">
-        <div className="tw-flex tw-w-full tw-min-w-0 tw-gap-3">
-          <span className="tw-mt-0.5 tw-inline-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-bg-white/[0.045] tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-300">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5 sm:tw-grid sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-start sm:tw-gap-4">
+        <div className="tw-flex tw-w-full tw-min-w-0 tw-gap-2.5 sm:tw-gap-3">
+          <span className="tw-mt-0.5 tw-inline-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-bg-white/[0.065] tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-200 sm:tw-bg-white/[0.045] sm:tw-text-iron-300">
             {partNumber}
           </span>
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col sm:tw-gap-2">
@@ -148,7 +148,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
             </div>
           </div>
         </div>
-        <div className="tw-flex tw-w-full tw-flex-none tw-items-center tw-justify-end tw-gap-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.035] tw-pt-2.5 tw-opacity-100 tw-transition-opacity focus-within:tw-opacity-100 group-hover:tw-opacity-100 sm:tw-w-auto sm:tw-justify-start sm:tw-border-0 sm:tw-pt-0 sm:tw-opacity-[0.55]">
+        <div className="tw-flex tw-min-h-11 tw-w-full tw-flex-none tw-items-center tw-justify-end tw-gap-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.045] tw-opacity-100 tw-transition-opacity focus-within:tw-opacity-100 group-hover:tw-opacity-100 sm:tw-min-h-0 sm:tw-w-auto sm:tw-justify-start sm:tw-border-0 sm:tw-opacity-[0.55]">
           <CustomTooltip
             content={editTitle}
             disabled={isMobileScreen || canEdit}
