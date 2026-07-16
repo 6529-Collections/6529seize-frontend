@@ -7,6 +7,7 @@ import {
   LinkIcon,
   PlayIcon,
 } from "@heroicons/react/24/outline";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import {
   useEffect,
@@ -401,6 +402,14 @@ function snapshotVideoPlayback(videoElement: HTMLVideoElement): {
   };
 }
 
+function handleVideoPlaybackRestoreError(error: unknown): void {
+  if (readObjectRecord(error)?.["name"] === "AbortError") {
+    return;
+  }
+
+  Sentry.captureException(error);
+}
+
 function restoreVideoPlayback(
   videoElement: HTMLVideoElement,
   snapshot: { readonly currentTime: number; readonly wasPlaying: boolean },
@@ -419,7 +428,7 @@ function restoreVideoPlayback(
     }
 
     if (snapshot.wasPlaying) {
-      void videoElement.play();
+      void videoElement.play().catch(handleVideoPlaybackRestoreError);
     }
   };
 

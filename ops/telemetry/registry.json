@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastReviewed": "2026-07-13",
+  "lastReviewed": "2026-07-15",
   "operationalOwner": "frontend-platform",
   "providers": [
     {
@@ -11,10 +11,10 @@
         "page-views",
         "browser-http-health"
       ],
-      "automatic": ["performance", "errors", "http", "page-views"],
+      "automatic": ["performance", "errors", "http"],
       "sampling": "AWS_RUM_SAMPLE_RATE per browser session; default 0.2",
       "release": "public VERSION as releaseId",
-      "notes": "X-Ray and interaction telemetry are disabled"
+      "notes": "X-Ray, interaction telemetry, and raw automatic page views are disabled; the provider manually records allowlisted App Router page families with query, hash, and dynamic identifiers removed"
     },
     {
       "id": "sentry",
@@ -130,7 +130,7 @@
       "owner": "mixpanel",
       "producer": "services/analytics/productImpactTelemetry.ts",
       "destinations": ["mixpanel:owner", "sentry:diagnostic"],
-      "sampling": "Sentry log transport plus consented production Mixpanel sessions",
+      "sampling": "One event per auth condition and account session until recovery, sent to Sentry plus consented production Mixpanel sessions",
       "privacy": "auth outcome, client type, route family, endpoint family, and booleans only",
       "externalUsage": "repo Mixpanel runbook; live dashboard unverified",
       "lifecycle": "keep",
@@ -388,6 +388,20 @@
       "lifecycle": "temporary",
       "replacement": "Remove after the data-path foundation is evaluated and a review records the decision",
       "reviewBy": "2026-10-13"
+    },
+    {
+      "name": "waves.initial_feed.fetch",
+      "kind": "span",
+      "question": "How long does the request-scoped initial Wave feed server path take?",
+      "owner": "sentry",
+      "producer": "app/waves/wave-feed-seed.server.ts",
+      "destinations": ["sentry:owner"],
+      "sampling": "only with a sampled parent Sentry request trace",
+      "privacy": "fixed route/data path and anonymous/authenticated cohort only; request count is omitted because multipart hydration can add nested requests",
+      "externalUsage": "new; none known",
+      "lifecycle": "temporary",
+      "replacement": "Remove after the server-seeded feed path is evaluated and a review records the decision",
+      "reviewBy": "2026-10-15"
     },
     {
       "name": "reaction.*",

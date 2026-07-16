@@ -143,11 +143,10 @@ export default function HeaderUserMenuDropdown({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-fixed tw-bottom-16 tw-left-6 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.2 }}
+            className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
+            style={{
+              left: "calc(var(--layout-margin, 0px) + 1.5rem)",
+            }}
           >
             <div className="tw-mt-1 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl">
               <div className="tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-2">

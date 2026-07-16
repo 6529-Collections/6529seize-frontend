@@ -15,9 +15,15 @@ import type { AppKitNetwork } from "@reown/appkit-common";
 import type { Chain } from "viem";
 
 // Configuration interface for AppKit initialization
-export interface AppKitInitializationConfig {
+export interface AppKitAdapterConfig {
   wallets: AppWallet[];
   adapterManager: AppKitAdapterManager;
+  isCapacitor: boolean;
+  chains: Chain[];
+}
+
+export interface AppKitInitializationConfig {
+  adapter: WagmiAdapter;
   isCapacitor: boolean;
   chains: Chain[];
 }
@@ -87,36 +93,42 @@ function createAdapter(
 }
 
 /**
- * Initializes AppKit with wallets using a fail-fast approach with retry logic
- * Extracted from WagmiSetup component for better maintainability and testability
+ * Creates the stable Wagmi adapter before the heavier AppKit bootstrap starts.
+ */
+export function createAppKitAdapter(config: AppKitAdapterConfig): WagmiAdapter {
+  const { wallets, adapterManager, isCapacitor } = config;
+
+  return createAdapter(wallets, adapterManager, isCapacitor, config.chains);
+}
+
+/**
+ * Initializes AppKit around an already-mounted Wagmi adapter.
  */
 export function initializeAppKit(
   config: AppKitInitializationConfig
 ): AppKitInitializationResult {
-  const { wallets, adapterManager, isCapacitor } = config;
-
-  const newAdapter = createAdapter(
-    wallets,
-    adapterManager,
-    isCapacitor,
-    config.chains
-  );
   const appKitConfig = buildAppKitConfig(
-    newAdapter,
+    config.adapter,
     config.chains,
-    isCapacitor
+    config.isCapacitor
   );
   const appKit = createAppKit(appKitConfig);
   const ready = appKit.ready();
   // Prevent unhandled rejections if a caller chooses not to await `ready`.
-  ready.catch((error) => {
-    logErrorSecurely("[AppKitInitialization] AppKit ready() failed", error);
-  });
+  void logAppKitReadyFailure(ready);
 
   return {
-    adapter: newAdapter,
+    adapter: config.adapter,
     ready,
   };
+}
+
+async function logAppKitReadyFailure(ready: Promise<void>): Promise<void> {
+  try {
+    await ready;
+  } catch (error) {
+    logErrorSecurely("[AppKitInitialization] AppKit ready() failed", error);
+  }
 }
 
 /**
