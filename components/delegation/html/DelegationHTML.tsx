@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import styles from "./DelegationHTML.module.css";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,17 +59,35 @@ function DelegationArticleView(
         }`}
       >
         {props.isFaqChildArticle && props.article && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
+          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
             <div className="tw-w-full tw-px-3">
+              <p className="tw-mb-3 tw-mt-0 tw-text-3xl tw-font-bold tw-text-white">
+                Delegation FAQ
+              </p>
               <nav aria-label="Breadcrumb" className={styles["breadcrumbNav"]}>
-                <Link href="/delegation/delegation-center">
+                <Link
+                  href="/delegation/delegation-center"
+                  className="tw-hidden sm:tw-inline"
+                >
                   Delegation Center
                 </Link>
-                <span>/</span>
+                <span aria-hidden="true" className="tw-hidden sm:tw-inline">
+                  /
+                </span>
                 <Link href="/delegation/delegation-faq">Delegation FAQ</Link>
-                <span>/</span>
+                <span aria-hidden="true">/</span>
                 <span aria-current="page">{props.article.title}</span>
               </nav>
+              <Link
+                href="/delegation/delegation-faq"
+                className="tw-mt-3 tw-inline-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-sm tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-auto sm:tw-justify-start"
+              >
+                <ArrowLeftIcon
+                  aria-hidden="true"
+                  className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+                />
+                All FAQ topics
+              </Link>
             </div>
           </div>
         )}
@@ -88,12 +107,6 @@ function DelegationArticleView(
               <p className={styles["articleSummary"]}>
                 {props.article.summary}
               </p>
-              <Link
-                href="/delegation/delegation-faq"
-                className={styles["articleBackLink"]}
-              >
-                Back to Delegation FAQ
-              </Link>
             </div>
           </div>
         )}

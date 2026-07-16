@@ -230,7 +230,6 @@ describe("WalletAddress", () => {
       </>
     );
 
-    const copyOptions = screen.getByLabelText(COPY_OPTIONS_LABEL);
     await user.tab();
     await user.tab();
     await user.keyboard("{Enter}");

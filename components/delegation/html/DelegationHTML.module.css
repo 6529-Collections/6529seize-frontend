@@ -43,16 +43,6 @@
   color: rgb(154, 154, 154);
 }
 
-.articleBackLink {
-  color: rgb(154, 154, 154);
-  text-decoration: none;
-}
-
-.articleBackLink:hover {
-  color: white;
-  text-decoration: underline;
-}
-
 .articlePager {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

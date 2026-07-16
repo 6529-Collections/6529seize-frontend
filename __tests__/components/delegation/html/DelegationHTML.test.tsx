@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import DelegationHTML from "@/components/delegation/html/DelegationHTML";
 import { fetchDelegationArticleHtml } from "@/components/delegation/html/delegationContent";
 
@@ -7,22 +7,26 @@ jest.mock("@/components/delegation/html/delegationContent", () => ({
   DELEGATION_TOP_LEVEL_ARTICLE_SLUGS: ["page"],
   delegationArticleSlugs: ["page"],
   fetchDelegationArticleHtml: jest.fn(),
-  getDelegationArticle: jest.fn((slug: string | undefined) =>
-    slug === "page"
-      ? {
-          title: "Hello World",
-          summary: "A test article.",
-          group: "Reference",
-          path: "html/page.html",
-          sourceUrl: "",
-          sourceUri: null,
-          sha256: "hash",
-        }
-      : undefined
-  ),
+  getDelegationArticle: jest.fn((slug: string | undefined) => {
+    if (slug !== "page" && slug !== "child") {
+      return undefined;
+    }
+
+    return {
+      title: slug === "child" ? "Child Article" : "Hello World",
+      summary: "A test article.",
+      group: "Reference",
+      path: `html/${slug}.html`,
+      sourceUrl: "",
+      sourceUri: null,
+      sha256: "hash",
+    };
+  }),
   getDelegationArticleIndex: jest.fn(() => 0),
   getDelegationArticleSlugAt: jest.fn(() => undefined),
-  isDelegationFaqChildArticle: jest.fn(() => false),
+  isDelegationFaqChildArticle: jest.fn(
+    (slug: string | undefined) => slug === "child"
+  ),
 }));
 
 const mockFetchDelegationArticleHtml =
@@ -57,6 +61,55 @@ test("renders fetched html", async () => {
   expect(
     screen.getByRole("heading", { name: "Hello World" })
   ).toBeInTheDocument();
+});
+
+test("keeps FAQ context and article hierarchy on child pages", async () => {
+  mockFetchDelegationArticleHtml.mockResolvedValue({
+    article: {
+      title: "Child Article",
+      summary: "A test article.",
+      group: "Reference",
+      path: "html/child.html",
+      sourceUrl: "",
+      sourceUri: null,
+      sha256: "hash",
+    },
+    html: "<p>child content</p>",
+    url: "/delegation-content/test/html/child.html",
+  });
+
+  render(<DelegationHTML path="child" />);
+
+  expect(
+    screen.getByText("Delegation FAQ", { selector: "p" })
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("heading", { name: "Delegation FAQ" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { level: 1, name: "Child Article" })
+  ).toBeInTheDocument();
+
+  const breadcrumb = screen.getByRole("navigation", { name: "Breadcrumb" });
+  expect(
+    within(breadcrumb).getByRole("link", { name: "Delegation Center" })
+  ).toHaveAttribute("href", "/delegation/delegation-center");
+  expect(
+    within(breadcrumb).getByRole("link", { name: "Delegation FAQ" })
+  ).toHaveAttribute("href", "/delegation/delegation-faq");
+  expect(within(breadcrumb).getByText("Child Article")).toHaveAttribute(
+    "aria-current",
+    "page"
+  );
+
+  const allTopicsLink = screen.getByRole("link", { name: "All FAQ topics" });
+  expect(allTopicsLink).toHaveAttribute("href", "/delegation/delegation-faq");
+  expect(allTopicsLink.querySelector("svg")).toBeInTheDocument();
+  expect(screen.queryByText("Back to Delegation FAQ")).not.toBeInTheDocument();
+
+  await waitFor(() =>
+    expect(screen.getByText("child content")).toBeInTheDocument()
+  );
 });
 
 test("shows 404 page when fetch fails", async () => {
