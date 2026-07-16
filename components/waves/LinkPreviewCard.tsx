@@ -38,6 +38,8 @@ const CHAT_FIRST_PARTY_FRAME_CLASSES =
   "tw-h-[15rem] tw-min-h-[15rem] tw-max-h-[15rem] tw-w-full tw-overflow-hidden lg:tw-h-[11rem] lg:tw-min-h-[11rem] lg:tw-max-h-[11rem]";
 const CHAT_COLLECTION_FRAME_CLASSES =
   "tw-h-[18rem] tw-min-h-[18rem] tw-max-h-[18rem] tw-w-full tw-overflow-hidden sm:tw-h-[15rem] sm:tw-min-h-[15rem] sm:tw-max-h-[15rem] md:tw-h-[15rem] md:tw-min-h-[15rem] md:tw-max-h-[15rem]";
+const CHAT_THE_MEMES_FRAME_CLASSES =
+  "tw-h-[18rem] tw-min-h-[18rem] tw-max-h-[18rem] tw-w-full tw-overflow-hidden sm:tw-h-[15rem] sm:tw-min-h-[15rem] sm:tw-max-h-[15rem] md:tw-h-[12rem] md:tw-min-h-[12rem] md:tw-max-h-[12rem]";
 const CHAT_VIDEO_FRAME_CLASSES =
   "tw-h-[18rem] tw-min-h-[18rem] tw-max-h-[18rem] tw-w-full tw-overflow-hidden sm:tw-h-[14rem] sm:tw-min-h-[14rem] sm:tw-max-h-[14rem] md:tw-h-[15rem] md:tw-min-h-[15rem] md:tw-max-h-[15rem]";
 const CHAT_FARCASTER_FRAME_CLASSES =
@@ -46,6 +48,7 @@ const CHAT_FARCASTER_FRAME_CLASSES =
 type ChatStableFrameKind =
   | "generic"
   | "first-party"
+  | "the-memes"
   | "collection"
   | "video"
   | "farcaster";
@@ -159,6 +162,11 @@ const is6529CollectionPathname = (pathname: string): boolean => {
   return false;
 };
 
+const isTheMemesPathname = (pathname: string): boolean => {
+  const [root, id] = pathname.split("/").filter(Boolean);
+  return root === "the-memes" && isNumericPathSegment(id);
+};
+
 const getChatStableFrameKind = (href: string): ChatStableFrameKind => {
   const parsed = parsePreviewHref(href);
   if (!parsed) {
@@ -188,6 +196,10 @@ const getChatStableFrameKind = (href: string): ChatStableFrameKind => {
   }
 
   if (is6529Hostname(hostname)) {
+    if (isTheMemesPathname(pathname)) {
+      return "the-memes";
+    }
+
     if (is6529CollectionPathname(pathname)) {
       return "collection";
     }
@@ -202,6 +214,8 @@ const getChatStableFrameClasses = (kind: ChatStableFrameKind): string => {
   switch (kind) {
     case "first-party":
       return CHAT_FIRST_PARTY_FRAME_CLASSES;
+    case "the-memes":
+      return CHAT_THE_MEMES_FRAME_CLASSES;
     case "collection":
       return CHAT_COLLECTION_FRAME_CLASSES;
     case "video":

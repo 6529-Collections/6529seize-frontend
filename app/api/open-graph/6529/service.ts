@@ -99,6 +99,7 @@ type PreviewBuildInput = {
   readonly people?: readonly SeizeCollectionPreviewPerson[] | undefined;
   readonly facts?: readonly SeizeCollectionPreviewFact[] | undefined;
   readonly traits?: readonly SeizeCollectionPreviewTrait[] | undefined;
+  readonly liveMint?: SeizeCollectionLinkPreview["liveMint"];
   readonly imageUrl?: string | null | undefined;
 };
 
@@ -594,6 +595,7 @@ function buildPreview(input: PreviewBuildInput): SeizeCollectionLinkPreview {
     people: input.people ?? [],
     facts: input.facts ?? [],
     traits: input.traits ?? [],
+    liveMint: input.liveMint ?? null,
   };
 }
 
@@ -714,14 +716,18 @@ function readMemeSeason(
   );
 }
 
+function readActualMemeEditionSize(
+  source: MemesRecord,
+  extended: MemesRecord | null
+): number | undefined {
+  return firstPositiveNumber(extended?.edition_size, source.supply);
+}
+
 function readFinalizedMemeEditionSize(
   source: MemesRecord,
   extended: MemesRecord | null
 ): number | undefined {
-  const actualEditionSize = firstPositiveNumber(
-    extended?.edition_size,
-    source.supply
-  );
+  const actualEditionSize = readActualMemeEditionSize(source, extended);
   const editionSizeFloor = readPositiveNumber(source.edition_size_floor);
 
   if (actualEditionSize === undefined) {
@@ -806,8 +812,8 @@ async function fetchTheMemesPreview(
   const manifoldEditionSize = isLiveMeme
     ? await fetchTheMemesManifoldEditionSize(id)
     : undefined;
+  const actualEditionSize = readActualMemeEditionSize(source, extended);
   const finalizedEditionSize = readFinalizedMemeEditionSize(source, extended);
-  const editionSize = isLiveMeme ? manifoldEditionSize : finalizedEditionSize;
   const season = readMemeSeason(source, metadata);
   const tdhRateValue = readTheMemesTdhRateValue(
     source.hodl_rate,
@@ -835,7 +841,9 @@ async function fetchTheMemesPreview(
     facts: compactFacts([
       createFact(
         "Edition size",
-        editionSize !== undefined ? formatInteger(editionSize) : undefined
+        !isLiveMeme && finalizedEditionSize !== undefined
+          ? formatInteger(finalizedEditionSize)
+          : undefined
       ),
       createFact("TDH rate", tdhRateValue),
       createFact(
@@ -844,6 +852,12 @@ async function fetchTheMemesPreview(
       ),
       createFact("Mint date", mintDate),
     ]),
+    liveMint: isLiveMeme
+      ? {
+          mintedCount: actualEditionSize,
+          maxCount: manifoldEditionSize,
+        }
+      : undefined,
     imageUrl: selectHttpsImageUrl(
       source.thumbnail,
       source.scaled,

@@ -441,11 +441,11 @@ describe("createFirstParty6529Plan", () => {
       })
     );
     expect(data.facts).toEqual([
-      { label: "Edition size", value: "328" },
       { label: "TDH rate", value: "Pending" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
     ]);
+    expect(data.liveMint).toEqual({ mintedCount: 173, maxCount: 328 });
   });
 
   it("does not use finalized primary-sale mint stats as edition size", async () => {
@@ -740,6 +740,10 @@ describe("createFirstParty6529Plan", () => {
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
     ]);
+    expect(data.liveMint).toEqual({
+      mintedCount: 173,
+      maxCount: undefined,
+    });
   });
 
   it("ignores malformed Manifold edition-size responses", async () => {
@@ -756,6 +760,10 @@ describe("createFirstParty6529Plan", () => {
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
     ]);
+    expect(data.liveMint).toEqual({
+      mintedCount: 173,
+      maxCount: undefined,
+    });
   });
 
   it("ignores non-decimal The Memes path ids", () => {
