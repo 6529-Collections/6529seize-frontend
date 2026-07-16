@@ -111,129 +111,95 @@ function DelegationArticleView(
 
   return (
     <div className="tw-w-full">
-      {props.isFaqChildArticle ? (
-        <header className="tw-mb-6">
-          <p className={SECTION_TITLE_CLASS}>Delegation FAQ</p>
-        </header>
-      ) : (
-        props.pageTitle && (
+      <div className="tw-mx-auto tw-w-full sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+        {props.isFaqChildArticle ? (
           <header className="tw-mb-6">
-            <h1 className={SECTION_TITLE_CLASS}>
-              {titleLighter && `${titleLighter} `}
-              {titleDarker}
-            </h1>
+            <p className={SECTION_TITLE_CLASS}>Delegation FAQ</p>
           </header>
-        )
-      )}
-      <div
-        className={`tw-mx-auto tw-w-full sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${
-          props.isFaqChildArticle ? "tw-px-3 tw-pt-2" : ""
-        }`}
-      >
-        {props.isFaqChildArticle && props.article && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-            <div className="tw-w-full tw-px-3">
-              <nav aria-label="Breadcrumb" className={styles["breadcrumbNav"]}>
-                <Link
-                  href="/delegation/delegation-faq"
-                  className="tw-rounded-sm tw-font-medium tw-text-white tw-no-underline hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                >
-                  Delegation FAQ
-                </Link>
-                <span aria-hidden="true">/</span>
-                <span aria-current="page">{props.article.title}</span>
-              </nav>
-              <Link
-                href="/delegation/delegation-faq"
-                className="tw-mt-3 tw-inline-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-sm tw-font-medium tw-text-white tw-no-underline tw-transition-colors hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-auto sm:tw-justify-start"
-              >
-                <ArrowLeftIcon
-                  aria-hidden="true"
-                  className="tw-h-5 tw-w-5 tw-flex-shrink-0"
-                />
-                All FAQ topics
-              </Link>
-            </div>
-          </div>
-        )}
-        {props.isFaqChildArticle && props.pageTitle && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-            <div className="tw-w-full tw-px-3">
-              <h1>
+        ) : (
+          props.pageTitle && (
+            <header className="tw-mb-6">
+              <h1 className={SECTION_TITLE_CLASS}>
                 {titleLighter && `${titleLighter} `}
                 {titleDarker}
               </h1>
-            </div>
-          </div>
+            </header>
+          )
         )}
         {props.isFaqChildArticle && props.article && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
-            <div className="tw-w-full tw-px-3">
-              <p className="tw-mb-2 tw-max-w-[780px] tw-font-semibold tw-text-white">
-                {props.article.summary}
-              </p>
-            </div>
+          <div className="tw-pb-4">
+            <Link
+              href="/delegation/delegation-faq"
+              className="tw-inline-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-sm tw-font-medium tw-text-white tw-no-underline tw-transition-colors hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-auto sm:tw-justify-start"
+            >
+              <ArrowLeftIcon
+                aria-hidden="true"
+                className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+              />
+              All FAQ topics
+            </Link>
           </div>
         )}
+        {props.isFaqChildArticle && props.pageTitle && (
+          <h1>
+            {titleLighter && `${titleLighter} `}
+            {titleDarker}
+          </h1>
+        )}
+        {props.isFaqChildArticle && props.article && (
+          <p className="tw-mb-2 tw-max-w-[780px] tw-pt-2 tw-font-semibold tw-text-white">
+            {props.article.summary}
+          </p>
+        )}
         <div
-          className={`tw-flex tw-flex-wrap ${
-            props.isFaqChildArticle ? "-tw-mx-3 tw-pt-3" : ""
+          ref={props.htmlContainerRef}
+          className={`${styles["htmlContainer"] ?? ""} tw-w-full ${
+            props.isFaqChildArticle ? "tw-pt-3" : ""
           }`}
+          aria-busy={props.loading}
         >
-          <div
-            ref={props.htmlContainerRef}
-            className={`${styles["htmlContainer"] ?? ""} tw-w-full ${
-              props.isFaqChildArticle ? "tw-px-3" : ""
-            }`}
-            aria-busy={props.loading}
-          >
-            {props.loading ? (
-              <div className="tw-min-h-48 tw-py-4" role="status">
-                <span className="tw-sr-only">Loading article...</span>
-                <div
-                  aria-hidden="true"
-                  className="tw-space-y-3 motion-safe:tw-animate-pulse"
-                >
-                  <div className="tw-h-4 tw-w-4/5 tw-rounded-md tw-bg-iron-800"></div>
-                  <div className="tw-h-4 tw-w-full tw-rounded-md tw-bg-iron-800"></div>
-                  <div className="tw-h-4 tw-w-2/3 tw-rounded-md tw-bg-iron-800"></div>
-                </div>
-              </div>
-            ) : (
+          {props.loading ? (
+            <div className="tw-min-h-48 tw-py-4" role="status">
+              <span className="tw-sr-only">Loading article...</span>
               <div
-                dangerouslySetInnerHTML={{
-                  __html: props.html,
-                }}
-              ></div>
-            )}
-          </div>
+                aria-hidden="true"
+                className="tw-space-y-3 motion-safe:tw-animate-pulse"
+              >
+                <div className="tw-h-4 tw-w-4/5 tw-rounded-md tw-bg-iron-800"></div>
+                <div className="tw-h-4 tw-w-full tw-rounded-md tw-bg-iron-800"></div>
+                <div className="tw-h-4 tw-w-2/3 tw-rounded-md tw-bg-iron-800"></div>
+              </div>
+            </div>
+          ) : (
+            <div
+              dangerouslySetInnerHTML={{
+                __html: props.html,
+              }}
+            ></div>
+          )}
         </div>
         {props.isFaqChildArticle &&
           (props.articleNavigation.previous ??
             props.articleNavigation.next) && (
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-              <div className="tw-w-full tw-px-3">
-                <nav
-                  aria-label="Delegation FAQ article navigation"
-                  className={styles["articlePager"]}
-                >
-                  {props.articleNavigation.previous ? (
-                    <Link href={props.articleNavigation.previous.href}>
-                      Previous: {props.articleNavigation.previous.title}
-                    </Link>
-                  ) : (
-                    <span></span>
-                  )}
-                  {props.articleNavigation.next ? (
-                    <Link href={props.articleNavigation.next.href}>
-                      Next: {props.articleNavigation.next.title}
-                    </Link>
-                  ) : (
-                    <span></span>
-                  )}
-                </nav>
-              </div>
-            </div>
+            <nav
+              aria-label="Delegation FAQ article navigation"
+              className={styles["articlePager"]}
+            >
+              {props.articleNavigation.previous ? (
+                <Link href={props.articleNavigation.previous.href}>
+                  Previous: {props.articleNavigation.previous.title}
+                </Link>
+              ) : (
+                <span></span>
+              )}
+              {props.articleNavigation.next ? (
+                <Link href={props.articleNavigation.next.href}>
+                  Next: {props.articleNavigation.next.title}
+                </Link>
+              ) : (
+                <span></span>
+              )}
+            </nav>
           )}
       </div>
     </div>

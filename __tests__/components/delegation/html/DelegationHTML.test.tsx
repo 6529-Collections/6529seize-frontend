@@ -1,10 +1,4 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import DelegationHTML from "@/components/delegation/html/DelegationHTML";
 import {
   getCachedDelegationArticleHtml,
@@ -118,22 +112,9 @@ test("keeps FAQ context and article hierarchy on child pages", async () => {
     screen.getByRole("heading", { level: 1, name: "Child Article" })
   ).toBeInTheDocument();
 
-  const breadcrumb = screen.getByRole("navigation", { name: "Breadcrumb" });
   expect(
-    within(breadcrumb).queryByRole("link", { name: "Delegation Center" })
+    screen.queryByRole("navigation", { name: "Breadcrumb" })
   ).not.toBeInTheDocument();
-  const faqBreadcrumbLink = within(breadcrumb).getByRole("link", {
-    name: "Delegation FAQ",
-  });
-  expect(faqBreadcrumbLink).toHaveAttribute(
-    "href",
-    "/delegation/delegation-faq"
-  );
-  expect(faqBreadcrumbLink).toHaveClass("tw-text-white");
-  expect(within(breadcrumb).getByText("Child Article")).toHaveAttribute(
-    "aria-current",
-    "page"
-  );
 
   const allTopicsLink = screen.getByRole("link", { name: "All FAQ topics" });
   expect(allTopicsLink).toHaveAttribute("href", "/delegation/delegation-faq");
@@ -150,7 +131,7 @@ test("keeps FAQ context and article hierarchy on child pages", async () => {
   );
 });
 
-test("keeps the FAQ section title in the same outer shell", async () => {
+test("keeps the FAQ section title aligned inside the article shell", async () => {
   mockLoadDelegationArticleHtml.mockResolvedValue({
     article: {
       title: "Hello World",
@@ -174,6 +155,7 @@ test("keeps the FAQ section title in the same outer shell", async () => {
   });
   const titleClasses = indexTitle.getAttribute("class");
   expect(indexTitle.parentElement).toHaveClass("tw-mb-6");
+  expect(indexTitle.parentElement?.parentElement).toHaveClass("tw-mx-auto");
 
   rerender(<DelegationHTML path="child" />);
   const childSectionTitle = screen.getByText("Delegation FAQ", {
@@ -181,6 +163,9 @@ test("keeps the FAQ section title in the same outer shell", async () => {
   });
   expect(childSectionTitle).toHaveAttribute("class", titleClasses);
   expect(childSectionTitle.parentElement).toHaveClass("tw-mb-6");
+  expect(childSectionTitle.parentElement?.parentElement).toHaveClass(
+    "tw-mx-auto"
+  );
 });
 
 test("uses client navigation for internal links from fetched html", async () => {

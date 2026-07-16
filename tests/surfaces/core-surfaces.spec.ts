@@ -221,12 +221,12 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
 
     await expect(
       page.getByRole("navigation", { name: "Breadcrumb" })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("heading", { name: "How to Register a Delegation?" })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Back to Delegation FAQ" })
+      page.getByRole("link", { name: "All FAQ topics" })
     ).toHaveAttribute("href", "/delegation/delegation-faq");
     await expect(
       page.getByRole("navigation", {

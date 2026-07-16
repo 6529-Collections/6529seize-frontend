@@ -146,7 +146,10 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       if (article.path.includes("/delegation-faq/")) {
         await expect(
           page.getByRole("navigation", { name: "Breadcrumb" })
-        ).toBeVisible();
+        ).toHaveCount(0);
+        await expect(
+          page.getByRole("link", { name: "All FAQ topics" })
+        ).toHaveAttribute("href", "/delegation/delegation-faq");
       }
       await expectHeading(page, article.heading);
       await expect(
