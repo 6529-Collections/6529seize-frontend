@@ -12,6 +12,10 @@ import {
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import WavesPageClient from "./page.client";
+import { fetchServerWaveFeedSeed } from "./wave-feed-seed.server";
+import WaveServerFeedSeed, {
+  WaveServerFeedSeedGate,
+} from "@/components/waves/WaveServerFeedSeed";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getWaveQueryKey } from "@/services/api/wave-query";
@@ -262,6 +266,17 @@ export async function renderWavesPageContent({
     queryClient.setQueryData(getWaveQueryKey(context.waveId), context.wave);
   }
 
+  const initialFeedRouteFamily =
+    routeContext === "messages" ? "/messages/[wave]" : "/waves/[wave]";
+  const initialFeedPromise =
+    context.waveId && context.wave
+      ? fetchServerWaveFeedSeed({
+          headers: context.headers,
+          routeFamily: initialFeedRouteFamily,
+          waveId: context.waveId,
+        })
+      : null;
+
   const dropMetadataId = getDropMetadataId(searchParams)?.trim();
   const dropMetadata =
     context.wave && dropMetadataId
@@ -288,9 +303,24 @@ export async function renderWavesPageContent({
         }
       />
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={null}>
-          <WavesPageClient />
-        </Suspense>
+        {initialFeedPromise && context.waveId && context.wave ? (
+          <WaveServerFeedSeedGate waveId={context.waveId}>
+            <Suspense fallback={null}>
+              <WaveServerFeedSeed
+                promise={initialFeedPromise}
+                wave={context.wave}
+                waveId={context.waveId}
+              />
+            </Suspense>
+            <Suspense fallback={null}>
+              <WavesPageClient />
+            </Suspense>
+          </WaveServerFeedSeedGate>
+        ) : (
+          <Suspense fallback={null}>
+            <WavesPageClient />
+          </Suspense>
+        )}
       </HydrationBoundary>
     </>
   );

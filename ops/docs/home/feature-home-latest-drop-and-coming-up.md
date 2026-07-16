@@ -95,6 +95,8 @@ Use this page for visibility rules, state switches, and route targets.
   trimmed), `Coming up` suppresses the `NEXT MINT` card.
 - Main Stage submission and Meme card links are omitted when their explicit
   backend mapping is unavailable; home does not infer a relationship.
+- The home `Next Drop` artwork panel includes a labeled local-time `Mint Date`
+  alongside its wave, submission time, and rating details.
 - On iOS outside the US, the countdown `Mint` button is hidden.
 - On iOS outside the US, The Memes subscription row is hidden.
 - Latest Drop subscription awareness is read-only and links to subscription
@@ -102,8 +104,12 @@ Use this page for visibility rules, state switches, and route targets.
   for the current or already-dropped card.
 - The current/latest `/the-memes/{id}` detail page uses the same awareness-only
   subscription row beside the mint countdown.
-- Unresolved upcoming `/the-memes/{id}` pages show the next-mint calendar panel
-  plus the same subscription awareness widget for that card.
+- When an unresolved `/the-memes/{id}` URL is the explicitly mapped next Meme
+  and home is in `Next Drop` mode, the page reuses the same artwork panel above
+  the calendar. Its Meme pill is static because the user is already on that
+  card route, and subscription awareness stays inside the artwork panel.
+- Other unresolved upcoming `/the-memes/{id}` pages keep the standalone
+  subscription awareness widget followed by the next-mint calendar panel.
 - Awareness-only rows do not embed the profile subscription editor. They show a
   blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
   optional `xN` user subscribed count when already subscribed, an

@@ -55,6 +55,7 @@ interface DropsListProps {
     | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly virtualScrollRootMargin?: string | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -84,6 +85,7 @@ const DropsList = memo(
     boostedDropsDisplayPreference = DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
     onBoostedDropClick,
     suspendLightDropHydration = false,
+    virtualScrollRootMargin,
     winningThreshold,
     winningThresholdMinDurationMs,
     isVotingClosed = false,
@@ -326,6 +328,7 @@ const DropsList = memo(
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
               type={drop.type}
               suspendLightDropHydration={suspendLightDropHydration}
+              rootMargin={virtualScrollRootMargin}
             >
               {dropContent}
             </VirtualScrollWrapper>
@@ -341,6 +344,7 @@ const DropsList = memo(
       renderBoostCard,
       renderUnreadDivider,
       suspendLightDropHydration,
+      virtualScrollRootMargin,
     ]);
 
     return (

@@ -340,12 +340,14 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       </>
                     )}
                     {pollAction}
-                    <StormButton
-                      isStormMode={isStormMode}
-                      canAddPart={canAddPart}
-                      submitting={submitting}
-                      breakIntoStorm={breakIntoStorm}
-                    />
+                    {!isStormMode && (
+                      <StormButton
+                        isStormMode={false}
+                        canAddPart={canAddPart}
+                        submitting={submitting}
+                        breakIntoStorm={breakIntoStorm}
+                      />
+                    )}
                   </div>
                 </motion.div>
               ) : (
