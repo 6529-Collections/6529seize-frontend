@@ -30,6 +30,9 @@ export const ES_ES_MESSAGES = {
   "attachment.safety.sha256": "SHA-256",
   "attachment.safety.size": "Tamaño {size}",
   "attachment.safety.viewDetails": "Ver detalles de seguridad",
+  "linkPreview.collection.maximumEdition": "Edición máxima",
+  "linkPreview.collection.minted": "Acuñados",
+  "linkPreview.collection.mintingLive": "Acuñación activa",
   "linkPreview.file.externalSource": "Fuente externa",
   "linkPreview.file.fact.mime": "MIME",
   "linkPreview.file.fact.size": "Tamaño",
@@ -397,8 +400,7 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.loadingEarlier": "Cargando drops anteriores",
   "waves.leaderboard.previousLoadError":
     "No se pudieron cargar los drops anteriores. Selecciona Reintentar para volver a intentarlo.",
-  "waves.leaderboard.retryEarlier":
-    "Reintentar la carga de drops anteriores",
+  "waves.leaderboard.retryEarlier": "Reintentar la carga de drops anteriores",
   "waves.leaderboard.loadingMore": "Cargando más drops",
   "waves.leaderboard.nextLoadError":
     "No se pudieron cargar más drops. Selecciona Reintentar para volver a intentarlo.",
