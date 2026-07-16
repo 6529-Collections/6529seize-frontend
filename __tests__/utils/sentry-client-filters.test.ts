@@ -35,6 +35,7 @@ type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
 type AppleWebKitSortedTrackListOverrides = {
   type?: string | undefined;
   value?: string | undefined;
+  includeMechanism?: boolean | undefined;
   mechanismType?: string | undefined;
   handled?: boolean | undefined;
   filename?: string | undefined;
@@ -44,6 +45,8 @@ type AppleWebKitSortedTrackListOverrides = {
   includeStacktrace?: boolean | undefined;
   additionalFrame?: SentryStackFrame | undefined;
   includeAdditionalException?: boolean | undefined;
+  includeExceptionValue?: boolean | undefined;
+  includeBrowserContext?: boolean | undefined;
   browserName?: string | undefined;
   transaction?: string | undefined;
 };
@@ -647,6 +650,7 @@ describe("sentry-client-filters", () => {
   const createAppleWebKitSortedTrackListEvent = ({
     type = "TypeError",
     value = "Type error",
+    includeMechanism = true,
     mechanismType = "auto.browser.global_handlers.onerror",
     handled = false,
     filename = "[native code]",
@@ -656,6 +660,8 @@ describe("sentry-client-filters", () => {
     includeStacktrace = true,
     additionalFrame,
     includeAdditionalException = false,
+    includeExceptionValue = true,
+    includeBrowserContext = true,
     browserName = "Mobile Safari UI/WKWebView",
     transaction = "/waves/:wave",
   }: AppleWebKitSortedTrackListOverrides = {}): TestSentryClientEvent => {
@@ -672,27 +678,40 @@ describe("sentry-client-filters", () => {
     const additionalValues = includeAdditionalException
       ? [{ type: "Error", value: "Nearby application error" }]
       : [];
-
-    return {
-      transaction,
-      contexts: {
-        browser: {
-          name: browserName,
-        },
-      },
-      exception: {
-        values: [
+    const mechanism = includeMechanism
+      ? {
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+        }
+      : {};
+    const values = includeExceptionValue
+      ? [
           {
             type,
             value,
-            mechanism: {
-              type: mechanismType,
-              handled,
-            },
+            ...mechanism,
             ...stacktrace,
           },
           ...additionalValues,
-        ],
+        ]
+      : [];
+    const contexts = includeBrowserContext
+      ? {
+          contexts: {
+            browser: {
+              name: browserName,
+            },
+          },
+        }
+      : {};
+
+    return {
+      transaction,
+      ...contexts,
+      exception: {
+        values,
       },
     };
   };
@@ -706,6 +725,7 @@ describe("sentry-client-filters", () => {
       "a changed mechanism",
       { mechanismType: "auto.browser.global_handlers.onunhandledrejection" },
     ],
+    ["no mechanism", { includeMechanism: false }],
     ["a handled exception", { handled: true }],
     ["a changed function", { functionName: "sortedTrackList" }],
     ["a changed filename", { filename: "https://example.test/app.js" }],
@@ -717,6 +737,7 @@ describe("sentry-client-filters", () => {
       },
     ],
     ["no stacktrace", { includeStacktrace: false }],
+    ["no exception values", { includeExceptionValue: false }],
     ["another exception value", { includeAdditionalException: true }],
     [
       "another native frame",
@@ -3617,6 +3638,19 @@ describe("sentry-client-filters", () => {
       includeAbsPath: true,
       browserName: "Apple Mail",
       transaction: "/notifications",
+    });
+
+    // Act
+    const result = shouldFilterAppleWebKitSortedTrackListTypeError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the exact native track-list TypeError without browser context", () => {
+    // Arrange
+    const event = createAppleWebKitSortedTrackListEvent({
+      includeBrowserContext: false,
     });
 
     // Act
