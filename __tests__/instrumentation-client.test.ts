@@ -433,6 +433,36 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops production-shaped React DOM removeChild NotFoundError events on the parameterized profile transaction", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "profile-react-dom-remove-child-event",
+      transaction: "/:user",
+      request: {
+        url: "https://6529.io/profile-name",
+      },
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/:user",
+        url: "/profile-name",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops injected WebAssembly CSP unsafe-eval errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {
@@ -560,6 +590,81 @@ describe("instrumentation-client", () => {
 
     expect(result).toBeNull();
   });
+
+  it.each([3, 7])(
+    "drops the observed raw anonymous EvalError wrapper at line %i",
+    (wrapperLine) => {
+      const beforeSend = loadBeforeSend();
+      const event = {
+        transaction: "/waves/:wave",
+        exception: {
+          values: [
+            {
+              type: "EvalError",
+              value: anonymousUnsafeEvalCspMessage,
+              mechanism: {
+                type: "auto.browser.global_handlers.onunhandledrejection",
+                handled: false,
+              },
+              stacktrace: {
+                frames: [
+                  {
+                    filename:
+                      "app:///_next/static/chunks/0example-chunk.js",
+                    abs_path:
+                      "app:///_next/static/chunks/0example-chunk.js",
+                    function: "n",
+                    in_app: true,
+                    lineno: wrapperLine,
+                    colno: 4853,
+                  },
+                  {
+                    filename: "<anonymous>",
+                    abs_path: "<anonymous>",
+                    function: "next",
+                    in_app: true,
+                    lineno: 234,
+                    colno: 30,
+                  },
+                  {
+                    filename: "<anonymous>",
+                    abs_path: "<anonymous>",
+                    function: "predicate",
+                    in_app: true,
+                    lineno: 234,
+                    colno: 30,
+                  },
+                  {
+                    filename: "<anonymous>",
+                    abs_path: "<anonymous>",
+                    function: "eval",
+                    in_app: true,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tags: {
+          environment: "production",
+          transaction: "/waves/:wave",
+          url: "/waves/example",
+        },
+      };
+      const error = new EvalError(anonymousUnsafeEvalCspMessage);
+      error.stack = [
+        `EvalError: ${anonymousUnsafeEvalCspMessage}`,
+        "    at eval (<anonymous>)",
+        "    at predicate (<anonymous>:234:30)",
+        "    at next (<anonymous>:234:30)",
+        `    at n (app:///_next/static/chunks/0example-chunk.js:${wrapperLine}:4853)`,
+      ].join("\n");
+
+      const result = beforeSend(event, { originalException: error });
+
+      expect(result).toBeNull();
+    }
+  );
 
   it("drops gif-picker Tenor category errors with no app frames", () => {
     const beforeSend = loadBeforeSend();
