@@ -105,6 +105,23 @@ describe("UserPageSubscriptionsTopUp", () => {
     await waitFor(() => {
       expect(screen.getByText("Top Up Successful!")).toBeInTheDocument();
     });
+    expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("/tx/0x123")
+    );
+  });
+
+  it("shows the shared non-closable wallet confirmation state", () => {
+    sendTransaction.isPending = true;
+
+    render(<UserPageSubscriptionsTopUp />);
+
+    expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
+    expect(screen.getByText("Confirm in your wallet")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Close modal" })
+    ).not.toBeInTheDocument();
   });
 
   it("submits custom count when Other option is selected", async () => {

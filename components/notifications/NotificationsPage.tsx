@@ -11,9 +11,12 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import ConnectWallet from "@/components/common/ConnectWallet";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export default function NotificationsPage() {
-  const { hasValidWalletAuth } = useSeizeConnectContext();
+  const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const { activeDrop: modalDrop, isDropOpen, onDropClose } = useDropModal();
   const { isApp } = useDeviceInfo();
@@ -22,6 +25,17 @@ export default function NotificationsPage() {
   const onCancelReplyQuote = () => {
     setActiveDrop(null);
   };
+
+  if (connectionState === "initializing" || connectionState === "connecting") {
+    return (
+      <div className="tailwind-scope tw-flex tw-h-full tw-min-h-[50vh] tw-items-center tw-justify-center tw-bg-black">
+        <div role="status" aria-label="Loading notifications">
+          <CircleLoader size={CircleLoaderSize.LARGE} />
+          <span className="tw-sr-only">Loading notifications</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!hasValidWalletAuth) {
     return <ConnectWallet />;

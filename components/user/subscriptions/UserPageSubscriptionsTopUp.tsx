@@ -1,20 +1,16 @@
 "use client";
 
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BoltIcon } from "@heroicons/react/24/outline";
-import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { parseEther } from "viem";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
+import OnchainTransactionModal, {
+  type OnchainTransactionModalStatus,
+} from "@/components/common/OnchainTransactionModal";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
@@ -35,32 +31,13 @@ import {
   SUBSCRIPTIONS_ADDRESS_ENS,
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
-import {
-  formatAddress,
-  getTransactionLink,
-  numberWithCommasFromString,
-} from "@/helpers/Helpers";
+import { formatAddress, numberWithCommasFromString } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import styles from "./UserPageSubscriptions.module.css";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 function getEthForCards(count: number): number {
   return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
-}
-
-function getTopUpModalEmoji(
-  status: "confirm_wallet" | "submitted" | "success" | "error"
-): string {
-  const emojiByStatus: Record<
-    "confirm_wallet" | "submitted" | "success" | "error",
-    string
-  > = {
-    confirm_wallet: "/emojis/sgt_flushed.webp",
-    submitted: "/emojis/sgt_flushed.webp",
-    success: "/emojis/sgt_saluting_face.webp",
-    error: "/emojis/sgt_sob.webp",
-  };
-  return emojiByStatus[status];
 }
 
 const TOP_UP_OPTION_GRID_CLASS =
@@ -181,17 +158,6 @@ export default function UserPageSubscriptionsTopUp() {
 
   const isClosable = waitSendTransaction.isSuccess || !!error;
 
-  useEffect(() => {
-    if (showModal) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [showModal]);
-
   const closeModal = useCallback(() => {
     if (isClosable) {
       sendTransaction.reset();
@@ -202,118 +168,25 @@ export default function UserPageSubscriptionsTopUp() {
     }
   }, [isClosable, sendTransaction]);
 
-  useEffect(() => {
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape" && isClosable && showModal) {
-        closeModal();
-      }
-    }
-
-    if (!showModal) return;
-    globalThis.addEventListener("keydown", handleEscape);
-    return () => {
-      globalThis.removeEventListener("keydown", handleEscape);
-    };
-  }, [showModal, isClosable, closeModal]);
-
-  function getModalContent() {
-    if (error) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-red">
-            <span>Error</span>
-            <img
-              src={getTopUpModalEmoji("error")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-          </p>
-          <p className="tw-mb-0 tw-text-iron-100">{error}</p>
-        </div>
-      );
-    }
-
-    if (sendTransaction.isPending) {
-      return (
-        <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-          <img
-            src={getTopUpModalEmoji("confirm_wallet")}
-            alt=""
-            role="presentation"
-            className="tw-h-6 tw-w-6"
-          />
-          <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-100">
-            Confirm in your wallet
-          </p>
-          <CircleLoader size={CircleLoaderSize.LARGE} />
-        </div>
-      );
-    }
-
-    if (waitSendTransaction.isLoading) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-iron-100">
-            <img
-              src={getTopUpModalEmoji("submitted")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-            Transaction Submitted
-            {sendTransaction.data && (
-              <a
-                className="tw-rounded-md tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black"
-                href={getTransactionLink(
-                  SUBSCRIPTIONS_CHAIN.id,
-                  sendTransaction.data
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Tx
-              </a>
-            )}
-          </p>
-          <p className="tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-md tw-font-medium tw-text-iron-100">
-            Waiting for confirmation{" "}
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          </p>
-        </div>
-      );
-    }
-
-    if (waitSendTransaction.isSuccess) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-green">
-            <img
-              src={getTopUpModalEmoji("success")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-            Top Up Successful!
-            {sendTransaction.data && (
-              <a
-                className="tw-rounded-md tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black"
-                href={getTransactionLink(
-                  SUBSCRIPTIONS_CHAIN.id,
-                  sendTransaction.data
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Tx
-              </a>
-            )}
-          </p>
-        </div>
-      );
-    }
-
-    return null;
+  let modalStatus: OnchainTransactionModalStatus | null = null;
+  if (error) {
+    modalStatus = "error";
+  } else if (sendTransaction.isPending) {
+    modalStatus = "confirm_wallet";
+  } else if (waitSendTransaction.isLoading) {
+    modalStatus = "submitted";
+  } else if (waitSendTransaction.isSuccess) {
+    modalStatus = "success";
+  }
+  const modalSubtitle =
+    topUpAmount === null
+      ? undefined
+      : `${(topUpAmount / MEMES_MINT_PRICE).toLocaleString()} Cards - ${numberWithCommasFromString(topUpAmount.toString())} ETH`;
+  let modalMessage: string | undefined;
+  if (modalStatus === "error") {
+    modalMessage = error;
+  } else if (modalStatus === "success") {
+    modalMessage = "Top Up Successful!";
   }
 
   if (hideSubscriptions) {
@@ -515,60 +388,17 @@ export default function UserPageSubscriptionsTopUp() {
       >
         {isIos ? iOsContent : topUpContent}
       </UserPageSubscriptionsSection>
-      {mounted &&
-        createPortal(
-          <AnimatePresence>
-            {showModal && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
-                onClick={isClosable ? closeModal : undefined}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  className="tw-relative tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-3">
-                    <div>
-                      <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
-                        Top up
-                      </h2>
-                      {topUpAmount !== null && (
-                        <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
-                          {(topUpAmount / MEMES_MINT_PRICE).toLocaleString()}{" "}
-                          Cards -{" "}
-                          {numberWithCommasFromString(topUpAmount.toString())}{" "}
-                          ETH
-                        </p>
-                      )}
-                    </div>
-                    {isClosable && (
-                      <button
-                        onClick={closeModal}
-                        className="-tw-mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
-                        aria-label="Close modal"
-                      >
-                        <FontAwesomeIcon
-                          icon={faXmark}
-                          className="tw-size-5 tw-flex-shrink-0"
-                        />
-                      </button>
-                    )}
-                  </div>
-                  <div className="tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-2">
-                    {getModalContent()}
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+      {mounted && showModal && modalStatus ? (
+        <OnchainTransactionModal
+          status={modalStatus}
+          title="Top up"
+          subtitle={modalSubtitle}
+          message={modalMessage}
+          transactionHash={sendTransaction.data}
+          chain={SUBSCRIPTIONS_CHAIN}
+          onClose={closeModal}
+        />
+      ) : null}
     </>
   );
 }

@@ -23,6 +23,9 @@ with cause filters, grouped reactions, and inline drop previews.
 
 ## Before Rows Render
 
+- Wallet session restoration: a centered loading indicator remains visible
+  while the site restores an existing wallet in a new tab. The disconnected
+  wallet prompt is shown only after restoration finishes without valid auth.
 - Wallet missing: `Connect your wallet to view notifications.` with
   `Reconnect wallet`.
 - Profile loading: `Loading profile...`.

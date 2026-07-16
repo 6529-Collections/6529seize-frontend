@@ -118,6 +118,13 @@ The launch surface combines:
     when live on-chain `totalMax` exists, that value becomes the active cap.
   - Entering a target above the active claim max snaps the field back to that
     cap and shows a toast explaining the limit.
+- On-chain actions:
+  - Wallet confirmation, submitted, success, and error states appear in a
+    transaction dialog using the active action name.
+  - Submitted and terminal states can include a `View Tx` explorer link.
+  - In-progress states stay open; success and error states can be dismissed
+    with the close control, backdrop, or Escape.
+  - Long transaction errors remain readable in a scrollable status panel.
 - Arweave review:
   - `Image`, `Animation`, and `Metadata` link cards support copy/open actions
     for the published Arweave targets.

@@ -11,13 +11,18 @@ Use this page when `/notifications` is blocked, rows look missing, or read/follo
 ## Quick Checks
 
 1. Confirm prerequisites: connected wallet, resolved profile handle, and no active profile proxy.
-2. Reopen `/notifications` and wait for `Loading profile...` then `Loading notifications...`.
+2. Reopen `/notifications` and allow the centered wallet-restoration indicator
+   to finish before checking for `Loading profile...` or
+   `Loading notifications...`.
 3. Use the in-page recovery action if shown: `Reconnect wallet`, `Switch to primary profile`, or `Try again`.
 4. Switch filter to `All` before treating rows as missing.
 5. If you opened `/notifications?reload=true`, wait for the one-time refetch + mark-read pass.
 
 ## Blocked Access and Load Errors
 
+- Centered loading indicator after opening a new tab:
+  let wallet restoration finish. A reconnect prompt appears only if the
+  restored session is not valid.
 - `Connect your wallet to view notifications.`:
   use `Reconnect wallet`.
 - `We couldn't determine your profile handle. Please reconnect to continue.`:
