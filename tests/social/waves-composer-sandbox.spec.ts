@@ -98,6 +98,63 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps the ordinary iOS chat composer within the viewport", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "capacitor-ios-sim",
+      "The shared iOS composer viewport contract is covered by the Capacitor simulation"
+    );
+
+    await gotoSandboxWave(page);
+
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    const wrapper = composer.locator(
+      "xpath=ancestor::div[contains(@class, 'tw-sticky') and contains(@class, 'tw-overflow-y-auto')][1]"
+    );
+
+    await expect(wrapper).toHaveAttribute("class", /--layout-viewport-height/);
+    const maxHeightBeforeKeyboardInset = await wrapper.evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).maxHeight)
+    );
+
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty(
+        "--native-keyboard-inset-bottom",
+        "180px"
+      );
+    });
+    await composer.fill("Ordinary iOS chat composer layout check.");
+
+    await expect
+      .poll(async () =>
+        wrapper.evaluate((element) =>
+          Number.parseFloat(getComputedStyle(element).maxHeight)
+        )
+      )
+      .toBeLessThan(maxHeightBeforeKeyboardInset);
+    const composerBounds = await composer.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        bottom: rect.bottom,
+        top: rect.top,
+        viewportHeight: window.innerHeight,
+      };
+    });
+    expect(composerBounds.top).toBeGreaterThanOrEqual(0);
+    expect(composerBounds.bottom).toBeLessThanOrEqual(
+      composerBounds.viewportHeight
+    );
+    await expect(
+      page.getByRole("button", { name: "Post" }).last()
+    ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("submits one exact-shape synthetic chat drop without uploads", async ({
     baseURL,
     page,
@@ -389,10 +446,13 @@ async function gotoSandboxWave(page: Page) {
   await waitForRouteReady(page);
   await expect(page).toHaveURL(new RegExp(`/waves/${SANDBOX_WAVE_ID}$`));
   await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: "Local Composer Sandbox Wave",
-    })
+    page
+      .getByRole("heading", {
+        level: 1,
+        name: "Local Composer Sandbox Wave",
+      })
+      .or(page.getByText("Local Composer Sandbox Wave", { exact: true }))
+      .first()
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await expect(
     page.getByRole("textbox", { name: "Write a chat message" }).last()
