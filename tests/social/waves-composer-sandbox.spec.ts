@@ -105,17 +105,13 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("keeps the ordinary iOS chat composer within the viewport", async ({
+  test("keeps the ordinary chat composer within the viewport", async ({
     baseURL,
     page,
   }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-ios-sim",
-      "The shared iOS composer viewport contract is covered by the Capacitor simulation"
-    );
-
     await gotoSandboxWave(page);
 
+    const isIosSurface = testInfo.project.name === "capacitor-ios-sim";
     const composer = page
       .getByRole("textbox", { name: "Write a chat message" })
       .last();
@@ -123,7 +119,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       "xpath=ancestor::div[contains(@class, 'tw-sticky') and contains(@class, 'tw-overflow-y-auto')][1]"
     );
 
-    await expect(wrapper).toHaveAttribute("class", /--layout-viewport-height/);
+    await expect(wrapper).toHaveAttribute(
+      "class",
+      isIosSurface ? /--layout-viewport-height/ : /100vh/
+    );
     const maxHeightBeforeKeyboardInset = await wrapper.evaluate((element) =>
       Number.parseFloat(getComputedStyle(element).maxHeight)
     );
@@ -134,15 +133,21 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         "180px"
       );
     });
-    await composer.fill("Ordinary iOS chat composer layout check.");
+    await composer.fill("Ordinary chat composer layout check.");
 
-    await expect
-      .poll(async () =>
-        wrapper.evaluate((element) =>
-          Number.parseFloat(getComputedStyle(element).maxHeight)
-        )
-      )
-      .toBeLessThan(maxHeightBeforeKeyboardInset);
+    const readWrapperMaxHeight = () =>
+      wrapper.evaluate((element) =>
+        Number.parseFloat(getComputedStyle(element).maxHeight)
+      );
+    if (isIosSurface) {
+      await expect
+        .poll(readWrapperMaxHeight)
+        .toBeLessThan(maxHeightBeforeKeyboardInset);
+    } else {
+      await expect
+        .poll(readWrapperMaxHeight)
+        .toBe(maxHeightBeforeKeyboardInset);
+    }
     const composerBounds = await composer.evaluate((element) => {
       const rect = element.getBoundingClientRect();
       return {
