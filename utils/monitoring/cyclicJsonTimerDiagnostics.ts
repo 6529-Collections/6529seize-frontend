@@ -11,8 +11,11 @@ const TIMER_MECHANISM = "auto.browser.browserapierrors.setTimeout";
 // WebView get repeated chances while stack creation stays bounded.
 const DEFAULT_TIMER_SAMPLE_RATE = 1 / 16;
 const MAX_SCHEDULING_FRAMES = 8;
-const INTERNAL_SCHEDULING_FRAMES = 2;
+const INTERNAL_TIMER_FUNCTION = "cyclicJsonTimerDiagnosticSetTimeout";
+const INTERNAL_STACK_FUNCTIONS = new Set([INTERNAL_TIMER_FUNCTION]);
 const SAFE_NAME_PATTERN = /[^A-Za-z0-9_$<>. -]/g;
+// Privacy wins over callback-name fidelity: long minified names can be
+// redacted because they are indistinguishable from identifier-shaped secrets.
 const SENSITIVE_IDENTIFIER_PATTERN = /(?:0x[a-f\d]{8,}|[A-Za-z\d_-]{32,})/i;
 const IOS_DEVICE_PATTERN = /\b(?:iPhone|iPad|iPod)\b/i;
 const IOS_OTHER_BROWSER_PATTERN = /\b(?:CriOS|EdgiOS|FxiOS|OPiOS)\//i;
@@ -75,6 +78,9 @@ function getSafeFunctionName(
   fallback: string
 ): string {
   const sanitized = getSafeName(value, fallback);
+  if (sanitized === INTERNAL_TIMER_FUNCTION) {
+    return sanitized;
+  }
   return SENSITIVE_IDENTIFIER_PATTERN.test(sanitized) ? "redacted" : sanitized;
 }
 
@@ -170,12 +176,12 @@ function getSanitizedFile(
     }
 
     return {
-      file: getFileBasename(parsed.pathname),
+      file: "non-http-script",
       origin: "unknown",
     };
   } catch {
     return {
-      file: getFileBasename(rawLocation.split(/[?#]/, 1)[0] ?? rawLocation),
+      file: "unknown-script",
       origin: "unknown",
     };
   }
@@ -258,14 +264,13 @@ function createDiagnostics(
   userAgent: string,
   firstPartyHostname: string,
   sampleRate: number,
-  stackFactory: () => string | undefined
+  stack: string | undefined
 ): CyclicJsonTimerDiagnostics {
-  const stack = stackFactory() ?? "";
-  const schedulingFrames = stack
+  const schedulingFrames = (stack ?? "")
     .split("\n")
     .map((line) => parseStackLine(line, firstPartyHostname))
     .filter((frame): frame is CyclicJsonTimerSchedulingFrame => frame !== null)
-    .slice(INTERNAL_SCHEDULING_FRAMES)
+    .filter((frame) => !INTERNAL_STACK_FUNCTIONS.has(frame.function))
     .slice(0, MAX_SCHEDULING_FRAMES);
 
   return {
@@ -292,10 +297,6 @@ function isExactCyclicJsonTypeError(error: unknown): error is object {
   } catch {
     return false;
   }
-}
-
-function getDefaultStack(): string | undefined {
-  return new Error("cyclic-json-timer-schedule").stack;
 }
 
 function normalizeSampleRate(value: number | undefined): number {
@@ -326,10 +327,10 @@ export function installCyclicJsonTimerDiagnostics(
 
   const originalSetTimeout = target.setTimeout;
   const random = options.random ?? Math.random;
-  const stackFactory = options.stackFactory ?? getDefaultStack;
+  const stackFactory = options.stackFactory;
   const firstPartyHostname = target.location?.hostname ?? "6529.io";
 
-  const diagnosticSetTimeout: TimerSetTimeout = function (
+  const diagnosticSetTimeout: TimerSetTimeout = function cyclicJsonTimerDiagnosticSetTimeout(
     this: TimerTarget,
     handler,
     timeout,
@@ -351,12 +352,15 @@ export function installCyclicJsonTimerDiagnostics(
 
     let diagnostics: CyclicJsonTimerDiagnostics;
     try {
+      const schedulingStack = stackFactory
+        ? stackFactory()
+        : new Error("cyclic-json-timer-schedule").stack;
       diagnostics = createDiagnostics(
         handler,
         userAgent,
         firstPartyHostname,
         sampleRate,
-        stackFactory
+        schedulingStack
       );
     } catch {
       return originalSetTimeout.apply(target, [handler, timeout, ...args]);
@@ -369,6 +373,9 @@ export function installCyclicJsonTimerDiagnostics(
       try {
         return handler.apply(this, callbackArgs);
       } catch (error) {
+        // This intentionally covers synchronous callback throws only. Promise
+        // rejections use a different Sentry mechanism and cannot be associated
+        // with the timer Error object here.
         if (isExactCyclicJsonTypeError(error)) {
           diagnosticsByError.set(error, diagnostics);
         }
@@ -384,6 +391,12 @@ export function installCyclicJsonTimerDiagnostics(
   };
 
   try {
+    // Preserve the diagnostic frame name through production minification so
+    // stack cleanup does not rely on a fixed frame position.
+    Object.defineProperty(diagnosticSetTimeout, "name", {
+      configurable: true,
+      value: INTERNAL_TIMER_FUNCTION,
+    });
     target.setTimeout = diagnosticSetTimeout;
     installedTargets.add(target);
     return true;
@@ -410,8 +423,9 @@ export function enrichCyclicJsonTimerEvent(
     return;
   }
 
-  // BrowserApiErrors includes timer arguments by default. They are unnecessary
-  // for origin diagnostics and may contain user or wallet data.
+  // BrowserApiErrors includes timer arguments by default. Strip them from every
+  // matching event, sampled or not, because they may contain user or wallet
+  // data and are unnecessary for origin diagnostics.
   const safeExtra = { ...event.extra };
   delete safeExtra["arguments"];
   event.extra = safeExtra;

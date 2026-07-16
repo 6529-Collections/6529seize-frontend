@@ -75,8 +75,7 @@ function createTimerHarness(options?: {
       (() =>
         [
           "Error: cyclic-json-timer-schedule",
-          "    at createDiagnostics (https://6529.io/_next/static/chunks/diagnostics.js:1:1)",
-          "    at diagnosticSetTimeout (https://6529.io/_next/static/chunks/diagnostics.js:2:2)",
+          "    at cyclicJsonTimerDiagnosticSetTimeout (https://6529.io/_next/static/chunks/diagnostics.js:2:2)",
           "    at scheduleMessageRefresh (https://6529.io/_next/static/chunks/app/messages/page.js?token=private:123:45)",
           "walletCallback@chrome-extension://secret-extension-id/inpage.js?address=0xsecret:67:89",
         ].join("\n")),
@@ -202,6 +201,9 @@ describe("cyclic JSON timer diagnostics", () => {
     const { target, getOriginalReceiver } = createTimerHarness();
     const detachedSetTimeout = target.setTimeout;
 
+    expect(detachedSetTimeout.name).toBe(
+      "cyclicJsonTimerDiagnosticSetTimeout"
+    );
     detachedSetTimeout(jest.fn(), 5);
 
     expect(getOriginalReceiver()).toBe(target);
@@ -318,6 +320,40 @@ describe("cyclic JSON timer diagnostics", () => {
       ).callbackName
     ).toBe("redacted");
     expect(JSON.stringify(event.extra)).not.toContain("0x1234567890abcdef");
+  });
+
+  it("uses fixed placeholders for non-HTTP and malformed stack locations", () => {
+    const { target, getScheduled } = createTimerHarness({
+      stackFactory: () =>
+        [
+          "Error: cyclic-json-timer-schedule",
+          "cyclicJsonTimerDiagnosticSetTimeout@https://6529.io/_next/static/chunks/diagnostics.js:2:2",
+          "inlineSource@data:text/javascript,privateIdentifier:4:5",
+          "malformed@privateIdentifier:6:7",
+        ].join("\n"),
+    });
+    const expectedError = new TypeError(CYCLIC_JSON_MESSAGE);
+    function failingTimerCallback() {
+      throw expectedError;
+    }
+
+    target.setTimeout(failingTimerCallback, 0);
+    const scheduled = getScheduled();
+    try {
+      (scheduled?.handler as (...args: unknown[]) => unknown)();
+    } catch (error) {
+      expect(error).toBe(expectedError);
+    }
+
+    const event = createCyclicJsonEvent();
+    enrichCyclicJsonTimerEvent(event, { originalException: expectedError });
+
+    const serializedDiagnostics = JSON.stringify(
+      event.extra?.["cyclicJsonTimerDiagnostics"]
+    );
+    expect(serializedDiagnostics).toContain("non-http-script");
+    expect(serializedDiagnostics).toContain("unknown-script");
+    expect(serializedDiagnostics).not.toContain("privateIdentifier");
   });
 
   it("leaves timers untouched in unrelated browsers", () => {

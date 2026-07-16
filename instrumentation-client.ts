@@ -194,6 +194,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  // Intentionally do not call shouldFilterSentryRouteParameterizationError.
+  // Keep all cyclic JSON timer failures while origin diagnostics are active.
+  // Generic Sentry/WKWebView frames do not prove third-party ownership, so
+  // retaining only the sampled diagnostic subset would hide genuine app errors.
   if (shouldFilterRabbyMobileRainbowKitNotFoundError(event, hint)) {
     return true;
   }
