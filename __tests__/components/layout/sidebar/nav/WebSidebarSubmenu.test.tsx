@@ -147,7 +147,7 @@ describe("WebSidebarSubmenu", () => {
       fireEvent.keyDown(lastLink as HTMLElement, { key: "Tab" });
 
       expect(nextControl).toHaveFocus();
-      expect(onClose).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
     } finally {
       trigger.remove();
       nextControl.remove();

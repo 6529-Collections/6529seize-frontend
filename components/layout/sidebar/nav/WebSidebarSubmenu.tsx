@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   type FocusEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -66,15 +67,21 @@ function WebSidebarSubmenu({
     [section.items, section.subsections]
   );
 
-  const handleKeyDown = useCallback(
+  const handleEscapeKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        triggerElement?.focus();
-        onClose();
+      if (event.key !== "Escape") {
         return;
       }
 
+      event.preventDefault();
+      triggerElement?.focus();
+      onClose();
+    },
+    [onClose, triggerElement]
+  );
+
+  const handleTabKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
       if (event.key !== "Tab") {
         return;
       }
@@ -117,7 +124,12 @@ function WebSidebarSubmenu({
       const nextFocusable =
         triggerIndex >= 0 ? focusableElements.at(triggerIndex + 1) : null;
 
-      (nextFocusable ?? triggerElement)?.focus();
+      if (nextFocusable) {
+        nextFocusable.focus();
+        return;
+      }
+
+      triggerElement?.focus();
       onClose();
     },
     [browserDocument, onClose, triggerElement]
@@ -181,18 +193,18 @@ function WebSidebarSubmenu({
       return;
     }
 
-    browserWindow.addEventListener("keydown", handleKeyDown);
+    browserWindow.addEventListener("keydown", handleEscapeKeyDown);
     browserDocument.addEventListener("mousedown", handleClickOutside);
     browserDocument.addEventListener("touchstart", handleClickOutside, {
       passive: true,
     });
 
     return () => {
-      browserWindow.removeEventListener("keydown", handleKeyDown);
+      browserWindow.removeEventListener("keydown", handleEscapeKeyDown);
       browserDocument.removeEventListener("mousedown", handleClickOutside);
       browserDocument.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [browserWindow, browserDocument, handleKeyDown, handleClickOutside]);
+  }, [browserWindow, browserDocument, handleEscapeKeyDown, handleClickOutside]);
 
   useLayoutEffect(() => {
     if (browserWindow && containerRef.current) {
@@ -274,6 +286,7 @@ function WebSidebarSubmenu({
       })}
       onPointerEnter={onPointerEnter}
       onPointerLeave={handlePointerLeave}
+      onKeyDown={handleTabKeyDown}
       onBlur={handleBlur}
     >
       <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-px-6 tw-pb-2 tw-pt-4">
