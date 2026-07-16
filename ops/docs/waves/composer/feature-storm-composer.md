@@ -22,7 +22,8 @@ The primary action always describes the next result: `Add part`,
 3. Select `Break into storm`.
 
 `Break into storm` is available only when the current part has text or media
-and stays within the storm length limit.
+and stays within the storm length limit. On mobile and in the app, the action
+uses a visible label instead of relying on the storm icon alone.
 
 ## User Journey
 
@@ -42,6 +43,11 @@ adds or saves a part; with an empty current editor it posts the storm.
   `Save changes`. `Cancel edit` keeps the original saved version.
 - Use the up and down controls to move a saved part earlier or later.
 - Remove an individual saved part with its remove control.
+- On mobile and in the app, each saved part places its 44px edit, move, and
+  remove controls in a separate row below the content so they remain easy to
+  reach without squeezing the draft text.
+- Saved parts use one numbered marker for orientation. The editor placeholder
+  communicates which part comes next without repeating that prompt above it.
 - Select `Discard`, then confirm `Discard draft`, to clear every saved part and
   the current unsaved part.
 - A media-only part is valid and appears as `Media-only part` in the draft.

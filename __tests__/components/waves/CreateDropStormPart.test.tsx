@@ -33,7 +33,8 @@ describe("CreateDropStormPart", () => {
       />
     );
 
-    expect(screen.getByText("Part 1")).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Part 1" })).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeVisible();
     await userEvent.click(
       screen.getByRole("button", { name: "Remove part 1" })
     );

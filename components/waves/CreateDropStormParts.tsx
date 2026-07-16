@@ -78,9 +78,6 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
       : "waves.stormComposer.partsCountOther",
     { count: formatInteger(locale, parts.length) }
   );
-  const activePartNumber =
-    editingPartIndex === null ? parts.length + 1 : editingPartIndex + 1;
-
   useEffect(() => {
     if (previousPartsCountRef.current === parts.length) {
       return;
@@ -116,9 +113,9 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
     <LazyMotion features={domAnimation}>
       <section
         aria-labelledby={headingId}
-        className="tw-mb-3 tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-colors tw-duration-300"
+        className="tw-mb-3 tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/60 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-colors tw-duration-300"
       >
-        <header className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.035] tw-px-4 tw-py-3">
+        <header className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.035] tw-px-3 tw-py-2.5 sm:tw-items-center sm:tw-px-4 sm:tw-py-3">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
             <span className="tw-flex tw-size-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.025] tw-text-iron-400">
               <svg
@@ -136,19 +133,21 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
                 />
               </svg>
             </span>
-            <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
-              <h2
-                id={headingId}
-                className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
-              >
-                {t(locale, "waves.stormComposer.draftTitle")}
-              </h2>
-              <span className="tw-rounded-full tw-bg-white/[0.045] tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-400">
-                {partsLabel}
-              </span>
-              <span className="tw-sr-only">
+            <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+                <h2
+                  id={headingId}
+                  className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+                >
+                  {t(locale, "waves.stormComposer.draftTitle")}
+                </h2>
+                <span className="tw-rounded-full tw-bg-white/[0.045] tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-400">
+                  {partsLabel}
+                </span>
+              </div>
+              <p className="tw-m-0 tw-text-[11px] tw-leading-4 tw-text-iron-500 sm:tw-sr-only">
                 {t(locale, "waves.stormComposer.privateDraftHint")}
-              </span>
+              </p>
             </div>
           </div>
           {!isConfirmingDiscard && (
@@ -157,7 +156,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
               type="button"
               onClick={() => setIsConfirmingDiscard(true)}
               disabled={controlsDisabled}
-              className="tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-white/[0.035] desktop-hover:hover:tw-text-iron-200"
+              className="tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-white/[0.035] desktop-hover:hover:tw-text-iron-200 sm:tw-h-auto sm:tw-py-1.5"
             >
               {t(locale, "waves.stormComposer.discard")}
             </button>
@@ -203,7 +202,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
           )}
         </AnimatePresence>
 
-        <ol className="tw-m-0 tw-flex tw-max-h-[40vh] tw-list-none tw-flex-col tw-divide-y tw-divide-white/[0.035] tw-overflow-y-auto tw-px-2 tw-py-1">
+        <ol className="tw-m-0 tw-flex tw-max-h-[34dvh] tw-list-none tw-flex-col tw-divide-y tw-divide-white/[0.035] tw-overflow-y-auto tw-px-2 tw-py-1 sm:tw-max-h-[40vh]">
           <AnimatePresence mode="popLayout" initial={false}>
             {parts.map((part, partIndex) => (
               <m.li
@@ -235,37 +234,23 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
             ))}
           </AnimatePresence>
         </ol>
-        <footer className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.025] tw-px-4 tw-py-3">
-          <span className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-truncate tw-pl-10 tw-text-xs tw-font-medium tw-text-iron-500">
-            <span
-              aria-hidden="true"
-              className={`tw-size-1.5 tw-flex-none tw-rounded-full ${
-                editingPartIndex === null
-                  ? "tw-bg-iron-600"
-                  : "tw-bg-primary-400"
-              }`}
-            />
-            <span className="tw-truncate">
-              {t(
-                locale,
-                editingPartIndex === null
-                  ? "waves.stormComposer.nextPart"
-                  : "waves.stormComposer.editingPart",
-                { number: activePartNumber }
-              )}
+        {editingPartIndex !== null && (
+          <footer className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.025] tw-bg-black/10 tw-px-3 tw-py-2.5 sm:tw-px-4 sm:tw-py-3">
+            <span className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-500 sm:tw-pl-10">
+              {t(locale, "waves.stormComposer.editingPart", {
+                number: editingPartIndex + 1,
+              })}
             </span>
-          </span>
-          {editingPartIndex !== null && (
             <button
               type="button"
               onClick={onCancelPartEdit}
               disabled={controlsDisabled}
-              className="tw-inline-flex tw-h-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-white/[0.035] desktop-hover:hover:tw-text-iron-200"
+              className="tw-inline-flex tw-h-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-white/[0.035] desktop-hover:hover:tw-text-iron-200 sm:tw-h-8"
             >
               {t(locale, "waves.stormComposer.cancelEdit")}
             </button>
-          )}
-        </footer>
+          </footer>
+        )}
       </section>
     </LazyMotion>
   );
