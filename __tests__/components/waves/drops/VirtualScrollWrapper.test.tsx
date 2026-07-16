@@ -353,6 +353,28 @@ describe("Height Measurement and Placeholder", () => {
     expect(measureSpy).toHaveBeenCalledTimes(1);
   });
 
+  test("does not restart the delayed fallback after a measured drop re-enters", () => {
+    const { container } = setup(DropSize.FULL);
+    const div = container.firstChild as HTMLElement;
+    const measureSpy = jest.fn(() => ({ height: 180 }));
+    Object.defineProperty(div, "getBoundingClientRect", {
+      value: measureSpy,
+    });
+
+    act(() => {
+      emitResize(div, 180);
+    });
+    act(() => {
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+    act(() => {
+      intersectionCb([{ isIntersecting: true } as any]);
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(measureSpy).toHaveBeenCalledTimes(1);
+  });
+
   test("keeps children mounted when a measured height is zero", () => {
     const { container } = setup(DropSize.FULL);
     const div = container.firstChild as HTMLElement;
@@ -369,7 +391,7 @@ describe("Height Measurement and Placeholder", () => {
     ).toBeInTheDocument();
   });
 
-  test("restores the fallback when FULL height observation restarts", () => {
+  test("restores the fallback after an in-view FULL observation restart", () => {
     const scrollRef = { current: document.createElement("div") };
     const renderWrapper = (type: DropSize) => (
       <VirtualScrollWrapper
