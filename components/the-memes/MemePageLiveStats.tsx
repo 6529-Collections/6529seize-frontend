@@ -32,8 +32,6 @@ import type { ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import MemePageMainStageSubmissionLink from "./MemePageMainStageSubmissionLink";
 
-const SECTION_HEADER_TITLE_CLASS =
-  "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
 const TOP_LABEL_CLASS =
   "tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-500";
 const CREATOR_NAME_CLASS =
@@ -54,6 +52,8 @@ const EDITION_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
 const MARKET_OVERVIEW_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-5 xl:tw-gap-x-8";
+const MARKET_GRID_ITEM_CLASS =
+  "tw-min-w-0 tw-basis-[calc(50%-0.75rem)] lg:tw-basis-[calc(33.333%-1rem)] xl:tw-basis-[calc(33.333%-1.334rem)]";
 const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   day: "numeric",
   month: "short",
@@ -587,10 +587,10 @@ function MemeMarketplaceLinks({
   }
 
   return (
-    <div className="tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
-      <span className={INLINE_METRIC_LABEL_CLASS}>
+    <div className={MARKET_GRID_ITEM_CLASS}>
+      <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
         {t(locale, "theMemes.detail.live.market.marketplaces")}
-      </span>
+      </div>
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
     </div>
   );
@@ -605,6 +605,7 @@ export function MemeNftLivePanel({
   readonly recordedInTdh?: boolean | null | undefined;
   readonly locale?: SupportedLocale | undefined;
 }) {
+  const ethUnit = t(locale, "theMemes.detail.live.market.ethUnit");
   const pendingTdhLabel =
     recordedInTdh === false
       ? t(locale, "theMemes.detail.live.market.pending")
@@ -612,28 +613,25 @@ export function MemeNftLivePanel({
 
   return (
     <section className="tw-pt-6 md:tw-pt-8">
-      <h3 className={`${SECTION_HEADER_TITLE_CLASS} tw-mb-4`}>
-        {t(locale, "theMemes.detail.live.market.title")}
-      </h3>
       <div className={MARKET_OVERVIEW_ROW_CLASS}>
         <MarketMetric
           label={t(locale, "theMemes.detail.live.market.mintPrice")}
           value={nft.mint_price}
           decimals={100000}
-          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          unit={ethUnit}
           locale={locale}
         />
         <MarketMetric
           label={t(locale, "theMemes.detail.live.market.floorPrice")}
           value={nft.floor_price}
-          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          unit={ethUnit}
           locale={locale}
         />
         <MarketMetric
           label={t(locale, "theMemes.detail.live.market.marketCap")}
           value={nft.market_cap}
           decimals={100}
-          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          unit={ethUnit}
           locale={locale}
         />
         <MarketMetric
@@ -646,11 +644,11 @@ export function MemeNftLivePanel({
         <MarketMetric
           label={t(locale, "theMemes.detail.live.market.highestOffer")}
           value={nft.highest_offer}
-          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          unit={ethUnit}
           locale={locale}
         />
+        <MemeMarketplaceLinks nft={nft} locale={locale} />
       </div>
-      <MemeMarketplaceLinks nft={nft} locale={locale} />
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-pt-5">
         <MemeDistributionPlanLink nft={nft} locale={locale} />
         <MemePageMainStageSubmissionLink memeCardId={nft.id} locale={locale} />
@@ -685,7 +683,7 @@ function MarketMetric({
       : unavailableLabel);
 
   return (
-    <div className="tw-min-w-0 tw-basis-[calc(50%-0.75rem)] xl:tw-basis-[calc(33.333%-1.334rem)]">
+    <div className={MARKET_GRID_ITEM_CLASS}>
       <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
         {label}
       </div>
