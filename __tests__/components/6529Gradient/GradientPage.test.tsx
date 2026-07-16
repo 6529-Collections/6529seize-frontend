@@ -238,7 +238,7 @@ describe("GradientPage", () => {
     expect(screen.getByText("Mint Date")).toBeInTheDocument();
     expect(screen.getByText("Artist")).toBeInTheDocument();
     expect(screen.getByTestId("artist")).toBeInTheDocument();
-    expect(screen.getByText("Market Overview")).toBeInTheDocument();
+    expect(screen.queryByText("Market Overview")).not.toBeInTheDocument();
     expect(screen.getByText("Floor Price")).toBeInTheDocument();
     expect(screen.getByText("Market Cap")).toBeInTheDocument();
     expect(screen.getByText("Highest Offer")).toBeInTheDocument();

@@ -44,7 +44,9 @@ const COPY_ICON_CLASS_NAME =
 const COPY_CONTROL_CLASS_NAME =
   "tw-m-0 tw-inline-flex tw-min-h-6 tw-min-w-6 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-leading-none tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 const COPY_MENU_ITEM_CLASS_NAME =
-  "tw-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-black hover:tw-bg-[#b8ccf4] hover:tw-text-black focus:tw-bg-[#b8ccf4] focus:tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-black hover:tw-bg-[#b8ccf4] hover:tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+const COPY_MENU_ITEM_COPIED_CLASS_NAME = "tw-bg-[#b8ccf4] tw-text-black";
+const COPY_MENU_CLOSE_DELAY_MS = 700;
 const FOCUSABLE_ELEMENT_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -124,6 +126,7 @@ export function WalletAddress(props: {
   const copyMenuRef = useRef<HTMLSpanElement>(null);
   const copyMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const copyMenuItemsRef = useRef<HTMLDivElement>(null);
+  const copyMenuOpenedWithKeyboardRef = useRef(false);
   const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
@@ -207,9 +210,11 @@ export function WalletAddress(props: {
     }
 
     updateCopyMenuPosition();
-    copyMenuItemsRef.current
-      ?.querySelector<HTMLButtonElement>("button")
-      ?.focus();
+    if (copyMenuOpenedWithKeyboardRef.current) {
+      copyMenuItemsRef.current
+        ?.querySelector<HTMLButtonElement>("button")
+        ?.focus();
+    }
     window.addEventListener("resize", updateCopyMenuPosition);
     window.addEventListener("scroll", updateCopyMenuPosition, true);
     document.addEventListener("pointerdown", handleInteractionOutside);
@@ -262,6 +267,27 @@ export function WalletAddress(props: {
     }
   }
 
+  function toggleCopyMenu(openedWithKeyboard: boolean) {
+    if (isCopyMenuOpen) {
+      closeCopyMenu();
+      return;
+    }
+
+    if (copyResetTimeoutRef.current !== null) {
+      globalThis.clearTimeout(copyResetTimeoutRef.current);
+      copyResetTimeoutRef.current = null;
+    }
+    if (copyMenuCloseTimeoutRef.current !== null) {
+      globalThis.clearTimeout(copyMenuCloseTimeoutRef.current);
+      copyMenuCloseTimeoutRef.current = null;
+    }
+
+    copyMenuOpenedWithKeyboardRef.current = openedWithKeyboard;
+    setIsCopied(false);
+    setCopiedTarget(null);
+    setIsCopyMenuOpen(true);
+  }
+
   function focusAfterCopyMenuTrigger() {
     const trigger = copyMenuTriggerRef.current;
     if (!trigger) {
@@ -295,6 +321,9 @@ export function WalletAddress(props: {
     if (copyResetTimeoutRef.current !== null) {
       globalThis.clearTimeout(copyResetTimeoutRef.current);
     }
+    if (copyMenuCloseTimeoutRef.current !== null) {
+      globalThis.clearTimeout(copyMenuCloseTimeoutRef.current);
+    }
     setIsCopied(true);
     setCopiedTarget(target);
     setIsCopyTooltipSuppressed(false);
@@ -311,7 +340,7 @@ export function WalletAddress(props: {
       copyMenuCloseTimeoutRef.current = globalThis.setTimeout(() => {
         closeCopyMenu(true);
         copyMenuCloseTimeoutRef.current = null;
-      }, 300);
+      }, COPY_MENU_CLOSE_DELAY_MS);
     } else {
       closeCopyMenu();
     }
@@ -350,6 +379,14 @@ export function WalletAddress(props: {
 
   const tooltipLabel = isCopied ? COPIED_TOOLTIP_LABEL : COPY_TOOLTIP_LABEL;
 
+  function getCopyMenuItemClassName(target: CopyTarget) {
+    return `${COPY_MENU_ITEM_CLASS_NAME} ${
+      isCopied && copiedTarget === target
+        ? COPY_MENU_ITEM_COPIED_CLASS_NAME
+        : ""
+    }`;
+  }
+
   return (
     <span className="tw-inline-flex tw-items-center tw-align-middle">
       {(hideCopy || !hasClipboard) &&
@@ -385,7 +422,7 @@ export function WalletAddress(props: {
                 aria-expanded={isCopyMenuOpen}
                 onMouseEnter={() => setIsCopyTooltipSuppressed(false)}
                 onFocus={() => setIsCopyTooltipSuppressed(false)}
-                onClick={() => setIsCopyMenuOpen((current) => !current)}
+                onClick={(event) => toggleCopyMenu(event.detail === 0)}
                 onKeyDown={(event) => {
                   if (event.key === "Escape") {
                     event.preventDefault();
@@ -417,7 +454,8 @@ export function WalletAddress(props: {
                     <button
                       type="button"
                       data-tooltip-id={ensTooltipId}
-                      className={COPY_MENU_ITEM_CLASS_NAME}
+                      className={getCopyMenuItemClassName("ens")}
+                      data-copied={isCopied && copiedTarget === "ens"}
                       aria-label={COPY_ENS_ARIA_LABEL}
                       onClick={copyEns}
                       onKeyDown={(event) =>
@@ -435,7 +473,8 @@ export function WalletAddress(props: {
                     <button
                       type="button"
                       data-tooltip-id={walletTooltipId}
-                      className={COPY_MENU_ITEM_CLASS_NAME}
+                      className={getCopyMenuItemClassName("wallet")}
+                      data-copied={isCopied && copiedTarget === "wallet"}
                       aria-label={COPY_WALLET_ARIA_LABEL}
                       onClick={() => {
                         void copy(props.wallet, "wallet");

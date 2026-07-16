@@ -1434,6 +1434,9 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
+  "theMemes.detail.loadError.message":
+    "We couldn't load this card. Please try again.",
+  "theMemes.detail.loadError.retry": "Try again",
   "theMemes.detail.mainStageSubmission.title": "Main Stage Submission",
   "theMemes.detail.sections.ariaLabel": "Meme page sections",
   "theMemes.detail.history.ariaLabel": "Meme history sections",
@@ -1878,6 +1881,9 @@ export const EN_US_MESSAGES = {
   "profile.mute.status.muted": "Notifications from this profile are muted.",
   "profile.mute.status.unmuted":
     "Notifications from this profile are not muted.",
+  "profile.subscriptions.mintingToday.label": "Minting Today",
+  "profile.subscriptions.mintingToday.tooltip":
+    "No changes allowed on minting day",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
   "drop.media.processingGeneric": "Processing media",

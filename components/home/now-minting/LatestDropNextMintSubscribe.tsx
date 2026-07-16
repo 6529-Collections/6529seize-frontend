@@ -132,6 +132,7 @@ function getToggleTooltipLabel({
 
 export default function LatestDropNextMintSubscribe(
   props: Readonly<{
+    appearance?: "default" | "quiet";
     tokenId?: number;
     statusSource?: SubscriptionStatusSource;
   }> = {}
@@ -234,6 +235,7 @@ export default function LatestDropNextMintSubscribe(
 
   return (
     <MemeSubscriptionAwarenessRow
+      appearance={props.appearance}
       onProfileSubscriptionsAction={openProfileSubscriptions}
       profileSubscriptionsActionPending={isConnecting}
       profileSubscriptionsHref={
