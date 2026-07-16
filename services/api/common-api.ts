@@ -185,6 +185,7 @@ interface ExecuteApiRequestParams {
   readonly parseJson?: boolean | undefined;
   readonly errorMode?: ApiErrorMode | undefined;
   readonly credentials?: RequestCredentials | undefined;
+  readonly cache?: RequestCache | undefined;
 }
 
 type RequestStatus = number | "aborted" | "network_error" | "unknown";
@@ -195,9 +196,10 @@ const createRequestInit = ({
   body,
   signal,
   credentials,
+  cache,
 }: Pick<
   ExecuteApiRequestParams,
-  "method" | "headers" | "body" | "signal" | "credentials"
+  "method" | "headers" | "body" | "signal" | "credentials" | "cache"
 >): RequestInit => {
   const requestInit: RequestInit = {
     method,
@@ -206,6 +208,7 @@ const createRequestInit = ({
   const hasBody = body !== undefined;
   const hasSignal = signal !== undefined;
   const hasCredentials = credentials !== undefined;
+  const hasCache = cache !== undefined;
 
   if (hasBody) {
     requestInit.body = body;
@@ -215,6 +218,9 @@ const createRequestInit = ({
   }
   if (hasCredentials) {
     requestInit.credentials = credentials;
+  }
+  if (hasCache) {
+    requestInit.cache = cache;
   }
 
   return requestInit;
@@ -299,6 +305,7 @@ const executeApiRequest = async <T>({
   parseJson = true,
   errorMode = "legacy-string",
   credentials,
+  cache,
 }: ExecuteApiRequestParams): Promise<T> => {
   const requestStartedAtMs = getRequestTimingNow();
   let status: RequestStatus = "unknown";
@@ -308,6 +315,7 @@ const executeApiRequest = async <T>({
     body,
     signal,
     credentials,
+    cache,
   });
 
   try {
@@ -347,6 +355,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
   includeWalletAuth?: boolean | undefined;
+  cache?: RequestCache | undefined;
 }): Promise<T> => {
   const url = buildUrl(
     param.endpoint,
@@ -370,6 +379,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     ),
     signal: param.signal,
     errorMode: param.errorMode ?? "legacy-string",
+    cache: param.cache,
   });
 };
 

@@ -154,7 +154,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   // Get unread notifications using the dedicated hook
   const { haveUnreadNotifications } = useUnreadNotifications(
     hasValidNotificationAuth ? (connectedProfile?.handle ?? null) : null,
-    { enabled: hasValidNotificationAuth }
+    {
+      enabled: hasValidNotificationAuth,
+      profileId: connectedProfile?.id,
+    }
   );
 
   const scrollActiveButtonIntoView = useCallback(
