@@ -10,7 +10,7 @@ interface UseIdentitiesSearchProps {
 }
 
 export const IDENTITY_SEARCH_MIN_HANDLE_LENGTH = 3;
-export const IDENTITY_SEARCH_MAX_HANDLE_LENGTH = 15;
+const IDENTITY_SEARCH_MAX_HANDLE_LENGTH = 15;
 
 const isSearchableHandle = (handle: string) =>
   /^\w+$/.test(handle) &&
