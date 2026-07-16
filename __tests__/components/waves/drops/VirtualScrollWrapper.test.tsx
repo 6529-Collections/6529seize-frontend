@@ -68,7 +68,7 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({ fetchAroundSerialNo: jest.fn() })),
 }));
 
-function setup(size: DropSize, dropId?: string) {
+function setup(size: DropSize, dropId?: string, rootMargin?: string) {
   const scrollRef = { current: document.createElement("div") };
   const { container, unmount } = render(
     <VirtualScrollWrapper
@@ -78,6 +78,7 @@ function setup(size: DropSize, dropId?: string) {
       dropSerialNo={1}
       waveId="wave"
       type={size}
+      rootMargin={rootMargin}
     >
       <div data-testid="child">content</div>
     </VirtualScrollWrapper>
@@ -137,6 +138,12 @@ describe("IntersectionObserver Configuration", () => {
   test("observes container element on mount", () => {
     const { container } = setup(DropSize.FULL);
     expect(observe).toHaveBeenCalledWith(container.firstChild);
+  });
+
+  test("supports a smaller render window", () => {
+    setup(DropSize.FULL, undefined, "1200px 0px");
+
+    expect(intersectionObserverOptions.rootMargin).toBe("1200px 0px");
   });
 
   test("updates drop near-viewport registry from observer state", () => {
@@ -300,19 +307,66 @@ describe("Height Measurement and Placeholder", () => {
     expect(measureSpy).toHaveBeenCalled();
   });
 
-  test("does not force a layout read when resize data is already available", () => {
+  test("does not use the delayed fallback when resize data is already available", () => {
     const { container } = setup(DropSize.FULL);
     const div = container.firstChild as HTMLElement;
     const measureSpy = jest.spyOn(div, "getBoundingClientRect");
 
     act(() => {
       emitResize(div, 175);
+      jest.advanceTimersByTime(1000);
     });
+
+    expect(measureSpy).not.toHaveBeenCalled();
+  });
+
+  test("captures the final height before rendering a placeholder", () => {
+    const { container } = setup(DropSize.FULL);
+    const div = container.firstChild as HTMLElement;
+    const measureSpy = jest.fn(() => ({ height: 190 }));
+    Object.defineProperty(div, "getBoundingClientRect", {
+      value: measureSpy,
+    });
+
+    act(() => {
+      emitResize(div, 175);
+      intersectionCb([{ isIntersecting: false } as any]);
+    });
+
+    expect(measureSpy).toHaveBeenCalledTimes(1);
+    expect((div.firstChild as HTMLElement).style.height).toBe("190px");
+  });
+
+  test("cancels the delayed fallback after leaving the render window", () => {
+    const { container } = setup(DropSize.FULL);
+    const div = container.firstChild as HTMLElement;
+    const measureSpy = jest.fn(() => ({ height: 180 }));
+    Object.defineProperty(div, "getBoundingClientRect", {
+      value: measureSpy,
+    });
+
+    act(() => {
+      intersectionCb([{ isIntersecting: false } as any]);
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(measureSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test("keeps children mounted when a measured height is zero", () => {
+    const { container } = setup(DropSize.FULL);
+    const div = container.firstChild as HTMLElement;
+    Object.defineProperty(div, "getBoundingClientRect", {
+      value: () => ({ height: 0 }),
+    });
+
     act(() => {
       intersectionCb([{ isIntersecting: false } as any]);
     });
 
-    expect(measureSpy).not.toHaveBeenCalled();
+    expect(
+      container.querySelector('[data-testid="child"]')
+    ).toBeInTheDocument();
   });
 
   test("restores the fallback when FULL height observation restarts", () => {
@@ -349,10 +403,13 @@ describe("Height Measurement and Placeholder", () => {
     expect(measureSpy).toHaveBeenCalled();
   });
 
-  test("tracks height changes without forcing layout", () => {
+  test("tracks height changes through the virtualization boundary", () => {
     const { container } = setup(DropSize.FULL);
     const div = container.firstChild as HTMLElement;
-    const measureSpy = jest.spyOn(div, "getBoundingClientRect");
+    const measureSpy = jest.fn(() => ({ height: 240 }));
+    Object.defineProperty(div, "getBoundingClientRect", {
+      value: measureSpy,
+    });
 
     act(() => {
       emitResize(div, 120);
@@ -361,7 +418,7 @@ describe("Height Measurement and Placeholder", () => {
     });
 
     expect((div.firstChild as HTMLElement).style.height).toBe("240px");
-    expect(measureSpy).not.toHaveBeenCalled();
+    expect(measureSpy).toHaveBeenCalledTimes(1);
   });
 
   test("uses content height when border-box size is unavailable", () => {

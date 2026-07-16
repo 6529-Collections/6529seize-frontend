@@ -81,6 +81,7 @@ interface VirtualScrollWrapperProps {
   readonly waveId: string;
   readonly type: DropSize;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly rootMargin?: string | undefined;
 
   /**
    * The child components to be rendered or virtualized.
@@ -118,6 +119,7 @@ export default function VirtualScrollWrapper({
   waveId,
   type,
   suspendLightDropHydration = false,
+  rootMargin = "5000px 0px 5000px 0px",
 }: VirtualScrollWrapperProps) {
   const { fetchAroundSerialNo } = useMyStream();
 
@@ -161,11 +163,7 @@ export default function VirtualScrollWrapper({
     }
   }, [updateMeasuredHeight]);
 
-  /**
-   * Once all media are loaded, optionally wait the provided `delay`
-   * before measuring the height. This allows any final reflows or
-   * async changes to settle.
-   */
+  /** Keep FULL-drop height tracking active across viewport transitions. */
   useEffect(() => {
     if (type === DropSize.LIGHT) return;
     const element = containerRef.current;
@@ -175,6 +173,21 @@ export default function VirtualScrollWrapper({
     const stopObservingHeight = observeHeight(element, {
       updateHeight: updateMeasuredHeight,
     });
+
+    return () => {
+      stopObservingHeight?.();
+    };
+  }, [type, updateMeasuredHeight]);
+
+  /**
+   * Fall back to one delayed layout read when ResizeObserver has not supplied
+   * a usable height. Cancel it while the drop is outside the render window.
+   */
+  useEffect(() => {
+    if (type === DropSize.LIGHT || !isInView || hasMeasuredHeightRef.current) {
+      return;
+    }
+
     const timer = setTimeout(() => {
       if (!hasMeasuredHeightRef.current) {
         measureHeight();
@@ -183,9 +196,8 @@ export default function VirtualScrollWrapper({
 
     return () => {
       clearTimeout(timer);
-      stopObservingHeight?.();
     };
-  }, [delay, measureHeight, type, updateMeasuredHeight]);
+  }, [delay, isInView, measureHeight, type]);
 
   /**
    * Intersection Observer to track if the element is in the viewport.
@@ -207,14 +219,10 @@ export default function VirtualScrollWrapper({
             isNearViewport: inView,
           });
         }
-        if (
-          !inView &&
-          containerRef.current &&
-          type !== DropSize.LIGHT &&
-          !hasMeasuredHeightRef.current
-        ) {
-          // Fall back to a synchronous measurement only if ResizeObserver has
-          // not supplied a height yet.
+        if (!inView && containerRef.current && type !== DropSize.LIGHT) {
+          // Capture the current border box immediately before replacing the
+          // drop with its placeholder. This preserves the chat's scroll
+          // geometry even if a resize notification is still pending.
           measureHeight();
         }
         setIsInView((currentValue) =>
@@ -225,10 +233,9 @@ export default function VirtualScrollWrapper({
         }
       },
       {
-        // For a reversed layout, we need a large margin at both top and bottom
-        // This ensures elements are detected well before they enter/leave the viewport
-        // Using a large value for both directions ensures smooth operation in both regular and reversed layouts
-        rootMargin: "5000px 0px 5000px 0px",
+        // Keep enough content mounted around the reversed viewport to avoid
+        // visible placeholder swaps during fast scrolling.
+        rootMargin,
         threshold: 0.0,
         root: scrollContainerRef.current,
       }
@@ -251,6 +258,7 @@ export default function VirtualScrollWrapper({
     dropSerialNo,
     fetchAroundSerialNo,
     measureHeight,
+    rootMargin,
     scrollContainerRef,
     suspendLightDropHydration,
     type,
