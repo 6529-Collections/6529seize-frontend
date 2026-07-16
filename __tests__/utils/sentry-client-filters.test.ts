@@ -934,6 +934,21 @@ describe("sentry-client-filters", () => {
       ...overrides,
     }) as TestSentryClientEvent;
 
+  const createObservedRabbyRainbowKitRawFrames = () => [
+    {
+      filename: "app:///_next/static/chunks/observed-rabby-webview.js",
+      abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
+      function: "n",
+      in_app: true,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "Promise",
+      in_app: true,
+    },
+  ];
+
   const createRabbyMobileRainbowKitNotFoundEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
@@ -950,22 +965,7 @@ describe("sentry-client-filters", () => {
               handled: false,
             },
             stacktrace: {
-              frames: [
-                {
-                  filename:
-                    "app:///_next/static/chunks/observed-rabby-webview.js",
-                  abs_path:
-                    "app:///_next/static/chunks/observed-rabby-webview.js",
-                  function: "n",
-                  in_app: true,
-                },
-                {
-                  filename: "[native code]",
-                  abs_path: "[native code]",
-                  function: "Promise",
-                  in_app: true,
-                },
-              ],
+              frames: createObservedRabbyRainbowKitRawFrames(),
             },
           },
         ],
@@ -5632,7 +5632,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it("filters the symbolicated RainbowKit lookup error without app frames", () => {
+  it("keeps symbolicated RainbowKit lookup errors without the raw signature", () => {
     // Arrange
     const event = createRabbyMobileRainbowKitNotFoundEvent({
       exception: {
@@ -5670,7 +5670,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("filters injected WebAssembly CSP unsafe-eval errors", () => {
@@ -6332,11 +6332,11 @@ describe("sentry-client-filters", () => {
             type: "Error",
             value: rainbowKitNotFoundMessage,
             mechanism: {
-              type: "generic",
+              type: "auto.browser.global_handlers.onunhandledrejection",
               handled: true,
             },
             stacktrace: {
-              frames: [],
+              frames: createObservedRabbyRainbowKitRawFrames(),
             },
           },
         ],
@@ -6380,7 +6380,7 @@ describe("sentry-client-filters", () => {
               handled: false,
             },
             stacktrace: {
-              frames: [],
+              frames: createObservedRabbyRainbowKitRawFrames(),
             },
           },
         ],

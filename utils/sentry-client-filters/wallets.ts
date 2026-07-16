@@ -126,6 +126,7 @@ function isObservedRabbyRainbowKitNativePromiseFrame(
 function hasObservedRabbyRainbowKitRawFrames(
   frames: SentryStackFrame[] | undefined
 ): boolean {
+  // beforeSend receives this exact two-frame shape before Sentry symbolicates it.
   return (
     Array.isArray(frames) &&
     frames.length === 2 &&
@@ -486,10 +487,7 @@ export function shouldFilterRabbyMobileRainbowKitNotFoundError(
   }
 
   const frames = value.stacktrace?.frames;
-  return (
-    hasObservedRabbyRainbowKitRawFrames(frames) ||
-    !hasLikelyAppOwnedFrame(frames)
-  );
+  return hasObservedRabbyRainbowKitRawFrames(frames);
 }
 
 export function shouldFilterCoinbaseWalletLinkWebSocket1006(

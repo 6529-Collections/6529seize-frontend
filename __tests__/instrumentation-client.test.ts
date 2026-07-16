@@ -212,6 +212,21 @@ describe("instrumentation-client", () => {
     },
   ];
 
+  const createObservedRabbyRainbowKitRawFrames = () => [
+    {
+      filename: "app:///_next/static/chunks/observed-rabby-webview.js",
+      abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
+      function: "n",
+      in_app: true,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "Promise",
+      in_app: true,
+    },
+  ];
+
   const createRabbyMobileRainbowKitNotFoundEvent = (
     overrides: Record<string, unknown> = {}
   ) => ({
@@ -226,22 +241,7 @@ describe("instrumentation-client", () => {
             handled: false,
           },
           stacktrace: {
-            frames: [
-              {
-                filename:
-                  "app:///_next/static/chunks/observed-rabby-webview.js",
-                abs_path:
-                  "app:///_next/static/chunks/observed-rabby-webview.js",
-                function: "n",
-                in_app: true,
-              },
-              {
-                filename: "[native code]",
-                abs_path: "[native code]",
-                function: "Promise",
-                in_app: true,
-              },
-            ],
+            frames: createObservedRabbyRainbowKitRawFrames(),
           },
         },
       ],
@@ -1233,6 +1233,43 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
+  it("keeps exact RainbowKit lookup errors without the observed raw frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                  in_app: false,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
   it("keeps non-exact RainbowKit lookup messages", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent({
@@ -1246,7 +1283,7 @@ describe("instrumentation-client", () => {
               handled: false,
             },
             stacktrace: {
-              frames: [],
+              frames: createObservedRabbyRainbowKitRawFrames(),
             },
           },
         ],
