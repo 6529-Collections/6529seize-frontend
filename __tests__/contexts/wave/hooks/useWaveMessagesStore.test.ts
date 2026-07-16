@@ -356,6 +356,9 @@ describe("useWaveMessagesStore", () => {
           })
         )
       );
+      await waitFor(() =>
+        expect(result.current.getData("wave1")?.hasNextPage).toBe(true)
+      );
     }
   );
 

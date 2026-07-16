@@ -109,6 +109,7 @@ function useWaveMessagesStore() {
   const serverFeedSeedReadyCallbacksRef = useRef<Map<string, () => void>>(
     new Map()
   );
+  const authoritativePaginationWaveIdsRef = useRef<Set<string>>(new Set());
   const serverFeedSeedGenerationRef = useRef(0);
 
   const releaseServerFeedSeedIfReady = useCallback((waveId: string): void => {
@@ -145,6 +146,9 @@ function useWaveMessagesStore() {
       serverFeedSeedReadyCallbacksRef.current.clear();
       updateQueueRef.current = updateQueueRef.current.filter(
         ({ update }) => !seededWaveIds.has(update.key)
+      );
+      seededWaveIds.forEach((waveId) =>
+        authoritativePaginationWaveIdsRef.current.delete(waveId)
       );
 
       if (seededWaveIds.size === 0) {
@@ -243,6 +247,8 @@ function useWaveMessagesStore() {
     const updatedWaveMessages = {
       ...newWaveMessages[update.key]!,
     };
+    const hasAuthoritativePagination =
+      authoritativePaginationWaveIdsRef.current.has(update.key);
 
     if (
       update.isLoading !== undefined &&
@@ -258,7 +264,9 @@ function useWaveMessagesStore() {
     }
     if (
       update.hasNextPage !== undefined &&
-      (mergePolicy === "standard" || existingWaveMessages === undefined)
+      (mergePolicy === "standard" ||
+        existingWaveMessages === undefined ||
+        !hasAuthoritativePagination)
     ) {
       updatedWaveMessages.hasNextPage = update.hasNextPage;
     }
@@ -281,6 +289,17 @@ function useWaveMessagesStore() {
       ...newWaveMessages,
       [update.key]: updatedWaveMessages,
     };
+    // Drops-only realtime/target updates create a default false cursor but do
+    // not own pagination until a feed or page result supplies messages.
+    const hasMessagesForPagination =
+      (existingWaveMessages?.drops.length ?? 0) > 0 ||
+      (update.drops?.length ?? 0) > 0;
+    if (
+      update.hasNextPage !== undefined &&
+      (mergePolicy === "preserve-existing" || hasMessagesForPagination)
+    ) {
+      authoritativePaginationWaveIdsRef.current.add(update.key);
+    }
     waveMessagesRef.current = nextState as Record<string, WaveMessages>;
     forceRender();
     onApplied?.();
