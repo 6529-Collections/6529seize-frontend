@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { WebSocketProvider } from "./WebSocketProvider";
-import type { WebSocketConfig } from "./WebSocketTypes";
+import type { WebSocketConfig } from ".";
 import { DEFAULT_WEBSOCKET_CONFIG } from ".";
 import { useWebSocket } from "./useWebSocket";
 import { useWebSocketHealth } from "./useWebSocketHealth";

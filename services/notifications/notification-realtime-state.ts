@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
-export interface NotificationRealtimeState {
+interface NotificationRealtimeState {
   readonly connected: boolean;
   readonly syncedProfileIds: readonly string[];
 }
