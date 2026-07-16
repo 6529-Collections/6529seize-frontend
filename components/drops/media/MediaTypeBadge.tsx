@@ -65,8 +65,6 @@ export default function MediaTypeBadge({
     "tw-rounded",
     "tw-border",
     "tw-border-solid",
-    "tw-transition-all",
-    "tw-duration-300",
     SIZE_CLASSES[size],
   ];
 
@@ -75,7 +73,13 @@ export default function MediaTypeBadge({
   }
 
   if (tone === "muted") {
-    iconClasses.push("tw-grayscale", "desktop-hover:hover:tw-grayscale-0");
+    iconClasses.push(
+      "tw-grayscale",
+      "tw-transition-[filter]",
+      "tw-duration-150",
+      "motion-reduce:tw-transition-none",
+      "desktop-hover:hover:tw-grayscale-0"
+    );
   }
 
   const icon = (

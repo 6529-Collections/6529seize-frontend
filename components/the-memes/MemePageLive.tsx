@@ -121,11 +121,11 @@ function MemePageAdditionalDetailsAccordion({
         type="button"
         aria-expanded={isOpen}
         onClick={() => setToggledOpen((current) => !(current ?? defaultOpen))}
-        className="tw-group tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-0 tw-py-4 tw-text-left tw-text-iron-100 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-text-white"
+        className="tw-group tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-0 tw-py-4 tw-text-left tw-text-iron-100 tw-transition-colors tw-duration-150 tw-ease-out hover:tw-text-white motion-reduce:tw-transition-none"
       >
         <span className="tw-flex tw-items-center tw-gap-3">
           <span
-            className={`tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-p-1.5 tw-transition-colors tw-duration-300 tw-ease-out ${
+            className={`tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-p-1.5 tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none ${
               isOpen
                 ? "tw-bg-primary-500 tw-text-iron-100"
                 : "tw-bg-iron-900 tw-text-iron-500 group-hover:tw-text-iron-100"
@@ -138,24 +138,13 @@ function MemePageAdditionalDetailsAccordion({
           </span>
         </span>
         <ChevronDownIcon
-          className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-500 tw-transition tw-duration-200 group-hover:tw-text-iron-100 ${
+          className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 tw-ease-out group-hover:tw-text-iron-100 motion-reduce:tw-transition-none ${
             isOpen ? "tw-rotate-180 tw-text-iron-100" : ""
           }`}
         />
       </button>
-      <div
-        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-300 tw-ease-out ${
-          isOpen
-            ? "tw-grid-rows-[1fr] tw-opacity-100"
-            : "tw-grid-rows-[0fr] tw-opacity-0"
-        }`}
-      >
-        <div
-          aria-hidden={!isOpen}
-          inert={!isOpen}
-          tabIndex={isOpen ? undefined : -1}
-          className={isOpen ? "tw-overflow-visible" : "tw-overflow-hidden"}
-        >
+      {isOpen && (
+        <div className="tw-animate-fadeIn motion-reduce:tw-animate-none">
           <MemePageArt
             show={true}
             nft={nft}
@@ -163,7 +152,7 @@ function MemePageAdditionalDetailsAccordion({
             locale={locale}
           />
         </div>
-      </div>
+      )}
     </section>
   );
 }

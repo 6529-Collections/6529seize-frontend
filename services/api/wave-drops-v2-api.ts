@@ -69,6 +69,8 @@ interface FetchWaveDropsV2Props {
   readonly dropType?: ApiDropType | undefined;
   readonly signal?: AbortSignal | undefined;
   readonly headers?: Record<string, string> | undefined;
+  readonly includeFullMetadata?: boolean | undefined;
+  readonly includeTopRaters?: boolean | undefined;
   readonly withRetry?: boolean | undefined;
 }
 
@@ -165,16 +167,19 @@ export type ApiWaveDropsV2PageFeed = ApiWaveDropsFeed & {
 
 const fetchDropPartV2 = async ({
   dropId,
+  headers,
   partNo,
   signal,
 }: {
   readonly dropId: string;
+  readonly headers?: Record<string, string> | undefined;
   readonly partNo: number;
   readonly signal?: AbortSignal | undefined;
 }): Promise<ApiDropPartV2 | null> => {
   try {
     return await commonApiFetch<ApiDropPartV2>({
       endpoint: `v2/drops/${getDropEndpointId(dropId)}/parts/${partNo}`,
+      headers,
       signal,
     });
   } catch (error) {
@@ -185,7 +190,8 @@ const fetchDropPartV2 = async ({
 
 const hydrateDropParts = async (
   drop: ApiDropV2,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  headers?: Record<string, string>
 ): Promise<ApiDropPart[]> => {
   const basePart = createBasePart(drop);
   const partsCount = Math.max(1, drop.parts_count || 1);
@@ -197,7 +203,7 @@ const hydrateDropParts = async (
   const fetchedParts = await Promise.all(
     Array.from({ length: partsCount - 1 }, (_, index) => {
       const partNo = index + 2;
-      return fetchDropPartV2({ dropId: drop.id, partNo, signal });
+      return fetchDropPartV2({ dropId: drop.id, headers, partNo, signal });
     })
   );
 
@@ -249,16 +255,19 @@ const mergeMetadata = (
 
 export const fetchDropMetadataByIdV2 = async ({
   dropId,
+  headers,
   priorityMetadata = [],
   signal,
 }: {
   readonly dropId: string;
+  readonly headers?: Record<string, string> | undefined;
   readonly priorityMetadata?: readonly ApiDropMetadataResponse[] | undefined;
   readonly signal?: AbortSignal | undefined;
 }): Promise<ApiDropMetadataResponse[]> => {
   try {
     const metadata = await commonApiFetch<ApiDropMetadataResponse[]>({
       endpoint: `v2/drops/${getDropEndpointId(getNormalizedDropId(dropId))}/metadata`,
+      headers,
       signal,
     });
     return mergeMetadata(priorityMetadata, metadata);
@@ -271,7 +280,8 @@ export const fetchDropMetadataByIdV2 = async ({
 const fetchDropMetadataV2 = async (
   drop: ApiDropV2,
   signal?: AbortSignal,
-  includeFullMetadata = true
+  includeFullMetadata = true,
+  headers?: Record<string, string>
 ): Promise<ApiDropMetadataResponse[]> => {
   const priorityMetadata = mapPriorityMetadataV2ToDropMetadata(drop);
 
@@ -281,6 +291,7 @@ const fetchDropMetadataV2 = async (
 
   return fetchDropMetadataByIdV2({
     dropId: drop.id,
+    headers,
     priorityMetadata,
     signal,
   });
@@ -288,7 +299,8 @@ const fetchDropMetadataV2 = async (
 
 const fetchTopRatersV2 = async (
   drop: ApiDropV2,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  headers?: Record<string, string>
 ): Promise<ApiDropRater[]> => {
   const votersCount = drop.submission_context?.voting.voters_count ?? 0;
   if (votersCount <= 0) {
@@ -298,6 +310,7 @@ const fetchTopRatersV2 = async (
   try {
     const voters = await commonApiFetch<ApiDropVotersPage>({
       endpoint: `v2/drops/${getDropEndpointId(drop.id)}/votes`,
+      headers,
       params: {
         page_size: "5",
         page: "1",
@@ -318,21 +331,25 @@ const fetchTopRatersV2 = async (
 
 const hydrateDropV2 = async ({
   drop,
+  headers,
   wave,
   signal,
   includeFullMetadata = true,
   includeTopRaters = true,
 }: {
   readonly drop: ApiDropV2;
+  readonly headers?: Record<string, string> | undefined;
   readonly wave: ApiWaveMin;
   readonly signal?: AbortSignal | undefined;
   readonly includeFullMetadata?: boolean | undefined;
   readonly includeTopRaters?: boolean | undefined;
 }): Promise<ApiDropV2View> => {
   const [parts, metadata, topRaters] = await Promise.all([
-    hydrateDropParts(drop, signal),
-    fetchDropMetadataV2(drop, signal, includeFullMetadata),
-    includeTopRaters ? fetchTopRatersV2(drop, signal) : Promise.resolve([]),
+    hydrateDropParts(drop, signal, headers),
+    fetchDropMetadataV2(drop, signal, includeFullMetadata, headers),
+    includeTopRaters
+      ? fetchTopRatersV2(drop, signal, headers)
+      : Promise.resolve([]),
   ]);
   const voting = drop.submission_context?.voting;
   const dropType = getDropType(drop);
@@ -436,12 +453,14 @@ export const mapLeaderboardDropV2 = ({
 
 const hydrateDropsV2 = async ({
   drops,
+  headers,
   wave,
   signal,
   includeFullMetadata = false,
   includeTopRaters = false,
 }: {
   readonly drops: ApiDropV2[];
+  readonly headers?: Record<string, string> | undefined;
   readonly wave: ApiWaveMin;
   readonly signal?: AbortSignal | undefined;
   readonly includeFullMetadata?: boolean | undefined;
@@ -451,6 +470,7 @@ const hydrateDropsV2 = async ({
     drops.map((drop) =>
       hydrateDropV2({
         drop,
+        headers,
         wave,
         signal,
         includeFullMetadata,
@@ -531,6 +551,8 @@ export async function fetchWaveDropsFeedV2({
   dropType,
   signal,
   headers,
+  includeFullMetadata = false,
+  includeTopRaters = false,
   withRetry = false,
 }: FetchWaveDropsV2Props): Promise<ApiWaveDropsFeed> {
   const params: Record<string, string> = {
@@ -566,8 +588,11 @@ export async function fetchWaveDropsFeedV2({
   const wave = mapApiWaveOverviewToApiWaveMin(data.wave);
   const drops = await hydrateDropsV2({
     drops: data.drops,
+    headers,
     wave,
     signal,
+    includeFullMetadata,
+    includeTopRaters,
   });
 
   return {

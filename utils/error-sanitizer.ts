@@ -109,6 +109,7 @@ export const isIndexedDBError = (error: unknown): boolean => {
     /^(?:UnknownError: )?Unable to open database file on disk$/i,
     /DOMException.*QuotaExceeded/i,
     /DOMException.*UnknownError/i,
+    /^(?:UnknownError: )?Database deleted by request of the user$/i,
   ];
 
   return indexedDBPatterns.some(

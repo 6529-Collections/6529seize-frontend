@@ -107,6 +107,26 @@ const tailwindConfig: Config = {
             opacity: "1",
           },
         },
+        "sidebar-flyout-in": {
+          "0%": {
+            opacity: "0",
+            transform: "translate3d(-4px, 0, 0)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translate3d(0, 0, 0)",
+          },
+        },
+        "sidebar-account-menu-in": {
+          "0%": {
+            opacity: "0",
+            transform: "translate3d(0, 4px, 0)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translate3d(0, 0, 0)",
+          },
+        },
         slideUp: {
           "0%": {
             opacity: "0",
@@ -214,6 +234,10 @@ const tailwindConfig: Config = {
         "gradient-x": "gradient-x 3s ease infinite",
         "spin-slow": "spin 15s linear infinite",
         fadeIn: "fadeIn 0.3s ease-out forwards",
+        "sidebar-flyout-in":
+          "sidebar-flyout-in 160ms cubic-bezier(0.22, 1, 0.36, 1) both",
+        "sidebar-account-menu-in":
+          "sidebar-account-menu-in 160ms cubic-bezier(0.22, 1, 0.36, 1) both",
         slideUp: "slideUp 0.3s ease-out forwards",
         slideDown: "slideDown 0.3s ease-out forwards",
         shake: "shake 0.3s ease-in-out",
