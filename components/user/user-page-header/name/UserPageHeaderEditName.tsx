@@ -119,7 +119,7 @@ export default function UserPageHeaderEditName({
       <button
         type="button"
         aria-label="Close edit username modal"
-        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-black/70 tw-p-0 tw-backdrop-blur-sm"
+        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0"
         onClick={onClose}
       />
       <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
@@ -128,7 +128,7 @@ export default function UserPageHeaderEditName({
           role="dialog"
           aria-modal="true"
           aria-label="Edit username"
-          className="tw-w-full tw-transform tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-5 tw-text-left tw-shadow-2xl tw-shadow-black/40 tw-backdrop-blur-xl tw-transition-all tw-duration-300 sm:tw-max-w-xl sm:tw-p-6 lg:tw-p-8"
+          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-xl lg:tw-p-8"
         >
           <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-5">
             <UserSettingsUsername

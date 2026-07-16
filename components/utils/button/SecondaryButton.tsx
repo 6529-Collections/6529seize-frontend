@@ -23,14 +23,14 @@ export default function SecondaryButton({
       ? "tw-px-3 tw-py-2 tw-text-xs"
       : "tw-px-3.5 tw-py-2.5 tw-text-sm";
   const stateClasses = inactive
-    ? "tw-cursor-not-allowed tw-border-white/[0.025] tw-bg-white/[0.04] tw-text-iron-600"
-    : "tw-border-white/[0.04] tw-bg-white/[0.1] tw-text-iron-200 tw-shadow-sm tw-shadow-black/20 desktop-hover:hover:tw-border-white/[0.06] desktop-hover:hover:tw-bg-white/[0.14] desktop-hover:hover:tw-text-iron-50 active:tw-bg-white/[0.08]";
+    ? "tw-cursor-not-allowed tw-border-iron-800 tw-bg-iron-900 tw-text-iron-600"
+    : "tw-border-iron-600/30 tw-bg-iron-700 tw-text-iron-100 tw-shadow-sm tw-shadow-black/20 desktop-hover:hover:tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-text-iron-50 active:tw-bg-iron-800";
 
   return (
     <button
       type="button"
       disabled={inactive}
-      className={`tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-md tw-border tw-border-solid tw-backdrop-blur-sm tw-ring-1 tw-ring-inset tw-ring-white/[0.025] ${stateClasses} ${sizeClasses} tw-font-semibold tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${className}`}
+      className={`tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-md tw-border tw-border-solid tw-ring-1 tw-ring-inset tw-ring-white/5 ${stateClasses} ${sizeClasses} tw-font-semibold tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${className}`}
       onClick={inactive ? undefined : onClicked}
     >
       {loading && <CircleLoader />}

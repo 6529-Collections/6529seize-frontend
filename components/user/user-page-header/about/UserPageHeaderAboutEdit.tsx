@@ -138,7 +138,7 @@ export default function UserPageHeaderAboutEdit({
       <form onSubmit={onSubmit}>
         <div className="tw-relative">
           <textarea
-            className="tw-block tw-min-h-32 tw-w-full tw-resize-none tw-rounded-xl tw-border-0 tw-bg-iron-950/80 tw-px-4 tw-pb-10 tw-pt-3.5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out placeholder:tw-text-iron-600 hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
+            className="tw-block tw-min-h-32 tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-950/80 tw-px-4 tw-pb-10 tw-pt-3.5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out placeholder:tw-text-iron-600 hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
             name="profile-about"
             id="profile-about-input"
             aria-label={getUserProfileHeaderMessage(

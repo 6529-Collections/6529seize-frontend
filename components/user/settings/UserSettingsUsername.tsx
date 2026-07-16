@@ -78,7 +78,7 @@ export default function UserSettingsUsername({
     <div>
       <label
         htmlFor="name"
-        className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200"
+        className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200"
       >
         Username
       </label>
@@ -95,7 +95,7 @@ export default function UserSettingsUsername({
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           placeholder="Please select a username"
-          className="tw-form-input tw-block tw-w-full tw-rounded-xl tw-border-0 tw-bg-iron-900/70 tw-px-4 tw-py-3 tw-pr-11 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-white/15 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
+          className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-pr-11 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-white/15 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
         />
         {loading && (
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">

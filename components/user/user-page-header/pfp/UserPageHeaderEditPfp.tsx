@@ -197,7 +197,7 @@ export default function UserPageHeaderEditPfp({
       <button
         type="button"
         aria-label="Close edit profile picture modal"
-        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-black/70 tw-p-0 tw-backdrop-blur-sm"
+        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0"
         onClick={onClose}
       />
       <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
@@ -206,7 +206,7 @@ export default function UserPageHeaderEditPfp({
           role="dialog"
           aria-modal="true"
           aria-label="Edit profile picture"
-          className="tw-w-full tw-transform tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-5 tw-text-left tw-shadow-2xl tw-shadow-black/40 tw-backdrop-blur-xl tw-transition-all tw-duration-300 sm:tw-w-full sm:tw-max-w-3xl sm:tw-p-6 md:tw-max-w-2xl lg:tw-p-8"
+          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-3xl md:tw-max-w-2xl lg:tw-p-8"
         >
           <form onSubmit={onSubmit}>
             <UserSettingsImgSelectMeme
@@ -216,7 +216,7 @@ export default function UserPageHeaderEditPfp({
 
             <div className="tw-my-5 tw-flex tw-w-full tw-items-center tw-gap-3">
               <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
-              <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-600">
+              <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600">
                 or
               </span>
               <span className="tw-h-px tw-flex-1 tw-bg-white/5" />

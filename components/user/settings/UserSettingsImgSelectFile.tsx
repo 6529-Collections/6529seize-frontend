@@ -28,8 +28,8 @@ export default function UserSettingsImgSelectFile({
         className={` ${
           dragging
             ? "tw-border-primary-400/60 tw-bg-primary-500/10"
-            : "tw-border-white/10 tw-bg-iron-900/50"
-        } tw-relative tw-flex tw-h-64 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-xl tw-border-2 tw-border-dashed tw-transition tw-duration-200 tw-ease-out hover:tw-border-white/20 hover:tw-bg-iron-900 focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 ${
+            : "tw-border-white/10 tw-bg-iron-900"
+        } tw-relative tw-flex tw-h-64 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-xl tw-border-2 tw-border-dashed tw-transition tw-duration-200 tw-ease-out hover:tw-border-white/20 hover:tw-bg-iron-800 focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 ${
           shake ? "tw-animate-shake" : ""
         } `}
       >
