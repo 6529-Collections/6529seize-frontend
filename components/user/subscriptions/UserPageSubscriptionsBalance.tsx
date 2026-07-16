@@ -56,14 +56,14 @@ export default function UserPageSubscriptionsBalance(
             </>
           ))}
       </div>
-      <div className="tw-mt-3 tw-min-h-9 sm:tw-mt-4">
+      <div className="tw-min-h-9">
         {props.fetching ? (
           <>
             <output className="tw-sr-only">Loading balance</output>
             <DotLoader />
           </>
         ) : (
-          <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-iron-100">
+          <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
             <span className="tw-flex tw-items-baseline tw-gap-2">
               <b className="tw-text-2xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
                 {balance > 0
