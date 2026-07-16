@@ -49,7 +49,10 @@ function WebSidebar({
   });
   const { haveUnreadNotifications } = useUnreadNotifications(
     hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
-    { enabled: hasValidWalletAuth }
+    {
+      enabled: hasValidWalletAuth,
+      profileId: connectedProfile?.id,
+    }
   );
   const profilePath = useMemo(() => {
     if (connectedProfile?.handle) return `/${connectedProfile.handle}`;

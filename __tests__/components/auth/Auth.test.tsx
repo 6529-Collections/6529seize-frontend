@@ -22,6 +22,7 @@ const mockRouterPush = jest.fn();
 const mockUsePathname = jest.fn(() => "/");
 const mockTrackAuthSessionRefreshProductImpact = jest.fn();
 const mockTrackAuthSessionRefreshSucceeded = jest.fn();
+const mockResetAuthSessionRefreshProductImpactDedupe = jest.fn();
 const mockTrackAuthValidationCancelled = jest.fn();
 const mockTrackAuthImpactEvent = jest.fn();
 
@@ -175,6 +176,11 @@ jest.mock("@/services/auth/immediate-validation.utils", () => ({
 }));
 
 jest.mock("@/services/analytics/productImpactTelemetry", () => ({
+  resetAuthSessionRefreshProductImpactDedupe: (
+    ...args: Parameters<
+      typeof mockResetAuthSessionRefreshProductImpactDedupe
+    >
+  ) => mockResetAuthSessionRefreshProductImpactDedupe(...args),
   trackAuthSessionRefreshProductImpact: (
     ...args: Parameters<typeof mockTrackAuthSessionRefreshProductImpact>
   ) => mockTrackAuthSessionRefreshProductImpact(...args),
@@ -1260,6 +1266,9 @@ describe("Auth component", () => {
         });
       });
       expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
+      expect(
+        mockResetAuthSessionRefreshProductImpactDedupe
+      ).toHaveBeenCalledWith(expect.any(String));
     });
 
     it("treats an empty local jwt as absent in auth validation telemetry", async () => {
@@ -1317,6 +1326,7 @@ describe("Auth component", () => {
       await waitFor(() => {
         expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledWith({
           clientType: "web",
+          dedupeScope: expect.any(String),
           hadLocalJwt: true,
           outcome: "reauth_required",
           refreshOutcome: "empty",
@@ -1970,6 +1980,26 @@ describe("Auth component", () => {
         route_pattern: "/",
         was_connected_wallet: true,
       });
+      expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        window.dispatchEvent(new Event("6529-wallet-accounts-updated"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+      });
+
+      const mockGetAuthJwt = require("@/services/auth/auth.utils")
+        .getAuthJwt as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("reauthenticated-jwt");
+      act(() => {
+        window.dispatchEvent(new Event("6529-auth-token-changed"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
+      });
 
       rerender(
         <ReactQueryWrapperContext.Provider
@@ -1986,6 +2016,138 @@ describe("Auth component", () => {
           ([eventName]) => eventName === "Auth Session Upgrade Prompt Shown"
         )
       ).toHaveLength(1);
+    });
+
+    it("revalidates a terminal auth scope after another session recovers", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const mockGetAuthJwt = require("@/services/auth/auth.utils")
+        .getAuthJwt as jest.MockedFunction<any>;
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      let currentJwt = "session-a-jwt";
+      mockGetAuthJwt.mockImplementation(() => currentJwt);
+      const requireSessionUpgrade = async ({ callbacks }: any) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          isValid: false,
+          validationCompleted: true,
+          authRefreshOutcome: "empty",
+          requiresSessionUpgrade: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      };
+      mockValidateAuthImmediate
+        .mockImplementationOnce(requireSessionUpgrade)
+        .mockResolvedValueOnce({
+          isValid: true,
+          validationCompleted: true,
+          authRefreshOutcome: "not_attempted",
+          wasCancelled: false,
+          shouldShowModal: false,
+        })
+        .mockImplementationOnce(requireSessionUpgrade);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledTimes(
+          1
+        );
+      });
+      const firstTerminalScope =
+        mockTrackAuthSessionRefreshProductImpact.mock.calls[0]?.[0]
+          .dedupeScope;
+      expect(firstTerminalScope).toEqual(expect.any(String));
+
+      currentJwt = "session-b-jwt";
+      act(() => {
+        window.dispatchEvent(new Event("6529-auth-token-changed"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
+      });
+      expect(
+        mockResetAuthSessionRefreshProductImpactDedupe
+      ).toHaveBeenCalledWith(firstTerminalScope);
+
+      currentJwt = "session-a-jwt";
+      act(() => {
+        window.dispatchEvent(new Event("6529-auth-token-changed"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(3);
+      });
+      expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledTimes(2);
+    });
+
+    it("retries validation after JWT removal fails", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockRemoveAuthJwt =
+        authUtils.removeAuthJwt as jest.MockedFunction<any>;
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockGetAuthJwt.mockReturnValue("invalid-jwt");
+      mockRemoveAuthJwt.mockRejectedValueOnce(new Error("storage failure"));
+      mockValidateAuthImmediate
+        .mockImplementationOnce(async ({ callbacks }) => {
+          try {
+            await callbacks.onRemoveJwt();
+          } catch {
+            return {
+              isValid: false,
+              validationCompleted: true,
+              authRefreshOutcome: "failed",
+              wasCancelled: false,
+              shouldShowModal: true,
+            };
+          }
+          throw new Error("Expected JWT removal to fail");
+        })
+        .mockResolvedValueOnce({
+          isValid: true,
+          validationCompleted: true,
+          authRefreshOutcome: "not_attempted",
+          wasCancelled: false,
+          shouldShowModal: false,
+        });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+      });
+
+      act(() => {
+        window.dispatchEvent(new Event("6529-wallet-accounts-updated"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
+      });
+      expect(mockRemoveAuthJwt).toHaveBeenCalledTimes(1);
     });
 
     it("tracks forced logout when the session upgrade deadline has expired", async () => {

@@ -39,7 +39,8 @@ The AWS RUM service will automatically create:
 - **JavaScript Errors**: Unhandled exceptions and error boundaries
 - **Performance Metrics**: Core Web Vitals (LCP, FID, CLS)
 - **HTTP Requests**: API calls and resource loading
-- **Page Views**: SPA navigation tracking with hash and path changes
+- **Page Views**: initial and client-side navigation grouped by stable App
+  Router families
 
 ## Configuration Details
 
@@ -64,14 +65,23 @@ The AWS RUM service will automatically create:
 
 ### Page Tracking
 
-- Automatic page views are enabled for browser performance analysis.
+- The SDK's automatic page-view plugin is disabled because it derives page IDs
+  from raw browser paths. `AwsRumProvider` records the initial page and later
+  Next.js client navigations with allowlisted route families such as `/waves`
+  and `/waves/[wave]`.
+- Query strings, hashes, profile/wallet values, UUIDs, and other dynamic route
+  parameters are never included in the page ID. Unknown subroutes collapse to a
+  known top-level family, profile CMS paths use `/[user]/[...cmsPath]`, and
+  non-page roots use `/unknown`.
+- Consecutive navigations with the same normalized family are deduplicated.
 
 ## Production Considerations
 
 1. **Adjust Sample Rate**: Consider reducing `sessionSampleRate` to 0.1 (10%) for high-traffic sites
 2. **Cost Management**: Monitor your CloudWatch RUM costs and adjust `sessionEventLimit`
 3. **Regional Deployment**: Ensure the RUM region matches your primary AWS region
-4. **Privacy Compliance**: AWS RUM automatically handles PII scrubbing
+4. **Privacy Compliance**: Keep page IDs and custom-event attributes bounded in
+   application code; do not rely on provider-side scrubbing for route values
 
 ## Troubleshooting
 
@@ -102,6 +112,7 @@ const rumClient = window.awsRum;
 // Record custom events (if custom events are enabled in AppMonitor)
 rumClient?.recordEvent('custom_event', { key: 'value' });
 
-// Manual page view tracking
-rumClient?.recordPageView('/custom-page');
 ```
+
+Page views are owned centrally by `AwsRumProvider`. Do not call
+`recordPageView` with a raw URL or route parameter from feature code.

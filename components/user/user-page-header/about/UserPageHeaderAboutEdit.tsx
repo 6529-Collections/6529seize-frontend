@@ -2,7 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import ActionButton from "@/components/utils/button/ActionButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type {
   ApiCreateOrUpdateProfileCicStatement,
@@ -134,46 +134,52 @@ export default function UserPageHeaderAboutEdit({
   );
 
   return (
-    <div className="tw-w-full tw-max-w-xl">
+    <div className="tw-w-full tw-max-w-2xl">
       <form onSubmit={onSubmit}>
-        <textarea
-          className="tw-form-input tw-block tw-min-h-28 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3.5 tw-py-3 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-          name="profile-about"
-          id="profile-about-input"
-          aria-label={getUserProfileHeaderMessage(
-            "user.profileHeader.aboutEdit.textareaLabel"
-          )}
-          placeholder={getUserProfileHeaderMessage(
-            "user.profileHeader.aboutEdit.placeholder"
-          )}
-          required
-          value={value}
-          onChange={handleInputChange}
-          ref={inputRef}
-          style={{ resize: "none" }}
-        ></textarea>
-        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-          <div className="tw-text-xs tw-font-medium tw-text-iron-500">
+        <div className="tw-relative">
+          <textarea
+            className="tw-block tw-min-h-32 tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-950/80 tw-px-4 tw-pb-10 tw-pt-3.5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out placeholder:tw-text-iron-600 hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
+            name="profile-about"
+            id="profile-about-input"
+            aria-label={getUserProfileHeaderMessage(
+              "user.profileHeader.aboutEdit.textareaLabel"
+            )}
+            aria-describedby="profile-about-character-count"
+            placeholder={getUserProfileHeaderMessage(
+              "user.profileHeader.aboutEdit.placeholder"
+            )}
+            maxLength={MAX_STATEMENT_LENGTH}
+            required
+            value={value}
+            onChange={handleInputChange}
+            ref={inputRef}
+          ></textarea>
+          <div
+            id="profile-about-character-count"
+            className="tw-pointer-events-none tw-absolute tw-bottom-3 tw-right-3 tw-rounded-full tw-bg-black/60 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-500 tw-ring-1 tw-ring-inset tw-ring-white/10"
+          >
             {characterCount}
           </div>
-          <div className="tw-flex tw-w-full tw-gap-2 sm:tw-w-auto">
-            <SecondaryButton disabled={loading} onClicked={onClose}>
-              {getUserProfileHeaderMessage(
-                "user.profileHeader.aboutEdit.cancel"
-              )}
-            </SecondaryButton>
-            <PrimaryButton
-              disabled={isDisabled}
-              loading={loading}
-              onClicked={submitStatement}
-              ariaLabel={getUserProfileHeaderMessage(
-                "user.profileHeader.aboutEdit.save"
-              )}
-              hideChildrenWhenLoading
-            >
-              {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.save")}
-            </PrimaryButton>
-          </div>
+        </div>
+        <div className="tw-mt-3 tw-flex tw-w-full tw-gap-2 sm:tw-ml-auto sm:tw-w-auto">
+          <SecondaryButton
+            disabled={loading}
+            onClicked={onClose}
+            className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
+          >
+            {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.cancel")}
+          </SecondaryButton>
+          <ActionButton
+            type="submit"
+            disabled={isDisabled}
+            loading={loading}
+            ariaLabel={getUserProfileHeaderMessage(
+              "user.profileHeader.aboutEdit.save"
+            )}
+            className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
+          >
+            {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.save")}
+          </ActionButton>
         </div>
       </form>
       <AnimatePresence mode="wait" initial={false}>

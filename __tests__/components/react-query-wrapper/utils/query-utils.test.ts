@@ -2,6 +2,7 @@ import {
   getDefaultQueryRetry,
   getWaveDropsInitialLimit,
   isRateLimitQueryError,
+  isTerminalNotificationAuthQueryError,
   shouldStopPollingRetry,
   WAVE_DROPS_NATIVE_INITIAL_PARAMS,
   WAVE_DROPS_PARAMS,
@@ -42,6 +43,27 @@ describe("default query retry policy", () => {
     expect(shouldStopPollingRetry({ status: 401 })).toBe(true);
     expect(shouldStopPollingRetry({ status: 429 })).toBe(true);
     expect(shouldStopPollingRetry({ status: 500 })).toBe(false);
+  });
+
+  it("scopes terminal 403 and session-upgrade handling to notification polling", () => {
+    expect(isTerminalNotificationAuthQueryError({ status: 401 })).toBe(true);
+    expect(isTerminalNotificationAuthQueryError({ status: 403 })).toBe(true);
+    expect(
+      isTerminalNotificationAuthQueryError({
+        status: 409,
+        response: { body: '{"error":"session_upgrade_required"}' },
+      })
+    ).toBe(true);
+    expect(
+      isTerminalNotificationAuthQueryError({
+        status: 409,
+        response: { body: "Conflict" },
+      })
+    ).toBe(false);
+    expect(isTerminalNotificationAuthQueryError({ status: 429 })).toBe(false);
+    expect(isTerminalNotificationAuthQueryError({ status: 503 })).toBe(false);
+
+    expect(shouldStopPollingRetry({ status: 403 })).toBe(false);
   });
 
   it("keeps retrying non-rate-limit failures until the default retry count", () => {

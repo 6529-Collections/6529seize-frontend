@@ -114,6 +114,7 @@ describe("fetchNotificationsV2", () => {
 
     expect(commonApiFetch).toHaveBeenCalledWith(
       expect.objectContaining({
+        cache: "no-store",
         endpoint: "v2/notifications",
         params: {
           limit: "30",

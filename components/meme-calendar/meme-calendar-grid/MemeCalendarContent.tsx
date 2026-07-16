@@ -242,7 +242,7 @@ export default function MemeCalendar({
     <div className="tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-[#0c0c0d] tw-p-4">
       {/* Division (zoom) selector buttons */}
       <div className="tw-mb-8 tw-grid tw-grid-cols-3 tw-gap-2 lg:tw-grid-cols-[repeat(6,minmax(0,1fr))_auto]">
-        <fieldset className="tw-col-span-3 tw-grid tw-grid-cols-3 tw-gap-2 lg:tw-col-span-6 lg:tw-grid-cols-6">
+        <fieldset className="tw-col-span-3 tw-grid tw-grid-cols-3 tw-gap-2 tw-border-0 tw-p-0 lg:tw-col-span-6 lg:tw-grid-cols-6">
           <legend className="tw-sr-only">
             {t(locale, "memeCalendar.grid.zoomGroup")}
           </legend>

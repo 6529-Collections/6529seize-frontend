@@ -11,6 +11,7 @@ import type {
 import type { ApiCreateDropPollRequest } from "@/generated/models/ApiCreateDropPollRequest";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import type { EditorState } from "lexical";
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -264,10 +265,36 @@ export const useCreateDropDraftState = ({
     setFiles([]);
   };
 
-  const finalizeAndAddDropPart = (): CreateDropConfig => {
+  const finalizeAndAddDropPart = (
+    replacePartIndex: number | null = null
+  ): CreateDropConfig => {
     const updatedDrop = getUpdatedDrop();
-    updateDropStateAndClearInput(updatedDrop);
-    return updatedDrop;
+    if (replacePartIndex === null) {
+      updateDropStateAndClearInput(updatedDrop);
+      return updatedDrop;
+    }
+
+    const originalPart = updatedDrop.parts[replacePartIndex];
+    const editedPart = updatedDrop.parts.at(-1);
+    if (!originalPart || !editedPart) {
+      updateDropStateAndClearInput(updatedDrop);
+      return updatedDrop;
+    }
+
+    const parts = updatedDrop.parts.slice(0, -1);
+    const clientId = originalPart.clientId ?? editedPart.clientId;
+    parts[replacePartIndex] = {
+      ...editedPart,
+      ...(clientId ? { clientId } : {}),
+      quoted_drop: originalPart.quoted_drop,
+    };
+    const replacedDrop = {
+      ...updatedDrop,
+      parts,
+      mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
+    };
+    updateDropStateAndClearInput(replacedDrop);
+    return replacedDrop;
   };
 
   const refreshState = () => {

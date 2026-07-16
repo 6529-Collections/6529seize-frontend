@@ -31,10 +31,12 @@ Every first-party collection preview returns:
 - `people`: named people with optional profile links
 - `facts`: label/value facts
 - `traits`: optional NextGen trait chips
+- `liveMint`: optional current and maximum mint counts for a live mint
 - `image` and `images`: normalized preview media
 
-Cards do not show floor price, live mint or phase status, or live minted count
-such as `158/328`.
+Cards do not show floor price. Live The Memes cards show mint status and
+progress; other collection families continue to show only their normalized
+people, facts, and traits.
 
 ## Per Collection Rules
 
@@ -45,15 +47,21 @@ such as `158/328`.
 - People: `by {artist}` with profile link when the API gives a resolvable 6529
   handle
 - Facts:
-  - `Edition size {n}`
+  - while live: `Minted {current} / {maximum}` (or `Minted {current}` when the
+    Manifold maximum cannot be read)
+  - after finalization: `Edition size {n}`
   - `TDH rate {x}`
   - `Season {x}`
   - `Mint date {date}` when available
 
-Edition size should prefer claim edition size, then guarded mint stats, then
-guarded public extended edition size. The card does not render live mint
-progress fractions such as `158/328`, and it does not label current minted
-supply as final edition size.
+When extended data explicitly reports `recorded_in_tdh: false`, the Meme is
+still live. The card shows a `Minting Live` badge, reads the current minted
+count from NFT/extended API data, and reads the maximum from Manifold
+`totalMax`. Once it is recorded in TDH, the live badge and progress disappear
+and the card mirrors the backend calculation edition size:
+`max(actual edition size, edition_size_floor)`. Legacy or unknown TDH state
+also uses that finalized calculation as the safer fallback. Mint-stat totals
+are primary-sale accounting and are not edition-size inputs.
 
 ### Meme Lab
 
@@ -119,6 +127,8 @@ the card lands on the real token page.
   values must not resize the preview frame.
 - Facts and traits wrap into compact chips and overflow is clipped inside the
   stable preview frame.
+- At medium widths, The Memes use a shorter stable frame than richer collection
+  cards so the compact content does not create excessive top and bottom space.
 
 ## Failure Behavior
 

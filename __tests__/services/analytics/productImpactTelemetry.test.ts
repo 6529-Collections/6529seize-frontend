@@ -159,6 +159,38 @@ describe("productImpactTelemetry", () => {
     );
   });
 
+  it("deduplicates one auth impact condition until that session recovers", async () => {
+    const { telemetry, sentry } = await loadProductImpactTelemetry();
+    const impact = {
+      clientType: "web" as const,
+      dedupeScope: "session-a",
+      hadLocalJwt: true,
+      outcome: "session_upgrade_required" as const,
+      refreshOutcome: "empty" as const,
+      requiresReauth: true,
+    };
+
+    telemetry.trackAuthSessionRefreshProductImpact(impact);
+    telemetry.trackAuthSessionRefreshProductImpact(impact);
+
+    expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(1);
+    expect(sentry.logger.warn).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(trackAnalyticsEventMock.mock.calls)).not.toContain(
+      "session-a"
+    );
+
+    telemetry.trackAuthSessionRefreshProductImpact({
+      ...impact,
+      dedupeScope: "session-b",
+    });
+    expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(2);
+
+    telemetry.resetAuthSessionRefreshProductImpactDedupe("session-a");
+    telemetry.trackAuthSessionRefreshProductImpact(impact);
+    expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(3);
+    expect(sentry.logger.warn).toHaveBeenCalledTimes(3);
+  });
+
   it("classifies wave feed HTTP failures into status and error buckets", async () => {
     const { telemetry } = await loadProductImpactTelemetry();
     const serviceError = Object.assign(new Error("Service unavailable"), {

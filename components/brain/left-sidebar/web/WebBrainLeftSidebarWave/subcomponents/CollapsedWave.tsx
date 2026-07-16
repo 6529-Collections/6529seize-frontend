@@ -79,7 +79,7 @@ export const CollapsedWave = ({
 
   return (
     <div
-      className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/70"

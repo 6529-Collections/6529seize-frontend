@@ -4,8 +4,20 @@ import { publicEnv } from "@/config/env";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import { AwsRum } from "aws-rum-web";
 
+const WAVE_ID = `${"a".repeat(8)}-${"b".repeat(4)}-4${"c".repeat(3)}-a${"d".repeat(3)}-${"e".repeat(12)}`;
+const OTHER_WAVE_ID = `${"f".repeat(8)}-${"1".repeat(4)}-4${"2".repeat(3)}-a${"3".repeat(3)}-${"4".repeat(12)}`;
+let mockPathname = `/waves/${WAVE_ID}`;
+
+jest.mock("next/navigation", () => ({
+  usePathname: () => mockPathname,
+}));
+
 jest.mock("aws-rum-web", () => ({
-  AwsRum: jest.fn(() => ({ disable: jest.fn(), recordEvent: jest.fn() })),
+  AwsRum: jest.fn(() => ({
+    disable: jest.fn(),
+    recordEvent: jest.fn(),
+    recordPageView: jest.fn(),
+  })),
 }));
 
 const mockAwsRum = AwsRum as jest.Mock;
@@ -18,6 +30,12 @@ type AwsRumHttpTelemetry = [
   },
 ];
 
+type MockAwsRumInstance = {
+  readonly disable: jest.Mock;
+  readonly recordEvent: jest.Mock;
+  readonly recordPageView: jest.Mock;
+};
+
 describe("AwsRumProvider", () => {
   let warnSpy: jest.SpyInstance;
 
@@ -29,6 +47,7 @@ describe("AwsRumProvider", () => {
       AWS_RUM_SAMPLE_RATE: "0.5",
       VERSION: "test-version",
     });
+    mockPathname = `/waves/${WAVE_ID}`;
     mockAwsRum.mockClear();
     delete window.awsRum;
     warnSpy = jest.spyOn(console, "warn").mockImplementation();
@@ -57,6 +76,7 @@ describe("AwsRumProvider", () => {
       expect.objectContaining({
         sessionSampleRate: 0.5,
         releaseId: "test-version",
+        disableAutoPageView: true,
         telemetries: [
           "performance",
           "errors",
@@ -70,6 +90,51 @@ describe("AwsRumProvider", () => {
       })
     );
     expect(window.awsRum).toBe(mockAwsRum.mock.results[0]?.value);
+    expect(getMockAwsRumInstance().recordPageView).toHaveBeenCalledWith(
+      "/waves/[wave]"
+    );
+  });
+
+  it("records client navigations once per normalized page family", async () => {
+    const { rerender } = render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+    const awsRumInstance = getMockAwsRumInstance();
+    await waitFor(() =>
+      expect(awsRumInstance.recordPageView).toHaveBeenCalledTimes(1)
+    );
+
+    mockPathname = `/waves/${OTHER_WAVE_ID}`;
+    rerender(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    expect(awsRumInstance.recordPageView).toHaveBeenCalledTimes(1);
+
+    mockPathname = "/notifications";
+    rerender(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() =>
+      expect(awsRumInstance.recordPageView).toHaveBeenCalledTimes(2)
+    );
+    expect(awsRumInstance.recordPageView.mock.calls).toEqual([
+      ["/waves/[wave]"],
+      ["/notifications"],
+    ]);
+
+    const payload = JSON.stringify(awsRumInstance.recordPageView.mock.calls);
+    expect(payload).not.toContain(WAVE_ID);
+    expect(payload).not.toContain(OTHER_WAVE_ID);
   });
 
   it("excludes third-party analytics noise without excluding app-owned APIs", async () => {
@@ -252,9 +317,7 @@ describe("AwsRumProvider", () => {
 
     await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
 
-    const awsRumInstance = mockAwsRum.mock.results[0]?.value as {
-      disable: jest.Mock;
-    };
+    const awsRumInstance = getMockAwsRumInstance();
 
     unmount();
 
@@ -277,4 +340,16 @@ const getHttpUrlsToExclude = (): RegExp[] => {
   expect(httpTelemetry).toBeDefined();
 
   return httpTelemetry?.[1].urlsToExclude ?? [];
+};
+
+const getMockAwsRumInstance = (): MockAwsRumInstance => {
+  const instance = mockAwsRum.mock.results[0]?.value as
+    | MockAwsRumInstance
+    | undefined;
+
+  if (!instance) {
+    throw new Error("AWS RUM mock was not initialized");
+  }
+
+  return instance;
 };

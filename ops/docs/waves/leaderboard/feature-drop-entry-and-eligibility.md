@@ -67,11 +67,12 @@ Entry behavior differs by wave type:
   card can show:
   - `Curation wave submissions require at least Level 10.`
   - `Learn more about Network Levels` link
-- Memes entry on desktop can show submit restriction states (for example
-  `How to Submit`, `Submission Limit Reached`, or closed/open timing states).
-  Select the restriction control to open the full explanation; the same
-  explanation is available from keyboard focus and pointer hover. `How to
-  Submit` also shows MemesNominee REP progress and a nomination action.
+- Memes entry can show submit restriction states (for example `How to Submit`,
+  `Submission Limit Reached`, or closed/open timing states). Select the
+  restriction control to open the full explanation; the same explanation is
+  available from keyboard focus and pointer hover. On The Memes Main Stage,
+  `How to Submit` opens `Unlock submissions` with MemesNominee REP progress and
+  a nomination action on desktop and in the native app header.
 - Memes desktop submit labels are responsive:
   - compact desktop widths can show short labels (for example `Submit Work`,
     `Closed`, `Opens {countdown}`, `Not Eligible`, `Limit Reached`)

@@ -490,7 +490,11 @@ export default function DistributionPage(props: Readonly<Props>) {
       <div>
         {nftId && (
           <div className="tw-w-full">
-            <UpcomingMemePage id={nftId} locale={locale} />
+            <UpcomingMemePage
+              id={nftId}
+              locale={locale}
+              showRevealedDrop={false}
+            />
           </div>
         )}
         <div className="tw-flex tw-w-full tw-justify-center tw-pt-8">

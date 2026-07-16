@@ -202,7 +202,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         tabIndex={isInteractive ? 0 : undefined}
         onKeyDown={handleKeyDown}
       >
-        <div className="tw-relative tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out">
+        <div className="tw-relative tw-overflow-hidden">
           <WaveDropPartDrop
             drop={drop}
             activePart={activePart}

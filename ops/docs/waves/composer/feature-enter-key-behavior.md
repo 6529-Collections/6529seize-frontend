@@ -6,8 +6,9 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 
 - Desktop web: `Enter` submits when submit is allowed.
 - Desktop web: `Shift+Enter` inserts a new paragraph.
-- Storm mode: when prior parts exist, `Enter` with current draft content adds
-  that part; `Enter` on an empty draft submits the storm.
+- Storm mode: when prior parts exist, `Enter` follows the visible primary
+  action. It selects `Add part` or `Save changes` with current content and
+  selects `Post storm` on an empty current editor.
 - Narrow composer rows show metadata/media/GIF/storm actions behind a chevron.
   After opening, those actions collapse on the next edit or when focus leaves
   the composer row.
@@ -30,9 +31,8 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 2. Type content.
 3. Use `Shift+Enter` for extra lines.
 4. Press `Enter` to submit when the draft is submittable.
-5. In storm mode with existing parts:
-   press `Enter` with content to add a part, or press `Enter` on empty content
-   to submit the storm.
+5. In storm mode with existing parts, check the primary action and press
+   `Enter` to add or save current content, or to post from an empty editor.
 6. On narrow rows, use the chevron to show actions, then continue typing.
 
 ## Common Scenarios
@@ -76,6 +76,7 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 ## Related Pages
 
 - [Wave Composer Index](README.md)
+- [Storm Composer](feature-storm-composer.md)
 - [Waves Index](../README.md)
 - [Wave Drop Composer Body Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)

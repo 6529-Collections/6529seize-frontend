@@ -1,5 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { useWaveDataFetching } from "@/contexts/wave/hooks/useWaveDataFetching";
+import useWaveMessagesStore from "@/contexts/wave/hooks/useWaveMessagesStore";
 import {
   WAVE_DROPS_NATIVE_INITIAL_PARAMS,
   WAVE_DROPS_PARAMS,
@@ -69,6 +70,7 @@ export const createEmptyWaveMessages = jest.fn();
 export const fetchNewestWaveMessages = jest.fn();
 
 jest.mock("@/contexts/wave/utils/wave-messages-utils", () => ({
+  ...jest.requireActual("@/contexts/wave/utils/wave-messages-utils"),
   fetchWaveMessages: (...args: any[]) => fetchWaveMessages(...args),
   formatWaveMessages: (...args: any[]) => formatWaveMessages(...args),
   createEmptyWaveMessages: (...args: any[]) => createEmptyWaveMessages(...args),
@@ -83,7 +85,10 @@ describe("useWaveDataFetching", () => {
 
   function setup(
     initial: Record<string, any>,
-    options: { readonly isCapacitor?: boolean } = {}
+    options: {
+      readonly hasServerFeedSeed?: (waveId: string) => boolean;
+      readonly isCapacitor?: boolean;
+    } = {}
   ) {
     const store = { ...initial };
     const updateData = jest.fn((u: any) => {
@@ -95,11 +100,131 @@ describe("useWaveDataFetching", () => {
         updateData,
         getData,
         removeDrop: jest.fn(),
+        hasServerFeedSeed: options.hasServerFeedSeed ?? (() => false),
         isCapacitor: options.isCapacitor,
       })
     );
     return { result, updateData, getData, store };
   }
+
+  it("does not start a duplicate initial request while a server seed is pending", async () => {
+    let hasSeed = true;
+    fetchWaveMessages.mockResolvedValue([{ id: "d1", serial_no: 1 }]);
+    formatWaveMessages.mockReturnValue({ key: "wave1", drops: [{ id: "d1" }] });
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const { result } = setup(
+      { wave1: { drops: [] } },
+      { hasServerFeedSeed: () => hasSeed }
+    );
+
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+      result.current.registerWave("wave1", true);
+      await Promise.resolve();
+    });
+
+    expect(fetchWaveMessages).not.toHaveBeenCalled();
+    expect(setLoadingState).not.toHaveBeenCalled();
+    expect(createController).not.toHaveBeenCalled();
+
+    hasSeed = false;
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+      await Promise.resolve();
+    });
+
+    expect(fetchWaveMessages).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the initial guard until a queued seed commits, then syncs newer drops", async () => {
+    jest.useFakeTimers();
+    formatWaveMessages.mockImplementation(
+      (waveId: string, drops: any[], options: Record<string, unknown> = {}) => ({
+        key: waveId,
+        drops,
+        ...options,
+      })
+    );
+    createEmptyWaveMessages.mockImplementation((waveId: string) => ({
+      key: waveId,
+      drops: [],
+    }));
+    fetchNewestWaveMessages.mockResolvedValue({
+      drops: [],
+      highestSerialNo: 1,
+    });
+    const seedPromise = Promise.resolve({
+      ok: true,
+      waveId: "wave1",
+      drops: [],
+      hasNextPage: false,
+    } as const);
+    const seedDrop = {
+      id: "seed",
+      serial_no: 1,
+      wave: { id: "wave1" },
+      author: { handle: "author" },
+      parts: [],
+      metadata: [],
+      created_at: "2020",
+      title: "",
+      type: "FULL",
+    } as any;
+    const { result } = renderHook(() => {
+      const store = useWaveMessagesStore();
+      const fetching = useWaveDataFetching({
+        updateData: store.updateData,
+        getData: store.getData,
+        removeDrop: store.removeDrop,
+        hasServerFeedSeed: store.hasServerFeedSeed,
+      });
+      return { fetching, store };
+    });
+
+    act(() => {
+      result.current.store.updateData({
+        key: "blocker",
+        isLoading: true,
+      });
+      result.current.store.registerPendingServerFeedSeed("wave1", seedPromise);
+      result.current.store.completeInitialServerFeedRegistration("wave1");
+      result.current.store.applyServerFeedSeed({
+        waveId: "wave1",
+        drops: [seedDrop],
+        hasNextPage: false,
+        onReady: () => result.current.fetching.registerWave("wave1", true),
+        promise: seedPromise,
+      });
+    });
+
+    expect(result.current.store.getData("wave1")).toBeUndefined();
+    expect(result.current.store.hasServerFeedSeed("wave1")).toBe(true);
+
+    await act(async () => {
+      result.current.fetching.registerWave("wave1", true);
+      await Promise.resolve();
+    });
+
+    expect(fetchWaveMessages).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await jest.runAllTimersAsync();
+      await Promise.resolve();
+    });
+
+    expect(result.current.store.getData("wave1")?.drops).toEqual([
+      expect.objectContaining({ id: "seed" }),
+    ]);
+    expect(result.current.store.hasServerFeedSeed("wave1")).toBe(false);
+    expect(fetchWaveMessages).not.toHaveBeenCalled();
+    expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
+      "wave1",
+      1,
+      WAVE_DROPS_PARAMS.limit,
+      expect.any(Object),
+      expect.any(Function)
+    );
+  });
 
   it("fetches wave data and updates store", async () => {
     fetchWaveMessages.mockResolvedValue([{ id: "d1", serial_no: 1 }]);

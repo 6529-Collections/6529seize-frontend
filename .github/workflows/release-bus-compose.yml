@@ -1,0 +1,280 @@
+name: Release Bus - Compose
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_train_id: { type: string, required: true }
+      release_train_revision: { type: string, required: true }
+      operation_key: { type: string, required: true }
+      target_lane:
+        { type: choice, required: true, options: [STAGING, PRODUCTION] }
+      base_sha: { type: string, required: true }
+      expected_sha: { type: string, required: true }
+      candidate_shas: { type: string, required: true }
+      release_branch: { type: string, required: true }
+
+permissions:
+  contents: read
+
+run-name: Compose frontend train ${{ inputs.release_train_id }} [${{ inputs.operation_key }}]
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate immutable inputs
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$EXPECTED_SHA" = "$BASE_SHA"
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          [[ "$RELEASE_BRANCH" =~ ^release-bus/(staging|production)-train-[A-Za-z0-9._-]+$ ]]
+          jq -e 'type == "array" and length > 0 and all(.[]; test("^[a-f0-9]{40}$"))' <<< "$CANDIDATE_SHAS"
+      - name: Authorize composition before using Codex
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+      - name: Check out exact base without write credentials
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Compose non-conflicting candidates
+        id: compose-candidates
+        env:
+          CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+          RELEASE_BUS_GIT_NAME: ${{ vars.RELEASE_BUS_GIT_NAME || '6529 Release Bus' }}
+          RELEASE_BUS_GIT_EMAIL: ${{ vars.RELEASE_BUS_GIT_EMAIL || 'release-bus@users.noreply.github.com' }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          mkdir -p .release-bus
+          jq -r '.[]' <<< "$CANDIDATE_SHAS" > .release-bus/candidates.txt
+          git config user.name "$RELEASE_BUS_GIT_NAME"
+          git config user.email "$RELEASE_BUS_GIT_EMAIL"
+          [[ "$RELEASE_BRANCH" =~ ^release-bus/(staging|production)-train-[A-Za-z0-9._-]+$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          git switch -c "$RELEASE_BRANCH"
+          has_conflict=false
+          while IFS= read -r sha; do
+            git fetch --no-tags origin "$sha"
+            if git merge --no-ff --no-commit "$sha"; then
+              git -c core.hooksPath=/dev/null commit -s \
+                -m "Release train $TRAIN_ID: merge candidate" \
+                -m "Candidate-SHA: $sha" \
+                -m "Release-Bus-Train: $TRAIN_ID" \
+                -m "Release-Bus-Revision: $TRAIN_REVISION"
+              sed -i '1d' .release-bus/candidates.txt
+            else
+              has_conflict=true
+              printf '%s\n' "$sha" > .release-bus/conflicted-sha.txt
+              git diff --name-only HEAD | sort -u > .release-bus/allowed-paths.txt
+              git diff --name-only --diff-filter=U | sort -u > .release-bus/conflict-paths.txt
+              if grep -Eq '^(\.github/|AGENTS\.md$|ops/|bin/)' .release-bus/conflict-paths.txt; then
+                echo 'Codex is not allowed to resolve conflicts in deployment or instruction surfaces.' >&2
+                exit 1
+              fi
+              comm -23 .release-bus/allowed-paths.txt .release-bus/conflict-paths.txt > .release-bus/non-conflict-paths.txt
+              while IFS= read -r path; do
+                if [ -L "$path" ]; then
+                  digest="symlink:$(readlink "$path")"
+                elif [ -f "$path" ]; then
+                  digest="file:$(git hash-object --no-filters "$path")"
+                else
+                  digest=missing
+                fi
+                printf '%s\t%s\n' "$path" "$digest"
+              done < .release-bus/non-conflict-paths.txt > .release-bus/non-conflict-hashes.txt
+              break
+            fi
+          done < <(cp .release-bus/candidates.txt /tmp/release-bus-candidates && cat /tmp/release-bus-candidates)
+          echo "has_conflict=$has_conflict" >> "$GITHUB_OUTPUT"
+      - name: Resolve one bounded merge conflict with Codex
+        if: steps.compose-candidates.outputs.has_conflict == 'true'
+        uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ":workspace"
+          safety-strategy: drop-sudo
+          allow-bot-users: ${{ vars.RELEASE_BUS_GITHUB_APP_BOT_LOGIN }}
+          codex-args: '["--ephemeral","--ignore-user-config"]'
+          output-file: .release-bus/codex-result.md
+          prompt: |
+            Resolve only the currently active Git merge conflict for release train ${{ inputs.release_train_id }}.
+            The only files you may edit are listed in .release-bus/conflict-paths.txt.
+            Preserve both sides' intended behavior with the smallest coherent resolution.
+            Do not run network commands, do not change workflow/configuration/instruction files, do not commit, and do not start another merge.
+            Finish with every current conflict resolved in the working tree and briefly explain the resolution.
+      - name: Validate Codex resolution and finish composition
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          HAS_CONFLICT: ${{ steps.compose-candidates.outputs.has_conflict }}
+          RELEASE_BUS_GIT_NAME: ${{ vars.RELEASE_BUS_GIT_NAME || '6529 Release Bus' }}
+          RELEASE_BUS_GIT_EMAIL: ${{ vars.RELEASE_BUS_GIT_EMAIL || 'release-bus@users.noreply.github.com' }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          if [ "$HAS_CONFLICT" = true ]; then
+            git diff --name-only HEAD | sort -u > /tmp/actual-paths.txt
+            unexpected="$(comm -13 .release-bus/allowed-paths.txt /tmp/actual-paths.txt)"
+            test -z "$unexpected" || { echo "Codex changed unexpected paths: $unexpected" >&2; exit 1; }
+            while IFS= read -r path; do
+              if [ -L "$path" ]; then
+                digest="symlink:$(readlink "$path")"
+              elif [ -f "$path" ]; then
+                digest="file:$(git hash-object --no-filters "$path")"
+              else
+                digest=missing
+              fi
+              printf '%s\t%s\n' "$path" "$digest"
+            done < .release-bus/non-conflict-paths.txt > /tmp/non-conflict-hashes.txt
+            cmp .release-bus/non-conflict-hashes.txt /tmp/non-conflict-hashes.txt || {
+              echo 'Codex changed an automatically merged non-conflict path.' >&2
+              exit 1
+            }
+            while IFS= read -r path; do
+              if grep -En '^(<<<<<<<|=======|>>>>>>>)' "$path"; then
+                echo "Unresolved conflict marker in $path" >&2
+                exit 1
+              fi
+              git add -- "$path"
+            done < .release-bus/conflict-paths.txt
+            test -z "$(git ls-files -u)"
+            git diff --check --cached
+            current_sha="$(cat .release-bus/conflicted-sha.txt)"
+            test "$current_sha" = "$(head -n1 .release-bus/candidates.txt)" || {
+              echo 'The recorded conflict is no longer the first pending candidate.' >&2
+              exit 1
+            }
+            git config user.name "$RELEASE_BUS_GIT_NAME"
+            git config user.email "$RELEASE_BUS_GIT_EMAIL"
+            git -c core.hooksPath=/dev/null commit -s \
+              -m "Release train $TRAIN_ID: resolve candidate conflict" \
+              -m "Candidate-SHA: $current_sha" \
+              -m "Release-Bus-Train: $TRAIN_ID" \
+              -m "Release-Bus-Revision: $TRAIN_REVISION"
+            sed -i '1d' .release-bus/candidates.txt
+          fi
+          while IFS= read -r sha; do
+            [ -n "$sha" ] || continue
+            git fetch --no-tags origin "$sha"
+            git merge --no-ff --no-commit "$sha"
+            git -c core.hooksPath=/dev/null commit -s \
+              -m "Release train $TRAIN_ID: merge candidate" \
+              -m "Candidate-SHA: $sha" \
+              -m "Release-Bus-Train: $TRAIN_ID" \
+              -m "Release-Bus-Revision: $TRAIN_REVISION"
+          done < .release-bus/candidates.txt
+          test -z "$(git ls-files -u)"
+          while IFS= read -r sha; do git merge-base --is-ancestor "$sha" HEAD; done < .release-bus/candidates.txt
+          git fsck --no-dangling
+          git bundle create release-bus-composition.bundle HEAD "^$BASE_SHA"
+      - name: Upload isolated composition
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-composition-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}
+          path: release-bus-composition.bundle
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: compose
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out exact base
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Download isolated composition
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release-bus-composition-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}
+          path: .release-bus-publish
+      - name: Verify composition history
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
+        run: |
+          set -euo pipefail
+          git bundle verify .release-bus-publish/release-bus-composition.bundle
+          git fetch .release-bus-publish/release-bus-composition.bundle HEAD:refs/remotes/release-bus/composed
+          head_sha="$(git rev-parse refs/remotes/release-bus/composed)"
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git merge-base --is-ancestor "$BASE_SHA" "$head_sha"
+          while IFS= read -r sha; do git merge-base --is-ancestor "$sha" "$head_sha"; done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
+          git fsck --no-dangling
+          echo "head_sha=$head_sha" >> "$GITHUB_ENV"
+      - name: Claim the idempotent publish operation
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          payload="$(jq -n \
+            --arg train_id "$TRAIN_ID" \
+            --arg operation_key "$OPERATION_KEY" \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg expected_sha "$EXPECTED_SHA" \
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+      - name: Create scoped GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        with:
+          app-id: ${{ vars.RELEASE_BUS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BUS_GITHUB_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: 6529seize-frontend
+          permission-contents: write
+      - name: Publish release branch
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_BRANCH" =~ ^release-bus/(staging|production)-train-[A-Za-z0-9._-]+$ ]]
+          git remote set-url origin "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git -c core.hooksPath=/dev/null push origin "$head_sha:refs/heads/$RELEASE_BRANCH"

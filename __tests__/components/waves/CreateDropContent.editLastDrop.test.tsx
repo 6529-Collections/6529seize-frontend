@@ -109,6 +109,9 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
     </button>
   </div>
 ));
+jest.mock("@/components/waves/CreateDropStormParts", () => () => (
+  <div data-testid="storm-parts" />
+));
 jest.mock("@/components/waves/CreateDropInput", () => {
   const ReactLib = require("react");
   return {

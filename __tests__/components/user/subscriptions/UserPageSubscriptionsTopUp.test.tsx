@@ -82,8 +82,8 @@ describe("UserPageSubscriptionsTopUp", () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const oneCardButton = screen.getByRole("button", { name: /1 Card/i });
-    await user.click(oneCardButton);
+    const oneCardOption = screen.getByRole("radio", { name: "1 Card" });
+    await user.click(oneCardOption);
 
     const sendButton = screen.getByRole("button", { name: "Send top up" });
     expect(sendButton).not.toBeDisabled();
@@ -111,8 +111,10 @@ describe("UserPageSubscriptionsTopUp", () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const otherButton = screen.getByRole("button", { name: /Other/i });
-    await user.click(otherButton);
+    const otherOption = screen.getByRole("radio", {
+      name: "Other card count",
+    });
+    await user.click(otherOption);
 
     const countInput = screen.getByPlaceholderText("count");
     await user.type(countInput, "2");

@@ -97,6 +97,16 @@ with cause filters, grouped reactions, and inline drop previews.
 ## Limits and Notes
 
 - Notifications are unavailable while users are in profile-proxy mode.
+- While the authenticated websocket is healthy, recipient-scoped invalidation
+  events refresh the active notification feed and unread indicators without
+  waiting for the previous 30-second poll. The event contains only the target
+  profile ID; notification rows remain REST-authoritative.
+- Connected secondary accounts subscribe with their own stored JWTs and refresh
+  only when the backend acknowledges those profile subscriptions.
+- REST polling remains as a 30-second active-profile / 15-second
+  connected-account fallback while realtime coverage is disconnected or
+  unconfirmed. Covered profiles use a five-minute REST reconciliation poll to
+  recover from any missed event.
 - `PRIORITY_ALERT` and `ALL_DROPS` rows stay under `All` (no dedicated chip).
 - Cause filters only affect `/notifications` results.
 - If auth expires, the page can trigger one re-auth request automatically after

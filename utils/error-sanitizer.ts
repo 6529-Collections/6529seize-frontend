@@ -108,6 +108,7 @@ export const isIndexedDBError = (error: unknown): boolean => {
     /Internal error opening backing store/i,
     /DOMException.*QuotaExceeded/i,
     /DOMException.*UnknownError/i,
+    /^(?:UnknownError: )?Database deleted by request of the user$/i,
   ];
 
   return indexedDBPatterns.some(

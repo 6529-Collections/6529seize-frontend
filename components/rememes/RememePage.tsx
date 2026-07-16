@@ -243,7 +243,7 @@ function RememeTabButton({
   return (
     <button
       type="button"
-      className={`tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+      className={`tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
         isActive
           ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
           : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
@@ -266,9 +266,21 @@ export default function RememePage(props: Readonly<Props>) {
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.LIVE);
 
   const [memes, setMemes] = useState<NFT[]>([]);
+  const [referencesLoaded, setReferencesLoaded] = useState(false);
 
   useEffect(() => {
-    async function fetchRememeAndReferences() {
+    setRememe(undefined);
+    setMemes([]);
+    setReferencesLoaded(false);
+
+    if (!props.contract || !props.id) {
+      return;
+    }
+
+    let cancelled = false;
+    const abortController = new AbortController();
+
+    async function fetchRememe() {
       if (!props.contract || !props.id) {
         return;
       }
@@ -279,8 +291,12 @@ export default function RememePage(props: Readonly<Props>) {
           id: props.id,
         });
         const response = await fetchUrl<DBResponse<Rememe>>(
-          `${publicEnv.API_ENDPOINT}/api/rememes?${query}`
+          `${publicEnv.API_ENDPOINT}/api/rememes?${query}`,
+          { signal: abortController.signal }
         );
+        if (cancelled) {
+          return;
+        }
         const fetchedRememe = response.data[0];
         if (response.data.length !== 1 || fetchedRememe === undefined) {
           return;
@@ -292,22 +308,71 @@ export default function RememePage(props: Readonly<Props>) {
             name: getRememeTitle(fetchedRememe),
           })
         );
-
-        const responseNfts = await fetchAllPages<NFT>(
-          `${
-            publicEnv.API_ENDPOINT
-          }/api/nfts?contract=${MEMES_CONTRACT}&id=${fetchedRememe.meme_references.join(
-            ","
-          )}`
-        );
-        setMemes(responseNfts.sort((a, b) => a.id - b.id));
       } catch (error: unknown) {
+        if (
+          cancelled ||
+          (error instanceof Error && error.name === "AbortError")
+        ) {
+          return;
+        }
         console.error("Failed to fetch ReMeme", error);
       }
     }
 
-    void fetchRememeAndReferences();
+    void fetchRememe();
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
   }, [locale, props.contract, props.id, setTitle]);
+
+  useEffect(() => {
+    if (activeTab !== Tabs.REFERENCES || !rememe || referencesLoaded) {
+      return;
+    }
+
+    if (rememe.meme_references.length === 0) {
+      setMemes([]);
+      setReferencesLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+    const abortController = new AbortController();
+
+    fetchAllPages<NFT>(
+      `${
+        publicEnv.API_ENDPOINT
+      }/api/nfts?contract=${MEMES_CONTRACT}&id=${rememe.meme_references.join(
+        ","
+      )}`,
+      { signal: abortController.signal }
+    )
+      .then((responseNfts) => {
+        if (cancelled) {
+          return;
+        }
+        setMemes(responseNfts.sort((a, b) => a.id - b.id));
+        setReferencesLoaded(true);
+      })
+      .catch((error: unknown) => {
+        if (
+          cancelled ||
+          (error instanceof Error && error.name === "AbortError")
+        ) {
+          return;
+        }
+        console.error("Failed to fetch ReMeme references", error);
+        setMemes([]);
+        setReferencesLoaded(true);
+      });
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+  }, [activeTab, referencesLoaded, rememe]);
 
   const ensResolutionDeployer = useEnsName({
     address: rememe ? (rememe.deployer as `0x${string}`) : undefined,
@@ -328,7 +393,13 @@ export default function RememePage(props: Readonly<Props>) {
       case Tabs.METADATA:
         return printMetadata();
       case Tabs.REFERENCES:
-        return <RememeReferencesGrid memes={memes} locale={locale} />;
+        return (
+          <RememeReferencesGrid
+            memes={memes}
+            loading={!referencesLoaded}
+            locale={locale}
+          />
+        );
     }
   }
 

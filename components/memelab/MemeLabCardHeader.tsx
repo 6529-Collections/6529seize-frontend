@@ -228,7 +228,6 @@ function MemeLabLiveDetails({
         <MemeLabCardDetailsStats nftMeta={nftMeta} locale={locale} />
       </section>
       <section className="tw-pt-6 md:tw-pt-8">
-        <h3 className={MEME_LAB_SECTION_TITLE_CLASS}>Market Overview</h3>
         <div className={MEME_LAB_MARKET_GRID_CLASS}>
           <MemeLabMarketMetric
             label="Mint Price"

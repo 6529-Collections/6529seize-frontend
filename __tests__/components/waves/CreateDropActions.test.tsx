@@ -459,7 +459,7 @@ describe("CreateDropActions", () => {
     expect(fileInput).toHaveAttribute("multiple");
   });
 
-  it("passes correct props to StormButton", () => {
+  it("hides the storm action after storm mode starts", () => {
     render(
       <CreateDropActions
         {...defaultProps}
@@ -469,9 +469,7 @@ describe("CreateDropActions", () => {
       />
     );
 
-    const stormButtons = screen.getAllByTestId("storm-button");
-    expect(stormButtons[0]).toHaveTextContent("Storm Mode");
-    expect(stormButtons[0]).toBeDisabled();
+    expect(screen.queryByTestId("storm-button")).not.toBeInTheDocument();
   });
 
   it("calls breakIntoStorm when storm button is clicked", async () => {

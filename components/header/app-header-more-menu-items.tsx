@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import type { CompactMenuItem } from "@/components/compact-menu";
+import ShareArrowIcon from "@/components/common/icons/ShareArrowIcon";
 import type { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 
 export type HeaderMoreMenuItem = CompactMenuItem & {
@@ -44,7 +45,11 @@ const getWaveLinkActionIcon = ({
   }
 
   if (waveLinkActionMode === "share") {
-    return <ShareIcon className={iconClassName} />;
+    return direct ? (
+      <ShareArrowIcon className={iconClassName} />
+    ) : (
+      <ShareIcon className={iconClassName} />
+    );
   }
 
   return <LinkIcon className={iconClassName} />;

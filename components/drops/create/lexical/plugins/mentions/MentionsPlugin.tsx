@@ -205,8 +205,8 @@ const NewMentionsPlugin = forwardRef<
       .map(
         (identity) =>
           new MentionTypeaheadOption({
-            id: identity.id ?? identity.primary_wallet,
-            handle: identity.handle ?? identity.primary_wallet,
+            id: identity.id,
+            handle: identity.handle,
             display: identity.display,
             picture: identity.pfp,
           })

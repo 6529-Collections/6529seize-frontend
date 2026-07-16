@@ -51,8 +51,10 @@ describe("MyStreamWaveTabsLeaderboard", () => {
   });
 
   it("shows leaderboard tab when voting ongoing", () => {
-    const { registerTabRef } = renderComponent();
-    expect(screen.getByText("Leaderboard")).toBeInTheDocument();
+    const { registerTabRef } = renderComponent(BrainView.LEADERBOARD);
+    const leaderboardTab = screen.getByText("Leaderboard");
+    expect(leaderboardTab).toHaveClass("tw-font-medium");
+    expect(leaderboardTab).not.toHaveClass("tw-font-semibold");
     expect(registerTabRef).toHaveBeenCalledWith(
       BrainView.LEADERBOARD,
       expect.any(HTMLButtonElement)

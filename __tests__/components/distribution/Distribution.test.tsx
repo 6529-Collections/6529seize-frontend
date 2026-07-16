@@ -154,8 +154,18 @@ jest.mock("@/components/scrollTo/ScrollToButton", () => {
 
 jest.mock("@/components/the-memes/UpcomingMemePage", () => ({
   __esModule: true,
-  default: ({ id }: { id: string }) => (
-    <div data-testid="upcoming-meme-page" data-id={id} />
+  default: ({
+    id,
+    showRevealedDrop,
+  }: {
+    id: string;
+    showRevealedDrop?: boolean;
+  }) => (
+    <div
+      data-testid="upcoming-meme-page"
+      data-id={id}
+      data-show-revealed-drop={String(showRevealedDrop)}
+    />
   ),
 }));
 
@@ -266,6 +276,10 @@ describe("DistributionPage", () => {
         const upcomingMemePage = screen.getByTestId("upcoming-meme-page");
         expect(upcomingMemePage).toBeInTheDocument();
         expect(upcomingMemePage).toHaveAttribute("data-id", "123");
+        expect(upcomingMemePage).toHaveAttribute(
+          "data-show-revealed-drop",
+          "false"
+        );
       });
     });
 

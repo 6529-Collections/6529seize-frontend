@@ -263,6 +263,9 @@ describe("BrainMobileTabs", () => {
       />
     );
 
+    expect(screen.getByText("About")).toHaveClass("tw-font-medium");
+    expect(screen.getByText("About")).not.toHaveClass("tw-font-semibold");
+
     expect(screen.getByRole("button", { name: /polls/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /chat/i })).toBeInTheDocument();
   });

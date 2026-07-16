@@ -48,7 +48,8 @@
 2. The route loads card metadata and card data for `{id}`.
 3. The route resolves `focus` to one tab.
 4. If `focus` is missing or unsupported, the route opens `Overview`.
-5. Switching tabs updates `focus` with `router.replace`, so the route does not do a full-page navigation.
+5. Switching tabs updates `focus` with native history replacement integrated
+   with the Next router, avoiding a server round trip or full-page navigation.
 6. Previous/next arrows move to adjacent card IDs and keep the full query string.
 7. The `Overview` live stats use the active supported `locale` for source
    copy fallbacks, mint dates, counts, ranks, percentages, and market numbers.
@@ -65,8 +66,8 @@
 11. The header calendar period strip uses the active supported `locale` for
     period labels, season-link accessible text, locale-preserving season
     links, and period number formatting.
-12. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
-    for later tab switches.
+12. Additional art details, references, collectors, activity, and timeline code
+    load only when first opened; collapsed art details are not mounted.
 13. The header Art Viewer uses the active supported `locale` for media action
     accessible names and save dialog titles.
 14. The Art additional-details rows use the active supported `locale` for
@@ -79,6 +80,8 @@
 ## Route States
 
 - Loading state: heading is visible while card data is still resolving; tab row is not rendered yet.
+- Load error state: if both the server seed and client fallback request fail,
+  the route replaces the loading skeleton with an inline `Try again` action.
 - Resolved card state: tab row and tab content render.
 - Unresolved numeric id state: route shows the shared next-mint fallback panel
   and subscription awareness widget for that numeric id.
@@ -108,12 +111,13 @@
   slide and its matching download/link row.
 - `File Type` and `Dimensions` rows appear only when the active `The Art`
   slide has usable metadata values.
-- If card fetches fail or resolve inconsistently, the route can stay in a heading-only state with no dedicated inline error panel.
+- If card fetches fail or resolve inconsistently, the route shows an inline
+  `Try again` action.
 
 ## Failure and Recovery
 
 - If a numeric ID resolves to fallback mode, use fallback timing details or return to `/the-memes` and open a nearby card.
-- If card content does not appear (heading-only state), refresh the route or reopen the card from `/the-memes`.
+- If card content fails to load, use the inline `Try again` action.
 - If a deep link opens the wrong tab, replace `focus` with a supported value.
 - If the route shows `MEME` not-found, retry with a positive integer card id.
 
@@ -161,7 +165,8 @@
   reviewed translations are added.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the
   shared tablist pattern with `aria-selected` and arrow-key navigation.
-- Deferred loading applies to `The Art`, `Activity`, and `Timeline`; first open can be slower than later switches.
+- Deferred loading applies to additional art details, References, Collectors,
+  Card Activity, and Timeline; first open can be slower than later switches.
 - Fallback panel is the compact card-route view and is fixed to local timezone.
 - Fallback panel includes the same subscription awareness widget used on home
   for the selected upcoming card.

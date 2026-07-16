@@ -35,10 +35,10 @@ export default function UserPageHeaderBanner({
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
 
   return (
-    <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40">
+    <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40 md:tw-h-[300px]">
       {scaledBannerUrl ? (
         <div
-          className="tw-absolute tw-inset-0"
+          className="tw-absolute tw-inset-0 tw-mix-blend-lighten tw-opacity-60"
           style={{
             backgroundImage: `url(${scaledBannerUrl})`,
             backgroundSize: "cover",
@@ -53,7 +53,8 @@ export default function UserPageHeaderBanner({
           }}
         />
       )}
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-white/5" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-transparent" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-32 tw-bg-gradient-to-b tw-from-black/40 tw-to-transparent" />
 
       {canEdit && (
         <button

@@ -463,7 +463,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     ).toBeTruthy();
     expect(
       collectorsLabel.parentElement?.parentElement?.parentElement
-    ).toHaveClass("tw-flex", "tw-flex-wrap");
+    ).toHaveClass("tw-grid", "tw-grid-cols-2", "lg:tw-grid-cols-3");
   });
 
   it("uses ranked collection size for live rank totals when provided", () => {
@@ -487,7 +487,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows unranked rank pills and pending TDH for memes not recorded in TDH", () => {
+  it("shows one unranked status and pending TDH for memes not recorded in TDH", () => {
     render(
       <MemePageLiveRightMenu
         show
@@ -503,12 +503,16 @@ describe("MemePageLiveRightMenu distribution link", () => {
       />
     );
 
-    expect(screen.getAllByText("Unranked")).toHaveLength(3);
+    expect(screen.getAllByText("Unranked")).toHaveLength(1);
     expect(screen.getByLabelText("Edition size: Unranked")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("ex. 6529 museum: Unranked")
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText("Collectors: Unranked")).toBeInTheDocument();
+    const exMuseumMetric =
+      screen.getByText("ex. 6529 museum").parentElement?.parentElement;
+    const collectorsMetric =
+      screen.getByText("Collectors").parentElement?.parentElement;
+    expect(exMuseumMetric).toHaveTextContent(/ex\. 6529 museum\s*100/);
+    expect(exMuseumMetric).not.toHaveTextContent(/Rank|Unranked/);
+    expect(collectorsMetric).toHaveTextContent(/Collectors\s*0/);
+    expect(collectorsMetric).not.toHaveTextContent(/Rank|Unranked/);
     expect(screen.getByText("Pending")).toBeInTheDocument();
     expect(screen.queryByText("22.65")).not.toBeInTheDocument();
   });
@@ -566,9 +570,6 @@ describe("MemePageLiveRightMenu distribution link", () => {
       screen.getByText(
         formatNumber("de-DE", nft.market_cap, { maximumFractionDigits: 2 })
       )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(t("de-DE", "theMemes.detail.live.market.title"))
     ).toBeInTheDocument();
   });
 
@@ -680,6 +681,7 @@ describe("MemePageLiveSubMenu details", () => {
     expect(
       screen.getByRole("button", { name: /additional details/i })
     ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
 
     rerender(
       <MemePageLiveSubMenu
@@ -695,6 +697,7 @@ describe("MemePageLiveSubMenu details", () => {
         screen.getByRole("button", { name: /additional details/i })
       ).toHaveAttribute("aria-expanded", "true")
     );
+    expect(screen.getByTestId("meme-page-art")).toBeInTheDocument();
   });
 
   it("passes locale into additional details content", () => {

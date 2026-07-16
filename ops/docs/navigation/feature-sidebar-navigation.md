@@ -11,6 +11,10 @@ On web layouts, route switching is sidebar-first.
 - Touch small-screen web: header menu button opens the same sidebar as overlay.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
   nested route grouping shown in the expanded rail.
+- In collapsed rail mode, a mouse hover opens `NFTs` and `About` after a short
+  intent delay; tap or click remains available for touch and pointer users.
+- Collapsed flyouts enter with a short opacity and horizontal-position reveal;
+  reduced-motion preferences show them immediately without animation.
 - The 6529 logo links to `/`; there is no labeled `Home` product row.
 - Primary menu concepts are `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
 - `NFTs` and `About` are expandable groups; `Waves`, `DMs`, and `Join 6529`
@@ -23,6 +27,8 @@ On web layouts, route switching is sidebar-first.
   `Notifications` row with its own unread dot.
 - Connected account avatar in the sidebar account area can show an unread dot
   when another connected account has unread notifications.
+- In the collapsed rail, the connected account avatar gets a visible hover
+  highlight; the account menu still opens by click or keyboard activation.
 
 ## Location in the Site
 
@@ -60,7 +66,8 @@ On web layouts, route switching is sidebar-first.
    or disconnected `Share`.
 4. Open `NFTs` or `About` for nested routes; use the `Waves` row for direct
    `/waves` navigation and the `Join 6529` row for `/join-6529`.
-5. In collapsed mode, group rows open anchored flyout submenus that preserve
+5. In collapsed mode, hover a group row with a mouse or activate it by tap,
+   click, or keyboard to open an anchored flyout submenu. The flyout preserves
    subsection labels such as `Network & Reputation`, `Delegation & Wallets`, or
    `Data & Developer Tools`.
 6. Select a destination and watch active state update.
@@ -118,9 +125,16 @@ On web layouts, route switching is sidebar-first.
   connected accounts (not the active one).
 - Active grouped routes auto-expand their section on route load/change.
 - In collapsed mode, selecting the same group toggles flyout open/closed.
+- Mouse hover uses a short intent delay before opening and a close grace period
+  so crossing from the group icon into the flyout does not dismiss it.
+- Only one collapsed flyout is open at a time. Moving from one group to another
+  replaces the open flyout.
 - Collapsed flyouts keep subsection headers as labels; only the nested rows
   inside each subsection navigate.
-- Flyouts close on outside click, `Escape`, or when rail exits collapsed mode.
+- Flyouts close after the mouse leaves both the trigger and flyout, on outside
+  click, with `Escape`, or when the rail exits collapsed mode. Keyboard opening
+  moves focus into the links, and `Escape` restores focus to the group trigger.
+- The collapsed-row tooltip stays hidden while its flyout is open.
 - Flyouts reposition on sidebar scroll and window resize.
 - `Notifications` row appears only when wallet connection is active.
 - `Profile` row appears only when wallet connection is active.
@@ -129,6 +143,8 @@ On web layouts, route switching is sidebar-first.
 - Connected user row opens the account menu on a single activate; a quick
   second activate cycles to the next connected account when at least two are
   available.
+- The web account dropdown stays horizontally anchored to the connected user
+  row when the centered desktop layout adds wide-screen margins.
 - Disconnected `Share` row is hidden in Capacitor/native context and
   mobile-device web.
 - Connected desktop-web `Share` moves into the user menu and stays hidden until

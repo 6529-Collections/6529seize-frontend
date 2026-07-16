@@ -46,6 +46,7 @@ interface RegisterWaveOptions {
 }
 
 interface WaveDataFetchingProps extends WaveDataStoreUpdater {
+  readonly hasServerFeedSeed: (waveId: string) => boolean;
   readonly isCapacitor?: boolean | undefined;
 }
 
@@ -559,6 +560,7 @@ function useSyncExistingWaveNewestMessages({
 export function useWaveDataFetching({
   updateData,
   getData,
+  hasServerFeedSeed,
   isCapacitor = false,
 }: WaveDataFetchingProps) {
   const { getLoadingState, setLoadingState, setPromise, clearLoadingState } =
@@ -629,6 +631,10 @@ export function useWaveDataFetching({
       syncNewest = false,
       options?: RegisterWaveOptions
     ) => {
+      if (hasServerFeedSeed(waveId)) {
+        return;
+      }
+
       const existingDropsCount = getData(waveId)?.drops.length ?? 0;
       if (existingDropsCount > 0) {
         if (!trackedCacheSuccessWaveIdsRef.current.has(waveId)) {
@@ -741,6 +747,7 @@ export function useWaveDataFetching({
       cleanupController,
       createController,
       getData,
+      hasServerFeedSeed,
       getLoadingState,
       handleFetchError,
       handleFetchSuccess,

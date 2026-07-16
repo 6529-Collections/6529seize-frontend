@@ -137,7 +137,7 @@ describe("DynamicHeadTitle", () => {
     mockIsTitleOwned = true;
     mockTitlePathname = "/messages";
     mockPathname = "/messages";
-    document.title = "Messages";
+    document.title = "Messages | Brain";
 
     const view = render(<DynamicHeadTitle />);
     expect(document.title).toBe("Wave One | Brain");
@@ -194,7 +194,7 @@ describe("DynamicHeadTitle", () => {
     mockIsTitleOwned = true;
     mockTitlePathname = "/messages";
     mockPathname = "/messages";
-    document.title = "Messages";
+    document.title = "Messages | Brain";
 
     render(<DynamicHeadTitle />);
     expect(document.title).toBe("Wave One | Brain");

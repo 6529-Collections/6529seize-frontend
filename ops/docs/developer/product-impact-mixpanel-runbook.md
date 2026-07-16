@@ -145,3 +145,6 @@ After deployment and real traffic:
    Sentry for `wave_feed_load_failed`,
    `auth_session_refresh_product_impact`, and related product-impact logger
    entries.
+7. Confirm `auth_session_refresh_product_impact` records one copy of each
+   condition per account session, then records it again only after that session
+   recovers or materially changes.

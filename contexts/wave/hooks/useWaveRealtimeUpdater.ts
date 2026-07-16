@@ -46,6 +46,7 @@ type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
+  readonly hasServerFeedSeed: (waveId: string) => boolean;
   readonly registerWave: (waveId: string) => void;
   readonly syncNewestMessages: (
     waveId: string,
@@ -635,6 +636,7 @@ interface UseProcessIncomingDropParams extends Pick<
   UseWaveRealtimeUpdaterProps,
   | "activeWaveId"
   | "getData"
+  | "hasServerFeedSeed"
   | "updateData"
   | "registerWave"
   | "syncNewestMessages"
@@ -647,6 +649,7 @@ interface UseProcessIncomingDropParams extends Pick<
 const useProcessIncomingDrop = ({
   activeWaveId,
   getData,
+  hasServerFeedSeed,
   updateData,
   registerWave,
   syncNewestMessages,
@@ -703,6 +706,23 @@ const useProcessIncomingDrop = ({
 
       const currentData = getData(waveId);
       if (!currentData) {
+        if (
+          type === ProcessIncomingDropType.DROP_INSERT &&
+          hasServerFeedSeed(waveId)
+        ) {
+          updateData({
+            key: waveId,
+            drops: [
+              buildOptimisticDrop({
+                drop,
+                existingDrop: null,
+                options,
+              }),
+            ],
+          });
+          markActiveWaveAsRead(waveId);
+          return;
+        }
         registerWave(waveId);
         return;
       }
@@ -767,6 +787,7 @@ const useProcessIncomingDrop = ({
     [
       activeWaveIdRef,
       getData,
+      hasServerFeedSeed,
       updateData,
       registerWave,
       applyCanonicalDropUpdateForExistingDrop,
@@ -873,6 +894,7 @@ const useDropDeleteMessages = (
 export function useWaveRealtimeUpdater({
   activeWaveId,
   getData,
+  hasServerFeedSeed,
   updateData,
   registerWave,
   syncNewestMessages,
@@ -887,6 +909,7 @@ export function useWaveRealtimeUpdater({
   const processIncomingDrop = useProcessIncomingDrop({
     activeWaveId,
     getData,
+    hasServerFeedSeed,
     updateData,
     registerWave,
     syncNewestMessages,

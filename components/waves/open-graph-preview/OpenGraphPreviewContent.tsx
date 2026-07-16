@@ -215,7 +215,11 @@ function renderSpecializedOpenGraphPreview({
 }): ReactElement | null {
   if (seizePreview) {
     return (
-      <SeizeCollectionPreviewCard {...commonProps} preview={seizePreview} />
+      <SeizeCollectionPreviewCard
+        {...commonProps}
+        preview={seizePreview}
+        locale={locale}
+      />
     );
   }
 

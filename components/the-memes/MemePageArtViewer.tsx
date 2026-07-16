@@ -331,7 +331,7 @@ export function MemePageArtViewer({
   }
 
   return (
-    <div className="tw-flex tw-h-full tw-flex-col tw-p-0">
+    <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-p-0">
       <div className="tw-flex tw-flex-1 tw-flex-col">
         {hasAnimation ? (
           <>

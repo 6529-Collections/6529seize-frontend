@@ -1,14 +1,11 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useState } from "react";
-import Toggle from "react-toggle";
+import { useContext, useEffect, useId, useState } from "react";
+import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 
 export default function UserPageSubscriptionsMode(
   props: Readonly<{
@@ -22,6 +19,8 @@ export default function UserPageSubscriptionsMode(
 
   const [isAuto, setIsAuto] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const descriptionId = useId();
+  const isDisabled = props.readonly || isUpdating;
 
   useEffect(() => {
     setIsAuto(props.details?.automatic ?? false);
@@ -76,54 +75,63 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <div>
-      <div className="tw-pb-2">
-        <div>
-          <h5 className="tw-mb-0">
-            Mode{" "}
-            {props.details && props.details.last_update > 0 && (
-              <span className="tw-text-sm tw-font-semibold tw-text-iron-400">
-                {new Date(props.details.last_update).toLocaleString("en-US", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                  timeZone: "UTC",
-                })}{" "}
-                UTC
-              </span>
-            )}
-          </h5>
+    <div className="tw-min-w-0 tw-p-1">
+      <div className="tw-min-w-0">
+        <div className="tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3">
+          <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+            Mode
+          </h3>
+          {props.details && props.details.last_update > 0 && (
+            <span className="tw-ml-auto tw-whitespace-nowrap tw-text-right tw-text-xs tw-font-normal tw-text-iron-600">
+              {new Date(props.details.last_update).toLocaleString("en-US", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+                timeZone: "UTC",
+              })}{" "}
+              UTC
+            </span>
+          )}
         </div>
-      </div>
-      <div className="tw-pt-1">
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <label htmlFor={"subscription-mode"} className="tw-text-white">
-            <b>Manual</b>
+        <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-gap-2.5">
+          <label
+            htmlFor="subscription-mode"
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
+              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+            } ${isAuto ? "tw-text-iron-500" : "tw-text-iron-100"}`}
+          >
+            Manual
           </label>
-          <Toggle
-            disabled={props.readonly || isUpdating}
-            id={"subscription-mode"}
+          <UserPageSubscriptionsToggle
+            disabled={isDisabled}
+            id="subscription-mode"
             checked={isAuto}
-            icons={false}
             onChange={toggleMode}
+            ariaLabel="Automatic subscription mode"
+            describedBy={props.readonly ? undefined : descriptionId}
           />
-          <label htmlFor={"subscription-mode"} className="tw-text-white">
-            <b>Automatic</b>
+          <label
+            htmlFor="subscription-mode"
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
+              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+            } ${isAuto ? "tw-text-iron-100" : "tw-text-iron-500"}`}
+          >
+            Automatic
           </label>
-          {isUpdating && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </div>
       </div>
       {!props.readonly && (
-        <div className="tw-pt-1">
-          <div className="tw-whitespace-nowrap">
-            {isAuto
-              ? "Automatic airdrops of all eligible drops unless you opt-out"
-              : "You have to opt-in to each specific drop"}
-          </div>
-        </div>
+        <p
+          id={descriptionId}
+          className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-light tw-leading-relaxed tw-text-iron-500"
+        >
+          {isAuto
+            ? "Automatic airdrops of all eligible drops unless you opt-out"
+            : "You have to opt-in to each specific drop"}
+        </p>
       )}
     </div>
   );

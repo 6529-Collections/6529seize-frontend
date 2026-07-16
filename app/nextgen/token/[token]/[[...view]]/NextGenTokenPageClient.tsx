@@ -11,8 +11,19 @@ import type {
 } from "@/entities/INextgen";
 import styles from "@/styles/Home.module.css";
 import { NextgenCollectionView } from "@/types/enums";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+function getTokenViewFromPathname(pathname: string): NextgenCollectionView {
+  const viewSegment = pathname.split("/").filter(Boolean)[3] ?? "";
+  const normalizedView = viewSegment.toLowerCase().replaceAll("-", " ");
+  const matchedView = [
+    NextgenCollectionView.PROVENANCE,
+    NextgenCollectionView.DISPLAY_CENTER,
+    NextgenCollectionView.RARITY,
+  ].find((view) => view.toLowerCase() === normalizedView);
+
+  return matchedView ?? NextgenCollectionView.ABOUT;
+}
 
 export default function NextGenTokenPageClient({
   tokenId,
@@ -29,9 +40,18 @@ export default function NextGenTokenPageClient({
   readonly collection: NextGenCollection;
   readonly view: NextgenCollectionView;
 }) {
-  const router = useRouter();
   const { setTitle } = useTitle();
-  const [tokenView] = useState<NextgenCollectionView>(initialView);
+  const [tokenView, setTokenView] =
+    useState<NextgenCollectionView>(initialView);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setTokenView(getTokenViewFromPathname(globalThis.location.pathname));
+    };
+
+    globalThis.addEventListener("popstate", handlePopState);
+    return () => globalThis.removeEventListener("popstate", handlePopState);
+  }, []);
 
   useEffect(() => {
     const baseTitle = token?.name ?? `${collection.name} - #${tokenId}`;
@@ -42,11 +62,17 @@ export default function NextGenTokenPageClient({
   }, [tokenView, token?.name, collection.name, tokenId, setTitle]);
 
   const updateView = (newView?: NextgenCollectionView) => {
-    let newPath = `/nextgen/token/${tokenId}`;
-    if (newView && newView !== NextgenCollectionView.ABOUT) {
-      newPath += `/${newView.toLowerCase().replaceAll(" ", "-")}`;
+    const nextView = newView ?? NextgenCollectionView.ABOUT;
+    if (nextView === tokenView) {
+      return;
     }
-    router.push(newPath, { scroll: false });
+
+    let newPath = `/nextgen/token/${tokenId}`;
+    if (nextView !== NextgenCollectionView.ABOUT) {
+      newPath += `/${nextView.toLowerCase().replaceAll(" ", "-")}`;
+    }
+    setTokenView(nextView);
+    globalThis.history.pushState({ view: nextView }, "", newPath);
   };
 
   return (

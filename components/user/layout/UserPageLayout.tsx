@@ -3,6 +3,7 @@ import { Suspense, type ReactNode } from "react";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import UserPageClientHydrator from "./UserPageClientHydrator";
 import UserPageDropModal from "./UserPageDropModal";
+import UserPageTabTransition from "./UserPageTabTransition";
 import UserPageTabs from "./UserPageTabs";
 
 function UserPageTabsFallback() {
@@ -24,8 +25,11 @@ export default function UserPageLayout({
   readonly children: ReactNode;
 }) {
   const normalizedHandleOrWallet = handleOrWallet.toLowerCase();
-  const mainAddress =
-    initialProfile?.primary_wallet ?? normalizedHandleOrWallet;
+  const primaryWallet = initialProfile.primary_wallet as
+    | string
+    | null
+    | undefined;
+  const mainAddress = primaryWallet ?? normalizedHandleOrWallet;
 
   return (
     <main className="tailwind-scope tw-flex tw-min-h-[100dvh] tw-flex-col">
@@ -44,7 +48,9 @@ export default function UserPageLayout({
           <Suspense fallback={<UserPageTabsFallback />}>
             <UserPageTabs initialProfile={initialProfile} />
           </Suspense>
-          <div className="tw-mt-6 lg:tw-mt-8">{children}</div>
+          <div className="tw-mt-6 lg:tw-mt-8">
+            <UserPageTabTransition>{children}</UserPageTabTransition>
+          </div>
         </div>
       </div>
     </main>

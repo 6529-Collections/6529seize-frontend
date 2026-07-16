@@ -52,6 +52,7 @@ interface WaveDropsContentProps {
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
   readonly unreadCount?: number | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly virtualScrollRootMargin?: string | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -86,6 +87,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onScrollToUnread,
   unreadCount,
   suspendLightDropHydration = false,
+  virtualScrollRootMargin,
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
@@ -148,6 +150,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onScrollToUnread={onScrollToUnread}
         onDismissUnread={handleDismissUnread}
         suspendLightDropHydration={suspendLightDropHydration}
+        virtualScrollRootMargin={virtualScrollRootMargin}
         winningThreshold={winningThreshold}
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}

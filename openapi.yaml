@@ -9924,6 +9924,58 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropsLeaderboardPageV2"
+  /v2/waves/{waveId}/mention-search:
+    get:
+      tags:
+        - WavesV2
+      summary: Search wave-eligible profiles for user mentions
+      description: >-
+        Returns profiles whose handles start with the requested value and who
+        are eligible to read the requested wave. Results are ranked by profile
+        level and exclude the authenticated acting profile.
+      operationId: searchWaveMentions
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/wave-mention-search.handler"
+          name: handleSearchWaveMentions
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: handle
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 15
+            pattern: ^\w{3,15}$
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 20
+            default: 5
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveMentionSearchResult"
+        "400":
+          description: Invalid search request
+        "404":
+          description: Wave not found or not visible to the caller
   /v2/waves/{waveId}/search:
     get:
       tags:
@@ -19098,6 +19150,24 @@ components:
         contents:
           type: object
           additionalProperties: true
+    ApiWaveMentionSearchResult:
+      type: object
+      required:
+        - id
+        - handle
+        - display
+        - pfp
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        display:
+          type: string
+          nullable: true
+        pfp:
+          type: string
+          nullable: true
     ApiWaveMetadata:
       type: object
       required:

@@ -651,8 +651,10 @@ export function formatFullDate(
 export const formatFullDateTime = (
   d: Date,
   mode: DisplayTz = "local",
-  locale = "en-US"
+  locale = "en-US",
+  options: Readonly<{ hour12?: boolean }> = {}
 ): string => {
+  const hour12 = options.hour12 ?? (mode === "utc" ? false : undefined);
   const s = d.toLocaleString(locale, {
     weekday: "short",
     year: "numeric",
@@ -660,7 +662,8 @@ export const formatFullDateTime = (
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    ...(mode === "utc" ? { timeZone: "UTC", hour12: false } : {}),
+    ...(mode === "utc" ? { timeZone: "UTC" } : {}),
+    ...(hour12 === undefined ? {} : { hour12 }),
   });
   return mode === "utc" ? `${s} UTC` : s;
 };

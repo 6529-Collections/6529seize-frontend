@@ -40,7 +40,7 @@ export function printMemeReferences(
                         tokenId: nft.id,
                         name: nft.name,
                       })}
-                      className="tw-block tw-min-w-0 tw-text-iron-200 tw-no-underline tw-transition-transform hover:tw-scale-[1.02] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                      className="tw-block tw-min-w-0 tw-text-iron-200 tw-no-underline tw-transition-transform tw-duration-150 hover:tw-scale-[1.02] hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                     >
                       <NFTImage
                         nft={nft}
@@ -83,24 +83,30 @@ export function printMemeReferences(
 
 export function RememeReferencesGrid({
   memes,
+  loading = false,
   locale = DEFAULT_LOCALE,
 }: {
   readonly memes: NFT[];
+  readonly loading?: boolean | undefined;
   readonly locale?: SupportedLocale | undefined;
 }) {
   return (
-    <section className="tw-space-y-5 tw-pb-5">
+    <section aria-busy={loading} className="tw-space-y-5 tw-pb-5">
       <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
         {t(locale, "rememes.detail.references.title")}
       </h2>
-      {memes.length > 0 ? (
+      {loading ? (
+        <div role="status">
+          {t(locale, "rememes.detail.references.fetching")} <DotLoader />
+        </div>
+      ) : memes.length > 0 ? (
         <div className="tw-grid tw-grid-cols-2 tw-gap-4 sm:tw-grid-cols-3 md:tw-grid-cols-4">
           {memes.map((nft) => (
             <div
               className="tw-group tw-min-w-0 tw-text-iron-200"
               key={`${nft.contract}-${nft.id}`}
             >
-              <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-transition-colors group-hover:tw-border-iron-600">
+              <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-transition-colors tw-duration-150 group-hover:tw-border-iron-600 motion-reduce:tw-transition-none">
                 <a
                   href={getRouteHrefWithLocale({
                     href: `/the-memes/${nft.id}`,

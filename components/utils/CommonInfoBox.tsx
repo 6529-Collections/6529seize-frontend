@@ -27,9 +27,9 @@ export default function CommonInfoBox({
           />
         </svg>
         <div className="tw-ml-2 tw-self-center">
-          <h3 className="tw-mb-0 tw-text-sm tw-font-medium tw-text-primary-300">
+          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-primary-300">
             {message}
-          </h3>
+          </p>
         </div>
       </div>
     </div>

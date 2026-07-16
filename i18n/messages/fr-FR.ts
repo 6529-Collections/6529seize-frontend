@@ -3,6 +3,7 @@ import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-to
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
@@ -31,6 +32,9 @@ export const FR_FR_MESSAGES = {
   "attachment.safety.sha256": "SHA-256",
   "attachment.safety.size": "Taille {size}",
   "attachment.safety.viewDetails": "Voir les détails de sécurité",
+  "linkPreview.collection.maximumEdition": "Édition maximale",
+  "linkPreview.collection.minted": "Mintés",
+  "linkPreview.collection.mintingLive": "Mint en cours",
   "linkPreview.file.externalSource": "Source externe",
   "linkPreview.file.fact.mime": "MIME",
   "linkPreview.file.fact.size": "Taille",
@@ -371,6 +375,7 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
+  ...stormComposerFrMessages,
   "waves.loadingStatus": "Chargement des waves",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
   "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",
@@ -405,8 +410,7 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.loadingEarlier": "Chargement des drops précédents",
   "waves.leaderboard.previousLoadError":
     "Impossible de charger les drops précédents. Sélectionnez Réessayer pour relancer le chargement.",
-  "waves.leaderboard.retryEarlier":
-    "Réessayer de charger les drops précédents",
+  "waves.leaderboard.retryEarlier": "Réessayer de charger les drops précédents",
   "waves.leaderboard.loadingMore": "Chargement de drops supplémentaires",
   "waves.leaderboard.nextLoadError":
     "Impossible de charger d’autres drops. Sélectionnez Réessayer pour relancer le chargement.",

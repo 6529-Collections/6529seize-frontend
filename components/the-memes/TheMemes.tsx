@@ -567,7 +567,7 @@ export default function TheMemesComponent({
                   <div className="tw-min-w-0 min-[1200px]:tw-hidden">
                     <CollectionsDropdown activePage="memes" variant="title" />
                   </div>
-                  <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                  <h1 className="tw-m-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
                     {t(locale, "theMemes.title")}
                   </h1>
                   <LFGButton contract={MEMES_CONTRACT} />

@@ -47,7 +47,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   return (
     <>
       <button
-        className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 ${
+        className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 ${
           !canReply ? "tw-cursor-default tw-opacity-50" : "tw-cursor-pointer"
         }`}
         onClick={canReply ? handleReplyClick : undefined}

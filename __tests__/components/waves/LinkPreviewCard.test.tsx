@@ -78,6 +78,21 @@ describe("LinkPreviewCard", () => {
     );
     return frame;
   };
+  const assertTheMemesFrame = () => {
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-h-[18rem]",
+      "tw-min-h-[18rem]",
+      "tw-max-h-[18rem]",
+      "sm:tw-h-[15rem]",
+      "sm:tw-min-h-[15rem]",
+      "sm:tw-max-h-[15rem]",
+      "md:tw-h-[12rem]",
+      "md:tw-min-h-[12rem]",
+      "md:tw-max-h-[12rem]"
+    );
+    return frame;
+  };
   const assertVideoFrame = () => {
     const frame = screen.getByTestId("link-preview-card-stable-frame");
     expect(frame).toHaveClass(
@@ -287,51 +302,66 @@ describe("LinkPreviewCard", () => {
     assertCollectionFrame();
   });
 
-  it.each([
-    {
-      href: "https://6529.io/the-memes/509",
+  it("uses a compact fixed The Memes frame before and after preview resolution", async () => {
+    const href = "https://6529.io/the-memes/509";
+    fetchLinkPreview.mockResolvedValue({
+      type: "6529.collection",
       title: "The Collective Synapse",
-    },
-    {
-      href: "https://6529.io/rememes/0x33fd426905f149f8376e227d0c9d3340aad17af1/181",
+      url: href,
+      image: { url: "https://cdn.6529.io/collection.png" },
+    });
+
+    render(
+      <LinkPreviewCard
+        href={href}
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    assertTheMemesFrame();
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({ type: "6529.collection" }),
+        })
+      )
+    );
+
+    assertTheMemesFrame();
+  });
+
+  it("keeps the standard collection frame for Rememes", async () => {
+    const href =
+      "https://6529.io/rememes/0x33fd426905f149f8376e227d0c9d3340aad17af1/181";
+    fetchLinkPreview.mockResolvedValue({
+      type: "6529.collection",
       title: "Rememe #181",
-    },
-  ])(
-    "uses a fixed 6529 collection frame for $href before and after preview resolution",
-    async ({ href, title }) => {
-      fetchLinkPreview.mockResolvedValue({
-        type: "6529.collection",
-        title,
-        url: href,
-        image: { url: "https://cdn.6529.io/collection.png" },
-      });
+      url: href,
+      image: { url: "https://cdn.6529.io/collection.png" },
+    });
 
-      render(
-        <LinkPreviewCard
-          href={href}
-          renderFallback={() => <div data-testid="fallback">fallback</div>}
-        />
-      );
+    render(
+      <LinkPreviewCard
+        href={href}
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
 
-      assertCollectionFrame();
+    assertCollectionFrame();
 
-      await waitFor(() =>
-        expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            preview: expect.objectContaining({ type: "6529.collection" }),
-          })
-        )
-      );
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({ type: "6529.collection" }),
+        })
+      )
+    );
 
-      assertCollectionFrame();
-    }
-  );
+    assertCollectionFrame();
+  });
 
   it.each([
-    {
-      href: "//6529.io/the-memes/509",
-      resolvedUrl: "https://6529.io/the-memes/509",
-    },
     {
       href: "6529.io/meme-lab/402",
       resolvedUrl: "https://6529.io/meme-lab/402",
@@ -366,6 +396,32 @@ describe("LinkPreviewCard", () => {
       assertCollectionFrame();
     }
   );
+
+  it("uses the compact The Memes frame for a protocol-relative href", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      type: "6529.collection",
+      title: "Normalized collection",
+      url: "https://6529.io/the-memes/509",
+      image: { url: "https://cdn.6529.io/collection.png" },
+    });
+
+    render(
+      <LinkPreviewCard
+        href="//6529.io/the-memes/509"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    assertTheMemesFrame();
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({ type: "6529.collection" }),
+        })
+      )
+    );
+    assertTheMemesFrame();
+  });
 
   it.each(["6529.io", "v1.2/foo"])(
     "does not classify bare dotted text %s as a first-party stable frame",

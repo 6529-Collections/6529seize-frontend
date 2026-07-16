@@ -59,6 +59,7 @@ export interface RunImmediateAuthValidationParams {
   readonly latestAddressRef: MutableCurrentRef<string | undefined>;
   readonly activeValidationOperationIdRef: MutableCurrentRef<string | null>;
   readonly abortControllerRef: MutableCurrentRef<AbortController | null>;
+  readonly terminalAuthTransitionScopeRef: MutableCurrentRef<string | null>;
   readonly activeProfileProxy: ApiProfileProxy | null;
   readonly hasActiveWalletAddress: boolean;
   readonly canSignActiveWallet: boolean;

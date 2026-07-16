@@ -25,11 +25,13 @@ describe("commonApiFetch", () => {
     const result = await commonApiFetch<{ result: number }>({
       endpoint: "test",
       params: { foo: "bar", typ: "nic" },
+      cache: "no-store",
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/test?foo=bar&typ=cic",
       expect.objectContaining({
+        cache: "no-store",
         headers: expect.objectContaining({
           "x-6529-auth": "s",
           Authorization: "Bearer jwt",

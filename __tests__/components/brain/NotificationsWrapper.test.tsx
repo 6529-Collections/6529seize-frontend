@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import NotificationsWrapper from "@/components/brain/notifications/NotificationsWrapper";
 import { useRouter } from "next/navigation";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import type { NotificationDisplayItem } from "@/types/feed.types";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -30,6 +31,10 @@ jest.mock(
 
 const push = jest.fn();
 const prefetchWaveData = jest.fn();
+const notificationsFromDistinctWaves = Array.from({ length: 5 }, (_, index) => ({
+  id: index + 1,
+  related_drops: [{ wave: { id: `visible-wave-${index + 1}` } }],
+})) as unknown as NotificationDisplayItem[];
 (useRouter as jest.Mock).mockReturnValue({ push });
 
 describe("NotificationsWrapper", () => {
@@ -54,18 +59,23 @@ describe("NotificationsWrapper", () => {
     ).toBeInTheDocument();
   });
 
-  it("delegates callbacks to router and state setter", () => {
+  it("prefetches only for an actual reply, not for rendered notifications", () => {
     const setActive = jest.fn();
     render(
       <NotificationsWrapper
-        items={[]}
+        items={notificationsFromDistinctWaves}
         loadingOlder={false}
         activeDrop={null}
         setActiveDrop={setActive}
       />
     );
+
+    expect(prefetchWaveData).not.toHaveBeenCalled();
+
     screen.getByTestId("items").click();
+
     expect(setActive).toHaveBeenCalledTimes(1);
+    expect(prefetchWaveData).toHaveBeenCalledTimes(1);
     expect(prefetchWaveData).toHaveBeenCalledWith("w");
     expect(push).toHaveBeenCalledWith("/waves/w?serialNo=1");
   });

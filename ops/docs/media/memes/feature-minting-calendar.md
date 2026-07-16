@@ -54,8 +54,10 @@ distribution routes.
 7. Open mint-day cells to view details, export links, and any override note.
 8. On fallback routes, the compact panel auto-selects the URL id and stays
    local-time read-only (no timezone toggle, no `Next Mint` button, no `Meme #`
-   input, no upcoming table). On unresolved positive `/the-memes/{id}` pages,
-   use the header-row `Distribution Plan` link to open
+   input, no upcoming table). When an unresolved route is the mapped next Meme
+   while home is in `Next Drop` mode, its revealed artwork panel appears above
+   the compact calendar. On unresolved positive `/the-memes/{id}` pages, use
+   the header-row `Distribution Plan` link to open
    `/the-memes/{id}/distribution`.
 
 ## Common Scenarios
@@ -65,8 +67,8 @@ distribution routes.
 - Export any upcoming mint to calendar from the top panel or day tooltip.
 - Compare `Local` vs `UTC` renderings for cross-time-zone coordination.
 - Open unresolved future card URLs and still see timing details in the fallback
-  panel; positive ids also show a header-row `Distribution Plan` link for that
-  card.
+  panel. The mapped next Meme also shows its winning artwork and drop details;
+  positive ids show a header-row `Distribution Plan` link for that card.
 - Open early distribution URLs and still see the same fallback timing panel
   above the centered "Distribution Plan will be made available soon!" message.
 - Query `/api/meme-calendar/{id}` for a mint timeline summary.

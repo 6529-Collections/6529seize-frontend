@@ -429,6 +429,7 @@ describe("MemeLabPageComponent", () => {
     expect(
       screen.queryByRole("heading", { name: "Meme Collectors" })
     ).not.toBeInTheDocument();
+    expect(screen.queryByText("Market Overview")).not.toBeInTheDocument();
     expect(screen.getAllByTestId("nft-image")).toHaveLength(1);
   });
 

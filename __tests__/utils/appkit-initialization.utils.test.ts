@@ -1,4 +1,7 @@
-import { initializeAppKit } from "@/utils/appkit-initialization.utils";
+import {
+  createAppKitAdapter,
+  initializeAppKit,
+} from "@/utils/appkit-initialization.utils";
 import { createAppKit } from "@reown/appkit/react";
 import { mainnet } from "viem/chains";
 import type { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
@@ -26,7 +29,7 @@ jest.mock("@/utils/error-sanitizer", () => ({
   logErrorSecurely: jest.fn(),
 }));
 
-describe("initializeAppKit", () => {
+describe("AppKit initialization", () => {
   const adapter = {
     wagmiConfig: { id: "wagmi-config" },
   } as unknown as WagmiAdapter;
@@ -41,19 +44,30 @@ describe("initializeAppKit", () => {
     };
   });
 
-  it("disables AppKit's default Coinbase connector on Capacitor", () => {
-    initializeAppKit({
+  it("creates the Wagmi adapter independently of AppKit", () => {
+    const result = createAppKitAdapter({
       wallets: [],
       adapterManager: adapterManager as unknown as AppKitAdapterManager,
       isCapacitor: true,
       chains: [mainnet],
     });
 
+    expect(result).toBe(adapter);
     expect(adapterManager.createAdapterWithCache).toHaveBeenCalledWith(
       [],
       true,
       [mainnet]
     );
+    expect(createAppKit).not.toHaveBeenCalled();
+  });
+
+  it("disables AppKit's default Coinbase connector on Capacitor", () => {
+    initializeAppKit({
+      adapter,
+      isCapacitor: true,
+      chains: [mainnet],
+    });
+
     expect(createAppKit).toHaveBeenCalledWith(
       expect.objectContaining({
         enableCoinbase: false,
@@ -63,17 +77,11 @@ describe("initializeAppKit", () => {
 
   it("keeps AppKit's default Coinbase connector enabled outside Capacitor", () => {
     initializeAppKit({
-      wallets: [],
-      adapterManager: adapterManager as unknown as AppKitAdapterManager,
+      adapter,
       isCapacitor: false,
       chains: [mainnet],
     });
 
-    expect(adapterManager.createAdapterWithCache).toHaveBeenCalledWith(
-      [],
-      false,
-      [mainnet]
-    );
     expect(createAppKit).toHaveBeenCalledWith(
       expect.objectContaining({
         enableCoinbase: true,

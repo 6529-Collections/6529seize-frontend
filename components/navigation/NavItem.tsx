@@ -199,7 +199,10 @@ const NavItemContent = ({
     item.name === "Notifications" && hasValidWalletAuth
       ? (connectedProfile?.handle ?? null)
       : null,
-    { enabled: hasValidWalletAuth }
+    {
+      enabled: hasValidWalletAuth,
+      profileId: connectedProfile?.id,
+    }
   );
 
   // Add unread messages logic

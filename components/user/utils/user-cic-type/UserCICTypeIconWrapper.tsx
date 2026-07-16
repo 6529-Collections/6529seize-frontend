@@ -5,6 +5,8 @@ import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 import UserCICTypeIcon from "./UserCICTypeIcon";
 
@@ -26,9 +28,14 @@ export default function UserCICTypeIconWrapper({
 
   return (
     <>
-      <div data-tooltip-id={tooltipId} className="tw-cursor-pointer">
+      <button
+        type="button"
+        data-tooltip-id={tooltipId}
+        aria-label={t(DEFAULT_LOCALE, "user.cicType.details")}
+        className="tw-inline-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-cursor-help focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+      >
         <UserCICTypeIcon cic={profile.cic} />
-      </div>
+      </button>
 
       {canRenderTooltip &&
         createPortal(
@@ -45,7 +52,9 @@ export default function UserCICTypeIconWrapper({
               pointerEvents: "auto",
             }}
           >
-            <UserCICTypeIconTooltip profile={profile} />
+            <div className="tailwind-scope">
+              <UserCICTypeIconTooltip profile={profile} />
+            </div>
           </Tooltip>,
           document.body
         )}
