@@ -1562,6 +1562,43 @@ describe("sentry-client-filters", () => {
     }
   );
 
+  it("filters production-shaped React DOM removeChild NotFoundError events on the parameterized profile transaction", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        transaction: "/:user",
+        request: {
+          url: "https://6529.io/profile-name",
+        },
+        tags: {
+          transaction: "/:user",
+          url: "/profile-name",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it.each(["/profile-name", "/about", "/:user/", "/:user/subscriptions"])(
+    "keeps React DOM removeChild NotFoundError events for non-matching profile route candidate %s",
+    (route) => {
+      const result = shouldFilterReactDomRemoveChildNotFoundError(
+        createReactDomRemoveChildEvent({
+          transaction: route,
+          request: {
+            url: `https://6529.io${route}`,
+          },
+          tags: {
+            transaction: route,
+            url: route,
+          },
+        })
+      );
+
+      expect(result).toBe(false);
+    }
+  );
+
   it("filters React DOM removeChild NotFoundError events when request URL identifies a waves route", () => {
     const result = shouldFilterReactDomRemoveChildNotFoundError(
       createReactDomRemoveChildEvent({
@@ -1579,6 +1616,7 @@ describe("sentry-client-filters", () => {
   it("keeps React DOM removeChild NotFoundError events when an app frame is present", () => {
     const result = shouldFilterReactDomRemoveChildNotFoundError(
       createReactDomRemoveChildEvent({
+        transaction: "/:user",
         exception: {
           values: [
             {
@@ -1595,6 +1633,10 @@ describe("sentry-client-filters", () => {
               },
             },
           ],
+        },
+        tags: {
+          transaction: "/:user",
+          url: "/profile-name",
         },
       })
     );
@@ -1619,6 +1661,7 @@ describe("sentry-client-filters", () => {
   it("keeps different removeChild NotFoundError messages from React DOM runtime frames", () => {
     const result = shouldFilterReactDomRemoveChildNotFoundError(
       createReactDomRemoveChildEvent({
+        transaction: "/:user",
         exception: {
           values: [
             {
@@ -1629,6 +1672,35 @@ describe("sentry-client-filters", () => {
               },
             },
           ],
+        },
+        tags: {
+          transaction: "/:user",
+          url: "/profile-name",
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps profile removeChild NotFoundError events without stack frames", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        transaction: "/:user",
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomRemoveChildMessage,
+              stacktrace: {
+                frames: [],
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction: "/:user",
+          url: "/profile-name",
         },
       })
     );
