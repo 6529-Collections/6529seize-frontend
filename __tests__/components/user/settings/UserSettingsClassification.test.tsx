@@ -16,9 +16,17 @@ describe('UserSettingsClassification', () => {
     );
     const toggle = screen.getByRole('button');
     expect(toggle).toHaveTextContent(CLASSIFICATIONS[ApiProfileClassification.Ai].title);
+    expect(toggle).not.toHaveAttribute('aria-controls');
     await userEvent.click(toggle);
-    const option = await screen.findByText(CLASSIFICATIONS[ApiProfileClassification.Pseudonym].title);
+    const optionsId = toggle.getAttribute('aria-controls');
+    expect(optionsId).not.toBeNull();
+    expect(document.getElementById(optionsId!)).toBeInTheDocument();
+    const option = await screen.findByRole('button', {
+      name: CLASSIFICATIONS[ApiProfileClassification.Pseudonym].title,
+    });
     await userEvent.click(option);
     expect(onSelect).toHaveBeenCalledWith(ApiProfileClassification.Pseudonym);
+    expect(toggle).toHaveFocus();
+    expect(toggle).not.toHaveAttribute('aria-controls');
   });
 });

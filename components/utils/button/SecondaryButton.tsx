@@ -24,7 +24,7 @@ export default function SecondaryButton({
       : "tw-px-3.5 tw-py-2.5 tw-text-sm";
   const stateClasses = inactive
     ? "tw-cursor-not-allowed tw-border-iron-800 tw-bg-iron-900 tw-text-iron-600"
-    : "tw-border-iron-600/30 tw-bg-iron-700 tw-text-iron-100 tw-shadow-sm tw-shadow-black/20 desktop-hover:hover:tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-650 desktop-hover:hover:tw-text-iron-50 active:tw-bg-iron-800";
+    : "tw-border-iron-600/25 tw-bg-iron-800 tw-text-iron-100 tw-shadow-sm tw-shadow-black/20 desktop-hover:hover:tw-border-iron-600/35 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 active:tw-bg-iron-900";
 
   return (
     <button

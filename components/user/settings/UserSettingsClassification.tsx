@@ -17,12 +17,19 @@ export default function UserSettingsClassification({
   const [isOpen, setIsOpen] = useState(false);
   const toggleOpen = () => setIsOpen((open) => !open);
   const listRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   useClickAway(listRef, () => setIsOpen(false));
-  useKeyPressEvent("Escape", () => setIsOpen(false));
+  useKeyPressEvent("Escape", () => {
+    if (isOpen) {
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    }
+  });
 
   const onClassification = (value: ApiProfileClassification) => {
     onSelect(value);
     setIsOpen(false);
+    triggerRef.current?.focus();
   };
 
   const classifications = Object.values(ApiProfileClassification);
@@ -42,11 +49,12 @@ export default function UserSettingsClassification({
       </div>
       <div className="tw-relative tw-mt-2">
         <button
+          ref={triggerRef}
           type="button"
           onClick={toggleOpen}
           aria-labelledby={`${labelId} ${valueId}`}
           aria-expanded={isOpen}
-          aria-controls={optionsId}
+          aria-controls={isOpen ? optionsId : undefined}
           className="tw-form-input tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-left tw-text-base tw-font-normal tw-text-iron-50 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out hover:tw-ring-white/15 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
         >
           <span id={valueId} className="tw-text-iron-50">
