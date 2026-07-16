@@ -1,4 +1,5 @@
-import { screen, waitFor } from "@testing-library/react";
+import * as Sentry from "@sentry/nextjs";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TwitterPreviewCard from "@/components/waves/TwitterPreviewCard";
@@ -8,13 +9,29 @@ import { renderWithQueryClient as render } from "../../utils/reactQuery";
 jest.mock("@/services/api/twitter-preview-api", () => ({
   fetchTwitterPreview: jest.fn(),
 }));
+jest.mock("@sentry/nextjs", () => ({
+  captureException: jest.fn(),
+}));
 
 const mockedFetchTwitterPreview = fetchTwitterPreview as jest.MockedFunction<
   typeof fetchTwitterPreview
 >;
+const captureExceptionMock = jest.mocked(Sentry.captureException);
+
+function createDeferredPlayRejection(): {
+  readonly promise: Promise<void>;
+  readonly reject: (reason: unknown) => void;
+} {
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<void>((_resolve, rejectPromise) => {
+    reject = rejectPromise;
+  });
+  return { promise, reject };
+}
 
 describe("TwitterPreviewCard", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.restoreAllMocks();
     jest
       .spyOn(HTMLMediaElement.prototype, "load")
@@ -271,23 +288,7 @@ describe("TwitterPreviewCard", () => {
         configurable: true,
         value: HTMLMediaElement.HAVE_METADATA,
       });
-      Object.defineProperty(video, "paused", {
-        configurable: true,
-        value: false,
-      });
-      Object.defineProperty(video, "ended", {
-        configurable: true,
-        value: false,
-      });
     }
-    const playRejection = Promise.reject(
-      new DOMException("The operation was aborted.", "AbortError")
-    );
-    void playRejection.then(undefined, () => undefined);
-    const playRejectionCatch = jest.spyOn(playRejection, "catch");
-    const play = jest
-      .spyOn(HTMLMediaElement.prototype, "play")
-      .mockReturnValueOnce(playRejection);
     await userEvent.click(screen.getByRole("radio", { name: "720p" }));
     await waitFor(() =>
       expect(container.querySelector("video")).toHaveAttribute(
@@ -296,8 +297,116 @@ describe("TwitterPreviewCard", () => {
       )
     );
     expect(container.querySelector("video")?.currentTime).toBe(12);
-    expect(play).toHaveBeenCalledTimes(1);
-    expect(playRejectionCatch).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores deferred playback aborts without hiding other failures", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2057727911914844378",
+      url: "https://x.com/elonmusk/status/2057727911914844378",
+      authorName: "Elon Musk",
+      authorHandle: "elonmusk",
+      text: "Humans using Mythos as seen by Mythos",
+      mediaVideoUrl: "https://video.twimg.com/tweet_video/1080x1350.mp4",
+      mediaVideoHlsUrl: "https://video.twimg.com/tweet_video/playlist.m3u8",
+      mediaVideoVariants: [
+        {
+          url: "https://video.twimg.com/tweet_video/1080x1350.mp4",
+          width: 1080,
+          height: 1350,
+          quality: 1080,
+        },
+        {
+          url: "https://video.twimg.com/tweet_video/720x900.mp4",
+          width: 720,
+          height: 900,
+          quality: 720,
+        },
+      ],
+    });
+
+    const { container } = render(
+      <TwitterPreviewCard
+        href="https://x.com/elonmusk/status/2057727911914844378"
+        tweetId="2057727911914844378"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    await waitFor(() =>
+      expect(video).toHaveAttribute(
+        "src",
+        "https://video.twimg.com/tweet_video/1080x1350.mp4"
+      )
+    );
+
+    Object.defineProperties(video, {
+      currentTime: { configurable: true, writable: true, value: 12 },
+      duration: { configurable: true, value: 30 },
+      readyState: {
+        configurable: true,
+        value: HTMLMediaElement.HAVE_NOTHING,
+      },
+      paused: { configurable: true, value: false },
+      ended: { configurable: true, value: false },
+    });
+
+    const play = jest.mocked(HTMLMediaElement.prototype.play);
+    play.mockClear();
+    const abortedPlayback = createDeferredPlayRejection();
+    play.mockReturnValueOnce(abortedPlayback.promise);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Video quality" })
+    );
+    await userEvent.click(screen.getByRole("radio", { name: "720p" }));
+    await waitFor(() =>
+      expect(video).toHaveAttribute(
+        "src",
+        "https://video.twimg.com/tweet_video/720x900.mp4"
+      )
+    );
+    expect(play).not.toHaveBeenCalled();
+
+    fireEvent.loadedMetadata(video);
+    await waitFor(() => expect(play).toHaveBeenCalledTimes(1));
+    expect(video.currentTime).toBe(12);
+
+    abortedPlayback.reject(
+      new DOMException("The operation was aborted.", "AbortError")
+    );
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+
+    const unsupportedError = new DOMException(
+      "The media source is not supported.",
+      "NotSupportedError"
+    );
+    const unsupportedPlayback = createDeferredPlayRejection();
+    play.mockReturnValueOnce(unsupportedPlayback.promise);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Video quality" })
+    );
+    await userEvent.click(screen.getByRole("radio", { name: "1080p" }));
+    await waitFor(() =>
+      expect(video).toHaveAttribute(
+        "src",
+        "https://video.twimg.com/tweet_video/1080x1350.mp4"
+      )
+    );
+    fireEvent.loadedMetadata(video);
+    await waitFor(() => expect(play).toHaveBeenCalledTimes(2));
+
+    unsupportedPlayback.reject(unsupportedError);
+    await waitFor(() =>
+      expect(captureExceptionMock).toHaveBeenCalledWith(unsupportedError)
+    );
   });
 
   it("does not render a duplicate manual quality option for HLS-only video", async () => {
