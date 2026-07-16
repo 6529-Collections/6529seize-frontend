@@ -70,6 +70,8 @@ import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/Plai
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -179,6 +181,7 @@ const CreateDropInput = forwardRef<
     readonly type: ActiveDropAction | null;
     readonly canSubmit: boolean;
     readonly isStormMode: boolean;
+    readonly stormPartNumber?: number | undefined;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
     readonly canMentionAll?: boolean | undefined;
@@ -206,6 +209,7 @@ const CreateDropInput = forwardRef<
       type,
       canSubmit,
       isStormMode,
+      stormPartNumber = 1,
       isDropMode,
       canMentionAll = false,
       submitting,
@@ -226,6 +230,7 @@ const CreateDropInput = forwardRef<
     ref
   ) => {
     const { isCapacitor } = useCapacitor();
+    const locale = useBrowserLocale();
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -270,7 +275,11 @@ const CreateDropInput = forwardRef<
     const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
     const getPlaceHolderText = () => {
-      if (isStormMode) return "Add to the storm";
+      if (isStormMode) {
+        return t(locale, "waves.stormComposer.writePart", {
+          number: stormPartNumber,
+        });
+      }
       if (type === null) {
         return isDropMode ? "Create a drop" : "Write a chat message";
       }

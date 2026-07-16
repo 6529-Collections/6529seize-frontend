@@ -1,4 +1,3 @@
-import "@google/model-viewer";
 import { useEffect, useMemo, useRef } from "react";
 import type { SyntheticEvent } from "react";
 import type { BaseNFT } from "@/entities/INFT";
@@ -14,6 +13,18 @@ export default function NFTModel(
 ) {
   const modelRef = useRef<ModelViewerElement | null>(null);
   const handleArweaveError = useMemo(() => withArweaveFallback(), []);
+
+  useEffect(() => {
+    async function loadModelViewer() {
+      try {
+        await import("@google/model-viewer");
+      } catch (error: unknown) {
+        console.error("Failed to load the 3D model viewer", error);
+      }
+    }
+
+    void loadModelViewer();
+  }, []);
 
   useEffect(() => {
     const modelElement = modelRef.current;

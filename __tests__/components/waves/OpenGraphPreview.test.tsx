@@ -710,8 +710,8 @@ describe("OpenGraphPreview", () => {
           title: "The Collective Synapse",
           kicker: "The Memes #509",
           people: [{ label: "by", name: "elnaz555", href: "/elnaz555" }],
+          liveMint: { mintedCount: 159, maxCount: 329 },
           facts: [
-            { label: "Edition size", value: "328" },
             { label: "TDH rate", value: "25.1" },
             { label: "Season", value: "15" },
             { label: "Mint date", value: "1 Jun 2026" },
@@ -736,13 +736,34 @@ describe("OpenGraphPreview", () => {
       "href",
       "/elnaz555"
     );
-    expect(screen.getByText("Edition size")).toBeInTheDocument();
-    expect(screen.getByText("328")).toBeInTheDocument();
+    expect(screen.getByText("Minting Live")).toBeInTheDocument();
+    expect(screen.getByText("Minted")).toBeInTheDocument();
+    expect(screen.getByText("159 / 329")).toBeInTheDocument();
+    expect(screen.queryByText("Edition size")).toBeNull();
     expect(screen.getByText("TDH rate")).toBeInTheDocument();
     expect(screen.getByText("25.1")).toBeInTheDocument();
     expect(screen.getByText("Season")).toBeInTheDocument();
     expect(screen.getByText("15")).toBeInTheDocument();
-    expect(screen.queryByText("158/328")).toBeNull();
+  });
+
+  it("shows current live mint count when Manifold max is unavailable", () => {
+    render(
+      <OpenGraphPreview
+        href="https://6529.io/the-memes/522"
+        preview={{
+          type: "6529.collection",
+          kind: "the-memes",
+          title: "Sentenced to Survive",
+          kicker: "The Memes #522",
+          liveMint: { mintedCount: 159 },
+          facts: [],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Minting Live")).toBeInTheDocument();
+    expect(screen.getByText("Minted")).toBeInTheDocument();
+    expect(screen.getByText("159")).toBeInTheDocument();
   });
 
   it("renders first-party NextGen cards with capped rare trait chips", () => {

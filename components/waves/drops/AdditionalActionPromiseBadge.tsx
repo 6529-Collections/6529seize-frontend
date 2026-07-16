@@ -16,7 +16,7 @@ const ADDITIONAL_ACTION_PROMISE_TOOLTIP = t(
 );
 
 const BADGE_CLASSES =
-  "tw-inline-flex tw-shrink-0 tw-cursor-help tw-items-center tw-rounded-full tw-bg-amber-400/10 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-leading-5 tw-text-amber-300 tw-ring-1 tw-ring-amber-300/25 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-amber-300";
+  "tw-inline-flex tw-shrink-0 tw-self-center tw-cursor-help tw-items-center tw-rounded-full tw-bg-amber-400/10 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-leading-5 tw-text-amber-300 tw-ring-1 tw-ring-amber-300/25 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-amber-300";
 
 interface AdditionalActionPromiseBadgeProps {
   readonly className?: string | undefined;
