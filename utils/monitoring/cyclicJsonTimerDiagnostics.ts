@@ -13,7 +13,7 @@ const DEFAULT_TIMER_SAMPLE_RATE = 1 / 16;
 const MAX_SCHEDULING_FRAMES = 8;
 const INTERNAL_TIMER_FUNCTION = "cyclicJsonTimerDiagnosticSetTimeout";
 const INTERNAL_STACK_FUNCTIONS = new Set([INTERNAL_TIMER_FUNCTION]);
-const SAFE_NAME_PATTERN = /[^A-Za-z0-9_$<>. -]/g;
+const SAFE_NAME_PATTERN = /[^\w$<>. -]/g;
 // Privacy wins over callback-name fidelity: long minified names can be
 // redacted because they are indistinguishable from identifier-shaped secrets.
 const SENSITIVE_IDENTIFIER_PATTERN = /(?:0x[a-f\d]{8,}|[A-Za-z\d_-]{32,})/i;
@@ -122,7 +122,7 @@ export function isIosWkWebViewUserAgent(userAgent: string): boolean {
 }
 
 function getFileBasename(path: string): string {
-  const normalized = path.replace(/\\/g, "/");
+  const normalized = path.replaceAll("\\", "/");
   const basename = normalized.slice(normalized.lastIndexOf("/") + 1);
   return getSafeName(basename, "unknown-script");
 }
@@ -202,10 +202,13 @@ function parseStackLine(
 
   let functionName = "anonymous";
   let location = candidate;
-  const parenthesizedLocation = candidate.match(/^(.*?)\s+\((.*)\)$/);
-  if (parenthesizedLocation) {
-    functionName = getSafeFunctionName(parenthesizedLocation[1], "anonymous");
-    location = parenthesizedLocation[2] ?? candidate;
+  const parenthesisStart = candidate.lastIndexOf(" (");
+  if (parenthesisStart > 0 && candidate.endsWith(")")) {
+    functionName = getSafeFunctionName(
+      candidate.slice(0, parenthesisStart),
+      "anonymous"
+    );
+    location = candidate.slice(parenthesisStart + 2, -1);
   } else {
     const safariSeparator = candidate.lastIndexOf("@");
     if (safariSeparator !== -1) {
@@ -217,19 +220,30 @@ function parseStackLine(
     }
   }
 
-  const coordinates = location.match(/^(.*):(\d+):(\d+)$/);
-  if (!coordinates) {
+  const columnSeparator = location.lastIndexOf(":");
+  const lineSeparator = location.lastIndexOf(":", columnSeparator - 1);
+  if (lineSeparator <= 0 || columnSeparator <= lineSeparator + 1) {
     return null;
   }
 
-  const line = Number.parseInt(coordinates[2] ?? "", 10);
-  const column = Number.parseInt(coordinates[3] ?? "", 10);
-  if (!Number.isSafeInteger(line) || !Number.isSafeInteger(column)) {
+  const lineText = location.slice(lineSeparator + 1, columnSeparator);
+  const columnText = location.slice(columnSeparator + 1);
+  if (!/^\d+$/.test(lineText) || !/^\d+$/.test(columnText)) {
+    return null;
+  }
+
+  const line = Number.parseInt(lineText, 10);
+  const column = Number.parseInt(columnText, 10);
+  if (
+    !Number.isSafeInteger(line) ||
+    !Number.isSafeInteger(column) ||
+    line < 1
+  ) {
     return null;
   }
 
   const { file, origin } = getSanitizedFile(
-    coordinates[1] ?? "unknown",
+    location.slice(0, lineSeparator),
     firstPartyHostname
   );
 
