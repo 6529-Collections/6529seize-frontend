@@ -22,6 +22,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterAnonymousUnsafeEvalCspError,
+  shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
@@ -198,6 +199,11 @@ function shouldFilterEvent(
   // Keep all cyclic JSON timer failures while origin diagnostics are active.
   // Generic Sentry/WKWebView frames do not prove third-party ownership, so
   // retaining only the sampled diagnostic subset would hide genuine app errors.
+
+  if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
+    return true;
+  }
+
   if (shouldFilterRabbyMobileRainbowKitNotFoundError(event, hint)) {
     return true;
   }

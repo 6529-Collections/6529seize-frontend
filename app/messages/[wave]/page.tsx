@@ -15,6 +15,10 @@ import {
   type WavesSearchParams,
 } from "@/app/waves/waves-page.shared";
 import MessagesPageClient from "../page.client";
+import WaveServerFeedSeed, {
+  WaveServerFeedSeedGate,
+} from "@/components/waves/WaveServerFeedSeed";
+import { fetchServerWaveFeedSeed } from "@/app/waves/wave-feed-seed.server";
 
 export const metadata = getAppMetadata({
   title: "Messages | Brain",
@@ -28,8 +32,7 @@ export default async function MessageWavePage({
   readonly params: Promise<{ wave: string }>;
   readonly searchParams: Promise<WavesSearchParams>;
 }) {
-  const { wave } = await params;
-  const resolvedParams = await searchParams;
+  const [{ wave }, resolvedParams] = await Promise.all([params, searchParams]);
   const context = await fetchWaveContext(wave);
 
   if (context.wave && !isApiWaveDirectMessage(context.wave)) {
@@ -46,12 +49,34 @@ export default async function MessageWavePage({
   if (context.wave) {
     queryClient.setQueryData(getWaveQueryKey(wave), context.wave);
   }
+  const initialFeedPromise = context.wave
+    ? fetchServerWaveFeedSeed({
+        headers: context.headers,
+        routeFamily: "/messages/[wave]",
+        waveId: wave,
+      })
+    : null;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={null}>
-        <MessagesPageClient />
-      </Suspense>
+      {initialFeedPromise && context.wave ? (
+        <WaveServerFeedSeedGate waveId={wave}>
+          <Suspense fallback={null}>
+            <WaveServerFeedSeed
+              promise={initialFeedPromise}
+              wave={context.wave}
+              waveId={wave}
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <MessagesPageClient />
+          </Suspense>
+        </WaveServerFeedSeedGate>
+      ) : (
+        <Suspense fallback={null}>
+          <MessagesPageClient />
+        </Suspense>
+      )}
     </HydrationBoundary>
   );
 }
