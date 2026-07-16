@@ -16,6 +16,8 @@ describe("instrumentation-client", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const indexedDBUserDeleteMessage =
+    "Database deleted by request of the user";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
@@ -61,8 +63,6 @@ describe("instrumentation-client", () => {
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
     "auto.browser.browserapierrors.setTimeout";
-  const rabbyMobileUserAgent =
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 Mobile/15E148";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
@@ -71,6 +71,7 @@ describe("instrumentation-client", () => {
   };
 
   type BeforeSendResult = {
+    level?: string | undefined;
     tags?: Record<string, unknown> | undefined;
     fingerprint?: string[] | undefined;
     exception?:
@@ -115,6 +116,54 @@ describe("instrumentation-client", () => {
       extra?: Record<string, unknown>;
     };
   };
+
+  const createUnhandledRejectionEvent = (message: string) => ({
+    level: "error",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: message,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+        },
+      ],
+    },
+  });
+
+  const createAppleWebKitSortedTrackListEvent = (
+    frames: Array<Record<string, unknown>> = [
+      {
+        filename: "[native code]",
+        abs_path: "[native code]",
+        function: "sortedTrackListForMenu",
+      },
+    ]
+  ) => ({
+    transaction: "/notifications",
+    contexts: {
+      browser: {
+        name: "Apple Mail",
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: "Type error",
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+  });
 
   const createSentryRouteParameterizationEvent = (
     frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame],
@@ -214,27 +263,36 @@ describe("instrumentation-client", () => {
     },
   ];
 
+  const createObservedRabbyRainbowKitRawFrames = () => [
+    {
+      filename: "app:///_next/static/chunks/observed-rabby-webview.js",
+      abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
+      function: "n",
+      in_app: true,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "Promise",
+      in_app: true,
+    },
+  ];
+
   const createRabbyMobileRainbowKitNotFoundEvent = (
     overrides: Record<string, unknown> = {}
   ) => ({
     event_id: "rabby-mobile-rainbowkit-not-found",
-    request: {
-      headers: {
-        "User-Agent": rabbyMobileUserAgent,
-      },
-    },
     exception: {
       values: [
         {
           type: "Error",
           value: rainbowKitNotFoundMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
           stacktrace: {
-            frames: [
-              {
-                filename: "https://static.rabby.io/mobile-shell.js",
-                in_app: false,
-              },
-            ],
+            frames: createObservedRabbyRainbowKitRawFrames(),
           },
         },
       ],
@@ -248,6 +306,48 @@ describe("instrumentation-client", () => {
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it.each([
+    {
+      description: "raw WebKit message",
+      message: indexedDBUserDeleteMessage,
+    },
+    {
+      description: "Sentry-prefixed WebKit value",
+      message: `UnknownError: ${indexedDBUserDeleteMessage}`,
+    },
+  ])(
+    "classifies the $description as a handled IndexedDB warning",
+    ({ message }) => {
+      const beforeSend = loadBeforeSend();
+
+      const result = beforeSend(createUnhandledRejectionEvent(message));
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          level: "warning",
+          tags: expect.objectContaining({
+            errorType: "indexeddb",
+            handled: true,
+          }),
+          fingerprint: ["indexeddb-connection-lost"],
+        })
+      );
+    }
+  );
+
+  it.each([
+    "UnknownError: Database deleted by request of the administrator",
+    "UnknownError: Database deleted by request of the user during migration",
+  ])("preserves the near-miss database failure %s", (message) => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createUnhandledRejectionEvent(message));
+
+    expect(result).toEqual(expect.objectContaining({ level: "error" }));
+    expect(result?.tags).toBeUndefined();
+    expect(result?.fingerprint).toBeUndefined();
   });
 
   it("drops disconnected wallet-provider object promise rejections", () => {
@@ -986,16 +1086,45 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops Sentry route parameterization cyclic JSON errors", () => {
+  it("drops the exact Apple WebKit native track-list TypeError", () => {
     const beforeSend = loadBeforeSend();
-    const event = createSentryRouteParameterizationEvent();
+    const event = createAppleWebKitSortedTrackListEvent();
 
     const result = beforeSend(event);
 
     expect(result).toBeNull();
   });
 
-  it("drops iOS WKWebView route parameterization cyclic JSON errors without app context", () => {
+  it("keeps the Apple WebKit-shaped TypeError when an application frame is present", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createAppleWebKitSortedTrackListEvent([
+      {
+        filename: "[native code]",
+        abs_path: "[native code]",
+        function: "sortedTrackListForMenu",
+      },
+      {
+        filename: "webpack-internal:///(app-pages-browser)/./app/page.tsx",
+        function: "renderPage",
+        in_app: true,
+      },
+    ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps cyclic JSON timer errors for origin diagnostics", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps iOS WKWebView cyclic JSON timer errors without app context", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent(
       [
@@ -1041,7 +1170,7 @@ describe("instrumentation-client", () => {
 
     const result = beforeSend(event);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
   it("keeps route parameterization cyclic JSON errors without MetaMaskMobile WKWebView context", () => {
@@ -1111,12 +1240,12 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops the raw CP route-parameterization event before browser context enrichment", () => {
+  it("keeps the raw CP event before browser context enrichment", () => {
     const beforeSend = loadBeforeSend();
 
     const result = beforeSend(noiseFilterFixtures.cp);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
   it("drops the raw B9 Twitter CONFIG event with a Sentry wrapper frame", () => {
@@ -1261,7 +1390,7 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops exact RabbyMobile RainbowKit lookup errors with no app frames", () => {
+  it("drops the observed raw RainbowKit lookup error without wallet context", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent();
 
@@ -1278,6 +1407,10 @@ describe("instrumentation-client", () => {
           {
             type: "Error",
             value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
                 {
@@ -1297,14 +1430,35 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps exact RainbowKit lookup errors outside RabbyMobile", () => {
+  it("keeps exact RainbowKit lookup errors without the observed raw frames", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent({
-      request: {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile Safari/605.1.15",
-        },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                  in_app: false,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
       },
     });
 
@@ -1313,7 +1467,7 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps non-exact RainbowKit lookup messages in RabbyMobile", () => {
+  it("keeps non-exact RainbowKit lookup messages", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent({
       exception: {
@@ -1321,8 +1475,12 @@ describe("instrumentation-client", () => {
           {
             type: "Error",
             value: "Error: not found rainbowkit",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
-              frames: [],
+              frames: createObservedRabbyRainbowKitRawFrames(),
             },
           },
         ],

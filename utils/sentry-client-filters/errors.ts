@@ -639,6 +639,37 @@ export function shouldFilterSentryRouteParameterizationError(
   );
 }
 
+export function shouldFilterAppleWebKitSortedTrackListTypeError(
+  event: SentryClientEvent
+): boolean {
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== "Type error" ||
+    value.mechanism?.type !== browserGlobalHandlerOnErrorMechanism ||
+    value.mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  const frames = value.stacktrace?.frames;
+  if (!Array.isArray(frames) || frames.length !== 1) {
+    return false;
+  }
+
+  const [frame] = frames;
+  return (
+    frame?.filename === "[native code]" &&
+    (frame.abs_path === undefined || frame.abs_path === "[native code]") &&
+    frame.function === "sortedTrackListForMenu"
+  );
+}
+
 export function shouldFilterInjectedWasmCspUnsafeEval(
   event: SentryClientEvent,
   hint?: SentryEventHint

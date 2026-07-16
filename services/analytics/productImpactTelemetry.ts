@@ -53,7 +53,8 @@ type WaveFeedLoadSource =
   | "background_sync"
   | "cache"
   | "initial_visible"
-  | "native_initial_backfill";
+  | "native_initial_backfill"
+  | "server_initial";
 
 interface WaveFeedTelemetryBase {
   readonly durationMs?: number | undefined;

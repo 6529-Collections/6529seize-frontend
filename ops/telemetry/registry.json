@@ -390,6 +390,20 @@
       "reviewBy": "2026-10-13"
     },
     {
+      "name": "waves.initial_feed.fetch",
+      "kind": "span",
+      "question": "How long does the request-scoped initial Wave feed server path take?",
+      "owner": "sentry",
+      "producer": "app/waves/wave-feed-seed.server.ts",
+      "destinations": ["sentry:owner"],
+      "sampling": "only with a sampled parent Sentry request trace",
+      "privacy": "fixed route/data path and anonymous/authenticated cohort only; request count is omitted because multipart hydration can add nested requests",
+      "externalUsage": "new; none known",
+      "lifecycle": "temporary",
+      "replacement": "Remove after the server-seeded feed path is evaluated and a review records the decision",
+      "reviewBy": "2026-10-15"
+    },
+    {
       "name": "reaction.*",
       "kind": "breadcrumb-family",
       "question": "What code-level sequence preceded a reaction failure or reconciliation anomaly?",

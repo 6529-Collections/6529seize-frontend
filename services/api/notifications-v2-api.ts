@@ -48,8 +48,7 @@ const toStringValue = (value: string | number | undefined): string =>
 
 const getPollOptionsValue = (
   context: ApiNotificationAdditionalContextV2
-): unknown =>
-  (context as { readonly poll_options?: unknown }).poll_options;
+): unknown => (context as { readonly poll_options?: unknown }).poll_options;
 
 const isNotificationPollVoteOption = (
   value: unknown
@@ -450,6 +449,7 @@ export const fetchNotificationsV2 = async ({
     params: buildNotificationsV2Params({ limit, cause, pageParam }),
     signal,
     headers,
+    cache: "no-store",
   });
 
   return mapNotificationsV2Response(response);

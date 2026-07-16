@@ -526,6 +526,32 @@ describe("WaveDropsAll", () => {
       });
     });
 
+    it("uses a tighter render window only for direct messages", () => {
+      const waveHelpers = require("@/helpers/waves/wave.helpers");
+      const directMessageSpy = jest
+        .spyOn(waveHelpers, "isWaveDirectMessage")
+        .mockImplementation((waveId: string) => waveId === "dm-wave");
+      const mockDrops = [createMockDrop()];
+
+      try {
+        setupMocks({
+          waveMessages: { drops: mockDrops },
+        });
+
+        const renderResult = renderComponent({ waveId: "dm-wave" });
+
+        expect(dropsProps.virtualScrollRootMargin).toBe("1200px 0px");
+
+        renderResult.rerender(
+          <WaveDropsAll {...renderResult.props} waveId="public-wave" />
+        );
+
+        expect(dropsProps.virtualScrollRootMargin).toBeUndefined();
+      } finally {
+        directMessageSpy.mockRestore();
+      }
+    });
+
     it("disables inserted boosted drops when the local preference is hidden", () => {
       localStorage.setItem(
         BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY,

@@ -231,7 +231,11 @@ function WebSidebarUser({
         >
           <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
             <div
-              className={`tw-relative tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl ${connectionIndicator.avatarClassName}`}
+              className={`tw-relative tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-transition-[box-shadow,filter] tw-duration-200 tw-ease-out ${connectionIndicator.avatarClassName} ${
+                isCollapsed
+                  ? "desktop-hover:group-hover/user:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_0_14px_rgba(255,255,255,0.06)] desktop-hover:group-hover/user:tw-brightness-[1.05]"
+                  : ""
+              }`}
               title={connectionIndicator.title}
             >
               <img
