@@ -73,6 +73,13 @@ jest.mock("@/contexts/wave/hooks/useWaveMessagesStore", () => ({
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
     optimisticUpdateDrop: jest.fn(),
+    hasServerFeedSeed: jest.fn(() => false),
+    registerPendingServerFeedSeed: jest.fn(),
+    clearPendingServerFeedSeed: jest.fn(),
+    replacePendingServerFeedSeed: jest.fn(),
+    expireServerFeedSeed: jest.fn(),
+    applyServerFeedSeed: jest.fn(),
+    completeInitialServerFeedRegistration: jest.fn(),
   })),
 }));
 
@@ -118,6 +125,9 @@ const useEnhancedWavesListCoreMock =
 const markMobileLaunchStepMock =
   require("@/utils/monitoring/mobileLaunchTiming")
     .markMobileLaunchStep as jest.Mock;
+const useWebsocketStatusMock =
+  require("@/services/websocket/useWebSocketMessage")
+    .useWebsocketStatus as jest.Mock;
 
 const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
   Object.defineProperty(document, "visibilityState", {
@@ -166,6 +176,7 @@ describe("MyStreamProvider resume sync", () => {
     jest.clearAllMocks();
     setDocumentVisibilityState("visible");
     useCapacitorMock.mockReturnValue({ isCapacitor: false, isActive: true });
+    useWebsocketStatusMock.mockReturnValue("disconnected");
     usePathnameMock.mockReturnValue("/waves");
     useWaveByIdMock.mockReturnValue({
       wave: null,
@@ -256,6 +267,62 @@ describe("MyStreamProvider resume sync", () => {
     expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
     expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
   });
+
+  it("syncs the active wave on the first websocket connection and reconnect", () => {
+    const { rerender } = render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+    mockRegisterWave.mockClear();
+    mainRefetch.mockClear();
+
+    useWebsocketStatusMock.mockReturnValue("connected");
+    rerender(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true, {
+      skipInitialBackfill: undefined,
+    });
+    expect(mainRefetch).toHaveBeenCalledTimes(1);
+
+    useWebsocketStatusMock.mockReturnValue("disconnected");
+    rerender(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+    useWebsocketStatusMock.mockReturnValue("connected");
+    rerender(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockRegisterWave).toHaveBeenCalledTimes(2);
+    expect(mockRegisterWave).toHaveBeenNthCalledWith(2, "wave-1", true, {
+      skipInitialBackfill: undefined,
+    });
+    expect(mainRefetch).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(["/waves/wave-1", "/messages/wave-1"])(
+    "leaves the initial detail registration to the gated page on %s",
+    (pathname) => {
+      usePathnameMock.mockReturnValue(pathname);
+
+      render(
+        <MyStreamProvider>
+          <div />
+        </MyStreamProvider>
+      );
+
+      expect(mockRegisterWave).not.toHaveBeenCalled();
+    }
+  );
 
   it("defers the main Waves list on native wave detail until it is requested", () => {
     useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });

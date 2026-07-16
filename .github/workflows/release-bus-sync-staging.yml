@@ -1,0 +1,96 @@
+name: Release Bus - Sync Main To Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_train_id: { type: string, required: true }
+      release_train_revision: { type: string, required: true }
+      operation_key: { type: string, required: true }
+      main_sha: { type: string, required: true }
+      expected_sha: { type: string, required: true }
+
+permissions:
+  contents: read
+
+run-name: Sync frontend staging ${{ inputs.release_train_id }} [${{ inputs.operation_key }}]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate immutable inputs
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          MAIN_SHA: ${{ inputs.main_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$MAIN_SHA" = "$EXPECTED_SHA"
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+      - name: Claim the idempotent staging sync
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          payload="$(jq -n \
+            --arg train_id "$TRAIN_ID" \
+            --arg operation_key "$OPERATION_KEY" \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg expected_sha "$EXPECTED_SHA" \
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+      - name: Create scoped GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        with:
+          app-id: ${{ vars.RELEASE_BUS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BUS_GITHUB_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: 6529seize-frontend
+          permission-contents: write
+      - name: Check out staging
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: 1a-staging
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Merge exact main into staging
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          MAIN_SHA: ${{ inputs.main_sha }}
+          RELEASE_BUS_GIT_NAME: ${{ vars.RELEASE_BUS_GIT_NAME || '6529 Release Bus' }}
+          RELEASE_BUS_GIT_EMAIL: ${{ vars.RELEASE_BUS_GIT_EMAIL || 'release-bus@users.noreply.github.com' }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$MAIN_SHA" = "$EXPECTED_SHA"
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          git fetch --no-tags origin "$MAIN_SHA"
+          if git merge-base --is-ancestor "$MAIN_SHA" HEAD; then exit 0; fi
+          git config user.name "$RELEASE_BUS_GIT_NAME"
+          git config user.email "$RELEASE_BUS_GIT_EMAIL"
+          git merge --no-ff --no-commit "$MAIN_SHA"
+          git commit -s \
+            -m "Release-Bus-Train: $TRAIN_ID" \
+            -m "Sync main after release train $TRAIN_ID" \
+            -m "Release-Bus-Revision: $TRAIN_REVISION"
+          git push origin HEAD:refs/heads/1a-staging
