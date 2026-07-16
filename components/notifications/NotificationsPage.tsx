@@ -30,7 +30,6 @@ export default function NotificationsPage() {
     return (
       <div className="tailwind-scope tw-flex tw-h-full tw-min-h-[50vh] tw-items-center tw-justify-center tw-bg-black">
         <output
-          role="status"
           aria-label="Loading notifications"
           aria-live="polite"
         >
