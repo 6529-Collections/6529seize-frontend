@@ -66,6 +66,7 @@
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
+        "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
         "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
       ],
       "canonical_path": "/waves",
@@ -677,6 +678,7 @@
       "facts": [
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
+        "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],

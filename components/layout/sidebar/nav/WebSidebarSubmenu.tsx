@@ -8,6 +8,8 @@ import {
   useMemo,
   useRef,
   useState,
+  type FocusEvent,
+  type PointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import type {
@@ -20,6 +22,9 @@ interface WebSidebarSubmenuProps {
   readonly section: SidebarSection;
   readonly pathname: string | null;
   readonly onClose: () => void;
+  readonly onPointerEnter?: (() => void) | undefined;
+  readonly onPointerLeave?: (() => void) | undefined;
+  readonly focusFirstItem?: boolean | undefined;
   readonly leftOffset?: number | undefined;
   readonly anchorTop?: number | undefined;
   readonly anchorHeight?: number | undefined;
@@ -30,6 +35,9 @@ function WebSidebarSubmenu({
   section,
   pathname,
   onClose,
+  onPointerEnter,
+  onPointerLeave,
+  focusFirstItem = false,
   leftOffset,
   anchorTop,
   anchorHeight,
@@ -58,9 +66,45 @@ function WebSidebarSubmenu({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        triggerElement?.focus();
+        onClose();
+      }
     },
-    [onClose]
+    [onClose, triggerElement]
+  );
+
+  const handlePointerLeave = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (event.pointerType !== "mouse") {
+        return;
+      }
+
+      const activeElement = browserDocument?.activeElement;
+      if (activeElement && containerRef.current?.contains(activeElement)) {
+        return;
+      }
+
+      onPointerLeave?.();
+    },
+    [browserDocument, onPointerLeave]
+  );
+
+  const handleBlur = useCallback(
+    (event: FocusEvent<HTMLDivElement>) => {
+      const nextTarget = event.relatedTarget;
+      if (
+        nextTarget instanceof Node &&
+        (containerRef.current?.contains(nextTarget) ||
+          triggerElement?.contains(nextTarget))
+      ) {
+        return;
+      }
+
+      onClose();
+    },
+    [onClose, triggerElement]
   );
 
   const handleClickOutside = useCallback(
@@ -121,6 +165,16 @@ function WebSidebarSubmenu({
     }
   }, [browserWindow, anchorTop, anchorHeight, section.key, totalItemCount]);
 
+  useEffect(() => {
+    if (!focusFirstItem) {
+      return;
+    }
+
+    containerRef.current
+      ?.querySelector<HTMLElement>("[role='menuitem']")
+      ?.focus();
+  }, [focusFirstItem, section.key]);
+
   if (browserDocument === undefined) {
     return null;
   }
@@ -164,16 +218,20 @@ function WebSidebarSubmenu({
   return createPortal(
     <div
       ref={containerRef}
-      className="tailwind-scope tw-fixed tw-z-[95] tw-flex tw-max-h-[65vh] tw-w-64 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)]"
+      id={`section-${section.key}`}
+      className="tailwind-scope tw-fixed tw-z-[95] tw-flex tw-max-h-[65vh] tw-w-64 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] motion-safe:tw-animate-sidebar-flyout-in motion-reduce:tw-animate-none"
       style={{
         left: leftStyle,
         top: topStyle,
       }}
       role="menu"
       aria-label={`${section.name} sub-navigation`}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={handlePointerLeave}
+      onBlur={handleBlur}
     >
       <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-px-6 tw-pb-2 tw-pt-4">
-        <h3 className="tw-text-base tw-font-semibold tw-text-iron-50">
+        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           {section.name}
         </h3>
       </div>

@@ -12,6 +12,15 @@ interface WebSidebarExpandableProps {
   readonly section: SidebarSection;
   readonly expanded: boolean;
   readonly onToggle: (e?: React.MouseEvent) => void;
+  readonly onPointerEnter?:
+    | React.PointerEventHandler<HTMLButtonElement>
+    | undefined;
+  readonly onPointerLeave?:
+    | React.PointerEventHandler<HTMLButtonElement>
+    | undefined;
+  readonly onKeyDown?:
+    | React.KeyboardEventHandler<HTMLButtonElement>
+    | undefined;
   readonly collapsed: boolean;
   readonly pathname: string | null;
   readonly "data-section"?: string | undefined;
@@ -21,6 +30,9 @@ function WebSidebarExpandable({
   section,
   expanded,
   onToggle,
+  onPointerEnter,
+  onPointerLeave,
+  onKeyDown,
   collapsed,
   pathname,
   "data-section": dataSection,
@@ -64,12 +76,16 @@ function WebSidebarExpandable({
     <>
       <WebSidebarNavItem
         onClick={(e) => onToggle(e)}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+        onKeyDown={onKeyDown}
         icon={section.icon}
         label={section.name}
         active={hasActiveItem}
         collapsed={collapsed}
         ariaExpanded={expanded}
         ariaControls={panelId}
+        ariaHasPopup={collapsed ? "menu" : undefined}
         data-section={dataSection}
         rightSlot={
           !collapsed && (
