@@ -3,8 +3,6 @@
 import { useRef, useState, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
-import CreateDropStormParts from "./CreateDropStormParts";
-import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
 import CreateCurationDropContent from "./CreateCurationDropContent";
 import QuorumProposalDropModal from "./quorum/QuorumProposalDropModal";
@@ -39,7 +37,6 @@ import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
-import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -82,8 +79,6 @@ export interface DropMutationBody {
   readonly onSuccess?: (() => void) | undefined;
   readonly onError?: ((error: unknown) => boolean | void) | undefined;
 }
-
-const ANIMATION_DURATION = 0.3;
 
 interface SlowModeChatReservation {
   readonly id: number;
@@ -198,8 +193,6 @@ export default function CreateDrop({
   const isQuorumProposalModalOpen =
     isQuorumProposalDropMode &&
     dismissedQuorumProposalScope !== quorumProposalScopeKey;
-  const canMentionAll =
-    wave.wave.authenticated_user_eligible_for_admin === true;
   const canUseCurationUrlSubmit =
     fixedDropMode === DropMode.CHAT
       ? onSubmitCurationUrl !== undefined && canSubmitCurationUrl !== false
@@ -315,28 +308,6 @@ export default function CreateDrop({
       onDropModeChange(true);
     }
   }, [isDropMode, onDropModeChange]);
-
-  const onRemovePart = useCallback(
-    (partIndex: number) => {
-      setDrop((prevDrop) => {
-        if (!prevDrop) return null;
-        const newParts = prevDrop.parts.filter((_, i) => i !== partIndex);
-        return {
-          ...prevDrop,
-          parts: newParts,
-          referenced_nfts: prevDrop.referenced_nfts,
-          mentioned_users: prevDrop.mentioned_users,
-          mentioned_groups: getMentionedGroupsFromParts(
-            newParts,
-            canMentionAll
-          ),
-          mentioned_waves: prevDrop.mentioned_waves ?? [],
-          metadata: prevDrop.metadata,
-        };
-      });
-    },
-    [canMentionAll]
-  );
 
   const slowModeChatStateByWaveRef = useRef<Map<string, SlowModeChatWaveState>>(
     new Map()
@@ -765,29 +736,5 @@ export default function CreateDrop({
     );
   }
 
-  return (
-    <>
-      <AnimatePresence>
-        {isStormMode && !isCurationDropMode && !isQuorumProposalDropMode && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: ANIMATION_DURATION }}
-          >
-            <CreateDropStormParts
-              parts={drop?.parts ?? []}
-              mentionedUsers={drop?.mentioned_users ?? []}
-              mentionedGroups={drop?.mentioned_groups ?? []}
-              mentionedWaves={drop?.mentioned_waves ?? []}
-              referencedNfts={drop?.referenced_nfts ?? []}
-              onRemovePart={onRemovePart}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {dropComposerContent}
-    </>
-  );
+  return dropComposerContent;
 }
