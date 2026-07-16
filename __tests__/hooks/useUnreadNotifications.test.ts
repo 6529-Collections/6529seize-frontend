@@ -124,15 +124,41 @@ describe("useUnreadNotifications", () => {
     expect(queryOptions.refetchOnReconnect(transientQuery)).toBe(true);
   });
 
-  it("uses only a five-minute reconciliation poll when realtime is synced", () => {
+  it("uses only a five-minute reconciliation poll when the active profile is synced", () => {
     setNotificationRealtimeState(true, ["profile-1"]);
     useQueryMock.mockReturnValue({ data: undefined });
 
-    renderHook(() => useUnreadNotifications("bob"));
+    renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
     expect(queryOptions.refetchInterval({ state: { error: undefined } })).toBe(
       300000
+    );
+  });
+
+  it("keeps fallback polling when only another profile is synced", () => {
+    setNotificationRealtimeState(true, ["profile-2"]);
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    expect(queryOptions.refetchInterval({ state: { error: undefined } })).toBe(
+      30000
+    );
+  });
+
+  it("bypasses browser caching when fetching the unread count", async () => {
+    commonApiFetchMock.mockResolvedValue({ unread_count: 0 });
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    await queryOptions.queryFn();
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ cache: "no-store" })
     );
   });
 

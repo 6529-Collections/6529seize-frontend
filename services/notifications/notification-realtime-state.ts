@@ -31,7 +31,10 @@ export const setNotificationRealtimeState = (
   profileIds: readonly string[] = []
 ): void => {
   const syncedProfileIds = connected
-    ? Array.from(new Set(profileIds.filter((profileId) => !!profileId))).sort()
+    ? Array.from(new Set(profileIds.filter((profileId) => !!profileId))).sort(
+        (leftProfileId, rightProfileId) =>
+          leftProfileId.localeCompare(rightProfileId)
+      )
     : [];
   if (
     state.connected === connected &&

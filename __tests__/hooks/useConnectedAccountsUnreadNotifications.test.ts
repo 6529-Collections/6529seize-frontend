@@ -80,10 +80,24 @@ describe("useConnectedAccountsUnreadNotifications", () => {
           profileId: "profile-1",
           profileHandle: "alice",
         },
+        {
+          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          refreshToken: "refresh-token-2",
+          role: null,
+          jwt: "jwt-token-2",
+          profileId: "profile-2",
+          profileHandle: "bob",
+        },
       ])
     );
 
-    expect(useQueryMock.mock.calls[0]?.[0].refetchInterval).toBe(300000);
+    expect(useQueryMock.mock.calls.at(-1)?.[0].refetchInterval).toBe(15000);
+
+    act(() => {
+      setNotificationRealtimeState(true, ["profile-1", "profile-2"]);
+    });
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].refetchInterval).toBe(300000);
   });
 
   it("does not enable polling for accounts without usable JWTs", () => {
