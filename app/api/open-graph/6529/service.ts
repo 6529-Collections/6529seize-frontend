@@ -36,7 +36,6 @@ import { mainnet } from "viem/chains";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
 const PUBLIC_API_BASE = "https://api.6529.io";
-const LIVE_MINT_FALLBACK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const MAINNET_RPC_TIMEOUT_MS = 5_000;
 const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
 const NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS = 5;
@@ -62,6 +61,7 @@ type ApiPage<T> = {
 type NftRecord = Partial<BaseNFT> &
   Partial<NFT> &
   Partial<LabNFT> & {
+    readonly edition_size_floor?: number | null | undefined;
     readonly owner?: string | null | undefined;
     readonly owner_display?: string | null | undefined;
   };
@@ -70,15 +70,9 @@ type MemesRecord = NftRecord & Partial<ApiMemesExtendedData>;
 type LabRecord = NftRecord & Partial<LabExtendedData>;
 
 type MintingClaimRecord = {
-  readonly edition_size?: number | null | undefined;
   readonly name?: string | null | undefined;
   readonly image_url?: string | null | undefined;
   readonly attributes?: readonly AttributeRecord[] | null | undefined;
-};
-
-type MemesMintStatRecord = {
-  readonly mint_date?: string | null | undefined;
-  readonly total_count?: number | null | undefined;
 };
 
 type AttributeRecord = {
@@ -105,6 +99,7 @@ type PreviewBuildInput = {
   readonly people?: readonly SeizeCollectionPreviewPerson[] | undefined;
   readonly facts?: readonly SeizeCollectionPreviewFact[] | undefined;
   readonly traits?: readonly SeizeCollectionPreviewTrait[] | undefined;
+  readonly liveMint?: SeizeCollectionLinkPreview["liveMint"];
   readonly imageUrl?: string | null | undefined;
 };
 
@@ -600,6 +595,7 @@ function buildPreview(input: PreviewBuildInput): SeizeCollectionLinkPreview {
     people: input.people ?? [],
     facts: input.facts ?? [],
     traits: input.traits ?? [],
+    liveMint: input.liveMint ?? null,
   };
 }
 
@@ -710,46 +706,6 @@ async function resolveIdentityProfile(
   );
 }
 
-function shouldUseExtendedEditionSize(
-  nft: NftRecord,
-  extendedEditionSize: number | undefined
-): boolean {
-  if (extendedEditionSize === undefined) {
-    return false;
-  }
-
-  const supply = readNumber(nft.supply);
-  const mintDate = new Date(readString(nft.mint_date) ?? "");
-  const looksLikeFreshLiveMintCount =
-    supply !== undefined &&
-    extendedEditionSize === supply &&
-    !Number.isNaN(mintDate.getTime()) &&
-    Date.now() - mintDate.getTime() < LIVE_MINT_FALLBACK_WINDOW_MS;
-
-  return !looksLikeFreshLiveMintCount;
-}
-
-function shouldUseMintStatEditionSize(
-  nft: NftRecord,
-  mintStat: MemesMintStatRecord | null | undefined,
-  mintStatEditionSize: number | undefined
-): boolean {
-  if (mintStatEditionSize === undefined) {
-    return false;
-  }
-
-  const supply = readNumber(nft.supply);
-  const mintDate = new Date(
-    readString(mintStat?.mint_date) ?? readString(nft.mint_date) ?? ""
-  );
-  const looksLikeFreshLiveMintCount =
-    !Number.isNaN(mintDate.getTime()) &&
-    Date.now() - mintDate.getTime() < LIVE_MINT_FALLBACK_WINDOW_MS &&
-    (supply === undefined || mintStatEditionSize <= supply);
-
-  return !looksLikeFreshLiveMintCount;
-}
-
 function readMemeSeason(
   nft: MemesRecord,
   metadata: Record<string, unknown> | null
@@ -758,6 +714,29 @@ function readMemeSeason(
     nft.season,
     readAttributeValue(readAttributes(metadata), "Type - Season")
   );
+}
+
+function readActualMemeEditionSize(
+  source: MemesRecord,
+  extended: MemesRecord | null
+): number | undefined {
+  return firstPositiveNumber(extended?.edition_size, source.supply);
+}
+
+function readFinalizedMemeEditionSize(
+  source: MemesRecord,
+  extended: MemesRecord | null
+): number | undefined {
+  const actualEditionSize = readActualMemeEditionSize(source, extended);
+  const editionSizeFloor = readPositiveNumber(source.edition_size_floor);
+
+  if (actualEditionSize === undefined) {
+    return editionSizeFloor;
+  }
+  if (editionSizeFloor === undefined) {
+    return actualEditionSize;
+  }
+  return Math.max(actualEditionSize, editionSizeFloor);
 }
 
 function readManifoldClaimTotalMax(data: unknown): number | undefined {
@@ -799,7 +778,7 @@ async function fetchTheMemesPreview(
   requestUrl: URL,
   context?: ApiContext
 ): Promise<SeizeCollectionLinkPreview> {
-  const [nft, extended, claim, mintStat] = await Promise.all([
+  const [nft, extended, claim] = await Promise.all([
     fetchFirstPageItem<MemesRecord>(
       "nfts",
       { contract: MEMES_CONTRACT, id },
@@ -808,11 +787,6 @@ async function fetchTheMemesPreview(
     fetchFirstPageItem<MemesRecord>("memes_extended_data", { id }, context),
     fetchOptionalApiJson<MintingClaimRecord>(
       `minting-claims/${encodeURIComponent(MEMES_CONTRACT)}/claims/${id}`,
-      undefined,
-      context
-    ),
-    fetchOptionalApiJson<MemesMintStatRecord>(
-      `memes-mint-stats/${id}`,
       undefined,
       context
     ),
@@ -834,34 +808,12 @@ async function fetchTheMemesPreview(
     source.name,
     `The Memes #${id}`
   )!;
-  const claimEditionSize = readPositiveNumber(claim?.edition_size);
-  const mintStatEditionSize = readPositiveNumber(mintStat?.total_count);
-  const guardedMintStatEditionSize = shouldUseMintStatEditionSize(
-    source,
-    mintStat,
-    mintStatEditionSize
-  )
-    ? mintStatEditionSize
-    : undefined;
-  const extendedEditionSize = readPositiveNumber(extended?.edition_size);
-  const fallbackEditionSize = shouldUseExtendedEditionSize(
-    source,
-    extendedEditionSize
-  )
-    ? extendedEditionSize
-    : undefined;
-  const shouldFetchManifoldEditionSize =
-    claimEditionSize === undefined &&
-    guardedMintStatEditionSize === undefined &&
-    fallbackEditionSize === undefined;
-  const manifoldEditionSize = shouldFetchManifoldEditionSize
+  const isLiveMeme = extended?.recorded_in_tdh === false;
+  const manifoldEditionSize = isLiveMeme
     ? await fetchTheMemesManifoldEditionSize(id)
     : undefined;
-  const editionSize =
-    claimEditionSize ??
-    manifoldEditionSize ??
-    guardedMintStatEditionSize ??
-    fallbackEditionSize;
+  const actualEditionSize = readActualMemeEditionSize(source, extended);
+  const finalizedEditionSize = readFinalizedMemeEditionSize(source, extended);
   const season = readMemeSeason(source, metadata);
   const tdhRateValue = readTheMemesTdhRateValue(
     source.hodl_rate,
@@ -889,7 +841,9 @@ async function fetchTheMemesPreview(
     facts: compactFacts([
       createFact(
         "Edition size",
-        editionSize !== undefined ? formatInteger(editionSize) : undefined
+        !isLiveMeme && finalizedEditionSize !== undefined
+          ? formatInteger(finalizedEditionSize)
+          : undefined
       ),
       createFact("TDH rate", tdhRateValue),
       createFact(
@@ -898,6 +852,12 @@ async function fetchTheMemesPreview(
       ),
       createFact("Mint date", mintDate),
     ]),
+    liveMint: isLiveMeme
+      ? {
+          mintedCount: actualEditionSize,
+          maxCount: manifoldEditionSize,
+        }
+      : undefined,
     imageUrl: selectHttpsImageUrl(
       source.thumbnail,
       source.scaled,

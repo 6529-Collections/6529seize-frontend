@@ -580,7 +580,6 @@ jobs:
           CI_PIPELINES_TARGET_ENV: production
           CI_PIPELINES_STATUS: failure
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
-          CI_PIPELINES_DESCRIPTION: "- ${{ env.COMMIT_MESSAGE }}"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
         run: node scripts/notify-ci-wave.mjs
@@ -605,7 +604,6 @@ jobs:
           CI_PIPELINES_TARGET_ENV: production
           CI_PIPELINES_STATUS: success
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline complete"
-          CI_PIPELINES_DESCRIPTION: "- ${{ env.COMMIT_MESSAGE }}"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
           CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md

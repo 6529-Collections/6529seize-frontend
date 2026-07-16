@@ -114,6 +114,38 @@ describe("instrumentation-client", () => {
     };
   };
 
+  const createAppleWebKitSortedTrackListEvent = (
+    frames: Array<Record<string, unknown>> = [
+      {
+        filename: "[native code]",
+        abs_path: "[native code]",
+        function: "sortedTrackListForMenu",
+      },
+    ]
+  ) => ({
+    transaction: "/notifications",
+    contexts: {
+      browser: {
+        name: "Apple Mail",
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: "Type error",
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+  });
+
   const createSentryRouteParameterizationEvent = (
     frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame],
     overrides: Record<string, unknown> = {}
@@ -912,6 +944,35 @@ describe("instrumentation-client", () => {
         ],
       },
     };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("drops the exact Apple WebKit native track-list TypeError", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createAppleWebKitSortedTrackListEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Apple WebKit-shaped TypeError when an application frame is present", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createAppleWebKitSortedTrackListEvent([
+      {
+        filename: "[native code]",
+        abs_path: "[native code]",
+        function: "sortedTrackListForMenu",
+      },
+      {
+        filename: "webpack-internal:///(app-pages-browser)/./app/page.tsx",
+        function: "renderPage",
+        in_app: true,
+      },
+    ]);
 
     const result = beforeSend(event);
 
