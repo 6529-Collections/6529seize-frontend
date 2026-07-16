@@ -16,6 +16,8 @@ import type {
   SidebarNavItem,
   SidebarSection,
 } from "@/components/navigation/navTypes";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { isSidebarNavItemActive } from "./sidebarActive";
 
 interface WebSidebarSubmenuProps {
@@ -24,7 +26,7 @@ interface WebSidebarSubmenuProps {
   readonly onClose: () => void;
   readonly onPointerEnter?: (() => void) | undefined;
   readonly onPointerLeave?: (() => void) | undefined;
-  readonly focusFirstItem?: boolean | undefined;
+  readonly focusRequest?: number | undefined;
   readonly leftOffset?: number | undefined;
   readonly anchorTop?: number | undefined;
   readonly anchorHeight?: number | undefined;
@@ -37,7 +39,7 @@ function WebSidebarSubmenu({
   onClose,
   onPointerEnter,
   onPointerLeave,
-  focusFirstItem = false,
+  focusRequest = 0,
   leftOffset,
   anchorTop,
   anchorHeight,
@@ -70,9 +72,55 @@ function WebSidebarSubmenu({
         event.preventDefault();
         triggerElement?.focus();
         onClose();
+        return;
       }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const container = containerRef.current;
+      const links = Array.from(
+        container?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? []
+      );
+      const activeElement = browserDocument?.activeElement;
+      const isLeavingBackwards =
+        event.shiftKey && activeElement === links.at(0);
+      const isLeavingForwards =
+        !event.shiftKey && activeElement === links.at(-1);
+
+      if (!isLeavingBackwards && !isLeavingForwards) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (isLeavingBackwards) {
+        triggerElement?.focus();
+        onClose();
+        return;
+      }
+
+      const focusableElements = Array.from(
+        browserDocument?.querySelectorAll<HTMLElement>(
+          "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+        ) ?? []
+      ).filter(
+        (element) =>
+          !container?.contains(element) &&
+          !element.closest("[hidden], [inert]") &&
+          element.getAttribute("aria-hidden") !== "true"
+      );
+      const triggerIndex = triggerElement
+        ? focusableElements.indexOf(triggerElement)
+        : -1;
+      const nextFocusable =
+        triggerIndex >= 0 ? focusableElements.at(triggerIndex + 1) : null;
+
+      (nextFocusable ?? triggerElement)?.focus();
+      onClose();
     },
-    [onClose, triggerElement]
+    [browserDocument, onClose, triggerElement]
   );
 
   const handlePointerLeave = useCallback(
@@ -135,7 +183,9 @@ function WebSidebarSubmenu({
 
     browserWindow.addEventListener("keydown", handleKeyDown);
     browserDocument.addEventListener("mousedown", handleClickOutside);
-    browserDocument.addEventListener("touchstart", handleClickOutside);
+    browserDocument.addEventListener("touchstart", handleClickOutside, {
+      passive: true,
+    });
 
     return () => {
       browserWindow.removeEventListener("keydown", handleKeyDown);
@@ -166,23 +216,18 @@ function WebSidebarSubmenu({
   }, [browserWindow, anchorTop, anchorHeight, section.key, totalItemCount]);
 
   useEffect(() => {
-    if (!focusFirstItem) {
+    if (focusRequest === 0) {
       return;
     }
 
-    containerRef.current
-      ?.querySelector<HTMLElement>("[role='menuitem']")
-      ?.focus();
-  }, [focusFirstItem, section.key]);
+    containerRef.current?.querySelector<HTMLElement>("a[href]")?.focus();
+  }, [focusRequest, section.key]);
 
   if (browserDocument === undefined) {
     return null;
   }
 
   const portalTarget = browserDocument.body;
-  if (!portalTarget) {
-    return null;
-  }
 
   const leftStyle =
     leftOffset === undefined
@@ -207,7 +252,6 @@ function WebSidebarSubmenu({
             : "tw-font-medium tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700/50 desktop-hover:hover:tw-text-iron-50"
         }`}
         aria-current={active ? "page" : undefined}
-        role="menuitem"
         onClick={onClose}
       >
         <span className="tw-truncate">{item.name}</span>
@@ -218,14 +262,16 @@ function WebSidebarSubmenu({
   return createPortal(
     <div
       ref={containerRef}
-      id={`section-${section.key}`}
+      id={`sidebar-flyout-${section.key}`}
       className="tailwind-scope tw-fixed tw-z-[95] tw-flex tw-max-h-[65vh] tw-w-64 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] motion-safe:tw-animate-sidebar-flyout-in motion-reduce:tw-animate-none"
       style={{
         left: leftStyle,
         top: topStyle,
       }}
-      role="menu"
-      aria-label={`${section.name} sub-navigation`}
+      role="navigation"
+      aria-label={t(DEFAULT_LOCALE, "navigation.sidebar.submenuLabel", {
+        section: section.name,
+      })}
       onPointerEnter={onPointerEnter}
       onPointerLeave={handlePointerLeave}
       onBlur={handleBlur}
@@ -247,7 +293,7 @@ function WebSidebarSubmenu({
                 section.items.length > 0 ? "tw-mt-3" : "tw-mt-3 first:tw-mt-0"
               }
             >
-              <div className="tw-px-3 tw-pb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
+              <div className="tw-px-3 tw-pb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
                 {subsection.name}
               </div>
 

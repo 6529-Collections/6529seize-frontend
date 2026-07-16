@@ -74,7 +74,7 @@ const WebSidebarNav = React.forwardRef<
   const [submenuTrigger, setSubmenuTrigger] = useState<HTMLElement | null>(
     null
   );
-  const [focusFirstSubmenuItem, setFocusFirstSubmenuItem] = useState(false);
+  const [submenuFocusRequest, setSubmenuFocusRequest] = useState(0);
   const hoverOpenTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   );
@@ -112,7 +112,7 @@ const WebSidebarNav = React.forwardRef<
     setOpenSubmenuKey(null);
     setSubmenuAnchor(null);
     setSubmenuTrigger(null);
-    setFocusFirstSubmenuItem(false);
+    setSubmenuFocusRequest(0);
   }, [clearHoverCloseTimer, clearHoverOpenTimer]);
 
   const openCollapsedSubmenu = useCallback(
@@ -128,7 +128,7 @@ const WebSidebarNav = React.forwardRef<
         height: rect.height,
       });
       setSubmenuTrigger(trigger);
-      setFocusFirstSubmenuItem(focusFirstItem);
+      setSubmenuFocusRequest((previous) => (focusFirstItem ? previous + 1 : 0));
     },
     [clearHoverCloseTimer, clearHoverOpenTimer]
   );
@@ -175,7 +175,7 @@ const WebSidebarNav = React.forwardRef<
         if (openSubmenuKey === sectionKey) {
           closeSubmenu();
         } else if (target) {
-          openCollapsedSubmenu(sectionKey, target, event?.detail === 0);
+          openCollapsedSubmenu(sectionKey, target);
         }
 
         return;
@@ -252,7 +252,7 @@ const WebSidebarNav = React.forwardRef<
 
   const handleSectionKeyDown = useCallback(
     (sectionKey: string, event: React.KeyboardEvent<HTMLButtonElement>) => {
-      if (!isCollapsed || !["Enter", " ", "ArrowDown"].includes(event.key)) {
+      if (!isCollapsed || !["Enter", " "].includes(event.key)) {
         return;
       }
 
@@ -260,7 +260,7 @@ const WebSidebarNav = React.forwardRef<
       event.stopPropagation();
 
       if (openSubmenuKey === sectionKey) {
-        setFocusFirstSubmenuItem(true);
+        setSubmenuFocusRequest((previous) => previous + 1);
         return;
       }
 
@@ -276,12 +276,6 @@ const WebSidebarNav = React.forwardRef<
     },
     [clearHoverCloseTimer, clearHoverOpenTimer]
   );
-
-  useEffect(() => {
-    if (!isCollapsed) {
-      closeSubmenu();
-    }
-  }, [closeSubmenu, isCollapsed]);
 
   useEffect(() => {
     if (isCollapsed && submenuTrigger) {
@@ -344,7 +338,7 @@ const WebSidebarNav = React.forwardRef<
             anchorTop={submenuAnchor.top}
             anchorHeight={submenuAnchor.height}
             triggerElement={submenuTrigger}
-            focusFirstItem={focusFirstSubmenuItem}
+            focusRequest={submenuFocusRequest}
             onPointerEnter={clearHoverCloseTimer}
             onPointerLeave={scheduleSubmenuClose}
           />
@@ -361,7 +355,7 @@ const WebSidebarNav = React.forwardRef<
       closeSubmenu,
       submenuAnchor,
       submenuTrigger,
-      focusFirstSubmenuItem,
+      submenuFocusRequest,
       clearHoverCloseTimer,
       scheduleSubmenuClose,
     ]
