@@ -61,8 +61,6 @@ describe("instrumentation-client", () => {
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
     "auto.browser.browserapierrors.setTimeout";
-  const rabbyMobileUserAgent =
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 Mobile/15E148";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
@@ -246,27 +244,36 @@ describe("instrumentation-client", () => {
     },
   ];
 
+  const createObservedRabbyRainbowKitRawFrames = () => [
+    {
+      filename: "app:///_next/static/chunks/observed-rabby-webview.js",
+      abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
+      function: "n",
+      in_app: true,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "Promise",
+      in_app: true,
+    },
+  ];
+
   const createRabbyMobileRainbowKitNotFoundEvent = (
     overrides: Record<string, unknown> = {}
   ) => ({
     event_id: "rabby-mobile-rainbowkit-not-found",
-    request: {
-      headers: {
-        "User-Agent": rabbyMobileUserAgent,
-      },
-    },
     exception: {
       values: [
         {
           type: "Error",
           value: rainbowKitNotFoundMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
           stacktrace: {
-            frames: [
-              {
-                filename: "https://static.rabby.io/mobile-shell.js",
-                in_app: false,
-              },
-            ],
+            frames: createObservedRabbyRainbowKitRawFrames(),
           },
         },
       ],
@@ -1247,7 +1254,7 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops exact RabbyMobile RainbowKit lookup errors with no app frames", () => {
+  it("drops the observed raw RainbowKit lookup error without wallet context", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent();
 
@@ -1264,6 +1271,10 @@ describe("instrumentation-client", () => {
           {
             type: "Error",
             value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
                 {
@@ -1283,14 +1294,35 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps exact RainbowKit lookup errors outside RabbyMobile", () => {
+  it("keeps exact RainbowKit lookup errors without the observed raw frames", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent({
-      request: {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile Safari/605.1.15",
-        },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                  in_app: false,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
       },
     });
 
@@ -1299,7 +1331,7 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps non-exact RainbowKit lookup messages in RabbyMobile", () => {
+  it("keeps non-exact RainbowKit lookup messages", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent({
       exception: {
@@ -1307,8 +1339,12 @@ describe("instrumentation-client", () => {
           {
             type: "Error",
             value: "Error: not found rainbowkit",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
-              frames: [],
+              frames: createObservedRabbyRainbowKitRawFrames(),
             },
           },
         ],
