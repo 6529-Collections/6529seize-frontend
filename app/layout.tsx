@@ -50,7 +50,8 @@ export default function RootLayout({
           <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
         )}
       </head>
-      <body>
+      {/* The touch-first helper may restore data-fine-pointer before hydration. */}
+      <body suppressHydrationWarning>
         <MobileLaunchTimingReporter />
         <AwsRumProvider>
           <Providers>

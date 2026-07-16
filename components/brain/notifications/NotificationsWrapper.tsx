@@ -1,12 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import {
-  isGroupedReactionsItem,
-  type NotificationDisplayItem,
-} from "@/types/feed.types";
+import type { NotificationDisplayItem } from "@/types/feed.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
@@ -15,8 +12,6 @@ import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
-
-const MAX_PREFETCHED_NOTIFICATION_WAVES = 4;
 
 type WaveWithChatScope = ExtendedDrop["wave"] & {
   is_direct_message?: boolean | undefined;
@@ -38,32 +33,6 @@ type WaveWithChatScope = ExtendedDrop["wave"] & {
 const hasChatScope = (wave: ExtendedDrop["wave"]): wave is WaveWithChatScope =>
   "chat" in wave || "is_direct_message" in wave;
 
-const getVisibleNotificationWaveIds = (
-  items: readonly NotificationDisplayItem[]
-): string[] => {
-  const waveIds = new Set<string>();
-
-  for (const item of items) {
-    if (isGroupedReactionsItem(item)) {
-      waveIds.add(item.drop.wave.id);
-    } else if ("related_drops" in item) {
-      for (const drop of item.related_drops) {
-        waveIds.add(drop.wave.id);
-
-        if (waveIds.size >= MAX_PREFETCHED_NOTIFICATION_WAVES) {
-          break;
-        }
-      }
-    }
-
-    if (waveIds.size >= MAX_PREFETCHED_NOTIFICATION_WAVES) {
-      break;
-    }
-  }
-
-  return [...waveIds];
-};
-
 interface NotificationsWrapperProps {
   readonly items: NotificationDisplayItem[];
   readonly loadingOlder: boolean;
@@ -83,20 +52,6 @@ export default function NotificationsWrapper({
   const { isApp } = useDeviceInfo();
   const prefetchWaveData = usePrefetchWaveData();
   const keyboardPrimerRef = useRef<HTMLTextAreaElement | null>(null);
-  const visibleWaveIds = useMemo(
-    () => getVisibleNotificationWaveIds(items),
-    [items]
-  );
-
-  useEffect(() => {
-    if (visibleWaveIds.length === 0) {
-      return;
-    }
-
-    for (const waveId of visibleWaveIds) {
-      prefetchWaveData(waveId);
-    }
-  }, [prefetchWaveData, visibleWaveIds]);
 
   useEffect(() => {
     if (activeDrop || document.activeElement !== keyboardPrimerRef.current) {

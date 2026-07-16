@@ -1,6 +1,7 @@
 import type { ZoomLevel } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   displayedSeasonNumberFromIndex,
+  formatFullDateTime,
   formatToFullDivision,
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
@@ -68,6 +69,25 @@ const getDivisionRows = (node: unknown): ReactElement<any>[] => {
 
   return Children.toArray(tbody.props.children).map(asElement);
 };
+
+describe("formatFullDateTime", () => {
+  const localDate = new Date(2026, 6, 15, 17, 40);
+
+  it("uses a 24-hour clock without changing locale-specific date order", () => {
+    const enUs = formatFullDateTime(localDate, "local", "en-US", {
+      hour12: false,
+    });
+    const enGb = formatFullDateTime(localDate, "local", "en-GB", {
+      hour12: false,
+    });
+
+    expect(enUs).toContain("Jul 15");
+    expect(enUs).toContain("17:40");
+    expect(enUs).not.toMatch(/\b(?:AM|PM)\b/);
+    expect(enGb).toContain("15 Jul");
+    expect(enGb).toContain("17:40");
+  });
+});
 
 describe("formatToFullDivision", () => {
   it("renders each division with a date range", () => {
