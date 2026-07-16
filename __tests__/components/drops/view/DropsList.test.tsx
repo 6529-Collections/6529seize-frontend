@@ -113,6 +113,7 @@ describe("DropsList", () => {
         onQuoteClick={jest.fn()}
         onDropContentClick={jest.fn()}
         dropViewDropId={null}
+        virtualScrollRootMargin="1200px 0px"
       />
     );
 
@@ -120,6 +121,10 @@ describe("DropsList", () => {
     expect(screen.getAllByTestId("highlight")).toHaveLength(2);
     expect(dropProps).toHaveLength(1);
     expect(lightProps).toHaveLength(1);
+    expect(wrapperProps).toEqual([
+      expect.objectContaining({ rootMargin: "1200px 0px" }),
+      expect.objectContaining({ rootMargin: "1200px 0px" }),
+    ]);
   });
 
   it("hydrates historical light drops after serial scrolling settles", () => {

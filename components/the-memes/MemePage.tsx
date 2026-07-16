@@ -447,7 +447,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
       ? `${artworkColumnBaseClassName} tw-order-2 tw-mt-6 tw-self-start lg:tw-order-none lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-mt-0`
       : artworkColumnBaseClassName;
     const detailsColumnClassName = hasMintingBox
-      ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-3 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-block lg:[&>*]:tw-order-none lg:[&>*]:tw-w-full lg:[&>*:nth-child(2)]:tw-pt-5"
+      ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-0 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-block lg:[&>*]:tw-order-none lg:[&>*]:tw-w-full lg:[&>*:nth-child(2)]:tw-pt-6"
       : undefined;
 
     return (
@@ -476,19 +476,18 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         </div>
         <div className={detailsColumnClassName}>
           {isLastCard && (
-            <div className="tw-w-full">
+            <div className="tw-w-full tw-space-y-3">
               <NowMintingCountdown
                 nftId={nft.id}
                 contract={MEMES_CONTRACT}
                 chainId={mainnet.id}
                 fullWidth
               />
-              <div className="tw-mt-4">
-                <LatestDropNextMintSubscribe
-                  tokenId={nft.id}
-                  statusSource="none"
-                />
-              </div>
+              <LatestDropNextMintSubscribe
+                appearance="quiet"
+                tokenId={nft.id}
+                statusSource="none"
+              />
             </div>
           )}
           <MemePageLiveRightMenu
