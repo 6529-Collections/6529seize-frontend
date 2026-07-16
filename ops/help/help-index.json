@@ -5188,6 +5188,7 @@
         "Upcoming unresolved Meme Card pages show mint timing and subscription awareness; positive card ids also show a Distribution Plan link for that card.",
         "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
         "Card tabs and focus links are documented for deep-linking into card page sections.",
+        "If a Meme Card fails to load, the card page replaces the loading state with a Try again action.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."
       ],
       "canonical_path": "/the-memes/{id}",

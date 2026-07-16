@@ -312,69 +312,71 @@ export default function CreateDropLayout({
               onDiscardStorm={onDiscardStorm}
             />
           )}
-          <div className="tw-flex tw-w-full tw-flex-none tw-items-end">
-            <div
-              ref={setActionsContainerRef}
-              className="tw-grid tw-w-full tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
-            >
-              <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
-                <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
-                {isLinksSubmitBlocked && (
-                  <p
-                    className="tw-mb-2 tw-mt-0 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400"
-                    aria-live="polite"
-                  >
-                    {CHAT_LINK_RESTRICTION_MESSAGE}
-                  </p>
-                )}
-              </div>
-              <div className="tw-col-start-1 tw-row-start-2 tw-mb-1 tw-self-end">
-                <CreateDropActions
-                  isStormMode={isStormModeActive}
-                  isDropMode={isDropMode}
-                  canAddPart={canAddPart}
-                  submitting={submitting}
-                  showOptions={showOptions}
-                  animateOptions={animateOptions}
-                  isRequiredMetadataMissing={
-                    !!missingRequirements.metadata.length
-                  }
-                  isRequiredMediaMissing={!!missingRequirements.media.length}
-                  canCreatePoll={canCreatePoll}
-                  isPollActive={hasPoll}
-                  handleFileChange={handleFileChange}
-                  onAddMetadataClick={openMetadata}
-                  onTogglePoll={togglePoll}
-                  breakIntoStorm={breakIntoStorm}
-                  setShowOptions={handleSetShowOptions}
-                  onGifDrop={onGifDrop}
-                />
-              </div>
-              <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
-                <CreateDropInput
-                  waveId={wave.id}
-                  key={dropEditorRefreshKey}
-                  ref={createDropInputRef}
-                  editorState={editorState}
-                  type={activeDrop?.action ?? null}
-                  submitting={submitting}
-                  isStormMode={isStormModeActive}
-                  stormPartNumber={displayedStormPartNumber}
-                  isDropMode={isDropMode}
-                  canMentionAll={canMentionAll}
-                  canSubmit={canSubmit}
-                  onEditorState={handleEditorStateChange}
-                  onEditorBlur={handleEditorBlur}
-                  onReferencedNft={onReferencedNft}
-                  onMentionedUser={onMentionedUser}
-                  onMentionedWave={onMentionedWave}
-                  onAttachmentFiles={handleFileChange}
-                  canEditLastDropWithArrow={canEditLastDropWithArrow}
-                  onRequestEditLastDrop={handleRequestEditLastDrop}
-                  initialMarkdown={initialMarkdown}
-                  initialMarkdownKey={initialMarkdownKey}
-                  onDrop={onDrop}
-                />
+          <div
+            ref={setActionsContainerRef}
+            className="tw-grid tw-w-full tw-flex-none tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+          >
+            <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
+              <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
+              {isLinksSubmitBlocked && (
+                <p
+                  className="tw-mb-2 tw-mt-0 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400"
+                  aria-live="polite"
+                >
+                  {CHAT_LINK_RESTRICTION_MESSAGE}
+                </p>
+              )}
+            </div>
+            <div className="tw-col-start-1 tw-row-start-2 tw-mb-1 tw-self-end">
+              <CreateDropActions
+                isStormMode={isStormModeActive}
+                isDropMode={isDropMode}
+                canAddPart={canAddPart}
+                submitting={submitting}
+                showOptions={showOptions}
+                animateOptions={animateOptions}
+                isRequiredMetadataMissing={
+                  !!missingRequirements.metadata.length
+                }
+                isRequiredMediaMissing={!!missingRequirements.media.length}
+                canCreatePoll={canCreatePoll}
+                isPollActive={hasPoll}
+                handleFileChange={handleFileChange}
+                onAddMetadataClick={openMetadata}
+                onTogglePoll={togglePoll}
+                breakIntoStorm={breakIntoStorm}
+                setShowOptions={handleSetShowOptions}
+                onGifDrop={onGifDrop}
+              />
+            </div>
+            <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
+              <CreateDropInput
+                waveId={wave.id}
+                key={dropEditorRefreshKey}
+                ref={createDropInputRef}
+                editorState={editorState}
+                type={activeDrop?.action ?? null}
+                submitting={submitting}
+                isStormMode={isStormModeActive}
+                stormPartNumber={displayedStormPartNumber}
+                isDropMode={isDropMode}
+                canMentionAll={canMentionAll}
+                canSubmit={canSubmit}
+                onEditorState={handleEditorStateChange}
+                onEditorBlur={handleEditorBlur}
+                onReferencedNft={onReferencedNft}
+                onMentionedUser={onMentionedUser}
+                onMentionedWave={onMentionedWave}
+                onAttachmentFiles={handleFileChange}
+                canEditLastDropWithArrow={canEditLastDropWithArrow}
+                onRequestEditLastDrop={handleRequestEditLastDrop}
+                initialMarkdown={initialMarkdown}
+                initialMarkdownKey={initialMarkdownKey}
+                onDrop={onDrop}
+              />
+            </div>
+            {(pollDraft || showCurationDropModeWarning) && (
+              <div className="tw-col-span-3 tw-col-start-1 tw-row-start-3 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2">
                 {pollDraft && (
                   <CreateDropPoll
                     draft={pollDraft}
@@ -401,21 +403,19 @@ export default function CreateDropLayout({
                   </div>
                 )}
               </div>
-            </div>
-            <div className="tw-ml-2 lg:tw-ml-3">
-              <div className="tw-flex tw-items-center tw-gap-x-3">
-                <CreateDropSubmit
-                  submitting={submitting}
-                  canSubmit={canSubmit}
-                  onDrop={onDrop}
-                  isDropMode={isDropMode}
-                  label={submitLabel}
-                  showLabelOnMobile={isStormModeActive}
-                  disabledTooltip={
-                    isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
-                  }
-                />
-              </div>
+            )}
+            <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
+              <CreateDropSubmit
+                submitting={submitting}
+                canSubmit={canSubmit}
+                onDrop={onDrop}
+                isDropMode={isDropMode}
+                label={submitLabel}
+                showLabelOnMobile={isStormModeActive}
+                disabledTooltip={
+                  isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
+                }
+              />
             </div>
           </div>
           {isDropMode && (

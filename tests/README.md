@@ -134,8 +134,10 @@ Surface matrix:
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
-  and deterministic link previews, plus one exact synthetic chat-drop submit.
-  The mock API allows only that queryless `/api/drops` shape, with signer
+  and deterministic link previews, plus exact synthetic chat-drop and poll
+  submits. The poll flow covers its responsive layout, options, type, closing
+  time, audience, and anonymity controls. The mock API allows only those
+  queryless `/api/drops` shapes, with signer
   limited to the configured sandbox wallet or the empty unsigned direct-contract
   form; upload and attachment endpoints still fail closed. It must run against a
   loopback base URL, but it is not a full network-isolation harness and is not a
