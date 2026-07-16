@@ -111,12 +111,13 @@
   slide and its matching download/link row.
 - `File Type` and `Dimensions` rows appear only when the active `The Art`
   slide has usable metadata values.
-- If card fetches fail or resolve inconsistently, the route can stay in a heading-only state with no dedicated inline error panel.
+- If card fetches fail or resolve inconsistently, the route shows an inline
+  `Try again` action.
 
 ## Failure and Recovery
 
 - If a numeric ID resolves to fallback mode, use fallback timing details or return to `/the-memes` and open a nearby card.
-- If card content does not appear (heading-only state), refresh the route or reopen the card from `/the-memes`.
+- If card content fails to load, use the inline `Try again` action.
 - If a deep link opens the wrong tab, replace `focus` with a supported value.
 - If the route shows `MEME` not-found, retry with a positive integer card id.
 

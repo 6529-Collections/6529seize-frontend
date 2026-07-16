@@ -64,13 +64,18 @@ function getInitialMemePageData(
     return undefined;
   }
 
-  if (metadataResult.value.length !== 1) {
+  if (metadataResult.value.length === 0) {
     return { nftNotFound: true } as const;
+  }
+
+  const nftMeta = metadataResult.value[0];
+  if (metadataResult.value.length !== 1 || !nftMeta || !nftResult.value) {
+    return undefined;
   }
 
   return {
     nft: nftResult.value,
-    nftMeta: metadataResult.value[0],
+    nftMeta,
     nftNotFound: false,
   } as const;
 }

@@ -392,6 +392,9 @@ export default function MemePage({
   useEffect(() => {
     if (connectedWallets.length && nftId) {
       const controller = new AbortController();
+      setUserLoaded(false);
+      setTransactions([]);
+      setNftBalance(0);
 
       async function loadTransactions() {
         try {
@@ -403,6 +406,9 @@ export default function MemePage({
             )}&id=${nftId}`,
             { signal: controller.signal }
           );
+          if (controller.signal.aborted) {
+            return;
+          }
           setTransactions(response.data);
           updateNftBalances(response.data);
           setUserLoaded(true);

@@ -7,11 +7,17 @@ import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedDa
 import { publicEnv } from "@/config/env";
 import { fetchUrl } from "@/services/6529api";
 
-export interface MemePageInitialData {
-  readonly nft?: NFT | undefined;
-  readonly nftMeta?: ApiMemesExtendedData | undefined;
-  readonly nftNotFound: boolean;
-}
+export type MemePageInitialData =
+  | {
+      readonly nftNotFound: true;
+      readonly nft?: never;
+      readonly nftMeta?: never;
+    }
+  | {
+      readonly nftNotFound: false;
+      readonly nft: NFT;
+      readonly nftMeta: ApiMemesExtendedData;
+    };
 
 type MemePageFallbackState =
   | { readonly status: "loading"; readonly attempt: number }
@@ -64,14 +70,33 @@ export function useMemePageFallbackData({
 
         const nftMetas = metaResponse.data;
         const nft = nftResponse.data[0];
-        const data: MemePageInitialData =
-          Array.isArray(nftMetas) && nftMetas.length === 1 && nft
-            ? {
-                nftMeta: nftMetas[0],
-                nft,
-                nftNotFound: false,
-              }
-            : { nftNotFound: true };
+        if (Array.isArray(nftMetas) && nftMetas.length === 0) {
+          setFallbackState((current) =>
+            current.status === "loading" && current.attempt === fallbackAttempt
+              ? { status: "loaded", data: { nftNotFound: true } }
+              : current
+          );
+          return;
+        }
+
+        const nftMeta =
+          Array.isArray(nftMetas) && nftMetas.length === 1
+            ? nftMetas[0]
+            : undefined;
+        if (!nftMeta || !nft) {
+          setFallbackState((current) =>
+            current.status === "loading" && current.attempt === fallbackAttempt
+              ? { status: "error", attempt: current.attempt }
+              : current
+          );
+          return;
+        }
+
+        const data: MemePageInitialData = {
+          nftMeta,
+          nft,
+          nftNotFound: false,
+        };
         setFallbackState((current) =>
           current.status === "loading" && current.attempt === fallbackAttempt
             ? { status: "loaded", data }

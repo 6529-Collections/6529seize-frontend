@@ -41,8 +41,12 @@ jest.mock("@/components/the-memes/MemePageLive", () => ({
 }));
 
 jest.mock("@/components/the-memes/MemePageYourCards", () => ({
-  MemePageYourCardsRightMenu: ({ show }: any) =>
-    show ? <div data-testid="yourcards-right">Your Cards</div> : null,
+  MemePageYourCardsRightMenu: ({ show, wallets }: any) =>
+    show ? (
+      <div data-testid="yourcards-right" data-wallets={wallets.join(",")}>
+        Your Cards
+      </div>
+    ) : null,
   MemePageYourCardsSubMenu: ({ show }: any) =>
     show ? <div data-testid="yourcards-sub">Your Cards Sub</div> : null,
 }));
@@ -562,7 +566,7 @@ describe("MemePage API interactions", () => {
     });
   });
 
-  it("handles empty metadata response", async () => {
+  it("shows the upcoming card state for an empty metadata response", async () => {
     (fetchUrl as jest.Mock).mockImplementation((url: string) => {
       if (url.includes("memes_extended_data")) {
         return Promise.resolve({ data: [] });
@@ -572,12 +576,32 @@ describe("MemePage API interactions", () => {
 
     renderPage();
 
-    await waitFor(() => {
-      const calls = (fetchUrl as jest.Mock).mock.calls;
-      const nftCalls = calls.filter((call) => call[0].includes("/api/nfts?"));
-      expect(nftCalls).toHaveLength(1);
+    expect(await screen.findByTestId("latest-drop-subscribe")).toHaveAttribute(
+      "data-token-id",
+      "1"
+    );
+    expect(
+      screen.getByRole("link", { name: "Distribution Plan" })
+    ).toHaveAttribute("href", "/the-memes/1/distribution");
+    expect(screen.queryByTestId("nft-navigation")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["a missing NFT", [nftMeta], []],
+    ["duplicate metadata", [nftMeta, nftMeta], [nft]],
+  ])("shows a retry action for %s", async (_case, metadata, nfts) => {
+    (fetchUrl as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes("memes_extended_data")) {
+        return Promise.resolve({ data: metadata });
+      }
+      return Promise.resolve({ data: nfts });
     });
 
+    renderPage();
+
+    expect(
+      await screen.findByText("We couldn't load this card. Please try again.")
+    ).toBeInTheDocument();
     expect(screen.queryByTestId("nft-navigation")).not.toBeInTheDocument();
   });
 });
@@ -587,7 +611,7 @@ describe("MemePage wallet integration", () => {
     (fetchUrl as jest.Mock).mockClear();
   });
 
-  it("fetches transactions for connected wallets", async () => {
+  it("clears old wallet data while replacement transactions load", async () => {
     const mockProfile = {
       id: "test-id",
       handle: "test-handle",
@@ -634,9 +658,12 @@ describe("MemePage wallet integration", () => {
       title: "Test Title",
     };
 
-    render(
+    const page = render(
       <AuthContext.Provider value={mockAuthContext as any}>
-        <MemePage nftId="1" />
+        <MemePage
+          nftId="1"
+          initialData={{ nft, nftMeta, nftNotFound: false }}
+        />
       </AuthContext.Provider>
     );
 
@@ -647,6 +674,51 @@ describe("MemePage wallet integration", () => {
       );
       expect(transactionCalls.length).toBeGreaterThan(0);
       expect(transactionCalls[0][0]).toContain("wallet=0x123,0x456");
+    });
+
+    expect(await screen.findByTestId("yourcards-right")).toHaveAttribute(
+      "data-wallets",
+      "0x123,0x456"
+    );
+
+    const replacementProfile = {
+      ...mockProfile,
+      wallets: [
+        {
+          wallet: "0x789",
+          ens: null,
+          wallet_displayed: "0x789",
+          is_primary: true,
+        },
+      ],
+    };
+    const pendingTransactions = new Promise(() => {});
+    (fetchUrl as jest.Mock).mockImplementation((url: string) =>
+      url.includes("/api/transactions")
+        ? pendingTransactions
+        : Promise.resolve({ data: [] })
+    );
+
+    page.rerender(
+      <AuthContext.Provider
+        value={{
+          ...mockAuthContext,
+          connectedProfile: replacementProfile,
+        } as any}
+      >
+        <MemePage
+          nftId="1"
+          initialData={{ nft, nftMeta, nftNotFound: false }}
+        />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("yourcards-right")).not.toBeInTheDocument();
+      expect(fetchUrl).toHaveBeenCalledWith(
+        expect.stringContaining("wallet=0x789"),
+        { signal: expect.any(AbortSignal) }
+      );
     });
   });
 

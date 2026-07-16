@@ -1,7 +1,11 @@
-import { generateMetadata } from "@/app/the-memes/[id]/page";
+import TheMemesDetailPage, {
+  generateMetadata,
+} from "@/app/the-memes/[id]/page";
 import { getSharedAppServerSideProps } from "@/components/the-memes/MemeShared";
+import type { MemePageInitialData } from "@/components/the-memes/useMemePageFallbackData";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { fetchUrl } from "@/services/6529api";
+import type { ReactElement } from "react";
 
 jest.mock("@/components/the-memes/MemePage", () => ({
   __esModule: true,
@@ -35,6 +39,76 @@ const prefetchedNft = {
   contract: MEMES_CONTRACT,
   name: "Meme",
 };
+const prefetchedMetadata = {
+  id: 123,
+  meme: 123,
+  meme_name: "Meme",
+};
+
+async function getInitialDataFromPage(): Promise<
+  MemePageInitialData | undefined
+> {
+  const page = await TheMemesDetailPage({
+    params: Promise.resolve({ id: "123" }),
+  });
+  const children = (
+    page as ReactElement<{
+      readonly children: readonly ReactElement[];
+    }>
+  ).props.children;
+  const memePage = children[1] as ReactElement<{
+    readonly initialData?: MemePageInitialData | undefined;
+  }>;
+
+  return memePage.props.initialData;
+}
+
+describe("The Memes detail page data seed", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("passes complete server data to the card", async () => {
+    mockFetchUrl.mockImplementation((url: string) =>
+      Promise.resolve({
+        data: url.includes("/api/nfts?")
+          ? [prefetchedNft]
+          : [prefetchedMetadata],
+      })
+    );
+
+    await expect(getInitialDataFromPage()).resolves.toEqual({
+      nft: prefetchedNft,
+      nftMeta: prefetchedMetadata,
+      nftNotFound: false,
+    });
+  });
+
+  it("passes the upcoming state when metadata is not found", async () => {
+    mockFetchUrl.mockResolvedValue({ data: [] });
+
+    await expect(getInitialDataFromPage()).resolves.toEqual({
+      nftNotFound: true,
+    });
+  });
+
+  it.each([
+    ["the NFT is missing", [prefetchedMetadata], []],
+    [
+      "metadata is duplicated",
+      [prefetchedMetadata, prefetchedMetadata],
+      [prefetchedNft],
+    ],
+  ])("uses the client fallback when %s", async (_case, metadata, nfts) => {
+    mockFetchUrl.mockImplementation((url: string) =>
+      Promise.resolve({
+        data: url.includes("/api/nfts?") ? nfts : metadata,
+      })
+    );
+
+    await expect(getInitialDataFromPage()).resolves.toBeUndefined();
+  });
+});
 
 describe("The Memes detail generateMetadata", () => {
   beforeEach(() => {
