@@ -122,14 +122,18 @@ export function NotificationWebSocketSync() {
         );
 
       if (shouldRefreshActive) {
-        void queryClient.invalidateQueries({
-          queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-        });
+        queryClient
+          .invalidateQueries({
+            queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+          })
+          .catch(() => undefined);
       }
       if (shouldRefreshConnectedAccounts) {
-        void queryClient.invalidateQueries({
-          queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
-        });
+        queryClient
+          .invalidateQueries({
+            queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+          })
+          .catch(() => undefined);
       }
     },
     [connectedAccounts, queryClient]

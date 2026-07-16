@@ -7,7 +7,7 @@ import {
 import { NotificationWebSocketSync } from "@/services/websocket/NotificationWebSocketSync";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 
-const invalidateQueriesMock = jest.fn();
+const invalidateQueriesMock = jest.fn().mockResolvedValue(undefined);
 const sendMock = jest.fn();
 const messageCallbacks = new Map<WsMessageType, (value: unknown) => void>();
 const getAuthJwtMock = jest.fn();
