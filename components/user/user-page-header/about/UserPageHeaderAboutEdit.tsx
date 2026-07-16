@@ -66,8 +66,7 @@ export default function UserPageHeaderAboutEdit({
   const isDisabled =
     profileStatementTarget.length === 0 ||
     value.trim().length === 0 ||
-    statement?.statement_value === value ||
-    loading;
+    statement?.statement_value === value;
 
   const addStatementMutation = useMutation({
     mutationFn: async (statementValue: string) => {
@@ -161,29 +160,25 @@ export default function UserPageHeaderAboutEdit({
             {characterCount}
           </div>
         </div>
-        <div className="tw-mt-3 tw-flex tw-justify-end">
-          <div className="tw-flex tw-w-full tw-gap-2 sm:tw-w-auto">
-            <SecondaryButton
-              disabled={loading}
-              onClicked={onClose}
-              className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
-            >
-              {getUserProfileHeaderMessage(
-                "user.profileHeader.aboutEdit.cancel"
-              )}
-            </SecondaryButton>
-            <ActionButton
-              disabled={isDisabled}
-              loading={loading}
-              onClicked={submitStatement}
-              ariaLabel={getUserProfileHeaderMessage(
-                "user.profileHeader.aboutEdit.save"
-              )}
-              className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
-            >
-              {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.save")}
-            </ActionButton>
-          </div>
+        <div className="tw-mt-3 tw-flex tw-w-full tw-gap-2 sm:tw-ml-auto sm:tw-w-auto">
+          <SecondaryButton
+            disabled={loading}
+            onClicked={onClose}
+            className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
+          >
+            {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.cancel")}
+          </SecondaryButton>
+          <ActionButton
+            type="submit"
+            disabled={isDisabled}
+            loading={loading}
+            ariaLabel={getUserProfileHeaderMessage(
+              "user.profileHeader.aboutEdit.save"
+            )}
+            className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
+          >
+            {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.save")}
+          </ActionButton>
         </div>
       </form>
       <AnimatePresence mode="wait" initial={false}>

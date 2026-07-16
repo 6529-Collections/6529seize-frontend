@@ -206,7 +206,7 @@ export default function UserPageHeaderEditPfp({
           role="dialog"
           aria-modal="true"
           aria-label="Edit profile picture"
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-3xl md:tw-max-w-2xl lg:tw-p-8"
+          className="tw-w-full tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl sm:tw-max-w-2xl lg:tw-p-8"
         >
           <form onSubmit={onSubmit}>
             <UserSettingsImgSelectMeme
@@ -231,24 +231,22 @@ export default function UserPageHeaderEditPfp({
                 {error}
               </p>
             )}
-            <div className="tw-pt-5">
-              <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row-reverse sm:tw-justify-start">
-                <ActionButton
-                  type="submit"
-                  loading={saving}
-                  disabled={!file && !selectedMeme}
-                  className="tw-min-h-11 tw-w-full sm:tw-w-auto"
-                >
-                  Save PFP
-                </ActionButton>
-                <SecondaryButton
-                  disabled={saving}
-                  onClicked={onClose}
-                  className="tw-min-h-11 tw-w-full sm:tw-w-auto"
-                >
-                  Cancel
-                </SecondaryButton>
-              </div>
+            <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 sm:tw-flex-row-reverse sm:tw-justify-start">
+              <ActionButton
+                type="submit"
+                loading={saving}
+                disabled={!file && !selectedMeme}
+                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+              >
+                Save PFP
+              </ActionButton>
+              <SecondaryButton
+                disabled={saving}
+                onClicked={onClose}
+                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+              >
+                Cancel
+              </SecondaryButton>
             </div>
           </form>
         </div>

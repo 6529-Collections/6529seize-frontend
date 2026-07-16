@@ -128,7 +128,7 @@ export default function UserPageHeaderEditName({
           role="dialog"
           aria-modal="true"
           aria-label="Edit username"
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-xl lg:tw-p-8"
+          className="tw-w-full tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl sm:tw-max-w-xl lg:tw-p-8"
         >
           <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-5">
             <UserSettingsUsername

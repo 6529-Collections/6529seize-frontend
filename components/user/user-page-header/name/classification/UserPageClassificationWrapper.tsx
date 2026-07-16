@@ -2,7 +2,9 @@
 
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import PencilIcon, { PencilIconSize } from "@/components/utils/icons/PencilIcon";
+import PencilIcon, {
+  PencilIconSize,
+} from "@/components/utils/icons/PencilIcon";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useState } from "react";
 import UserPageHeaderEditClassification from "./UserPageHeaderEditClassification";
@@ -39,7 +41,7 @@ export default function UserPageClassificationWrapper({
         {children}
         <span
           aria-hidden="true"
-          className="tw-absolute -tw-left-5 tw-top-1/2 tw-hidden tw-size-4 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-text-iron-400 group-focus-visible:tw-flex group-hover:tw-flex"
+          className="tw-absolute -tw-left-5 tw-top-1/2 tw-hidden tw-size-4 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-text-iron-400 group-hover:tw-flex group-focus-visible:tw-flex"
         >
           <PencilIcon size={PencilIconSize.SMALL} />
         </span>
@@ -49,7 +51,8 @@ export default function UserPageClassificationWrapper({
           <CommonAnimationOpacity
             key="modal"
             elementClasses="tw-absolute tw-z-10"
-            onClicked={(e) => e.stopPropagation()}>
+            onClicked={(e) => e.stopPropagation()}
+          >
             <UserPageHeaderEditClassification
               profile={profile}
               onClose={() => setIsEditOpen(false)}

@@ -61,9 +61,9 @@ export default function UserPageSubscriptionsAirdropAddress(
         {props.fetching ? (
           <DotLoader />
         ) : (
-          <div className="tw-min-w-0">
+          <div>
             {airdropAddress && (
-              <span className="tw-min-w-0 tw-break-all">
+              <span className="tw-break-all">
                 {airdropAddress.ens && (
                   <span className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-200">
                     {airdropAddress.ens}
@@ -73,11 +73,11 @@ export default function UserPageSubscriptionsAirdropAddress(
                   type="button"
                   data-tooltip-id={addressTooltipId}
                   aria-describedby={addressTooltipId}
-                  className={
+                  className={`tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 ${
                     airdropAddress.ens
-                      ? "tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xs tw-leading-5 tw-text-iron-500"
-                      : "tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-leading-5 tw-text-iron-200"
-                  }
+                      ? "tw-text-xs tw-text-iron-500"
+                      : "tw-text-sm tw-text-iron-200"
+                  }`}
                 >
                   {airdropAddress.address}
                 </button>

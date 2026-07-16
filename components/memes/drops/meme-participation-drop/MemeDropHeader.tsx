@@ -4,7 +4,7 @@ interface MemeDropHeaderProps {
 
 export default function MemeDropHeader({ title }: MemeDropHeaderProps) {
   return (
-    <h3 className="tw-m-0 tw-inline-flex tw-min-h-6 tw-items-center tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+    <h3 className="tw-m-0 tw-inline-flex tw-items-center tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
       {title}
     </h3>
   );

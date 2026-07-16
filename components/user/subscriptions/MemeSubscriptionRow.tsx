@@ -305,7 +305,7 @@ export default function MemeSubscriptionRow(
       props.minting_today;
 
     return (
-      <span className="tw-inline-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-rounded-xl tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/[0.03] tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400/25">
+      <span className="tw-inline-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/[0.03] tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400/25">
         <span className="tw-relative tw-inline-flex tw-items-center">
           <select
             className={SUBSCRIPTION_COUNT_SELECT_CLASS}

@@ -63,7 +63,7 @@ export default function UserPageSubscriptionsBalance(
             <DotLoader />
           </>
         ) : (
-          <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-iron-100">
+          <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
             <span className="tw-flex tw-items-baseline tw-gap-2">
               <b className="tw-text-2xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
                 {balance > 0

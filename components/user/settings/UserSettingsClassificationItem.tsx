@@ -18,9 +18,9 @@ export default function UserSettingsClassificationItem({
       <button
         type="button"
         onClick={() => onClassification(classification)}
-        className="tw-flex tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-2.5 tw-text-left tw-text-white tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-bg-iron-800 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-bg-iron-800"
+        className="tw-flex tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-2.5 tw-text-left tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-bg-iron-800 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-bg-iron-800"
       >
-        <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-iron-100">
+        <span className="tw-text-sm tw-font-medium tw-text-iron-100">
           {CLASSIFICATIONS[classification].title}
         </span>
         {isActive && (

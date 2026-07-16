@@ -47,38 +47,34 @@ export default function UserSettingsClassification({
       >
         Profile classification
       </div>
-      <div className="tw-relative tw-mt-2">
-        <button
-          ref={triggerRef}
-          type="button"
-          onClick={toggleOpen}
-          aria-labelledby={`${labelId} ${valueId}`}
-          aria-expanded={isOpen}
-          aria-controls={isOpen ? optionsId : undefined}
-          className="tw-form-input tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-left tw-text-base tw-font-normal tw-text-iron-50 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out hover:tw-ring-white/15 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={toggleOpen}
+        aria-labelledby={`${labelId} ${valueId}`}
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? optionsId : undefined}
+        className="tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-left tw-text-base tw-font-normal tw-text-iron-50 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
+      >
+        <span id={valueId}>{title}</span>
+        <svg
+          className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300 tw-transition-transform tw-duration-200 ${
+            isOpen ? "tw-rotate-0" : "-tw-rotate-90"
+          }`}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <span id={valueId} className="tw-text-iron-50">
-            {title}
-          </span>
-          <svg
-            className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300 tw-transition-transform tw-duration-200 ${
-              isOpen ? "tw-rotate-0" : "-tw-rotate-90"
-            }`}
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 9L12 15L18 9"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
+          <path
+            d="M6 9L12 15L18 9"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
 
       <LazyMotion features={domAnimation}>
         <AnimatePresence mode="wait" initial={false}>
@@ -90,7 +86,7 @@ export default function UserSettingsClassification({
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="tw-flow-root tw-max-h-[calc(280px+_-5vh)] tw-overflow-y-auto tw-overflow-x-hidden tw-p-1.5 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+              <div className="tw-max-h-[calc(280px_-_5vh)] tw-overflow-y-auto tw-overflow-x-hidden tw-p-1.5 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
                 <ul
                   id={optionsId}
                   className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0"
