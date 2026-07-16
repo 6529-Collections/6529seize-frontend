@@ -62,6 +62,9 @@ import {
 } from "./app-frame-utils";
 
 const sentryBrowserPathTokens = ["@sentry/browser", "@sentry+browser"];
+const anonymousUnsafeEvalRawChunkPathPattern =
+  /^app:\/\/\/_next\/static\/chunks\/[a-z0-9._~-]+\.js$/i;
+const anonymousUnsafeEvalRawWrapperLineNumbers = new Set([3, 7]);
 const twitterUserAgentPattern = /(?:^|[\s;(])twitter(?:android)?\//i;
 
 function shouldFilterFilenameExceptions(
@@ -335,27 +338,106 @@ function hasAnonymousUnsafeEvalCspFrameSignature(
   );
 }
 
+function hasOnlyAnonymousFramePaths(frame: SentryStackFrame): boolean {
+  const paths = getFramePaths(frame);
+  return (
+    paths.length > 0 && paths.every((path) => path.trim() === "<anonymous>")
+  );
+}
+
+function isAnonymousUnsafeEvalRawWrapperFrame(
+  frame: SentryStackFrame | undefined
+): boolean {
+  if (!frame) {
+    return false;
+  }
+
+  const paths = getFramePaths(frame);
+  return (
+    frame.function?.trim() === "n" &&
+    frame.lineno !== undefined &&
+    anonymousUnsafeEvalRawWrapperLineNumbers.has(frame.lineno) &&
+    frame.colno === 4853 &&
+    paths.length > 0 &&
+    paths.every((path) =>
+      anonymousUnsafeEvalRawChunkPathPattern.test(path.trim())
+    )
+  );
+}
+
+function isAnonymousUnsafeEvalRawAnonymousFrame(
+  frame: SentryStackFrame | undefined,
+  functionName: string
+): boolean {
+  return (
+    !!frame &&
+    frame.function?.trim() === functionName &&
+    frame.lineno === 234 &&
+    frame.colno === 30 &&
+    hasOnlyAnonymousFramePaths(frame)
+  );
+}
+
+function isAnonymousUnsafeEvalRawEvalFrame(
+  frame: SentryStackFrame | undefined
+): boolean {
+  return (
+    !!frame &&
+    frame.function?.trim() === "eval" &&
+    frame.lineno === undefined &&
+    frame.colno === undefined &&
+    hasOnlyAnonymousFramePaths(frame)
+  );
+}
+
+function hasAnonymousUnsafeEvalRawFrameSignature(
+  frames: SentryStackFrame[] | undefined
+): frames is SentryStackFrame[] {
+  // beforeSend receives this Sentry wrapper before source-map processing.
+  return (
+    Array.isArray(frames) &&
+    frames.length === 4 &&
+    isAnonymousUnsafeEvalRawWrapperFrame(frames[0]) &&
+    isAnonymousUnsafeEvalRawAnonymousFrame(frames[1], "next") &&
+    isAnonymousUnsafeEvalRawAnonymousFrame(frames[2], "predicate") &&
+    isAnonymousUnsafeEvalRawEvalFrame(frames[3])
+  );
+}
+
 function hasAnonymousUnsafeEvalCspAppEvidence(
   event: SentryClientEvent,
+  frames: SentryStackFrame[] | undefined,
+  ignoreRawWrapperStack: boolean,
   hint?: SentryEventHint
 ): boolean {
   const value = event.exception?.values?.[0];
-  const frames = value?.stacktrace?.frames;
+  let sourceEvidenceValue = value;
+  if (value && frames !== value.stacktrace?.frames) {
+    sourceEvidenceValue = {
+      ...value,
+      stacktrace: { frames },
+    };
+  }
+
+  // The hint repeats the raw wrapper URL; source-level app paths remain checked.
+  const stackSignatureHint = ignoreRawWrapperStack ? undefined : hint;
 
   if (
-    hasAppOwnedNonExtensionSignature(frames, hint) ||
-    hasAppOwnedSourceEvidence(event, value, hint)
+    hasAppOwnedNonExtensionSignature(frames, stackSignatureHint) ||
+    hasAppOwnedSourceEvidence(event, sourceEvidenceValue, hint)
   ) {
     return true;
   }
 
-  return getStackSignatureValues(frames, hint).some((candidate) => {
-    const normalizedCandidate = candidate.toLowerCase();
-    return (
-      normalizedCandidate.includes("/_next/static/") ||
-      normalizedCandidate.includes("webpack-internal:///(app-")
-    );
-  });
+  return getStackSignatureValues(frames, stackSignatureHint).some(
+    (candidate) => {
+      const normalizedCandidate = candidate.toLowerCase();
+      return (
+        normalizedCandidate.includes("/_next/static/") ||
+        normalizedCandidate.includes("webpack-internal:///(app-")
+      );
+    }
+  );
 }
 
 export function isTwitterBrowser(event: SentryClientEvent): boolean {
@@ -590,9 +672,23 @@ export function shouldFilterAnonymousUnsafeEvalCspError(
     return false;
   }
 
-  if (!hasAnonymousUnsafeEvalCspFrameSignature(value.stacktrace?.frames)) {
+  const frames = value.stacktrace?.frames;
+  const hasRawFrameSignature = hasAnonymousUnsafeEvalRawFrameSignature(frames);
+  if (
+    !hasRawFrameSignature &&
+    !hasAnonymousUnsafeEvalCspFrameSignature(frames)
+  ) {
     return false;
   }
 
-  return !hasAnonymousUnsafeEvalCspAppEvidence(event, hint);
+  // The exact raw signature accounts for all four browser frames. Sentry marks
+  // them in_app before source-map processing, so use only independent source
+  // evidence to decide whether an application failure is present.
+  const appEvidenceFrames = hasRawFrameSignature ? [] : frames;
+  return !hasAnonymousUnsafeEvalCspAppEvidence(
+    event,
+    appEvidenceFrames,
+    hasRawFrameSignature,
+    hint
+  );
 }
