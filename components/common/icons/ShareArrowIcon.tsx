@@ -16,12 +16,12 @@ const ShareArrowIcon = ({
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="m15 5.75 6.25 6.25L15 18.25"
+      d="M12 15.5V3.75m0 0L7.75 8M12 3.75 16.25 8"
     />
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M20.5 12H11a8.25 8.25 0 0 0-8.25 8.25"
+      d="M6.25 11v7.25C6.25 19.22 7.03 20 8 20h8c.97 0 1.75-.78 1.75-1.75V11"
     />
   </svg>
 );

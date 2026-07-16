@@ -9,16 +9,27 @@ import { Share } from "@capacitor/share";
 import clsx from "clsx";
 import { useState } from "react";
 
+interface BrowserGlobals {
+  readonly document?: Document | undefined;
+  readonly navigator?: Navigator | undefined;
+  readonly window?: Window | undefined;
+}
+
+const browserGlobals = globalThis as unknown as BrowserGlobals;
+
 function getCurrentPublicUrl(): string {
-  const route = `${globalThis.location.pathname}${globalThis.location.search}${globalThis.location.hash}`;
+  const currentWindow = browserGlobals.window;
+  const route = currentWindow
+    ? `${currentWindow.location.pathname}${currentWindow.location.search}${currentWindow.location.hash}`
+    : "/";
   const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
   const normalizedRoute = route.startsWith("/") ? route : "/" + route;
   return `${normalizedBase}${normalizedRoute}`;
 }
 
 function getShareTitle(): string {
-  const title = globalThis.document.title;
-  if (title.trim()) {
+  const title = browserGlobals.document?.title;
+  if (title?.trim()) {
     return title;
   }
 
@@ -26,8 +37,8 @@ function getShareTitle(): string {
 }
 
 async function copyFallback(url: string): Promise<void> {
-  const clipboard = (globalThis.navigator as Partial<Navigator>).clipboard;
-  if (!clipboard) {
+  const clipboard = browserGlobals.navigator?.clipboard;
+  if (typeof clipboard?.writeText !== "function") {
     return;
   }
 
