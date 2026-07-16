@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 
 const useQueryMock = jest.fn();
 const commonApiFetchMock = jest.fn();
@@ -27,6 +28,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 describe("useUnreadNotifications", () => {
   beforeEach(() => {
+    setNotificationRealtimeState(false);
     useQueryMock.mockReset();
     commonApiFetchMock.mockReset();
     getAuthJwtMock.mockReset();
@@ -120,6 +122,18 @@ describe("useUnreadNotifications", () => {
     expect(queryOptions.refetchOnWindowFocus(transientQuery)).toBe(true);
     expect(queryOptions.refetchOnMount(transientQuery)).toBe(true);
     expect(queryOptions.refetchOnReconnect(transientQuery)).toBe(true);
+  });
+
+  it("uses only a five-minute reconciliation poll when realtime is synced", () => {
+    setNotificationRealtimeState(true, ["profile-1"]);
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob"));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    expect(queryOptions.refetchInterval({ state: { error: undefined } })).toBe(
+      300000
+    );
   });
 
   it("uses a fresh query after the auth token materially changes", () => {
