@@ -16,9 +16,9 @@ const NAVIGATION_TIMEOUT_MS = 15000;
 const WAVE_SCORE_RESULT = /Wave Score.*About.*Network & Reputation/i;
 const WAVE_SCORE_HEADING = "Wave score transparency";
 const REQUIRED_DELEGATION_ACTIONS = [
-  "Register Delegation",
-  "Register Consolidation",
-  "Register Delegation Manager",
+  "Delegation",
+  "Consolidation",
+  "Delegation Manager",
 ];
 
 async function gotoReady(page: Page, path: string) {

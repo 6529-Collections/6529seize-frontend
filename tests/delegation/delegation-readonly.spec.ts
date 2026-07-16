@@ -11,9 +11,9 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 const SYNTHETIC_EMPTY_WALLET = "0x000000000000000000000000000000000000dEaD";
 
 const DELEGATION_ACTIONS = [
-  "Register Delegation",
-  "Register Consolidation",
-  "Register Delegation Manager",
+  "Delegation",
+  "Consolidation",
+  "Delegation Manager",
 ] as const;
 
 const ARTICLE_ROUTES = [
