@@ -41,7 +41,7 @@ let fallbackDropPartClientId = 0;
 
 const createDropPartClientId = (): string => {
   if (
-    typeof globalThis.crypto !== "undefined" &&
+    globalThis.crypto !== undefined &&
     typeof globalThis.crypto.randomUUID === "function"
   ) {
     return globalThis.crypto.randomUUID();
