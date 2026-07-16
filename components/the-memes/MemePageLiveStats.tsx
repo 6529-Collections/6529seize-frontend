@@ -32,8 +32,8 @@ import type { ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import MemePageMainStageSubmissionLink from "./MemePageMainStageSubmissionLink";
 
-const TOP_LABEL_CLASS =
-  "tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-500";
+const ARTWORK_LABEL_CLASS =
+  "tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-mb-2";
 const CREATOR_NAME_CLASS =
   "tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
 const INLINE_METRIC_LABEL_CLASS =
@@ -48,8 +48,9 @@ const RANK_BADGE_CLASS =
   "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-[11px] md:tw-leading-4";
 const INLINE_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
-const EDITION_STATS_ROW_CLASS =
-  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
+const DETAIL_STATS_GRID_CLASS =
+  "tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-6 tw-gap-y-6 lg:tw-grid-cols-3 xl:tw-gap-x-8";
+const DETAIL_STATS_GRID_ITEM_CLASS = "tw-min-w-0";
 const MARKET_OVERVIEW_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-5 xl:tw-gap-x-8";
 const MARKET_GRID_ITEM_CLASS =
@@ -139,8 +140,9 @@ export function MemeEditionSizeStats({
 
   return (
     <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8">
-      <div className={EDITION_STATS_ROW_CLASS}>
+      <div className={DETAIL_STATS_GRID_CLASS}>
         <InlineStatsMetric
+          className={DETAIL_STATS_GRID_ITEM_CLASS}
           label={t(locale, "theMemes.detail.live.edition.editionSize")}
           value={formatInteger(locale, nftMeta.edition_size)}
           rank={nftMeta.edition_size_rank}
@@ -151,12 +153,14 @@ export function MemeEditionSizeStats({
         {nftMeta.burnt > 0 && (
           <>
             <InlineStatsMetric
+              className={DETAIL_STATS_GRID_ITEM_CLASS}
               label={t(locale, "theMemes.detail.live.edition.burnt")}
               value={formatInteger(locale, nftMeta.burnt)}
               icon={<FireIcon className="tw-h-4 tw-w-4 tw-text-red" />}
               locale={locale}
             />
             <InlineStatsMetric
+              className={DETAIL_STATS_GRID_ITEM_CLASS}
               label={t(locale, "theMemes.detail.live.edition.exBurnt")}
               value={formatInteger(locale, nftMeta.edition_size_not_burnt)}
               rank={nftMeta.edition_size_not_burnt_rank}
@@ -166,6 +170,7 @@ export function MemeEditionSizeStats({
           </>
         )}
         <InlineStatsMetric
+          className={DETAIL_STATS_GRID_ITEM_CLASS}
           label={editionSizeExMuseumLabel}
           value={formatInteger(locale, nftMeta.edition_size_cleaned)}
           rank={nftMeta.edition_size_cleaned_rank}
@@ -173,6 +178,7 @@ export function MemeEditionSizeStats({
           locale={locale}
         />
         <InlineStatsMetric
+          className={DETAIL_STATS_GRID_ITEM_CLASS}
           label={t(locale, "theMemes.detail.live.collectors.collectors")}
           value={formatInteger(locale, nftMeta.hodlers)}
           rank={nftMeta.hodlers_rank}
@@ -185,6 +191,7 @@ export function MemeEditionSizeStats({
 }
 
 function InlineStatsMetric({
+  className,
   label,
   value,
   rank,
@@ -194,6 +201,7 @@ function InlineStatsMetric({
   infoTitle,
   locale,
 }: {
+  readonly className?: string | undefined;
   readonly label: string;
   readonly value: string;
   readonly rank?: number | undefined;
@@ -209,7 +217,7 @@ function InlineStatsMetric({
   const displayableRank = getDisplayableRank(rank, total);
 
   return (
-    <div className="tw-min-w-[8.5rem]">
+    <div className={className ?? "tw-min-w-[8.5rem]"}>
       <div className="tw-mb-1 tw-flex tw-items-center tw-gap-2 md:tw-mb-2">
         {icon}
         <span className={INLINE_METRIC_LABEL_CLASS}>{label}</span>
@@ -362,21 +370,25 @@ export function MemeArtworkDetails({
   const isAligned = layout === "aligned";
   const rowClassName = isAligned
     ? "tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-8 tw-gap-y-6 sm:tw-grid-cols-2"
-    : "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-6";
+    : DETAIL_STATS_GRID_CLASS;
+  const creatorClassName = isAligned
+    ? "tw-min-w-0"
+    : "tw-col-span-1 tw-min-w-0 lg:tw-col-span-2";
   const itemClassName = isAligned
     ? "tw-min-w-[8.5rem] sm:tw-justify-self-end sm:tw-text-right"
-    : "tw-min-w-fit";
-  const mintDateClassName =
-    "tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end";
+    : "tw-col-start-2 tw-min-w-0 lg:tw-col-start-3";
+  const mintDateClassName = isAligned
+    ? "tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end"
+    : "tw-flex tw-h-7 tw-flex-wrap tw-items-center";
 
   return (
     <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-8 md:tw-pb-8 lg:tw-pt-0">
       <div className={rowClassName}>
-        <div className="tw-min-w-0">
-          <div className={TOP_LABEL_CLASS}>
+        <div className={creatorClassName}>
+          <div className={ARTWORK_LABEL_CLASS}>
             {t(locale, "theMemes.detail.live.artwork.createdBy")}
           </div>
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2">
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-y-2">
             {creators.map((creator, index) => {
               const nextCreator = creators[index + 1];
               const hasNextCreator = nextCreator !== undefined;
@@ -391,7 +403,7 @@ export function MemeArtworkDetails({
                       ? `handle:${creator.handle}`
                       : `plain:${creator.display}`
                   }
-                  className={`tw-flex tw-items-center ${
+                  className={`tw-flex tw-min-w-0 tw-items-center ${
                     hasNextCreator && !showComma ? "tw-mr-4" : ""
                   }`}
                 >
@@ -417,7 +429,7 @@ export function MemeArtworkDetails({
           </div>
         </div>
         <div className={itemClassName}>
-          <div className={TOP_LABEL_CLASS}>
+          <div className={ARTWORK_LABEL_CLASS}>
             {t(locale, "theMemes.detail.live.artwork.mintDate")}
           </div>
           <div className={mintDateClassName}>

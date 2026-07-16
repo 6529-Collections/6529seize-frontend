@@ -463,7 +463,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     ).toBeTruthy();
     expect(
       collectorsLabel.parentElement?.parentElement?.parentElement
-    ).toHaveClass("tw-flex", "tw-flex-wrap");
+    ).toHaveClass("tw-grid", "tw-grid-cols-2", "lg:tw-grid-cols-3");
   });
 
   it("uses ranked collection size for live rank totals when provided", () => {
