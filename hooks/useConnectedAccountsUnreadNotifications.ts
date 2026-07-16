@@ -124,6 +124,7 @@ const fetchUnreadCountForAccount = async (
       headers: {
         Authorization: `Bearer ${account.jwt}`,
       },
+      cache: "no-store",
       errorMode: "structured",
     });
     return clampUnreadCount(notifications.unread_count);

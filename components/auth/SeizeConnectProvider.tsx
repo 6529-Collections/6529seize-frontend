@@ -746,7 +746,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const { notifications: activeUnreadNotifications } = useUnreadNotifications(
     hasValidWalletAuth ? (activeStoredAccount?.profileHandle ?? null) : null,
-    { enabled: hasValidWalletAuth }
+    {
+      enabled: hasValidWalletAuth,
+      profileId: activeStoredAccount?.profileId,
+    }
   );
 
   const connectedAccountUnreadNotifications = useMemo(() => {

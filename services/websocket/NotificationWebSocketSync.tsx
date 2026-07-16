@@ -102,12 +102,13 @@ export function NotificationWebSocketSync() {
   }, [authRevision, connectedAccountsRevision, send, status]);
 
   const invalidateProfiles = useCallback(
-    (profileIds: readonly string[]) => {
+    (profileIds: readonly string[], forceActiveRefresh = false) => {
       const profileIdSet = new Set(profileIds);
       const activeProfileId = connectedAccounts.find(
         (account) => account.isActive
       )?.profileId;
       const shouldRefreshActive =
+        forceActiveRefresh ||
         !profileIdSet.size ||
         !activeProfileId ||
         profileIdSet.has(activeProfileId);
@@ -161,7 +162,7 @@ export function NotificationWebSocketSync() {
         return;
       }
       setNotificationRealtimeState(true, value.profile_ids);
-      invalidateProfiles(value.profile_ids);
+      invalidateProfiles(value.profile_ids, true);
     },
     [invalidateProfiles]
   );

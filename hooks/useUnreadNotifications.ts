@@ -15,6 +15,7 @@ import { useNotificationRealtimeState } from "@/services/notifications/notificat
 
 interface UseUnreadNotificationsOptions {
   readonly enabled?: boolean | undefined;
+  readonly profileId?: string | null | undefined;
 }
 
 const FALLBACK_POLL_INTERVAL_MS = 30_000;
@@ -47,7 +48,8 @@ export function useUnreadNotifications(
   const isEnabled = !!handle && options.enabled !== false && hasUsableAuthJwt;
   const isRealtimeCovered =
     notificationRealtimeState.connected &&
-    notificationRealtimeState.syncedProfileIds.length > 0;
+    !!options.profileId &&
+    notificationRealtimeState.syncedProfileIds.includes(options.profileId);
 
   const notificationQuery = useQuery<ApiNotificationsResponseV2>({
     queryKey: [
@@ -73,6 +75,7 @@ export function useUnreadNotifications(
         params: {
           limit: "1",
         },
+        cache: "no-store",
         errorMode: "structured",
       });
     },

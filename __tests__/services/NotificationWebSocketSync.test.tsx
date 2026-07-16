@@ -177,6 +177,29 @@ describe("NotificationWebSocketSync", () => {
     unmount();
   });
 
+  it("catches up the active profile when a sync ack omits it", () => {
+    const { unmount } = render(<Subject />);
+    invalidateQueriesMock.mockClear();
+
+    act(() => {
+      messageCallbacks.get(WsMessageType.NOTIFICATION_IDENTITIES_SYNCED)?.({
+        profile_ids: ["profile-2"],
+      });
+    });
+
+    expect(invalidateQueriesMock).toHaveBeenCalledTimes(2);
+    expect(invalidateQueriesMock).toHaveBeenCalledWith({
+      queryKey: ["IDENTITY_NOTIFICATIONS"],
+    });
+    expect(invalidateQueriesMock).toHaveBeenCalledWith({
+      queryKey: ["CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS"],
+    });
+    expect(screen.getByTestId("realtime-state")).toHaveTextContent(
+      "true:profile-2"
+    );
+    unmount();
+  });
+
   it("ignores malformed payloads and globally refreshes after an empty sync ack", () => {
     const { unmount } = render(<Subject />);
     invalidateQueriesMock.mockClear();
