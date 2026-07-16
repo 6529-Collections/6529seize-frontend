@@ -92,8 +92,8 @@ test("keeps FAQ context and article hierarchy on child pages", async () => {
 
   const breadcrumb = screen.getByRole("navigation", { name: "Breadcrumb" });
   expect(
-    within(breadcrumb).getByRole("link", { name: "Delegation Center" })
-  ).toHaveAttribute("href", "/delegation/delegation-center");
+    within(breadcrumb).queryByRole("link", { name: "Delegation Center" })
+  ).not.toBeInTheDocument();
   expect(
     within(breadcrumb).getByRole("link", { name: "Delegation FAQ" })
   ).toHaveAttribute("href", "/delegation/delegation-faq");

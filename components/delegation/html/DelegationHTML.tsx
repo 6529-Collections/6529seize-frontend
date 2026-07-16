@@ -65,15 +65,6 @@ function DelegationArticleView(
                 Delegation FAQ
               </p>
               <nav aria-label="Breadcrumb" className={styles["breadcrumbNav"]}>
-                <Link
-                  href="/delegation/delegation-center"
-                  className="tw-hidden sm:tw-inline"
-                >
-                  Delegation Center
-                </Link>
-                <span aria-hidden="true" className="tw-hidden sm:tw-inline">
-                  /
-                </span>
                 <Link href="/delegation/delegation-faq">Delegation FAQ</Link>
                 <span aria-hidden="true">/</span>
                 <span aria-current="page">{props.article.title}</span>
