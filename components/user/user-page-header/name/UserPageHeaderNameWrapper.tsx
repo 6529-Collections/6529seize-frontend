@@ -51,7 +51,6 @@ export default function UserPageHeaderNameWrapper({
           <CommonAnimationOpacity
             key="modal"
             elementClasses="tw-absolute tw-z-10"
-            elementRole="dialog"
             onClicked={(e) => e.stopPropagation()}
           >
             <UserPageHeaderEditName
