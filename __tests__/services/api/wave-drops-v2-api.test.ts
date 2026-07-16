@@ -552,6 +552,71 @@ describe("fetchWaveDropsFeedV2", () => {
     ]);
   });
 
+  it("forwards the same server headers to the feed and every nested hydration request", async () => {
+    const safeServerHeaders = { "x-safe-server-context": "present" };
+    const fullMetadata = [{ data_key: "artist", data_value: "Alice" }];
+    commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
+      if (endpoint === "v2/waves/wave-1/drops") {
+        return {
+          wave,
+          drops: [createEnrichableDrop({ parts_count: 2 })],
+        } as never;
+      }
+      if (endpoint === "v2/drops/drop-1/parts/2") {
+        return {
+          part_no: 2,
+          content: "Part 2",
+          media: [],
+          attachments: [],
+          quoted_drop: null,
+        } as never;
+      }
+      if (endpoint === "v2/drops/drop-1/metadata") {
+        return fullMetadata as never;
+      }
+      if (endpoint === "v2/drops/drop-1/votes") {
+        return {
+          data: [{ voter: identity, vote: 5 }],
+          count: 1,
+          page: 1,
+          next: false,
+        } as never;
+      }
+      throw new Error(`Unexpected test endpoint: ${endpoint}`);
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+      headers: safeServerHeaders,
+      includeFullMetadata: true,
+      includeTopRaters: true,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(4);
+    expect(
+      commonApiFetchMock.mock.calls.map(([request]) => request.endpoint)
+    ).toEqual(
+      expect.arrayContaining([
+        "v2/waves/wave-1/drops",
+        "v2/drops/drop-1/parts/2",
+        "v2/drops/drop-1/metadata",
+        "v2/drops/drop-1/votes",
+      ])
+    );
+    for (const [request] of commonApiFetchMock.mock.calls) {
+      expect(request.headers).toEqual(safeServerHeaders);
+    }
+    expect(result.drops[0]).toEqual(
+      expect.objectContaining({
+        metadata: [...priorityMetadata, ...fullMetadata],
+        top_raters: [expect.objectContaining({ rating: 5 })],
+      })
+    );
+    expect(JSON.stringify(result)).not.toContain("x-safe-server-context");
+    expect(JSON.stringify(result)).not.toContain("present");
+  });
+
   it("rethrows abort errors from additional part fetches", async () => {
     const abortError = new DOMException("Aborted", "AbortError");
     commonApiFetchMock
