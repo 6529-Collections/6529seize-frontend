@@ -57,6 +57,11 @@ export interface SeizeCollectionPreviewTrait {
   readonly value: string;
 }
 
+export interface SeizeCollectionLiveMint {
+  readonly mintedCount?: number | null | undefined;
+  readonly maxCount?: number | null | undefined;
+}
+
 export interface SeizeCollectionLinkPreview extends LinkPreviewBase {
   readonly type: "6529.collection";
   readonly kind: SeizeCollectionPreviewKind;
@@ -65,6 +70,7 @@ export interface SeizeCollectionLinkPreview extends LinkPreviewBase {
   readonly people?: readonly SeizeCollectionPreviewPerson[] | null | undefined;
   readonly facts?: readonly SeizeCollectionPreviewFact[] | null | undefined;
   readonly traits?: readonly SeizeCollectionPreviewTrait[] | null | undefined;
+  readonly liveMint?: SeizeCollectionLiveMint | null | undefined;
 }
 
 type GoogleWorkspaceAvailability = "public" | "restricted";

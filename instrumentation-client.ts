@@ -18,6 +18,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterAnonymousUnsafeEvalCspError,
+  shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
@@ -192,6 +193,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterSentryRouteParameterizationError(event)) {
+    return true;
+  }
+
+  if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
     return true;
   }
 
