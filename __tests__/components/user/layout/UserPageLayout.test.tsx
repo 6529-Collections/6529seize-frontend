@@ -21,8 +21,17 @@ jest.mock("next/navigation", () => ({
 jest.mock(
   "@/components/user/user-page-header/UserPageHeader",
   () =>
-    function MockHeader() {
-      return <div data-testid="user-page-header" />;
+    function MockHeader({
+      fallbackMainAddress,
+    }: {
+      readonly fallbackMainAddress: string;
+    }) {
+      return (
+        <div
+          data-testid="user-page-header"
+          data-fallback-main-address={fallbackMainAddress}
+        />
+      );
     }
 );
 jest.mock(
@@ -52,7 +61,10 @@ describe("UserPageLayout", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
   });
 
-  const renderComponent = () => {
+  const renderComponent = (
+    profile: ApiIdentity = mockProfile,
+    handleOrWallet = "testuser"
+  ) => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -61,7 +73,10 @@ describe("UserPageLayout", () => {
         <QueryClientProvider client={queryClient}>
           <AuthContext.Provider value={mockAuthContext}>
             <ReactQueryWrapperContext.Provider value={mockReactQueryContext}>
-              <UserPageLayout profile={mockProfile} handleOrWallet="testuser">
+              <UserPageLayout
+                profile={profile}
+                handleOrWallet={handleOrWallet}
+              >
                 <div>Content</div>
               </UserPageLayout>
             </ReactQueryWrapperContext.Provider>
@@ -82,6 +97,18 @@ describe("UserPageLayout", () => {
     renderComponent();
     await waitFor(() =>
       expect(mockReactQueryContext.setProfile).toHaveBeenCalledWith(mockProfile)
+    );
+  });
+
+  it("uses the normalized route identity when a primary wallet is absent", () => {
+    renderComponent(
+      { ...mockProfile, primary_wallet: undefined as unknown as string },
+      "WalletlessProfile"
+    );
+
+    expect(screen.getByTestId("user-page-header")).toHaveAttribute(
+      "data-fallback-main-address",
+      "walletlessprofile"
     );
   });
 });

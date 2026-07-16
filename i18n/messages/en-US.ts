@@ -298,6 +298,27 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "subsection.developerOpenData": "Data & Developer Tools",
 } as const);
 
+const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
+  "routes.waves": "Waves | Brain",
+  "routes.notifications": "Notifications | Brain",
+  "routes.messages": "Messages | Brain",
+  "routes.memeCalendar": "Memes Minting Calendar",
+  "routes.theMemes": "The Memes | Collections",
+  "routes.memeLab": "Meme Lab | Collections",
+  "routes.network": "Network",
+  "routes.gradient": "6529 Gradient | Collections",
+  "routes.nextGen": "NextGen | Collections",
+  "routes.rememes": "Rememes | Collections",
+  "routes.openData": "Open Data | Tools",
+  "routes.discovery": "Discovery",
+  "routes.profile": "Profile | 6529.io",
+  "wave.default": "{waveName} | Brain",
+  "wave.newMessages.one": "({count} new message) {waveName} | Brain",
+  "wave.newMessages.other": "({count} new messages) {waveName} | Brain",
+  "notifications.one": "({count} notification) {title}",
+  "notifications.other": "({count} notifications) {title}",
+} as const);
+
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   waveSections: "Wave sections",
   appSections: "App sections",
@@ -527,6 +548,7 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
 
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
+  "classification.edit": "Edit {name}'s classification",
   "dm.createFailed.title": "Couldn't create this direct message.",
   "dm.createFailed.description": PLEASE_TRY_AGAIN,
   "name.profileEnabled": "Profile enabled: {date}",
@@ -561,6 +583,10 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.errors.doxxing.title": "Error: Doxxing of Another Person",
   "aboutEdit.errors.doxxing.value":
     "Your About text was not accepted because our automated checks flagged it for potentially doxxing another user of the system. We have a strong cultural value around respecting pseudonymity, so we'd appreciate it if you adjusted your text.",
+} as const);
+
+const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
+  details: "Network ID Check details",
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
@@ -1861,6 +1887,7 @@ export const EN_US_MESSAGES = {
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
+  ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...wavesRightPanelMessages,
@@ -1903,6 +1930,7 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
