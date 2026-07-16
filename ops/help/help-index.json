@@ -4436,6 +4436,44 @@
       "source_refs": ["ops/docs/waves/composer/feature-enter-key-behavior.md"]
     },
     {
+      "id": "waves.composer.storms",
+      "kind": "workflow",
+      "title": "Create and manage a storm post",
+      "aliases": [
+        "storm post",
+        "create a storm",
+        "multi-part post",
+        "add storm part",
+        "edit storm part",
+        "reorder storm"
+      ],
+      "keywords": [
+        "waves",
+        "composer",
+        "storm",
+        "parts",
+        "edit",
+        "reorder",
+        "discard",
+        "post"
+      ],
+      "facts": [
+        "Write the first part and select Break into storm to open the private Storm draft workspace.",
+        "The primary action says Add part while writing a new part, Save changes while editing, and Post storm when the current editor is empty.",
+        "Saved parts have visible controls to edit, move earlier or later, and remove; Discard clears the complete draft after confirmation.",
+        "Blank or whitespace-only text is not saved as a storm part, while media-only parts are allowed.",
+        "The storm is published as one drop with multiple ordered parts."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/messages"],
+      "tags": ["waves", "composer", "storm", "workflow"],
+      "source_refs": [
+        "ops/docs/waves/composer/feature-storm-composer.md",
+        "components/waves/CreateDropStormParts.tsx",
+        "components/waves/create-drop-content/CreateDropLayout.tsx"
+      ]
+    },
+    {
       "id": "waves.composer.curation-url",
       "kind": "workflow",
       "title": "Wave curation URL submissions",

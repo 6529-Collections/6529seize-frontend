@@ -37,6 +37,20 @@ import type {
 const getFileIdentity = (file: File): string =>
   [file.name, file.size, file.type, file.lastModified].join(":");
 
+let fallbackDropPartClientId = 0;
+
+const createDropPartClientId = (): string => {
+  if (
+    globalThis.crypto !== undefined &&
+    typeof globalThis.crypto.randomUUID === "function"
+  ) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  fallbackDropPartClientId += 1;
+  return `wave-drop-part-${Date.now()}-${fallbackDropPartClientId}`;
+};
+
 export const normalizeIdentityValue = (identity: string | null | undefined) =>
   identity?.trim().toLowerCase() ?? null;
 
@@ -142,9 +156,24 @@ export const canAddDropPart = ({
   readonly drop: CreateDropConfig | null;
   readonly hasPendingInlineImageUpload: boolean;
 }): boolean =>
-  (!!markdown || files.length > 0) &&
+  ((markdown?.trim().length ?? 0) > 0 || files.length > 0) &&
   !hasPendingInlineImageUpload &&
   !getIsDropLimit(drop, markdown);
+
+export const canSubmitComposerAction = ({
+  canAddPart,
+  canSubmit,
+  editingPartIndex,
+  isStormMode,
+}: {
+  readonly canAddPart: boolean;
+  readonly canSubmit: boolean;
+  readonly editingPartIndex: number | null;
+  readonly isStormMode: boolean;
+}): boolean =>
+  isStormMode && (editingPartIndex !== null || canAddPart)
+    ? canAddPart
+    : canSubmit;
 
 const ensurePartsWithFallback = (
   parts: CreateDropPart[],
@@ -359,6 +388,7 @@ export const buildGifDrop = ({
   const parts: CreateDropPart[] = [
     ...(drop?.parts ?? []),
     {
+      clientId: createDropPartClientId(),
       content: gif,
       quoted_drop:
         activeDrop?.action === ActiveDropAction.QUOTE
@@ -444,6 +474,7 @@ export const buildCurrentDrop = ({
       : [
           ...(drop?.parts ?? []),
           {
+            clientId: createDropPartClientId(),
             content: (markdown?.length ?? 0) > 0 ? markdown : null,
             quoted_drop: quotedDrop,
             media: availableFiles,
