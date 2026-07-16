@@ -21,7 +21,7 @@ const ShareArrowIcon = ({
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M20.5 12H11a8.25 8.25 0 0 0-8.25 8.25v.5A10 10 0 0 1 11 16.5h3"
+      d="M20.5 12H11a8.25 8.25 0 0 0-8.25 8.25"
     />
   </svg>
 );
