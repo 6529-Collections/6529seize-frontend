@@ -12,6 +12,13 @@ import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector"
 import { act, render, waitFor } from "@testing-library/react";
 import React from "react";
 
+const resetWagmiAppKitFastPathForTests = (): void => {
+  Reflect.deleteProperty(
+    globalThis,
+    Symbol.for("6529.wagmiAppKitFastPathStore")
+  );
+};
+
 // Mock capacitor-secure-storage-plugin first to prevent import errors
 jest.mock("capacitor-secure-storage-plugin", () => ({
   SecureStoragePlugin: {
@@ -27,11 +34,13 @@ jest.mock("@/components/auth/Auth");
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: jest.fn(),
 }));
+const mockPasswordRequestDelegates: jest.Mock[] = [];
 jest.mock("@/hooks/useAppWalletPasswordModal", () => ({
-  useAppWalletPasswordModal: () => ({
-    requestPassword: jest.fn(),
-    modal: null,
-  }),
+  useAppWalletPasswordModal: () => {
+    const requestPassword = jest.fn().mockResolvedValue("password");
+    mockPasswordRequestDelegates.push(requestPassword);
+    return { requestPassword, modal: null };
+  },
 }));
 jest.mock("@reown/appkit/react", () => ({
   createAppKit: jest.fn(),
@@ -42,11 +51,9 @@ jest.mock("@capacitor/core", () => ({
   },
 }));
 jest.mock("@/utils/appkit-initialization.utils", () => ({
-  initializeAppKit: jest.fn().mockReturnValue({
-    adapter: {
-      wagmiConfig: { chains: [], client: {} },
-    },
-  }),
+  createAppKitAdapter: jest.fn(),
+  initializeAppKit: jest.fn().mockReturnValue({}),
+  AppKitAdapterConfig: {},
   AppKitInitializationConfig: {},
 }));
 jest.mock("@/components/providers/AppKitAdapterManager", () => ({
@@ -112,6 +119,7 @@ jest.mock("ethers", () => ({
 
 describe("WagmiSetup Security Tests", () => {
   let mockInitializeAppKit: jest.Mock;
+  let mockCreateAppKitAdapter: jest.Mock;
   let mockLogErrorSecurely: jest.Mock;
   let mockSetToast: jest.Mock;
   let mockAdapterCreateMethod: jest.Mock;
@@ -167,6 +175,8 @@ describe("WagmiSetup Security Tests", () => {
   };
 
   beforeEach(() => {
+    resetWagmiAppKitFastPathForTests();
+    mockPasswordRequestDelegates.length = 0;
     jest.clearAllMocks();
     jest.useFakeTimers();
     restoreEthereumState();
@@ -182,6 +192,8 @@ describe("WagmiSetup Security Tests", () => {
 
     mockInitializeAppKit =
       require("@/utils/appkit-initialization.utils").initializeAppKit;
+    mockCreateAppKitAdapter =
+      require("@/utils/appkit-initialization.utils").createAppKitAdapter;
     mockLogErrorSecurely = require("@/utils/error-sanitizer").logErrorSecurely;
     mockSetToast = jest.fn();
     mockAdapterCreateMethod = jest.fn();
@@ -220,21 +232,21 @@ describe("WagmiSetup Security Tests", () => {
     }));
 
     // Default successful mock response
-    mockInitializeAppKit.mockReturnValue({
-      adapter: {
-        wagmiConfig: {
-          chains: [],
-          client: {},
-          connectors: [],
-          _internal: {
-            connectors: {
-              setup: mockConnectorSetup,
-              setState: mockConnectorSetState,
-            },
+    const adapter = {
+      wagmiConfig: {
+        chains: [],
+        client: {},
+        connectors: [],
+        _internal: {
+          connectors: {
+            setup: mockConnectorSetup,
+            setState: mockConnectorSetState,
           },
         },
       },
-    });
+    };
+    mockCreateAppKitAdapter.mockReturnValue(adapter);
+    mockInitializeAppKit.mockReturnValue({ adapter });
   });
 
   const renderAndWaitForMount = async (
@@ -269,7 +281,15 @@ describe("WagmiSetup Security Tests", () => {
 
   const AppKitBootstrapProbe = () => {
     const bootstrap = useAppKitBootstrap();
-    return <div data-testid="appkit-bootstrap-status">{bootstrap.status}</div>;
+    return (
+      <>
+        <div data-testid="appkit-bootstrap-status">{bootstrap.status}</div>
+        <div data-testid="appkit-terminal-error">
+          {String(bootstrap.hasTerminalError)}
+        </div>
+        <div data-testid="appkit-created">{String(bootstrap.isCreated)}</div>
+      </>
+    );
   };
 
   afterEach(() => {
@@ -297,10 +317,10 @@ describe("WagmiSetup Security Tests", () => {
       );
     });
 
-    it("calls initializeAppKit with empty wallets on mount", async () => {
+    it("creates the Wagmi adapter with empty wallets on mount", async () => {
       await renderAndWaitForMount();
 
-      expect(mockInitializeAppKit).toHaveBeenCalledWith({
+      expect(mockCreateAppKitAdapter).toHaveBeenCalledWith({
         wallets: [],
         adapterManager: expect.any(Object),
         isCapacitor: false,
@@ -701,6 +721,251 @@ describe("WagmiSetup Security Tests", () => {
   });
 
   describe("State Management Security", () => {
+    it("renders the Wagmi provider before starting AppKit", async () => {
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+          <div data-testid="children">Test</div>
+        </WagmiSetup>
+      );
+
+      expect(
+        container.querySelector('[data-testid="wagmi-provider"]')
+      ).toBeTruthy();
+      expect(mockCreateAppKitAdapter).toHaveBeenCalledTimes(1);
+      expect(mockInitializeAppKit).not.toHaveBeenCalled();
+      expect(
+        container.querySelector('[data-testid="appkit-created"]')
+      ).toHaveTextContent("false");
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+    });
+
+    it("initializes the adapter and AppKit once in Strict Mode", async () => {
+      const tree = (
+        <React.StrictMode>
+          <WagmiSetup>
+            <div data-testid="children">Test</div>
+          </WagmiSetup>
+        </React.StrictMode>
+      );
+      const view = render(tree);
+
+      await waitFor(() => {
+        expect(view.getByTestId("wagmi-provider")).toBeInTheDocument();
+      });
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+
+      view.rerender(tree);
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+
+      expect(mockCreateAppKitAdapter).toHaveBeenCalledTimes(1);
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+    });
+
+    it("reuses the adapter and AppKit initialization across a full remount", async () => {
+      const firstView = render(
+        <WagmiSetup>
+          <div data-testid="first-child">First</div>
+        </WagmiSetup>
+      );
+
+      await waitFor(() => {
+        expect(firstView.getByTestId("wagmi-provider")).toBeInTheDocument();
+      });
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      firstView.unmount();
+
+      const secondView = render(
+        <WagmiSetup>
+          <div data-testid="second-child">Second</div>
+        </WagmiSetup>
+      );
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+
+      expect(secondView.getByTestId("wagmi-provider")).toBeInTheDocument();
+      expect(mockCreateAppKitAdapter).toHaveBeenCalledTimes(1);
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+    });
+
+    it("routes retained connector callbacks only to the current password modal", async () => {
+      const appWallet = {
+        address: "0x1234567890123456789012345678901234567890",
+        address_hashed: "hashed-address",
+        name: "Wallet 1",
+        created_at: Date.now(),
+        mnemonic: "",
+        private_key:
+          "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        imported: false,
+      };
+      mockUseAppWallets.mockReturnValue({
+        fetchingAppWallets: false,
+        appWallets: [appWallet],
+        appWalletsSupported: true,
+        createAppWallet: jest.fn(),
+        importAppWallet: jest.fn(),
+        deleteAppWallet: jest.fn(),
+        migrateAppWallet: jest.fn(),
+      });
+
+      const firstView = await renderAndWaitForMount();
+      await waitFor(() => {
+        expect(mockCreateAppWalletConnector).toHaveBeenCalled();
+      });
+      const retainedPasswordRequest = mockCreateAppWalletConnector.mock
+        .calls[0]?.[2] as (() => Promise<string>) | undefined;
+      expect(retainedPasswordRequest).toBeDefined();
+      const firstMountDelegates = [...mockPasswordRequestDelegates];
+
+      firstView.unmount();
+      await expect(retainedPasswordRequest!()).rejects.toThrow(
+        "Internal API failed"
+      );
+      for (const delegate of firstMountDelegates) {
+        expect(delegate).not.toHaveBeenCalled();
+      }
+
+      await renderAndWaitForMount();
+      expect(mockCreateAppWalletConnector).toHaveBeenCalledTimes(1);
+      const currentDelegate = mockPasswordRequestDelegates.at(-1);
+      expect(currentDelegate).toBeDefined();
+      await expect(retainedPasswordRequest!()).resolves.toBe("password");
+
+      expect(currentDelegate).toHaveBeenCalledWith(
+        appWallet.address,
+        appWallet.address_hashed
+      );
+      for (const delegate of firstMountDelegates) {
+        expect(delegate).not.toHaveBeenCalled();
+      }
+      expect(mockCreateAppWalletConnector).toHaveBeenCalledTimes(1);
+    });
+
+    it("routes a retained readiness failure toast to the current provider", async () => {
+      let rejectReady!: (error: Error) => void;
+      const ready = new Promise<void>((_resolve, reject) => {
+        rejectReady = reject;
+      });
+      const adapter = {
+        wagmiConfig: {
+          chains: [],
+          client: {},
+          connectors: [],
+          _internal: {
+            connectors: {
+              setup: mockConnectorSetup,
+              setState: mockConnectorSetState,
+            },
+          },
+        },
+      };
+      const firstToast = jest.fn();
+      const currentToast = jest.fn();
+      mockInitializeAppKit.mockReturnValue({ adapter, ready });
+      (useAuth as jest.Mock).mockReturnValue({ setToast: firstToast });
+
+      const firstView = render(
+        <WagmiSetup>
+          <div>First</div>
+        </WagmiSetup>
+      );
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      firstView.unmount();
+
+      (useAuth as jest.Mock).mockReturnValue({ setToast: currentToast });
+      render(
+        <WagmiSetup>
+          <div>Second</div>
+        </WagmiSetup>
+      );
+
+      const readyError = new Error("ready failed");
+      await act(async () => {
+        rejectReady(readyError);
+        await ready.catch(() => undefined);
+      });
+
+      await waitFor(() => {
+        expect(currentToast).toHaveBeenCalledWith(
+          expect.objectContaining({ type: "error" })
+        );
+      });
+      expect(firstToast).not.toHaveBeenCalled();
+    });
+
+    it("does not remount children when AppKit is created", async () => {
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      const adapter = mockCreateAppKitAdapter.mock.results[0]?.value ?? {
+        wagmiConfig: {
+          chains: [],
+          client: {},
+          connectors: [],
+          _internal: {
+            connectors: {
+              setup: mockConnectorSetup,
+              setState: mockConnectorSetState,
+            },
+          },
+        },
+      };
+      mockInitializeAppKit.mockReturnValue({ adapter, ready });
+      let mountCount = 0;
+      let unmountCount = 0;
+
+      const ChildMountProbe = () => {
+        React.useEffect(() => {
+          mountCount += 1;
+          return () => {
+            unmountCount += 1;
+          };
+        }, []);
+        return <div data-testid="stable-child">Stable</div>;
+      };
+
+      const view = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+          <ChildMountProbe />
+        </WagmiSetup>
+      );
+      await waitFor(() => {
+        expect(view.getByTestId("stable-child")).toBeInTheDocument();
+      });
+      const childBeforeAppKit = view.getByTestId("stable-child");
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+
+      expect(view.getByTestId("appkit-created")).toHaveTextContent("true");
+      expect(view.getByTestId("stable-child")).toBe(childBeforeAppKit);
+      expect(mountCount).toBe(1);
+      expect(unmountCount).toBe(0);
+
+      await act(async () => {
+        resolveReady();
+        await ready;
+      });
+    });
+
     it("prevents hydration mismatches by using client-side only mounting", async () => {
       // This test verifies the security pattern of preventing SSR hydration mismatches
       // by ensuring the component handles mounting state properly
@@ -831,6 +1096,9 @@ describe("WagmiSetup Security Tests", () => {
           container.querySelector('[data-testid="appkit-bootstrap-status"]')
         ).toHaveTextContent("error");
       });
+      expect(
+        container.querySelector('[data-testid="appkit-terminal-error"]')
+      ).toHaveTextContent("true");
       expect(container.querySelector('[data-testid="children"]')).toBeTruthy();
       expect(mockLogErrorSecurely).toHaveBeenCalledWith(
         "[WagmiSetup] AppKit ready failed after adapter mount",
@@ -839,6 +1107,193 @@ describe("WagmiSetup Security Tests", () => {
       expect(mockSetToast).toHaveBeenCalledWith(
         expect.objectContaining({ type: "error" })
       );
+    });
+
+    it("bounds a hung background AppKit initialization without uncreating AppKit", async () => {
+      jest.useFakeTimers();
+      const ready = new Promise<void>(() => {
+        // Intentionally never settles to simulate a hung WalletConnect relay.
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
+      });
+
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+        </WagmiSetup>
+      );
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("initializing");
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(15_000);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("error");
+      expect(
+        container.querySelector('[data-testid="appkit-created"]')
+      ).toHaveTextContent("true");
+      expect(
+        container.querySelector('[data-testid="appkit-terminal-error"]')
+      ).toHaveTextContent("false");
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+    });
+
+    it("recovers future waiters when AppKit becomes ready after the timeout", async () => {
+      jest.useFakeTimers();
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
+      });
+
+      const WaitForReadyProbe = () => {
+        const bootstrap = useAppKitBootstrap();
+        const [waitState, setWaitState] = React.useState("idle");
+        return (
+          <>
+            <div data-testid="late-ready-wait-state">{waitState}</div>
+            <button
+              data-testid="late-ready-wait"
+              onClick={() => {
+                bootstrap
+                  .waitForReady()
+                  .then(() => setWaitState("resolved"))
+                  .catch(() => setWaitState("rejected"));
+              }}
+            >
+              Wait
+            </button>
+          </>
+        );
+      };
+
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+          <WaitForReadyProbe />
+        </WagmiSetup>
+      );
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(15_000);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("error");
+
+      await act(async () => {
+        resolveReady();
+        await ready;
+      });
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="appkit-bootstrap-status"]')
+        ).toHaveTextContent("ready");
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-terminal-error"]')
+      ).toHaveTextContent("false");
+
+      await act(async () => {
+        container
+          .querySelector<HTMLButtonElement>('[data-testid="late-ready-wait"]')
+          ?.click();
+        await Promise.resolve();
+      });
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="late-ready-wait-state"]')
+        ).toHaveTextContent("resolved");
+      });
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
+    });
+
+    it("makes a timed-out bootstrap terminal if AppKit later rejects", async () => {
+      jest.useFakeTimers();
+      let rejectReady!: (error: Error) => void;
+      const ready = new Promise<void>((_resolve, reject) => {
+        rejectReady = reject;
+      });
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+        ready,
+      });
+
+      const { container } = render(
+        <WagmiSetup>
+          <AppKitBootstrapProbe />
+        </WagmiSetup>
+      );
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(15_000);
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-terminal-error"]')
+      ).toHaveTextContent("false");
+
+      const readyError = new Error("late ready failure");
+      await act(async () => {
+        rejectReady(readyError);
+        await ready.catch(() => undefined);
+      });
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-testid="appkit-terminal-error"]')
+        ).toHaveTextContent("true");
+      });
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("error");
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
     });
 
     it("rejects connect-intent waiters when AppKit ready hangs past the timeout", async () => {
@@ -877,6 +1332,7 @@ describe("WagmiSetup Security Tests", () => {
 
       const { container } = render(
         <WagmiSetup>
+          <AppKitBootstrapProbe />
           <WaitForReadyProbe />
         </WagmiSetup>
       );
@@ -894,6 +1350,10 @@ describe("WagmiSetup Security Tests", () => {
       expect(
         container.querySelector('[data-testid="wait-for-ready-state"]')
       ).toHaveTextContent("rejected");
+      expect(
+        container.querySelector('[data-testid="appkit-bootstrap-status"]')
+      ).toHaveTextContent("error");
+      expect(mockInitializeAppKit).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1254,8 +1714,7 @@ describe("WagmiSetup Security Tests", () => {
       await renderAndWaitForMount();
 
       expect(mockInitializeAppKit).toHaveBeenCalledWith({
-        wallets: [],
-        adapterManager: expect.any(Object),
+        adapter: expect.any(Object),
         isCapacitor: false,
         chains: expect.any(Array),
       });
@@ -1325,21 +1784,21 @@ describe("WagmiSetup Security Tests", () => {
       };
       const existingConnector = { id: "wallet-connect" };
 
-      mockInitializeAppKit.mockReturnValue({
-        adapter: {
-          wagmiConfig: {
-            chains: [],
-            client: {},
-            connectors: [existingConnector],
-            _internal: {
-              connectors: {
-                setup: mockConnectorSetup,
-                setState: mockConnectorSetState,
-              },
+      const adapter = {
+        wagmiConfig: {
+          chains: [],
+          client: {},
+          connectors: [existingConnector],
+          _internal: {
+            connectors: {
+              setup: mockConnectorSetup,
+              setState: mockConnectorSetState,
             },
           },
         },
-      });
+      };
+      mockCreateAppKitAdapter.mockReturnValue(adapter);
+      mockInitializeAppKit.mockReturnValue({ adapter });
       mockUseAppWallets.mockReturnValue({
         fetchingAppWallets: false,
         appWallets: [validWallet, invalidWallet],
@@ -1397,8 +1856,7 @@ describe("WagmiSetup Security Tests", () => {
       // Component should initialize successfully with valid config
       expect(mockInitializeAppKit).toHaveBeenCalledWith(
         expect.objectContaining({
-          wallets: [],
-          adapterManager: expect.any(Object),
+          adapter: expect.any(Object),
           isCapacitor: false,
         })
       );

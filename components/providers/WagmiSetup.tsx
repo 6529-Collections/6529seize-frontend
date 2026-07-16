@@ -1,7 +1,7 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { mainnet, sepolia } from "viem/chains";
 import { WagmiProvider } from "wagmi";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
@@ -17,8 +17,14 @@ import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { publicEnv } from "@/config/env";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { AppKitValidationError } from "@/errors/appkit-initialization";
-import type { AppKitInitializationConfig } from "@/utils/appkit-initialization.utils";
-import { initializeAppKit } from "@/utils/appkit-initialization.utils";
+import type {
+  AppKitAdapterConfig,
+  AppKitInitializationConfig,
+} from "@/utils/appkit-initialization.utils";
+import {
+  createAppKitAdapter,
+  initializeAppKit,
+} from "@/utils/appkit-initialization.utils";
 import {
   logErrorSecurely,
   sanitizeErrorForUser,
@@ -39,24 +45,246 @@ type MutableRef<T> = {
   current: T;
 };
 
-type SetupAppKitAdapter = (wallets: AppWallet[]) => Promise<void>;
-
-// Ceiling on how long connect-intent callers wait for AppKit readiness; a hung
-// WalletConnect relay must surface as a connect error, not a stuck busy state.
-const APPKIT_READY_WAIT_TIMEOUT_MS = 15_000;
-
-type InitializeAdapterInput = {
-  readonly currentAdapter: WagmiAdapter | null;
-  readonly isInitializingRef: MutableRef<boolean>;
-  readonly setupAppKitAdapter: SetupAppKitAdapter;
+type WagmiAppKitFastPathSnapshot = {
+  readonly adapter: WagmiAdapter | null;
+  readonly adapterInitializationStarted: boolean;
+  readonly configurationKey: string | null;
+  readonly hasTerminalError: boolean;
+  readonly initializationPromise: Promise<void> | null;
+  readonly isCreated: boolean;
+  readonly status: AppKitBootstrapStatus;
 };
+
+type WagmiAppKitFastPathStore = {
+  snapshot: WagmiAppKitFastPathSnapshot;
+  readonly listeners: Set<() => void>;
+  readonly processedWallets: MutableRef<Set<string>>;
+  passwordRequestDelegate:
+    | ((address: string, addressHashed: string) => Promise<string>)
+    | null;
+  toastDelegate: ((toast: AppToastInput) => void) | null;
+};
+
+const WAGMI_APPKIT_FAST_PATH_STORE_KEY = Symbol.for(
+  "6529.wagmiAppKitFastPathStore"
+);
+const INTERNAL_API_FAILED_MESSAGE = "Internal API failed";
+// A hung WalletConnect relay must settle the shared bootstrap as an error, not
+// leave every present and future connect intent in a perpetual waiting state.
+const APPKIT_READY_WAIT_TIMEOUT_MS = 15_000;
+const APPKIT_READY_TIMEOUT_MESSAGE =
+  "Timed out waiting for wallet connection services to become ready";
+
+const EMPTY_FAST_PATH_SNAPSHOT: WagmiAppKitFastPathSnapshot = Object.freeze({
+  adapter: null,
+  adapterInitializationStarted: false,
+  configurationKey: null,
+  hasTerminalError: false,
+  initializationPromise: null,
+  isCreated: false,
+  status: "initializing",
+});
+
+function getWagmiAppKitFastPathStore(): WagmiAppKitFastPathStore {
+  const existingStore = Reflect.get(
+    globalThis,
+    WAGMI_APPKIT_FAST_PATH_STORE_KEY
+  ) as WagmiAppKitFastPathStore | undefined;
+  if (existingStore) {
+    // Preserve the retained adapter across HMR while safely upgrading stores
+    // created by an earlier module version.
+    if (
+      typeof Reflect.get(existingStore.snapshot, "hasTerminalError") !==
+      "boolean"
+    ) {
+      existingStore.snapshot = {
+        ...existingStore.snapshot,
+        hasTerminalError: existingStore.snapshot.status === "error",
+      };
+    }
+    return existingStore;
+  }
+
+  const store: WagmiAppKitFastPathStore = {
+    snapshot: EMPTY_FAST_PATH_SNAPSHOT,
+    listeners: new Set(),
+    processedWallets: { current: new Set() },
+    passwordRequestDelegate: null,
+    toastDelegate: null,
+  };
+  Reflect.set(globalThis, WAGMI_APPKIT_FAST_PATH_STORE_KEY, store);
+  return store;
+}
+
+function getWagmiAppKitFastPathSnapshot(): WagmiAppKitFastPathSnapshot {
+  return getWagmiAppKitFastPathStore().snapshot;
+}
+
+function getEmptyWagmiAppKitFastPathSnapshot(): WagmiAppKitFastPathSnapshot {
+  return EMPTY_FAST_PATH_SNAPSHOT;
+}
+
+function subscribeToWagmiAppKitFastPathStore(listener: () => void): () => void {
+  const store = getWagmiAppKitFastPathStore();
+  store.listeners.add(listener);
+  return () => {
+    store.listeners.delete(listener);
+  };
+}
+
+function updateWagmiAppKitFastPathSnapshot(
+  update: Partial<WagmiAppKitFastPathSnapshot>
+): void {
+  const store = getWagmiAppKitFastPathStore();
+  store.snapshot = { ...store.snapshot, ...update };
+  for (const listener of store.listeners) {
+    listener();
+  }
+}
+
+function requestAppWalletPassword(
+  address: string,
+  addressHashed: string
+): Promise<string> {
+  const delegate = getWagmiAppKitFastPathStore().passwordRequestDelegate;
+  if (!delegate) {
+    return Promise.reject(
+      new AppKitValidationError(INTERNAL_API_FAILED_MESSAGE)
+    );
+  }
+
+  return delegate(address, addressHashed);
+}
+
+function showAppKitToast(toast: AppToastInput): void {
+  getWagmiAppKitFastPathStore().toastDelegate?.(toast);
+}
+
+function assertFastPathConfiguration(configurationKey: string): void {
+  const existingConfigurationKey =
+    getWagmiAppKitFastPathSnapshot().configurationKey;
+  if (
+    existingConfigurationKey !== null &&
+    existingConfigurationKey !== configurationKey
+  ) {
+    throw new AppKitValidationError(INTERNAL_API_FAILED_MESSAGE);
+  }
+}
+
+function createWagmiAdapterOnce(
+  configurationKey: string,
+  createAdapter: () => WagmiAdapter
+): WagmiAdapter {
+  assertFastPathConfiguration(configurationKey);
+  const snapshot = getWagmiAppKitFastPathSnapshot();
+  if (snapshot.adapter) {
+    return snapshot.adapter;
+  }
+  if (snapshot.adapterInitializationStarted) {
+    throw new AppKitValidationError(INTERNAL_API_FAILED_MESSAGE);
+  }
+
+  updateWagmiAppKitFastPathSnapshot({
+    adapterInitializationStarted: true,
+    configurationKey,
+  });
+
+  try {
+    const adapter = createAdapter();
+    updateWagmiAppKitFastPathSnapshot({ adapter });
+    return adapter;
+  } catch (error) {
+    updateWagmiAppKitFastPathSnapshot({
+      hasTerminalError: true,
+      status: "error",
+    });
+    throw error;
+  }
+}
+
+async function runAppKitInitialization(
+  initialize: () => Promise<void>
+): Promise<void> {
+  await Promise.resolve();
+  let didTimeout = false;
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeoutHandle = setTimeout(() => {
+      didTimeout = true;
+      reject(new Error(APPKIT_READY_TIMEOUT_MESSAGE));
+    }, APPKIT_READY_WAIT_TIMEOUT_MS);
+  });
+
+  try {
+    const sdkInitializationPromise = initialize().then(
+      () => {
+        // The caller still receives the bounded timeout rejection, but a
+        // genuine late SDK readiness signal makes future attempts usable.
+        if (didTimeout) {
+          updateWagmiAppKitFastPathSnapshot({
+            hasTerminalError: false,
+            status: "ready",
+          });
+        }
+        return undefined;
+      },
+      (error: unknown) => {
+        if (didTimeout) {
+          updateWagmiAppKitFastPathSnapshot({
+            hasTerminalError: true,
+            status: "error",
+          });
+        }
+        throw error;
+      }
+    );
+    await Promise.race([sdkInitializationPromise, timeoutPromise]);
+    updateWagmiAppKitFastPathSnapshot({
+      hasTerminalError: false,
+      status: "ready",
+    });
+  } catch (error) {
+    updateWagmiAppKitFastPathSnapshot({
+      hasTerminalError: !didTimeout,
+      status: "error",
+    });
+    throw error;
+  } finally {
+    clearTimeout(timeoutHandle);
+  }
+}
+
+function startAppKitInitializationOnce(
+  configurationKey: string,
+  initialize: () => Promise<void>
+): Promise<void> {
+  try {
+    assertFastPathConfiguration(configurationKey);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
+  const snapshot = getWagmiAppKitFastPathSnapshot();
+  if (snapshot.status === "ready") {
+    return Promise.resolve();
+  }
+  if (snapshot.initializationPromise) {
+    return snapshot.initializationPromise;
+  }
+
+  const initializationPromise = runAppKitInitialization(initialize);
+
+  updateWagmiAppKitFastPathSnapshot({
+    configurationKey,
+    initializationPromise,
+    status: "initializing",
+  });
+  return initializationPromise;
+}
 
 type InjectAppWalletConnectorsInput = {
   readonly currentAdapter: WagmiAdapter | null;
   readonly appWallets: readonly AppWallet[];
-  readonly appWalletPasswordModal: ReturnType<typeof useAppWalletPasswordModal>;
-  readonly processedWallets: MutableRef<Set<string>>;
-  readonly setToast: (toast: AppToastInput) => void;
 };
 
 type AppKitAdapterManagerPublicShape = Pick<
@@ -173,7 +401,7 @@ function canAssignProperty(descriptor: PropertyDescriptor): boolean {
 
 function assertAppKitAdapterManager(value: unknown): AppKitAdapterManager {
   if (!isAppKitAdapterManager(value)) {
-    throw new AppKitValidationError("Internal API failed");
+    throw new AppKitValidationError(INTERNAL_API_FAILED_MESSAGE);
   }
 
   return value;
@@ -198,21 +426,6 @@ function isAppKitAdapterManager(value: unknown): value is AppKitAdapterManager {
   );
 }
 
-function initializeAdapterWhenNeeded({
-  currentAdapter,
-  isInitializingRef,
-  setupAppKitAdapter,
-}: InitializeAdapterInput): void {
-  if (currentAdapter !== null || isInitializingRef.current) {
-    return;
-  }
-
-  installSafeEthereumProxy();
-  // Prevent unhandled promise rejections during eager initialization.
-  // Fail-fast behavior is preserved by leaving `currentAdapter` unset.
-  void setupAppKitAdapter([]).catch(() => undefined);
-}
-
 function markAdapterReadyForLaunchTiming(
   currentAdapter: WagmiAdapter | null
 ): void {
@@ -226,13 +439,12 @@ function markAdapterReadyForLaunchTiming(
 function injectAppWalletConnectors({
   currentAdapter,
   appWallets,
-  appWalletPasswordModal,
-  processedWallets,
-  setToast,
 }: InjectAppWalletConnectorsInput): void {
   if (currentAdapter === null) {
     return;
   }
+
+  const { processedWallets } = getWagmiAppKitFastPathStore();
 
   // Check if wallets have actually changed to prevent unnecessary re-injection
   const currentAddresses = new Set(appWallets.map((w) => w.address));
@@ -254,11 +466,7 @@ function injectAppWalletConnectors({
         const connector = createAppWalletConnector(
           Array.from(currentAdapter.wagmiConfig.chains),
           { appWallet: wallet },
-          () =>
-            appWalletPasswordModal.requestPassword(
-              wallet.address,
-              wallet.address_hashed
-            )
+          () => requestAppWalletPassword(wallet.address, wallet.address_hashed)
         );
         const setupConnector =
           currentAdapter.wagmiConfig._internal.connectors.setup(connector);
@@ -288,7 +496,7 @@ function injectAppWalletConnectors({
   } catch (error) {
     logErrorSecurely("[WagmiSetup] Connector injection failed", error);
     const userMessage = sanitizeErrorForUser(error);
-    setToast({
+    showAppKitToast({
       message: userMessage,
       type: "error",
     });
@@ -307,17 +515,27 @@ export default function WagmiSetup({
   const { appWallets, migrateAppWallet } = useAppWallets();
   const appWalletPasswordModal = useAppWalletPasswordModal(migrateAppWallet);
 
-  const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(
-    null
+  const fastPathSnapshot = useSyncExternalStore(
+    subscribeToWagmiAppKitFastPathStore,
+    getWagmiAppKitFastPathSnapshot,
+    getEmptyWagmiAppKitFastPathSnapshot
   );
-  const [appKitBootstrapStatus, setAppKitBootstrapStatus] =
-    useState<AppKitBootstrapStatus>("initializing");
 
-  // Track processed wallets by address for efficient comparison
-  const processedWallets = useRef<Set<string>>(new Set());
-  const isInitializingRef = useRef(false);
-  const isMountedRef = useRef(true);
-  const appKitReadyPromiseRef = useRef<Promise<void> | null>(null);
+  useEffect(() => {
+    const store = getWagmiAppKitFastPathStore();
+    const passwordRequestDelegate = appWalletPasswordModal.requestPassword;
+    store.passwordRequestDelegate = passwordRequestDelegate;
+    store.toastDelegate = setToast;
+
+    return () => {
+      if (store.passwordRequestDelegate === passwordRequestDelegate) {
+        store.passwordRequestDelegate = null;
+      }
+      if (store.toastDelegate === setToast) {
+        store.toastDelegate = null;
+      }
+    };
+  }, [appWalletPasswordModal.requestPassword, setToast]);
 
   // Memoize platform detection to avoid repeated calls
   const isCapacitor = useMemo(() => {
@@ -326,153 +544,147 @@ export default function WagmiSetup({
     return isNative;
   }, []);
 
-  // Use the same adapter manager for both mobile and web
-  // AppKit will automatically handle the appropriate connectors
-  const adapterManager = useMemo(
-    () => new AppKitAdapterManager(appWalletPasswordModal.requestPassword),
-    [appWalletPasswordModal.requestPassword]
+  const chains = useMemo<Chain[]>(
+    () => (enableTestnet ? [mainnet, sepolia] : [mainnet]),
+    [enableTestnet]
   );
 
+  const bootstrapConfigurationKey = `${isCapacitor ? "capacitor" : "web"}:${chains
+    .map((chain) => chain.id)
+    .join(",")}`;
+  const hasFastPathConfigurationMismatch =
+    fastPathSnapshot.configurationKey !== null &&
+    fastPathSnapshot.configurationKey !== bootstrapConfigurationKey;
+  const currentAdapter = hasFastPathConfigurationMismatch
+    ? null
+    : fastPathSnapshot.adapter;
+
   useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const waitForAppKitReady = useCallback(async () => {
-    const readyPromise = appKitReadyPromiseRef.current;
-    if (!readyPromise) {
+    if (
+      !hasFastPathConfigurationMismatch ||
+      fastPathSnapshot.status === "error"
+    ) {
       return;
     }
 
-    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-    const timeoutPromise = new Promise<never>((_resolve, reject) => {
-      timeoutHandle = setTimeout(() => {
-        reject(
-          new Error(
-            "Timed out waiting for wallet connection services to become ready"
-          )
-        );
-      }, APPKIT_READY_WAIT_TIMEOUT_MS);
+    const error = new AppKitValidationError(INTERNAL_API_FAILED_MESSAGE);
+    updateWagmiAppKitFastPathSnapshot({
+      hasTerminalError: true,
+      status: "error",
     });
+    logErrorSecurely("[WagmiSetup] AppKit configuration changed", error);
+    showAppKitToast({
+      message: sanitizeErrorForUser(error),
+      type: "error",
+    });
+  }, [fastPathSnapshot.status, hasFastPathConfigurationMismatch]);
 
-    try {
-      await Promise.race([readyPromise, timeoutPromise]);
-    } finally {
-      clearTimeout(timeoutHandle);
+  const createWagmiAdapter = useCallback((): WagmiAdapter => {
+    const adapterManager = new AppKitAdapterManager(requestAppWalletPassword);
+
+    const config: AppKitAdapterConfig = {
+      wallets: [],
+      adapterManager: assertAppKitAdapterManager(adapterManager),
+      isCapacitor,
+      chains,
+    };
+
+    return createAppKitAdapter(config);
+  }, [chains, isCapacitor]);
+
+  const startAppKitInitialization = useCallback((): Promise<void> => {
+    if (currentAdapter === null) {
+      return Promise.reject(
+        new AppKitValidationError(INTERNAL_API_FAILED_MESSAGE)
+      );
     }
-  }, []);
+
+    return startAppKitInitializationOnce(
+      bootstrapConfigurationKey,
+      async () => {
+        let result: ReturnType<typeof initializeAppKit>;
+
+        try {
+          const config: AppKitInitializationConfig = {
+            adapter: currentAdapter,
+            isCapacitor,
+            chains,
+          };
+          result = await measureMobileLaunchAsync("wagmi_appkit_init", () =>
+            initializeAppKit(config)
+          );
+          updateWagmiAppKitFastPathSnapshot({ isCreated: true });
+        } catch (error) {
+          logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
+          showAppKitToast({
+            message: sanitizeErrorForUser(error),
+            type: "error",
+          });
+          throw error;
+        }
+
+        try {
+          await measureMobileLaunchAsync("wagmi_adapter_ready", async () => {
+            await (result.ready ?? Promise.resolve());
+          });
+          markMobileLaunchStep("wagmi_ready");
+        } catch (error) {
+          showAppKitToast({
+            message: sanitizeErrorForUser(error),
+            type: "error",
+          });
+          logErrorSecurely(
+            "[WagmiSetup] AppKit ready failed after adapter mount",
+            error
+          );
+          throw error;
+        }
+      }
+    );
+  }, [bootstrapConfigurationKey, chains, currentAdapter, isCapacitor]);
+
+  const waitForAppKitReady = useCallback(
+    () => startAppKitInitialization(),
+    [startAppKitInitialization]
+  );
 
   const appKitBootstrapValue = useMemo(
     (): AppKitBootstrapContextValue => ({
-      status: appKitBootstrapStatus,
-      isReady: appKitBootstrapStatus === "ready",
-      isWaiting: appKitBootstrapStatus === "initializing",
+      status: fastPathSnapshot.status,
+      hasTerminalError: fastPathSnapshot.hasTerminalError,
+      isCreated: fastPathSnapshot.isCreated,
+      isReady: fastPathSnapshot.status === "ready",
+      isWaiting: fastPathSnapshot.status === "initializing",
       waitForReady: waitForAppKitReady,
     }),
-    [appKitBootstrapStatus, waitForAppKitReady]
+    [fastPathSnapshot, waitForAppKitReady]
   );
 
-  // Create adapter with essential configuration only
-  const initializeAppKitWithWallets = useCallback(
-    (wallets: AppWallet[]) => {
-      const chains: Chain[] = [mainnet];
-      if (enableTestnet) {
-        chains.push(sepolia);
-      }
-
-      const config: AppKitInitializationConfig = {
-        wallets,
-        adapterManager: assertAppKitAdapterManager(adapterManager),
-        isCapacitor,
-        chains,
-      };
-
-      return initializeAppKit(config);
-    },
-    [adapterManager, isCapacitor, enableTestnet]
-  );
-
-  // Create the wagmi adapter fail-fast, then let AppKit finish readiness work
-  // without blocking the app shell.
-  const setupAppKitAdapter = useCallback(
-    async (wallets: AppWallet[]) => {
-      if (isInitializingRef.current) {
-        throw new AppKitValidationError("Internal API failed");
-      }
-
-      isInitializingRef.current = true;
-      setAppKitBootstrapStatus("initializing");
-      appKitReadyPromiseRef.current = null;
-
-      try {
-        markMobileLaunchStep("wagmi_init_start");
-        const result = await measureMobileLaunchAsync("wagmi_appkit_init", () =>
-          initializeAppKitWithWallets(wallets)
-        );
-        markMobileLaunchStep("wagmi_adapter_created");
-
-        const readyPromise = measureMobileLaunchAsync(
-          "wagmi_adapter_ready",
-          async () => {
-            await (result.ready ?? Promise.resolve());
-          }
-        )
-          .then(() => {
-            markMobileLaunchStep("wagmi_ready");
-            if (isMountedRef.current) {
-              setAppKitBootstrapStatus("ready");
-            }
-            return undefined;
-          })
-          .catch((error) => {
-            if (isMountedRef.current) {
-              setAppKitBootstrapStatus("error");
-              setToast({
-                message: sanitizeErrorForUser(error),
-                type: "error",
-              });
-            }
-            logErrorSecurely(
-              "[WagmiSetup] AppKit ready failed after adapter mount",
-              error
-            );
-            throw error;
-          });
-
-        appKitReadyPromiseRef.current = readyPromise;
-        // Keep the stored promise rejectable for connect-intent callers while
-        // preventing background readiness work from surfacing an unhandled rejection.
-        void readyPromise.catch(() => undefined);
-        setCurrentAdapter(result.adapter);
-      } catch (error) {
-        if (isMountedRef.current) {
-          setAppKitBootstrapStatus("error");
-        }
-        logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
-        const userMessage = sanitizeErrorForUser(error);
-        setToast({
-          message: userMessage,
-          type: "error",
-        });
-        throw error; // Adapter creation still fails fast because wagmi hooks need a provider.
-      } finally {
-        isInitializingRef.current = false;
-      }
-    },
-    [initializeAppKitWithWallets, setToast]
-  );
-
-  // Initialize adapter eagerly on mount with empty wallets
+  // Create only the Wagmi adapter on mount so hooks can render under a stable
+  // provider before AppKit performs its heavier initialization.
   useEffect(() => {
-    initializeAdapterWhenNeeded({
-      currentAdapter,
-      isInitializingRef,
-      setupAppKitAdapter,
-    });
-  }, [currentAdapter, setupAppKitAdapter]);
+    if (fastPathSnapshot.adapterInitializationStarted) {
+      return;
+    }
+
+    installSafeEthereumProxy();
+    markMobileLaunchStep("wagmi_init_start");
+
+    try {
+      createWagmiAdapterOnce(bootstrapConfigurationKey, createWagmiAdapter);
+      markMobileLaunchStep("wagmi_adapter_created");
+    } catch (error) {
+      logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
+      showAppKitToast({
+        message: sanitizeErrorForUser(error),
+        type: "error",
+      });
+    }
+  }, [
+    bootstrapConfigurationKey,
+    createWagmiAdapter,
+    fastPathSnapshot.adapterInitializationStarted,
+  ]);
 
   useEffect(() => {
     markAdapterReadyForLaunchTiming(currentAdapter);
@@ -483,11 +695,25 @@ export default function WagmiSetup({
     injectAppWalletConnectors({
       currentAdapter,
       appWallets,
-      appWalletPasswordModal,
-      processedWallets,
-      setToast,
     });
-  }, [currentAdapter, appWallets, appWalletPasswordModal, setToast]);
+  }, [currentAdapter, appWallets]);
+
+  // A new task gives React a paint opportunity after the Wagmi provider and
+  // children commit. User connect intent can start the same singleton sooner
+  // through waitForAppKitReady without creating a second AppKit instance.
+  useEffect(() => {
+    if (currentAdapter === null) {
+      return;
+    }
+
+    const timeoutHandle = setTimeout(() => {
+      startAppKitInitialization().catch(() => undefined);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutHandle);
+    };
+  }, [currentAdapter, startAppKitInitialization]);
 
   // Show loading state until the wagmi adapter exists.
   if (currentAdapter === null) {

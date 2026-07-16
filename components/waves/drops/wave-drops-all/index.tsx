@@ -36,6 +36,7 @@ import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 const EMPTY_DROPS: Drop[] = [];
 const DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE = 50;
 const MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE = 25;
+const DIRECT_MESSAGE_VIRTUAL_SCROLL_ROOT_MARGIN = "1200px 0px";
 
 const getVirtualizedDropsPageSize = (isMobileAllDropsView: boolean): number =>
   isMobileAllDropsView
@@ -102,6 +103,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const [boostedDropsDisplayPreference] = useBoostedDropsDisplayPreference();
   const shouldRenderInsertedBoostedDrops =
     boostedDropsDisplayPreference !== "hidden";
+  const virtualScrollRootMargin = isWaveDirectMessage(waveId, wave)
+    ? DIRECT_MESSAGE_VIRTUAL_SCROLL_ROOT_MARGIN
+    : undefined;
 
   const scrollBehavior = useScrollBehavior();
   const {
@@ -304,6 +308,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         onScrollToUnread={queueSerialTarget}
         unreadCount={unreadCount}
         suspendLightDropHydration={isScrolling || serialTarget !== null}
+        virtualScrollRootMargin={virtualScrollRootMargin}
         winningThreshold={winningThreshold}
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}

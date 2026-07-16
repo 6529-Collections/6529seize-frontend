@@ -36,11 +36,15 @@ expose different controls.
   - single activate opens the account dropdown
   - quick double activate cycles to the next connected account when at least
     two accounts are available
+  - collapsed-rail hover visibly highlights the avatar without opening the
+    dropdown
   - avatar can show a small unread dot when another connected account has
     unread notifications.
 
 ### Web Account Dropdown
 
+- The dropdown enters with a short opacity and vertical-position reveal;
+  reduced-motion preferences show it immediately without animation.
 - Identity rows:
   - base identity row is always present
   - received proxy rows appear when available
@@ -135,6 +139,8 @@ expose different controls.
 - `Profile` shortcuts in web/app navigation appear only when an address is
   present.
 - Web dropdown always includes the base identity row.
+- Web dropdown positioning follows the sidebar account row when wide desktop
+  layouts add centered outer margins.
 - Connected-account controls appear only when at least one connected account is
   available.
 - Add-account controls appear only while fewer than five connected profiles are

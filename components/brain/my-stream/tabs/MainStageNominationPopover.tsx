@@ -183,11 +183,11 @@ function MainStageNominationPopoverContent() {
     useMemesNomineeProgress();
 
   return (
-    <div className="tw-w-[min(88vw,20rem)]">
+    <div className="tw-w-[min(88vw,20rem)] tw-pt-1">
       <div className="tw-mb-5 tw-flex tw-flex-col tw-items-start">
         <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2">
           <PermissionIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400" />
-          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100">
+          <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100">
             Unlock submissions
           </p>
         </div>
