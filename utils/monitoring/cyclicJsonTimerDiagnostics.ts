@@ -16,7 +16,7 @@ const INTERNAL_STACK_FUNCTIONS = new Set([INTERNAL_TIMER_FUNCTION]);
 const SAFE_NAME_PATTERN = /[^\w$<>. -]/g;
 // Privacy wins over callback-name fidelity: long minified names can be
 // redacted because they are indistinguishable from identifier-shaped secrets.
-const SENSITIVE_IDENTIFIER_PATTERN = /(?:0x[a-f\d]{8,}|[A-Za-z\d_-]{32,})/i;
+const SENSITIVE_IDENTIFIER_PATTERN = /(?:0x[a-f\d]{8,}|[a-z\d_-]{32,})/i;
 const IOS_DEVICE_PATTERN = /\b(?:iPhone|iPad|iPod)\b/i;
 const IOS_OTHER_BROWSER_PATTERN = /\b(?:CriOS|EdgiOS|FxiOS|OPiOS)\//i;
 
