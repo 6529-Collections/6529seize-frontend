@@ -97,11 +97,12 @@ describe("WebSidebarSubmenu", () => {
   });
 
   it("repeats keyboard focus requests while the same flyout stays open", () => {
+    const onClose = jest.fn();
     const { rerender } = render(
       <WebSidebarSubmenu
         section={section}
         pathname="/open-data/team"
-        onClose={jest.fn()}
+        onClose={onClose}
         focusRequest={1}
       />
     );
@@ -109,12 +110,13 @@ describe("WebSidebarSubmenu", () => {
     const firstLink = screen.getByRole("link", { name: "API" });
     expect(firstLink).toHaveFocus();
 
-    firstLink.blur();
+    screen.getByRole("link", { name: "Team" }).focus();
+    expect(onClose).not.toHaveBeenCalled();
     rerender(
       <WebSidebarSubmenu
         section={section}
         pathname="/open-data/team"
-        onClose={jest.fn()}
+        onClose={onClose}
         focusRequest={2}
       />
     );
