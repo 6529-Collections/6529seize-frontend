@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { ABOUT_SUBSCRIPTIONS_HREF } from "../../user/subscriptions/subscriptionNavigation";
 
 const SUBSCRIPTION_ROW_CLASS_NAME =
-  "tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-3 tw-py-3 md:tw-px-4";
+  "tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-3 md:tw-px-4";
 
 function ReadonlySubscriptionToggle({
   checked,
@@ -175,6 +175,7 @@ function SubscribersCountText({
 }
 
 export default function MemeSubscriptionAwarenessRow({
+  appearance = "default",
   onProfileSubscriptionsAction,
   profileSubscriptionsActionPending,
   profileSubscriptionsHref,
@@ -184,6 +185,7 @@ export default function MemeSubscriptionAwarenessRow({
   subscribersCountLoading,
   tooltipLabel,
 }: Readonly<{
+  appearance?: "default" | "quiet" | undefined;
   onProfileSubscriptionsAction?: (() => void | Promise<void>) | undefined;
   profileSubscriptionsActionPending?: boolean | undefined;
   profileSubscriptionsHref?: string | undefined;
@@ -210,7 +212,14 @@ export default function MemeSubscriptionAwarenessRow({
   );
 
   return (
-    <div className={SUBSCRIPTION_ROW_CLASS_NAME}>
+    <div
+      className={clsx(
+        SUBSCRIPTION_ROW_CLASS_NAME,
+        appearance === "quiet"
+          ? "tw-border-white/5 tw-bg-iron-900/60"
+          : "tw-border-primary-400/45 tw-bg-primary-500/10"
+      )}
+    >
       <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-4 tw-gap-y-3">
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           <div className="tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 md:tw-text-base">

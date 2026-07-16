@@ -9,7 +9,7 @@ import {
 import UserSettingsImgSelectFile from "@/components/user/settings/UserSettingsImgSelectFile";
 import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import UserSettingsImgSelectMeme from "@/components/user/settings/UserSettingsImgSelectMeme";
-import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import ActionButton from "@/components/utils/button/ActionButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -197,13 +197,16 @@ export default function UserPageHeaderEditPfp({
       <button
         type="button"
         aria-label="Close edit profile picture modal"
-        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0 tw-backdrop-blur-sm"
+        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0"
         onClick={onClose}
       />
       <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
         <div
           ref={modalRef}
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-3xl md:tw-max-w-2xl lg:tw-p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit profile picture"
+          className="tw-w-full tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl sm:tw-max-w-2xl lg:tw-p-8"
         >
           <form onSubmit={onSubmit}>
             <UserSettingsImgSelectMeme
@@ -211,33 +214,39 @@ export default function UserPageHeaderEditPfp({
               onMeme={setSelectedMemeAndRemoveFile}
             />
 
-            <div className="tw-my-2 tw-inline-flex tw-w-full tw-items-center tw-justify-center">
-              <hr className="tw-h-px tw-w-full tw-border tw-bg-iron-800" />
-              <span className="tw-absolute tw-px-3 tw-text-sm tw-font-semibold tw-uppercase tw-text-iron-300">
+            <div className="tw-my-5 tw-flex tw-w-full tw-items-center tw-gap-3">
+              <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
+              <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600">
                 or
               </span>
+              <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
             </div>
 
             <UserSettingsImgSelectFile
               imageToShow={imageToShow}
               setFile={setFileAndRemoveMeme}
             />
-            {error && <p className="tw-mt-3 tw-text-sm tw-text-red">{error}</p>}
-            <div className="tw-pt-6">
-              <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
-                <UserSettingsSave
-                  loading={saving}
-                  disabled={!file && !selectedMeme}
-                  title="Save PFP"
-                />
-                <SecondaryButton
-                  disabled={saving}
-                  onClicked={onClose}
-                  className="tw-mt-3 tw-w-full sm:tw-mt-0 sm:tw-w-auto"
-                >
-                  Cancel
-                </SecondaryButton>
-              </div>
+            {error && (
+              <p className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-sm tw-text-error">
+                {error}
+              </p>
+            )}
+            <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 sm:tw-flex-row-reverse sm:tw-justify-start">
+              <ActionButton
+                type="submit"
+                loading={saving}
+                disabled={!file && !selectedMeme}
+                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+              >
+                Save PFP
+              </ActionButton>
+              <SecondaryButton
+                disabled={saving}
+                onClicked={onClose}
+                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+              >
+                Cancel
+              </SecondaryButton>
             </div>
           </form>
         </div>
