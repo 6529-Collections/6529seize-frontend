@@ -240,7 +240,6 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
     ["artwork.mintDate", "Mint date"],
     ["artwork.notAvailable", "not available"],
     ["artwork.artistAvatarAlt", "{artist} avatar"],
-    ["market.title", "Market Overview"],
     ["market.mintPrice", "Mint price"],
     ["market.floorPrice", "Floor price"],
     ["market.marketCap", "Market cap"],

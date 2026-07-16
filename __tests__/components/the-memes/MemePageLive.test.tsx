@@ -571,9 +571,6 @@ describe("MemePageLiveRightMenu distribution link", () => {
         formatNumber("de-DE", nft.market_cap, { maximumFractionDigits: 2 })
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(t("de-DE", "theMemes.detail.live.market.title"))
-    ).toBeInTheDocument();
   });
 
   it("formats collector percentages with the selected locale", () => {
