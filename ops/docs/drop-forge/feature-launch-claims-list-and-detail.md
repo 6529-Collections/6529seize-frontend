@@ -184,6 +184,21 @@ The launch surface combines:
   Sepolia minting configuration.
 - Launch actions are operational tooling; they are not public mint surfaces.
 
+### Localization fallback debt
+
+- Route or component: Drop Forge launch actions and the shared
+  `components/common/OnchainTransactionModal.tsx` status surface.
+- Untranslated surface: transaction status, transaction-link, close-control,
+  and backdrop accessible names.
+- Current fallback behavior: all supported locales use the canonical `en-US`
+  strings while the shared modal has no local message family.
+- User impact: on-chain progress and recovery remain accessible and functional,
+  but the modal copy is English-only.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: add one shared on-chain transaction message family
+  so Drop Forge and subscription consumers localize visible and accessible copy
+  together, then verify wrapping and focus behavior in every supported locale.
+
 ## Related Pages
 
 - [Drop Forge Index](README.md)

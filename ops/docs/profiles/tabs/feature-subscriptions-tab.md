@@ -129,16 +129,21 @@ are documented in
 
 ### Localization fallback debt
 
-- Route or component: `/{user}/subscriptions` and
-  `components/user/subscriptions/*`.
-- Current fallback: the tab's user-facing copy and accessible names are
-  hardcoded in canonical `en-US`; the profile tab does not yet expose a locale
-  switch for this content.
+- Route or component: `/{user}/subscriptions`,
+  `components/user/subscriptions/*`, and the shared
+  `components/common/OnchainTransactionModal.tsx` status surface.
+- Untranslated surface: subscription controls plus the shared transaction
+  status, transaction-link, close-control, and backdrop accessible names.
+- Current fallback behavior: all supported locales use hardcoded canonical
+  `en-US`; the profile tab and shared modal do not yet expose a message family
+  for this content.
 - User impact: the English UI remains fully functional, but these controls and
   states are not translated yet.
-- Remediation path: move the complete subscriptions message family into the
-  shared i18n dictionaries together so visible copy, empty/loading states, and
-  accessible names stay aligned across supported locales.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: move the complete subscriptions and on-chain
+  transaction message families into the shared i18n dictionaries together so
+  visible copy, empty/loading states, and accessible names stay aligned across
+  supported locales.
 
 ## Related Pages
 

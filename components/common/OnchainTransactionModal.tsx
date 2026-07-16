@@ -162,18 +162,8 @@ export default function OnchainTransactionModal({
   const titleId = useId();
   const subtitleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const onCloseRef = useRef(onClose);
-  const closableRef = useRef(false);
   const closable = status === "success" || status === "error";
   const hasSubtitle = subtitle !== undefined && subtitle !== null;
-
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  useEffect(() => {
-    closableRef.current = closable;
-  }, [closable]);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -186,7 +176,23 @@ export default function OnchainTransactionModal({
         : null;
     const previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      if (previouslyFocusedElement?.isConnected) {
+        previouslyFocusedElement.focus();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     dialogRef.current?.focus();
+  }, [status]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const dialog = dialogRef.current;
@@ -194,9 +200,9 @@ export default function OnchainTransactionModal({
         return;
       }
 
-      if (event.key === "Escape" && closableRef.current) {
+      if (event.key === "Escape" && closable) {
         event.preventDefault();
-        onCloseRef.current();
+        onClose();
         return;
       }
 
@@ -206,12 +212,8 @@ export default function OnchainTransactionModal({
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousBodyOverflow;
-      if (previouslyFocusedElement?.isConnected) {
-        previouslyFocusedElement.focus();
-      }
     };
-  }, []);
+  }, [closable, onClose]);
 
   if (typeof document === "undefined") {
     return null;
@@ -280,9 +282,9 @@ export default function OnchainTransactionModal({
           ) : null}
         </div>
 
-        <div
+        <output
           className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
-          role={status === "error" ? "alert" : "status"}
+          role={status === "error" ? "alert" : undefined}
           aria-live={status === "error" ? "assertive" : "polite"}
         >
           <ModalStatusContent
@@ -290,7 +292,7 @@ export default function OnchainTransactionModal({
             message={message}
             transactionUrl={transactionUrl}
           />
-        </div>
+        </output>
       </dialog>
     </div>,
     document.body

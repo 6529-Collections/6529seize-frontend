@@ -72,8 +72,7 @@ describe("OnchainTransactionModal", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("dismisses a terminal state with Escape and the backdrop", async () => {
-    const user = userEvent.setup();
+  it("dismisses a terminal state with Escape", () => {
     const onClose = jest.fn();
     render(
       <OnchainTransactionModal
@@ -84,11 +83,58 @@ describe("OnchainTransactionModal", () => {
     );
 
     fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("dismisses a terminal state with the backdrop", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    render(
+      <OnchainTransactionModal
+        status="success"
+        title="Onchain action"
+        onClose={onClose}
+      />
+    );
+
     await user.click(
       screen.getByRole("button", { name: "Close modal backdrop" })
     );
 
-    expect(onClose).toHaveBeenCalledTimes(2);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("updates focus and Escape behavior across an in-place status transition", () => {
+    const onClose = jest.fn();
+    const { rerender } = render(
+      <OnchainTransactionModal
+        status="confirm_wallet"
+        title="Onchain action"
+        onClose={onClose}
+      />
+    );
+    const dialog = screen.getByRole("dialog", { name: "Onchain action" });
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
+
+    const outsideControl = document.createElement("button");
+    document.body.appendChild(outsideControl);
+    outsideControl.focus();
+
+    rerender(
+      <OnchainTransactionModal
+        status="success"
+        title="Onchain action"
+        onClose={onClose}
+      />
+    );
+
+    expect(dialog).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    outsideControl.remove();
   });
 
   it("links a transaction hash using the supplied chain", () => {

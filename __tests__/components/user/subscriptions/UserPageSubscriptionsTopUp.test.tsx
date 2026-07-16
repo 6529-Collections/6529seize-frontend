@@ -8,16 +8,29 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";
 
-const sendTransaction = {
+const sendTransaction: {
+  data: `0x${string}` | undefined;
+  sendTransaction: jest.Mock;
+  reset: jest.Mock;
+  isPending: boolean;
+  error: Error | undefined;
+} = {
   data: undefined,
   sendTransaction: jest.fn(),
   reset: jest.fn(),
   isPending: false,
   error: undefined,
 };
-const waitSendTransaction = {
+const waitSendTransaction: {
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  error: Error | undefined;
+} = {
   isLoading: false,
   isSuccess: false,
+  isError: false,
+  error: undefined,
 };
 
 jest.mock("wagmi", () => ({
@@ -75,6 +88,8 @@ describe("UserPageSubscriptionsTopUp", () => {
     sendTransaction.error = undefined;
     waitSendTransaction.isLoading = false;
     waitSendTransaction.isSuccess = false;
+    waitSendTransaction.isError = false;
+    waitSendTransaction.error = undefined;
     jest.clearAllMocks();
   });
 
@@ -97,7 +112,7 @@ describe("UserPageSubscriptionsTopUp", () => {
   });
 
   it("shows success message when transaction succeeded", async () => {
-    sendTransaction.data = "0x123" as any;
+    sendTransaction.data = "0x123";
     waitSendTransaction.isSuccess = true;
 
     render(<UserPageSubscriptionsTopUp />);
@@ -122,6 +137,20 @@ describe("UserPageSubscriptionsTopUp", () => {
     expect(
       screen.queryByRole("button", { name: "Close modal" })
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps receipt failures visible in a closable error modal", () => {
+    sendTransaction.data = "0x123";
+    waitSendTransaction.isError = true;
+    waitSendTransaction.error = new Error("Transaction receipt failed");
+
+    render(<UserPageSubscriptionsTopUp />);
+
+    expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
+    expect(screen.getByText("Transaction receipt failed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Close modal" })
+    ).toBeInTheDocument();
   });
 
   it("submits custom count when Other option is selected", async () => {

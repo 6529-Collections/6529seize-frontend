@@ -29,10 +29,9 @@ export default function NotificationsPage() {
   if (connectionState === "initializing" || connectionState === "connecting") {
     return (
       <div className="tailwind-scope tw-flex tw-h-full tw-min-h-[50vh] tw-items-center tw-justify-center tw-bg-black">
-        <div role="status" aria-label="Loading notifications">
+        <output aria-label="Loading notifications" aria-live="polite">
           <CircleLoader size={CircleLoaderSize.LARGE} />
-          <span className="tw-sr-only">Loading notifications</span>
-        </div>
+        </output>
       </div>
     );
   }

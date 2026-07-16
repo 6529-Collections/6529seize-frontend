@@ -11,7 +11,7 @@ Use this page when `/notifications` is blocked, rows look missing, or read/follo
 ## Quick Checks
 
 1. Confirm prerequisites: connected wallet, resolved profile handle, and no active profile proxy.
-2. Reopen `/notifications` and allow the centered wallet-restoration indicator
+2. Reopen `/notifications` and allow the centered wallet connection indicator
    to finish before checking for `Loading profile...` or
    `Loading notifications...`.
 3. Use the in-page recovery action if shown: `Reconnect wallet`, `Switch to primary profile`, or `Try again`.
@@ -20,9 +20,9 @@ Use this page when `/notifications` is blocked, rows look missing, or read/follo
 
 ## Blocked Access and Load Errors
 
-- Centered loading indicator after opening a new tab:
-  let wallet restoration finish. A reconnect prompt appears only if the
-  restored session is not valid.
+- Centered loading indicator after opening a new tab or choosing to reconnect:
+  let wallet restoration or the active connection attempt finish. A reconnect
+  prompt appears only if the resulting session is not valid.
 - `Connect your wallet to view notifications.`:
   use `Reconnect wallet`.
 - `We couldn't determine your profile handle. Please reconnect to continue.`:

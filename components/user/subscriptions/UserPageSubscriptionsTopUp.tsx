@@ -33,6 +33,8 @@ import {
 } from "@/constants/constants";
 import { formatAddress, numberWithCommasFromString } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import styles from "./UserPageSubscriptions.module.css";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
@@ -51,6 +53,7 @@ const TOP_UP_CUSTOM_OPTION_CLASS = `${TOP_UP_OPTION_SURFACE_CLASS} tw-w-full tw-
 
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
+  const locale = useBrowserLocale();
   const { country } = useCookieConsent();
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -87,6 +90,7 @@ export default function UserPageSubscriptionsTopUp() {
   const [showDeep, setShowDeep] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState<number | null>(null);
+  const [topUpCardCount, setTopUpCardCount] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const otherInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -134,6 +138,7 @@ export default function UserPageSubscriptionsTopUp() {
     }
     const value = getEthForCards(count);
     setTopUpAmount(value);
+    setTopUpCardCount(count);
     sendTransaction.reset();
     sendTransaction.sendTransaction({
       chainId: SUBSCRIPTIONS_CHAIN.id,
@@ -150,26 +155,32 @@ export default function UserPageSubscriptionsTopUp() {
     }
   }, [sendTransaction.error]);
 
+  const receiptErrorMessage = waitSendTransaction.error?.message;
+  const hasReceiptError =
+    waitSendTransaction.isError || receiptErrorMessage !== undefined;
   const showModal =
     sendTransaction.isPending ||
     waitSendTransaction.isLoading ||
     waitSendTransaction.isSuccess ||
+    hasReceiptError ||
     !!error;
 
-  const isClosable = waitSendTransaction.isSuccess || !!error;
+  const isClosable =
+    waitSendTransaction.isSuccess || hasReceiptError || !!error;
 
   const closeModal = useCallback(() => {
     if (isClosable) {
       sendTransaction.reset();
       setError("");
       setTopUpAmount(null);
+      setTopUpCardCount(null);
       setSelectedOption(null);
       setMemeCount("");
     }
   }, [isClosable, sendTransaction]);
 
   let modalStatus: OnchainTransactionModalStatus | null = null;
-  if (error) {
+  if (error || hasReceiptError) {
     modalStatus = "error";
   } else if (sendTransaction.isPending) {
     modalStatus = "confirm_wallet";
@@ -179,12 +190,12 @@ export default function UserPageSubscriptionsTopUp() {
     modalStatus = "success";
   }
   const modalSubtitle =
-    topUpAmount === null
+    topUpAmount === null || topUpCardCount === null
       ? undefined
-      : `${(topUpAmount / MEMES_MINT_PRICE).toLocaleString()} Cards - ${numberWithCommasFromString(topUpAmount.toString())} ETH`;
+      : `${formatInteger(locale, topUpCardCount)} Cards - ${numberWithCommasFromString(topUpAmount.toString())} ETH`;
   let modalMessage: string | undefined;
   if (modalStatus === "error") {
-    modalMessage = error;
+    modalMessage = error || receiptErrorMessage;
   } else if (modalStatus === "success") {
     modalMessage = "Top Up Successful!";
   }
@@ -223,7 +234,7 @@ export default function UserPageSubscriptionsTopUp() {
           <CardCountOption
             id={`subscription-top-up-${optionId}`}
             count={count}
-            display={`Remaining ${label} ${value.toLocaleString()}`}
+            display={`Remaining ${label} ${formatInteger(locale, value)}`}
             selected={selectedOption === optionId}
             onSelect={() => {
               setSelectedOption(optionId);
@@ -412,10 +423,11 @@ function CardCountOption(
     onSelect: () => void;
   }>
 ) {
+  const locale = useBrowserLocale();
   const cardLabel = props.count > 1 ? "Cards" : "Card";
   const labelText = props.display
-    ? `${props.display} - ${props.count.toLocaleString()} Cards`
-    : `${props.count.toLocaleString()} ${cardLabel}`;
+    ? `${props.display} - ${formatInteger(locale, props.count)} Cards`
+    : `${formatInteger(locale, props.count)} ${cardLabel}`;
 
   return (
     <label
@@ -455,7 +467,7 @@ function CardCountOption(
         )}
         <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
           <span className="tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
-            {props.count.toLocaleString()} Card{props.count > 1 && "s"}
+            {formatInteger(locale, props.count)} Card{props.count > 1 && "s"}
           </span>
           <span className="tw-flex tw-items-center tw-gap-1.5">
             <span className="tw-text-sm tw-leading-5 tw-text-iron-400">
