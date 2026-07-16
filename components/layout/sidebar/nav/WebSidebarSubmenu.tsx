@@ -8,18 +8,29 @@ import {
   useMemo,
   useRef,
   useState,
+  type FocusEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import type {
   SidebarNavItem,
   SidebarSection,
 } from "@/components/navigation/navTypes";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { isSidebarNavItemActive } from "./sidebarActive";
+
+const FOCUSABLE_ELEMENT_SELECTOR =
+  "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
 interface WebSidebarSubmenuProps {
   readonly section: SidebarSection;
   readonly pathname: string | null;
   readonly onClose: () => void;
+  readonly onPointerEnter?: (() => void) | undefined;
+  readonly onPointerLeave?: (() => void) | undefined;
+  readonly focusRequest?: number | undefined;
   readonly leftOffset?: number | undefined;
   readonly anchorTop?: number | undefined;
   readonly anchorHeight?: number | undefined;
@@ -30,6 +41,9 @@ function WebSidebarSubmenu({
   section,
   pathname,
   onClose,
+  onPointerEnter,
+  onPointerLeave,
+  focusRequest = 0,
   leftOffset,
   anchorTop,
   anchorHeight,
@@ -56,11 +70,106 @@ function WebSidebarSubmenu({
     [section.items, section.subsections]
   );
 
-  const handleKeyDown = useCallback(
+  const handleEscapeKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      event.preventDefault();
+      triggerElement?.focus();
+      onClose();
     },
-    [onClose]
+    [onClose, triggerElement]
+  );
+
+  const handleTabKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const container = containerRef.current;
+      const links = Array.from(
+        container?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? []
+      );
+      const activeElement = browserDocument?.activeElement;
+      const isLeavingBackwards =
+        event.shiftKey && activeElement === links.at(0);
+      const isLeavingForwards =
+        !event.shiftKey && activeElement === links.at(-1);
+
+      if (!isLeavingBackwards && !isLeavingForwards) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (isLeavingBackwards) {
+        triggerElement?.focus();
+        onClose();
+        return;
+      }
+
+      const sidebarFocusScope = triggerElement?.closest(
+        "[data-sidebar-scroll='true']"
+      );
+      const focusableElements = Array.from(
+        sidebarFocusScope?.querySelectorAll<HTMLElement>(
+          FOCUSABLE_ELEMENT_SELECTOR
+        ) ?? []
+      ).filter(
+        (element) =>
+          !element.closest("[hidden], [inert]") &&
+          element.getAttribute("aria-hidden") !== "true"
+      );
+      const triggerIndex = triggerElement
+        ? focusableElements.indexOf(triggerElement)
+        : -1;
+      const nextFocusable =
+        triggerIndex >= 0 ? focusableElements.at(triggerIndex + 1) : null;
+
+      if (nextFocusable) {
+        nextFocusable.focus();
+        return;
+      }
+
+      triggerElement?.focus();
+      onClose();
+    },
+    [browserDocument, onClose, triggerElement]
+  );
+
+  const handlePointerLeave = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (event.pointerType !== "mouse") {
+        return;
+      }
+
+      const activeElement = browserDocument?.activeElement;
+      if (activeElement && containerRef.current?.contains(activeElement)) {
+        return;
+      }
+
+      onPointerLeave?.();
+    },
+    [browserDocument, onPointerLeave]
+  );
+
+  const handleBlur = useCallback(
+    (event: FocusEvent<HTMLDivElement>) => {
+      const nextTarget = event.relatedTarget;
+      if (
+        nextTarget instanceof Node &&
+        (containerRef.current?.contains(nextTarget) ||
+          triggerElement?.contains(nextTarget))
+      ) {
+        return;
+      }
+
+      onClose();
+    },
+    [onClose, triggerElement]
   );
 
   const handleClickOutside = useCallback(
@@ -89,16 +198,18 @@ function WebSidebarSubmenu({
       return;
     }
 
-    browserWindow.addEventListener("keydown", handleKeyDown);
+    browserWindow.addEventListener("keydown", handleEscapeKeyDown);
     browserDocument.addEventListener("mousedown", handleClickOutside);
-    browserDocument.addEventListener("touchstart", handleClickOutside);
+    browserDocument.addEventListener("touchstart", handleClickOutside, {
+      passive: true,
+    });
 
     return () => {
-      browserWindow.removeEventListener("keydown", handleKeyDown);
+      browserWindow.removeEventListener("keydown", handleEscapeKeyDown);
       browserDocument.removeEventListener("mousedown", handleClickOutside);
       browserDocument.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [browserWindow, browserDocument, handleKeyDown, handleClickOutside]);
+  }, [browserWindow, browserDocument, handleEscapeKeyDown, handleClickOutside]);
 
   useLayoutEffect(() => {
     if (browserWindow && containerRef.current) {
@@ -121,14 +232,19 @@ function WebSidebarSubmenu({
     }
   }, [browserWindow, anchorTop, anchorHeight, section.key, totalItemCount]);
 
+  useEffect(() => {
+    if (focusRequest === 0) {
+      return;
+    }
+
+    containerRef.current?.querySelector<HTMLElement>("a[href]")?.focus();
+  }, [focusRequest, section.key]);
+
   if (browserDocument === undefined) {
     return null;
   }
 
   const portalTarget = browserDocument.body;
-  if (!portalTarget) {
-    return null;
-  }
 
   const leftStyle =
     leftOffset === undefined
@@ -153,7 +269,6 @@ function WebSidebarSubmenu({
             : "tw-font-medium tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700/50 desktop-hover:hover:tw-text-iron-50"
         }`}
         aria-current={active ? "page" : undefined}
-        role="menuitem"
         onClick={onClose}
       >
         <span className="tw-truncate">{item.name}</span>
@@ -164,16 +279,23 @@ function WebSidebarSubmenu({
   return createPortal(
     <div
       ref={containerRef}
-      className="tailwind-scope tw-fixed tw-z-[95] tw-flex tw-max-h-[65vh] tw-w-64 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)]"
+      id={`sidebar-flyout-${section.key}`}
+      className="tailwind-scope tw-fixed tw-z-[95] tw-flex tw-max-h-[65vh] tw-w-64 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] motion-safe:tw-animate-sidebar-flyout-in motion-reduce:tw-animate-none"
       style={{
         left: leftStyle,
         top: topStyle,
       }}
-      role="menu"
-      aria-label={`${section.name} sub-navigation`}
+      role="navigation"
+      aria-label={t(DEFAULT_LOCALE, "navigation.sidebar.submenuLabel", {
+        section: section.name,
+      })}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={handlePointerLeave}
+      onKeyDown={handleTabKeyDown}
+      onBlur={handleBlur}
     >
       <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-px-6 tw-pb-2 tw-pt-4">
-        <h3 className="tw-text-base tw-font-semibold tw-text-iron-50">
+        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           {section.name}
         </h3>
       </div>
@@ -189,7 +311,7 @@ function WebSidebarSubmenu({
                 section.items.length > 0 ? "tw-mt-3" : "tw-mt-3 first:tw-mt-0"
               }
             >
-              <div className="tw-px-3 tw-pb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
+              <div className="tw-px-3 tw-pb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
                 {subsection.name}
               </div>
 

@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 
 const useQueryMock = jest.fn();
 const commonApiFetchMock = jest.fn();
@@ -27,6 +28,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 describe("useUnreadNotifications", () => {
   beforeEach(() => {
+    setNotificationRealtimeState(false);
     useQueryMock.mockReset();
     commonApiFetchMock.mockReset();
     getAuthJwtMock.mockReset();
@@ -120,6 +122,44 @@ describe("useUnreadNotifications", () => {
     expect(queryOptions.refetchOnWindowFocus(transientQuery)).toBe(true);
     expect(queryOptions.refetchOnMount(transientQuery)).toBe(true);
     expect(queryOptions.refetchOnReconnect(transientQuery)).toBe(true);
+  });
+
+  it("uses only a five-minute reconciliation poll when the active profile is synced", () => {
+    setNotificationRealtimeState(true, ["profile-1"]);
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    expect(queryOptions.refetchInterval({ state: { error: undefined } })).toBe(
+      300000
+    );
+  });
+
+  it("keeps fallback polling when only another profile is synced", () => {
+    setNotificationRealtimeState(true, ["profile-2"]);
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    expect(queryOptions.refetchInterval({ state: { error: undefined } })).toBe(
+      30000
+    );
+  });
+
+  it("bypasses browser caching when fetching the unread count", async () => {
+    commonApiFetchMock.mockResolvedValue({ unread_count: 0 });
+    useQueryMock.mockReturnValue({ data: undefined });
+
+    renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    await queryOptions.queryFn();
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ cache: "no-store" })
+    );
   });
 
   it("uses a fresh query after the auth token materially changes", () => {

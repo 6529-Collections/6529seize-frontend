@@ -286,6 +286,8 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.join6529": "Join 6529",
   "primary.about": "About",
   "primary.home": "Home",
+  "sidebar.submenuLabel": "{section} sub-navigation",
+  "sidebar.panelLabel": "{section} items",
   "account.notifications": "Notifications",
   "section.main": "Main",
   "section.utility": "Utility",
@@ -1419,6 +1421,9 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
+  "theMemes.detail.loadError.message":
+    "We couldn't load this card. Please try again.",
+  "theMemes.detail.loadError.retry": "Try again",
   "theMemes.detail.mainStageSubmission.title": "Main Stage Submission",
   "theMemes.detail.sections.ariaLabel": "Meme page sections",
   "theMemes.detail.history.ariaLabel": "Meme history sections",

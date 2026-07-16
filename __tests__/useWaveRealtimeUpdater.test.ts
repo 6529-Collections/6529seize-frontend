@@ -120,6 +120,7 @@ describe("useWaveRealtimeUpdater", () => {
     updateData: jest.fn((update: any) => {
       store[update.key] = { ...store[update.key], ...update };
     }),
+    hasServerFeedSeed: jest.fn().mockReturnValue(false),
     registerWave: jest.fn(),
     syncNewestMessages: jest
       .fn()
@@ -687,6 +688,38 @@ describe("useWaveRealtimeUpdater", () => {
       )
     );
     expect(props.registerWave).toHaveBeenCalledWith("wave2");
+  });
+
+  it("applies inserts while a server seed is pending without a full registration", async () => {
+    const store: Record<string, any> = {};
+    const props = baseProps(store);
+    props.hasServerFeedSeed.mockImplementation(
+      (waveId: string) => waveId === "wave2"
+    );
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "seed-gap-drop",
+      serial_no: 2,
+      wave: { id: "wave2" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+
+    expect(props.updateData).toHaveBeenCalledWith({
+      key: "wave2",
+      drops: [expect.objectContaining({ id: "seed-gap-drop" })],
+    });
+    expect(store["wave2"]?.drops).toEqual([
+      expect.objectContaining({ id: "seed-gap-drop" }),
+    ]);
+    expect(props.registerWave).not.toHaveBeenCalled();
+    expect(props.syncNewestMessages).not.toHaveBeenCalled();
   });
 
   it("skips when existing drop is LIGHT type", async () => {
