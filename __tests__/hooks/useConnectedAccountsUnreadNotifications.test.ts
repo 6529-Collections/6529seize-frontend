@@ -1,6 +1,7 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
 import { act, renderHook } from "@testing-library/react";
+import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 
 const useQueryMock = jest.fn();
 const getQueryDataMock = jest.fn();
@@ -29,6 +30,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 describe("useConnectedAccountsUnreadNotifications", () => {
   beforeEach(() => {
+    setNotificationRealtimeState(false);
     useQueryMock.mockReset();
     getQueryDataMock.mockReset();
     commonApiFetchMock.mockReset();
@@ -62,6 +64,40 @@ describe("useConnectedAccountsUnreadNotifications", () => {
         ],
       })
     );
+  });
+
+  it("uses only a five-minute reconciliation poll when every account is synced", () => {
+    setNotificationRealtimeState(true, ["profile-1"]);
+    useQueryMock.mockReturnValue({ data: {} });
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token",
+          role: null,
+          jwt: "jwt-token",
+          profileId: "profile-1",
+          profileHandle: "alice",
+        },
+        {
+          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          refreshToken: "refresh-token-2",
+          role: null,
+          jwt: "jwt-token-2",
+          profileId: "profile-2",
+          profileHandle: "bob",
+        },
+      ])
+    );
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].refetchInterval).toBe(15000);
+
+    act(() => {
+      setNotificationRealtimeState(true, ["profile-1", "profile-2"]);
+    });
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].refetchInterval).toBe(300000);
   });
 
   it("does not enable polling for accounts without usable JWTs", () => {
@@ -197,9 +233,9 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     );
 
     const firstQueryOptions = useQueryMock.mock.calls[0]?.[0];
-    const terminalError = await firstQueryOptions.queryFn().catch(
-      (error: unknown) => error
-    );
+    const terminalError = await firstQueryOptions
+      .queryFn()
+      .catch((error: unknown) => error);
     act(() => {
       expect(firstQueryOptions.retry(0, terminalError)).toBe(false);
     });
