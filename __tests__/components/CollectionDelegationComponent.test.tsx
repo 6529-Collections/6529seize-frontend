@@ -8,7 +8,10 @@ jest.mock("react", () => {
 });
 
 import CollectionDelegationComponent from "@/components/delegation/CollectionDelegation";
-import { MEMES_COLLECTION } from "@/components/delegation/delegation-constants";
+import {
+  ALL_USE_CASES,
+  MEMES_COLLECTION,
+} from "@/components/delegation/delegation-constants";
 import { DelegationCenterSection } from "@/types/enums";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
@@ -84,6 +87,39 @@ describe("CollectionDelegationComponent", () => {
       data:
         params?.args?.[0] === collection.contract ? collectionLocked : false,
     }));
+  }
+
+  function mockUseCaseLockState(options: {
+    readonly localLockedIndex?: number;
+    readonly globalLockedIndex?: number;
+  }) {
+    mockUseReadContracts.mockImplementation(
+      (params?: {
+        contracts?: {
+          functionName?: string;
+          args?: readonly (string | number | undefined)[];
+        }[];
+      }) => {
+        const firstContract = params?.contracts?.[0];
+        if (
+          firstContract?.functionName !== "retrieveCollectionUseCaseLockStatus"
+        ) {
+          return { data: undefined, refetch: jest.fn() };
+        }
+
+        const isLocalScope = firstContract.args?.[0] === collection.contract;
+        const lockedIndex = isLocalScope
+          ? options.localLockedIndex
+          : options.globalLockedIndex;
+
+        return {
+          data: ALL_USE_CASES.map((_, index) => ({
+            result: index === lockedIndex,
+          })),
+          refetch: jest.fn(),
+        };
+      }
+    );
   }
 
   beforeEach(() => {
@@ -275,6 +311,65 @@ describe("CollectionDelegationComponent", () => {
         functionName: "setCollectionLock",
       })
     );
+  });
+
+  it.each([
+    { useCase: 997, index: 17, label: "Primary Address" },
+    {
+      useCase: 998,
+      index: 18,
+      label: "Delegation Management (Sub-Delegation)",
+    },
+    { useCase: 999, index: 19, label: "Consolidation" },
+  ])(
+    "unlocks special use case $useCase using its actual multicall slot",
+    ({ useCase, index, label }) => {
+      mockUseCaseLockState({ localLockedIndex: index });
+
+      render(
+        <CollectionDelegationComponent
+          collection={collection}
+          setSection={setSection}
+        />
+      );
+
+      fireEvent.change(
+        screen.getByRole("combobox", { name: "Lock or unlock use case" }),
+        { target: { value: String(useCase) } }
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Unlock Use Case" }));
+
+      expect(
+        screen.getByText(`Unlocking Wallet on Use Case #${useCase} - ${label}`)
+      ).toBeInTheDocument();
+      expect(mockWriteContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          args: [collection.contract, useCase, false],
+          functionName: "setCollectionUsecaseLock",
+        })
+      );
+    }
+  );
+
+  it("blocks a collection-specific use-case update when the global lock is set", () => {
+    mockUseCaseLockState({ globalLockedIndex: 19 });
+
+    render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Lock or unlock use case" }),
+      { target: { value: "999" } }
+    );
+
+    expect(
+      screen.queryByRole("button", { name: /^(Lock|Unlock) Use Case$/ })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Unlock use case in/i)).toBeInTheDocument();
   });
 
   it("shows collection lock receipt failures instead of success", () => {
