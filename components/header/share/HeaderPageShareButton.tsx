@@ -1,28 +1,24 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import ShareArrowIcon from "@/components/common/icons/ShareArrowIcon";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { isShareCancelError } from "@/utils/error";
 import { Share } from "@capacitor/share";
-import { ShareIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useState } from "react";
 
 function getCurrentPublicUrl(): string {
-  const currentWindow = globalThis.window;
-  const route =
-    currentWindow === undefined
-      ? "/"
-      : `${currentWindow.location.pathname}${currentWindow.location.search}${currentWindow.location.hash}`;
+  const route = `${globalThis.location.pathname}${globalThis.location.search}${globalThis.location.hash}`;
   const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
   const normalizedRoute = route.startsWith("/") ? route : "/" + route;
   return `${normalizedBase}${normalizedRoute}`;
 }
 
 function getShareTitle(): string {
-  const title = globalThis.document?.title;
-  if (title?.trim()) {
+  const title = globalThis.document.title;
+  if (title.trim()) {
     return title;
   }
 
@@ -30,12 +26,12 @@ function getShareTitle(): string {
 }
 
 async function copyFallback(url: string): Promise<void> {
-  const writeText = globalThis.navigator?.clipboard?.writeText;
-  if (typeof writeText !== "function") {
+  const clipboard = (globalThis.navigator as Partial<Navigator>).clipboard;
+  if (!clipboard) {
     return;
   }
 
-  await writeText.call(globalThis.navigator.clipboard, url);
+  await clipboard.writeText(url);
 }
 
 export default function HeaderPageShareButton({
@@ -95,7 +91,7 @@ export default function HeaderPageShareButton({
           : "tw-bg-black tw-text-iron-300 hover:tw-text-iron-50 active:tw-bg-iron-800"
       )}
     >
-      <ShareIcon className="tw-size-5 tw-flex-shrink-0" aria-hidden="true" />
+      <ShareArrowIcon className="tw-size-5 tw-flex-shrink-0" />
     </button>
   );
 }
