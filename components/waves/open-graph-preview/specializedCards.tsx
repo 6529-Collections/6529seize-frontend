@@ -3,11 +3,16 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
   FarcasterEmbedLinkPreview,
   SeizeCollectionLinkPreview,
+  SeizeCollectionLiveMint,
+  SeizeCollectionPreviewFact,
+  SeizeCollectionPreviewPerson,
+  SeizeCollectionPreviewTrait,
   YoutubeVideoLinkPreview,
 } from "@/services/api/link-preview-api";
 import type { LinkPreviewVariant } from "../LinkPreviewContext";
@@ -25,6 +30,37 @@ import {
   LinkPreviewCardLayout,
 } from "./cards";
 import type { FirstPartyOpenGraphPreviewKind } from "./types";
+
+function createLiveMintFact(
+  liveMint: SeizeCollectionLiveMint | null,
+  locale: SupportedLocale
+): SeizeCollectionPreviewFact | null {
+  if (!liveMint) {
+    return null;
+  }
+
+  if (liveMint.mintedCount !== null && liveMint.mintedCount !== undefined) {
+    const mintedCount = formatInteger(locale, liveMint.mintedCount);
+    const value =
+      liveMint.maxCount !== null && liveMint.maxCount !== undefined
+        ? `${mintedCount} / ${formatInteger(locale, liveMint.maxCount)}`
+        : mintedCount;
+
+    return {
+      label: t(locale, "linkPreview.collection.minted"),
+      value,
+    };
+  }
+
+  if (liveMint.maxCount !== null && liveMint.maxCount !== undefined) {
+    return {
+      label: t(locale, "linkPreview.collection.maximumEdition"),
+      value: formatInteger(locale, liveMint.maxCount),
+    };
+  }
+
+  return null;
+}
 
 export function FirstPartyOpenGraphPreviewCard({
   effectiveHref,
@@ -112,6 +148,7 @@ export function SeizeCollectionPreviewCard({
   linkRel,
   variant,
   hideActions,
+  locale,
 }: {
   readonly href: string;
   readonly preview: SeizeCollectionLinkPreview;
@@ -120,15 +157,29 @@ export function SeizeCollectionPreviewCard({
   readonly linkRel?: string | undefined;
   readonly variant?: LinkPreviewVariant | undefined;
   readonly hideActions?: boolean | undefined;
+  readonly locale: SupportedLocale;
 }) {
   const imageUrl = extractImageUrl(preview);
-  const people = Array.isArray(preview.people) ? preview.people : [];
-  const facts = Array.isArray(preview.facts) ? preview.facts : [];
-  const traits = Array.isArray(preview.traits)
+  const people: readonly SeizeCollectionPreviewPerson[] = Array.isArray(
+    preview.people
+  )
+    ? preview.people
+    : [];
+  const facts: readonly SeizeCollectionPreviewFact[] = Array.isArray(
+    preview.facts
+  )
+    ? preview.facts
+    : [];
+  const traits: readonly SeizeCollectionPreviewTrait[] = Array.isArray(
+    preview.traits
+  )
     ? preview.traits.slice(0, 3)
     : [];
   const resolvedVariant = variant ?? "chat";
   const isHome = resolvedVariant === "home";
+  const liveMint: SeizeCollectionLiveMint | null = preview.liveMint ?? null;
+  const liveMintFact = createLiveMintFact(liveMint, locale);
+  const displayFacts = liveMintFact ? [liveMintFact, ...facts] : facts;
 
   return (
     <LinkPreviewCardLayout
@@ -178,8 +229,19 @@ export function SeizeCollectionPreviewCard({
           )}
           <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden md:tw-gap-2">
             {preview.kicker && (
-              <div className="tw-[overflow-wrap:anywhere] tw-line-clamp-1 tw-break-words tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
-                {wrapLongUnbrokenSegments(preview.kicker)}
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+                <div className="tw-[overflow-wrap:anywhere] tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {wrapLongUnbrokenSegments(preview.kicker)}
+                </div>
+                {liveMint && (
+                  <span className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-emerald-400/30 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-leading-4 tw-text-emerald-200">
+                    <span
+                      aria-hidden="true"
+                      className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-emerald-400"
+                    />
+                    {t(locale, "linkPreview.collection.mintingLive")}
+                  </span>
+                )}
               </div>
             )}
             <Link
@@ -229,9 +291,9 @@ export function SeizeCollectionPreviewCard({
                 })}
               </div>
             )}
-            {facts.length > 0 && (
+            {displayFacts.length > 0 && (
               <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-1.5 tw-overflow-hidden">
-                {facts.map((fact) => (
+                {displayFacts.map((fact) => (
                   <span
                     key={`${fact.label}-${fact.value}`}
                     className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-[11px] tw-leading-5"

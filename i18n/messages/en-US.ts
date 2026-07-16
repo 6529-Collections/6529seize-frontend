@@ -298,6 +298,27 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "subsection.developerOpenData": "Data & Developer Tools",
 } as const);
 
+const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
+  "routes.waves": "Waves | Brain",
+  "routes.notifications": "Notifications | Brain",
+  "routes.messages": "Messages | Brain",
+  "routes.memeCalendar": "Memes Minting Calendar",
+  "routes.theMemes": "The Memes | Collections",
+  "routes.memeLab": "Meme Lab | Collections",
+  "routes.network": "Network",
+  "routes.gradient": "6529 Gradient | Collections",
+  "routes.nextGen": "NextGen | Collections",
+  "routes.rememes": "Rememes | Collections",
+  "routes.openData": "Open Data | Tools",
+  "routes.discovery": "Discovery",
+  "routes.profile": "Profile | 6529.io",
+  "wave.default": "{waveName} | Brain",
+  "wave.newMessages.one": "({count} new message) {waveName} | Brain",
+  "wave.newMessages.other": "({count} new messages) {waveName} | Brain",
+  "notifications.one": "({count} notification) {title}",
+  "notifications.other": "({count} notifications) {title}",
+} as const);
+
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   waveSections: "Wave sections",
   appSections: "App sections",
@@ -1842,6 +1863,9 @@ export const EN_US_MESSAGES = {
   "profile.mute.status.muted": "Notifications from this profile are muted.",
   "profile.mute.status.unmuted":
     "Notifications from this profile are not muted.",
+  "profile.subscriptions.mintingToday.label": "Minting Today",
+  "profile.subscriptions.mintingToday.tooltip":
+    "No changes allowed on minting day",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
   "drop.media.processingGeneric": "Processing media",
@@ -1909,6 +1933,7 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,

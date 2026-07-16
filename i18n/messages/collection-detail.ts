@@ -376,6 +376,9 @@ export const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
 export const LINK_PREVIEW_MESSAGES = namespaceMessages("linkPreview", [
   ["externalSourceFallback", "External link"],
   ["byline", "by {author}"],
+  ["collection.maximumEdition", "Maximum edition"],
+  ["collection.minted", "Minted"],
+  ["collection.mintingLive", "Minting Live"],
   ["file.externalSource", "External source"],
   ["file.fact.mime", "MIME"],
   ["file.fact.size", "Size"],
