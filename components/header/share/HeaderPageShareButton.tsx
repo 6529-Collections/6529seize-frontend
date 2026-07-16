@@ -1,11 +1,11 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import ShareArrowIcon from "@/components/common/icons/ShareArrowIcon";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { isShareCancelError } from "@/utils/error";
 import { Share } from "@capacitor/share";
+import { ShareIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useState } from "react";
 
@@ -102,7 +102,7 @@ export default function HeaderPageShareButton({
           : "tw-bg-black tw-text-iron-300 hover:tw-text-iron-50 active:tw-bg-iron-800"
       )}
     >
-      <ShareArrowIcon className="tw-size-5 tw-flex-shrink-0" />
+      <ShareIcon className="tw-size-5 tw-flex-shrink-0" aria-hidden="true" />
     </button>
   );
 }
