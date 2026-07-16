@@ -26,6 +26,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import type { WaveMessages } from "./hooks/types";
+import type { ServerWaveFeedSeedResult } from "./server-wave-feed-seed";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import useEnhancedWavesListCore from "./hooks/useEnhancedWavesListCore";
@@ -81,6 +82,33 @@ interface MyStreamContextType {
   readonly requestMainWavesList: () => () => void;
   readonly requestDirectMessagesList: () => () => void;
   readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
+  readonly serverFeedSeed: {
+    readonly registerPending: (
+      waveId: string,
+      promise: Promise<ServerWaveFeedSeedResult>
+    ) => void;
+    readonly clearPending: (
+      waveId: string,
+      promise: Promise<ServerWaveFeedSeedResult>
+    ) => void;
+    readonly replacePending: (
+      waveId: string,
+      expectedPromise: Promise<ServerWaveFeedSeedResult>,
+      promise: Promise<ServerWaveFeedSeedResult>
+    ) => boolean;
+    readonly expire: (
+      waveId: string,
+      expectedPromise: Promise<ServerWaveFeedSeedResult>
+    ) => void;
+    readonly apply: (params: {
+      readonly drops: ApiDrop[];
+      readonly hasNextPage: boolean;
+      readonly onReady: () => void;
+      readonly promise: Promise<ServerWaveFeedSeedResult>;
+      readonly waveId: string;
+    }) => boolean;
+    readonly completeInitialRegistration: (waveId: string) => void;
+  };
   readonly fetchNextPageForWave: (
     props: NextPageProps
   ) => Promise<(ApiDrop | ApiDropId)[] | null>;
@@ -172,6 +200,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   ] = useState(0);
   const isDirectMessagesRoute = pathname?.startsWith("/messages") ?? false;
   const isWaveDetailRoute = pathname?.startsWith("/waves/") ?? false;
+  const isDirectMessageDetailRoute =
+    pathname?.startsWith("/messages/") ?? false;
+  const hasMountedActiveWaveRegistrationRef = useRef(false);
   const shouldDeferMainWavesList =
     isCapacitor && isWaveDetailRoute && !isDirectMessagesRoute;
   const [hasMainWavesListBeenRequested, setHasMainWavesListBeenRequested] =
@@ -220,6 +251,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveDataManager = useWaveDataManager({
     updateData: waveMessagesStore.updateData,
     getData: waveMessagesStore.getData,
+    hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
     removeDrop: waveMessagesStore.removeDrop,
     isCapacitor,
   });
@@ -300,6 +332,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
     activeWaveId,
     getData: waveMessagesStore.getData,
+    hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
     updateData: waveMessagesStore.updateData,
     registerWave,
     syncNewestMessages,
@@ -375,12 +408,24 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [websocketStatus]);
 
   useEffect(() => {
+    if (!hasMountedActiveWaveRegistrationRef.current) {
+      hasMountedActiveWaveRegistrationRef.current = true;
+      if (isWaveDetailRoute || isDirectMessageDetailRoute) {
+        return;
+      }
+    }
     if (activeWaveId) {
       registerWave(activeWaveId, true, {
         skipInitialBackfill: hasActiveWaveDropTarget,
       });
     }
-  }, [activeWaveId, hasActiveWaveDropTarget, registerWave]);
+  }, [
+    activeWaveId,
+    hasActiveWaveDropTarget,
+    isDirectMessageDetailRoute,
+    isWaveDetailRoute,
+    registerWave,
+  ]);
 
   // Detect when app comes to foreground on mobile
   useEffect(() => {
@@ -487,6 +532,15 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       requestMainWavesList,
       requestDirectMessagesList,
       registerWave,
+      serverFeedSeed: {
+        registerPending: waveMessagesStore.registerPendingServerFeedSeed,
+        clearPending: waveMessagesStore.clearPendingServerFeedSeed,
+        replacePending: waveMessagesStore.replacePendingServerFeedSeed,
+        expire: waveMessagesStore.expireServerFeedSeed,
+        apply: waveMessagesStore.applyServerFeedSeed,
+        completeInitialRegistration:
+          waveMessagesStore.completeInitialServerFeedRegistration,
+      },
       fetchNextPageForWave: fetchNextPage,
       fetchAroundSerialNo,
       processIncomingDrop,
@@ -527,6 +581,12 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     waveMessagesStore.subscribe,
     waveMessagesStore.unsubscribe,
     registerWave,
+    waveMessagesStore.registerPendingServerFeedSeed,
+    waveMessagesStore.clearPendingServerFeedSeed,
+    waveMessagesStore.replacePendingServerFeedSeed,
+    waveMessagesStore.expireServerFeedSeed,
+    waveMessagesStore.applyServerFeedSeed,
+    waveMessagesStore.completeInitialServerFeedRegistration,
     fetchNextPage,
     fetchAroundSerialNo,
     processIncomingDrop,

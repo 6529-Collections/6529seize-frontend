@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { commonApiFetch } from "@/services/api/common-api";
 import { renderWavesPageContent } from "@/app/waves/waves-page.shared";
 
+const mockFetchServerWaveFeedSeed = jest.fn();
+
 jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
 }));
@@ -12,6 +14,17 @@ jest.mock("@/helpers/server.app.helpers", () => ({
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
+}));
+
+jest.mock("@/app/waves/wave-feed-seed.server", () => ({
+  fetchServerWaveFeedSeed: (...args: unknown[]) =>
+    mockFetchServerWaveFeedSeed(...args),
+}));
+
+jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
+  __esModule: true,
+  default: () => null,
+  WaveServerFeedSeedGate: ({ children }: any) => children,
 }));
 
 jest.mock("@/app/waves/page.client", () => ({
@@ -52,6 +65,7 @@ describe("renderWavesPageContent route family redirects", () => {
     expect(redirect).toHaveBeenCalledWith(
       "/messages/dm-wave?drop=drop-1&serialNo=42"
     );
+    expect(mockFetchServerWaveFeedSeed).not.toHaveBeenCalled();
   });
 
   it("redirects non-DM waves from /messages to /waves", async () => {
@@ -68,5 +82,6 @@ describe("renderWavesPageContent route family redirects", () => {
     expect(redirect).toHaveBeenCalledWith(
       "/waves/regular-wave?drop=drop-1&divider=7"
     );
+    expect(mockFetchServerWaveFeedSeed).not.toHaveBeenCalled();
   });
 });

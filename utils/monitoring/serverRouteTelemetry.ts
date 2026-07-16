@@ -6,6 +6,7 @@ export const SERVER_ROUTE_SPAN_NAMES = {
   notificationsProfilePrefetch: "notifications.profile.prefetch",
   wavesIndexDataPath: "waves.index.server_data",
   wavesMetadataFetch: "waves.metadata.fetch",
+  wavesInitialFeedFetch: "waves.initial_feed.fetch",
 } as const;
 
 type ServerRouteSpanName =
@@ -15,15 +16,20 @@ type ServerRouteDataPath =
   | "none"
   | "notifications_feed"
   | "profile"
+  | "wave_initial_feed"
   | "wave_metadata";
 
 type ServerRouteAuthCohort = "anonymous" | "authenticated";
 
 type ServerRouteSpanOptions = {
   readonly name: ServerRouteSpanName;
-  readonly routeFamily: "/notifications" | "/waves" | "/waves/[wave]";
+  readonly routeFamily:
+    | "/messages/[wave]"
+    | "/notifications"
+    | "/waves"
+    | "/waves/[wave]";
   readonly dataPath: ServerRouteDataPath;
-  readonly apiRequestCount: 0 | 1;
+  readonly apiRequestCount?: 0 | 1 | undefined;
   readonly authCohort?: ServerRouteAuthCohort | undefined;
 };
 
@@ -47,7 +53,9 @@ export async function traceServerRouteData<T>(
       attributes: {
         "route.family": options.routeFamily,
         "data.path": options.dataPath,
-        "data.api_request_count": options.apiRequestCount,
+        ...(options.apiRequestCount !== undefined
+          ? { "data.api_request_count": options.apiRequestCount }
+          : {}),
         ...(options.authCohort ? { "auth.cohort": options.authCohort } : {}),
       },
     });

@@ -1,401 +1,241 @@
-# Deployment Bus Automation
-
-Status: deployment-bus automation slices. The deployment bus process remains defined in
-`ops/docs/developer/deployment-bus-process.md`; this page documents the durable
-automation primitives added around the current staging and production workflows.
-
-## What This Automates
-
-This PR does not move the bus automatically. It adds the release ledger that a
-safe bus needs before queue automation can make decisions:
-
-- deployment bus manifest schema at `ops/deployment-bus/manifest.v1.schema.json`
-- repo-native CLI at `ops/scripts/deployment-bus.cjs`
-- GitHub Deployment records for staging and production deploy workflows
-- Deployment status heartbeats while SSM or Elastic Beanstalk waits are running
-- manifest artifacts retained from deploy workflow runs
-- release report artifacts retained beside the manifest
-- standard deployed-environment validation pack names and commands
-- auto-hold evaluation for missing or failed required evidence
-- post-deploy watch evidence in the release report
-- explicit canary-readiness fields that say what rollout capability exists
-- deployed HTTP `/api/version` checks that prove the live app serves the
-  deployed SHA before the workflow marks a deployment verified
-- production workflow check that fails if `origin/main` advances during the
-  build before Elastic Beanstalk is updated
-- deployed-staging Playwright mode through `PLAYWRIGHT_BASE_URL` and
-  `PLAYWRIGHT_SKIP_WEB_SERVER`
-
-The next automation PR can use these records for queue collection, PR comments,
-label transitions, dashboards, and stricter production preflight enforcement.
-
-## Manifest Contract
-
-Generate a manifest with:
-
-```bash
-6529 run deployment-bus -- create-manifest \
-  --environment staging \
-  --staging-deploy-sha <1a-staging-sha> \
-  --production-candidate-sha <origin-main-sha> \
-  --production-eligible true \
-  --release-captain <owner> \
-  --output deployment-bus-manifest.json
-```
-
-Validate and summarize:
-
-```bash
-6529 run deployment-bus -- validate-manifest --file deployment-bus-manifest.json
-6529 run deployment-bus -- summarize-manifest --file deployment-bus-manifest.json
-6529 run deployment-bus -- record-validation-check \
-  --file deployment-bus-manifest.json \
-  --pack playwright:core-smoke \
-  --status passed \
-  --surfaces web:desktop-chromium,web:mobile-chromium \
-  --artifact-uri s3://6529reviewbot-prod-artifacts/frontend-deployment/<release-id>/core-smoke.json \
-  --redaction-status verified-redacted \
-  --artifact-sha256 <sha256> \
-  --retention-policy standard-90-days
-6529 run deployment-bus -- upload-validation-artifact \
-  --file deployment-bus-manifest.json \
-  --pack deployment:http-version \
-  --status passed \
-  --source-file deployment-version-evidence.json \
-  --s3-prefix s3://6529reviewbot-prod-artifacts/frontend-deployment/ \
-  --retention-policy standard-90-days
-6529 run deployment-bus -- record-post-deploy-watch \
-  --file deployment-bus-manifest.json \
-  --status passed \
-  --observed-duration-minutes 30 \
-  --checkpoint version-match \
-  --checkpoint-status passed \
-  --evidence https://github.com/6529-Collections/6529seize-frontend/actions/runs/<run-id> \
-  --notes "API version, route smoke, and static asset checks passed"
-6529 run deployment-bus -- release-report --file deployment-bus-manifest.json --output deployment-release-report.md
-```
-
-The manifest separates:
-
-- `shas.staging_deploy_sha`: the actual `1a-staging` SHA deployed to staging
-- `shas.production_candidate_sha`: the `origin/main` SHA that staging is meant
-  to prove for production
-- `production_eligible`: whether this staging deployment satisfies the
-  production same-SHA gate
-
-If staging does not contain the current `origin/main` SHA, the workflow still
-records the deployment, but the manifest is exploratory and not production
-eligible.
-
-Manifest creation is intentionally a hard deploy gate. If the workflow cannot
-create and validate the manifest, it stops before SSM, S3, or Elastic Beanstalk
-mutation. The deployment lane should not move when its release ledger cannot be
-written.
-
-## Standard Validation Packs
-
-The deployment manifest now records the standard frontend deployed-environment
-packs in `validation.required_packs` and expands them in
-`validation.pack_plan`.
-
-`playwright:core-smoke` is the fast route smoke pack. `playwright:surface-matrix`
-is the broader route/navigation workflow pack. `playwright:production-readonly`
-is a known production-only aggregate pack that release captains can opt into
-when recording full production-safe read-only evidence. `native:surface-evidence`
-is an optional native evidence classifier pack for trains that touch
-Capacitor/Electron-adjacent code. Neither optional pack is in the default
-required pack set.
-
-| Pack                             | Staging command                                                                                                        | Production command                                                                                             |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `playwright:core-smoke`          | `seize run test:e2e:staging:smoke`                                                                                     | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:smoke:surface-matrix`     |
-| `playwright:surface-matrix`      | `seize run test:e2e:staging`                                                                                           | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:surface-matrix`           |
-| `playwright:wcag-i18n`           | `PLAYWRIGHT_BASE_URL=https://staging.6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` | `PLAYWRIGHT_BASE_URL=https://6529.io PLAYWRIGHT_SKIP_WEB_SERVER=1 seize run test:e2e:wcag-i18n:surface-matrix` |
-| `playwright:production-readonly` | production-only                                                                                                        | `seize run test:e2e:production:readonly`                                                                       |
-| `native:surface-evidence`        | `seize run test:native-evidence`                                                                                       | `seize run test:native-evidence`                                                                               |
-
-The default required standard pack plan records `web:desktop-chromium` and
-`web:mobile-chromium` as the covered deployed web surfaces. The production
-read-only aggregate records `web:desktop-chromium` only because production
-scripts intentionally run production-safe public checks on desktop Chromium.
-Firefox, WebKit, Capacitor simulation, and Electron simulation remain optional
-train/nightly or targeted validation lanes until they are stable enough to make
-them required deployment evidence. `native:surface-evidence` records the
-classifier JSON only; it does not run simulator specs. Browser simulation and
-package-prerequisite checks must not be described as real native or real
-Electron shell coverage. A PR or train may claim real packaged native or
-Electron evidence only when separate package-build and runtime-smoke artifacts
-are recorded.
-
-For standard required packs, release readiness requires the latest passing
-check to record the pack-plan command and every required pack-plan surface.
-Equivalent but differently spelled commands should be recorded as custom or
-release-captain exception evidence, not as a passed standard pack.
-
-## Release Reports And Auto-Hold
-
-Deploy workflows now update `deployment-bus-manifest.json` to a terminal deploy
-status before artifact upload and write `deployment-release-report.md` beside
-it. The report includes:
-
-- exact staging and production candidate SHAs;
-- release captain and environment URL;
-- required validation packs and their commands;
-- recorded validation checks and artifact pointers;
-- post-deploy watch status, duration, checkpoints, and evidence links;
-- current canary capability and future traffic-split prerequisites;
-- auto-hold findings;
-- included PRs and artifact policy.
-
-The report status is `hold` when required validation evidence has not been
-recorded yet. A hold does not mean the deploy failed. It means production
-promotion or public release notes still need the missing deployed-environment
-evidence or a recorded release-captain exception.
-
-`record-validation-check` appends a timestamped result to
-`validation.checks`. Use it after a required pack finishes so the next release
-report can distinguish unresolved findings from a fixed rerun. The latest
-recorded result for each required pack is authoritative for pack readiness; a
-failed run can be cleared by a later passing rerun with retained evidence.
-
-For release readiness, each required pack's latest passing check needs its own
-approved durable artifact pointer. An unrelated check's artifact does not prove
-the required pack. The pointer must include:
-
-- an approved durable URI without query strings, fragments, signed URL tokens,
-  local filesystem paths, or Git LFS pointers;
-- `redaction_status=verified-redacted`;
-- integrity metadata: `sha256`, `etag`, or `cid`;
-- retention metadata: `retention_days`, `retention_until`, or
-  `retention_policy`.
-
-Current auto-hold criteria:
-
-- any required validation pack records `failed`, `blocked`, or `timed_out`;
-- a deploy-verified or terminal manifest lacks a passed check for each required
-  validation pack;
-- a production-eligible manifest's latest passing required-pack check lacks an
-  approved durable artifact pointer with verified redaction, integrity metadata,
-  and retention metadata;
-- a production release manifest has not recorded a passed post-deploy watch, or
-  the watch duration/checkpoints do not satisfy the manifest;
-- the production candidate SHA no longer matches the staging-validated release
-  set.
-
-Durable evidence must point at approved 6529-controlled artifact storage such
-as `s3://6529reviewbot-prod-artifacts/frontend-deployment/`,
-`s3://6529-artifacts/` once that dedicated bucket exists,
-`https://artifacts.6529.io/`, or `ipfs://` for intentionally public redacted
-provenance. Git LFS and committed generated files are not durable release
-evidence stores. Do not record temporary signed URLs, query-string credentials,
-fragments, local paths, or unredacted artifacts.
-
-Use `upload-validation-artifact` when the evidence is a text or JSON file. The
-command redacts known secret patterns, verifies the redacted file, uploads it
-to an approved S3 prefix, records SHA-256 and retention metadata, and appends a
-validation check to the manifest. It fails before upload for unapproved S3
-prefixes or unredacted evidence. It currently supports text evidence only; do
-not use it for raw Playwright traces until a binary scrubbing contract exists.
-Deploy workflows run this as a non-blocking feedback step: successful uploads
-record durable evidence, while failed uploads warn and leave release readiness
-incomplete without inventing an artifact pointer.
-
-GitHub Actions workflow artifacts and run URLs are useful temporary evidence,
-but they are not durable artifact pointers. They can appear in post-deploy watch
-checkpoints and release reports; they do not satisfy the durable-artifact hold
-for retained Playwright traces, screenshots, or validation outputs.
-
-## Post-Deploy Watch And Canary Readiness
-
-Every manifest has `post_deploy_watch` and `canary_readiness` fields.
-
-`post_deploy_watch` records:
-
-- whether a watch is required;
-- current status: `not_started`, `in_progress`, `passed`, `failed`,
-  `blocked`, or `skipped`;
-- minimum and observed watch duration;
-- timestamped checkpoints with evidence links;
-- notes for the release captain or validation agents.
-
-The staging workflow records a staging deploy-verification checkpoint after SSM
-and deployed-SHA verification. Both deploy workflows also run a GET-only
-`/api/version` check against the deployed environment and upload
-`deployment-version-evidence.json` with the workflow artifacts. The production
-workflow records an `eb-version-health` checkpoint after Elastic Beanstalk
-health/readiness and version-label validation. Production workflow evidence
-starts the watch but does not by itself complete the release-captain
-post-deploy watch; production validation agents should record the final
-`passed` watch after the deployed environment checks finish.
-
-Run the same HTTP version probe locally or from a release-captain shell with:
-
-```bash
-6529 run verify:deployment-version -- \
-  --base-url https://6529.io \
-  --expected-version <sha> \
-  --output deployment-version-evidence.json
-```
-
-For staging, provide the access code through `PLAYWRIGHT_STAGING_ACCESS_CODE` or
-`STAGING_AUTH` only as an environment value. The evidence file records the
-target origin, `/api/version` status, cache policy, expected version, and actual
-version, but never request headers or cookies.
-
-Production watch completion is intentionally a two-step handoff:
-
-1. The production workflow records the automated `eb-version-health` checkpoint
-   and leaves `post_deploy_watch.status` as `in_progress`.
-2. The release captain or validation agent runs the production-safe smoke,
-   surface-matrix, WCAG/i18n, API version, and changed-surface checks.
-3. After those checks pass, the validator records the terminal watch status:
-
-```bash
-6529 run deployment-bus -- record-post-deploy-watch \
-  --file deployment-bus-manifest.json \
-  --status passed \
-  --observed-duration-minutes 30 \
-  --checkpoint release-captain-validation \
-  --checkpoint-status passed \
-  --evidence https://github.com/6529-Collections/6529seize-frontend/actions/runs/<run-id> \
-  --notes "Production smoke, surface matrix, WCAG/i18n, and API version checks passed"
-```
-
-Use canonical evidence URLs without query strings or fragments; signed URLs and
-tokenized dashboard links do not belong in deployment-bus manifests or release
-reports.
-
-If production validation fails, record `failed` or `blocked` instead and keep
-the release on hold until rollback or fix-forward validation passes.
-
-`canary_readiness` records current rollout capability. Today the frontend bus
-supports auto-hold and explicit staged watch. Generic deployment traffic
-splitting is not currently supported, and feature flags are app-specific rather
-than a release-lane capability. The manifest records candidate/control metrics
-and prerequisites so a future traffic-split canary implementation has a clear
-contract instead of being inferred from prose.
-
-## GitHub Deployment Ledger
-
-The staging workflow creates a GitHub Deployment with:
-
-- `environment=staging`
-- `task=deploy:staging`
-- `ref=<staging_deploy_sha>`
-- static deployment bus pointer payload; the manifest artifact is the ledger
-- status `queued`, then `in_progress`, then `success`, `failure`, or `error`
-
-The production workflow creates a GitHub Deployment with:
-
-- `environment=production`
-- `task=deploy:production`
-- `ref=<github.sha>`
-- static deployment bus pointer payload; the manifest artifact is the ledger
-- status `queued`, then `in_progress`, then `success`, `failure`, or `error`
-
-Each status includes a workflow `log_url`; terminal statuses include the public
-environment URL.
-
-## Complex And Multi-Hour Deployments
-
-Complex releases are first-class. A manifest becomes long-running when
-`complexity=complex` or `lane.expected_duration_minutes` is greater than 120.
-The validator then requires:
-
-- explicit heartbeat interval and stale-after window
-- progress update channels
-- escalation window
-- checkpoint labels
-- rollback and fix-forward plans
-
-Recommended operating model:
-
-- heartbeat every 5-10 minutes while SSM or Elastic Beanstalk is doing active
-  infrastructure work
-- heartbeat every 15-30 minutes while humans validate a complex candidate
-- mark a release stale when the workflow is terminal but the Deployment is not,
-  no heartbeat appears after the stale window, or a superseded run tries to
-  update an older candidate
-- never auto-steal production; staging can be superseded only by a release
-  captain with a recorded reason
-
-The current workflows emit periodic `in_progress` Deployment statuses during
-long SSM and Elastic Beanstalk wait loops. Human validation heartbeats can use:
-
-```bash
-6529 run deployment-bus -- heartbeat-manifest \
-  --file deployment-bus-manifest.json \
-  --status validating \
-  --phase area-pack-validation \
-  --message "Waves and media validation still in progress"
-```
-
-For live Deployment status updates:
-
-```bash
-6529 run deployment-bus -- github-create-status \
-  --deployment-id <deployment-id> \
-  --state in_progress \
-  --description "Validation still in progress: media/IPFS pack"
-```
-
-## Production Preflight
-
-Production deploys remain human-approved and main-only. The production workflow
-now performs a late check after build. It fetches `origin/main`, passes the
-resolved SHA into the deployment bus preflight, and aborts before the first
-production mutation when the staged candidate no longer matches:
-
-```text
-origin/main must still equal github.sha before assets are uploaded and Elastic
-Beanstalk is updated.
-```
-
-This catches long-build races where the workflow started from `main`, but a
-newer unvalidated commit reached `origin/main` before production mutation. A
-future PR can make this stricter by reading the latest successful staging
-manifest artifact and requiring its `production_candidate_sha` to match
-`github.sha`.
-
-## Deployed-Staging Smoke
-
-Run the read-only staging smoke pack without starting a local web server:
-
-```bash
-6529 run test:e2e:staging
-```
-
-The command sets:
-
-- `PLAYWRIGHT_BASE_URL=https://staging.6529.io`
-- `PLAYWRIGHT_SKIP_WEB_SERVER=1`
-
-When the staging access gate is enabled, provide the access code through
-`PLAYWRIGHT_STAGING_ACCESS_CODE` or `STAGING_AUTH`. Operators must not print or
-persist it.
-
-The Playwright config disables traces when `PLAYWRIGHT_BASE_URL` is
-`https://staging.6529.io` so the access-code entry is not retained in retry
-artifacts. Do not re-enable traces for staging smoke runs unless the unlock flow
-has a separate redaction path.
-
-Keep deployed-environment tests production-safe: no public posts, purchases,
-wallet transfers, signer changes, destructive writes, or irreversible live
-actions.
-
-## What Remains Manual
-
-Still manual in this slice:
-
-- deciding the staging batch
-- pushing or updating `1a-staging`
-- labels and PR comments
-- release dashboard
-- backend service deployment order
-- production approval
-- production promotion
-- production rollback
-- release notes and wave publication
-
-Those should build on this ledger instead of re-inferring release state from
-workflow runs alone.
+# Deployment Bus Automation and Operations
+
+Status: implementation reference and go-live runbook. Code is feature-gated;
+merging it does not by itself enable autonomous deployments.
+
+## Runtime architecture
+
+- The existing application MySQL database is the durable release ledger.
+- `releaseBusStarter` runs every minute with reserved concurrency `1`.
+- AWS Standard Step Functions keeps one short-running worker invocation per
+  state transition and waits between polls.
+- `releaseBusWorker` reconciles state and starts the next idempotent operation.
+- Each train is pinned to the published worker Lambda version whose code hash
+  matched the deployment at departure time. Retained versions let an in-flight
+  train finish under one implementation even if newer bus code is deployed.
+- `releaseBusCleaner` removes old temporary release-bus branches while
+  protecting branches referenced by active trains.
+- GitHub Actions composes candidates, builds immutable artifacts, deploys,
+  validates, and reports exact evidence.
+- A narrowly scoped GitHub App is the machine identity for reads, temporary
+  branch writes, release PRs, expected-SHA branch advancement, comments, and
+  workflow dispatch.
+- `/deploy/ui/bus` is the developer queue and operator control panel.
+
+The Step Functions input contains only the train ID. Durable state remains in
+MySQL, so worker replacement, Lambda timeout, duplicate schedules, and delayed
+GitHub responses do not require an in-memory continuation.
+
+The orchestrator stack is deployed once, in the production AWS region. It owns
+both staging and production lanes; a second staging-region scheduler must not
+be deployed against the same ledger.
+
+## Release ledger
+
+The additive migration creates:
+
+| Table                            | Purpose                                              |
+| -------------------------------- | ---------------------------------------------------- |
+| `release_ready_deployments`      | Immutable candidate identity and lifecycle           |
+| `release_candidate_dependencies` | Cross-repository candidate DAG                       |
+| `release_trains`                 | Frozen staging or production trains                  |
+| `release_train_items`            | Ordered candidates in a train                        |
+| `release_train_operations`       | Exactly correlated external effects                  |
+| `release_train_evidence`         | SHA, artifact, workflow, E2E, and deploy evidence    |
+| `release_deployment_lanes`       | Global orchestration, staging, and production leases |
+| `release_bus_controls`           | Durable `ALL`, `STAGING`, and `PRODUCTION` pauses    |
+| `release_train_events`           | Append-only audit history                            |
+
+There are no database foreign keys or database enum constraints. Application
+code enforces transitions and optimistic row versions. The release tables are
+isolated from product-domain transactions even though they use the same DB.
+
+## APIs
+
+All endpoints are under `/deploy`:
+
+- `POST /release-candidates/ready`
+- `POST /release-candidates/:id/cancel`
+- `GET /release-candidates`
+- `GET /release-trains`
+- `GET /release-trains/:id`
+- `GET /release-bus/controls`
+- `POST /release-bus/pause`
+- `POST /release-bus/resume`
+- `POST /release-bus/authorize`
+- `POST /release-bus/authorize-break-glass`
+- `POST /github/webhook`
+
+Developer readiness uses the developer's GitHub token only to establish
+identity, repository write permission, current branch SHA, open source PR, and
+dependency heads. Tokens are never persisted.
+
+Workflow authorization uses a separate shared workflow credential and then
+matches train ID, revision-derived operation key, workflow run ID, repository,
+environment, service, expected SHA, artifact run ID, artifact digest, and live
+lane ownership. The first matching execution and digest are bound atomically;
+a different run or digest cannot claim the same operation.
+
+Webhook signatures use the raw request body and HMAC-SHA256. The minute
+reconciler independently checks queued branch heads, so webhook loss affects
+latency rather than correctness.
+
+## GitHub workflows
+
+Both repositories contain release-bus workflows for:
+
+- temporary release-branch composition;
+- immutable preflight and packaging;
+- deterministic candidate isolation with read-only Codex diagnostics;
+- post-production `main` to `1a-staging` synchronization.
+
+Backend deployment continues through the generated per-service workflow, now
+with exact SHA, preflight run, checksum, operation, and authorization gates.
+The deploy registry supplies adapters, environments, regions, verification
+targets, default dependencies, and rollback capability.
+
+Frontend has dedicated bus workflows for immutable staging and production
+deployment, plus production-safe read-only E2E. The legacy staging deploy and
+staging E2E workflows recognize release-bus marker commits and do not duplicate
+an already completed bus deployment.
+
+Bus deployment workflows never build again after authorization. They download
+the artifact from the exact preflight run, verify its manifest and checksums,
+compute the package digest, bind that digest at the API gate, deploy, and verify
+the live version.
+
+## Concurrency and retry safety
+
+- Lambda reserved concurrency is `1` for starter, worker, and cleaner.
+- DB leases enforce one global train, one staging mutation, and one production
+  mutation even if Lambda concurrency settings change.
+- A train contains at most 20 candidates by default (configurable up to 50),
+  which bounds isolation fan-out and workflow/API load. Later candidates stay
+  queued for the next departure.
+- Every branch, workflow, service deploy, merge, and synchronization has a
+  deterministic operation key with train, revision, immutable identity, and
+  attempt.
+- A repeat call first loads its operation and reconciles GitHub. It creates a
+  new external effect only when absence is proven.
+- Step Functions retries transient Lambda service failures and returns to a
+  wait loop after an exhausted task error, preserving the train ID.
+- The starter records the deterministic execution ARN before starting Step
+  Functions and reconciles terminal or missing executions. Recovery reuses the
+  train's recorded worker version rather than silently switching code.
+- Existing manual or bus deploy workflow runs are detected before a lane is
+  acquired.
+- Branch updates use expected-old-SHA, non-force fast-forward semantics.
+
+## Modes
+
+`RELEASE_BUS_MODE` has four values:
+
+- `OFF`: no trains are collected.
+- `SHADOW`: dependency and batching decisions are recorded, candidates are
+  returned to the queue, and no GitHub writes occur. Each exact candidate is
+  evaluated once per lane so the scheduler does not create the same shadow
+  train every minute; production-ready candidates are shadowed before unrelated
+  staging-ready candidates, matching live priority.
+- `STAGING`: the bus owns normal staging; production remains manual break glass.
+- `PRODUCTION`: the bus owns normal staging and production.
+
+`RELEASE_BUS_ENFORCEMENT=true` in each GitHub repository turns legacy manual
+deployments into operator-only audited break glass. Enable it only after the
+corresponding bus mode is healthy.
+
+## Required external setup
+
+The code can be merged and deployed with mode `OFF` before these values exist.
+Before shadow or live use, create and install the GitHub App with:
+
+- metadata read;
+- contents read/write;
+- actions read/write;
+- pull requests read/write;
+- checks and commit statuses read/write;
+- deployments read/write;
+- issues write;
+- organization members read, for operator-team checks.
+
+Add the App as the repository-ruleset bypass actor. Protect `main` and
+`1a-staging`; permit normal writes only from the App, and permit named operator
+break glass according to organization policy.
+
+AWS application secrets/configuration:
+
+- `RELEASE_BUS_GITHUB_APP_ID`
+- `RELEASE_BUS_GITHUB_INSTALLATION_ID`
+- `RELEASE_BUS_GITHUB_PRIVATE_KEY`
+- `RELEASE_BUS_GITHUB_WEBHOOK_SECRET`
+- `RELEASE_BUS_WORKFLOW_AUTH_TOKEN`
+- optional `RELEASE_BUS_GITHUB_ORG`, `RELEASE_BUS_OPERATOR_TEAM`, and
+  `RELEASE_BUS_UI_URL` for commit-status links
+
+The AWS and GitHub copies of `RELEASE_BUS_WORKFLOW_AUTH_TOKEN` must contain the
+same high-entropy value. Set `RELEASE_BUS_MODE` in AWS configuration only when
+advancing the rollout mode; it defaults to `OFF`.
+
+GitHub repository variables/secrets in both repositories:
+
+- variable `RELEASE_BUS_API_URL`
+- variable `RELEASE_BUS_GITHUB_APP_ID`
+- variable `RELEASE_BUS_GITHUB_APP_BOT_LOGIN`
+- secret `RELEASE_BUS_GITHUB_PRIVATE_KEY`
+- secret `RELEASE_BUS_WORKFLOW_AUTH_TOKEN`
+- secret `OPENAI_API_KEY` only for the isolated Codex jobs
+- the existing AWS, staging, build, and E2E secrets used by current workflows
+
+Frontend bus deployment additionally needs its existing staging host, S3,
+Elastic Beanstalk, CloudFront, build, and staging-auth values. Never paste
+private keys or workflow credentials into chat or committed files.
+
+## Zero-downtime rollout
+
+1. Merge the backward-compatible workflows and API code.
+2. Deploy the additive migration through `dbMigrationsLoop` before API or bus
+   code reads the tables.
+3. Deploy `api`.
+4. Deploy `releaseBus` with mode `OFF`.
+5. Install the GitHub App, webhook, secrets, operator team, and rulesets.
+6. Enable `SHADOW` and compare recorded trains with real manual releases.
+7. Enable `STAGING` and let the bus own staging while enforcement remains off.
+8. After the chosen staging soak threshold, set repository enforcement true
+   and retain the operator break-glass path.
+9. Enable production shadow comparison.
+10. After the separately chosen production go-live threshold, enable
+    `PRODUCTION`, then production enforcement.
+
+Gate enforcement is last. Existing deployment workflows remain usable while
+the bus is `OFF` or in its initial shadow rollout.
+
+## Operations and recovery
+
+- Pause/resume at `/deploy/ui/bus`; every change requires a reason and is
+  recorded in `release_train_events`.
+- A paused train heartbeats owned leases but does not start the next
+  irreversible operation.
+- A missed workflow response remains `AMBIGUOUS` until exact-run reconciliation
+  proves its state.
+- Expired leases can be acquired only after the active worker and external-run
+  checks no longer show an owner.
+- Production failure pauses production and blocks later trains. Restore a
+  known-good version through a declared adapter or audited break glass, verify
+  health, then resume explicitly.
+- Temporary branches are retained for seven days by default and then cleaned.
+
+CloudWatch publishes queue depth, oldest-ready age, holds, quarantines, active
+train age, train duration, and train failures. The infrastructure creates
+alarms for starter/worker errors, state-machine failures, trains older than two
+hours, and production train failure. Route those alarms to the existing
+operations notification path during infrastructure setup.
+
+## Deliberate limits
+
+- Generic traffic-split canaries are not implemented.
+- Automatic rollback defaults to disabled for every service until an adapter
+  and validation procedure are explicitly declared in the deploy registry.
+- Codex cannot authorize ejection, merge, deployment, or rollback.
+- The bus does not publish release notes.
+- The existing deployment manifest CLI and schema remain useful evidence
+  tooling, but the database train ledger and exact operation records are the
+  automation source of truth.
