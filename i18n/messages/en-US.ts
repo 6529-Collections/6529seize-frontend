@@ -1895,6 +1895,9 @@ export const EN_US_MESSAGES = {
   "profile.mute.status.muted": "Notifications from this profile are muted.",
   "profile.mute.status.unmuted":
     "Notifications from this profile are not muted.",
+  "profile.subscriptions.mintingToday.label": "Minting Today",
+  "profile.subscriptions.mintingToday.tooltip":
+    "No changes allowed on minting day",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
   "drop.media.processingGeneric": "Processing media",

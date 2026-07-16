@@ -1,11 +1,14 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import UserSettingsClassificationItem from '@/components/user/settings/UserSettingsClassificationItem';
-import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import UserSettingsClassificationItem from "@/components/user/settings/UserSettingsClassificationItem";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 
 const classification = ApiProfileClassification.Bot;
 
-function renderItem(selected: ApiProfileClassification | null, handler = jest.fn()) {
+function renderItem(
+  selected: ApiProfileClassification | null,
+  handler = jest.fn()
+) {
   render(
     <ul>
       <UserSettingsClassificationItem
@@ -18,21 +21,20 @@ function renderItem(selected: ApiProfileClassification | null, handler = jest.fn
   return handler;
 }
 
-describe('UserSettingsClassificationItem', () => {
-  it('calls onClassification when clicked', async () => {
+describe("UserSettingsClassificationItem", () => {
+  it("calls onClassification when clicked", async () => {
     const handler = renderItem(null);
-    const item = screen.getByText('Bot').closest('li') as HTMLElement;
-    await userEvent.click(item);
+    await userEvent.click(screen.getByRole("button", { name: "Bot" }));
     expect(handler).toHaveBeenCalledWith(classification);
   });
 
-  it('shows check icon when selected', () => {
+  it("shows check icon when selected", () => {
     renderItem(classification);
-    const item = screen.getByText('Bot').closest('li') as HTMLElement;
-    expect(item.querySelector('svg')).toBeInTheDocument();
+    const item = screen.getByText("Bot").closest("li") as HTMLElement;
+    expect(item.querySelector("svg")).toBeInTheDocument();
   });
 
-  it('updates active state when selected prop changes', () => {
+  it("updates active state when selected prop changes", () => {
     const { rerender } = render(
       <ul>
         <UserSettingsClassificationItem
@@ -42,8 +44,8 @@ describe('UserSettingsClassificationItem', () => {
         />
       </ul>
     );
-    let item = screen.getByText('Bot').closest('li') as HTMLElement;
-    expect(item.querySelector('svg')).toBeNull();
+    let item = screen.getByText("Bot").closest("li") as HTMLElement;
+    expect(item.querySelector("svg")).toBeNull();
 
     rerender(
       <ul>
@@ -54,7 +56,7 @@ describe('UserSettingsClassificationItem', () => {
         />
       </ul>
     );
-    item = screen.getByText('Bot').closest('li') as HTMLElement;
-    expect(item.querySelector('svg')).toBeInTheDocument();
+    item = screen.getByText("Bot").closest("li") as HTMLElement;
+    expect(item.querySelector("svg")).toBeInTheDocument();
   });
 });
