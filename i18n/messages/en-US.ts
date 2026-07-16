@@ -286,6 +286,8 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.join6529": "Join 6529",
   "primary.about": "About",
   "primary.home": "Home",
+  "sidebar.submenuLabel": "{section} sub-navigation",
+  "sidebar.panelLabel": "{section} items",
   "account.notifications": "Notifications",
   "section.main": "Main",
   "section.utility": "Utility",
