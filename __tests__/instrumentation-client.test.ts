@@ -61,6 +61,8 @@ describe("instrumentation-client", () => {
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
     "auto.browser.browserapierrors.setTimeout";
+  const browserUnhandledRejectionMechanismType =
+    "auto.browser.global_handlers.onunhandledrejection";
   const rabbyMobileUserAgent =
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 Mobile/15E148";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
@@ -71,11 +73,23 @@ describe("instrumentation-client", () => {
   };
 
   type BeforeSendResult = {
+    level?: string | undefined;
     tags?: Record<string, unknown> | undefined;
     fingerprint?: string[] | undefined;
     exception?:
       | {
-          values?: Array<{ value?: string | undefined } | undefined>;
+          values?: Array<
+            | {
+                value?: string | undefined;
+                mechanism?:
+                  | {
+                      type?: string | undefined;
+                      handled?: boolean | undefined;
+                    }
+                  | undefined;
+              }
+            | undefined
+          >;
         }
       | undefined;
     message?: string | undefined;
@@ -248,6 +262,72 @@ describe("instrumentation-client", () => {
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it("downgrades the WebKit IndexedDB open failure to handled warning telemetry", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "UnknownError: Unable to open database file on disk",
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              handled: false,
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+    expect(result?.level).toBe("warning");
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        errorType: "indexeddb",
+        handled: true,
+      })
+    );
+    expect(result?.fingerprint).toEqual(["indexeddb-connection-lost"]);
+    expect(result?.exception?.values?.[0]?.mechanism).toEqual({
+      type: browserUnhandledRejectionMechanismType,
+      handled: true,
+    });
+  });
+
+  it("keeps near-miss database errors as ordinary reportable errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      level: "error",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value:
+              "UnknownError: Unable to open database file on disk because it is locked",
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              handled: false,
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+    expect(result?.level).toBe("error");
+    expect(result?.tags?.["errorType"]).toBeUndefined();
+    expect(result?.tags?.["handled"]).toBeUndefined();
+    expect(result?.fingerprint).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.mechanism).toEqual({
+      type: browserUnhandledRejectionMechanismType,
+      handled: false,
+    });
   });
 
   it("drops disconnected wallet-provider object promise rejections", () => {
