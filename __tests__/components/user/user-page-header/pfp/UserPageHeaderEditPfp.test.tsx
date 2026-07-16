@@ -18,11 +18,6 @@ jest.mock('@/components/user/settings/UserSettingsImgSelectFile', () => ({
   __esModule: true,
   default: (props: any) => <button data-testid="file" onClick={() => props.setFile(new File([new ArrayBuffer(3000000)], 'big.png', { type: 'image/png' }))} />
 }));
-jest.mock('@/components/user/settings/UserSettingsSave', () => ({
-  __esModule: true,
-  default: (props: any) => <button data-testid="save" type="submit" disabled={props.disabled}>{props.title}</button>
-}));
-
 const mutateAsync = jest.fn();
 jest.mock('@tanstack/react-query', () => ({ useMutation: () => ({ mutateAsync }), useQuery: () => ({ data: [] }) }));
 jest.mock('@/components/ipfs/IPFSContext', () => ({ useIpfsService: () => ({ addFile: jest.fn() }) }));
@@ -42,7 +37,7 @@ describe('UserPageHeaderEditPfp', () => {
       </AuthContext.Provider>
     );
     await userEvent.click(screen.getByTestId('file'));
-    await userEvent.click(screen.getByTestId('save'));
+    await userEvent.click(screen.getByRole('button', { name: 'Save PFP' }));
     expect(screen.getByText('File size must be less than 2MB')).toBeInTheDocument();
   });
 
@@ -55,7 +50,7 @@ describe('UserPageHeaderEditPfp', () => {
       </AuthContext.Provider>
     );
     await userEvent.click(screen.getByTestId('meme'));
-    await userEvent.click(screen.getByTestId('save'));
+    await userEvent.click(screen.getByRole('button', { name: 'Save PFP' }));
     expect(authCtx.requestAuth).toHaveBeenCalled();
     expect(mutateAsync).toHaveBeenCalled();
   });

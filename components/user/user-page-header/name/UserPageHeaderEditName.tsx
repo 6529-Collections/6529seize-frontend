@@ -2,15 +2,16 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import UserSettingsUsername from "@/components/user/settings/UserSettingsUsername";
+import ActionButton from "@/components/utils/button/ActionButton";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditName({
@@ -31,12 +32,7 @@ export default function UserPageHeaderEditName({
   const params = useParams();
 
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
-
-  const [haveChanges, setHaveChanges] = useState<boolean>(false);
-
-  useEffect(() => {
-    setHaveChanges(userName !== profile.handle);
-  }, [userName]);
+  const haveChanges = userName !== (profile.handle ?? "");
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -123,15 +119,18 @@ export default function UserPageHeaderEditName({
       <button
         type="button"
         aria-label="Close edit username modal"
-        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0 tw-backdrop-blur-sm"
+        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-black/70 tw-p-0 tw-backdrop-blur-sm"
         onClick={onClose}
       />
       <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
         <div
           ref={modalRef}
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 md:tw-max-w-xl lg:tw-p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit username"
+          className="tw-w-full tw-transform tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-5 tw-text-left tw-shadow-2xl tw-shadow-black/40 tw-backdrop-blur-xl tw-transition-all tw-duration-300 sm:tw-max-w-xl sm:tw-p-6 lg:tw-p-8"
         >
-          <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
+          <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-5">
             <UserSettingsUsername
               userName={userName}
               originalUsername={profile.handle ?? ""}
@@ -140,10 +139,23 @@ export default function UserPageHeaderEditName({
               setIsLoading={setCheckingUsername}
             />
 
-            <UserSettingsSave
-              loading={mutating}
-              disabled={!haveChanges || !available || checkingUsername}
-            />
+            <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row-reverse sm:tw-justify-start">
+              <ActionButton
+                type="submit"
+                loading={mutating}
+                disabled={!haveChanges || !available || checkingUsername}
+                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+              >
+                Save
+              </ActionButton>
+              <SecondaryButton
+                disabled={mutating}
+                onClicked={onClose}
+                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+              >
+                Cancel
+              </SecondaryButton>
+            </div>
           </form>
         </div>
       </div>

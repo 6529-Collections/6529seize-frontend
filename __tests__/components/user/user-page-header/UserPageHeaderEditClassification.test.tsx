@@ -5,13 +5,15 @@ import { ApiProfileClassification } from '@/generated/models/ApiProfileClassific
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 
-let capturedSaveProps: any;
+let capturedActionProps: any;
 let capturedClassificationProps: any;
 
-jest.mock('@/components/user/settings/UserSettingsSave', () => (props: any) => {
-  capturedSaveProps = props;
-  return <button disabled={props.disabled}>save</button>;
+jest.mock('@/components/utils/button/ActionButton', () => (props: any) => {
+  capturedActionProps = props;
+  return <button type={props.type} disabled={props.disabled}>save</button>;
 });
+
+jest.mock('@/components/utils/button/SecondaryButton', () => () => <button type="button">cancel</button>);
 
 jest.mock('@/components/user/settings/UserSettingsClassification', () => (props: any) => {
   capturedClassificationProps = props;
@@ -38,12 +40,12 @@ describe('UserPageHeaderEditClassification', () => {
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
-    expect(capturedSaveProps.disabled).toBe(true);
+    expect(capturedActionProps.disabled).toBe(true);
 
     act(() => {
       capturedClassificationProps.onSelect(ApiProfileClassification.Bot);
     });
-    expect(capturedSaveProps.disabled).toBe(false);
+    expect(capturedActionProps.disabled).toBe(false);
 });
 
   it('submits when auth succeeds', async () => {

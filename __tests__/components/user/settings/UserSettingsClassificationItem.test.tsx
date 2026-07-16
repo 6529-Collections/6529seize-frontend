@@ -21,8 +21,7 @@ function renderItem(selected: ApiProfileClassification | null, handler = jest.fn
 describe('UserSettingsClassificationItem', () => {
   it('calls onClassification when clicked', async () => {
     const handler = renderItem(null);
-    const item = screen.getByText('Bot').closest('li') as HTMLElement;
-    await userEvent.click(item);
+    await userEvent.click(screen.getByRole('button', { name: 'Bot' }));
     expect(handler).toHaveBeenCalledWith(classification);
   });
 

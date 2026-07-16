@@ -27,26 +27,27 @@ export default function UserSettingsImgSelectFile({
       <label
         className={` ${
           dragging
-            ? "tw-border-iron-600 tw-bg-iron-800"
-            : "tw-border-iron-700 tw-bg-iron-900"
-        } tw-relative tw-flex tw-h-64 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-600 hover:tw-bg-iron-800 ${
+            ? "tw-border-primary-400/60 tw-bg-primary-500/10"
+            : "tw-border-white/10 tw-bg-iron-900/50"
+        } tw-relative tw-flex tw-h-64 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-xl tw-border-2 tw-border-dashed tw-transition tw-duration-200 tw-ease-out hover:tw-border-white/20 hover:tw-bg-iron-900 focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 ${
           shake ? "tw-animate-shake" : ""
         } `}
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pb-6 tw-pt-5">
           {imageToShow && (
-            <div className="tw-relative tw-h-40 tw-w-40">
+            <div className="tw-relative tw-h-40 tw-w-40 tw-overflow-hidden tw-rounded-xl tw-bg-black/20 tw-ring-1 tw-ring-inset tw-ring-white/10">
               <Image
                 src={imageToShow}
                 alt="Profile image"
                 fill
-                className="tw-rounded-sm tw-object-contain"
+                sizes="10rem"
+                className="tw-object-contain"
               />
             </div>
           )}
           {!imageToShow && (
             <>
-              <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-800">
+              <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-transition tw-duration-200 tw-ease-out group-hover:tw-border-white/15 group-hover:tw-bg-iron-900">
                 <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                   <svg
                     className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50"
@@ -84,7 +85,8 @@ export default function UserSettingsImgSelectFile({
         <input
           id="pfp-upload-input"
           type="file"
-          className="tw-hidden"
+          aria-label="Upload profile picture"
+          className="tw-sr-only"
           accept={ACCEPTED_FORMATS_DISPLAY}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const f = e.target.files?.[0];

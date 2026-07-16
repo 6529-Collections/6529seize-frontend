@@ -2,7 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import ActionButton from "@/components/utils/button/ActionButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type {
   ApiCreateOrUpdateProfileCicStatement,
@@ -166,24 +166,23 @@ export default function UserPageHeaderAboutEdit({
             <SecondaryButton
               disabled={loading}
               onClicked={onClose}
-              className="tw-min-h-11 tw-flex-1 sm:tw-min-w-24 sm:tw-flex-none"
+              className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
             >
               {getUserProfileHeaderMessage(
                 "user.profileHeader.aboutEdit.cancel"
               )}
             </SecondaryButton>
-            <PrimaryButton
+            <ActionButton
               disabled={isDisabled}
               loading={loading}
               onClicked={submitStatement}
               ariaLabel={getUserProfileHeaderMessage(
                 "user.profileHeader.aboutEdit.save"
               )}
-              className="tw-min-h-11 tw-flex-1 sm:tw-min-w-24 sm:tw-flex-none"
-              hideChildrenWhenLoading
+              className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
             >
               {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.save")}
-            </PrimaryButton>
+            </ActionButton>
           </div>
         </div>
       </form>
