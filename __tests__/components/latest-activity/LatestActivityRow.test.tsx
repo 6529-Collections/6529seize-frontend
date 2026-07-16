@@ -2,6 +2,10 @@ import LatestActivityRow, {
   printGas,
   printRoyalties,
 } from "@/components/latest-activity/LatestActivityRow";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "@/components/nextGen/nextgen_contracts";
 import { MANIFOLD } from "@/constants/constants";
 import {
   faCartPlus,
@@ -88,6 +92,36 @@ describe("LatestActivityRow", () => {
       "even:tw-bg-iron-900/45",
       "hover:tw-bg-iron-900/70"
     );
+  });
+
+  it("keeps the date column compact when the NFT image is hidden", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LatestActivityRow tr={baseTr} />
+        </tbody>
+      </table>
+    );
+
+    expect(container.querySelector("td")).toHaveClass("tw-w-px");
+  });
+
+  it("describes a NextGen transfer from sender to recipient", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LatestActivityRow
+            tr={{
+              ...baseTr,
+              contract: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
+            }}
+            hideNextgenTokenId
+          />
+        </tbody>
+      </table>
+    );
+
+    expect(container).toHaveTextContent("Transferred from From to To");
   });
 
   it("uses burn icon when to address is null", () => {

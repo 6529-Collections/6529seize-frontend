@@ -413,24 +413,34 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       );
     }
 
+    if (props.tr.value === 0) {
+      return (
+        <>
+          {!props.hideNextgenTokenId ? (
+            <>{tokenInfo} transferred from</>
+          ) : (
+            "Transferred from"
+          )}
+          &nbsp;
+          <Address
+            wallets={[props.tr.from_address]}
+            display={props.tr.from_display}
+          />
+          &nbsp;to&nbsp;
+          <Address
+            wallets={[props.tr.to_address]}
+            display={props.tr.to_display}
+          />
+        </>
+      );
+    }
+
     return (
       <>
-        {props.tr.value > 0 ? (
-          <>
-            {!props.hideNextgenTokenId ? (
-              <>{tokenInfo} purchased by</>
-            ) : (
-              `Purchased by`
-            )}
-          </>
+        {!props.hideNextgenTokenId ? (
+          <>{tokenInfo} purchased by</>
         ) : (
-          <>
-            {!props.hideNextgenTokenId ? (
-              <>{tokenInfo} transferred to</>
-            ) : (
-              `Transferred to`
-            )}
-          </>
+          "Purchased by"
         )}
         &nbsp;
         <Address
@@ -543,7 +553,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       className="tw-h-16 odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70"
     >
       <td
-        className={`tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`}
+        className={`${props.showNftIdentity ? "" : "tw-w-px"} tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`}
       >
         {getDateDisplay(new Date(props.tr.transaction_date))}
       </td>
