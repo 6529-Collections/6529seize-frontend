@@ -3,6 +3,7 @@ import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-to
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
@@ -374,6 +375,7 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
+  ...stormComposerFrMessages,
   "waves.loadingStatus": "Chargement des waves",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
   "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",

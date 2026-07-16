@@ -54,6 +54,8 @@ const SANDBOX_POLL_OPTIONS = [
   "A longer poll option that stays readable on a phone",
   "A second poll option",
 ];
+const SANDBOX_STORM_FIRST_PART = "Calm storm opening.";
+const SANDBOX_STORM_SECOND_PART = "Calm storm conclusion.";
 const SANDBOX_SIGNATURE_WAVE_NAME = "Local Signature Sandbox Wave";
 const SANDBOX_SIGNATURE_WAVE_DESCRIPTION =
   "Local-only signed drop sandbox wave for Playwright.";
@@ -941,6 +943,26 @@ function isExpectedChatDropPart(part, expectedContent) {
   );
 }
 
+function isExpectedChatDropParts(parts, hasPoll) {
+  if (!Array.isArray(parts)) {
+    return false;
+  }
+
+  if (hasPoll) {
+    return parts.length === 1 && isExpectedChatDropPart(parts[0], null);
+  }
+
+  if (parts.length === 1) {
+    return isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT);
+  }
+
+  return (
+    parts.length === 2 &&
+    isExpectedChatDropPart(parts[0], SANDBOX_STORM_FIRST_PART) &&
+    isExpectedChatDropPart(parts[1], SANDBOX_STORM_SECOND_PART)
+  );
+}
+
 function isExpectedPoll(poll) {
   return (
     hasOnlyKeys(poll, [
@@ -997,12 +1019,7 @@ function isExpectedChatDropBody(body) {
     body.signature === null &&
     body.is_safe_signature === false &&
     isExpectedChatDropSignerAddress(body.signer_address) &&
-    Array.isArray(body.parts) &&
-    body.parts.length === 1 &&
-    isExpectedChatDropPart(
-      body.parts[0],
-      hasPoll ? null : SANDBOX_CHAT_DROP_CONTENT
-    ) &&
+    isExpectedChatDropParts(body.parts, hasPoll) &&
     (!hasPoll || isExpectedPoll(body.poll)) &&
     Array.isArray(body.referenced_nfts) &&
     body.referenced_nfts.length === 0 &&
@@ -1573,6 +1590,11 @@ function loggedRequestBody(pathname, body) {
           }
         : null,
       part_count: Array.isArray(body.parts) ? body.parts.length : 0,
+      part_contents: Array.isArray(body.parts)
+        ? body.parts.map((part) =>
+            isPlainObject(part) ? part.content : null
+          )
+        : [],
       part_keys: isPlainObject(firstPart) ? sortedKeys(firstPart) : [],
       media_count: Array.isArray(firstPart?.media) ? firstPart.media.length : 0,
       has_attachments:
@@ -1871,10 +1893,23 @@ function handleAllowedChatDropPost(method, pathname, body, requestKind, res) {
     return false;
   }
 
-  return writeJsonResponse(
-    res,
-    isPlainObject(body.poll) ? submittedPollDrop : submittedChatDrop
-  );
+  if (isPlainObject(body.poll)) {
+    return writeJsonResponse(res, submittedPollDrop);
+  }
+
+  const parts = body.parts.map((part, index) => ({
+    part_id: index + 1,
+    content: part.content,
+    media: [],
+    attachments: [],
+    quoted_drop: null,
+  }));
+
+  return writeJsonResponse(res, {
+    ...submittedChatDrop,
+    parts,
+    parts_count: parts.length,
+  });
 }
 
 function handleAllowedChatDropEditPost(method, pathname, requestKind, res) {
