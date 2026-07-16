@@ -16,6 +16,8 @@ describe("instrumentation-client", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const indexedDBUserDeleteMessage =
+    "Database deleted by request of the user";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
@@ -69,6 +71,7 @@ describe("instrumentation-client", () => {
   };
 
   type BeforeSendResult = {
+    level?: string | undefined;
     tags?: Record<string, unknown> | undefined;
     fingerprint?: string[] | undefined;
     exception?:
@@ -113,6 +116,22 @@ describe("instrumentation-client", () => {
       extra?: Record<string, unknown>;
     };
   };
+
+  const createUnhandledRejectionEvent = (message: string) => ({
+    level: "error",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: message,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+        },
+      ],
+    },
+  });
 
   const createAppleWebKitSortedTrackListEvent = (
     frames: Array<Record<string, unknown>> = [
@@ -287,6 +306,48 @@ describe("instrumentation-client", () => {
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it.each([
+    {
+      description: "raw WebKit message",
+      message: indexedDBUserDeleteMessage,
+    },
+    {
+      description: "Sentry-prefixed WebKit value",
+      message: `UnknownError: ${indexedDBUserDeleteMessage}`,
+    },
+  ])(
+    "classifies the $description as a handled IndexedDB warning",
+    ({ message }) => {
+      const beforeSend = loadBeforeSend();
+
+      const result = beforeSend(createUnhandledRejectionEvent(message));
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          level: "warning",
+          tags: expect.objectContaining({
+            errorType: "indexeddb",
+            handled: true,
+          }),
+          fingerprint: ["indexeddb-connection-lost"],
+        })
+      );
+    }
+  );
+
+  it.each([
+    "UnknownError: Database deleted by request of the administrator",
+    "UnknownError: Database deleted by request of the user during migration",
+  ])("preserves the near-miss database failure %s", (message) => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createUnhandledRejectionEvent(message));
+
+    expect(result).toEqual(expect.objectContaining({ level: "error" }));
+    expect(result?.tags).toBeUndefined();
+    expect(result?.fingerprint).toBeUndefined();
   });
 
   it("drops disconnected wallet-provider object promise rejections", () => {
