@@ -21,13 +21,24 @@ export default function DelegationPageClient(props: {
   useSetTitle(getDelegationAppTitle(metadata));
   const router = useRouter();
   const section = props.section;
-  const [addressQuery, setAddressQuery] = useState<string>(
-    props.addressQuery ?? ""
-  );
-  const [collectionQuery, setCollectionQuery] = useState<string>(
-    props.collectionQuery ?? ""
-  );
-  const [useCaseQuery, setUseCaseQuery] = useState<number>(props.useCaseQuery);
+  const [queryState, setQueryState] = useState({
+    addressQuery: props.addressQuery ?? "",
+    collectionQuery: props.collectionQuery ?? "",
+    useCaseQuery: props.useCaseQuery,
+  });
+  const { addressQuery, collectionQuery, useCaseQuery } = queryState;
+
+  function setAddressQuery(address: string) {
+    setQueryState((current) => ({ ...current, addressQuery: address }));
+  }
+
+  function setCollectionQuery(collection: string) {
+    setQueryState((current) => ({ ...current, collectionQuery: collection }));
+  }
+
+  function setUseCaseQuery(useCase: number) {
+    setQueryState((current) => ({ ...current, useCaseQuery: useCase }));
+  }
 
   function getQueryParams(s: DelegationCenterSection) {
     let queryParams: { [key: string]: string | number } = {};
@@ -64,19 +75,6 @@ export default function DelegationPageClient(props: {
 
   const updatePath = (s: DelegationCenterSection) => {
     if (s) {
-      if (
-        ![
-          DelegationCenterSection.CHECKER,
-          DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
-        ].includes(s)
-      ) {
-        setAddressQuery("");
-      }
-      if (s !== DelegationCenterSection.REGISTER_DELEGATION) {
-        setCollectionQuery("");
-        setUseCaseQuery(0);
-      }
-
       if (s === DelegationCenterSection.HTML && props.path) {
         router.push(`/delegation/${props.path.join("/")}`);
       } else {
@@ -93,6 +91,21 @@ export default function DelegationPageClient(props: {
     const queryParams = getQueryParams(s);
     router.replace(buildUrl(s, queryParams));
   };
+
+  useEffect(() => {
+    const nextQueryState = {
+      addressQuery: props.addressQuery ?? "",
+      collectionQuery: props.collectionQuery ?? "",
+      useCaseQuery: props.useCaseQuery,
+    };
+    setQueryState((current) =>
+      current.addressQuery === nextQueryState.addressQuery &&
+      current.collectionQuery === nextQueryState.collectionQuery &&
+      current.useCaseQuery === nextQueryState.useCaseQuery
+        ? current
+        : nextQueryState
+    );
+  }, [props.addressQuery, props.collectionQuery, props.useCaseQuery]);
 
   useEffect(() => {
     updateQueryParams(section);

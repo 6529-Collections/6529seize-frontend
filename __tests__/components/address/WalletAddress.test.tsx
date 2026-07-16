@@ -122,7 +122,7 @@ describe("WalletAddress", () => {
     ).toBe(tooltipId);
   });
 
-  it("renders accessible ENS copy choices", async () => {
+  it("opens ENS copy choices without selecting an item for pointer users", async () => {
     const user = setupUser();
     render(
       <WalletAddress
@@ -136,17 +136,85 @@ describe("WalletAddress", () => {
     expect(copyOptions.tagName.toLowerCase()).toBe("button");
 
     await user.click(copyOptions);
-    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveFocus();
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).not.toHaveFocus();
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveAttribute(
+      "data-copied",
+      "false"
+    );
+    expect(screen.getByLabelText(COPY_WALLET_LABEL)).toHaveAttribute(
+      "data-copied",
+      "false"
+    );
+
     fireEvent.click(screen.getByLabelText(COPY_ENS_LABEL));
     await flushAsyncClipboard();
 
     expect(writeTextMock).toHaveBeenCalledWith("vitalik.eth");
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveAttribute(
+      "data-copied",
+      "true"
+    );
+    expect(screen.getByLabelText(COPY_WALLET_LABEL)).toHaveAttribute(
+      "data-copied",
+      "false"
+    );
     expect(screen.getByLabelText(COPY_WALLET_LABEL)).toBeInTheDocument();
     act(() => {
-      jest.advanceTimersByTime(300);
+      jest.advanceTimersByTime(700);
     });
     expect(copyOptions).toHaveFocus();
     flushCopiedResetTimer();
+  });
+
+  it("highlights the copied wallet choice until the menu closes", async () => {
+    const user = setupUser();
+    render(
+      <WalletAddress
+        wallet="0xabc"
+        display={undefined}
+        displayEns="vitalik.eth"
+      />
+    );
+
+    const copyOptions = screen.getByLabelText(COPY_OPTIONS_LABEL);
+    await user.click(copyOptions);
+    fireEvent.click(screen.getByLabelText(COPY_WALLET_LABEL));
+    await flushAsyncClipboard();
+
+    expect(writeTextMock).toHaveBeenCalledWith("0xabc");
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveAttribute(
+      "data-copied",
+      "false"
+    );
+    expect(screen.getByLabelText(COPY_WALLET_LABEL)).toHaveAttribute(
+      "data-copied",
+      "true"
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(700);
+    });
+    expect(screen.queryByLabelText(COPY_ENS_LABEL)).not.toBeInTheDocument();
+    expect(copyOptions).toHaveFocus();
+    flushCopiedResetTimer();
+  });
+
+  it("focuses the first choice when the copy menu opens by keyboard", async () => {
+    const user = setupUser();
+    render(
+      <WalletAddress
+        wallet="0xabc"
+        display={undefined}
+        displayEns="vitalik.eth"
+      />
+    );
+
+    await user.tab();
+    await user.tab();
+    expect(screen.getByLabelText(COPY_OPTIONS_LABEL)).toHaveFocus();
+    await user.keyboard("{Enter}");
+
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveFocus();
   });
 
   it("closes the ENS copy menu when focus leaves it", async () => {
@@ -163,7 +231,9 @@ describe("WalletAddress", () => {
     );
 
     const copyOptions = screen.getByLabelText(COPY_OPTIONS_LABEL);
-    await user.click(copyOptions);
+    await user.tab();
+    await user.tab();
+    await user.keyboard("{Enter}");
     expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveFocus();
 
     await user.tab();
@@ -185,7 +255,9 @@ describe("WalletAddress", () => {
     );
 
     const copyOptions = screen.getByLabelText(COPY_OPTIONS_LABEL);
-    await user.click(copyOptions);
+    await user.tab();
+    await user.tab();
+    await user.keyboard("{Enter}");
     expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveFocus();
 
     await user.keyboard("{Escape}");
