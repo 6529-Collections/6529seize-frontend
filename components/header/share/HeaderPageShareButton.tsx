@@ -9,26 +9,19 @@ import { ShareIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useState } from "react";
 
-interface BrowserGlobals {
-  readonly document?: Document | undefined;
-  readonly navigator?: Navigator | undefined;
-  readonly window?: Window | undefined;
-}
-
-const browserGlobals = globalThis as unknown as BrowserGlobals;
-
 function getCurrentPublicUrl(): string {
-  const currentWindow = browserGlobals.window;
-  const route = currentWindow
-    ? `${currentWindow.location.pathname}${currentWindow.location.search}${currentWindow.location.hash}`
-    : "/";
+  const currentWindow = globalThis.window;
+  const route =
+    currentWindow === undefined
+      ? "/"
+      : `${currentWindow.location.pathname}${currentWindow.location.search}${currentWindow.location.hash}`;
   const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
   const normalizedRoute = route.startsWith("/") ? route : "/" + route;
   return `${normalizedBase}${normalizedRoute}`;
 }
 
 function getShareTitle(): string {
-  const title = browserGlobals.document?.title;
+  const title = globalThis.document?.title;
   if (title?.trim()) {
     return title;
   }
@@ -37,12 +30,12 @@ function getShareTitle(): string {
 }
 
 async function copyFallback(url: string): Promise<void> {
-  const clipboard = browserGlobals.navigator?.clipboard;
-  if (typeof clipboard?.writeText !== "function") {
+  const writeText = globalThis.navigator?.clipboard?.writeText;
+  if (typeof writeText !== "function") {
     return;
   }
 
-  await clipboard.writeText(url);
+  await writeText.call(globalThis.navigator.clipboard, url);
 }
 
 export default function HeaderPageShareButton({
