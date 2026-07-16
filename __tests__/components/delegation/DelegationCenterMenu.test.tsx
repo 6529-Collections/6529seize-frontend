@@ -92,7 +92,7 @@ describe("DelegationCenterMenu links", () => {
 
     render(
       <DelegationToast
-        toastRef={createRef<HTMLDivElement>()}
+        toastRef={createRef<HTMLDialogElement>()}
         toast={{
           title: "Wallet Error",
           message: '<img src="x" onerror="alert(1)" />',
@@ -106,6 +106,29 @@ describe("DelegationCenterMenu links", () => {
       screen.getByText('<img src="x" onerror="alert(1)" />')
     ).toBeInTheDocument();
     expect(document.querySelector('img[src="x"]')).toBeNull();
+  });
+
+  it("portals delegation notifications into a viewport-fixed dialog", async () => {
+    const mod = await import("@/components/delegation/DelegationToast");
+    const { DelegationToast } = mod;
+
+    render(
+      <div style={{ transform: "translateZ(0)" }}>
+        <DelegationToast
+          toastRef={createRef<HTMLDialogElement>()}
+          toast={{
+            title: "Viewport Notice",
+            message: "Visible without scrolling",
+          }}
+          showToast={true}
+          setShowToast={jest.fn()}
+        />
+      </div>
+    );
+
+    const dialog = screen.getByRole("dialog", { name: "Viewport Notice" });
+    expect(dialog.parentElement).toBe(document.body);
+    expect(dialog).toHaveClass("tw-fixed", "tw-h-[100dvh]");
   });
 
   it("reopens shared delegation toasts after a dismiss", async () => {

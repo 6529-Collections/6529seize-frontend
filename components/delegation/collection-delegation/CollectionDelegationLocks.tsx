@@ -18,14 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { Spinner } from "../../dotLoader/DotLoader";
 import type { DelegationCollection } from "../delegation-constants";
-import {
-  ALL_USE_CASES,
-  ANY_COLLECTION_PATH,
-  CONSOLIDATION_USE_CASE,
-  DELEGATION_USE_CASES,
-  PRIMARY_ADDRESS_USE_CASE,
-  SUB_DELEGATION_USE_CASE,
-} from "../delegation-constants";
+import { ALL_USE_CASES, ANY_COLLECTION_PATH } from "../delegation-constants";
 import type { DelegationToastState } from "../DelegationToast";
 import {
   BUTTON_ICON_CLASS,
@@ -42,22 +35,20 @@ interface CollectionDelegationLocksProps {
   showDelegationToast: (toast: DelegationToastState) => void;
 }
 
-/**
- * Maps a selected use-case number to its index in the lock-status
- * multicall arrays. NOTE: the special use cases land one position before
- * their actual array slots — issue #3108 tracks correcting this mapping.
- */
+interface LockStatusResult {
+  readonly result?: unknown;
+}
+
 function getLockUseCaseIndex(value: number) {
-  if (value === CONSOLIDATION_USE_CASE.use_case) {
-    return 18;
-  }
-  if (value === SUB_DELEGATION_USE_CASE.use_case) {
-    return 17;
-  }
-  if (value === PRIMARY_ADDRESS_USE_CASE.use_case) {
-    return 16;
-  }
-  return value - 1;
+  return ALL_USE_CASES.findIndex((useCase) => useCase.use_case === value);
+}
+
+function getLockStatus(
+  statuses: readonly LockStatusResult[] | undefined,
+  index: number
+) {
+  const result = statuses?.[index]?.result;
+  return typeof result === "boolean" ? result : undefined;
 }
 
 function CollectionLockUseCaseOptions(
@@ -65,13 +56,15 @@ function CollectionLockUseCaseOptions(
 ) {
   return ALL_USE_CASES.map((useCase, index) => {
     if (useCase.use_case === 1) return null;
-    const asteriskDisplay = props.locks.useCaseLockStatusesGlobal.data?.[index]
-      ? ` *`
-      : ``;
+    const isLockedGlobally =
+      getLockStatus(props.locks.useCaseLockStatusesGlobal.data, index) === true;
+    const isLocked =
+      getLockStatus(props.locks.useCaseLockStatuses.data, index) === true;
+    const asteriskDisplay = isLockedGlobally ? ` *` : ``;
     const lockDisplay =
-      props.locks.useCaseLockStatuses.data?.[index] ||
-      props.locks.useCaseLockStatusesGlobal.data?.[index] ||
-      props.locks.collectionLockRead.data
+      isLocked ||
+      isLockedGlobally ||
+      Boolean(props.locks.collectionLockRead.data)
         ? ` - LOCKED${asteriskDisplay}`
         : ` - UNLOCKED`;
 
@@ -142,15 +135,82 @@ export function CollectionDelegationLocks(
 ) {
   const { collection, locks, chainsMatch, getSwitchToMessage } = props;
   const { showDelegationToast } = props;
-  const globalUseCaseLockStatuses = locks.useCaseLockStatusesGlobal.data;
-  const canManageSelectedUseCase =
-    globalUseCaseLockStatuses === undefined ||
-    // Double cast preserves the existing comparison against the multicall
-    // envelope object (issue #3078 tracks reading `.result` here); typing it
-    // honestly would change behavior.
-    (globalUseCaseLockStatuses[
+  const selectedUseCase = ALL_USE_CASES[locks.lockUseCaseIndex];
+  const selectedUseCaseLocked =
+    getLockStatus(locks.useCaseLockStatuses.data, locks.lockUseCaseIndex) ===
+    true;
+  const selectedUseCaseLockedGlobally =
+    getLockStatus(
+      locks.useCaseLockStatusesGlobal.data,
       locks.lockUseCaseIndex
-    ] as unknown as boolean) === false;
+    ) === true;
+  const canManageSelectedUseCase = !selectedUseCaseLockedGlobally;
+  const selectedUseCaseAction = selectedUseCaseLocked ? "Unlock" : "Lock";
+  const selectedUseCaseActionInProgress = selectedUseCaseLocked
+    ? "Unlocking"
+    : "Locking";
+  let useCaseAction: ReactNode;
+
+  if (!selectedUseCase) {
+    useCaseAction = (
+      <div
+        className="tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-error"
+        role="alert"
+      >
+        This use case is unavailable. Select another use case and try again.
+      </div>
+    );
+  } else if (!canManageSelectedUseCase) {
+    useCaseAction = (
+      <div className="tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300">
+        <span className="tw-font-semibold tw-text-white">Note:</span> Unlock use
+        case in{" "}
+        <Link
+          className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
+          href={`/delegation/${ANY_COLLECTION_PATH}`}
+        >
+          All Collections
+        </Link>
+      </div>
+    );
+  } else {
+    useCaseAction = (
+      <button
+        type="button"
+        className={PRIMARY_ACTION_CLASS}
+        onClick={() => {
+          const title = `${selectedUseCaseActionInProgress} Wallet on Use Case #${selectedUseCase.use_case} - ${selectedUseCase.display}`;
+          let message: ReactNode = "Confirm in your wallet...";
+          locks.setUseCaseLockToastTitle(title);
+
+          if (chainsMatch()) {
+            locks.useCaseLockWrite.writeContract({
+              address: DELEGATION_CONTRACT.contract,
+              abi: DELEGATION_ABI,
+              chainId: DELEGATION_CONTRACT.chain_id,
+              args: [
+                collection.contract,
+                locks.lockUseCaseValue,
+                !selectedUseCaseLocked,
+              ],
+              functionName: "setCollectionUsecaseLock",
+            });
+          } else {
+            message = getSwitchToMessage();
+          }
+          showDelegationToast({ title, message });
+        }}
+      >
+        <FontAwesomeIcon
+          icon={selectedUseCaseLocked ? faLock : faLockOpen}
+          className={BUTTON_ICON_CLASS}
+        />
+        {selectedUseCaseAction} Use Case
+        {(locks.useCaseLockWrite.isPending ||
+          locks.waitUseCaseLockWrite.isLoading) && <Spinner />}
+      </button>
+    );
+  }
 
   return (
     <section className="tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
@@ -213,71 +273,7 @@ export function CollectionDelegationLocks(
           </div>
           {locks.lockUseCaseValue !== 0 && (
             <div className="tw-flex tw-items-center md:tw-col-span-2">
-              {canManageSelectedUseCase ? (
-                <button
-                  type="button"
-                  className={PRIMARY_ACTION_CLASS}
-                  onClick={() => {
-                    const useCase =
-                      DELEGATION_USE_CASES[locks.lockUseCaseIndex];
-                    if (!useCase) {
-                      return;
-                    }
-                    const title = `${
-                      locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
-                        ? "Unlocking"
-                        : "Locking"
-                    } Wallet on Use Case #${useCase.use_case} - ${useCase.display}`;
-                    let message: ReactNode = "Confirm in your wallet...";
-                    locks.setUseCaseLockToastTitle(title);
-
-                    if (chainsMatch()) {
-                      locks.useCaseLockWrite.writeContract({
-                        address: DELEGATION_CONTRACT.contract,
-                        abi: DELEGATION_ABI,
-                        chainId: DELEGATION_CONTRACT.chain_id,
-                        args: [
-                          collection.contract,
-                          locks.lockUseCaseValue,
-                          !locks.useCaseLockStatuses.data?.[
-                            locks.lockUseCaseIndex
-                          ],
-                        ],
-                        functionName: "setCollectionUsecaseLock",
-                      });
-                    } else {
-                      message = getSwitchToMessage();
-                    }
-                    showDelegationToast({ title, message });
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={
-                      locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
-                        ? faLock
-                        : faLockOpen
-                    }
-                    className={BUTTON_ICON_CLASS}
-                  />
-                  {locks.useCaseLockStatuses.data?.[locks.lockUseCaseIndex]
-                    ? "Unlock"
-                    : "Lock"}{" "}
-                  Use Case
-                  {(locks.useCaseLockWrite.isPending ||
-                    locks.waitUseCaseLockWrite.isLoading) && <Spinner />}
-                </button>
-              ) : (
-                <div className="tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300">
-                  <span className="tw-font-semibold tw-text-white">Note:</span>{" "}
-                  Unlock use case in{" "}
-                  <Link
-                    className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
-                    href={`/delegation/${ANY_COLLECTION_PATH}`}
-                  >
-                    All Collections
-                  </Link>
-                </div>
-              )}
+              {useCaseAction}
             </div>
           )}
         </div>
