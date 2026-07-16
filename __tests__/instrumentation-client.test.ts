@@ -433,6 +433,36 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops production-shaped React DOM removeChild NotFoundError events on the parameterized profile transaction", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "profile-react-dom-remove-child-event",
+      transaction: "/:user",
+      request: {
+        url: "https://6529.io/profile-name",
+      },
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/:user",
+        url: "/profile-name",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops injected WebAssembly CSP unsafe-eval errors", () => {
     const beforeSend = loadBeforeSend();
     const event = {
