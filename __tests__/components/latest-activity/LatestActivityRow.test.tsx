@@ -74,6 +74,22 @@ const baseTr = {
 } as any;
 
 describe("LatestActivityRow", () => {
+  it("applies striped Tailwind row styling", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LatestActivityRow tr={baseTr} />
+        </tbody>
+      </table>
+    );
+
+    expect(container.querySelector("tr")).toHaveClass(
+      "odd:tw-bg-transparent",
+      "even:tw-bg-iron-900/45",
+      "hover:tw-bg-iron-900/70"
+    );
+  });
+
   it("uses burn icon when to address is null", () => {
     render(
       <table>
@@ -83,7 +99,10 @@ describe("LatestActivityRow", () => {
       </table>
     );
     expect(iconMock).toHaveBeenCalledWith(
-      expect.objectContaining({ icon: faFire, className: "iconRed" })
+      expect.objectContaining({
+        icon: faFire,
+        className: expect.stringContaining("tw-text-red"),
+      })
     );
   });
 
@@ -98,7 +117,10 @@ describe("LatestActivityRow", () => {
       </table>
     );
     expect(iconMock).toHaveBeenCalledWith(
-      expect.objectContaining({ icon: faCartPlus, className: "iconWhite" })
+      expect.objectContaining({
+        icon: faCartPlus,
+        className: expect.stringContaining("tw-text-iron-100"),
+      })
     );
   });
 
@@ -145,13 +167,13 @@ describe("extra cases", () => {
   });
 });
 
-test("printNft fallback when no nft provided", () => {
+test("prints an NFT identity fallback when requested without metadata", () => {
   const { container } = render(
     <table>
       <tbody>
-        <LatestActivityRow tr={{ ...baseTr, nft: undefined }} />
+        <LatestActivityRow tr={{ ...baseTr, nft: undefined }} showNftIdentity />
       </tbody>
     </table>
   );
-  expect(container.textContent).toContain("Meme #1");
+  expect(container.textContent).toContain("The Memes #1");
 });

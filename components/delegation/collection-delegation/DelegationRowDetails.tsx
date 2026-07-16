@@ -3,7 +3,6 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
-import styles from "../Delegation.module.css";
 import type { ContractWalletDelegation } from "../CollectionDelegation.utils";
 import DelegationWallet from "../DelegationWallet";
 
@@ -24,34 +23,30 @@ export function DelegationRowDetails(
   const { consolidationStatus, pending, isConsolidation } = props;
 
   return (
-    <span className="tw-flex tw-flex-col tw-gap-1">
+    <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
       <DelegationWallet address={w.wallet} />
-      <span className="tw-flex tw-items-center tw-gap-3">
-        <span className="tw-text-[#9a9a9a]">
+      <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-sm">
+        <span className="tw-text-iron-300">
           {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
         </span>
         <span
-          className={
-            w.expiry === "expired"
-              ? styles["delegationExpiredLabel"]
-              : styles["delegationActiveLabel"]
-          }
+          className={`tw-font-semibold ${
+            w.expiry === "expired" ? "tw-text-error" : "tw-text-success"
+          }`}
         >
           {w.expiry}
         </span>
         {isConsolidation && (
           <span
-            className={
-              pending
-                ? styles["consolidationNotAcceptedLabel"]
-                : styles["consolidationActiveLabel"]
-            }
+            className={`tw-inline-flex tw-items-center tw-font-semibold ${
+              pending ? "tw-text-amber-300" : "tw-text-primary-300"
+            }`}
           >
             {consolidationStatus}
             {pending && (
               <>
                 <FontAwesomeIcon
-                  className={styles["infoIcon"]}
+                  className="tw-ml-2 tw-h-4 tw-w-4 tw-cursor-help"
                   icon={faInfoCircle}
                   data-tooltip-id={`consolidation-missing-${label}-${w.wallet}`}
                 ></FontAwesomeIcon>

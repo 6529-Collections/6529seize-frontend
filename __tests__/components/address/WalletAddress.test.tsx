@@ -49,7 +49,7 @@ async function flushAsyncClipboard() {
 
 function flushCopiedResetTimer() {
   act(() => {
-    jest.advanceTimersByTime(1000);
+    jest.advanceTimersByTime(1200);
   });
 }
 
@@ -133,15 +133,65 @@ describe("WalletAddress", () => {
     );
 
     const copyOptions = screen.getByLabelText(COPY_OPTIONS_LABEL);
-    expect(copyOptions.tagName.toLowerCase()).toBe("summary");
+    expect(copyOptions.tagName.toLowerCase()).toBe("button");
 
     await user.click(copyOptions);
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveFocus();
     fireEvent.click(screen.getByLabelText(COPY_ENS_LABEL));
     await flushAsyncClipboard();
 
     expect(writeTextMock).toHaveBeenCalledWith("vitalik.eth");
     expect(screen.getByLabelText(COPY_WALLET_LABEL)).toBeInTheDocument();
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+    expect(copyOptions).toHaveFocus();
     flushCopiedResetTimer();
+  });
+
+  it("closes the ENS copy menu when focus leaves it", async () => {
+    const user = setupUser();
+    render(
+      <>
+        <WalletAddress
+          wallet="0xabc"
+          display={undefined}
+          displayEns="vitalik.eth"
+        />
+        <button type="button">After address</button>
+      </>
+    );
+
+    const copyOptions = screen.getByLabelText(COPY_OPTIONS_LABEL);
+    await user.click(copyOptions);
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByLabelText(COPY_WALLET_LABEL)).toHaveFocus();
+    await user.tab();
+
+    expect(screen.getByRole("button", { name: "After address" })).toHaveFocus();
+    expect(screen.queryByLabelText(COPY_ENS_LABEL)).not.toBeInTheDocument();
+  });
+
+  it("closes the ENS copy menu with Escape and restores trigger focus", async () => {
+    const user = setupUser();
+    render(
+      <WalletAddress
+        wallet="0xabc"
+        display={undefined}
+        displayEns="vitalik.eth"
+      />
+    );
+
+    const copyOptions = screen.getByLabelText(COPY_OPTIONS_LABEL);
+    await user.click(copyOptions);
+    expect(screen.getByLabelText(COPY_ENS_LABEL)).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByLabelText(COPY_ENS_LABEL)).not.toBeInTheDocument();
+    expect(copyOptions).toHaveFocus();
   });
 
   it("renders without copy controls when clipboard is unavailable", () => {

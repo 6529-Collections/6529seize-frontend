@@ -82,12 +82,12 @@ describe("NFTActivityPage", () => {
     expect(screen.getByTestId("showMore")).toHaveTextContent("Show More: true");
   });
 
-  it("applies correct CSS classes", () => {
+  it("applies the activity page spacing", () => {
     const { container } = renderComponent();
 
     const section = container.querySelector("main > section");
-    expect(section).toHaveClass("leaderboardContainer");
-    expect(section).toHaveClass("tailwind-scope");
+    expect(section).toHaveClass("tw-px-4");
+    expect(section).toHaveClass("tw-py-4");
   });
 
   it("sets the page title on mount", () => {
@@ -102,10 +102,11 @@ describe("NFTActivityPage", () => {
     });
   });
 
-  it("renders with main element having correct class", () => {
+  it("renders inside the shared Tailwind page shell", () => {
     const { container } = renderComponent();
 
     const mainElement = container.querySelector("main");
-    expect(mainElement).toHaveClass("main");
+    expect(mainElement).toHaveClass("tailwind-scope");
+    expect(mainElement).toHaveClass("tw-border-iron-800");
   });
 });

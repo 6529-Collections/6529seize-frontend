@@ -3,7 +3,6 @@
 import { Fragment, type ReactNode } from "react";
 
 import { areEqualAddresses } from "@/helpers/Helpers";
-import styles from "../Delegation.module.css";
 import type {
   ContractDelegation,
   ContractWalletDelegation,
@@ -56,7 +55,10 @@ export function DelegationsTable(
       return (
         <Fragment key={`${direction}-${del.useCase.use_case}-${index}`}>
           <tr>
-            <td colSpan={4} className={styles["delegationsTableUseCaseHeader"]}>
+            <td
+              colSpan={4}
+              className="tw-px-1 tw-pb-1 tw-pt-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400"
+            >
               #{del.useCase.use_case} - {del.useCase.display}
             </td>
           </tr>
@@ -82,7 +84,10 @@ export function DelegationsTable(
   } else if (delegationsLoaded) {
     body = (
       <tr>
-        <td colSpan={4}>
+        <td
+          colSpan={4}
+          className="tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-base tw-text-iron-300"
+        >
           No {direction} {scope} found for {collection.title}
         </td>
       </tr>
@@ -90,7 +95,10 @@ export function DelegationsTable(
   } else {
     body = (
       <tr>
-        <td colSpan={4}>
+        <td
+          colSpan={4}
+          className="tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-base tw-text-iron-300"
+        >
           Fetching {direction} {scope} for {collection.title}
         </td>
       </tr>
@@ -98,10 +106,10 @@ export function DelegationsTable(
   }
 
   return (
-    <div className="tw-w-full tw-p-0">
-      <div className={styles["delegationsTableScrollContainer"]}>
-        <div className="tw-w-full">
-          <table className={`${styles["delegationsTable"]} tw-w-full`}>
+    <div className="tw-w-full">
+      <div className="tw-w-full tw-overflow-x-auto">
+        <div className="tw-w-full tw-min-w-[34rem] sm:tw-min-w-0">
+          <table className="tw-mb-0 tw-w-full tw-border-separate tw-border-spacing-0">
             <tbody>
               {body}
               {props.renderFooter?.(delegationsCount)}

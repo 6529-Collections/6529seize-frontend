@@ -3,6 +3,7 @@ import { NEVER_DATE } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import {
+  faArrowRight,
   faCheck,
   faPlusCircle,
   faXmark,
@@ -10,13 +11,13 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Fragment } from "react";
 import { ALL_USE_CASES, SUPPORTED_COLLECTIONS } from "../delegation-constants";
-import styles from "./WalletChecker.module.css";
 
 const TABLE_CLASS =
-  "tw-w-full tw-min-w-[720px] tw-border-separate tw-border-spacing-y-1";
+  "tw-w-full tw-min-w-[720px] tw-border-separate tw-border-spacing-y-1 tw-text-sm [&_tbody_tr]:tw-bg-iron-950";
 const TABLE_HEADER_CELL_CLASS =
-  "tw-px-2 tw-py-1 tw-text-left tw-font-bold tw-text-iron-200";
-const TABLE_CELL_CLASS = "tw-px-2 tw-py-1 tw-align-middle";
+  "tw-px-4 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
+const TABLE_CELL_CLASS =
+  "tw-px-4 tw-py-3 tw-align-middle tw-text-iron-100 first:tw-rounded-l-lg last:tw-rounded-r-lg";
 const TABLE_CENTER_CELL_CLASS = `${TABLE_CELL_CLASS} tw-text-center`;
 
 export interface ConsolidationDisplay {
@@ -101,7 +102,7 @@ function CheckedWalletAddress(
     return address;
   }
 
-  return <span className={styles["supportingAddress"]}>{address}</span>;
+  return <span className="[&_a]:tw-font-semibold">{address}</span>;
 }
 
 function DelegationAddressCells(
@@ -140,11 +141,11 @@ function DelegationsResults(
 ) {
   return (
     <>
-      <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-w-full tw-px-3">
-          <h5 className="tw-pb-2 tw-pt-2">
+      <section className="tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+        <div className="tw-w-full">
+          <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
             Delegations ({props.delegations.length})
-          </h5>
+          </h2>
           {props.delegations.length > 0 ? (
             <div className="tw-overflow-x-auto">
               <table className={TABLE_CLASS}>
@@ -184,53 +185,59 @@ function DelegationsResults(
               </table>
             </div>
           ) : (
-            `No delegations found`
+            <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+              No delegations found
+            </p>
+          )}
+          {props.activeDelegation && (
+            <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-success/25 tw-bg-success/5 tw-p-4 sm:tw-p-5">
+              <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-success">
+                Active Minting Delegation for The Memes
+              </h3>
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
+                <span>
+                  To:{" "}
+                  <Address
+                    wallets={[
+                      props.activeDelegation.to_address as `0x${string}`,
+                    ]}
+                    display={props.activeDelegation.to_display}
+                  />
+                </span>
+                <span>
+                  Collection:{" "}
+                  <b>
+                    {getCollectionDisplay(props.activeDelegation.collection)}
+                  </b>
+                </span>
+                <span>
+                  Use Case:{" "}
+                  <b>{getUseCaseDisplay(props.activeDelegation.use_case)}</b>
+                </span>
+                {Boolean(props.activeDelegation.expiry) && (
+                  <span>
+                    Expiry:{" "}
+                    <b>
+                      {props.activeDelegation.expiry === NEVER_DATE
+                        ? `Never`
+                        : formatExpiry(props.activeDelegation.expiry)}
+                    </b>
+                  </span>
+                )}
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  className="tw-h-4 tw-w-4 tw-rounded-full tw-bg-success tw-p-2 tw-text-iron-950"
+                />
+              </div>
+            </div>
           )}
         </div>
       </section>
-      {props.activeDelegation && (
-        <div className="tw-pt-2">
-          <h5 className="tw-pb-2 tw-pt-2">
-            Active Minting Delegation for The Memes
-          </h5>
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
-            <span>
-              To:{" "}
-              <Address
-                wallets={[props.activeDelegation.to_address as `0x${string}`]}
-                display={props.activeDelegation.to_display}
-              />
-            </span>
-            <span>
-              Collection:{" "}
-              <b>{getCollectionDisplay(props.activeDelegation.collection)}</b>
-            </span>
-            <span>
-              Use Case:{" "}
-              <b>{getUseCaseDisplay(props.activeDelegation.use_case)}</b>
-            </span>
-            {Boolean(props.activeDelegation.expiry) && (
-              <span>
-                &nbsp;&nbsp;Expiry:{" "}
-                <b>
-                  {props.activeDelegation.expiry == NEVER_DATE
-                    ? `Never`
-                    : formatExpiry(props.activeDelegation.expiry)}
-                </b>
-              </span>
-            )}
-            <FontAwesomeIcon
-              icon={faCheck}
-              className={styles["activeDelegationIcon"]}
-            />
-          </div>
-        </div>
-      )}
-      <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-w-full tw-px-3">
-          <h5 className="tw-pb-2 tw-pt-2">
+      <section className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+        <div className="tw-w-full">
+          <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
             Delegation Managers ({props.subDelegations.length})
-          </h5>
+          </h2>
           {props.subDelegations.length > 0 ? (
             <div className="tw-overflow-x-auto">
               <table className={TABLE_CLASS}>
@@ -254,7 +261,9 @@ function DelegationsResults(
               </table>
             </div>
           ) : (
-            `No delegation managers found`
+            <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+              No delegation managers found
+            </p>
           )}
         </div>
       </section>
@@ -271,27 +280,31 @@ function ConsolidationsResults(
   }>
 ) {
   return (
-    <section className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-      <div className="tw-w-full tw-px-3">
-        <h5 className="tw-pb-2 tw-pt-2">
+    <section className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+      <div className="tw-w-full">
+        <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
           Consolidations ({props.consolidations.length})
-        </h5>
+        </h2>
         {props.consolidations.length > 0 ? (
           <div className="tw-overflow-x-auto">
-            <table className="tw-w-full tw-min-w-[520px] tw-border-separate tw-border-spacing-y-1">
+            <table className="tw-w-full tw-min-w-[520px] tw-border-separate tw-border-spacing-y-1 tw-text-sm">
               <tbody>
                 {props.consolidations.map((consolidation) => (
-                  <tr key={getConsolidationKey("consolidation", consolidation)}>
-                    <td className="tw-flex tw-items-center tw-px-2 tw-py-1">
+                  <tr
+                    key={getConsolidationKey("consolidation", consolidation)}
+                    className="tw-bg-iron-950"
+                  >
+                    <td className="tw-flex tw-items-center tw-gap-4 tw-rounded-lg tw-px-4 tw-py-3">
                       <CheckedWalletAddress
                         checkedAddress={props.fetchedAddress}
                         address={consolidation.from}
                         display={consolidation.from_display}
                       />
-                      <span className="tw-inline-flex tw-items-center tw-justify-center">
-                        <span className={styles["arrowBody"]}></span>
-                        <span className={styles["arrowHead"]}></span>
-                      </span>
+                      <FontAwesomeIcon
+                        icon={faArrowRight}
+                        className="tw-h-4 tw-w-4 tw-shrink-0 tw-text-iron-500"
+                        aria-hidden="true"
+                      />
                       <CheckedWalletAddress
                         checkedAddress={props.fetchedAddress}
                         address={consolidation.to}
@@ -304,13 +317,17 @@ function ConsolidationsResults(
             </table>
           </div>
         ) : (
-          `No consolidations found`
+          <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+            No consolidations found
+          </p>
         )}
         {props.consolidations.length > 1 &&
           props.consolidatedWallets.length > 1 && (
-            <div className="tw-pt-2">
-              <h5 className="tw-pb-2 tw-pt-2">Active Consolidation</h5>
-              <div className="tw-flex tw-flex-wrap tw-items-center">
+            <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-success/25 tw-bg-success/5 tw-p-4 sm:tw-p-5">
+              <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-success">
+                Active Consolidation
+              </h3>
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
                 {props.consolidatedWallets.map((wallet, index) => (
                   <Fragment
                     key={`consolidated-wallet-${wallet.address.toLowerCase()}`}
@@ -323,30 +340,27 @@ function ConsolidationsResults(
                     {props.consolidatedWallets.length - 1 > index && (
                       <FontAwesomeIcon
                         icon={faPlusCircle}
-                        className={styles["consolidationPlusIcon"]}
+                        className="tw-h-4 tw-w-4 tw-text-iron-500"
                       />
                     )}
                   </Fragment>
                 ))}
                 <FontAwesomeIcon
                   icon={faCheck}
-                  className={styles["consolidationActiveIcon"]}
+                  className="tw-ml-2 tw-h-4 tw-w-4 tw-rounded-full tw-bg-success tw-p-2 tw-text-iron-950"
                 />
               </div>
             </div>
           )}
         {props.consolidationActions.length > 0 && (
           <>
-            <div className="tw-flex tw-items-center tw-pb-2 tw-pt-2">
-              <FontAwesomeIcon
-                icon={faXmark}
-                className={styles["consolidationRecommendationIcon"]}
-              />
+            <div className="tw-mt-5 tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/5 tw-p-4 tw-font-semibold tw-text-error">
+              <FontAwesomeIcon icon={faXmark} className="tw-h-5 tw-w-5" />
               Incomplete Consolidation
             </div>
-            <div className="tw-pb-2 tw-pt-2">
-              Recommended Actions:
-              <ul className={`${styles["recommendationsList"]} tw-pt-2`}>
+            <div className="tw-pt-4 tw-text-sm tw-text-iron-200">
+              <span className="tw-font-semibold">Recommended Actions:</span>
+              <ul className="tw-mb-0 tw-mt-2 tw-space-y-2 tw-pl-5">
                 {props.consolidationActions.map((consolidation) => (
                   <li
                     key={getConsolidationKey(

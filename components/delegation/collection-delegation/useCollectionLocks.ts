@@ -231,9 +231,17 @@ export function useCollectionLocks(options: {
     setLockUseCaseIndex(0);
   }
 
+  function setCollectionLockToastTitle(title: string) {
+    collectionLockToastTitleRef.current = title;
+  }
+
+  function setUseCaseLockToastTitle(title: string) {
+    useCaseLockToastTitleRef.current = title;
+  }
+
   return {
-    collectionLockToastTitleRef,
-    useCaseLockToastTitleRef,
+    setCollectionLockToastTitle,
+    setUseCaseLockToastTitle,
     lockUseCaseValue,
     setLockUseCaseValue,
     lockUseCaseIndex,

@@ -660,8 +660,6 @@ export default function MemeLabPageComponent({
                 <LatestActivityRow
                   tr={tr}
                   nft={nft}
-                  variant="tailwind"
-                  rowStyle="striped"
                   key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                 />
               ))}

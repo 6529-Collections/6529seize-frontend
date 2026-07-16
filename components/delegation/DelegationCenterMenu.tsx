@@ -3,13 +3,14 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { DelegationCenterSection } from "@/types/enums";
+import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
-import styles from "./Delegation.module.css";
 import DelegationCenterComponent from "./DelegationCenter";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
@@ -51,6 +52,17 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
   },
 ];
 
+const SECTIONS_WITHOUT_NAVIGATION = new Set<DelegationCenterSection>([
+  DelegationCenterSection.REGISTER_DELEGATION,
+  DelegationCenterSection.REGISTER_SUB_DELEGATION,
+  DelegationCenterSection.REGISTER_CONSOLIDATION,
+  DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+  DelegationCenterSection.ANY_COLLECTION,
+  DelegationCenterSection.MEMES_COLLECTION,
+  DelegationCenterSection.MEME_LAB_COLLECTION,
+  DelegationCenterSection.GRADIENTS_COLLECTION,
+]);
+
 interface Props {
   section: DelegationCenterSection;
   path?: string[] | undefined;
@@ -73,6 +85,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
     address: accountResolution.address as `0x${string}`,
     chainId: 1,
   });
+  const showNavigation = !SECTIONS_WITHOUT_NAVIGATION.has(props.section);
 
   const {
     toastRef,
@@ -229,6 +242,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       case DelegationCenterSection.CHECKER:
         return (
           <WalletCheckerComponent
+            key={props.address_query}
             address_query={props.address_query}
             setAddressQuery={props.setAddressQuery}
           />
@@ -252,8 +266,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       <button
         type="button"
         onClick={() => props.setActiveSection(section)}
-        className={`${styles["menuLeftItem"]} ${
-          active ? styles["menuLeftItemActive"] : ""
+        className={`tw-min-h-11 tw-w-full tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+          active
+            ? "tw-border-primary-400 tw-bg-primary-500 tw-text-white"
+            : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white"
         }`}
         aria-current={active ? "page" : undefined}
       >
@@ -263,62 +279,28 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   }
 
   function printMenuRows() {
-    return DELEGATION_MENU_ITEMS.map((item, index) => (
-      <div
-        className={`-tw-mx-3 tw-flex tw-flex-wrap ${
-          index === 0 ? "tw-pt-2" : "tw-pt-1"
-        } tw-pb-2`}
-        key={item.section}
-      >
-        <div className="tw-w-full tw-px-3">
-          {printMenuButton(item.section, item.label)}
-        </div>
-      </div>
+    return DELEGATION_MENU_ITEMS.map((item) => (
+      <div key={item.section}>{printMenuButton(item.section, item.label)}</div>
     ));
   }
 
   function printExternalLinkRows() {
-    return [
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-2" key="etherscan">
-        <div className="tw-w-full tw-px-3">
-          <EtherscanLink />
-        </div>
-      </div>,
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-2" key="github">
-        <div className="tw-w-full tw-px-3">
-          <GithubLink />
-        </div>
-      </div>,
-    ];
+    return [<GithubLink key="github" />, <EtherscanLink key="etherscan" />];
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-4 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className={`${styles["menuLeft"]} tw-px-3`}>
-          <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-            {printMenuRows()}
+    <div className="tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-px-8">
+      {showNavigation && (
+        <nav aria-label="Delegation center" className="tw-mb-8">
+          <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 sm:tw-justify-end">
             {printExternalLinkRows()}
           </div>
-        </div>
-        <div className={`${styles["menuRight"]} tw-px-3`}>{printContent()}</div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className={`${styles["menuLeftFull"]} tw-px-3`}>
-          <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-              <div className="tw-flex-1 tw-px-3">
-                <div className="tw-w-full tw-p-0">{printMenuRows()}</div>
-              </div>
-              <div className="tw-flex-1 tw-px-3">
-                <div className="tw-w-full tw-p-0">
-                  {printExternalLinkRows()}
-                </div>
-              </div>
-            </div>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-grid-cols-5">
+            {printMenuRows()}
           </div>
-        </div>
-      </div>
+        </nav>
+      )}
+      <div className="tw-w-full">{printContent()}</div>
       {toast && (
         <DelegationToast
           toastRef={toastRef}
@@ -341,10 +323,15 @@ function EtherscanLink() {
       }
       target="_blank"
       rel="noopener noreferrer"
-      className={styles["delegationLink"]}
+      className="tw-group tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-md tw-px-1 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition-all hover:-tw-translate-y-0.5 hover:tw-text-white hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
-      <Image unoptimized src="/etherscan_w.png" alt="" width={30} height={30} />
+      <Image unoptimized src="/etherscan_w.png" alt="" width={24} height={24} />
       <span>Etherscan</span>
+      <FontAwesomeIcon
+        icon={faArrowUpRightFromSquare}
+        className="tw-h-3.5 tw-w-3.5 tw-text-white tw-transition-colors group-hover:tw-text-primary-300"
+        aria-hidden="true"
+      />
     </Link>
   );
 }
@@ -355,10 +342,15 @@ function GithubLink() {
       href={`https://github.com/6529-Collections/nftdelegation`}
       target="_blank"
       rel="noopener noreferrer"
-      className={styles["delegationLink"]}
+      className="tw-group tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-md tw-px-1 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition-all hover:-tw-translate-y-0.5 hover:tw-text-white hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
-      <Image unoptimized src="/github_w.png" alt="" width={30} height={30} />
+      <Image unoptimized src="/github_w.png" alt="" width={24} height={24} />
       <span>GitHub</span>
+      <FontAwesomeIcon
+        icon={faArrowUpRightFromSquare}
+        className="tw-h-3.5 tw-w-3.5 tw-text-white tw-transition-colors group-hover:tw-text-primary-300"
+        aria-hidden="true"
+      />
     </Link>
   );
 }
@@ -372,14 +364,21 @@ function DelegationConnectWalletState(
 ) {
   return (
     <section
-      className={styles["connectRequired"]}
+      className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6"
       aria-labelledby="connect-wallet-heading"
     >
-      <h1 id="connect-wallet-heading">{props.title}</h1>
-      <p>{props.body}</p>
+      <h1
+        id="connect-wallet-heading"
+        className="tw-mb-2 tw-mt-0 tw-text-3xl tw-font-bold tw-text-white"
+      >
+        {props.title}
+      </h1>
+      <p className="tw-mb-4 tw-text-base tw-leading-6 tw-text-iron-300">
+        {props.body}
+      </p>
       <button
         type="button"
-        className={styles["connectRequiredButton"]}
+        className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         onClick={() => {
           props.onConnect();
         }}

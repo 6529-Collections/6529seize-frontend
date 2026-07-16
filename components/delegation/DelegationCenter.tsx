@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import styles from "./Delegation.module.css";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
   DELEGATION_ALL_ADDRESS,
   GRADIENT_CONTRACT,
@@ -19,6 +19,22 @@ import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 
 interface Props {
   setSection(section: DelegationCenterSection): void;
+}
+
+function getCollectionSection(contract: string) {
+  if (areEqualAddresses(contract, DELEGATION_ALL_ADDRESS)) {
+    return DelegationCenterSection.ANY_COLLECTION;
+  }
+  if (areEqualAddresses(contract, MEMES_CONTRACT)) {
+    return DelegationCenterSection.MEMES_COLLECTION;
+  }
+  if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
+    return DelegationCenterSection.MEME_LAB_COLLECTION;
+  }
+  if (areEqualAddresses(contract, GRADIENT_CONTRACT)) {
+    return DelegationCenterSection.GRADIENTS_COLLECTION;
+  }
+  return undefined;
 }
 
 export default function DelegationCenterComponent(props: Readonly<Props>) {
@@ -62,213 +78,155 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
 
   function printCollectionSelection() {
     return (
-      <div className="tw-w-full tw-p-0">
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2 tw-pt-4">
-          <div className="tw-w-full tw-px-3">
-            <h4>Manage by Collection</h4>
-          </div>
-        </div>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
-            <div
-              key={c.contract}
-              className="tw-flex tw-w-full tw-flex-wrap tw-gap-3 tw-px-3 tw-py-2 sm:tw-w-1/2 md:tw-w-1/4"
-            >
-              <button
-                key={c.contract}
-                className={styles["collectionSelectionButton"]}
-                onClick={() => {
-                  const newSection = areEqualAddresses(
-                    c.contract,
-                    DELEGATION_ALL_ADDRESS
-                  )
-                    ? DelegationCenterSection.ANY_COLLECTION
-                    : areEqualAddresses(c.contract, MEMES_CONTRACT)
-                      ? DelegationCenterSection.MEMES_COLLECTION
-                      : areEqualAddresses(c.contract, MEMELAB_CONTRACT)
-                        ? DelegationCenterSection.MEME_LAB_COLLECTION
-                        : areEqualAddresses(c.contract, GRADIENT_CONTRACT)
-                          ? DelegationCenterSection.GRADIENTS_COLLECTION
-                          : null;
-                  if (newSection) {
-                    setRedirect(newSection);
-                  }
-                }}
-              >
-                <span className="tw-flex tw-items-center tw-gap-3">
-                  <Image
-                    unoptimized
-                    className={styles["collectionSelectionImage"]}
-                    loading="eager"
-                    priority
-                    width={0}
-                    height={0}
-                    src={c.preview}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                  <span>{c.title}</span>
-                </span>
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
-        <div className="tw-w-full tw-px-3">
-          <h1>Delegation Center</h1>
-          <p className={styles["delegationCenterIntro"]}>
-            Register wallet relationships for NFT utility and 6529 collection
-            metrics. These actions do not transfer NFTs.
-          </p>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-w-full tw-px-3">
-          <div className={`${styles["delegationCenterSection"]} tw-py-4`}>
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-              <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4">
-                <span className="tw-flex tw-flex-col">
-                  <h3 className="tw-pb-4">Delegations</h3>
-                  <span className="tw-flex tw-items-center tw-gap-3">
-                    <Image
-                      unoptimized
-                      loading="eager"
-                      priority
-                      src="/delegation-icon.png"
-                      alt="delegation"
-                      width={50}
-                      height={50}
-                    />
-                    <ul className="tw-mb-0">
-                      <li>
-                        Let a hot wallet use NFT utility held by a vault wallet
-                      </li>
-                      <li>Useful for minting, allowlists, and airdrops</li>
-                    </ul>
-                  </span>
-                </span>
-              </div>
-              <div className="tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-2 md:tw-w-1/4">
-                <button
-                  className={`${styles["addNewDelegationBtn"]}`}
-                  onClick={() =>
-                    setRedirect(DelegationCenterSection.REGISTER_DELEGATION)
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon={faPlus}
-                    className={styles["buttonIcon"]}
-                  />
-                  Register Delegation
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
-        <div className="tw-w-full tw-px-3">
-          <div className={`${styles["delegationCenterSection"]} tw-py-4`}>
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-              <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4">
-                <span className="tw-flex tw-flex-col">
-                  <h3 className="tw-pb-4">Consolidations</h3>
-                  <span className="tw-flex tw-items-center tw-gap-3">
-                    <Image
-                      unoptimized
-                      loading="eager"
-                      priority
-                      src="/consolidation-icon.png"
-                      alt="consolidation"
-                      width={50}
-                      height={50}
-                    />
-                    <ul className="tw-mb-0">
-                      <li>
-                        Link wallets you control for TDH and collection metrics
-                      </li>
-                      <li>Requires reciprocal records between the wallets</li>
-                    </ul>
-                  </span>
-                </span>
-              </div>
-              <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-py-2 md:tw-w-1/4">
-                <button
-                  className={`${styles["addNewDelegationBtn"]}`}
-                  onClick={() =>
-                    setRedirect(DelegationCenterSection.REGISTER_CONSOLIDATION)
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon={faPlus}
-                    className={styles["buttonIcon"]}
-                  />
-                  Register Consolidation
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
-        <div className="tw-w-full tw-px-3">
-          <div className={`${styles["delegationCenterSection"]} tw-py-4`}>
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-              <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-w-3/4">
-                <span className="tw-flex tw-flex-col">
-                  <h3 className="tw-pb-4">Delegation Management</h3>
-                  <span className="tw-flex tw-items-center tw-gap-3">
-                    <Image
-                      unoptimized
-                      loading="eager"
-                      priority
-                      src="/manager-icon.png"
-                      alt="delegation-manager"
-                      width={50}
-                      height={50}
-                    />
-                    <ul className="tw-mb-0">
-                      <li>
-                        Let one wallet maintain delegations for another wallet
-                      </li>
-                      <li>Keep vault wallets cold after setup</li>
-                    </ul>
-                  </span>
-                </span>
-              </div>
-              <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-py-2 md:tw-w-1/4">
-                <button
-                  className={`${styles["addNewDelegationBtn"]}`}
-                  onClick={() =>
-                    setRedirect(DelegationCenterSection.REGISTER_SUB_DELEGATION)
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon={faPlus}
-                    className={styles["buttonIcon"]}
-                  />
-                  Register Delegation Manager
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-w-full tw-px-3">
-          <p className={styles["delegationCenterIntro"]}>
+      <section className="tw-w-full" aria-labelledby="manage-by-collection">
+        <div className="tw-mb-5">
+          <h2
+            id="manage-by-collection"
+            className="tw-mb-2 tw-text-xl tw-font-semibold tw-text-white"
+          >
+            Manage by Collection
+          </h2>
+          <p className="tw-mb-0 tw-text-base tw-leading-6 tw-text-iron-300">
             Manage existing records by collection scope, including locks that
             block incoming delegations.
           </p>
-          {printCollectionSelection()}
         </div>
+        <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+          {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
+            <button
+              key={c.contract}
+              type="button"
+              className="tw-group tw-grid tw-min-h-20 tw-w-full tw-grid-cols-[56px_minmax(0,1fr)_56px] tw-items-center tw-gap-4 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-5 tw-py-3 tw-text-white tw-shadow-sm tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              onClick={() => {
+                const newSection = getCollectionSection(c.contract);
+                if (newSection !== undefined) {
+                  setRedirect(newSection);
+                }
+              }}
+            >
+              <span className="tw-relative tw-h-14 tw-w-14 tw-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
+                <Image
+                  unoptimized
+                  className="tw-object-cover"
+                  loading="eager"
+                  priority
+                  fill
+                  sizes="56px"
+                  src={c.preview}
+                  alt=""
+                  aria-hidden="true"
+                />
+              </span>
+              <span className="tw-whitespace-nowrap tw-text-center tw-text-base tw-font-semibold">
+                {c.title}
+              </span>
+              <span aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  const actionCards = [
+    {
+      title: "Delegations",
+      icon: "/delegation-icon.png",
+      iconAlt: "",
+      details: [
+        "Let a hot wallet use NFT utility held by a vault wallet",
+        "Useful for minting, allowlists, and airdrops",
+      ],
+      buttonLabel: "Delegation",
+      section: DelegationCenterSection.REGISTER_DELEGATION,
+    },
+    {
+      title: "Consolidations",
+      icon: "/consolidation-icon.png",
+      iconAlt: "",
+      details: [
+        "Link wallets you control for TDH and collection metrics",
+        "Requires reciprocal records between the wallets",
+      ],
+      buttonLabel: "Consolidation",
+      section: DelegationCenterSection.REGISTER_CONSOLIDATION,
+    },
+    {
+      title: "Delegation Management",
+      icon: "/manager-icon.png",
+      iconAlt: "",
+      details: [
+        "Let one wallet maintain delegations for another wallet",
+        "Keep vault wallets cold after setup",
+      ],
+      buttonLabel: "Delegation Manager",
+      section: DelegationCenterSection.REGISTER_SUB_DELEGATION,
+    },
+  ] as const;
+
+  return (
+    <div className="tw-w-full">
+      <header className="tw-mb-6">
+        <h1 className="tw-mb-2 tw-text-3xl tw-font-bold tw-text-white">
+          Delegation Center
+        </h1>
+        <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-300">
+          Register wallet relationships for NFT utility and 6529 collection
+          metrics. These actions do not transfer NFTs.
+        </p>
+      </header>
+
+      <div className="tw-space-y-3">
+        {actionCards.map((card) => (
+          <section
+            key={card.title}
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6"
+          >
+            <div className="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
+              <div className="tw-min-w-0 tw-flex-1">
+                <h2 className="tw-mb-8 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+                  {card.title}
+                </h2>
+                <div className="tw-flex tw-items-center tw-gap-4">
+                  <Image
+                    unoptimized
+                    loading="eager"
+                    priority
+                    src={card.icon}
+                    alt={card.iconAlt}
+                    aria-hidden="true"
+                    width={56}
+                    height={56}
+                    className="tw-h-14 tw-w-14 tw-shrink-0 tw-object-contain"
+                  />
+                  <ul className="tw-my-0 tw-min-w-0 tw-pl-5 tw-text-base tw-leading-6 tw-text-iron-100">
+                    {card.details.map((detail) => (
+                      <li key={detail}>{detail}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="tw-w-full tw-shrink-0 lg:tw-w-72">
+                <PrimaryButton
+                  loading={false}
+                  disabled={false}
+                  onClicked={() => setRedirect(card.section)}
+                  size="lg"
+                  className="tw-min-h-12 tw-w-full"
+                >
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    className="tw-h-3.5 tw-w-3.5"
+                  />
+                  {card.buttonLabel}
+                </PrimaryButton>
+              </div>
+            </div>
+          </section>
+        ))}
       </div>
+
+      <div className="tw-mt-10">{printCollectionSelection()}</div>
     </div>
   );
 }

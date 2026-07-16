@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
@@ -7,7 +8,7 @@ import { useEffect, useState } from "react";
 
 interface UseNFTCollectionsReturn {
   // Data
-  nfts: NFT[]; // Memes + Gradients
+  nfts: NFT[]; // Memes + MemeLab + Gradients
   nextgenCollections: NextGenCollection[];
 
   // Loading state
@@ -24,7 +25,7 @@ export function useNFTCollections(initialCollections?: {
   >(initialCollections?.nextgenCollections || []);
   const [loading, setLoading] = useState(!initialCollections);
 
-  // Fetch Memes and Gradients collections
+  // Fetch Memes, MemeLab, and Gradients collections
   useEffect(() => {
     // Skip fetch if we have initial data
     if (initialCollections && initialCollections.nfts.length > 0) {
@@ -34,30 +35,42 @@ export function useNFTCollections(initialCollections?: {
     let cancelled = false;
     setLoading(true);
 
-    const fetchCollections = async () => {
+    const fetchCollection = async (
+      collectionName: string,
+      request: () => Promise<NFT[]>
+    ): Promise<NFT[]> => {
       try {
-        const memeResponse = await fetchUrl(
-          `${publicEnv.API_ENDPOINT}/api/memes_lite`
-        );
-        if (cancelled) {
-          return;
-        }
-        const gradients = await fetchAllPages<NFT>(
-          `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
-        );
-        if (cancelled) {
-          return;
-        }
-        setNfts([...memeResponse.data, ...gradients]);
+        return await request();
       } catch (error) {
-        if (!cancelled) {
-          console.error("Failed to fetch NFT collections", error);
-          setNfts([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        console.error(`Failed to fetch ${collectionName} collection`, error);
+        return [];
+      }
+    };
+
+    const fetchCollections = async () => {
+      const [memes, memeLab, gradients] = await Promise.all([
+        fetchCollection("The Memes", async () => {
+          const response = await fetchUrl<DBResponse<NFT>>(
+            `${publicEnv.API_ENDPOINT}/api/memes_lite`
+          );
+          return response.data;
+        }),
+        fetchCollection("MemeLab", async () => {
+          const response = await fetchUrl<DBResponse<NFT>>(
+            `${publicEnv.API_ENDPOINT}/api/memelab_lite`
+          );
+          return response.data;
+        }),
+        fetchCollection("6529 Gradient", () =>
+          fetchAllPages<NFT>(
+            `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`
+          )
+        ),
+      ]);
+
+      if (!cancelled) {
+        setNfts([...memes, ...memeLab, ...gradients]);
+        setLoading(false);
       }
     };
 

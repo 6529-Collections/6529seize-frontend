@@ -6,7 +6,6 @@ import {
   getDelegationRouteMetadata,
 } from "@/components/delegation/delegation-page-metadata";
 import { useSetTitle } from "@/contexts/TitleContext";
-import styles from "@/styles/Home.module.css";
 import { DelegationCenterSection } from "@/types/enums";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -85,7 +84,6 @@ export default function DelegationPageClient(props: {
         router.push(buildUrl(s, queryParams));
       }
     }
-    window.scrollTo(0, 0);
   };
 
   const updateQueryParams = (s: DelegationCenterSection) => {
@@ -101,7 +99,7 @@ export default function DelegationPageClient(props: {
   }, [addressQuery, collectionQuery, useCaseQuery]);
 
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
       <DelegationCenterMenu
         section={section}
         path={props.path}

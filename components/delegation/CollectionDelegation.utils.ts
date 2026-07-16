@@ -132,7 +132,7 @@ export function getDelegationsFromData(data: readonly { result?: unknown }[]) {
         if (useCase.use_case >= PRIMARY_ADDRESS_USE_CASE.use_case) {
           myDateDisplay = `active - non-expiring`;
         } else {
-          const isNonExpiring = myDate == 0 || myDate >= NEVER_DATE;
+          const isNonExpiring = myDate === 0 || myDate >= NEVER_DATE;
           myDateDisplay = isNonExpiring
             ? `active - non-expiring`
             : new Date().getTime() / 1000 > myDate

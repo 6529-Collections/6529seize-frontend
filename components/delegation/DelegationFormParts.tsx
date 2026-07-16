@@ -22,16 +22,15 @@ import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import type { DelegationWriteParams } from "./delegation-shared";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
-import styles from "./Delegation.module.css";
 
 const FORM_ROW_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-2 tw-pb-4 sm:tw-grid-cols-12 sm:tw-gap-4";
 const FORM_ROW_COMPACT_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-12 sm:tw-gap-4";
 const INPUT_CLASS =
-  "tw-block tw-w-full tw-min-w-0 tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-black focus:tw-border-primary-400 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-75";
+  "tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-black focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-200 disabled:tw-text-iron-500";
 const RADIO_CLASS =
-  "tw-mr-2 tw-h-4 tw-w-4 tw-cursor-pointer tw-border-0 tw-bg-white tw-text-black focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
+  "tw-h-4 tw-w-4 tw-cursor-pointer tw-border-0 tw-bg-white tw-text-black focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
 
 function getLabelSpanClass(span: number) {
   if (span === 4) {
@@ -63,6 +62,41 @@ export function DelegationFormRow(
   );
 }
 
+export function DelegationFormShell(
+  props: Readonly<{
+    title: string;
+    description?: string | undefined;
+    closeTitle?: string | undefined;
+    showClose?: boolean | undefined;
+    onHide: () => void;
+    children: ReactNode;
+  }>
+) {
+  return (
+    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
+      <header className="tw-flex tw-items-start tw-justify-between tw-gap-4">
+        <div>
+          <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+            {props.title}
+          </h2>
+          {props.description && (
+            <p className="tw-mb-0 tw-text-base tw-leading-6 tw-text-iron-300">
+              {props.description}
+            </p>
+          )}
+        </div>
+        {props.showClose !== false && (
+          <DelegationCloseButton
+            onHide={props.onHide}
+            title={props.closeTitle ?? props.title}
+          />
+        )}
+      </header>
+      <div className="tw-mt-6">{props.children}</div>
+    </section>
+  );
+}
+
 export function DelegationFormField(
   props: Readonly<{
     children: ReactNode;
@@ -84,10 +118,7 @@ export function DelegationFormField(
 export function DelegationFormInput(props: ComponentPropsWithoutRef<"input">) {
   const { className, ...inputProps } = props;
   return (
-    <input
-      {...inputProps}
-      className={`${styles["formInput"]} ${INPUT_CLASS} ${className ?? ""}`}
-    />
+    <input {...inputProps} className={`${INPUT_CLASS} ${className ?? ""}`} />
   );
 }
 
@@ -96,10 +127,7 @@ export function DelegationFormSelect(
 ) {
   const { className, children, ...selectProps } = props;
   return (
-    <select
-      {...selectProps}
-      className={`${styles["formInput"]} ${INPUT_CLASS} ${className ?? ""}`}
-    >
+    <select {...selectProps} className={`${INPUT_CLASS} ${className ?? ""}`}>
       {children}
     </select>
   );
@@ -115,7 +143,7 @@ export function DelegationRadio(
   const { label, className, ...inputProps } = props;
   return (
     <label
-      className={`${styles["newDelegationFormToggle"]} tw-inline-flex tw-items-center ${className ?? ""}`}
+      className={`tw-mr-4 tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-py-2 tw-text-base tw-text-iron-100 ${className ?? ""}`}
     >
       <input {...inputProps} type="radio" className={RADIO_CLASS} />
       <span>{label}</span>
@@ -165,13 +193,13 @@ export function DelegationFormLabel(
 
   return (
     <label
-      className={`tw-flex tw-items-center ${getLabelSpanClass(
+      className={`tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-iron-200 sm:tw-min-h-11 ${getLabelSpanClass(
         props.span ?? 3
       )}`}
     >
       {props.title}
       <FontAwesomeIcon
-        className={styles["infoIcon"]}
+        className="tw-ml-2 tw-h-4 tw-w-4 tw-cursor-help tw-text-iron-400"
         icon={faInfoCircle}
         data-tooltip-id={tooltipId}
       ></FontAwesomeIcon>
@@ -208,7 +236,6 @@ export function DelegationFormOriginalDelegatorFormGroup(
       <DelegationFormField>
         <DelegationFormInput
           aria-label="Original Delegator"
-          className={styles["formInputDisabled"]}
           type="text"
           value={
             orignalDelegatorEnsResolution.data
@@ -238,7 +265,6 @@ export function DelegationAddressDisabledInput(
   return (
     <DelegationFormInput
       aria-label={props.label ?? "Address"}
-      className={styles["formInputDisabled"]}
       type="text"
       value={displayValue}
       disabled
@@ -357,6 +383,7 @@ export function DelegationSubmitGroups(
     writeParams: DelegationWriteParams;
     showCancel: boolean;
     gasError?: string | undefined;
+    isDestructive?: boolean | undefined;
     validate: () => string[];
     onHide: () => void;
     onSetToast: (toast: { title: string; message: ReactNode }) => void;
@@ -368,6 +395,7 @@ export function DelegationSubmitGroups(
     writeParams,
     showCancel,
     gasError,
+    isDestructive = false,
     validate,
     onHide,
     onSetToast,
@@ -411,7 +439,7 @@ export function DelegationSubmitGroups(
         href={getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
         target="_blank"
         rel="noopener noreferrer"
-        className={styles["etherscanLink"]}
+        className="tw-font-semibold tw-text-primary-600 tw-underline tw-underline-offset-2 hover:tw-text-primary-500"
       >
         view
       </a>
@@ -479,11 +507,11 @@ export function DelegationSubmitGroups(
     <>
       <div className={`${FORM_ROW_COMPACT_CLASS} tw-pb-4 tw-pt-2`}>
         <div className="tw-hidden sm:tw-col-span-4 sm:tw-block"></div>
-        <div className="tw-flex tw-items-center tw-justify-center sm:tw-col-span-8">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3 sm:tw-col-span-8">
           {showCancel && (
             <button
               type="button"
-              className={styles["newDelegationCancelBtn"]}
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-iron-400 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               onClick={() => onHide()}
             >
               Cancel
@@ -492,8 +520,10 @@ export function DelegationSubmitGroups(
           <button
             type="button"
             disabled={isLoading()}
-            className={`${styles["newDelegationSubmitBtn"]} ${
-              isLoading() ? `${styles["newDelegationSubmitBtnDisabled"]}` : ``
+            className={`tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 disabled:tw-cursor-not-allowed disabled:tw-border-iron-700 disabled:tw-bg-iron-700 disabled:tw-text-iron-400 ${
+              isDestructive
+                ? "tw-border-red tw-bg-red tw-text-white hover:tw-bg-[#e05f57] focus-visible:tw-ring-red"
+                : "tw-border-white tw-bg-white tw-text-black hover:tw-bg-iron-200 focus-visible:tw-ring-primary-400"
             }`}
             onClick={(e) => {
               e.preventDefault();
@@ -503,9 +533,7 @@ export function DelegationSubmitGroups(
             {submitBtnLabel ?? "Submit"}{" "}
             {isLoading() && (
               <span className="tw-inline-block">
-                <output
-                  className={`${styles["loader"]} tw-inline-block tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-white/30 tw-border-t-white`}
-                >
+                <output className="tw-border-current/30 tw-inline-block tw-h-5 tw-w-5 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-t-current">
                   <span className="tw-sr-only">Transaction pending</span>
                 </output>
               </span>
@@ -515,7 +543,7 @@ export function DelegationSubmitGroups(
       </div>
       {(errors.length > 0 || gasError) && (
         <div
-          className={`${FORM_ROW_COMPACT_CLASS} tw-pb-2 tw-pt-2 ${styles["newDelegationError"]}`}
+          className={`${FORM_ROW_COMPACT_CLASS} tw-pb-2 tw-pt-2 tw-text-error`}
           role="alert"
           aria-live="assertive"
         >
@@ -540,25 +568,21 @@ export function DelegationExpiryCalendar(
   }>
 ) {
   return (
-    <div className="tw-w-full tw-p-0 tw-pt-3">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-w-full tw-px-3 md:tw-w-1/2 lg:tw-w-1/3">
-          <DelegationFormInput
-            aria-label="Expiry Date"
-            min={new Date().toISOString().slice(0, 10)}
-            type="date"
-            placeholder="Expiry Date"
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value) {
-                props.setDelegationDate(new Date(value));
-              } else {
-                props.setDelegationDate(undefined);
-              }
-            }}
-          />
-        </div>
-      </div>
+    <div className="tw-mt-3 tw-w-full sm:tw-max-w-xs">
+      <DelegationFormInput
+        aria-label="Expiry Date"
+        min={new Date().toISOString().slice(0, 10)}
+        type="date"
+        placeholder="Expiry Date"
+        onChange={(e) => {
+          const value = e.target.value;
+          if (value) {
+            props.setDelegationDate(new Date(value));
+          } else {
+            props.setDelegationDate(undefined);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -569,31 +593,27 @@ export function DelegationTokenSelection(
   }>
 ) {
   return (
-    <div className="tw-w-full tw-p-0 tw-pt-3">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-w-full tw-px-3 md:tw-w-1/2 lg:tw-w-1/3">
-          <DelegationFormInput
-            aria-label="Token ID"
-            min={0}
-            type="number"
-            placeholder="Token ID"
-            onChange={(e) => {
-              const value = e.target.value;
-              try {
-                const intValue = parseInt(value);
-                props.setDelegationToken(intValue);
-              } catch {
-                props.setDelegationToken(undefined);
-              }
-            }}
-          />
-        </div>
-      </div>
+    <div className="tw-mt-3 tw-w-full sm:tw-max-w-xs">
+      <DelegationFormInput
+        aria-label="Token ID"
+        min={0}
+        type="number"
+        placeholder="Token ID"
+        onChange={(e) => {
+          const value = e.target.value;
+          try {
+            const intValue = parseInt(value);
+            props.setDelegationToken(intValue);
+          } catch {
+            props.setDelegationToken(undefined);
+          }
+        }}
+      />
     </div>
   );
 }
 
-export function DelegationCloseButton(
+function DelegationCloseButton(
   props: Readonly<{ title: string; onHide: () => void }>
 ) {
   const tooltipId = `delegation-close-button-${props.title
@@ -605,11 +625,15 @@ export function DelegationCloseButton(
       <button
         type="button"
         aria-label={`Cancel ${props.title}`}
-        className={styles["closeNewDelegationForm"]}
+        className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         onClick={() => props.onHide()}
         data-tooltip-id={tooltipId}
       >
-        <FontAwesomeIcon icon={faTimesCircle} aria-hidden />
+        <FontAwesomeIcon
+          icon={faTimesCircle}
+          className="tw-h-6 tw-w-6"
+          aria-hidden
+        />
       </button>
       <Tooltip
         id={tooltipId}
