@@ -284,6 +284,7 @@ async function openMobileDropMenu(
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
   } finally {
+    // Cancel the held gesture so its release cannot retarget the opened sheet.
     await cdp
       .send("Input.dispatchTouchEvent", {
         type: "touchCancel",

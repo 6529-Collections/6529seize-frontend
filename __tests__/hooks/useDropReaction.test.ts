@@ -416,7 +416,7 @@ describe("useDropReaction", () => {
     expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
   });
 
-  it("shows structured API error messages for quick react failures", async () => {
+  it("resolves after surfacing a structured quick react failure", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
         body: JSON.stringify({ error: "Reaction not allowed" }),
@@ -430,7 +430,7 @@ describe("useDropReaction", () => {
     );
 
     await act(async () => {
-      await result.current.react(":smile:");
+      await expect(result.current.react(":smile:")).resolves.toBeUndefined();
     });
 
     expect(commonApi.commonApiPost).toHaveBeenCalledWith({
