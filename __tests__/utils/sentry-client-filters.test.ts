@@ -1,4 +1,7 @@
 import {
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
+import {
   __testing,
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
@@ -137,19 +140,6 @@ describe("sentry-client-filters", () => {
     function: functionName,
     in_app: true,
   });
-  const createReactDomRawInsertBeforeFrames = (
-    terminalFunction: "sN" | "sR" = "sN"
-  ): SentryStackFrame[] => {
-    const repeatedFrames = Array.from({ length: 24 }, () => [
-      reactDomRawStaticChunkFrame("lr"),
-      reactDomRawStaticChunkFrame("li"),
-    ]).flat();
-    return [
-      ...repeatedFrames,
-      reactDomRawStaticChunkFrame("lo"),
-      reactDomRawStaticChunkFrame(terminalFunction),
-    ];
-  };
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
   const metaMaskMobileWebViewUserAgent =
@@ -1779,7 +1769,9 @@ describe("sentry-client-filters", () => {
           type: options.exceptionType ?? "NotFoundError",
           value: options.exceptionValue ?? reactDomInsertBeforeMessage,
           stacktrace: {
-            frames: options.frames ?? createReactDomRawInsertBeforeFrames(),
+            frames:
+              options.frames ??
+              createObservedReactDomRawInsertBeforeFrames(),
           },
         },
         ...(options.includeAdditionalException
@@ -2005,7 +1997,8 @@ describe("sentry-client-filters", () => {
     (terminalFunction) => {
       const result = shouldFilterReactDomInsertBeforeNotFoundError(
         createReactDomRawInsertBeforeEvent({
-          frames: createReactDomRawInsertBeforeFrames(terminalFunction),
+          frames:
+            createObservedReactDomRawInsertBeforeFrames(terminalFunction),
         })
       );
 
@@ -2016,13 +2009,14 @@ describe("sentry-client-filters", () => {
   it.each([
     {
       name: "a changed frame count",
-      getFrames: () => createReactDomRawInsertBeforeFrames().slice(1),
+      getFrames: () =>
+        createObservedReactDomRawInsertBeforeFrames().slice(1),
     },
     {
       name: "an unknown function",
       getFrames: () => [
         reactDomRawStaticChunkFrame("WaveDrop"),
-        ...createReactDomRawInsertBeforeFrames().slice(1),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
       ],
     },
     {
@@ -2032,31 +2026,38 @@ describe("sentry-client-filters", () => {
           "lr",
           "app:///_next/static/chunks/0different-runtime.js"
         ),
-        ...createReactDomRawInsertBeforeFrames().slice(1),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
       ],
     },
     {
       name: "a missing required function",
       getFrames: () =>
-        createReactDomRawInsertBeforeFrames().map((frame) =>
+        createObservedReactDomRawInsertBeforeFrames().map((frame) =>
           frame.function === "lr"
             ? reactDomRawStaticChunkFrame("li")
             : frame
         ),
     },
     {
-      name: "both terminal function variants",
+      name: "mixed sN and sR function variants",
       getFrames: () => [
         reactDomRawStaticChunkFrame("sR"),
-        ...createReactDomRawInsertBeforeFrames().slice(1),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
       ],
     },
     {
-      name: "a non-placement terminal function",
+      name: "an allowed non-placement frame after an sR placement frame",
       getFrames: () => [
-        ...createReactDomRawInsertBeforeFrames().slice(0, -1),
+        reactDomRawStaticChunkFrame("lr"),
+        reactDomRawStaticChunkFrame("sR"),
+        ...createObservedReactDomRawInsertBeforeFrames("sR").slice(2, -1),
         reactDomRawStaticChunkFrame("li"),
       ],
+    },
+    {
+      name: "the production frame order reversed",
+      getFrames: () =>
+        createObservedReactDomRawInsertBeforeFrames().reverse(),
     },
   ])("keeps raw insertBefore events with $name", ({ getFrames }) => {
     const result = shouldFilterReactDomInsertBeforeNotFoundError(

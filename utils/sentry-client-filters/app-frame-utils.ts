@@ -118,7 +118,7 @@ function hasRawReactDomInsertBeforeFrameSignature(
     return false;
   }
 
-  const terminalFunction = frames[frames.length - 1]?.function?.trim();
+  const terminalFunction = frames.at(-1)?.function?.trim();
   if (
     !terminalFunction ||
     !reactDomInsertBeforeRawTerminalFunctions.has(terminalFunction)

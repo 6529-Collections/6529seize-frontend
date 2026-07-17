@@ -1,4 +1,7 @@
 import noiseFilterFixtures from "@/__tests__/fixtures/sentry-noise-filter-hardening.json";
+import {
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
 
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
@@ -33,21 +36,6 @@ describe("instrumentation-client", () => {
   const reactDomFrame = {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
-  };
-  const createReactDomRawInsertBeforeFrames = () => {
-    const chunkPath =
-      "app:///_next/static/chunks/0example-react-dom-runtime.js";
-    const createFrame = (functionName: string) => ({
-      filename: chunkPath,
-      abs_path: chunkPath,
-      function: functionName,
-      in_app: true,
-    });
-    const repeatedFrames = Array.from({ length: 24 }, () => [
-      createFrame("lr"),
-      createFrame("li"),
-    ]).flat();
-    return [...repeatedFrames, createFrame("lo"), createFrame("sN")];
   };
   const gifPickerTenorManagerFrame = {
     filename:
@@ -661,32 +649,36 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
-  it("drops the production-shaped raw React DOM insertBefore stack", () => {
-    const beforeSend = loadBeforeSend();
-    const event = {
-      event_id: "raw-react-dom-insert-before-event",
-      transaction: "/waves",
-      exception: {
-        values: [
-          {
-            type: "NotFoundError",
-            value: reactDomInsertBeforeMessage,
-            stacktrace: {
-              frames: createReactDomRawInsertBeforeFrames(),
-            },
-          },
-        ],
-      },
-      tags: {
+  it.each(["sN", "sR"] as const)(
+    "drops the production-shaped raw React DOM stack ending in %s",
+    (terminalFunction) => {
+      const beforeSend = loadBeforeSend();
+      const event = {
+        event_id: "raw-react-dom-insert-before-event",
         transaction: "/waves",
-        url: "/waves",
-      },
-    };
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames:
+                  createObservedReactDomRawInsertBeforeFrames(terminalFunction),
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction: "/waves",
+          url: "/waves",
+        },
+      };
 
-    const result = beforeSend(event);
+      const result = beforeSend(event);
 
-    expect(result).toBeNull();
-  });
+      expect(result).toBeNull();
+    }
+  );
 
   it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
     const beforeSend = loadBeforeSend();
