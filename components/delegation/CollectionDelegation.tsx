@@ -30,6 +30,12 @@ interface Props {
   collection: DelegationCollection;
 }
 
+function getSwitchToMessage() {
+  return `Switch to ${
+    DELEGATION_CONTRACT.chain_id === 1 ? "Ethereum Mainnet" : "Sepolia Network"
+  }`;
+}
+
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const accountResolution = useSeizeConnectContext();
   const previousAccountAddressRef = useRef<string | undefined>(undefined);
@@ -64,14 +70,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   function chainsMatch() {
     return networkResolution === DELEGATION_CONTRACT.chain_id;
-  }
-
-  function getSwitchToMessage() {
-    return `Switch to ${
-      DELEGATION_CONTRACT.chain_id === 1
-        ? "Ethereum Mainnet"
-        : "Sepolia Network"
-    }`;
   }
 
   const delegationReads = useCollectionDelegationReads({
