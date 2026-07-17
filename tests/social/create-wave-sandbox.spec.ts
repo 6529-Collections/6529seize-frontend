@@ -654,6 +654,9 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expect(timelineToggle).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    // Each step must start at the top: the layout scroller used to keep the
+    // previous step's offset, landing users mid-page on this tall step.
+    await expect(timelineToggle).toBeInViewport();
     await expect(timelineToggle).toHaveAttribute("aria-expanded", "true");
     await page.getByText("First Winners Announcement").first().click();
     await expect(timelineToggle).toHaveAttribute("aria-expanded", "true");

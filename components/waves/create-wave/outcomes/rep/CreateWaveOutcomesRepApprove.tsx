@@ -3,7 +3,10 @@
 import { useState } from "react";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import { CreateWaveOutcomeType } from "@/types/waves.types";
-import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
+import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import CreateWaveOutcomesRepCategoryField from "./CreateWaveOutcomesRepCategoryField";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesRepApprove({
@@ -22,11 +25,24 @@ export default function CreateWaveOutcomesRepApprove({
     winnersConfig: null,
   });
 
-  const [categoryError, setCategoryError] = useState<boolean>(false);
+  const locale = useBrowserLocale();
+  const [showCategoryRequired, setShowCategoryRequired] =
+    useState<boolean>(false);
   const [creditError, setCreditError] = useState<boolean>(false);
 
+  // Same category rules the rep-assignment flow enforces (mirrors the
+  // backend); named live so an invalid category never survives to submit.
+  const categoryViolation = outcome.category
+    ? getRepCategoryViolation(outcome.category)
+    : null;
+  const categoryErrorMessage = categoryViolation
+    ? t(locale, categoryViolation.key, { ...categoryViolation.params })
+    : showCategoryRequired
+      ? "Rep category is required"
+      : null;
+
   const setCategory = (category: string | null) => {
-    setCategoryError(false);
+    setShowCategoryRequired(false);
     setOutcome({ ...outcome, category });
   };
 
@@ -40,10 +56,14 @@ export default function CreateWaveOutcomesRepApprove({
   const onSubmit = () => {
     const dontHaveCategorySet = !outcome.category;
     const dontHaveCreditSet = !outcome.credit;
-    setCategoryError(dontHaveCategorySet);
+    setShowCategoryRequired(dontHaveCategorySet);
     setCreditError(dontHaveCreditSet);
 
-    if (dontHaveCategorySet || dontHaveCreditSet) {
+    if (
+      dontHaveCategorySet ||
+      categoryViolation !== null ||
+      dontHaveCreditSet
+    ) {
       return;
     }
     onOutcome(outcome);
@@ -53,9 +73,9 @@ export default function CreateWaveOutcomesRepApprove({
     <div className="tw-col-span-full">
       <div className="tw-flex tw-flex-col tw-gap-y-5">
         <div className="tw-flex tw-w-full tw-flex-col tw-gap-4 tw-pt-[0.5px] sm:tw-flex-row">
-          <RepCategorySearch
-            error={categoryError}
+          <CreateWaveOutcomesRepCategoryField
             category={outcome.category}
+            errorMessage={categoryErrorMessage}
             setCategory={setCategory}
           />
         </div>
