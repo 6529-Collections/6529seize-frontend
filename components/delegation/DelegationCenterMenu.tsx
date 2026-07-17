@@ -2,12 +2,14 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { DelegationCenterSection } from "@/types/enums";
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
@@ -76,9 +78,10 @@ interface Props {
 }
 
 export default function DelegationCenterMenu(props: Readonly<Props>) {
+  const { section, setAddressQuery } = props;
   const pathname = usePathname();
   const accountResolution = useSeizeConnectContext();
-  const connectedAddress = accountResolution.address as string | undefined;
+  const connectedAddress = accountResolution.address;
   const hasConnectedWallet =
     accountResolution.isConnected && !!connectedAddress;
   const ensResolution = useEnsName({
@@ -86,6 +89,24 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
     chainId: 1,
   });
   const showNavigation = !SECTIONS_WITHOUT_NAVIGATION.has(props.section);
+  const previousConnectedAddress = useRef(connectedAddress);
+
+  useEffect(() => {
+    const previousAddress = previousConnectedAddress.current;
+    const accountChanged =
+      previousAddress !== undefined &&
+      connectedAddress !== undefined &&
+      !areEqualAddresses(previousAddress, connectedAddress);
+
+    if (
+      accountChanged &&
+      section === DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS
+    ) {
+      setAddressQuery("");
+    }
+
+    previousConnectedAddress.current = connectedAddress;
+  }, [connectedAddress, section, setAddressQuery]);
 
   const { toast, showToast, showDelegationToast, setToastVisibility } =
     useDelegationToast();
@@ -110,6 +131,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         }
         return (
           <NewDelegationComponent
+            key={`${props.section}-${connectedAddress.toLowerCase()}`}
             address={connectedAddress}
             ens={ensResolution.data}
             collection_query={props.collection_query}
@@ -134,6 +156,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         }
         return (
           <NewSubDelegationComponent
+            key={`${props.section}-${connectedAddress.toLowerCase()}`}
             address={connectedAddress}
             ens={ensResolution.data}
             onHide={() => {
@@ -154,6 +177,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         }
         return (
           <NewConsolidationComponent
+            key={`${props.section}-${connectedAddress.toLowerCase()}`}
             address={connectedAddress}
             ens={ensResolution.data}
             onHide={() => {
@@ -174,6 +198,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         }
         return (
           <NewAssignPrimaryAddress
+            key={`${props.section}-${connectedAddress.toLowerCase()}`}
             address={connectedAddress}
             ens={ensResolution.data}
             onHide={() => {

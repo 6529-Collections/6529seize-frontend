@@ -7,7 +7,10 @@ import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUB_DELEGATION_USE_CASE } from "./delegation-constants";
-import { getGasError } from "./delegation-shared";
+import {
+  getGasError,
+  type DelegationWriteSettledHandler,
+} from "./delegation-shared";
 import type { DelegationToastState } from "./DelegationToast";
 import {
   DelegationAddressDisabledInput,
@@ -41,6 +44,9 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
   const [gasError, setGasError] = useState<string>();
+  const handleWriteSettled: DelegationWriteSettledHandler = (_data, error) => {
+    setGasError(error ? getGasError(error) : undefined);
+  };
 
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
@@ -60,14 +66,6 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
           validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
-        onSettled(data: unknown, error: Error | null) {
-          if (data) {
-            setGasError(undefined);
-          }
-          if (error) {
-            setGasError(getGasError(error));
-          }
-        },
       }
     : {
         address: DELEGATION_CONTRACT.contract,
@@ -83,14 +81,6 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
         ],
         functionName:
           validate().length === 0 ? "registerDelegationAddress" : undefined,
-        onSettled(data: unknown, error: Error | null) {
-          if (data) {
-            setGasError(undefined);
-          }
-          if (error) {
-            setGasError(getGasError(error));
-          }
-        },
       };
 
   function validate() {
@@ -156,6 +146,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
           writeParams={contractWriteDelegationConfigParams}
           showCancel={true}
           gasError={gasError}
+          onWriteSettled={handleWriteSettled}
           validate={validate}
           onHide={props.onHide}
           onSetToast={props.onSetToast}

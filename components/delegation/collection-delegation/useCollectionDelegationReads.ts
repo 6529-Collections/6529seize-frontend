@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useReadContracts } from "wagmi";
 
 import {
-  getDelegationsFromData,
+  getDelegationsFromSuccessfulData,
   type ContractDelegation,
+  type ContractReadResult,
 } from "../CollectionDelegation.utils";
 import type { DelegationCollection } from "../delegation-constants";
 import { CONSOLIDATION_USE_CASE } from "../delegation-constants";
@@ -17,6 +18,27 @@ import {
 export interface ActiveConsolidation {
   wallet: string;
   status: string;
+}
+
+function getConsolidationStatuses(
+  wallets: readonly { readonly wallet: string }[],
+  data: readonly ContractReadResult[]
+) {
+  return wallets.map((walletDelegation, index) => {
+    const read = data[index];
+    let status = "consolidation status unavailable";
+
+    if (read !== undefined && read.status !== "failure") {
+      status = Boolean(read.result)
+        ? "consolidation active"
+        : "consolidation incomplete";
+    }
+
+    return {
+      wallet: walletDelegation.wallet,
+      status,
+    };
+  });
 }
 
 /**
@@ -61,9 +83,15 @@ export function useCollectionDelegationReads(options: {
 
   useEffect(() => {
     if (retrieveOutgoingDelegations.data) {
-      const myDelegations = getDelegationsFromData(
+      const myDelegations = getDelegationsFromSuccessfulData(
         retrieveOutgoingDelegations.data
       );
+      if (!myDelegations) {
+        setOutgoingDelegations([]);
+        setOutgoingDelegationsLoaded(false);
+        return;
+      }
+
       setOutgoingDelegations(myDelegations);
       setOutgoingDelegationsLoaded(true);
     }
@@ -94,13 +122,9 @@ export function useCollectionDelegationReads(options: {
       return;
     }
 
-    const activeConsolidations = consolidationDelegations.wallets.map(
-      (walletDelegation, index) => ({
-        wallet: walletDelegation.wallet,
-        status: retrieveOutgoingConsolidations.data?.[index]?.result
-          ? "consolidation active"
-          : "consolidation incomplete",
-      })
+    const activeConsolidations = getConsolidationStatuses(
+      consolidationDelegations.wallets,
+      retrieveOutgoingConsolidations.data
     );
 
     setOutgoingActiveConsolidations(activeConsolidations);
@@ -120,9 +144,15 @@ export function useCollectionDelegationReads(options: {
 
   useEffect(() => {
     if (retrieveIncomingDelegations.data) {
-      const myDelegations = getDelegationsFromData(
+      const myDelegations = getDelegationsFromSuccessfulData(
         retrieveIncomingDelegations.data
       );
+      if (!myDelegations) {
+        setIncomingDelegations([]);
+        setIncomingDelegationsLoaded(false);
+        return;
+      }
+
       setIncomingDelegations(myDelegations);
       setIncomingDelegationsLoaded(true);
     }
@@ -153,13 +183,9 @@ export function useCollectionDelegationReads(options: {
       return;
     }
 
-    const activeConsolidations = consolidationDelegations.wallets.map(
-      (walletDelegation, index) => ({
-        wallet: walletDelegation.wallet,
-        status: retrieveIncomingConsolidations.data?.[index]?.result
-          ? "consolidation active"
-          : "consolidation incomplete",
-      })
+    const activeConsolidations = getConsolidationStatuses(
+      consolidationDelegations.wallets,
+      retrieveIncomingConsolidations.data
     );
 
     setIncomingActiveConsolidations(activeConsolidations);
@@ -179,15 +205,21 @@ export function useCollectionDelegationReads(options: {
     outgoingDelegations,
     outgoingDelegationsLoaded,
     outgoingDelegationsError:
-      !outgoingDelegationsLoaded &&
-      Boolean(retrieveOutgoingDelegations.isError),
+      retrieveOutgoingDelegations.data?.some(
+        (entry) => entry.status === "failure"
+      ) === true ||
+      (!outgoingDelegationsLoaded &&
+        Boolean(retrieveOutgoingDelegations.isError)),
     retryOutgoingDelegations: retrieveOutgoingDelegations.refetch,
     outgoingActiveConsolidations,
     incomingDelegations,
     incomingDelegationsLoaded,
     incomingDelegationsError:
-      !incomingDelegationsLoaded &&
-      Boolean(retrieveIncomingDelegations.isError),
+      retrieveIncomingDelegations.data?.some(
+        (entry) => entry.status === "failure"
+      ) === true ||
+      (!incomingDelegationsLoaded &&
+        Boolean(retrieveIncomingDelegations.isError)),
     retryIncomingDelegations: retrieveIncomingDelegations.refetch,
     incomingActiveConsolidations,
     resetDelegationReads,

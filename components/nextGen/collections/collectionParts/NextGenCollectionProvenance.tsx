@@ -64,32 +64,47 @@ function getActivityTransaction(log: NextGenLog): Transaction | undefined {
 }
 
 export default function NextGenCollectionProvenance(props: Readonly<Props>) {
-  const scrollTarget = useRef<HTMLImageElement>(null);
+  const scrollTarget = useRef<HTMLDivElement>(null);
 
   const [logs, setLogs] = useState<NextGenLog[]>([]);
   const [logsLoaded, setLogsLoaded] = useState(false);
+  const [logsError, setLogsError] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
+  const [requestVersion, setRequestVersion] = useState(0);
 
-  function fetchResults(mypage: number) {
+  useEffect(() => {
+    let isCurrentRequest = true;
     setLogsLoaded(false);
+    setLogsError(false);
+    setLogs([]);
+
     commonApiFetch<{
       count: number;
       page: number;
       next: unknown;
       data: NextGenLog[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/logs?page_size=${PAGE_SIZE}&page=${mypage}`,
-    }).then((response) => {
-      setTotalResults(response.count);
-      setLogs(response.data);
-      setLogsLoaded(true);
-    });
-  }
+      endpoint: `nextgen/collections/${props.collection.id}/logs?page_size=${PAGE_SIZE}&page=${page}`,
+    })
+      .then((response) => {
+        if (!isCurrentRequest) return;
+        setTotalResults(response.count);
+        setLogs(response.data);
+        setLogsLoaded(true);
+      })
+      .catch((error) => {
+        if (!isCurrentRequest) return;
+        console.error("Failed to fetch NextGen collection provenance", error);
+        setTotalResults(0);
+        setLogsError(true);
+        setLogsLoaded(true);
+      });
 
-  useEffect(() => {
-    fetchResults(page);
-  }, [page]);
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [page, props.collection.id, requestVersion]);
 
   return (
     <div
@@ -100,6 +115,37 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
           <table className="tw-w-full tw-min-w-[900px] tw-border-collapse">
             <tbody>
+              {!logsLoaded && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="tw-border-0 tw-p-6 tw-text-center tw-text-base tw-text-iron-300"
+                  >
+                    Loading provenance…
+                  </td>
+                </tr>
+              )}
+              {logsError && (
+                <tr>
+                  <td colSpan={4} className="tw-border-0 tw-p-6">
+                    <div
+                      role="alert"
+                      className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 tw-text-base tw-text-error"
+                    >
+                      <span>Unable to load collection provenance.</span>
+                      <button
+                        type="button"
+                        className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                        onClick={() =>
+                          setRequestVersion((version) => version + 1)
+                        }
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )}
               {logs.map((log, index) => {
                 const transaction = getActivityTransaction(log);
                 if (transaction) {

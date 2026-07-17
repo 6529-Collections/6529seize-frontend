@@ -115,6 +115,49 @@ describe("DelegationSubmitGroups", () => {
     });
   });
 
+  it("passes form-specific settlement handling as Wagmi mutation options", () => {
+    const onWriteSettled = jest.fn();
+    render(
+      <DelegationSubmitGroups
+        title="T"
+        writeParams={{ functionName: "registerDelegationAddress" }}
+        showCancel={false}
+        gasError={undefined}
+        onWriteSettled={onWriteSettled}
+        validate={() => []}
+        onHide={jest.fn()}
+        onSetToast={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(mockWriteContract).toHaveBeenCalledWith(
+      { functionName: "registerDelegationAddress" },
+      { onSettled: onWriteSettled }
+    );
+  });
+
+  it("allows retrying after a previous gas error", () => {
+    render(
+      <DelegationSubmitGroups
+        title="T"
+        writeParams={{ functionName: "registerDelegationAddress" }}
+        showCancel={false}
+        gasError="CANNOT ESTIMATE GAS"
+        validate={() => []}
+        onHide={jest.fn()}
+        onSetToast={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(mockWriteContract).toHaveBeenCalledWith({
+      functionName: "registerDelegationAddress",
+    });
+  });
+
   it("does not submit while writeParams lack a functionName", () => {
     const onSetToast = jest.fn();
     render(

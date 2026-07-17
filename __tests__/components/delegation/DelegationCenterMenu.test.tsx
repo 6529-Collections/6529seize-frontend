@@ -13,7 +13,18 @@ jest.mock("@/components/delegation/DelegationCenter", () => () => (
 jest.mock("@/components/delegation/walletChecker/WalletChecker", () => () => (
   <div />
 ));
-jest.mock("@/components/delegation/NewDelegation", () => () => <div />);
+jest.mock("@/components/delegation/NewDelegation", () => {
+  return function MockNewDelegation() {
+    const [value, setValue] = jest.requireActual("react").useState("");
+    return (
+      <input
+        aria-label="Mock delegation address"
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+      />
+    );
+  };
+});
 jest.mock("@/components/delegation/NewSubDelegation", () => () => <div />);
 jest.mock("@/components/delegation/NewConsolidation", () => () => <div />);
 jest.mock("@/components/delegation/NewAssignPrimaryAddress", () => () => (
@@ -22,8 +33,13 @@ jest.mock("@/components/delegation/NewAssignPrimaryAddress", () => () => (
 jest.mock("@/components/delegation/CollectionDelegation", () => () => <div />);
 jest.mock("@/components/delegation/html/DelegationHTML", () => () => <div />);
 
+let mockConnectedAddress = "0xabc";
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: "0xabc" }),
+  useSeizeConnectContext: () => ({
+    address: mockConnectedAddress,
+    isConnected: true,
+    seizeConnect: jest.fn(),
+  }),
 }));
 
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: "ens" }) }));
@@ -45,6 +61,11 @@ const props = {
 };
 
 describe("DelegationCenterMenu links", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockConnectedAddress = "0xabc";
+  });
+
   it("renders resource links", async () => {
     const mod = await import("@/components/delegation/DelegationCenterMenu");
     const DelegationCenterMenu = mod.default;
@@ -84,6 +105,47 @@ describe("DelegationCenterMenu links", () => {
     expect(
       screen.queryByRole("navigation", { name: "Delegation center" })
     ).not.toBeInTheDocument();
+  });
+
+  it("resets standalone form state when the connected account changes", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    const actionProps = {
+      ...props,
+      section: DelegationCenterSection.REGISTER_DELEGATION,
+    };
+    const { rerender } = render(<DelegationCenterMenu {...actionProps} />);
+    const addressInput = screen.getByRole("textbox", {
+      name: "Mock delegation address",
+    });
+
+    fireEvent.change(addressInput, { target: { value: "0xrecipient" } });
+    expect(addressInput).toHaveValue("0xrecipient");
+
+    mockConnectedAddress = "0xdef";
+    rerender(<DelegationCenterMenu {...actionProps} />);
+
+    expect(
+      screen.getByRole("textbox", { name: "Mock delegation address" })
+    ).toHaveValue("");
+  });
+
+  it("clears a primary-address query when the connected account changes", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    const setAddressQuery = jest.fn();
+    const actionProps = {
+      ...props,
+      section: DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+      address_query: "0xrecipient",
+      setAddressQuery,
+    };
+    const { rerender } = render(<DelegationCenterMenu {...actionProps} />);
+
+    mockConnectedAddress = "0xdef";
+    rerender(<DelegationCenterMenu {...actionProps} />);
+
+    expect(setAddressQuery).toHaveBeenCalledWith("");
   });
 
   it("renders toast text without interpreting it as html", async () => {

@@ -22,6 +22,11 @@ export interface ContractDelegation {
   wallets: ContractWalletDelegation[];
 }
 
+export interface ContractReadResult {
+  readonly result?: unknown;
+  readonly status?: "success" | "failure";
+}
+
 /**
  * One entry of a `useReadContracts` `contracts` array targeting the
  * delegation contract.
@@ -107,7 +112,7 @@ export function getReadParams(
   return getParams(address, collection, functionName, useCases);
 }
 
-export function getDelegationsFromData(data: readonly { result?: unknown }[]) {
+export function getDelegationsFromData(data: readonly ContractReadResult[]) {
   const myDelegations: ContractDelegation[] = [];
   data.map((d, index) => {
     const walletDelegations: ContractWalletDelegation[] = [];
@@ -153,4 +158,19 @@ export function getDelegationsFromData(data: readonly { result?: unknown }[]) {
     }
   });
   return myDelegations;
+}
+
+/**
+ * Multicalls allow individual contract reads to fail. A partial result is not
+ * a trustworthy snapshot, so callers must surface a read error instead of
+ * interpreting the missing entries as an empty delegation list.
+ */
+export function getDelegationsFromSuccessfulData(
+  data: readonly ContractReadResult[]
+) {
+  if (data.some((entry) => entry.status === "failure")) {
+    return undefined;
+  }
+
+  return getDelegationsFromData(data);
 }

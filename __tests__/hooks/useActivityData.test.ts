@@ -637,6 +637,55 @@ describe("useActivityData", () => {
         );
       });
     });
+
+    it("ignores a stale response after filters change", async () => {
+      let resolveFirst: (value: DBResponse) => void = () => {};
+      let resolveSecond: (value: DBResponse) => void = () => {};
+      mockFetchUrl
+        .mockReturnValueOnce(
+          new Promise<DBResponse>((resolve) => {
+            resolveFirst = resolve;
+          })
+        )
+        .mockReturnValueOnce(
+          new Promise<DBResponse>((resolve) => {
+            resolveSecond = resolve;
+          })
+        );
+
+      const { result, rerender } = renderHook(
+        ({ typeFilter }) =>
+          useActivityData(1, 20, typeFilter, ContractFilter.ALL),
+        { initialProps: { typeFilter: TypeFilter.ALL } }
+      );
+
+      rerender({ typeFilter: TypeFilter.SALES });
+
+      await act(async () => {
+        resolveSecond({
+          count: 1,
+          page: 1,
+          next: null,
+          data: [{ transaction: "0xnew" } as Transaction],
+        });
+      });
+      await waitFor(() => {
+        expect(result.current.activity[0]?.transaction).toBe("0xnew");
+        expect(result.current.fetching).toBe(false);
+      });
+
+      await act(async () => {
+        resolveFirst({
+          count: 1,
+          page: 1,
+          next: null,
+          data: [{ transaction: "0xstale" } as Transaction],
+        });
+      });
+
+      expect(result.current.activity[0]?.transaction).toBe("0xnew");
+      expect(result.current.totalResults).toBe(1);
+    });
   });
 
   // Note: Error handling tests were removed because they were testing implementation bugs
