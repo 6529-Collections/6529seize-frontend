@@ -35,6 +35,15 @@ import {
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
 type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
+type TwitterConfigRawEventOptions = {
+  exceptionType?: string | undefined;
+  exceptionValue?: string | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  frames?: SentryStackFrame[] | undefined;
+  userAgent?: string | undefined;
+  includeAdditionalException?: boolean | undefined;
+};
 type TwitterCurrentInsetEventOptions = {
   request?: TestSentryClientEvent["request"];
   mechanismType?: string;
@@ -218,6 +227,136 @@ describe("sentry-client-filters", () => {
     },
     ...overrides,
   });
+
+  const createTwitterConfigRawFrames = (): SentryStackFrame[] => [
+    {
+      filename: "app:///_next/static/chunks/11w902cjh4qgz.js",
+      function: "n",
+      lineno: 7,
+      colno: 4858,
+      in_app: true,
+    },
+    {
+      filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+      lineno: 464,
+      colno: 28,
+      in_app: true,
+    },
+    {
+      filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+      function: "updateFooterPositions",
+      lineno: 449,
+      colno: 18,
+      in_app: true,
+    },
+    {
+      filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+      function: "updateGapFiller",
+      lineno: 311,
+      colno: 46,
+      in_app: true,
+    },
+  ];
+
+  const createTwitterConfigRawEvent = ({
+    exceptionType = "ReferenceError",
+    exceptionValue = "Can't find variable: CONFIG",
+    mechanismType = "auto.browser.browserapierrors.addEventListener",
+    handled = false,
+    frames = createTwitterConfigRawFrames(),
+    userAgent = twitterForIphoneUserAgent,
+    includeAdditionalException = false,
+  }: TwitterConfigRawEventOptions = {}): TestSentryClientEvent => {
+    const additionalValues = includeAdditionalException
+      ? [{ type: "Error", value: "Nearby application error" }]
+      : [];
+
+    return {
+      request: {
+        headers: {
+          "User-Agent": userAgent,
+        },
+      },
+      exception: {
+        values: [
+          {
+            type: exceptionType,
+            value: exceptionValue,
+            mechanism: {
+              type: mechanismType,
+              handled,
+            },
+            stacktrace: { frames },
+          },
+          ...additionalValues,
+        ],
+      },
+    };
+  };
+
+  const overrideTwitterConfigRawFrame = (
+    index: number,
+    overrides: Partial<SentryStackFrame>
+  ): SentryStackFrame[] =>
+    createTwitterConfigRawFrames().map((frame, frameIndex) =>
+      frameIndex === index ? { ...frame, ...overrides } : frame
+    );
+
+  const reorderTwitterConfigRawFrames = (): SentryStackFrame[] => {
+    const frames = createTwitterConfigRawFrames();
+    return [frames[0], frames[2], frames[1], frames[3]].filter(
+      (frame): frame is SentryStackFrame => frame !== undefined
+    );
+  };
+
+  const twitterConfigRawNearMisses: Array<
+    [string, TwitterConfigRawEventOptions]
+  > = [
+    ["a changed exception type", { exceptionType: "TypeError" }],
+    [
+      "a changed exception message",
+      { exceptionValue: "Can't find variable: CONFIGURATION" },
+    ],
+    ["another exception value", { includeAdditionalException: true }],
+    ["a changed capture mechanism", { mechanismType: "generic" }],
+    ["a handled exception", { handled: true }],
+    [
+      "a changed wrapper function",
+      { frames: overrideTwitterConfigRawFrame(0, { function: "capture" }) },
+    ],
+    [
+      "changed wrapper coordinates",
+      { frames: overrideTwitterConfigRawFrame(0, { colno: 4859 }) },
+    ],
+    [
+      "a missing injected frame",
+      { frames: createTwitterConfigRawFrames().slice(0, 3) },
+    ],
+    [
+      "reordered injected frames",
+      { frames: reorderTwitterConfigRawFrames() },
+    ],
+    [
+      "an application-owned frame",
+      {
+        frames: overrideTwitterConfigRawFrame(2, {
+          filename:
+            "webpack-internal:///(app-pages-browser)/./components/waves/WaveLayout.tsx",
+        }),
+      },
+    ],
+    [
+      "plain iPhone Safari",
+      {
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+      },
+    ],
+    [
+      "a Twitter-lookalike user agent",
+      { userAgent: "ExampleTwitter/12.9 (iPhone; iOS 16.7.16)" },
+    ],
+  ];
 
   const createTwitterCurrentInsetEvent = ({
     request = {
@@ -3909,6 +4048,49 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(true);
   });
+
+  it("filters the observed raw Twitter CONFIG event before source-map processing", () => {
+    // Arrange
+    const event = createTwitterConfigRawEvent();
+
+    // Act
+    const result = shouldFilterTwitterConfigReferenceError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each(twitterConfigRawNearMisses)(
+    "does not filter the raw Twitter CONFIG shape with %s",
+    (_label, options) => {
+      // Arrange
+      const event = createTwitterConfigRawEvent(options);
+
+      // Act
+      const result = shouldFilterTwitterConfigReferenceError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it.each([
+    ["a missing request", undefined],
+    ["missing request headers", {}],
+    ["an empty User-Agent", { headers: { "User-Agent": "" } }],
+  ] satisfies Array<[string, TestSentryClientEvent["request"]]>)(
+    "does not filter the raw Twitter CONFIG shape with %s",
+    (_label, request) => {
+      // Arrange
+      const event = { ...createTwitterConfigRawEvent(), request };
+
+      // Act
+      const result = shouldFilterTwitterConfigReferenceError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
 
   it("does not filter CONFIG reference errors outside Twitter", () => {
     // Arrange
