@@ -65,7 +65,10 @@ const sentryBrowserPathTokens = ["@sentry/browser", "@sentry+browser"];
 const anonymousUnsafeEvalRawChunkPathPattern =
   /^app:\/\/\/_next\/static\/chunks\/[a-z0-9._~-]+\.js$/i;
 const anonymousUnsafeEvalRawWrapperLineNumbers = new Set([3, 7]);
-const twitterUserAgentPattern = /(?:^|[\s;(])twitter(?:android)?\//i;
+const twitterUserAgentPattern =
+  /(?:^|[\s;(])twitter(?:android| for iphone)?\//i;
+const twitterConfigAddEventListenerMechanism =
+  "auto.browser.browserapierrors.addEventListener";
 
 function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined
@@ -490,6 +493,60 @@ function hasOnlyTwitterInjectedWaveDocumentFrames(
   );
 }
 
+function isTwitterConfigRawWrapperFrame(
+  frame: SentryStackFrame | undefined
+): boolean {
+  if (!frame) {
+    return false;
+  }
+
+  const paths = getFramePaths(frame);
+  return (
+    frame.function?.trim() === "n" &&
+    frame.lineno !== undefined &&
+    anonymousUnsafeEvalRawWrapperLineNumbers.has(frame.lineno) &&
+    frame.colno === 4858 &&
+    paths.length > 0 &&
+    paths.every((path) =>
+      anonymousUnsafeEvalRawChunkPathPattern.test(path.trim())
+    )
+  );
+}
+
+function isTwitterConfigRawInjectedFrame(
+  frame: SentryStackFrame | undefined,
+  functionName: string | undefined,
+  lineNumber: number,
+  columnNumber: number
+): boolean {
+  return (
+    !!frame &&
+    frame.function?.trim() === functionName &&
+    frame.lineno === lineNumber &&
+    frame.colno === columnNumber &&
+    isTwitterInjectedWaveDocumentFrame(frame)
+  );
+}
+
+function hasTwitterConfigRawFrameSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  // beforeSend receives this Sentry wrapper before source-map processing.
+  return (
+    Array.isArray(frames) &&
+    frames.length === 4 &&
+    isTwitterConfigRawWrapperFrame(frames[0]) &&
+    isTwitterConfigRawInjectedFrame(frames[1], undefined, 464, 28) &&
+    isTwitterConfigRawInjectedFrame(
+      frames[2],
+      "updateFooterPositions",
+      449,
+      18
+    ) &&
+    isTwitterConfigRawInjectedFrame(frames[3], "updateGapFiller", 311, 46)
+  );
+}
+
 export function shouldFilterByFilenameExceptions(
   frames: SentryStackFrame[] | undefined,
   hint?: SentryEventHint
@@ -502,7 +559,12 @@ export function shouldFilterByFilenameExceptions(
 export function shouldFilterTwitterConfigReferenceError(
   event: SentryClientEvent
 ): boolean {
-  const value = event.exception?.values?.[0];
+  const values = event.exception?.values;
+  if (values?.length !== 1) {
+    return false;
+  }
+
+  const value = values[0];
   if (value?.type !== "ReferenceError") {
     return false;
   }
@@ -515,7 +577,16 @@ export function shouldFilterTwitterConfigReferenceError(
     return false;
   }
 
-  return hasOnlyTwitterInjectedWaveDocumentFrames(value.stacktrace?.frames);
+  const frames = value.stacktrace?.frames;
+  if (hasOnlyTwitterInjectedWaveDocumentFrames(frames)) {
+    return true;
+  }
+
+  return (
+    value.mechanism?.type === twitterConfigAddEventListenerMechanism &&
+    value.mechanism.handled === false &&
+    hasTwitterConfigRawFrameSignature(frames)
+  );
 }
 
 export function shouldFilterTwitterCurrentInsetReferenceError(
