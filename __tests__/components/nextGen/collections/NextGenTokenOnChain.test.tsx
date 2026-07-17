@@ -30,6 +30,9 @@ jest.mock("react-tooltip", () => ({
     <div data-testid={`tooltip-${id}`}>{children}</div>
   ),
 }));
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/nextgen/token/10000000001",
+}));
 
 // Mock hooks
 jest.mock("@/hooks/useCapacitor", () => () => ({ platform: "web" }));
@@ -117,7 +120,7 @@ describe("NextGenTokenOnChain", () => {
 
     render(<NextGenTokenOnChain {...baseProps} />);
 
-    expect(screen.getByText("Token Not Found")).toBeInTheDocument();
+    expect(screen.getByText("Token not found")).toBeInTheDocument();
   });
 
   it("shows token not found when token data is null", () => {
@@ -125,7 +128,7 @@ describe("NextGenTokenOnChain", () => {
 
     render(<NextGenTokenOnChain {...baseProps} />);
 
-    expect(screen.getByText("Token Not Found")).toBeInTheDocument();
+    expect(screen.getByText("Token not found")).toBeInTheDocument();
   });
 
   it("renders token information when data is available", async () => {
@@ -144,11 +147,12 @@ describe("NextGenTokenOnChain", () => {
 
     render(<NextGenTokenOnChain {...baseProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByText("Test Collection #1")).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByText("About")).toBeInTheDocument());
 
-    expect(screen.getByText("About")).toBeInTheDocument();
+    expect(screen.getByText("Test Collection #1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Back to collection art" })
+    ).toHaveAttribute("href", "/nextgen/collection/test-collection/art");
     expect(screen.getByText("#10000000001")).toBeInTheDocument();
     expect(screen.getByText("Test Collection")).toBeInTheDocument();
     expect(screen.getByText("Test Artist")).toBeInTheDocument();
@@ -181,7 +185,7 @@ describe("NextGenTokenOnChain", () => {
     render(<NextGenTokenOnChain {...baseProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText("On-Chain")).toBeInTheDocument();
+      expect(screen.getByText("On-chain")).toBeInTheDocument();
     });
   });
 
@@ -203,7 +207,7 @@ describe("NextGenTokenOnChain", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Off-Chain")).toBeInTheDocument();
+      expect(screen.getByText("Off-chain")).toBeInTheDocument();
     });
   });
 
@@ -259,7 +263,10 @@ describe("NextGenTokenOnChain", () => {
     render(<NextGenTokenOnChain {...baseProps} />);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(metadataUrl);
+      expect(global.fetch).toHaveBeenCalledWith(
+        metadataUrl,
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
     });
 
     await waitFor(() => {

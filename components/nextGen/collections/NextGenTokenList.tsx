@@ -16,7 +16,6 @@ import {
   NextGenTokenRarityType,
 } from "../nextgen_helpers";
 import type { SortDirection } from "@/entities/ISort";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 interface Props {
   collection: NextGenCollection;
@@ -149,17 +148,13 @@ export default function NextGenTokenList(props: Readonly<Props>) {
   }, [props.sort, props.show_normalised, props.show_trait_count]);
 
   return (
-    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+    <div className="tw-w-full">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-grid-cols-3 sm:tw-gap-x-6">
         {(() => {
           if (tokensLoaded) {
             if (tokens.length > 0) {
               return tokens.map((t) => (
-                <div
-                  key={getRandomObjectId()}
-                  className="tw-relative tw-w-1/2 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-w-1/3 min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
-                  style={{ maxWidth: "100%" }}
-                >
+                <div key={t.id} className="tw-min-w-0">
                   <NextGenTokenImage
                     token={t}
                     rarity_type={rarityType}
@@ -177,14 +172,14 @@ export default function NextGenTokenList(props: Readonly<Props>) {
               ));
             } else {
               return (
-                <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-2 tw-pt-2">
+                <p className="tw-col-span-full tw-m-0 tw-py-4 tw-text-sm tw-text-iron-300">
                   No results found
-                </div>
+                </p>
               );
             }
           } else {
             return (
-              <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-2 tw-pt-2">
+              <div className="tw-col-span-full tw-flex tw-min-h-24 tw-items-start tw-py-4">
                 <DotLoader />
               </div>
             );
@@ -192,7 +187,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
         })()}
       </div>
       {totalResults > pageSize && tokensLoaded && props.show_pagination && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-6 tw-pt-6 tw-text-center">
+        <div className="tw-flex tw-justify-center tw-pb-6 tw-pt-8 tw-text-center">
           <Pagination
             page={page}
             pageSize={pageSize}

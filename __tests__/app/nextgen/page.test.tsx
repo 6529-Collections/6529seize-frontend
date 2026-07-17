@@ -50,10 +50,7 @@ jest.mock("@/components/nextGen/collections/NextGenNavigationHeader", () => {
   return {
     __esModule: true,
     default: ({ view, setView }: any) => (
-      <button
-        data-testid="nav"
-        onClick={() => setView(NextgenView.ARTISTS)}
-      >
+      <button data-testid="nav" onClick={() => setView(NextgenView.ARTISTS)}>
         {view}
       </button>
     ),
@@ -87,7 +84,7 @@ describe("generateMetadata", () => {
     const md = await generateMetadata({
       params: Promise.resolve({ view: ["artists"] }),
     } as any);
-    expect(md).toMatchObject({ title: "NextGen Artists" });
+    expect(md).toMatchObject({ title: "Artists | NextGen" });
   });
 });
 
@@ -148,7 +145,9 @@ describe("NextGen page component", () => {
     render(jsx);
 
     await waitFor(() =>
-      expect(screen.getByAltText("questionmark")).toBeInTheDocument()
+      expect(
+        screen.getByAltText("NextGen collection unavailable")
+      ).toBeInTheDocument()
     );
   });
 });

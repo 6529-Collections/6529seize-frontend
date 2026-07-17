@@ -74,7 +74,8 @@ Use these collection routes to mint and review distribution data:
 - Burn flow can have `0 available` tokens after ownership/range/prefix filters.
 - Burn flow `Mint To` is fixed to the selected burn address.
 - Burn flow shows `Burn Not Active` when burn status is disabled.
-- Distribution-plan table has no dedicated empty/error message row.
+- Distribution-plan table shows a loading row while allowlist data is being
+  fetched and a no-match row when the selected filters return no entries.
 
 ## Failure and Recovery
 

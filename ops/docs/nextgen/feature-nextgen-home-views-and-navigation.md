@@ -44,8 +44,10 @@ Parent: [NextGen Index](README.md)
 - Header `LFG: Start the Show!` opens the NextGen slideshow overlay.
 - `Collections` supports `ALL`, `LIVE`, `UPCOMING`, and `COMPLETED`.
 - Changing the collections status filter resets pagination to page `1`.
+- `Collections` and `Artists` show placeholder cards while their results load.
 - `Collections` shows `No collections found` when a loaded filter/page has no
   results.
+- `Artists` shows `No artists found` when no artist groups are returned.
 - `Artists` groups collections by artist wallet and lists collection links for
   each artist row.
 - On `xl` and smaller layouts, the shared collections dropdown appears under
@@ -66,10 +68,10 @@ Parent: [NextGen Index](README.md)
 
 - Initial load for all home views depends on the featured-collection fetch on
   the server route.
-- `Collections` and `Artists` fetch data client-side with no inline retry
-  control.
-- `Collections` has no explicit loading indicator.
-- `Artists` has no explicit empty/error message.
+- `Collections` and `Artists` fetch data client-side and show loading
+  placeholders, but they do not provide an inline retry control.
+- `Collections` and `Artists` show an empty-state message after a successful
+  request returns no results.
 - If a tab looks empty or stale after a failed request, refresh the route to
   retry the fetches.
 

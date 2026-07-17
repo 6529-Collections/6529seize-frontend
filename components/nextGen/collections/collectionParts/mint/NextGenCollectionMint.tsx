@@ -9,7 +9,9 @@ import {
   NEXTGEN_MINTER,
 } from "@/components/nextGen/nextgen_contracts";
 import type { NextGenCollection } from "@/entities/INextgen";
-import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
+import NextGenCollectionHeader, {
+  NextGenBackToCollectionPageLink,
+} from "../NextGenCollectionHeader";
 
 interface Props {
   collection: NextGenCollection;
@@ -55,18 +57,51 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     }
   }, [mintPriceRead.data]);
 
+  const isLoading = burnAmountRead.isLoading || mintPriceRead.isLoading;
+  const hasError = burnAmountRead.isError || mintPriceRead.isError;
+
   return (
-    <>
-      <NextGenNavigationHeader />
-      <div className="tailwind-scope tw-mx-auto tw-w-full tw-px-3 tw-py-4 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] xl:tw-max-w-[1140px] 2xl:tw-max-w-[1320px]">
-        {burnAmountRead.isSuccess && mintPriceRead.isSuccess && (
-          <NextGenMint
+    <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8">
+      <section className="tw-py-6 sm:tw-py-8">
+        <NextGenBackToCollectionPageLink collection={props.collection} />
+        <div className="tw-mt-2">
+          <NextGenCollectionHeader
             collection={props.collection}
-            mint_price={mintPrice}
-            burn_amount={burnAmount}
+            contained={false}
+            compact={true}
+            show_links={true}
           />
+        </div>
+      </section>
+
+      <section>
+        <h2 className="tw-mb-5 tw-mt-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
+          Mint
+        </h2>
+        {isLoading && (
+          <div
+            role="status"
+            className="tw-flex tw-items-center tw-gap-2 tw-py-8 tw-text-sm tw-text-iron-400"
+          >
+            Loading mint details…
+          </div>
         )}
-      </div>
-    </>
+        {hasError && (
+          <div role="alert" className="tw-py-8 tw-text-sm tw-text-error">
+            Mint details could not be loaded. Please try again.
+          </div>
+        )}
+        {!isLoading &&
+          !hasError &&
+          burnAmountRead.isSuccess &&
+          mintPriceRead.isSuccess && (
+            <NextGenMint
+              collection={props.collection}
+              mint_price={mintPrice}
+              burn_amount={burnAmount}
+            />
+          )}
+      </section>
+    </div>
   );
 }

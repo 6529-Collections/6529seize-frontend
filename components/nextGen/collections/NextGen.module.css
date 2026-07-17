@@ -1,45 +1,3 @@
-.navigationHeader {
-  display: flex;
-  align-items: center;
-}
-
-.navigationHeaderHr {
-  margin: 0;
-  border-top-width: 2px;
-  color: rgb(68, 68, 68);
-}
-
-.nextgenBannerWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.nextgenBanner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.collectionPreview {
-  padding: 20px;
-  border: 1px solid transparent;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-  transition: transform 0.3s ease;
-}
-.collectionPreview:hover {
-  transform: scale(1.02);
-  border: 1px solid rgb(51, 51, 51);
-}
-
-.collectionPreviewTitle {
-  padding: 15px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-  color: white !important;
-}
-
 .mintBtn {
   border-radius: 0;
   border: none;
@@ -56,27 +14,12 @@
   cursor: pointer;
 }
 
-.viewAllTokens :hover {
-  color: rgb(154, 154, 154);
-}
-.viewAllTokens svg {
-  height: 22px;
-}
-
 .infoIcon {
   height: 18px;
   margin-left: 6px;
   cursor: help;
 }
 .infoIcon:focus {
-  outline: none !important;
-}
-
-.backIcon {
-  height: 18px;
-  cursor: pointer;
-}
-.backIcon:focus {
   outline: none !important;
 }
 
@@ -204,27 +147,6 @@
   color: white;
 }
 
-.phaseTimeTagComplete {
-  border: 1px solid rgb(154, 154, 154);
-  color: rgb(154, 154, 154);
-}
-
-.phaseTimeTagActive {
-  border: 1px solid rgb(56, 235, 56);
-  color: rgb(56, 235, 56);
-}
-
-.phaseTimeTagUpcoming {
-  border: 1px solid #ffa500;
-  color: #ffa500;
-}
-
-.artistSignature {
-  padding: 20px;
-  background-color: black;
-  font-weight: bold;
-}
-
 .tokenContainer {
   background-color: rgb(40, 40, 40);
 }
@@ -316,27 +238,6 @@
   height: 30px;
 }
 
-.slideshowContainer {
-  background-color: rgb(40, 40, 40);
-}
-
-.countdownContainer {
-  background-color: rgb(34, 34, 34);
-  padding: 15px 20px;
-  width: 100%;
-  color: white;
-  box-shadow:
-    0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
-    1px 3px 6px 0px rgba(0, 0, 0, 0.15),
-    -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
-    -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,
-    6px 3px 6px 0px rgba(0, 0, 0, 0.4) inset;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  border-radius: 0.5rem;
-}
-
 .logsTable tr td {
   white-space: nowrap;
 }
@@ -394,36 +295,8 @@
   overflow-x: auto;
 }
 
-.nextgenTokenDetailsLinkSelected {
-  border-bottom: 1px solid white !important;
-}
-
 .tokenLogsTable {
   min-height: 450px;
-}
-
-.traitsAccordion h1,
-.traitsAccordion h2,
-.traitsAccordion h3,
-.traitsAccordion h4,
-.traitsAccordion h5 {
-  float: none;
-}
-.traitsAccordion button {
-  padding-left: 0;
-  padding-right: 0;
-  font-weight: bold;
-  background-color: rgb(34, 34, 34) !important;
-}
-
-.traitsAccordionItem {
-  background-color: rgb(34, 34, 34) !important;
-}
-
-.traitsAccordionBody {
-  padding: 0px;
-  color: white;
-  background-color: rgb(34, 34, 34) !important;
 }
 
 .listed {
@@ -452,49 +325,4 @@
 }
 .phaseBox:hover {
   transform: scale(1.015);
-}
-
-.exploreBtn {
-  background-color: transparent;
-  border: 2px solid white !important;
-  font-size: larger !important;
-  font-weight: bold;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-.exploreBtn:hover {
-  background-color: white;
-  color: black;
-}
-
-.collectorSetPill {
-  background-color: transparent;
-  color: white;
-  font-weight: bold;
-  font-size: larger;
-  border: 1px solid white;
-  width: 100%;
-  text-align: center;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  cursor: pointer;
-}
-.collectorSetPill:hover {
-  background-color: rgb(215, 215, 215);
-  color: black;
-}
-
-.collectorSetPillSelected {
-  background-color: white;
-  color: black;
-  pointer-events: none;
-}
-
-.collectorSetAccordionBody {
-  color: white;
-  background-color: rgb(40, 40, 40);
-}
-
-.collectorSetAccordionButtonUltimate::after {
-  display: none;
 }
