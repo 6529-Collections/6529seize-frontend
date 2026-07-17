@@ -2,6 +2,8 @@
 
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ContractDelegation } from "../CollectionDelegation.utils";
@@ -51,6 +53,7 @@ export function IncomingDelegationsTable(
     onShowSubForm: (form: SubDelegationForm) => void;
   }>
 ) {
+  const locale = useBrowserLocale();
   const { scope, myDelegations, collection, delegationsLoaded } = props;
   const { activeConsolidations, isSubdelegation } = props;
   const { subDelegationOriginalDelegator, onSetOriginalDelegator } = props;
@@ -59,7 +62,8 @@ export function IncomingDelegationsTable(
   function printIncomingDelegationRow(args: DelegationRowRenderArgs) {
     const { delegationIndex, walletIndex, del } = args;
     const { walletDelegation: w } = args;
-    const { consolidationStatus, pending, isConsolidation } = args;
+    const { consolidationStatus, statusUnavailable, pending, isConsolidation } =
+      args;
 
     return (
       <tr
@@ -70,7 +74,11 @@ export function IncomingDelegationsTable(
             <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
               {del.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case ? (
                 <input
-                  aria-label={`Select ${w.wallet} as original delegator`}
+                  aria-label={t(
+                    locale,
+                    "delegation.collection.incoming.selectOriginal",
+                    { wallet: w.wallet }
+                  )}
                   type="checkbox"
                   className={CHECKBOX_CLASS}
                   checked={areEqualAddresses(
@@ -89,9 +97,10 @@ export function IncomingDelegationsTable(
                 <></>
               )}
               <DelegationRowDetails
-                label="Outgoing"
+                label={t(locale, "delegation.collection.row.label.outgoing")}
                 walletDelegation={w}
                 consolidationStatus={consolidationStatus}
+                statusUnavailable={statusUnavailable}
                 pending={pending}
                 isConsolidation={isConsolidation}
               />
@@ -111,8 +120,7 @@ export function IncomingDelegationsTable(
         <td colSpan={2} className="tw-pt-3">
           <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-3">
             <p className="tw-mb-3 tw-text-sm tw-text-iron-300">
-              Select a delegator above, then choose an action to perform on
-              their behalf.
+              {t(locale, "delegation.collection.incoming.actionsDescription")}
             </p>
             <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
               <button
@@ -124,7 +132,7 @@ export function IncomingDelegationsTable(
                 }}
               >
                 <FontAwesomeIcon icon={faPlus} className={BUTTON_ICON_CLASS} />
-                Register Delegation
+                {t(locale, "delegation.collection.incoming.registerDelegation")}
               </button>
               <button
                 type="button"
@@ -135,7 +143,7 @@ export function IncomingDelegationsTable(
                 }}
               >
                 <FontAwesomeIcon icon={faPlus} className={BUTTON_ICON_CLASS} />
-                Register Delegation Manager
+                {t(locale, "delegation.collection.incoming.registerManager")}
               </button>
               <button
                 type="button"
@@ -146,7 +154,10 @@ export function IncomingDelegationsTable(
                 }}
               >
                 <FontAwesomeIcon icon={faPlus} className={BUTTON_ICON_CLASS} />
-                Register Consolidation
+                {t(
+                  locale,
+                  "delegation.collection.incoming.registerConsolidation"
+                )}
               </button>
               {(collection.contract === DELEGATION_ALL_ADDRESS ||
                 collection.contract === MEMES_COLLECTION.contract) && (
@@ -162,7 +173,7 @@ export function IncomingDelegationsTable(
                     icon={faPlus}
                     className={BUTTON_ICON_CLASS}
                   />
-                  Assign Primary Address
+                  {t(locale, "delegation.collection.incoming.assignPrimary")}
                 </button>
               )}
               <button
@@ -174,7 +185,7 @@ export function IncomingDelegationsTable(
                 }}
               >
                 <FontAwesomeIcon icon={faMinus} className={BUTTON_ICON_CLASS} />
-                Revoke
+                {t(locale, "delegation.collection.incoming.revoke")}
               </button>
             </span>
           </div>

@@ -17,7 +17,7 @@ import {
 
 export interface ActiveConsolidation {
   wallet: string;
-  status: string;
+  status: "active" | "incomplete" | "unavailable";
 }
 
 function getConsolidationStatuses(
@@ -26,12 +26,10 @@ function getConsolidationStatuses(
 ) {
   return wallets.map((walletDelegation, index) => {
     const read = data[index];
-    let status = "consolidation status unavailable";
+    let status: ActiveConsolidation["status"] = "unavailable";
 
     if (read !== undefined && read.status !== "failure") {
-      status = read.result
-        ? "consolidation active"
-        : "consolidation incomplete";
+      status = read.result ? "active" : "incomplete";
     }
 
     return {

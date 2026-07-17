@@ -210,7 +210,7 @@ export function NextGenCollectionProvenanceRow(
     "\\$&"
   );
   const transactionMatch = new RegExp(
-    `(${escapedCollectionName} #(\\d+))`
+    String.raw`(${escapedCollectionName} #(\d+))`
   ).exec(log.log);
   const isTransaction = Boolean(
     transactionMatch?.[1] &&

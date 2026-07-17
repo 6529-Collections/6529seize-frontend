@@ -2,6 +2,9 @@
 
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
@@ -47,6 +50,7 @@ export function OutgoingDelegationsTable(
     }) => void;
   }>
 ) {
+  const locale = useBrowserLocale();
   const { scope, myDelegations, collection, delegationsLoaded } = props;
   const { activeConsolidations, revocation, chainsMatch } = props;
   const { getSwitchToMessage, showDelegationToast, onEditDelegation } = props;
@@ -55,7 +59,8 @@ export function OutgoingDelegationsTable(
   function printOutgoingDelegationRow(args: DelegationRowRenderArgs) {
     const { delegationIndex, walletIndex, delegationsCount, del } = args;
     const { walletDelegation: w } = args;
-    const { consolidationStatus, pending, isConsolidation } = args;
+    const { consolidationStatus, statusUnavailable, pending, isConsolidation } =
+      args;
 
     return (
       <tr
@@ -66,7 +71,11 @@ export function OutgoingDelegationsTable(
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
               {delegationsCount >= 2 && (
                 <input
-                  aria-label={`Select ${w.wallet} for bulk revoke`}
+                  aria-label={t(
+                    locale,
+                    "delegation.collection.outgoing.selectBulk",
+                    { wallet: w.wallet }
+                  )}
                   type="checkbox"
                   className={CHECKBOX_CLASS}
                   disabled={
@@ -92,9 +101,10 @@ export function OutgoingDelegationsTable(
                 />
               )}
               <DelegationRowDetails
-                label="Incoming"
+                label={t(locale, "delegation.collection.row.label.incoming")}
                 walletDelegation={w}
                 consolidationStatus={consolidationStatus}
+                statusUnavailable={statusUnavailable}
                 pending={pending}
                 isConsolidation={isConsolidation}
               />
@@ -102,7 +112,11 @@ export function OutgoingDelegationsTable(
             <div className="tw-flex tw-flex-none tw-items-center tw-gap-2 tw-self-end sm:tw-self-auto">
               <button
                 type="button"
-                aria-label={`Edit delegation for ${w.wallet}`}
+                aria-label={t(
+                  locale,
+                  "delegation.collection.outgoing.editAriaLabel",
+                  { wallet: w.wallet }
+                )}
                 className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-p-0 tw-text-iron-200 tw-transition-colors hover:tw-border-iron-400 hover:tw-bg-iron-700 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                 data-tooltip-id={`edit-${del.useCase.use_case}-${w.wallet}`}
                 onClick={() => {
@@ -123,15 +137,22 @@ export function OutgoingDelegationsTable(
                   padding: "4px 8px",
                 }}
               >
-                Edit
+                {t(locale, "delegation.collection.outgoing.edit")}
               </Tooltip>
               <button
                 type="button"
-                aria-label={`Revoke delegation for ${w.wallet}`}
+                aria-label={t(
+                  locale,
+                  "delegation.collection.outgoing.revokeAriaLabel",
+                  { wallet: w.wallet }
+                )}
                 className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-red tw-bg-red tw-p-0 tw-text-white tw-transition-colors hover:tw-bg-[#e05f57] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-red"
                 data-tooltip-id={`revoke-${del.useCase.use_case}-${w.wallet}`}
                 onClick={() => {
-                  const title = "Revoking Delegation";
+                  const title = t(
+                    locale,
+                    "delegation.collection.toast.revokingDelegation"
+                  );
                   let toast: DelegationToastState = {
                     status: "confirm_wallet",
                     title,
@@ -167,7 +188,7 @@ export function OutgoingDelegationsTable(
                   padding: "4px 8px",
                 }}
               >
-                Revoke
+                {t(locale, "delegation.collection.outgoing.revoke")}
               </Tooltip>
             </div>
           </div>
@@ -185,17 +206,24 @@ export function OutgoingDelegationsTable(
         <td colSpan={4} className="tw-pt-3">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-3">
             <span className="tw-text-sm tw-font-medium tw-text-iron-300">
-              Selected:{" "}
-              {bulkRevocations.length === MAX_BULK_ACTIONS
-                ? `${MAX_BULK_ACTIONS} (max)`
-                : bulkRevocations.length}
+              {t(locale, "delegation.collection.outgoing.selected", {
+                count:
+                  bulkRevocations.length === MAX_BULK_ACTIONS
+                    ? t(locale, "delegation.collection.outgoing.selectedMax", {
+                        count: formatInteger(locale, MAX_BULK_ACTIONS),
+                      })
+                    : formatInteger(locale, bulkRevocations.length),
+              })}
             </span>
             <button
               type="button"
               disabled={bulkRevocations.length < 2}
               className={DANGER_ACTION_CLASS}
               onClick={() => {
-                const title = "Batch Revoking Delegations";
+                const title = t(
+                  locale,
+                  "delegation.collection.toast.batchRevoking"
+                );
                 let toast: DelegationToastState = {
                   status: "confirm_wallet",
                   title,
@@ -223,11 +251,13 @@ export function OutgoingDelegationsTable(
                 showDelegationToast(toast);
               }}
             >
-              Batch Revoke
+              {t(locale, "delegation.collection.outgoing.batchRevoke")}
               {revocation.batchRevokeInFlight && (
                 <output className="tw-inline-flex tw-items-center">
                   <Spinner dimension={20} />
-                  <span className="tw-sr-only">Transaction pending</span>
+                  <span className="tw-sr-only">
+                    {t(locale, "delegation.collection.transaction.pending")}
+                  </span>
                 </output>
               )}
             </button>

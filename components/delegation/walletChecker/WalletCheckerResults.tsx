@@ -2,6 +2,10 @@ import Address from "@/components/address/Address";
 import { NEVER_DATE } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   faArrowRight,
   faCheck,
@@ -77,9 +81,9 @@ function formatExpiry(myDate: number) {
   return `${year}-${month}-${day}`;
 }
 
-function getDateDisplay(myDate: number) {
+function getDateDisplay(myDate: number, locale: SupportedLocale) {
   if (myDate === NEVER_DATE) {
-    return `Never`;
+    return t(locale, "delegation.collection.walletChecker.never");
   }
   return formatExpiry(myDate);
 }
@@ -103,6 +107,51 @@ function CheckedWalletAddress(
   }
 
   return <span className="[&_a]:tw-font-semibold">{address}</span>;
+}
+
+const FROM_ADDRESS_TOKEN = "__FROM_ADDRESS__";
+const TO_ADDRESS_TOKEN = "__TO_ADDRESS__";
+const ADDRESS_TOKEN_PATTERN = /(__FROM_ADDRESS__|__TO_ADDRESS__)/;
+
+function ConsolidationActionMessage(
+  props: Readonly<{
+    locale: SupportedLocale;
+    fetchedAddress: string;
+    consolidation: ConsolidationDisplay;
+  }>
+) {
+  const parts = t(
+    props.locale,
+    "delegation.collection.walletChecker.registerConsolidation",
+    {
+      from: FROM_ADDRESS_TOKEN,
+      to: TO_ADDRESS_TOKEN,
+    }
+  ).split(ADDRESS_TOKEN_PATTERN);
+
+  return parts.map((part, index) => {
+    if (part === FROM_ADDRESS_TOKEN) {
+      return (
+        <CheckedWalletAddress
+          key={part}
+          checkedAddress={props.fetchedAddress}
+          address={props.consolidation.to}
+          display={props.consolidation.to_display}
+        />
+      );
+    }
+    if (part === TO_ADDRESS_TOKEN) {
+      return (
+        <CheckedWalletAddress
+          key={part}
+          checkedAddress={props.fetchedAddress}
+          address={props.consolidation.from}
+          display={props.consolidation.from_display}
+        />
+      );
+    }
+    return <Fragment key={`${part}-${index}`}>{part}</Fragment>;
+  });
 }
 
 function DelegationAddressCells(
@@ -137,29 +186,64 @@ function DelegationsResults(
     delegations: Delegation[];
     subDelegations: Delegation[];
     activeDelegation: Delegation | undefined;
+    locale: SupportedLocale;
   }>
 ) {
+  const { locale } = props;
+
   return (
     <>
       <section className="tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
         <div className="tw-w-full">
           <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-            Delegations ({props.delegations.length})
+            {t(
+              locale,
+              "delegation.collection.walletChecker.delegations.title",
+              {
+                count: formatInteger(locale, props.delegations.length),
+              }
+            )}
           </h2>
           {props.delegations.length > 0 ? (
             <div className="tw-overflow-x-auto">
               <table className={TABLE_CLASS}>
                 <thead>
                   <tr>
-                    <th className={TABLE_HEADER_CELL_CLASS}>From</th>
-                    <th className={TABLE_HEADER_CELL_CLASS}>To</th>
-                    <th className={TABLE_HEADER_CELL_CLASS}>Collection</th>
-                    <th className={TABLE_HEADER_CELL_CLASS}>Use Case</th>
-                    <th className={`${TABLE_HEADER_CELL_CLASS} tw-text-center`}>
-                      Tokens
+                    <th className={TABLE_HEADER_CELL_CLASS}>
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.from"
+                      )}
+                    </th>
+                    <th className={TABLE_HEADER_CELL_CLASS}>
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.to"
+                      )}
+                    </th>
+                    <th className={TABLE_HEADER_CELL_CLASS}>
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.collection"
+                      )}
+                    </th>
+                    <th className={TABLE_HEADER_CELL_CLASS}>
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.useCase"
+                      )}
                     </th>
                     <th className={`${TABLE_HEADER_CELL_CLASS} tw-text-center`}>
-                      Expiry
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.tokens"
+                      )}
+                    </th>
+                    <th className={`${TABLE_HEADER_CELL_CLASS} tw-text-center`}>
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.expiry"
+                      )}
                     </th>
                   </tr>
                 </thead>
@@ -174,10 +258,12 @@ function DelegationsResults(
                         {getUseCaseDisplay(delegation.use_case)}
                       </td>
                       <td className={TABLE_CENTER_CELL_CLASS}>
-                        {delegation.all_tokens ? `All` : delegation.token_id}
+                        {delegation.all_tokens
+                          ? t(locale, "delegation.collection.walletChecker.all")
+                          : delegation.token_id}
                       </td>
                       <td className={TABLE_CENTER_CELL_CLASS}>
-                        {getDateDisplay(delegation.expiry)}
+                        {getDateDisplay(delegation.expiry, locale)}
                       </td>
                     </tr>
                   ))}
@@ -186,17 +272,23 @@ function DelegationsResults(
             </div>
           ) : (
             <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-              No delegations found
+              {t(
+                locale,
+                "delegation.collection.walletChecker.delegations.empty"
+              )}
             </p>
           )}
           {props.activeDelegation && (
             <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-success/25 tw-bg-success/5 tw-p-4 sm:tw-p-5">
               <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-success">
-                Active Minting Delegation for The Memes
+                {t(
+                  locale,
+                  "delegation.collection.walletChecker.activeDelegation"
+                )}
               </h3>
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
                 <span>
-                  To:{" "}
+                  {t(locale, "delegation.collection.walletChecker.labels.to")}{" "}
                   <Address
                     wallets={[
                       props.activeDelegation.to_address as `0x${string}`,
@@ -205,21 +297,30 @@ function DelegationsResults(
                   />
                 </span>
                 <span>
-                  Collection:{" "}
+                  {t(
+                    locale,
+                    "delegation.collection.walletChecker.labels.collection"
+                  )}{" "}
                   <b>
                     {getCollectionDisplay(props.activeDelegation.collection)}
                   </b>
                 </span>
                 <span>
-                  Use Case:{" "}
+                  {t(
+                    locale,
+                    "delegation.collection.walletChecker.labels.useCase"
+                  )}{" "}
                   <b>{getUseCaseDisplay(props.activeDelegation.use_case)}</b>
                 </span>
                 {Boolean(props.activeDelegation.expiry) && (
                   <span>
-                    Expiry:{" "}
+                    {t(
+                      locale,
+                      "delegation.collection.walletChecker.labels.expiry"
+                    )}{" "}
                     <b>
                       {props.activeDelegation.expiry === NEVER_DATE
-                        ? `Never`
+                        ? t(locale, "delegation.collection.walletChecker.never")
                         : formatExpiry(props.activeDelegation.expiry)}
                     </b>
                   </span>
@@ -236,16 +337,33 @@ function DelegationsResults(
       <section className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
         <div className="tw-w-full">
           <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-            Delegation Managers ({props.subDelegations.length})
+            {t(locale, "delegation.collection.walletChecker.managers.title", {
+              count: formatInteger(locale, props.subDelegations.length),
+            })}
           </h2>
           {props.subDelegations.length > 0 ? (
             <div className="tw-overflow-x-auto">
               <table className={TABLE_CLASS}>
                 <thead>
                   <tr>
-                    <th className={TABLE_HEADER_CELL_CLASS}>From</th>
-                    <th className={TABLE_HEADER_CELL_CLASS}>To</th>
-                    <th className={TABLE_HEADER_CELL_CLASS}>Collection</th>
+                    <th className={TABLE_HEADER_CELL_CLASS}>
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.from"
+                      )}
+                    </th>
+                    <th className={TABLE_HEADER_CELL_CLASS}>
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.to"
+                      )}
+                    </th>
+                    <th className={TABLE_HEADER_CELL_CLASS}>
+                      {t(
+                        locale,
+                        "delegation.collection.walletChecker.columns.collection"
+                      )}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -262,7 +380,7 @@ function DelegationsResults(
             </div>
           ) : (
             <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-              No delegation managers found
+              {t(locale, "delegation.collection.walletChecker.managers.empty")}
             </p>
           )}
         </div>
@@ -277,13 +395,22 @@ function ConsolidationsResults(
     consolidations: ConsolidationDisplay[];
     consolidatedWallets: ConsolidatedWallet[];
     consolidationActions: ConsolidationDisplay[];
+    locale: SupportedLocale;
   }>
 ) {
+  const { locale } = props;
+
   return (
     <section className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
       <div className="tw-w-full">
         <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-          Consolidations ({props.consolidations.length})
+          {t(
+            locale,
+            "delegation.collection.walletChecker.consolidations.title",
+            {
+              count: formatInteger(locale, props.consolidations.length),
+            }
+          )}
         </h2>
         {props.consolidations.length > 0 ? (
           <div className="tw-overflow-x-auto">
@@ -318,14 +445,20 @@ function ConsolidationsResults(
           </div>
         ) : (
           <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-            No consolidations found
+            {t(
+              locale,
+              "delegation.collection.walletChecker.consolidations.empty"
+            )}
           </p>
         )}
         {props.consolidations.length > 1 &&
           props.consolidatedWallets.length > 1 && (
             <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-success/25 tw-bg-success/5 tw-p-4 sm:tw-p-5">
               <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-success">
-                Active Consolidation
+                {t(
+                  locale,
+                  "delegation.collection.walletChecker.activeConsolidation"
+                )}
               </h3>
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
                 {props.consolidatedWallets.map((wallet, index) => (
@@ -356,10 +489,18 @@ function ConsolidationsResults(
           <>
             <div className="tw-mt-5 tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/5 tw-p-4 tw-font-semibold tw-text-error">
               <FontAwesomeIcon icon={faXmark} className="tw-h-5 tw-w-5" />
-              Incomplete Consolidation
+              {t(
+                locale,
+                "delegation.collection.walletChecker.incompleteConsolidation"
+              )}
             </div>
             <div className="tw-pt-4 tw-text-sm tw-text-iron-200">
-              <span className="tw-font-semibold">Recommended Actions:</span>
+              <span className="tw-font-semibold">
+                {t(
+                  locale,
+                  "delegation.collection.walletChecker.recommendedActions"
+                )}
+              </span>
               <ul className="tw-mb-0 tw-mt-2 tw-space-y-2 tw-pl-5">
                 {props.consolidationActions.map((consolidation) => (
                   <li
@@ -369,17 +510,11 @@ function ConsolidationsResults(
                     )}
                     className="tw-flex tw-items-center tw-gap-2"
                   >
-                    &bull;&nbsp;Register Consolidation from{" "}
-                    <CheckedWalletAddress
-                      checkedAddress={props.fetchedAddress}
-                      address={consolidation.to}
-                      display={consolidation.to_display}
-                    />{" "}
-                    to{" "}
-                    <CheckedWalletAddress
-                      checkedAddress={props.fetchedAddress}
-                      address={consolidation.from}
-                      display={consolidation.from_display}
+                    &bull;&nbsp;
+                    <ConsolidationActionMessage
+                      locale={locale}
+                      fetchedAddress={props.fetchedAddress}
+                      consolidation={consolidation}
                     />
                   </li>
                 ))}
@@ -405,6 +540,8 @@ export default function WalletCheckerResults(
     consolidationActions: ConsolidationDisplay[];
   }>
 ) {
+  const locale = useBrowserLocale();
+
   return (
     <>
       {props.delegationsLoaded && (
@@ -413,6 +550,7 @@ export default function WalletCheckerResults(
           delegations={props.delegations}
           subDelegations={props.subDelegations}
           activeDelegation={props.activeDelegation}
+          locale={locale}
         />
       )}
       {props.consolidationsLoaded && (
@@ -421,6 +559,7 @@ export default function WalletCheckerResults(
           consolidations={props.consolidations}
           consolidatedWallets={props.consolidatedWallets}
           consolidationActions={props.consolidationActions}
+          locale={locale}
         />
       )}
     </>
