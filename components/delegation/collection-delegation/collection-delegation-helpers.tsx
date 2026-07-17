@@ -6,6 +6,8 @@ import {
   DELEGATION_CONTRACT,
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   getParams,
   type ContractDelegation,
@@ -62,25 +64,26 @@ export function getConsolidationReadParams(
 }
 
 export function getCollectionScopeDescription(
-  collection: DelegationCollection
+  collection: DelegationCollection,
+  locale: SupportedLocale
 ) {
   if (areEqualAddresses(collection.contract, DELEGATION_ALL_ADDRESS)) {
-    return "Records here apply across every supported delegation collection.";
+    return t(locale, "delegation.collection.scope.all");
   }
 
   if (areEqualAddresses(collection.contract, MEMES_COLLECTION.contract)) {
-    return "Records here apply only to The Memes collection.";
+    return t(locale, "delegation.collection.scope.memes");
   }
 
   if (areEqualAddresses(collection.contract, MEME_LAB_COLLECTION.contract)) {
-    return "Records here apply only to Meme Lab.";
+    return t(locale, "delegation.collection.scope.memeLab");
   }
 
   if (areEqualAddresses(collection.contract, GRADIENTS_COLLECTION.contract)) {
-    return "Records here apply only to 6529 Gradient.";
+    return t(locale, "delegation.collection.scope.gradient");
   }
 
-  return "Records here apply to the selected collection scope.";
+  return t(locale, "delegation.collection.scope.selected");
 }
 
 export const CHECKBOX_CLASS =

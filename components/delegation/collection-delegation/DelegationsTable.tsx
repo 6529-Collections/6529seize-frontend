@@ -3,7 +3,7 @@
 import { Fragment, type ReactNode } from "react";
 
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type {
   ContractDelegation,
@@ -22,6 +22,7 @@ export interface DelegationRowRenderArgs {
   readonly del: ContractDelegation;
   readonly walletDelegation: ContractWalletDelegation;
   readonly consolidationStatus: string | undefined;
+  readonly statusUnavailable: boolean;
   readonly pending: boolean;
   readonly isConsolidation: boolean;
 }
@@ -45,6 +46,7 @@ export function DelegationsTable(
     renderFooter?: ((delegationsCount: number) => ReactNode) | undefined;
   }>
 ) {
+  const locale = useBrowserLocale();
   const { direction, scope, myDelegations, collection } = props;
   const { delegationsLoaded, activeConsolidations, renderRow } = props;
 
@@ -67,10 +69,17 @@ export function DelegationsTable(
             </td>
           </tr>
           {del.wallets.map((w, walletIndex) => {
-            const consolidationStatus = activeConsolidations.find((i) =>
+            const consolidationStatusCode = activeConsolidations.find((i) =>
               areEqualAddresses(w.wallet, i.wallet)
             )?.status;
-            const pending = consolidationStatus === "consolidation incomplete";
+            const pending = consolidationStatusCode === "incomplete";
+            const statusUnavailable = consolidationStatusCode === "unavailable";
+            const consolidationStatus = consolidationStatusCode
+              ? t(
+                  locale,
+                  `delegation.collection.row.status.${consolidationStatusCode}`
+                )
+              : undefined;
             return renderRow({
               delegationIndex: index,
               walletIndex,
@@ -78,6 +87,7 @@ export function DelegationsTable(
               del,
               walletDelegation: w,
               consolidationStatus,
+              statusUnavailable,
               pending,
               isConsolidation,
             });
@@ -94,7 +104,7 @@ export function DelegationsTable(
             className="tw-flex tw-flex-wrap tw-items-center tw-gap-3"
           >
             <span className="tw-text-base tw-text-error">
-              {t(DEFAULT_LOCALE, "delegation.collection.readError.message", {
+              {t(locale, "delegation.collection.readError.message", {
                 collection: collection.title,
               })}
             </span>
@@ -103,7 +113,7 @@ export function DelegationsTable(
               className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               onClick={props.onRetry}
             >
-              {t(DEFAULT_LOCALE, "delegation.collection.readError.retry")}
+              {t(locale, "delegation.collection.readError.retry")}
             </button>
           </div>
         </td>
@@ -116,7 +126,14 @@ export function DelegationsTable(
           colSpan={4}
           className="tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-base tw-text-iron-300"
         >
-          No {direction} {scope} found for {collection.title}
+          {t(locale, "delegation.collection.records.empty", {
+            direction: t(
+              locale,
+              `delegation.collection.direction.${direction}`
+            ),
+            scope,
+            collection: collection.title,
+          })}
         </td>
       </tr>
     );
@@ -127,7 +144,14 @@ export function DelegationsTable(
           colSpan={4}
           className="tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-base tw-text-iron-300"
         >
-          Fetching {direction} {scope} for {collection.title}
+          {t(locale, "delegation.collection.records.fetching", {
+            direction: t(
+              locale,
+              `delegation.collection.direction.${direction}`
+            ),
+            scope,
+            collection: collection.title,
+          })}
         </td>
       </tr>
     );

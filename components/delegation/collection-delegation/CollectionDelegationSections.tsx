@@ -1,5 +1,7 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useEffect, useMemo, type Dispatch, type SetStateAction } from "react";
 
 import type { ContractDelegation } from "../CollectionDelegation.utils";
@@ -79,6 +81,7 @@ export function CollectionDelegationSections(
     disclosureState: DisclosureState;
   }>
 ) {
+  const locale = useBrowserLocale();
   const { collection, reads, revocation } = props;
   const { chainsMatch, getSwitchToMessage, showDelegationToast } = props;
   const { onEditDelegation, onSetOriginalDelegator, onShowSubForm } = props;
@@ -190,15 +193,17 @@ export function CollectionDelegationSections(
     return (
       <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
         <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-          Delegations
+          {t(locale, "delegation.collection.sections.delegations.title")}
         </h2>
         <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
-          Delegations let another wallet use NFT utility for this collection
-          scope without moving the NFT.
+          {t(locale, "delegation.collection.sections.delegations.description")}
         </p>
         <div className="tw-space-y-3">
           <DelegationDisclosurePanel
-            title="Outgoing Delegations"
+            title={t(
+              locale,
+              "delegation.collection.sections.delegations.outgoing"
+            )}
             isOpen={delegationKeys.includes("0")}
             onToggle={() =>
               toggleDisclosureKey(
@@ -208,10 +213,16 @@ export function CollectionDelegationSections(
               )
             }
           >
-            {printOutgoingDelegations("delegations", outDelegations)}
+            {printOutgoingDelegations(
+              t(locale, "delegation.collection.scopeLabel.delegations"),
+              outDelegations
+            )}
           </DelegationDisclosurePanel>
           <DelegationDisclosurePanel
-            title="Incoming Delegations"
+            title={t(
+              locale,
+              "delegation.collection.sections.delegations.incoming"
+            )}
             isOpen={delegationKeys.includes("1")}
             onToggle={() =>
               toggleDisclosureKey(
@@ -221,7 +232,10 @@ export function CollectionDelegationSections(
               )
             }
           >
-            {printIncomingDelegations("delegations", inDelegations)}
+            {printIncomingDelegations(
+              t(locale, "delegation.collection.scopeLabel.delegations"),
+              inDelegations
+            )}
           </DelegationDisclosurePanel>
         </div>
       </section>
@@ -232,15 +246,17 @@ export function CollectionDelegationSections(
     return (
       <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
         <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-          Delegation Managers
+          {t(locale, "delegation.collection.sections.managers.title")}
         </h2>
         <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
-          Manager rights let another wallet maintain delegations or
-          consolidations for this collection scope.
+          {t(locale, "delegation.collection.sections.managers.description")}
         </p>
         <div className="tw-space-y-3">
           <DelegationDisclosurePanel
-            title="Outgoing Manager Rights"
+            title={t(
+              locale,
+              "delegation.collection.sections.managers.outgoing"
+            )}
             isOpen={subDelegationKeys.includes("0")}
             onToggle={() =>
               toggleDisclosureKey(
@@ -250,10 +266,16 @@ export function CollectionDelegationSections(
               )
             }
           >
-            {printOutgoingDelegations("Delegation Managers", outSubDelegations)}
+            {printOutgoingDelegations(
+              t(locale, "delegation.collection.scopeLabel.managers"),
+              outSubDelegations
+            )}
           </DelegationDisclosurePanel>
           <DelegationDisclosurePanel
-            title="Incoming Manager Rights"
+            title={t(
+              locale,
+              "delegation.collection.sections.managers.incoming"
+            )}
             isOpen={subDelegationKeys.includes("1")}
             onToggle={() =>
               toggleDisclosureKey(
@@ -264,7 +286,7 @@ export function CollectionDelegationSections(
             }
           >
             {printIncomingDelegations(
-              "Delegation Managers",
+              t(locale, "delegation.collection.scopeLabel.managers"),
               inSubDelegations,
               true
             )}
@@ -278,15 +300,20 @@ export function CollectionDelegationSections(
     return (
       <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
         <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-          Consolidations
+          {t(locale, "delegation.collection.sections.consolidations.title")}
         </h2>
         <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
-          Consolidations link wallets you control so 6529 can treat them
-          together for collection metrics.
+          {t(
+            locale,
+            "delegation.collection.sections.consolidations.description"
+          )}
         </p>
         <div className="tw-space-y-3">
           <DelegationDisclosurePanel
-            title="Outgoing Consolidations"
+            title={t(
+              locale,
+              "delegation.collection.sections.consolidations.outgoing"
+            )}
             isOpen={consolidationKeys.includes("0")}
             onToggle={() =>
               toggleDisclosureKey(
@@ -296,10 +323,16 @@ export function CollectionDelegationSections(
               )
             }
           >
-            {printOutgoingDelegations("consolidations", outConsolidations)}
+            {printOutgoingDelegations(
+              t(locale, "delegation.collection.scopeLabel.consolidations"),
+              outConsolidations
+            )}
           </DelegationDisclosurePanel>
           <DelegationDisclosurePanel
-            title="Incoming Consolidations"
+            title={t(
+              locale,
+              "delegation.collection.sections.consolidations.incoming"
+            )}
             isOpen={consolidationKeys.includes("1")}
             onToggle={() =>
               toggleDisclosureKey(
@@ -309,7 +342,10 @@ export function CollectionDelegationSections(
               )
             }
           >
-            {printIncomingDelegations("consolidations", inConsolidations)}
+            {printIncomingDelegations(
+              t(locale, "delegation.collection.scopeLabel.consolidations"),
+              inConsolidations
+            )}
           </DelegationDisclosurePanel>
         </div>
       </section>

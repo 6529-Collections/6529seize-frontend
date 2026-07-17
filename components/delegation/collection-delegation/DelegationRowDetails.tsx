@@ -1,5 +1,7 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
@@ -15,14 +17,15 @@ export function DelegationRowDetails(
     label: string;
     walletDelegation: ContractWalletDelegation;
     consolidationStatus: string | undefined;
+    statusUnavailable: boolean;
     pending: boolean;
     isConsolidation: boolean;
   }>
 ) {
+  const locale = useBrowserLocale();
   const { label, walletDelegation: w } = props;
-  const { consolidationStatus, pending, isConsolidation } = props;
-  const statusUnavailable =
-    consolidationStatus === "consolidation status unavailable";
+  const { consolidationStatus, statusUnavailable, pending, isConsolidation } =
+    props;
   let consolidationStatusClass = "tw-text-primary-300";
   if (statusUnavailable) {
     consolidationStatusClass = "tw-text-error";
@@ -35,7 +38,11 @@ export function DelegationRowDetails(
       <DelegationWallet address={w.wallet} />
       <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-sm">
         <span className="tw-text-iron-300">
-          {w.all ? `all tokens` : ` - token ID: ${w.tokens}`}
+          {w.all
+            ? t(locale, "delegation.collection.row.allTokens")
+            : t(locale, "delegation.collection.row.tokenId", {
+                tokens: String(w.tokens),
+              })}
         </span>
         <span
           className={`tw-font-semibold ${
@@ -64,7 +71,9 @@ export function DelegationRowDetails(
                     padding: "4px 8px",
                   }}
                 >
-                  {label} consolidation missing
+                  {t(locale, "delegation.collection.row.consolidationMissing", {
+                    label,
+                  })}
                 </Tooltip>
               </>
             )}

@@ -14,19 +14,24 @@ import {
   DELEGATION_CONTRACT,
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getReadParams } from "../CollectionDelegation.utils";
 import type { DelegationCollection } from "../delegation-constants";
 import { ALL_USE_CASES } from "../delegation-constants";
 import type { DelegationToastState } from "../DelegationToast";
 import { getTransactionErrorToastMessage } from "./collection-delegation-helpers";
 
-function getFailedLockTitle(title: string) {
+function getFailedLockTitle(title: string, locale: SupportedLocale) {
   const lineBreakIndex = title.indexOf("\n");
   if (lineBreakIndex === -1) {
-    return `${title} Failed`;
+    return t(locale, "delegation.collection.toast.lockFailed", { title });
   }
 
-  return `${title.slice(0, lineBreakIndex)} Failed${title.slice(lineBreakIndex)}`;
+  return `${t(locale, "delegation.collection.toast.lockFailed", {
+    title: title.slice(0, lineBreakIndex),
+  })}${title.slice(lineBreakIndex)}`;
 }
 
 /**
@@ -41,13 +46,18 @@ export function useCollectionLocks(options: {
   readonly collection: DelegationCollection;
   readonly showDelegationToast: (toast: DelegationToastState) => void;
 }) {
+  const locale = useBrowserLocale();
   const { address, isConnected, collection, showDelegationToast } = options;
 
   // The refs hold the title for the lock write currently in flight. Set them
   // immediately before each writeContract call so success/error toasts stay tied
   // to the user action that opened the wallet.
-  const collectionLockToastTitleRef = useRef("Locking Wallet");
-  const useCaseLockToastTitleRef = useRef("Locking Wallet");
+  const collectionLockToastTitleRef = useRef(
+    t(locale, "delegation.collection.toast.lockingWallet")
+  );
+  const useCaseLockToastTitleRef = useRef(
+    t(locale, "delegation.collection.toast.lockingWallet")
+  );
 
   const [lockUseCaseValue, setLockUseCaseValue] = useState(0);
   const [lockUseCaseIndex, setLockUseCaseIndex] = useState(0);
@@ -148,7 +158,7 @@ export function useCollectionLocks(options: {
         title,
         message: getTransactionErrorToastMessage(
           collectionLockWrite.error,
-          "Failed to start wallet lock update."
+          t(locale, "delegation.collection.toast.walletLockStartFailed")
         ),
       });
     }
@@ -168,10 +178,10 @@ export function useCollectionLocks(options: {
       } else if (waitCollectionLockWrite.isError) {
         showDelegationToast({
           status: "error",
-          title: getFailedLockTitle(title),
+          title: getFailedLockTitle(title, locale),
           message: getTransactionErrorToastMessage(
             waitCollectionLockWrite.error,
-            "Transaction failed while waiting for confirmation."
+            t(locale, "delegation.collection.toast.confirmationFailed")
           ),
           transactionHash: collectionLockWrite.data,
         });
@@ -180,6 +190,7 @@ export function useCollectionLocks(options: {
   }, [
     collectionLockWrite.error,
     collectionLockWrite.data,
+    locale,
     showDelegationToast,
     waitCollectionLockWrite.error,
     waitCollectionLockWrite.isError,
@@ -196,7 +207,7 @@ export function useCollectionLocks(options: {
         title,
         message: getTransactionErrorToastMessage(
           useCaseLockWrite.error,
-          "Failed to start use-case lock update."
+          t(locale, "delegation.collection.toast.useCaseLockStartFailed")
         ),
       });
     }
@@ -216,10 +227,10 @@ export function useCollectionLocks(options: {
       } else if (waitUseCaseLockWrite.isError) {
         showDelegationToast({
           status: "error",
-          title: getFailedLockTitle(title),
+          title: getFailedLockTitle(title, locale),
           message: getTransactionErrorToastMessage(
             waitUseCaseLockWrite.error,
-            "Transaction failed while waiting for confirmation."
+            t(locale, "delegation.collection.toast.confirmationFailed")
           ),
           transactionHash: useCaseLockWrite.data,
         });
@@ -229,6 +240,7 @@ export function useCollectionLocks(options: {
     useCaseLockWrite.error,
     useCaseLockWrite.data,
     showDelegationToast,
+    locale,
     waitUseCaseLockWrite.error,
     waitUseCaseLockWrite.isError,
     waitUseCaseLockWrite.isLoading,
@@ -236,8 +248,14 @@ export function useCollectionLocks(options: {
   ]);
 
   function resetLockWrites() {
-    collectionLockToastTitleRef.current = "Locking Wallet";
-    useCaseLockToastTitleRef.current = "Locking Wallet";
+    collectionLockToastTitleRef.current = t(
+      locale,
+      "delegation.collection.toast.lockingWallet"
+    );
+    useCaseLockToastTitleRef.current = t(
+      locale,
+      "delegation.collection.toast.lockingWallet"
+    );
     useCaseLockWrite.reset();
     collectionLockWrite.reset();
   }

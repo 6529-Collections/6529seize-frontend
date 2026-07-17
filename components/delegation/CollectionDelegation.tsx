@@ -4,6 +4,9 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useChainId, useEnsName } from "wagmi";
 
 import { DELEGATION_CONTRACT } from "@/constants/constants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 import { faCircleArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -35,13 +38,19 @@ interface AccountSnapshot {
   readonly isConnected: boolean;
 }
 
-function getSwitchToMessage() {
-  return `Switch to ${
-    DELEGATION_CONTRACT.chain_id === 1 ? "Ethereum Mainnet" : "Sepolia Network"
-  }`;
+function getSwitchToMessage(locale: SupportedLocale) {
+  return t(locale, "delegation.collection.network.switch", {
+    network: t(
+      locale,
+      DELEGATION_CONTRACT.chain_id === 1
+        ? "delegation.collection.network.ethereumMainnet"
+        : "delegation.collection.network.sepolia"
+    ),
+  });
 }
 
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const accountResolution = useSeizeConnectContext();
   const previousAccountSnapshotRef = useRef<AccountSnapshot | undefined>(
     undefined
@@ -201,7 +210,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             icon={faCircleArrowLeft}
             className="tw-h-5 tw-w-5 tw-flex-none"
           />
-          <span>Back to Delegation Center</span>
+          <span>{t(locale, "delegation.collection.navigation.back")}</span>
         </button>
         <header className="tw-mb-6">
           <div className="tw-flex tw-items-center tw-gap-4">
@@ -223,7 +232,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             </h1>
           </div>
           <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-6 tw-text-iron-300">
-            {getCollectionScopeDescription(props.collection)}
+            {getCollectionScopeDescription(props.collection, locale)}
           </p>
         </header>
         {!showUpdateDelegation &&
@@ -242,11 +251,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     id="collection-connect-heading"
                     className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white"
                   >
-                    Connect Wallet to Manage {props.collection.title}
+                    {t(locale, "delegation.collection.connect.title", {
+                      collection: props.collection.title,
+                    })}
                   </h2>
                   <p className="tw-mb-4 tw-text-base tw-leading-6 tw-text-iron-300">
-                    Connect the wallet whose outgoing and incoming records you
-                    want to review.
+                    {t(locale, "delegation.collection.connect.description")}
                   </p>
                   <button
                     type="button"
@@ -255,7 +265,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       accountResolution.seizeConnect();
                     }}
                   >
-                    Connect Wallet
+                    {t(locale, "delegation.collection.connect.button")}
                   </button>
                 </section>
               ) : (
@@ -265,7 +275,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     reads={delegationReads}
                     revocation={revocation}
                     chainsMatch={chainsMatch}
-                    getSwitchToMessage={getSwitchToMessage}
+                    getSwitchToMessage={() => getSwitchToMessage(locale)}
                     showDelegationToast={showDelegationToast}
                     onEditDelegation={handleEditDelegation}
                     subDelegationOriginalDelegator={
@@ -292,7 +302,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     collection={props.collection}
                     locks={locks}
                     chainsMatch={chainsMatch}
-                    getSwitchToMessage={getSwitchToMessage}
+                    getSwitchToMessage={() => getSwitchToMessage(locale)}
                     showDelegationToast={showDelegationToast}
                   />
                 </>
