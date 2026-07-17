@@ -2038,7 +2038,8 @@
         "When Vote with reply is enabled, removing all rationale text blocks submission until text is added or the switch is turned off.",
         "If an optional rationale reply fails after a successful vote, the vote stays saved and the user is told that the reply failed.",
         "Boosting is a per-user flame toggle on full drop cards and boosted cards in wave and direct-message threads.",
-        "Wave creator badges and drop state indicators explain context around submitted drops."
+        "Wave creator badges and drop state indicators explain context around submitted drops.",
+        "The Edit action on your own drop appears only while the drop is still editable; each drop has an edit window after posting (or after its last edit), and once it passes the option is hidden because the API no longer accepts changes."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
