@@ -166,7 +166,10 @@ export default function SubsequentDecisions({
 
                 <button
                   onClick={(e) => handleDeleteDecision(index, e)}
-                  className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/30 tw-opacity-0 tw-transition-all tw-duration-300 group-hover:tw-opacity-100 hover:tw-bg-iron-700/60 desktop-hover:hover:tw-text-red"
+                  aria-label={`Remove announcement #${index + 2}`}
+                  // Hover-revealed on pointer devices; always visible where
+                  // there is no hover to reveal it (touch phones).
+                  className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/30 tw-transition-all tw-duration-300 hover:tw-bg-iron-700/60 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red touch-only:tw-opacity-100"
                 >
                   <FontAwesomeIcon icon={faTrashCan} className="tw-size-3.5" />
                 </button>

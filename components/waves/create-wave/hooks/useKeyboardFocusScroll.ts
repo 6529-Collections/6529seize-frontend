@@ -28,8 +28,7 @@ const scrollFieldIntoVisibleViewport = (field: HTMLElement) => {
   // centres fields underneath it.
   const fieldTop = field.getBoundingClientRect().top;
   const targetTop =
-    visualViewport.offsetTop +
-    visualViewport.height * TARGET_VIEWPORT_FRACTION;
+    visualViewport.offsetTop + visualViewport.height * TARGET_VIEWPORT_FRACTION;
   window.scrollBy({ top: fieldTop - targetTop, behavior: "smooth" });
 };
 
@@ -65,7 +64,7 @@ export default function useKeyboardFocusScroll(
         clearTimeout(timer);
       }
       timer = setTimeout(() => {
-        if (document.activeElement !== target) {
+        if (document.activeElement !== target || !target.isConnected) {
           return;
         }
         scrollFieldIntoVisibleViewport(target);
