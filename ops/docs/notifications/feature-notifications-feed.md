@@ -68,8 +68,8 @@ with cause filters, grouped reactions, and inline drop previews.
   `Follow All` or `Following All`.
 - Header actions stay beside notification text when both remain readable and
   wrap below it when the available width is too narrow.
-- Multi-actor reaction summaries reserve the same leading avatar column as
-  actor notifications so labels and actions keep a consistent scan line.
+- Multi-actor reaction summaries keep their heading at the row edge while the
+  batch action follows the same scan line as actor-notification actions.
 - Priority alerts show `sent a priority alert 🚨` as:
   - header-only rows (no related drop), or
   - header plus first related drop preview.
