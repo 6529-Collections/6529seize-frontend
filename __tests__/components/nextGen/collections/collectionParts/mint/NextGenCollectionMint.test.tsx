@@ -11,7 +11,11 @@ jest.mock('@/components/nextGen/collections/collectionParts/mint/NextGenMint', (
   default: (props: any) => MockNextGenMint(props),
 }));
 
-jest.mock('@/components/nextGen/collections/NextGenNavigationHeader', () => () => <div data-testid="header" />);
+jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => ({
+  __esModule: true,
+  default: () => <div data-testid="collection-header" />,
+  NextGenBackToCollectionPageLink: () => <div data-testid="back-link" />,
+}));
 
 jest.mock('wagmi', () => ({ useReadContract: jest.fn() }));
 

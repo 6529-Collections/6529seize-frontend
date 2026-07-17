@@ -47,6 +47,9 @@ function useImageChecker(token: NextGenToken, resolution: Resolution) {
   const [imageSize, setImageSize] = useState(0);
 
   useEffect(() => {
+    setImageLoaded(false);
+    setImageExists(false);
+    setImageSize(0);
     const url = getUrl(token, resolution);
     fetch(url, { method: "HEAD" })
       .then((response) => {
@@ -60,16 +63,16 @@ function useImageChecker(token: NextGenToken, resolution: Resolution) {
         } else {
           setImageExists(false);
         }
-        setImageLoaded(true);
       })
-      .catch(() => setImageExists(false));
+      .catch(() => setImageExists(false))
+      .finally(() => setImageLoaded(true));
   }, [token, resolution]);
 
   return { imageLoaded, imageExists, imageSize };
 }
 
 export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
-  const { imageExists, imageSize } = useImageChecker(
+  const { imageLoaded, imageExists, imageSize } = useImageChecker(
     props.token,
     props.resolution
   );
@@ -79,7 +82,7 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
     <li>
       <button
         type="button"
-        disabled={!imageExists}
+        disabled={!imageLoaded || !imageExists}
         onClick={() => {
           if (imageExists) {
             downloader.download(
@@ -90,15 +93,18 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
           }
         }}
         className={`tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
-          imageExists
+          !imageLoaded
+            ? "tw-cursor-wait tw-text-iron-300"
+            : imageExists
             ? "tw-cursor-pointer tw-text-white hover:tw-bg-iron-800"
             : "tw-cursor-not-allowed tw-text-iron-500"
         }`}
       >
         {props.resolution}
-        {imageExists && imageSize > 0
-          ? ` (${numberWithCommas(imageSize)} MB)`
-          : " Coming Soon"}
+        {!imageLoaded && " Loading…"}
+        {imageLoaded && imageExists && imageSize > 0 &&
+          ` (${numberWithCommas(imageSize)} MB)`}
+        {imageLoaded && !imageExists && " Coming Soon"}
       </button>
     </li>
   );
@@ -117,25 +123,28 @@ export default function NextGenTokenDownload(
 
   function printResolution(quality: Resolution) {
     return (
-      <span className="tw-whitespace-nowrap tw-min-w-fit tw-flex tw-items-center tw-gap-4">
-        <FontAwesomeIcon
+      <span className="tw-flex tw-min-w-fit tw-items-center tw-gap-1">
+        <button
+          type="button"
+          aria-label={`Open ${quality} image in a new tab`}
           data-tooltip-id={`external-link-${props.token.id}-${quality}`}
-          style={{ cursor: "pointer", height: "20px", width: "20px" }}
           onClick={() => {
             const h = getUrl(props.token, quality);
             window.open(h, "_blank");
           }}
-          icon={faExternalLink}
-        />
+          className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-bg-white/10 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          <FontAwesomeIcon
+            icon={faExternalLink}
+            className="tw-h-4 tw-w-4"
+            aria-hidden="true"
+          />
+        </button>
         <Tooltip
           id={`external-link-${props.token.id}-${quality}`}
           place="top"
           delayShow={100}
-          style={{
-            backgroundColor: "#1F2937",
-            color: "white",
-            padding: "4px 8px",
-          }}
+          className="!tw-bg-iron-900 !tw-px-2 !tw-py-1 !tw-text-white"
         >
           Open in new tab
         </Tooltip>
@@ -155,23 +164,16 @@ export default function NextGenTokenDownload(
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 tw-py-1 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-items-center">
-        <div
-          className="tw-relative tw-w-1/3 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-          style={{ maxWidth: "100%" }}
-        >
-          <span className="tw-whitespace-nowrap tw-min-w-fit">
-            <span>{props.resolution}</span>
-            {imageExists &&
-              imageSize > 0 &&
-              ` (${numberWithCommas(imageSize)} MB)`}
-          </span>
-        </div>
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          {getDisplay()}
-        </div>
-      </div>
+    <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-black/20 tw-px-3 tw-py-2">
+      <span className="tw-min-w-0 tw-text-sm tw-text-white">
+        {props.resolution}
+        {imageExists &&
+          imageSize > 0 &&
+          ` (${numberWithCommas(imageSize)} MB)`}
+      </span>
+      <span className="tw-flex tw-flex-none tw-items-center tw-text-sm tw-text-iron-400">
+        {getDisplay()}
+      </span>
     </div>
   );
 }
@@ -191,27 +193,31 @@ function NextGenTokenDownloadButton(
 
   return (
     <>
-      <FontAwesomeIcon
+      <button
+        type="button"
+        aria-label={`Download ${props.quality} image`}
         data-tooltip-id={`download-${props.token.id}-${props.quality}`}
-        icon={faDownload}
-        className={props.class}
-        style={{ cursor: "pointer", height: "20px", width: "20px" }}
         onClick={() => {
           downloader.download(
             getUrl(props.token, props.quality),
             `${props.token.id}_${props.quality.toUpperCase()}.png`
           );
         }}
-      />
+        className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-bg-white/10 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+          props.class ?? ""
+        }`}
+      >
+        <FontAwesomeIcon
+          icon={faDownload}
+          className="tw-h-4 tw-w-4"
+          aria-hidden="true"
+        />
+      </button>
       <Tooltip
         id={`download-${props.token.id}-${props.quality}`}
         place="top"
         delayShow={100}
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
+        className="!tw-bg-iron-900 !tw-px-2 !tw-py-1 !tw-text-white"
       >
         Download
       </Tooltip>

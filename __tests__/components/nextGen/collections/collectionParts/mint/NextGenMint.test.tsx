@@ -7,6 +7,7 @@ jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionHea
 jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   useSharedState: () => ({ mintingDetails: null, setMintingDetails: jest.fn() }),
   useCollectionCostsHook: jest.fn(),
+  useCollectionMintCount: () => ({ data: 0, refetch: jest.fn() }),
   useMintSharedState: () => ({
     available: 0,
     setAvailable: jest.fn(),

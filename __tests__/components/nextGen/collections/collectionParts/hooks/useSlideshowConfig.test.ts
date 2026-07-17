@@ -26,7 +26,7 @@ describe('useSlideshowConfig', () => {
   });
 
   describe('Initial State', () => {
-    it('returns 4 slides per view for large screens (>1200px)', () => {
+    it('returns 3.5 slides per view for large screens (>1200px)', () => {
       Object.defineProperty(window, 'innerWidth', {
         value: 1400,
         writable: true,
@@ -35,7 +35,7 @@ describe('useSlideshowConfig', () => {
 
       const { result } = renderHook(() => useSlideshowConfig());
       
-      expect(result.current.slidesPerView).toBe(4);
+      expect(result.current.slidesPerView).toBe(3.5);
     });
 
     it('returns 2 slides per view for medium screens (500-1200px)', () => {
@@ -64,7 +64,7 @@ describe('useSlideshowConfig', () => {
   });
 
   describe('Boundary Conditions', () => {
-    it('returns 4 slides per view exactly at 1201px', () => {
+    it('returns 3.5 slides per view exactly at 1201px', () => {
       Object.defineProperty(window, 'innerWidth', {
         value: 1201,
         writable: true,
@@ -73,7 +73,7 @@ describe('useSlideshowConfig', () => {
 
       const { result } = renderHook(() => useSlideshowConfig());
       
-      expect(result.current.slidesPerView).toBe(4);
+      expect(result.current.slidesPerView).toBe(3.5);
     });
 
     it('returns 2 slides per view exactly at 1200px', () => {
@@ -123,7 +123,7 @@ describe('useSlideshowConfig', () => {
       });
 
       const { result } = renderHook(() => useSlideshowConfig());
-      expect(result.current.slidesPerView).toBe(4);
+      expect(result.current.slidesPerView).toBe(3.5);
 
       // Resize to medium screen
       act(() => {
@@ -183,7 +183,7 @@ describe('useSlideshowConfig', () => {
         window.dispatchEvent(new Event('resize'));
       });
 
-      expect(result.current.slidesPerView).toBe(4);
+      expect(result.current.slidesPerView).toBe(3.5);
     });
 
     it('handles multiple rapid resize events correctly', () => {
@@ -194,7 +194,7 @@ describe('useSlideshowConfig', () => {
       });
 
       const { result } = renderHook(() => useSlideshowConfig());
-      expect(result.current.slidesPerView).toBe(4);
+      expect(result.current.slidesPerView).toBe(3.5);
 
       // Rapid resize events
       act(() => {
@@ -220,7 +220,7 @@ describe('useSlideshowConfig', () => {
         window.dispatchEvent(new Event('resize'));
       });
 
-      expect(result.current.slidesPerView).toBe(4);
+      expect(result.current.slidesPerView).toBe(3.5);
     });
   });
 
@@ -297,7 +297,7 @@ describe('useSlideshowConfig', () => {
 
       const { result } = renderHook(() => useSlideshowConfig());
       
-      expect(result.current.slidesPerView).toBe(4);
+      expect(result.current.slidesPerView).toBe(3.5);
     });
 
     it('handles zero window width', () => {

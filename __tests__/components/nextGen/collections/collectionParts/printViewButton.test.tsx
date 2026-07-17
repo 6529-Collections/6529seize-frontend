@@ -13,8 +13,8 @@ describe("printViewButton", () => {
       )
     );
     const button = screen.getByRole("button");
-    expect(button.className).toMatch(/nextgenTokenDetailsLinkSelected/);
-    expect(screen.getByText("About")).toHaveClass("tw-text-white");
+    expect(button).toHaveAttribute("aria-current", "page");
+    expect(button).toHaveClass("tw-border-primary-400", "tw-text-white");
     fireEvent.click(button);
     expect(setView).toHaveBeenCalledWith(NextgenCollectionView.ABOUT);
   });
@@ -29,11 +29,8 @@ describe("printViewButton", () => {
       )
     );
     const button = screen.getByRole("button");
-    expect(button.className).not.toMatch(/nextgenTokenDetailsLinkSelected/);
-    expect(screen.getByText("Provenance")).toHaveClass(
-      "tw-text-[#9a9a9a]",
-      "tw-cursor-pointer"
-    );
+    expect(button).not.toHaveAttribute("aria-current");
+    expect(button).toHaveClass("tw-border-transparent", "tw-text-iron-400");
     fireEvent.click(button);
     expect(setView).toHaveBeenCalledWith(NextgenCollectionView.PROVENANCE);
   });

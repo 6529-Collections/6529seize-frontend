@@ -46,6 +46,11 @@ jest.mock('wagmi', () => ({
 }));
 jest.mock('@/components/dotLoader/DotLoader', () => () => <div />);
 jest.mock('@/components/nextGen/collections/collectionParts/mint/NextGenMintShared', () => ({
+  MINT_ACTION_BUTTON_CLASSNAME: '',
+  MINT_INPUT_CLASSNAME: '',
+  MINT_SELECT_CLASSNAME: '',
+  MintInfoTooltip: () => null,
+  NextGenMintErrors: () => null,
   NextGenMintingFor: () => <div />,
 }));
 jest.mock('@/helpers/Helpers', () => {

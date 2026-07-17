@@ -12,62 +12,95 @@ export default function NextGenArtists() {
   const [artistCollections, setArtistCollections] = useState<
     { address: string; collections: NextGenCollection[] }[]
   >([]);
-
-  function fetchResults() {
-    let url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections`;
-    fetchUrl(url).then((response: DBResponse) => {
-      setArtistCollections(
-        response.data.reduce<
-          { address: string; collections: NextGenCollection[] }[]
-        >((acc, collection) => {
-          if (
-            !acc.find((a) =>
-              areEqualAddresses(a.address, collection.artist_address)
-            )
-          ) {
-            acc.push({
-              address: collection.artist_address,
-              collections: response.data
-                .filter((c) =>
-                  areEqualAddresses(c.artist_address, collection.artist_address)
-                )
-                .sort((a, b) => a.id - b.id),
-            });
-          }
-          return acc;
-        }, [])
-      );
-    });
-  }
+  const [artistsLoaded, setArtistsLoaded] = useState(false);
 
   useEffect(() => {
-    fetchResults();
+    let cancelled = false;
+    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections`;
+    void fetchUrl<DBResponse<NextGenCollection>>(url)
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+
+        setArtistCollections(
+          response.data.reduce<
+            { address: string; collections: NextGenCollection[] }[]
+          >((acc, collection) => {
+            if (
+              !acc.find((a) =>
+                areEqualAddresses(a.address, collection.artist_address)
+              )
+            ) {
+              acc.push({
+                address: collection.artist_address,
+                collections: response.data
+                  .filter((c) =>
+                    areEqualAddresses(
+                      c.artist_address,
+                      collection.artist_address
+                    )
+                  )
+                  .sort((a, b) => a.id - b.id),
+              });
+            }
+            return acc;
+          }, [])
+        );
+        setArtistsLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setArtistCollections([]);
+          setArtistsLoaded(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
-    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 tw-pb-6 tw-pt-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h1>Artists</h1>
-        </div>
-      </div>
-      {artistCollections.map(
-        (ac: { address: string; collections: NextGenCollection[] }) => {
-          return (
+    <section className="tw-py-6 sm:tw-py-8">
+      <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
+        Artists
+      </h1>
+
+      <div className="tw-mt-6 tw-space-y-4" aria-busy={!artistsLoaded}>
+        {!artistsLoaded &&
+          [0, 1, 2].map((skeleton) => (
             <div
-              className="-tw-mx-3 tw-flex tw-flex-wrap"
-              key={`nextgen-artist-${ac.address}`}
+              key={`artist-skeleton-${skeleton}`}
+              className="tw-flex tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5"
+              aria-hidden="true"
             >
-              <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                <NextGenCollectionArtist
-                  collection={ac.collections[0]!}
-                  link_collections={ac.collections}
-                />
+              <div className="tw-h-24 tw-w-24 tw-shrink-0 tw-animate-pulse tw-rounded-lg tw-bg-iron-800 motion-reduce:tw-animate-none" />
+              <div className="tw-flex-1 tw-space-y-3 tw-py-2">
+                <div className="tw-h-5 tw-w-1/3 tw-animate-pulse tw-rounded-md tw-bg-iron-700 motion-reduce:tw-animate-none" />
+                <div className="tw-h-4 tw-w-1/2 tw-animate-pulse tw-rounded-md tw-bg-iron-800 motion-reduce:tw-animate-none" />
+                <div className="tw-h-4 tw-w-4/5 tw-animate-pulse tw-rounded-md tw-bg-iron-800 motion-reduce:tw-animate-none" />
               </div>
             </div>
-          );
-        }
-      )}
-    </div>
+          ))}
+
+        {artistsLoaded &&
+          artistCollections.map((artist) => (
+            <NextGenCollectionArtist
+              key={`nextgen-artist-${artist.address}`}
+              collection={artist.collections[0]!}
+              link_collections={artist.collections}
+            />
+          ))}
+
+        {artistsLoaded && artistCollections.length === 0 && (
+          <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-900/50 tw-px-6 tw-py-12 tw-text-center">
+            <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-200">
+              No artists found
+            </h2>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

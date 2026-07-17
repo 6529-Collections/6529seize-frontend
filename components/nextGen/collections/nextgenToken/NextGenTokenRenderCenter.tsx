@@ -6,65 +6,66 @@ import type { NextGenToken } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
 import { mainnet } from "wagmi/chains";
-import styles from "./NextGenToken.module.css";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 
 export default function NextgenTokenRenderCenter(
   props: Readonly<{ token: NextGenToken }>
 ) {
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
-          <h3 className="tw-mb-0">Display Center</h3>
+    <section>
+      <h2 className="tw-mb-5 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+        Display Center
+      </h2>
+      <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5">
+        <div className="tw-grid tw-gap-5 lg:tw-grid-cols-[2fr_1fr]">
+          <div>
+            <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-white">
+              Rendered Versions
+            </h3>
+            <div className="tw-grid tw-gap-2">
+              <NextGenTokenDownload
+                token={props.token}
+                resolution={Resolution["1K"]}
+              />
+              <NextGenTokenDownload
+                token={props.token}
+                resolution={Resolution["2K"]}
+              />
+              <NextGenTokenDownload
+                token={props.token}
+                resolution={Resolution["4K"]}
+              />
+              <NextGenTokenDownload
+                token={props.token}
+                resolution={Resolution["8K"]}
+              />
+              <NextGenTokenDownload
+                token={props.token}
+                resolution={Resolution["16K"]}
+              />
+            </div>
+          </div>
+          <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-pl-5 lg:tw-pt-0">
+            <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-white">
+              For Thumbnail Use Only
+            </h3>
+            <div className="tw-grid tw-gap-2">
+              <NextGenTokenDownload
+                token={props.token}
+                resolution={Resolution["Thumbnail"]}
+              />
+              <NextGenTokenDownload
+                token={props.token}
+                resolution={Resolution["0.5K"]}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div
-          className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-wrap tw-gap-2 tw-px-3 tw-pb-4 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
-          style={{ maxWidth: "100%" }}
-        >
-          <span className="tw-text-[#9a9a9a]">Rendered Versions:</span>
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["1K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["2K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["4K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["8K"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["16K"]}
-          />
-        </div>
-        <div
-          className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-gap-2 tw-px-3 tw-pb-4 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
-          style={{ maxWidth: "100%" }}
-        >
-          <span className="tw-text-[#9a9a9a]">For Thumbnail Use Only :</span>
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["Thumbnail"]}
-          />
-          <NextGenTokenDownload
-            token={props.token}
-            resolution={Resolution["0.5K"]}
-          />
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
+      </section>
+      <div className="tw-mt-4">
         <CustomRender token={props.token} />
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -107,101 +108,85 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
   }
 
   return (
-    <div
-      className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
-      style={{
-        minHeight: "150px",
-      }}
-    >
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <span className="tw-text-[#9a9a9a]">Custom Render:</span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-flex-wrap tw-gap-2 tw-px-3">
-          <label
-            className={`${styles["customRenderDropdown"]} tw-flex tw-items-center tw-gap-2`}
-          >
-            <span className="tw-text-[#9a9a9a]">Render Type:</span>
-            <select
-              value={renderType}
-              onChange={(event) => {
-                setRenderType(event.target.value as RenderType);
-              }}
-              className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-py-1 tw-pl-1 tw-pr-8 tw-text-lg tw-font-bold tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-              style={{ colorScheme: "dark" }}
-            >
-              {Object.values(RenderType).map((type) => (
-                <option
-                  key={type}
-                  value={type}
-                  className="tw-bg-black tw-text-white"
-                >
-                  {type}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label
-            className={`${styles["customRenderDropdown"]} tw-flex tw-items-center tw-gap-2`}
-          >
-            <span className="tw-text-[#9a9a9a]">Script Version:</span>
-            <select
-              value={scriptVersion}
-              onChange={(event) => {
-                setScriptVersion(event.target.value as ScriptVersion);
-              }}
-              className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-py-1 tw-pl-1 tw-pr-8 tw-text-lg tw-font-bold tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-              style={{ colorScheme: "dark" }}
-            >
-              {Object.values(ScriptVersion).map((version) => (
-                <option
-                  key={version}
-                  value={version}
-                  className="tw-bg-black tw-text-white"
-                >
-                  {version}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label
-            className={`${styles["customRenderDropdown"]} tw-flex tw-items-center tw-gap-2`}
-          >
-            <span className="tw-text-[#9a9a9a]">Height:</span>
-            <span className="tw-flex tw-items-center tw-gap-2">
-              <span className="tw-min-w-[88px] tw-text-left tw-text-lg tw-font-bold tw-text-white">
-                {height ? `${numberWithCommas(height)} px` : "Screen Size"}
-              </span>
-              <input
-                type="number"
-                min={1}
-                placeholder="enter height"
-                aria-label="Custom render height in pixels"
-                className={`${styles["customRenderInput"]} tw-rounded-md tw-border-0 tw-px-2 tw-py-1 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
-                value={height ?? ""}
-                onChange={(e) => {
-                  const nextHeight = Number.parseInt(e.target.value, 10);
-                  setHeight(
-                    Number.isNaN(nextHeight) || nextHeight < 1
-                      ? null
-                      : nextHeight
-                  );
-                }}
-              />
-            </span>
-          </label>
-          <button
-            className={`tw-min-w-fit tw-whitespace-nowrap tw-rounded-none tw-border-0 tw-px-5 tw-py-2 tw-font-bold ${styles["sceneBtn"]}`}
-            onClick={() => {
-              go();
+    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5">
+      <h3 className="tw-mb-3 tw-mt-0 tw-text-lg tw-font-semibold tw-text-white">
+        Custom Render
+      </h3>
+      <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-[1fr_1fr_1.35fr_auto] lg:tw-items-end">
+        <label className="tw-grid tw-gap-2">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-400">
+            Render Type
+          </span>
+          <select
+            value={renderType}
+            onChange={(event) => {
+              setRenderType(event.target.value as RenderType);
             }}
+            className="tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-[color-scheme:dark] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
-            <span>GO!</span>
-          </button>
-        </div>
+            {Object.values(RenderType).map((type) => (
+              <option
+                key={type}
+                value={type}
+                className="tw-bg-black tw-text-white"
+              >
+                {type}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="tw-grid tw-gap-2">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-400">
+            Script Version
+          </span>
+          <select
+            value={scriptVersion}
+            onChange={(event) => {
+              setScriptVersion(event.target.value as ScriptVersion);
+            }}
+            className="tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-[color-scheme:dark] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {Object.values(ScriptVersion).map((version) => (
+              <option
+                key={version}
+                value={version}
+                className="tw-bg-black tw-text-white"
+              >
+                {version}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="tw-grid tw-gap-2">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-400">
+            Height{" "}
+            {height ? `(${numberWithCommas(height)} px)` : "(screen size)"}
+          </span>
+          <input
+            type="number"
+            min={1}
+            placeholder="enter height"
+            aria-label="Custom render height in pixels"
+            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-[color-scheme:dark] placeholder:tw-text-iron-500 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            value={height ?? ""}
+            onChange={(e) => {
+              const nextHeight = Number.parseInt(e.target.value, 10);
+              setHeight(
+                Number.isNaN(nextHeight) || nextHeight < 1 ? null : nextHeight
+              );
+            }}
+          />
+        </label>
+        <button
+          type="button"
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition hover:tw-bg-iron-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          onClick={() => {
+            go();
+          }}
+        >
+          Open Render
+        </button>
       </div>
-    </div>
+    </section>
   );
 }

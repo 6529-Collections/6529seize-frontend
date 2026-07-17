@@ -16,7 +16,7 @@ jest.mock('@/components/cookies/CookieConsentContext', () => ({
 
 // Mock Next.js navigation hooks
 jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(() => '/test/path'),
+  usePathname: jest.fn(() => window.location.pathname),
 }));
 
 // Mock WagmiProvider and related hooks

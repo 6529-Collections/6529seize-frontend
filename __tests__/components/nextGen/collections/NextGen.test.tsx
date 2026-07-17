@@ -44,6 +44,7 @@ const collection: any = {
 
 describe("NextGen component", () => {
   it("calls setView when Learn More clicked", async () => {
+    window.scrollTo = jest.fn();
     const setView = jest.fn();
     render(<NextGen collection={collection} setView={setView} />);
     await userEvent.click(screen.getByText("Learn More"));

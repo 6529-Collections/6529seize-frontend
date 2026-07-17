@@ -34,20 +34,19 @@ export default function NextGenZoomableImage(
 
   useEffect(() => {
     const preventDefault = (e: Event) => e.preventDefault();
-    if (dragStart !== null) {
-      window.addEventListener("wheel", preventDefault, { passive: false });
-      window.addEventListener("touchmove", preventDefault, { passive: false });
-      document.body.style.overflow = "hidden";
-    } else {
-      window.removeEventListener("wheel", preventDefault);
-      window.removeEventListener("touchmove", preventDefault);
-      document.body.style.overflow = "";
+    if (dragStart === null) {
+      return;
     }
+
+    const previousOverflow = document.body.style.overflow;
+    window.addEventListener("wheel", preventDefault, { passive: false });
+    window.addEventListener("touchmove", preventDefault, { passive: false });
+    document.body.style.overflow = "hidden";
 
     return () => {
       window.removeEventListener("wheel", preventDefault);
       window.removeEventListener("touchmove", preventDefault);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [dragStart]);
 
@@ -182,11 +181,12 @@ export default function NextGenZoomableImage(
   }
 
   function getContent() {
-    let height = "85vh";
+    let viewportClassName = "tw-h-[85vh] tw-max-h-[85vh] tw-max-w-full";
     if (props.is_fullscreen) {
-      height = "100vh";
+      viewportClassName =
+        "tw-h-[calc(100dvh-2rem)] tw-w-[calc(100vw-2rem)] tw-max-h-[calc(100dvh-2rem)] tw-max-w-[calc(100vw-2rem)]";
     } else if (isMobileScreen) {
-      height = "55vh";
+      viewportClassName = "tw-h-[55vh] tw-max-h-[55vh] tw-max-w-full";
     }
     let cursor = "default";
     if (props.zoom_scale > MIN_ZOOM_SCALE) {
@@ -198,28 +198,11 @@ export default function NextGenZoomableImage(
     }
     return (
       <span
-        className="tw-flex tw-items-center tw-justify-center"
-        style={{
-          height: height,
-          width: "auto",
-          maxHeight: props.is_fullscreen ? "100vh" : "85vh",
-          maxWidth: "100%",
-          overflow: "hidden",
-          position: "relative",
-        }}
+        className={`tw-relative tw-flex tw-items-center tw-justify-center tw-overflow-hidden ${viewportClassName}`}
       >
         {loading && (
           <span
-            className="tw-flex tw-flex-col tw-gap-4 tw-items-center tw-justify-center"
-            style={{
-              position: "absolute",
-              top: "0",
-              left: "0",
-              width: "100%",
-              height: "100%",
-              zIndex: 2,
-              backgroundColor: "rgb(0, 0, 0)",
-            }}
+            className="tw-absolute tw-inset-0 tw-z-[2] tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-bg-black"
           >
             <span className="tw-flex tw-flex-wrap tw-text-center">
               {isMobileDevice ? "8K" : "16K"} Pebbles are very large

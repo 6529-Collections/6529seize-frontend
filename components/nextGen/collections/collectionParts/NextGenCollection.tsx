@@ -3,6 +3,7 @@
 import {
   getCollectionView,
   getContentViewKeyByValue,
+  getNextgenCollectionDocumentTitle,
 } from "@/app/nextgen/collection/[collection]/page-utils";
 import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
 import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
@@ -10,7 +11,6 @@ import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import { useEffect, useState } from "react";
-import styles from "../NextGen.module.css";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionArtist from "./NextGenCollectionArtist";
@@ -23,22 +23,20 @@ export function printViewButton(
   v: NextgenCollectionView,
   setView: (v: NextgenCollectionView) => void
 ) {
+  const isCurrent = v === currentView;
+
   return (
     <button
+      type="button"
       onClick={() => setView(v)}
-      className={`tw-cursor-pointer tw-border-0 tw-bg-transparent !tw-p-0 tw-font-[inherit] tw-text-inherit tw-no-underline tw-outline-[inherit] hover:tw-bg-transparent hover:tw-text-[#9a9a9a] focus:tw-bg-transparent focus:tw-text-[#9a9a9a] active:tw-bg-transparent active:tw-text-[#9a9a9a] ${
-        v === currentView ? styles["nextgenTokenDetailsLinkSelected"] : ""
+      aria-current={isCurrent ? "page" : undefined}
+      className={`tw-inline-flex tw-min-h-12 tw-items-center tw-justify-center tw-whitespace-nowrap tw-border-0 tw-border-b-2 tw-border-solid tw-bg-transparent tw-px-1 tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-bg-white/10 sm:tw-text-base ${
+        isCurrent
+          ? "tw-border-primary-400 tw-text-white"
+          : "tw-border-transparent tw-text-iron-400 hover:tw-text-white"
       }`}
     >
-      <h4
-        className={
-          v === currentView
-            ? "tw-text-white"
-            : "tw-cursor-pointer tw-text-[#9a9a9a]"
-        }
-      >
-        {v}
-      </h4>
+      {v}
     </button>
   );
 }
@@ -55,9 +53,7 @@ export default function NextGenCollectionComponent({
 
   const [view, setView] = useState<NextgenCollectionView>(initialView);
   useEffect(() => {
-    const viewTitle =
-      view !== NextgenCollectionView.OVERVIEW ? ` | ${view}` : "";
-    setTitle(`${collection.name}${viewTitle} | NextGen`);
+    setTitle(getNextgenCollectionDocumentTitle(collection.name, view));
   }, [collection.name, view, setTitle]);
 
   const updateView = (newView: NextgenCollectionView) => {
@@ -74,11 +70,11 @@ export default function NextGenCollectionComponent({
   };
 
   useEffect(() => {
-    const onPopState = (e: PopStateEvent) => {
-      if (e.state?.view) {
-        const newView = getCollectionView(e.state.view);
-        setView(newView);
-      }
+    const onPopState = () => {
+      const pathSegments = globalThis.location.pathname
+        .split("/")
+        .filter(Boolean);
+      setView(getCollectionView(pathSegments.at(-1) ?? ""));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
@@ -87,13 +83,27 @@ export default function NextGenCollectionComponent({
   return (
     <>
       <NextGenNavigationHeader />
-      {collection.mint_count > 0 && (
-        <NextGenCollectionSlideshow collection={collection} />
-      )}
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-2 tw-pt-4 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-        <NextGenCollectionHeader collection={collection} show_links={true} />
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-12">
-          <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-6 tw-px-3">
+      <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8">
+        <section className="tw-py-6 sm:tw-py-8">
+          <NextGenCollectionHeader
+            collection={collection}
+            show_links={true}
+            contained={false}
+            compact={true}
+          />
+        </section>
+
+        {collection.mint_count > 0 && (
+          <section aria-label={`${collection.name} slideshow`}>
+            <NextGenCollectionSlideshow collection={collection} />
+          </section>
+        )}
+
+        <nav
+          aria-label={`${collection.name} sections`}
+          className="tw-mt-6 tw-overflow-x-auto tw-border-0 tw-border-b tw-border-solid tw-border-white/15"
+        >
+          <div className="-tw-mb-px tw-inline-flex tw-min-w-max tw-gap-6 sm:tw-gap-8">
             {printViewButton(view, NextgenCollectionView.OVERVIEW, updateView)}
             {printViewButton(view, NextgenCollectionView.ABOUT, updateView)}
             {printViewButton(
@@ -107,32 +117,22 @@ export default function NextGenCollectionComponent({
               updateView
             )}
           </div>
-        </div>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <NextGenCollectionDetails collection={collection} view={view} />
-          </div>
-        </div>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <NextGenCollectionArt
-              collection={collection}
-              show_view_all={true}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-6 tw-pt-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <h4>About the Artist</h4>
-          </div>
-        </div>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <NextGenCollectionArtist collection={collection} />
-          </div>
-        </div>
+        </nav>
+
+        <section className="tw-pt-6">
+          <NextGenCollectionDetails collection={collection} view={view} />
+        </section>
+
+        <section className="tw-pt-10 sm:tw-pt-12">
+          <NextGenCollectionArt collection={collection} show_view_all={true} />
+        </section>
+
+        <section className="tw-pt-10 sm:tw-pt-12">
+          <h2 className="tw-mb-5 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl">
+            About the Artist
+          </h2>
+          <NextGenCollectionArtist collection={collection} headingLevel={3} />
+        </section>
       </div>
     </>
   );

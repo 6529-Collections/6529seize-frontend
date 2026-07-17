@@ -11,7 +11,6 @@ import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
 import { DistributionLink } from "../NextGen";
-import styles from "../NextGen.module.css";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
 import NextGenTraitSets from "./NextGenTraitSets";
 
@@ -37,232 +36,215 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-              <div
-                className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-pb-2 tw-pt-2 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
-                style={{ maxWidth: "100%" }}
-              >
-                {props.collection.artist_signature && (
-                  <>
-                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-[#9a9a9a]">
-                        Artist Signature
-                      </div>
-                    </div>
-                    <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-2">
-                      <div
-                        className="tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-pt-2"
-                        style={{ maxWidth: "100%" }}
-                      >
-                        <div className={styles["artistSignature"]}>
-                          {props.collection.artist_signature}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-                <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                  <div
-                    className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-px-3 tw-pb-2 tw-pt-2"
-                    style={{ maxWidth: "100%" }}
-                  >
-                    <span className="tw-text-[#9a9a9a]">Allowlist</span>
-                    <DistributionLink collection={props.collection} />
-                  </div>
-                  <div
-                    className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-gap-12 tw-px-3 tw-pb-2 tw-pt-2"
-                    style={{ maxWidth: "100%" }}
-                  >
-                    <span className="tw-flex tw-flex-col">
-                      <span className="tw-text-[#9a9a9a]">License</span>
-                      <span>{props.collection.licence}</span>
-                    </span>
-                    <span className="tw-flex tw-flex-col">
-                      <span className="tw-text-[#9a9a9a]">Library</span>
-                      <span>
-                        {props.collection.library
-                          ? props.collection.library
-                          : "-"}
-                      </span>
-                    </span>
-                  </div>
-                  <div
-                    className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-px-3 tw-pb-2 tw-pt-2"
-                    style={{ maxWidth: "100%" }}
-                  >
-                    <span className="tw-text-[#9a9a9a]">Contract</span>
-                    <span>
-                      <Link
-                        className="tw-text-white tw-no-underline"
-                        href={getEtherscanLink()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        data-tooltip-id={`contract-tooltip-${props.collection.id}`}
-                      >
-                        {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}
-                      </Link>
-                      <Tooltip
-                        id={`contract-tooltip-${props.collection.id}`}
-                        place="right"
-                        delayShow={500}
-                        style={{
-                          backgroundColor: "#1F2937",
-                          color: "white",
-                          padding: "4px 8px",
-                        }}
-                      >
-                        {NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}
-                      </Tooltip>
-                    </span>
-                  </div>
-                </div>
+    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-5 tw-shadow-lg sm:tw-p-6">
+      <div className="tw-grid tw-gap-5 lg:tw-grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:tw-gap-6">
+        <aside>
+          {props.collection.artist_signature && (
+            <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-3">
+              <h2 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                Artist Signature
+              </h2>
+              <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-line tw-break-words tw-text-base tw-font-semibold tw-leading-6 tw-text-white">
+                {props.collection.artist_signature}
+              </p>
+            </div>
+          )}
+
+          <dl className="tw-m-0 tw-grid tw-gap-3 tw-pt-3 sm:tw-grid-cols-2 lg:tw-grid-cols-1">
+            <div>
+              <dt className="tw-sr-only">Allowlist</dt>
+              <dd className="tw-m-0">
+                <DistributionLink
+                  collection={props.collection}
+                  emphasized={true}
+                />
+              </dd>
+            </div>
+            <div className="tw-grid tw-grid-cols-2 tw-gap-4">
+              <div>
+                <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                  License
+                </dt>
+                <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-100">
+                  {props.collection.licence || "-"}
+                </dd>
               </div>
-              <div
-                className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-flex-col tw-px-3 tw-pb-2 tw-pt-2 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-2/3 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto"
-                style={{ maxWidth: "100%" }}
-              >
-                <span className="tw-text-[#9a9a9a]">Collection Overview</span>
-                <span>{props.collection.description}</span>
+              <div>
+                <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                  Library
+                </dt>
+                <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-100">
+                  {props.collection.library || "-"}
+                </dd>
               </div>
             </div>
-          </div>
-        </div>
+            <div>
+              <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                Contract
+              </dt>
+              <dd className="tw-m-0 tw-mt-1">
+                <Link
+                  className="tw-inline-flex tw-rounded-md tw-text-sm tw-font-medium tw-text-white tw-no-underline hover:tw-text-primary-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  href={getEtherscanLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-tooltip-id={`contract-tooltip-${props.collection.id}`}
+                >
+                  {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}
+                </Link>
+                <Tooltip
+                  id={`contract-tooltip-${props.collection.id}`}
+                  place="right"
+                  delayShow={500}
+                  className="!tw-bg-iron-800 !tw-px-2 !tw-py-1 !tw-text-white"
+                >
+                  {NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}
+                </Tooltip>
+              </dd>
+            </div>
+          </dl>
+        </aside>
+
+        <article className="tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-pl-6 lg:tw-pt-0">
+          <h2 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+            Collection Overview
+          </h2>
+          <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-line tw-text-base tw-leading-7 tw-text-iron-100">
+            {props.collection.description}
+          </p>
+        </article>
       </div>
-    </div>
+    </section>
   );
 }
 
 function NextGenCollectionDetailsAbout() {
   return (
-    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 tw-pt-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h4>About Pebbles</h4>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <p>
+    <article className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-5 tw-shadow-lg sm:tw-p-6 lg:tw-p-8">
+      <div className="tw-space-y-8">
+        <section>
+          <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+            About Pebbles
+          </h2>
+          <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-200">
             Pebbles aims to explore the order that can emerge from a small set
             of organically inspired elements of points, lines, textures, and
             light.
           </p>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h4>History of Technical Innovation</h4>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <p>
+        </section>
+
+        <section>
+          <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+            History of Technical Innovation
+          </h2>
+          <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-200">
             ZeBlocks prides itself on technical innovation in its generative
             mints and on-chain work. Most ZeBlocks projects, including Pebbles,
             are 100% on-chain, and do not use any external libraries.
           </p>
-          <p>Pebbles follows in the tradition of prior ZeBlocks projects:</p>
-          <ul>
+          <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-200">
+            Pebbles follows in the tradition of prior ZeBlocks projects:
+          </p>
+          <ul className="tw-mb-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200">
             <li>Unigrids: SVG-based generative art & music project</li>
             <li>
               Beatboxes: First fully immersive VR audiovisual generative art
             </li>
             <li>Sensthesia: Audio-sensitive generative art NFTs</li>
           </ul>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h4>Pebbles: Matched To The Human Eye</h4>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <p>
+        </section>
+
+        <section>
+          <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+            Pebbles: Matched To The Human Eye
+          </h2>
+          <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-200">
             Pebble is one of the highest-resolution generative collections ever
             released
           </p>
-          <ul>
-            <li>The Challenge:</li>
-            <ul>
-              <li>
-                With the exception of SVG-based collections (that typically have
-                simpler structures), most generative collections do not, in
-                practice, have unlimited scalability resolution-wise
-              </li>
-              <li>
-                An output can be scaled up and rendered to a higher resolution
-                but if the underlying data point density does not exist in the
-                algorithm, render quality will typically start to suffer above
-                4K
-              </li>
-            </ul>
-          </ul>
-          <ul>
-            <li>The Goal</li>
-            <ul>
-              <li>
-                Pebbles aims to provide sufficient resolution to match or exceed
-                the acuity of the human eye even in a world of wall-sized TVs or
-                AR devices
-              </li>
-              <li>
-                Under typical large-screen TV viewing distances, 4K or 8K is
-                more than sufficient to exceed the acuity of the human eye
-              </li>
-              <li>
-                If wall-size TVs become common in the future, the limit of human
-                vision to discern differences in resolutions, under normal
-                conditions, will move up to somewhere between 8K and 16K
-              </li>
-              <li>
-                Pebbles is designed to have no loss of resolution at all up to
-                12.5K and continue to provide extraordinary detail at 16K and
-                beyond
-              </li>
-              <li>
-                In practice, and under the large majority of future display
-                conditions, every Pebble has more resolution than the human eye
-                can discern
-              </li>
-            </ul>
-          </ul>
-          <ul>
-            <li>The Approach</li>
-            <ul>
-              <li>The Pebble algorithm address this issue in two ways:</li>
-              <ul>
+          <div className="tw-mt-5 tw-space-y-6">
+            <div>
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-white">
+                The Challenge
+              </h3>
+              <ul className="tw-mb-0 tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200">
+                <li>
+                  With the exception of SVG-based collections (that typically
+                  have simpler structures), most generative collections do not,
+                  in practice, have unlimited scalability resolution-wise
+                </li>
+                <li>
+                  An output can be scaled up and rendered to a higher resolution
+                  but if the underlying data point density does not exist in the
+                  algorithm, render quality will typically start to suffer above
+                  4K
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-white">
+                The Goal
+              </h3>
+              <ul className="tw-mb-0 tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200">
+                <li>
+                  Pebbles aims to provide sufficient resolution to match or
+                  exceed the acuity of the human eye even in a world of
+                  wall-sized TVs or AR devices
+                </li>
+                <li>
+                  Under typical large-screen TV viewing distances, 4K or 8K is
+                  more than sufficient to exceed the acuity of the human eye
+                </li>
+                <li>
+                  If wall-size TVs become common in the future, the limit of
+                  human vision to discern differences in resolutions, under
+                  normal conditions, will move up to somewhere between 8K and
+                  16K
+                </li>
+                <li>
+                  Pebbles is designed to have no loss of resolution at all up to
+                  12.5K and continue to provide extraordinary detail at 16K and
+                  beyond
+                </li>
+                <li>
+                  In practice, and under the large majority of future display
+                  conditions, every Pebble has more resolution than the human
+                  eye can discern
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-white">
+                The Approach
+              </h3>
+              <p className="tw-mb-0 tw-mt-2 tw-text-base tw-leading-7 tw-text-iron-200">
+                The Pebble algorithm addresses this issue in two ways:
+              </p>
+              <ul className="tw-mb-0 tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200">
                 <li>Very dense number of data points</li>
                 <li>
                   Matches the data points to the exact pixels available at each
                   render, regardless of resolution
                 </li>
+                <li>
+                  This makes it computationally expensive to render. Pebbles
+                  does not use p5.js or other processing libraries to improve
+                  rendering performance, particularly at large sizes.
+                </li>
               </ul>
-              <li>
-                This makes it computationally expensive to render. Pebbles does
-                not use p5.js or other processing libraries to improve rendering
-                performance, particularly at large sizes.
-              </li>
-            </ul>
-          </ul>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h4>NextGen x Pebbles</h4>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+            NextGen x Pebbles
+          </h2>
+          <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-200">
             NextGen will take the following approach to support Pebbles’s
             extraordinary resolution:
           </p>
-          <ul>
+          <ul className="tw-mb-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200">
             <li>
               On mint day, NextGen will initially render Pebble mints in 1K (it
               will still take several minutes per mint given the complexity).
@@ -285,73 +267,102 @@ function NextGenCollectionDetailsAbout() {
               which can go fully on-chain independently.
             </li>
           </ul>
-        </div>
+        </section>
+
+        <section>
+          <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+            Key Collection Parameters
+          </h2>
+          <div className="tw-mt-4 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/10">
+            <table className="tw-w-full tw-min-w-[560px] tw-border-collapse tw-text-left tw-text-sm">
+              <tbody>
+                <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10">
+                  <th
+                    scope="row"
+                    className="tw-w-1/3 tw-bg-white/[0.03] tw-px-4 tw-py-3 tw-font-medium tw-text-iron-300"
+                  >
+                    Collection Size:
+                  </th>
+                  <td className="tw-px-4 tw-py-3 tw-text-iron-100">
+                    1,000 (or fewer, if fewer are minted in 24 hours)
+                  </td>
+                </tr>
+                <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10">
+                  <th
+                    scope="row"
+                    className="tw-bg-white/[0.03] tw-px-4 tw-py-3 tw-font-medium tw-text-iron-300"
+                  >
+                    Orientation:
+                  </th>
+                  <td className="tw-px-4 tw-py-3 tw-text-iron-100">Vertical</td>
+                </tr>
+                <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10">
+                  <th
+                    scope="row"
+                    className="tw-bg-white/[0.03] tw-px-4 tw-py-3 tw-font-medium tw-text-iron-300"
+                  >
+                    Aspect Ratio:
+                  </th>
+                  <td className="tw-px-4 tw-py-3 tw-text-iron-100">1:1.294</td>
+                </tr>
+                <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10">
+                  <th
+                    scope="row"
+                    className="tw-bg-white/[0.03] tw-px-4 tw-py-3 tw-font-medium tw-text-iron-300"
+                  >
+                    Script:
+                  </th>
+                  <td className="tw-px-4 tw-py-3 tw-text-iron-100">
+                    Javascript
+                  </td>
+                </tr>
+                <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10">
+                  <th
+                    scope="row"
+                    className="tw-bg-white/[0.03] tw-px-4 tw-py-3 tw-font-medium tw-text-iron-300"
+                  >
+                    Script Size:
+                  </th>
+                  <td className="tw-px-4 tw-py-3 tw-text-iron-100">17Kb</td>
+                </tr>
+                <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10">
+                  <th
+                    scope="row"
+                    className="tw-bg-white/[0.03] tw-px-4 tw-py-3 tw-font-medium tw-text-iron-300"
+                  >
+                    External libraries used:
+                  </th>
+                  <td className="tw-px-4 tw-py-3 tw-text-iron-100">None</td>
+                </tr>
+                <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10">
+                  <th
+                    scope="row"
+                    className="tw-bg-white/[0.03] tw-px-4 tw-py-3 tw-font-medium tw-text-iron-300"
+                  >
+                    License:
+                  </th>
+                  <td className="tw-px-4 tw-py-3 tw-text-iron-100">
+                    Creative Commons 0 (CC0)
+                  </td>
+                </tr>
+                <tr>
+                  <th
+                    scope="row"
+                    className="tw-bg-white/[0.03] tw-px-4 tw-py-3 tw-font-medium tw-text-iron-300"
+                  >
+                    Prints:
+                  </th>
+                  <td className="tw-px-4 tw-py-3 tw-text-iron-100">
+                    An official ZeBlocks approved printing process will be
+                    available in a few weeks
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <h4>Key Collection Parameters</h4>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <table className="tw-w-full tw-border-collapse">
-            <tbody>
-              <tr>
-                <th scope="row" className="tw-text-left tw-font-normal">
-                  Collection Size:
-                </th>
-                <td>1,000 (or fewer, if fewer are minted in 24 hours)</td>
-              </tr>
-              <tr>
-                <th scope="row" className="tw-text-left tw-font-normal">
-                  Orientation:
-                </th>
-                <td>Vertical</td>
-              </tr>
-              <tr>
-                <th scope="row" className="tw-text-left tw-font-normal">
-                  Aspect Ratio:
-                </th>
-                <td>1:1.294</td>
-              </tr>
-              <tr>
-                <th scope="row" className="tw-text-left tw-font-normal">
-                  Script:
-                </th>
-                <td>Javascript</td>
-              </tr>
-              <tr>
-                <th scope="row" className="tw-text-left tw-font-normal">
-                  Script Size:
-                </th>
-                <td>17Kb</td>
-              </tr>
-              <tr>
-                <th scope="row" className="tw-text-left tw-font-normal">
-                  External libraries used:
-                </th>
-                <td>None</td>
-              </tr>
-              <tr>
-                <th scope="row" className="tw-text-left tw-font-normal">
-                  License:
-                </th>
-                <td>Creative Commons 0 (CC0)</td>
-              </tr>
-              <tr>
-                <th scope="row" className="tw-text-left tw-font-normal">
-                  Prints:
-                </th>
-                <td>
-                  An official ZeBlocks approved printing process will be
-                  available in a few weeks
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    </article>
   );
 }
 

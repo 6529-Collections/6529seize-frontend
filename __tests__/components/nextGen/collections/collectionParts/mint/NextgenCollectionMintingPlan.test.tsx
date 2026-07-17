@@ -7,7 +7,11 @@ jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
 
-jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => () => <div data-testid='header' />);
+jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionHeader', () => ({
+  __esModule: true,
+  default: () => <div data-testid='header' />,
+  NextGenBackToCollectionPageLink: () => <div data-testid='back' />,
+}));
 jest.mock('@/components/pagination/Pagination', () => (props: any) => (
   <div data-testid='pagination'>
     <button onClick={() => props.setPage(props.page + 1)}>next</button>

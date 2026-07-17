@@ -1,7 +1,5 @@
 "use client";
 
-import styles from "./NextGenToken.module.css";
-
 import type {
   NextGenCollection,
   NextGenToken,
@@ -57,43 +55,29 @@ function TraitAccordion(
   }>
 ) {
   return (
-    <details>
-      <summary className="tw-cursor-pointer tw-py-2 focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400">
-        <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-            <div
-              className="tw-relative tw-w-5/12 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-              style={{ maxWidth: "100%" }}
-            >
-              {props.title}
-            </div>
-            <div
-              className="tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3"
-              style={{ maxWidth: "100%" }}
-            ></div>
-            <div
-              className="tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-text-center"
-              style={{ maxWidth: "100%" }}
-            >
-              <span className="tw-text-[#9a9a9a]">Rank:</span> #
+    <details className="tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80">
+      <summary className="tw-cursor-pointer tw-list-none tw-p-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+          <span className="tw-flex tw-items-center tw-gap-3 tw-font-semibold tw-text-white before:tw-content-['›'] group-open:before:tw-rotate-90 before:tw-text-xl before:tw-text-iron-400 before:tw-transition-transform">
+            {props.title}
+          </span>
+          <span className="tw-grid tw-grid-cols-2 tw-gap-4 tw-text-sm sm:tw-gap-8">
+            <span>
+              <span className="tw-text-iron-400">Rank:</span> #
               {props.rank.toLocaleString()}
-            </div>
-            <div
-              className="tw-relative tw-w-1/6 tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 tw-text-center"
-              style={{ maxWidth: "100%" }}
-            >
-              <span className="tw-text-[#9a9a9a]">Score:</span>{" "}
+            </span>
+            <span>
+              <span className="tw-text-iron-400">Score:</span>{" "}
               {displayScore(props.score)}
-            </div>
-          </div>
+            </span>
+          </span>
         </div>
       </summary>
       {props.traits && (
-        <div className={styles["tokenPropertiesAccordionBody"]}>
-          <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-            <table className="tw-w-full tw-border-collapse">
+        <div className="tw-overflow-x-auto tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/20">
+          <table className="tw-w-full tw-min-w-[720px] tw-border-collapse">
               <thead>
-                <tr className="tw-border-b tw-border-solid tw-border-iron-700">
+                <tr className="tw-border-b tw-border-solid tw-border-white/10 tw-text-sm tw-text-iron-400">
                   <th
                     scope="col"
                     className="tw-w-5/12 tw-px-3 tw-py-2 tw-text-left tw-font-normal"
@@ -125,13 +109,14 @@ function TraitAccordion(
                   .filter((t) => t.score !== -1)
                   .map((t) => (
                     <tr
+                      className="tw-border-0 tw-border-b tw-border-solid tw-border-white/5 last:tw-border-b-0"
                       key={`trait-${t.trait.replaceAll(
                         " ",
                         "-"
                       )}-${t.value.replaceAll(" ", "-")}`}
                     >
                       <td className="tw-w-5/12 tw-px-3 tw-py-2">
-                        <span className="tw-text-[#9a9a9a]">{t.trait}:</span>{" "}
+                        <span className="tw-text-iron-400">{t.trait}:</span>{" "}
                         <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
@@ -154,8 +139,7 @@ function TraitAccordion(
                     </tr>
                   ))}
               </tbody>
-            </table>
-          </div>
+          </table>
         </div>
       )}
     </details>
@@ -293,133 +277,117 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
-          <h3 className="tw-mb-0">Rarity</h3>
-        </div>
+    <section>
+      <div>
+        <h2 className="tw-mb-3 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+          Rarity
+        </h2>
+        <p className="tw-text-base tw-text-white">
+          Please be careful with rarity in generative collections.
+        </p>
+        <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
+          While it can be interesting to know, rarity does not necessarily
+          correlate with aesthetic quality or the value of generative art.
+        </p>
       </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <p>Please be careful with rarity in generative collections.</p>
-          <p>
-            While it can be an interesting thing to know, many less experienced
-            collectors over-estimate its importance. A piece of generative art
-            can be rare but not aesthetically pleasing. Rarity also does not
-            necessarily correlate to the value of a piece of generative art.
-          </p>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-4">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-lg tw-font-bold">
-          {props.token.name}
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-2">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-between tw-px-3">
-          <span className="tw-flex tw-gap-4">
-            <span className="tw-flex tw-items-center tw-gap-1">
+
+      <div className="tw-mt-6">
+        <div className="tw-mb-4 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white">
+            {props.token.name}
+          </h3>
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-3">
+            <span className="tw-flex tw-items-center tw-gap-2">
               <NextgenRarityToggle
                 title={"Trait Normalization"}
                 show={showNormalised}
                 setShow={setShowNormalised}
               />
             </span>
-            <span className="tw-flex tw-items-center tw-gap-1">
+            <span className="tw-flex tw-items-center tw-gap-2">
               <NextgenRarityToggle
                 title={"Trait Count"}
                 show={showTraitCount}
                 setShow={setShowTraitCount}
               />
             </span>
-          </span>
-          <span>Token Count: {props.tokenCount.toLocaleString()}</span>
+            <span className="tw-text-sm tw-text-iron-400">
+              Token count: {props.tokenCount.toLocaleString()}
+            </span>
+          </div>
         </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-2">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <TraitAccordion
-            title={"Rarity"}
-            score={getRarityScore()}
-            rank={getRarityRank()}
-            collection={props.collection}
-            token_count={props.tokenCount}
-            traits={props.traits
-              .map((t) => ({
-                trait: t.trait,
-                value: t.value,
-                score: getTraitRarityScore(t),
-                rank: getTraitRarityRank(t),
-                trait_count: t.trait_count,
-                value_count: t.value_count,
-              }))
-              .sort((a, b) => b.score - a.score)}
-          />
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-2">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <TraitAccordion
-            title={"Statistical Rarity"}
-            score={getStatisticalScore()}
-            rank={getStatisticalRank()}
-            collection={props.collection}
-            token_count={props.tokenCount}
-            traits={props.traits
-              .map((t) => ({
-                trait: t.trait,
-                value: t.value,
-                score: getTraitStatisticalScore(t),
-                rank: getTraitStatisticalRank(t),
-                trait_count: t.trait_count,
-                value_count: t.value_count,
-              }))
-              .sort((a, b) => b.score - a.score)}
-          />
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-2">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <TraitAccordion
-            title={"Single Trait Rarity"}
-            score={getSingleTraitRarityScore()}
-            rank={getSingleTraitRarityRank()}
-            collection={props.collection}
-            token_count={props.tokenCount}
-            traits={props.traits.map((t) => ({
+        <div className="tw-grid tw-gap-3">
+        <TraitAccordion
+          title={"Rarity"}
+          score={getRarityScore()}
+          rank={getRarityRank()}
+          collection={props.collection}
+          token_count={props.tokenCount}
+          traits={props.traits
+            .map((t) => ({
               trait: t.trait,
               value: t.value,
-              score: getTraitSingleRarityScore(t),
-              rank: getTraitSingleRarityRank(t),
+              score: getTraitRarityScore(t),
+              rank: getTraitRarityRank(t),
               trait_count: t.trait_count,
               value_count: t.value_count,
-            }))}
-          />
+            }))
+            .sort((a, b) => b.score - a.score)}
+        />
+        <TraitAccordion
+          title={"Statistical Rarity"}
+          score={getStatisticalScore()}
+          rank={getStatisticalRank()}
+          collection={props.collection}
+          token_count={props.tokenCount}
+          traits={props.traits
+            .map((t) => ({
+              trait: t.trait,
+              value: t.value,
+              score: getTraitStatisticalScore(t),
+              rank: getTraitStatisticalRank(t),
+              trait_count: t.trait_count,
+              value_count: t.value_count,
+            }))
+            .sort((a, b) => b.score - a.score)}
+        />
+        <TraitAccordion
+          title={"Single Trait Rarity"}
+          score={getSingleTraitRarityScore()}
+          rank={getSingleTraitRarityRank()}
+          collection={props.collection}
+          token_count={props.tokenCount}
+          traits={props.traits.map((t) => ({
+            trait: t.trait,
+            value: t.value,
+            score: getTraitSingleRarityScore(t),
+            rank: getTraitSingleRarityRank(t),
+            trait_count: t.trait_count,
+            value_count: t.value_count,
+          }))}
+        />
         </div>
       </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3"></div>
-      </div>
-    </div>
+    </section>
   );
 }
 
 export function NextgenTokenTraits(props: Readonly<Props>) {
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
-          <h3 className="tw-mb-0">Traits</h3>
-        </div>
-      </div>
-      {props.traits.map((t) => (
-        <div
-          className="-tw-mx-3 tw-flex tw-flex-wrap"
-          key={`trait-${t.trait.replaceAll(" ", "-")}`}
-        >
-          <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3 tw-pb-4">
-            <span className="tw-text-[#9a9a9a]">{t.trait}:</span>
-            <span>
+    <section>
+      <h3 className="tw-mb-3 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white">
+        Traits
+      </h3>
+      <dl className="tw-m-0 tw-divide-y tw-divide-white/10">
+        {props.traits.map((t) => (
+          <div
+            className="tw-grid tw-gap-1 tw-py-3 sm:tw-grid-cols-[minmax(9rem,0.38fr)_minmax(0,0.62fr)] sm:tw-gap-4"
+            key={`trait-${t.trait.replaceAll(" ", "-")}`}
+          >
+            <dt className="tw-text-sm tw-font-medium tw-text-iron-400">
+              {t.trait}:
+            </dt>
+            <dd className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               <Link
                 href={`/nextgen/collection/${formatNameForUrl(
                   props.collection.name
@@ -427,14 +395,15 @@ export function NextgenTokenTraits(props: Readonly<Props>) {
               >
                 {t.value}
               </Link>
-            </span>
-            <span className="tw-text-[#9a9a9a]">
-              {t.value_count.toLocaleString()}/{t.token_count.toLocaleString()}
-            </span>
+              <span className="tw-text-sm tw-text-iron-400">
+                {t.value_count.toLocaleString()}/
+                {t.token_count.toLocaleString()}
+              </span>
+            </dd>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </dl>
+    </section>
   );
 }
 
@@ -457,9 +426,11 @@ export function NextgenRarityToggle(
       />
       <label
         htmlFor={label}
-        className={props.disabled ? "tw-text-[#9a9a9a]" : "tw-text-white"}
+        className={`tw-font-medium ${
+          props.disabled ? "tw-text-iron-500" : "tw-text-white"
+        }`}
       >
-        <b>{props.title}</b>
+        {props.title}
       </label>
     </>
   );
