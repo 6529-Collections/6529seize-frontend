@@ -858,6 +858,13 @@ describe("CreateDropContent identity picker flow", () => {
         "false"
       );
 
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
       await userEvent.click(screen.getByText("type content"));
 
       await waitFor(() => {

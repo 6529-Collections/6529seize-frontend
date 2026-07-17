@@ -487,7 +487,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     drop,
     editingPartIndex,
     finalizeAndAddDropPartDraft,
-    isWideContainer,
+    keepOptionsVisible: keepDesktopOptionsVisible,
     refreshState,
     setDrop,
     setEditingPartIndex,
@@ -595,7 +595,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { handleFileChange, removeFile } = useCreateDropFileHandlers({
     drop,
     files,
-    isWideContainer,
+    keepOptionsVisible: keepDesktopOptionsVisible,
     waveId: wave.id,
     externalAttachmentDrop,
     onExternalAttachmentDropConsumed,
@@ -611,13 +611,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     (next: boolean) => {
       shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: next });
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         closeOnNextInputRef.current = false;
         return;
       }
       closeOnNextInputRef.current = next;
     },
-    [isWideContainer, wave.id]
+    [keepDesktopOptionsVisible, wave.id]
   );
 
   const handleEditorStateChange = useCallback(
@@ -625,7 +625,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setEditorState(newEditorState);
       shouldCollapseOptionsAfterMarkdownSyncRef.current = true;
 
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         return;
       }
 
@@ -633,12 +633,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         collapseOptions();
       }
     },
-    [collapseOptions, isWideContainer]
+    [collapseOptions, keepDesktopOptionsVisible]
   );
 
   const handleEditorBlur = useCallback(
     (event: React.FocusEvent<HTMLDivElement>) => {
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         return;
       }
       const nextTarget = event.relatedTarget as Node | null;
@@ -649,7 +649,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     },
-    [isWideContainer, wave.id]
+    [keepDesktopOptionsVisible, wave.id]
   );
 
   useEffect(() => {
