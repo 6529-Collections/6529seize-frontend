@@ -251,9 +251,9 @@ operations notification path during infrastructure setup.
   and validation procedure are explicitly declared in the deploy registry.
 - Codex cannot authorize ejection, merge, deployment, or rollback.
 - The bus remains functional without Codex credentials. A composition conflict
-  then quarantines the first candidate absent from the partial release branch,
-  requeues the other candidates, and relies on deterministic isolation logs
-  without an AI summary.
+  then publishes the conflict-free prefix (possibly containing zero
+  candidates), quarantines its first omitted candidate, requeues the others,
+  and relies on deterministic isolation logs without an AI summary.
 - The bus does not publish release notes.
 - The existing deployment manifest CLI and schema remain useful evidence
   tooling, but the database train ledger and exact operation records are the

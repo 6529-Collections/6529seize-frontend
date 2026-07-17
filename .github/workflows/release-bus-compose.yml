@@ -151,13 +151,18 @@ jobs:
           composition_complete=true
           if [ "$HAS_CONFLICT" = true ]; then
             if [ "$CODEX_ENABLED" != true ]; then
+              git rev-parse -q --verify MERGE_HEAD >/dev/null || {
+                echo 'Expected an active merge before deferring the conflicting candidate.' >&2
+                exit 1
+              }
               git merge --abort
               git config user.name "$RELEASE_BUS_GIT_NAME"
               git config user.email "$RELEASE_BUS_GIT_EMAIL"
               git -c core.hooksPath=/dev/null commit --allow-empty -s \
                 -m "Release train $TRAIN_ID: defer conflicting candidate" \
                 -m "Release-Bus-Train: $TRAIN_ID" \
-                -m "Release-Bus-Revision: $TRAIN_REVISION"
+                -m "Release-Bus-Revision: $TRAIN_REVISION" \
+                -m "Release-Bus-Defer: true"
               composition_complete=false
             else
               git diff --name-only HEAD | sort -u > /tmp/actual-paths.txt
@@ -256,6 +261,23 @@ jobs:
           git merge-base --is-ancestor "$BASE_SHA" "$head_sha"
           if [ "$COMPOSITION_COMPLETE" = true ]; then
             while IFS= read -r sha; do git merge-base --is-ancestor "$sha" "$head_sha"; done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
+          else
+            test "$(git rev-list --parents -n1 "$head_sha" | awk '{print NF}')" -eq 2
+            parent_sha="$(git rev-parse "$head_sha^1")"
+            test "$(git rev-parse "$head_sha^{tree}")" = "$(git rev-parse "$parent_sha^{tree}")"
+            git log -1 --format=%B "$head_sha" | grep -Fx 'Release-Bus-Defer: true'
+            missing_seen=false
+            while IFS= read -r sha; do
+              if git merge-base --is-ancestor "$sha" "$head_sha"; then
+                test "$missing_seen" = false || {
+                  echo 'Incomplete composition does not contain a strict candidate prefix.' >&2
+                  exit 1
+                }
+              else
+                missing_seen=true
+              fi
+            done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
+            test "$missing_seen" = true
           fi
           git fsck --no-dangling
           echo "head_sha=$head_sha" >> "$GITHUB_ENV"

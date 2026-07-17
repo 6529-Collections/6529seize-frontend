@@ -139,10 +139,11 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   validation checks the result. Deployment, schema, authentication,
   authorization, and instruction conflicts are never auto-resolved.
 - Codex is optional and read-only during failure diagnosis. Without it, the
-  bus publishes the partial conflict-free branch, verifies candidate ancestry,
-  quarantines the first omitted immutable candidate, and returns the others to
-  the queue. Deterministic isolation still works and its raw log remains the
-  diagnostic source of truth.
+  bus publishes the conflict-free candidate prefix (which can be empty when
+  the first candidate conflicts), verifies candidate ancestry, quarantines the
+  first omitted immutable candidate, and returns the others to the queue.
+  Deterministic isolation still works and its raw log remains the diagnostic
+  source of truth.
 - Isolation uses non-secret placeholder analytics and Sentry values. It helps
   diagnose deterministic candidate failures but does not replace the real
   preflight build or prove behavior that depends on credential value formats.
