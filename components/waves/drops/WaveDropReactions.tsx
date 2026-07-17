@@ -37,6 +37,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import {
   cloneReactionEntries,
@@ -852,21 +853,29 @@ function WaveDropReaction({
           </span>
         </div>
       </button>
-      {!isTouchDevice && (
-        <Tooltip
-          id={tooltipId}
-          delayShow={250}
-          place="bottom"
-          opacity={1}
-          clickable
-          style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}
-        >
-          <div className="tw-flex tw-items-center tw-gap-2">
-            {emojiNodeTooltip}
-            {tooltipContent}
-          </div>
-        </Tooltip>
-      )}
+      {!isTouchDevice &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <Tooltip
+            id={tooltipId}
+            delayShow={250}
+            place="bottom"
+            positionStrategy="fixed"
+            opacity={1}
+            clickable
+            style={{
+              backgroundColor: "#37373E",
+              color: "white",
+              zIndex: 99999,
+            }}
+          >
+            <div className="tw-flex tw-items-center tw-gap-2">
+              {emojiNodeTooltip}
+              {tooltipContent}
+            </div>
+          </Tooltip>,
+          document.body
+        )}
     </>
   );
 }

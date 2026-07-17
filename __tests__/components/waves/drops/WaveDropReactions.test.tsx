@@ -1044,7 +1044,7 @@ describe("WaveDropReactions", () => {
       )
     );
 
-    render(
+    const { container } = render(
       <WaveDropReactions
         drop={
           createMockDrop({
@@ -1071,6 +1071,7 @@ describe("WaveDropReactions", () => {
     await waitFor(() => {
       const moreButton = screen.queryByText(/and 2 others/);
       expect(moreButton).toBeInTheDocument();
+      expect(container.contains(moreButton)).toBe(false);
     });
   });
 
