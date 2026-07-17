@@ -14,6 +14,7 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const dropReactionRequestFailedMessage = "Drop reaction request failed";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
   const indexedDBUserDeleteMessage =
@@ -304,6 +305,54 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+  });
+
+  const createDropReactionNetworkEvent = (eventId: string) => ({
+    event_id: eventId,
+    level: "warning",
+    message: "",
+    fingerprint: ["drop-reaction", "network"],
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: dropReactionRequestFailedMessage,
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+        },
+      ],
+    },
+    tags: {
+      feature: "drop-reaction",
+      operation: "reaction-request",
+      error_kind: "network",
+    },
+    breadcrumbs: [
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "GET",
+          url: "/profile",
+          "url.is_first_party": true,
+          "url.is_first_party_api": false,
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "POST",
+          url: "/api/drops/reaction",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
+        },
+      },
+    ],
   });
 
   const createPoperBlockerOrphanFetchRejectionEvent = (
@@ -2706,6 +2755,43 @@ describe("instrumentation-client", () => {
     expect(event.message).toBe(expectedMessage);
     expect(event.exception.values[0]?.value).not.toContain("token=");
     expect(event.message).not.toContain("#hash");
+  });
+
+  it("drops a sampled-out synthetic drop-reaction transport warning", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createDropReactionNetworkEvent("network-drop-event");
+
+    const result = beforeSend(event, {
+      originalException: new Error(dropReactionRequestFailedMessage),
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps and tags a sampled-in synthetic drop-reaction transport warning", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createDropReactionNetworkEvent("event-200");
+
+    const result = beforeSend(event, {
+      originalException: new Error(dropReactionRequestFailedMessage),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        feature: "drop-reaction",
+        operation: "reaction-request",
+        error_kind: "network",
+        network_failure_kind: "browser_transport",
+        network_noise_sampled: "true",
+      })
+    );
+    expect(result?.tags?.["errorType"]).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      dropReactionRequestFailedMessage
+    );
+    expect(result?.exception?.values?.[0]?.value).not.toContain("/");
+    expect(result?.fingerprint).toEqual(["drop-reaction", "network"]);
   });
 
   it("keeps and tags sampled-in app-wrapped absolute API network errors using the original target", () => {

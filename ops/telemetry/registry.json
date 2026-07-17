@@ -424,7 +424,7 @@
       "owner": "sentry",
       "producer": "utils/monitoring/dropReactionMonitoring.ts",
       "destinations": ["sentry:owner"],
-      "sampling": "breadcrumbs attach to captured Sentry events; error capture has a 60-second dedupe window",
+      "sampling": "breadcrumbs attach to captured Sentry events; error capture has a 60-second dedupe window; the exact privacy-safe no-status first-party browser-transport warning uses the shared deterministic 10% low-value network sample, while all other reaction warnings and failures remain outside that sampler",
       "privacy": "bounded route and endpoint families, source/action/status/error enums, booleans, mutation sequence, and duration buckets only; raw mutation/drop/wave/profile identifiers, reaction values, paths, endpoints, and error messages were removed 2026-07-17",
       "externalUsage": "unverified",
       "lifecycle": "keep",

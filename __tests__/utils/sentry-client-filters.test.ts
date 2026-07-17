@@ -1681,6 +1681,38 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createDropReactionNetworkEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    event_id: "network-drop-event",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "Drop reaction request failed",
+        },
+      ],
+    },
+    tags: {
+      feature: "drop-reaction",
+      operation: "reaction-request",
+      error_kind: "network",
+    },
+    breadcrumbs: [
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          url: "/api/drops/reaction",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
+        },
+      },
+    ],
+    ...overrides,
+  });
+
   const setNavigatorUserAgent = (userAgent: string): void => {
     Object.defineProperty(globalThis.navigator, "userAgent", {
       value: userAgent,
@@ -2727,6 +2759,127 @@ describe("sentry-client-filters", () => {
 
     expect(result).toBe("drop");
   });
+
+  it("samples the exact synthetic drop-reaction transport warning", () => {
+    const event = createDropReactionNetworkEvent();
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it.each([
+    {
+      name: "message",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Drop reaction request timed out",
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "additional exception",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Drop reaction request failed",
+            },
+            {
+              type: "Error",
+              value: "Additional application failure",
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "feature",
+      overrides: {
+        tags: {
+          feature: "wave-reaction",
+          operation: "reaction-request",
+          error_kind: "network",
+        },
+      },
+    },
+    {
+      name: "operation",
+      overrides: {
+        tags: {
+          feature: "drop-reaction",
+          operation: "reaction-sync",
+          error_kind: "network",
+        },
+      },
+    },
+    ...["auth", "rate-limit", "endpoint-contract", "server"].map(
+      (errorKind) => ({
+        name: `${errorKind} error kind`,
+        overrides: {
+          tags: {
+            feature: "drop-reaction",
+            operation: "reaction-request",
+            error_kind: errorKind,
+          },
+        },
+      })
+    ),
+    {
+      name: "HTTP response status",
+      overrides: {
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            level: "error",
+            data: {
+              status_code: 500,
+              url: "/api/drops/reaction",
+              "url.is_first_party": true,
+              "url.is_first_party_api": true,
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: "third-party target",
+      overrides: {
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            level: "error",
+            data: {
+              url: "https://example.com/reaction",
+              "url.is_first_party": false,
+              "url.is_first_party_api": false,
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: "failed transport breadcrumb",
+      overrides: { breadcrumbs: [] },
+    },
+  ])(
+    "keeps a synthetic drop-reaction near miss with different $name",
+    ({ overrides }) => {
+      expect(
+        getLowValueNetworkErrorDecision(
+          createDropReactionNetworkEvent(overrides),
+          0
+        )
+      ).toBe("not_applicable");
+    }
+  );
 
   it("drops sampled-out status 0 network errors from API environment subdomains", () => {
     const event = createLowValueNetworkEvent({

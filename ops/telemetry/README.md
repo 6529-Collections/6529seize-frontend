@@ -33,6 +33,17 @@ the sample rate and exact `duration_ms` attached. Warnings, failures, and
 product-unavailable outcomes remain always eligible for Sentry delivery.
 Cancellation remains a non-failure classification.
 
+Drop-reaction error telemetry has one narrower transport-noise policy. After
+the producer's 60-second dedupe window, only the exact privacy-safe
+`Drop reaction request failed` warning with the `drop-reaction` feature,
+`reaction-request` operation, `network` error kind, one `Error` exception, and
+a failed no-status first-party API breadcrumb enters the shared deterministic
+10% low-value network sampler. Retained samples receive the existing
+`network_failure_kind=browser_transport` and `network_noise_sampled=true`
+tags. Auth, rate-limit, endpoint-contract, server, real HTTP-status,
+different-message, different-tag, third-party, extra-exception, and
+missing-transport-breadcrumb cases remain outside this sampler.
+
 Using the observed release volume of about 55,700 routine Wave start, success,
 and cancellation records versus 31 warnings, even the conservative assumption
 that every routine record is sample-eligible bounds routine Sentry volume at
