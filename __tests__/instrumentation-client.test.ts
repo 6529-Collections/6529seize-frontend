@@ -16,6 +16,8 @@ describe("instrumentation-client", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const emptyObjectUnhandledRejectionMessage =
+    "Object captured as promise rejection with keys: [object has no keys]";
   const indexedDBUserDeleteMessage =
     "Database deleted by request of the user";
   const talismanOnboardingMessage =
@@ -413,6 +415,36 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("preserves empty-object global rejections without third-party proof", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      level: "error",
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: emptyObjectUnhandledRejectionMessage,
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              synthetic: true,
+              handled: false,
+            },
+          },
+        ],
+      },
+      extra: { __serialized__: {} },
+    };
+
+    const result = beforeSend(event, { originalException: {} });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        level: "error",
+        exception: event.exception,
+      })
+    );
   });
 
   it("drops exact React DOM insertBefore NotFoundError events on waves routes with no app frames", () => {
