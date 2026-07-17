@@ -734,6 +734,7 @@ describe("sentry-client-filters", () => {
     value = poperBlockerNetworkErrorMessage,
     mechanismType = "auto.browser.global_handlers.onunhandledrejection",
     handled = false,
+    includeHandled = true,
     frames = [
       {
         filename:
@@ -763,6 +764,7 @@ describe("sentry-client-filters", () => {
     value?: string | undefined;
     mechanismType?: string | undefined;
     handled?: boolean | undefined;
+    includeHandled?: boolean | undefined;
     frames?: SentryStackFrame[] | undefined;
   } = {}): TestSentryClientEvent => ({
     transaction: "/waves/:wave",
@@ -773,7 +775,7 @@ describe("sentry-client-filters", () => {
           value,
           mechanism: {
             type: mechanismType,
-            handled,
+            ...(includeHandled ? { handled } : {}),
           },
           stacktrace: { frames },
         },
@@ -6516,10 +6518,40 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("keeps Poper Blocker-shaped rejections with an extra injected frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
   it.each([
     ["unrelated error", { value: "Application request validation failed." }],
     ["non-TypeError", { type: "Error" }],
     ["handled rejection", { handled: true }],
+    ["missing handled flag", { includeHandled: false }],
     ["different mechanism", { mechanismType: "generic" }],
   ])("keeps a Poper Blocker frame pair for an %s", (_caseName, overrides) => {
     const event = createPoperBlockerOrphanFetchRejectionEvent(overrides);
@@ -6552,6 +6584,36 @@ describe("sentry-client-filters", () => {
         },
       ],
     });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps mixed-exception events with a Poper Blocker rejection first", () => {
+    const poperBlockerEvent = createPoperBlockerOrphanFetchRejectionEvent();
+    const event: TestSentryClientEvent = {
+      ...poperBlockerEvent,
+      exception: {
+        values: [
+          ...(poperBlockerEvent.exception?.values ?? []),
+          {
+            type: "Error",
+            value: "Application request validation failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+                  function: "executeApiRequest",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
 
     const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
 

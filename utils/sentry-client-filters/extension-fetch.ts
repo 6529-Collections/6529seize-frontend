@@ -56,7 +56,12 @@ export function shouldFilterPoperBlockerOrphanFetchRejection(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  const value = event.exception?.values?.[0];
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
   if (
     value?.type !== "TypeError" ||
     !isNetworkErrorMessage(value.value ?? "") ||

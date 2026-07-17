@@ -1585,6 +1585,37 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("keeps mixed-exception events with a Poper Blocker rejection first", () => {
+    const beforeSend = loadBeforeSend();
+    const poperBlockerEvent = createPoperBlockerOrphanFetchRejectionEvent();
+    const event = {
+      ...poperBlockerEvent,
+      exception: {
+        values: [
+          ...poperBlockerEvent.exception.values,
+          {
+            type: "Error",
+            value: "Application request validation failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+                  function: "executeApiRequest",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
   it("keeps first-party unread-DM network failures without the extension signature", () => {
     const beforeSend = loadBeforeSend();
     const event = {
