@@ -30,6 +30,21 @@ export default function CreateWave({
   const containerRef = useRef<HTMLDivElement | null>(null);
   useKeyboardFocusScroll(containerRef);
 
+  // Each step renders fresh content, but the layout's scroll container keeps
+  // the offset where the user tapped Next (the bottom of the previous step),
+  // landing them mid-page on taller steps like the announce-wave Dates step.
+  // Reset every scrolled ancestor so each step starts at the top.
+  useEffect(() => {
+    let node: HTMLElement | null = containerRef.current;
+    while (node) {
+      if (node.scrollTop > 0) {
+        node.scrollTop = 0;
+      }
+      node = node.parentElement;
+    }
+    window.scrollTo({ top: 0 });
+  }, [step]);
+
   // The Next button can sit a full screen below the offending field on
   // phones, where a validation failure with no visible reaction reads as a
   // dead button. Effects run after the error state commits, so the invalid
@@ -69,7 +84,13 @@ export default function CreateWave({
   };
 
   return (
-    <div ref={containerRef}>
+    // The bottom safe-area region is inside the viewport (viewport-fit=cover)
+    // and iOS Safari's floating bottom chrome overlays it; without this
+    // padding the last row (Previous/Next) renders half-hidden behind it.
+    <div
+      ref={containerRef}
+      className="create-wave-flow tw-pb-[env(safe-area-inset-bottom,0px)]"
+    >
       <CreateWaveFlow
         title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
           config.overview.name ? `"${config.overview.name}"` : ""
