@@ -86,7 +86,7 @@ Both repositories contain release-bus workflows for:
 
 - temporary release-branch composition;
 - immutable preflight and packaging;
-- deterministic candidate isolation with read-only Codex diagnostics;
+- deterministic candidate isolation with optional read-only Codex diagnostics;
 - post-production `main` to `1a-staging` synchronization.
 
 Backend deployment continues through the generated per-service workflow, now
@@ -139,6 +139,19 @@ the live version.
 - `STAGING`: the bus owns normal staging; production remains manual break glass.
 - `PRODUCTION`: the bus owns normal staging and production.
 
+The readiness API enforces those boundaries:
+
+- `OFF` rejects every readiness submission before GitHub or the ledger is
+  touched.
+- `SHADOW` accepts eligible shadow candidates but does not create a GitHub
+  commit status.
+- `STAGING` accepts staging readiness and rejects production readiness.
+- `PRODUCTION` accepts both staging and production readiness.
+- Cancelling a candidate that already has a `Release Bus` commit status
+  publishes the terminal status `release readiness cancelled`, including when
+  a rollout mode was reduced after the original submission. Shadow-only
+  candidates do not gain a status when cancelled.
+
 `RELEASE_BUS_ENFORCEMENT=true` in each GitHub repository turns legacy manual
 deployments into operator-only audited break glass. Enable it only after the
 corresponding bus mode is healthy.
@@ -180,9 +193,11 @@ GitHub repository variables/secrets in both repositories:
 - variable `RELEASE_BUS_API_URL`
 - variable `RELEASE_BUS_GITHUB_APP_ID`
 - variable `RELEASE_BUS_GITHUB_APP_BOT_LOGIN`
+- optional variable `RELEASE_BUS_CODEX_ENABLED`; it must equal `true` to run
+  Codex and defaults to disabled when absent
 - secret `RELEASE_BUS_GITHUB_PRIVATE_KEY`
 - secret `RELEASE_BUS_WORKFLOW_AUTH_TOKEN`
-- secret `OPENAI_API_KEY` only for the isolated Codex jobs
+- secret `OPENAI_API_KEY` only when `RELEASE_BUS_CODEX_ENABLED=true`
 - the existing AWS, staging, build, and E2E secrets used by current workflows
 
 Frontend bus deployment additionally needs its existing staging host, S3,
@@ -235,6 +250,10 @@ operations notification path during infrastructure setup.
 - Automatic rollback defaults to disabled for every service until an adapter
   and validation procedure are explicitly declared in the deploy registry.
 - Codex cannot authorize ejection, merge, deployment, or rollback.
+- The bus remains functional without Codex credentials. A composition conflict
+  then quarantines the first candidate absent from the partial release branch,
+  requeues the other candidates, and relies on deterministic isolation logs
+  without an AI summary.
 - The bus does not publish release notes.
 - The existing deployment manifest CLI and schema remain useful evidence
   tooling, but the database train ledger and exact operation records are the
