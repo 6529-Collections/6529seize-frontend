@@ -17,9 +17,11 @@ import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
 import {
   canStoreAnotherWalletAccount,
   getAuthJwt,
+  getWalletAddress,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
 } from "@/services/auth/auth.utils";
+import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { validateJwt } from "@/services/auth/jwt-validation.utils";
 import {
   getSessionNonce,
@@ -39,6 +41,7 @@ import type {
   AuthLoadingState,
   AuthRolloutSettings,
   AuthorizedWalletValidationResult,
+  RequestAuthOptions,
   SessionUpgradePromptStatus,
   SignModalReason,
 } from "./authTypes";
@@ -88,11 +91,51 @@ interface AuthRequestActions {
   readonly onActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
   ) => Promise<void>;
-  readonly requestAuth: () => Promise<{ success: boolean }>;
+  readonly requestAuth: (
+    options?: RequestAuthOptions
+  ) => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade: () => Promise<{ success: boolean }>;
 }
 
+interface AuthRequestGuard {
+  readonly isCurrent: () => boolean;
+  readonly acceptCurrentState: (walletAddress: string) => boolean;
+}
+
 const MANUAL_AUTH_VALIDATION_TIMEOUT_MS = 30_000;
+
+const getCurrentAuthStateFingerprint = (): string =>
+  getAuthStateFingerprint({
+    walletAddress: getWalletAddress(),
+    jwt: getAuthJwt(),
+  });
+
+const createAuthRequestGuard = ({
+  expectedAuthStateFingerprint,
+}: RequestAuthOptions): AuthRequestGuard => {
+  let expectedFingerprint = expectedAuthStateFingerprint;
+
+  return {
+    isCurrent: () =>
+      expectedFingerprint === undefined ||
+      getCurrentAuthStateFingerprint() === expectedFingerprint,
+    acceptCurrentState: (walletAddress: string) => {
+      if (expectedFingerprint === undefined) {
+        return true;
+      }
+
+      const currentWalletAddress = getWalletAddress();
+      if (
+        currentWalletAddress?.toLowerCase() !== walletAddress.toLowerCase()
+      ) {
+        return false;
+      }
+
+      expectedFingerprint = getCurrentAuthStateFingerprint();
+      return true;
+    },
+  };
+};
 
 const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
   if (globalThis.window === undefined) {
@@ -271,11 +314,16 @@ export function createAuthRequestActions({
   const requestSignIn = async ({
     signerAddress,
     role,
+    authRequestGuard,
   }: {
     readonly signerAddress: string;
     readonly role: string | null;
+    readonly authRequestGuard?: AuthRequestGuard | undefined;
   }): Promise<{ success: boolean }> => {
     try {
+      if (authRequestGuard && !authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
       if (!canStoreAnotherWalletAccount(signerAddress)) {
         setToast({
           message: "You've reached the connected profile limit.",
@@ -285,9 +333,15 @@ export function createAuthRequestActions({
       }
 
       const nonceResponse = await getNonce({ signerAddress });
+      if (authRequestGuard && !authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
       const { signable_message, server_signature } = nonceResponse;
 
       const clientSignature = await getSignature({ message: signable_message });
+      if (authRequestGuard && !authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
       if (clientSignature.userRejected) {
         setToast({
           message: "Authentication was canceled in your wallet.",
@@ -306,12 +360,16 @@ export function createAuthRequestActions({
         return { success: false };
       }
 
-      const isPersisted = await loginWithSessionV2({
+      const sessionResponse = await loginWithSessionV2({
         serverSignature: server_signature,
         clientSignature: clientSignature.signature,
         signerAddress,
         role,
-      }).then(persistSessionResponse);
+      });
+      if (authRequestGuard && !authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
+      const isPersisted = await persistSessionResponse(sessionResponse);
       if (!isPersisted) {
         setToast({
           message: "Couldn't save this connected profile. Please try again.",
@@ -319,9 +377,18 @@ export function createAuthRequestActions({
         });
         return { success: false };
       }
+      if (
+        authRequestGuard &&
+        !authRequestGuard.acceptCurrentState(signerAddress)
+      ) {
+        return { success: false };
+      }
 
       return { success: true };
     } catch (error) {
+      if (authRequestGuard && !authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
       if (error instanceof InvalidSignerAddressError) {
         setToast({
           message: "Enter a valid wallet address.",
@@ -365,13 +432,18 @@ export function createAuthRequestActions({
   };
 
   const authenticateUnauthorizedWallet = async (
-    walletAddress: string
+    walletAddress: string,
+    authRequestGuard: AuthRequestGuard
   ): Promise<boolean> => {
     const { success } = await requestSignIn({
       signerAddress: walletAddress,
       role: null,
+      authRequestGuard,
     });
 
+    if (!authRequestGuard.isCurrent()) {
+      return false;
+    }
     if (!success) {
       setShowSignModal(false);
       try {
@@ -396,9 +468,13 @@ export function createAuthRequestActions({
   };
 
   const getAuthorizedWalletValidationResult = async ({
+    authRequestGuard,
+    serverRejected,
     walletAddress,
     role,
   }: {
+    readonly authRequestGuard: AuthRequestGuard;
+    readonly serverRejected: boolean;
     readonly walletAddress: string;
     readonly role: string | null;
   }): Promise<AuthorizedWalletValidationResult> => {
@@ -416,7 +492,17 @@ export function createAuthRequestActions({
       operationId: `manual-auth-${Date.now()}`,
       abortSignal: validationAbort.signal,
       activeProfileProxy,
+      serverRejected,
+      shouldPersistRefreshedSession: authRequestGuard.isCurrent,
     }).finally(validationAbort.cleanup);
+
+    if (serverRejected && validationResult.isValid) {
+      if (!authRequestGuard.acceptCurrentState(walletAddress)) {
+        return { isValid: false, wasCancelled: true };
+      }
+    } else if (!authRequestGuard.isCurrent()) {
+      return { isValid: false, wasCancelled: true };
+    }
 
     if (
       validationResult.requiresSessionUpgrade &&
@@ -429,16 +515,20 @@ export function createAuthRequestActions({
   };
 
   const prepareAuthorizedWalletReauthentication = async ({
+    serverRejected,
     walletAddress,
     validationResult,
   }: {
+    readonly serverRejected: boolean;
     readonly walletAddress: string;
     readonly validationResult: AuthorizedWalletValidationResult;
   }): Promise<boolean> => {
     if (!validationResult.requiresSessionUpgrade) {
       setSignModalReason("auth");
       setSessionUpgradeRequired(false);
-      await removeAuthJwt();
+      if (!serverRejected) {
+        await removeAuthJwt();
+      }
       return true;
     }
 
@@ -478,16 +568,23 @@ export function createAuthRequestActions({
   };
 
   const authenticateAuthorizedWallet = async (
-    walletAddress: string
+    walletAddress: string,
+    serverRejected: boolean,
+    authRequestGuard: AuthRequestGuard
   ): Promise<boolean> => {
     const role = activeProfileProxy
       ? validateRoleForAuthentication(activeProfileProxy)
       : null;
 
     const validationResult = await getAuthorizedWalletValidationResult({
+      authRequestGuard,
+      serverRejected,
       walletAddress,
       role,
     });
+    if (!authRequestGuard.isCurrent()) {
+      return false;
+    }
     if (validationResult.wasCancelled) {
       setToast({
         message: "Couldn't verify your session. Please try again.",
@@ -518,17 +615,23 @@ export function createAuthRequestActions({
 
     if (!validationResult.isValid) {
       const canReauthenticate = await prepareAuthorizedWalletReauthentication({
+        serverRejected,
         walletAddress,
         validationResult,
       });
-      if (!canReauthenticate) {
+      if (!canReauthenticate || !authRequestGuard.isCurrent()) {
         return false;
       }
 
       const { success } = await requestSignIn({
         signerAddress: walletAddress,
         role,
+        authRequestGuard,
       });
+
+      if (!authRequestGuard.isCurrent()) {
+        return false;
+      }
 
       if (!success) {
         return await handleAuthorizedWalletSignInFailure(
@@ -546,7 +649,14 @@ export function createAuthRequestActions({
     return finishAuthorizedWalletAuthentication();
   };
 
-  const requestAuth = async (): Promise<{ success: boolean }> => {
+  const requestAuth = async (
+    options?: RequestAuthOptions
+  ): Promise<{ success: boolean }> => {
+    const authRequestGuard = createAuthRequestGuard(options ?? {});
+    if (!authRequestGuard.isCurrent()) {
+      return { success: false };
+    }
+
     const connectedAddress = ensureConnectedWalletAddress();
     if (!connectedAddress) {
       return { success: false };
@@ -560,11 +670,20 @@ export function createAuthRequestActions({
 
     try {
       const success = isAddressAuthorized
-        ? await authenticateAuthorizedWallet(connectedAddress)
-        : await authenticateUnauthorizedWallet(connectedAddress);
+        ? await authenticateAuthorizedWallet(
+            connectedAddress,
+            options?.serverRejected === true,
+            authRequestGuard
+          )
+        : await authenticateUnauthorizedWallet(
+            connectedAddress,
+            authRequestGuard
+          );
       return { success };
     } finally {
-      setAuthLoadingState("idle");
+      if (authRequestGuard.isCurrent()) {
+        setAuthLoadingState("idle");
+      }
     }
   };
 
