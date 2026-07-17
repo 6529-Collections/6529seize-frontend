@@ -289,11 +289,10 @@ describe("sentry-client-filters", () => {
             handled: false,
           },
           stacktrace: {
+            // Matches the Browser SDK frame shape available to beforeSend.
             frames: [
               {
                 filename: "app:///requestRelay.js",
-                abs_path: "app:///requestRelay.js",
-                module: "requestRelay",
                 function: "i.onclose",
                 lineno: 2,
                 colno: 248957,
@@ -4082,8 +4081,19 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it("filters the exact Coinbase Wallet extension request relay signature", () => {
+  it("filters the browser-parsed Coinbase Wallet request relay signature", () => {
     const event = createCoinbaseWalletRequestRelayEvent();
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the qualified request relay function from the latest occurrence", () => {
+    const event = createCoinbaseWalletRequestRelayEvent({
+      function:
+        "__webpack_modules__.67891.t.WalletLinkWebSocket.connect.i.onclose",
+    });
 
     const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
 
@@ -4102,8 +4112,8 @@ describe("sentry-client-filters", () => {
   });
 
   it.each([
-    ["module", { module: "otherRelay" }],
     ["function", { function: "onclose" }],
+    ["qualified function", { function: "other.i.onclose" }],
     ["line", { lineno: 3 }],
     ["column", { colno: 248958 }],
   ] as const)(
@@ -4190,8 +4200,6 @@ describe("sentry-client-filters", () => {
   it.each([
     ["missing filename", { filename: undefined }],
     ["different filename", { filename: "app:///other.js" }],
-    ["missing abs_path", { abs_path: undefined }],
-    ["different abs_path", { abs_path: "app:///other.js" }],
   ] as const)(
     "does not filter a request relay signature with %s",
     (_case, frameOverrides) => {

@@ -6,8 +6,8 @@ import {
   coinbaseWalletRequestRelayCloseFunction,
   coinbaseWalletRequestRelayColumn,
   coinbaseWalletRequestRelayLine,
-  coinbaseWalletRequestRelayModule,
   coinbaseWalletRequestRelayPath,
+  coinbaseWalletRequestRelayQualifiedCloseFunction,
   coinbaseWalletSdkPathTokens,
   nextStaticFramePathToken,
   walletWebSocketAppKitBootstrapBreadcrumbTokens,
@@ -59,19 +59,18 @@ function isCoinbaseWalletLinkWebSocketFrame(frame: SentryStackFrame): boolean {
 }
 
 function isCoinbaseWalletRequestRelayFrame(frame: SentryStackFrame): boolean {
+  const hasObservedCloseFunction =
+    frame.function === coinbaseWalletRequestRelayCloseFunction ||
+    frame.function === coinbaseWalletRequestRelayQualifiedCloseFunction;
   if (
-    frame.module !== coinbaseWalletRequestRelayModule ||
-    frame.function !== coinbaseWalletRequestRelayCloseFunction ||
+    !hasObservedCloseFunction ||
     frame.lineno !== coinbaseWalletRequestRelayLine ||
     frame.colno !== coinbaseWalletRequestRelayColumn
   ) {
     return false;
   }
 
-  return (
-    frame.filename === coinbaseWalletRequestRelayPath &&
-    frame.abs_path === coinbaseWalletRequestRelayPath
-  );
+  return frame.filename === coinbaseWalletRequestRelayPath;
 }
 
 export function hasCoinbaseWalletRequestRelayFrame(

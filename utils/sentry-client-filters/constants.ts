@@ -236,8 +236,9 @@ export const sentryBrowserPackagePathTokens = [
   "@sentry+browser",
 ];
 export const coinbaseWalletRequestRelayPath = "app:///requestRelay.js";
-export const coinbaseWalletRequestRelayModule = "requestRelay";
 export const coinbaseWalletRequestRelayCloseFunction = "i.onclose";
+export const coinbaseWalletRequestRelayQualifiedCloseFunction =
+  "__webpack_modules__.67891.t.WalletLinkWebSocket.connect.i.onclose";
 export const coinbaseWalletRequestRelayLine = 2;
 export const coinbaseWalletRequestRelayColumn = 248957;
 export const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
