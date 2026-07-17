@@ -150,7 +150,7 @@ export function CollectionDelegationSections(
         delegationsLoaded={reads.outgoingDelegationsLoaded}
         delegationsError={reads.outgoingDelegationsError}
         onRetry={() => {
-          void reads.retryOutgoingDelegations();
+          reads.retryOutgoingDelegations();
         }}
         activeConsolidations={reads.outgoingActiveConsolidations}
         revocation={revocation}
@@ -175,7 +175,7 @@ export function CollectionDelegationSections(
         delegationsLoaded={reads.incomingDelegationsLoaded}
         delegationsError={reads.incomingDelegationsError}
         onRetry={() => {
-          void reads.retryIncomingDelegations();
+          reads.retryIncomingDelegations();
         }}
         activeConsolidations={reads.incomingActiveConsolidations}
         isSubdelegation={isSubdelegation}
