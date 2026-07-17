@@ -16,6 +16,7 @@ import {
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -157,6 +158,8 @@ describe("sentry-client-filters", () => {
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
   const extensionMessagingConnectionFailureMessage =
     "Could not establish connection. Receiving end does not exist.";
+  const poperBlockerNetworkErrorMessage =
+    "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const webkitExtensionMessagingTabNotFoundMessage =
     "Invalid call to runtime.sendMessage(). Tab not found.";
 
@@ -939,6 +942,60 @@ describe("sentry-client-filters", () => {
       },
     ],
     ...overrides,
+  });
+
+  const createPoperBlockerOrphanFetchRejectionEvent = ({
+    type = "TypeError",
+    value = poperBlockerNetworkErrorMessage,
+    mechanismType = "auto.browser.global_handlers.onunhandledrejection",
+    handled = false,
+    includeHandled = true,
+    frames = [
+      {
+        filename:
+          "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+        function: "e.prototype.handle",
+        in_app: false,
+      },
+      {
+        filename: "app:///injectScriptAdjust.js",
+        abs_path: "app:///injectScriptAdjust.js",
+        function: "window.fetch",
+        lineno: 1,
+        colno: 4520,
+        in_app: true,
+      },
+      {
+        filename: "app:///injectScriptAdjust.js",
+        abs_path: "app:///injectScriptAdjust.js",
+        function: "VihJ",
+        lineno: 1,
+        colno: 3159,
+        in_app: true,
+      },
+    ],
+  }: {
+    type?: string | undefined;
+    value?: string | undefined;
+    mechanismType?: string | undefined;
+    handled?: boolean | undefined;
+    includeHandled?: boolean | undefined;
+    frames?: SentryStackFrame[] | undefined;
+  } = {}): TestSentryClientEvent => ({
+    transaction: "/waves/:wave",
+    exception: {
+      values: [
+        {
+          type,
+          value,
+          mechanism: {
+            type: mechanismType,
+            ...(includeHandled ? { handled } : {}),
+          },
+          stacktrace: { frames },
+        },
+      ],
+    },
   });
 
   const createWebKitExtensionMessagingTabNotFoundEvent = (
@@ -6865,6 +6922,204 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
 
     // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters the observed Poper Blocker rejection with the short AWS RUM stack", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent();
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the observed Poper Blocker rejection with the expanded AWS RUM stack", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename:
+            "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/DataPlaneClient.js",
+          function: "ts.<anonymous>",
+          in_app: false,
+        },
+        {
+          filename:
+            "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/RetryHttpHandler.js",
+          function: "e.prototype.handle",
+          in_app: false,
+        },
+        {
+          filename: "<anonymous>",
+          function: "new Promise",
+          in_app: true,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+          in_app: true,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+          in_app: true,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["similar filename", { filename: "app:///injectScriptAdjustment.js" }],
+    ["changed function", { function: "window.fetchWrapper" }],
+    ["changed line", { lineno: 2 }],
+    ["changed column", { colno: 4519 }],
+  ])("keeps Poper Blocker near-misses with a %s", (_caseName, frameChange) => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+          ...frameChange,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Poper Blocker-shaped rejections with a missing signature frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Poper Blocker-shaped rejections with an extra injected frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["unrelated error", { value: "Application request validation failed." }],
+    ["non-TypeError", { type: "Error" }],
+    ["handled rejection", { handled: true }],
+    ["missing handled flag", { includeHandled: false }],
+    ["different mechanism", { mechanismType: "generic" }],
+  ])("keeps a Poper Blocker frame pair for an %s", (_caseName, overrides) => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent(overrides);
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Poper Blocker-shaped rejections with app-owned source evidence", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+        {
+          filename:
+            "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+          function: "executeApiRequest",
+          in_app: true,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps mixed-exception events with a Poper Blocker rejection first", () => {
+    const poperBlockerEvent = createPoperBlockerOrphanFetchRejectionEvent();
+    const event: TestSentryClientEvent = {
+      ...poperBlockerEvent,
+      exception: {
+        values: [
+          ...(poperBlockerEvent.exception?.values ?? []),
+          {
+            type: "Error",
+            value: "Application request validation failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+                  function: "executeApiRequest",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
     expect(result).toBe(false);
   });
 
