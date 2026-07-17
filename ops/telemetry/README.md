@@ -74,6 +74,9 @@ narrow record filter. It drops only HTTP failures whose error type is
 network failures, near-match messages, and non-HTTP telemetry remain visible.
 The filter runs before the privacy boundary, so every retained HTTP event still
 receives the existing URL sanitization.
+Classification failures fail open and preserve the original event. If the AWS
+recorder itself throws, the wrapper stays intentionally silent and non-blocking
+instead of recursively trying to report a monitoring-path failure.
 
 The AWS RUM compatibility event `drop_popup_ready` and the legacy AWS RUM-owned
 events `ab_card_impression`, `ab_card_link_out`, and `ab_card_live_open` keep
