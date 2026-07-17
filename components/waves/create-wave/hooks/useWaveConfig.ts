@@ -120,6 +120,9 @@ export function useWaveConfig() {
     useState<CreateWaveOutcomeType | null>(null);
 
   const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
+  // Bumped on every failed forward navigation; CreateWave watches it to
+  // focus the first invalid field after the error state has committed.
+  const [errorFocusRequest, setErrorFocusRequest] = useState(0);
 
   const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
     {}
@@ -249,20 +252,7 @@ export function useWaveConfig() {
       });
       if (newErrors.length) {
         setErrors(newErrors);
-        // The Next button can sit a full screen below the offending field on
-        // phones, where a validation failure with no visible reaction reads
-        // as a dead button. Focus the first invalid field and bring it back
-        // on screen once the error state has rendered.
-        setTimeout(() => {
-          const invalidField = document.querySelector<HTMLElement>(
-            '[aria-invalid="true"]'
-          );
-          if (!invalidField) {
-            return;
-          }
-          invalidField.focus({ preventScroll: true });
-          invalidField.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 100);
+        setErrorFocusRequest((count) => count + 1);
         return;
       }
     }
@@ -493,6 +483,7 @@ export function useWaveConfig() {
     step,
     selectedOutcomeType,
     errors,
+    errorFocusRequest,
     groupsCache,
     isMemeCountLoading: shouldLoadMemeCount && memeCountQuery.isLoading,
     isMemeCountError: shouldLoadMemeCount && memeCountQuery.isError,
