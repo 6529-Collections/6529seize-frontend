@@ -20,7 +20,7 @@ export default function NotificationsPage() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const { activeDrop: modalDrop, isDropOpen, onDropClose } = useDropModal();
   const { isApp } = useDeviceInfo();
-  const { spaces } = useLayout();
+  const { notificationsViewStyle, spaces } = useLayout();
 
   const onCancelReplyQuote = () => {
     setActiveDrop(null);
@@ -28,11 +28,11 @@ export default function NotificationsPage() {
 
   if (connectionState === "initializing" || connectionState === "connecting") {
     return (
-      <div className="tailwind-scope tw-flex tw-h-full tw-min-h-[50vh] tw-items-center tw-justify-center tw-bg-black">
-        <output
-          aria-label="Loading notifications"
-          aria-live="polite"
-        >
+      <div
+        className="tailwind-scope tw-flex tw-items-center tw-justify-center tw-bg-black"
+        style={notificationsViewStyle}
+      >
+        <output aria-label="Loading notifications" aria-live="polite">
           <CircleLoader size={CircleLoaderSize.LARGE} />
         </output>
       </div>

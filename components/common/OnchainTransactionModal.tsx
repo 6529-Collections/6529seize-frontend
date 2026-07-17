@@ -46,6 +46,35 @@ const DEFAULT_STATUS_MESSAGE: Record<OnchainTransactionModalStatus, string> = {
 const TRANSACTION_LINK_CLASS_NAME =
   "tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black tw-no-underline tw-transition hover:tw-bg-[#d7d7d7] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
+function getStatusMessage(
+  status: OnchainTransactionModalStatus,
+  message: string | undefined
+): string {
+  const normalizedMessage = message?.trim();
+  if (normalizedMessage) {
+    return normalizedMessage;
+  }
+  return DEFAULT_STATUS_MESSAGE[status];
+}
+
+function isEventFromNestedModal(
+  event: KeyboardEvent,
+  parentDialog: HTMLDialogElement | null
+): boolean {
+  if (!parentDialog) {
+    return false;
+  }
+
+  return event.composedPath().some((target) => {
+    if (!(target instanceof Element)) {
+      return false;
+    }
+
+    const nearestModal = target.closest('[aria-modal="true"], dialog[open]');
+    return nearestModal !== null && nearestModal !== parentDialog;
+  });
+}
+
 function StatusEmoji({
   status,
 }: Readonly<{ status: OnchainTransactionModalStatus }>) {
@@ -95,9 +124,14 @@ function ModalStatusContent({
           <span>Error</span>
           <StatusEmoji status={status} />
         </p>
-        <div className="tw-mx-auto tw-mt-4 tw-max-h-40 tw-w-full tw-max-w-full tw-overflow-y-auto tw-pr-1">
+        <div
+          role="region"
+          aria-label="Transaction error details"
+          tabIndex={0}
+          className="tw-mx-auto tw-mt-4 tw-max-h-40 tw-w-full tw-max-w-full tw-overflow-y-auto tw-pr-1 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
           <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-iron-100 [overflow-wrap:anywhere]">
-            {message ?? DEFAULT_STATUS_MESSAGE.error}
+            {getStatusMessage(status, message)}
           </p>
         </div>
         {transactionUrl ? (
@@ -109,7 +143,7 @@ function ModalStatusContent({
     );
   }
 
-  const statusMessage = message ?? DEFAULT_STATUS_MESSAGE[status];
+  const statusMessage = getStatusMessage(status, message);
 
   if (status === "submitted") {
     return (
@@ -187,7 +221,7 @@ export default function OnchainTransactionModal({
 
   useEffect(() => {
     dialogRef.current?.focus();
-  }, [status]);
+  }, []);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -197,6 +231,17 @@ export default function OnchainTransactionModal({
     const handleKeyDown = (event: KeyboardEvent) => {
       const dialog = dialogRef.current;
       if (!dialog) {
+        return;
+      }
+
+      if (event.key !== "Escape" && event.key !== "Tab") {
+        return;
+      }
+
+      if (
+        event.defaultPrevented ||
+        isEventFromNestedModal(event, dialogRef.current)
+      ) {
         return;
       }
 
@@ -282,9 +327,9 @@ export default function OnchainTransactionModal({
           ) : null}
         </div>
 
-        <output
+        <div
           className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
-          role={status === "error" ? "alert" : undefined}
+          role={status === "error" ? "alert" : "status"}
           aria-live={status === "error" ? "assertive" : "polite"}
         >
           <ModalStatusContent
@@ -292,7 +337,7 @@ export default function OnchainTransactionModal({
             message={message}
             transactionUrl={transactionUrl}
           />
-        </output>
+        </div>
       </dialog>
     </div>,
     document.body

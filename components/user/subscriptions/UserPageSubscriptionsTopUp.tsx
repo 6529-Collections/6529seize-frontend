@@ -42,6 +42,15 @@ function getEthForCards(count: number): number {
   return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
 }
 
+function getTopUpTransactionErrorMessage(
+  transactionError: Error | null | undefined
+): string {
+  const message = transactionError?.message
+    .split("Request Arguments")[0]
+    ?.trim();
+  return message ? `Error - ${message}` : "Transaction failed";
+}
+
 const TOP_UP_OPTION_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4";
 const TOP_UP_DEEP_GRID_CLASS =
@@ -147,26 +156,28 @@ export default function UserPageSubscriptionsTopUp() {
     });
   }
 
-  useEffect(() => {
-    if (sendTransaction.error) {
-      const errorMsg =
-        sendTransaction.error.message.split("Request Arguments")[0];
-      setError(`Error - ${errorMsg}`);
-    }
-  }, [sendTransaction.error]);
-
-  const receiptErrorMessage = waitSendTransaction.error?.message;
+  const sendTransactionErrorMessage = sendTransaction.error
+    ? getTopUpTransactionErrorMessage(sendTransaction.error)
+    : undefined;
+  const receiptErrorMessage = waitSendTransaction.error
+    ? getTopUpTransactionErrorMessage(waitSendTransaction.error)
+    : undefined;
+  const hasSendTransactionError = sendTransactionErrorMessage !== undefined;
   const hasReceiptError =
     waitSendTransaction.isError || receiptErrorMessage !== undefined;
   const showModal =
     sendTransaction.isPending ||
     waitSendTransaction.isLoading ||
     waitSendTransaction.isSuccess ||
+    hasSendTransactionError ||
     hasReceiptError ||
     !!error;
 
   const isClosable =
-    waitSendTransaction.isSuccess || hasReceiptError || !!error;
+    waitSendTransaction.isSuccess ||
+    hasSendTransactionError ||
+    hasReceiptError ||
+    !!error;
 
   const closeModal = useCallback(() => {
     if (isClosable) {
@@ -180,7 +191,7 @@ export default function UserPageSubscriptionsTopUp() {
   }, [isClosable, sendTransaction]);
 
   let modalStatus: OnchainTransactionModalStatus | null = null;
-  if (error || hasReceiptError) {
+  if (error || hasSendTransactionError || hasReceiptError) {
     modalStatus = "error";
   } else if (sendTransaction.isPending) {
     modalStatus = "confirm_wallet";
@@ -195,7 +206,13 @@ export default function UserPageSubscriptionsTopUp() {
       : `${formatInteger(locale, topUpCardCount)} Cards - ${numberWithCommasFromString(topUpAmount.toString())} ETH`;
   let modalMessage: string | undefined;
   if (modalStatus === "error") {
-    modalMessage = error || receiptErrorMessage;
+    if (error) {
+      modalMessage = error;
+    } else if (sendTransactionErrorMessage) {
+      modalMessage = sendTransactionErrorMessage;
+    } else {
+      modalMessage = receiptErrorMessage;
+    }
   } else if (modalStatus === "success") {
     modalMessage = "Top Up Successful!";
   }

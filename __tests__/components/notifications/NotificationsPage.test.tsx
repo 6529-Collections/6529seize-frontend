@@ -35,7 +35,13 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
-  useLayout: () => ({ spaces: { headerSpace: 0 } }),
+  useLayout: () => ({
+    spaces: { headerSpace: 0 },
+    notificationsViewStyle: {
+      height: "640px",
+      maxHeight: "640px",
+    },
+  }),
 }));
 
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
@@ -51,9 +57,14 @@ describe("NotificationsPage", () => {
 
       render(<NotificationsPage />);
 
-      expect(
-        screen.getByRole("status", { name: "Loading notifications" })
-      ).toBeInTheDocument();
+      const loadingStatus = screen.getByRole("status", {
+        name: "Loading notifications",
+      });
+      expect(loadingStatus).toBeInTheDocument();
+      expect(loadingStatus.parentElement).toHaveAttribute(
+        "style",
+        "height: 640px; max-height: 640px;"
+      );
       expect(screen.queryByText("Connect wallet gate")).not.toBeInTheDocument();
     }
   );

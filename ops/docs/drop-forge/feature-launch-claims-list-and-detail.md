@@ -124,7 +124,8 @@ The launch surface combines:
   - Submitted and terminal states can include a `View Tx` explorer link.
   - In-progress states stay open; success and error states can be dismissed
     with the close control, backdrop, or Escape.
-  - Long transaction errors remain readable in a scrollable status panel.
+  - Long transaction errors remain readable in a keyboard-focusable,
+    scrollable status panel.
 - Arweave review:
   - `Image`, `Animation`, and `Metadata` link cards support copy/open actions
     for the published Arweave targets.
