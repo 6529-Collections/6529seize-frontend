@@ -29,7 +29,7 @@ function getConsolidationStatuses(
     let status = "consolidation status unavailable";
 
     if (read !== undefined && read.status !== "failure") {
-      status = Boolean(read.result)
+      status = read.result
         ? "consolidation active"
         : "consolidation incomplete";
     }
