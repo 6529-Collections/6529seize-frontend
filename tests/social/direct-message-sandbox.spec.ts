@@ -1,6 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
 
-import { DEFAULT_LONG_PRESS_DURATION_MS } from "../../hooks/useLongPressInteraction";
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -79,7 +78,7 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
     browserName,
     page,
   }, testInfo) => {
-    test.skip(
+    testInfo.skip(
       !isCapacitorSimulationProject(testInfo.project.name) ||
         browserName !== "chromium",
       "This regression requires a Chromium Capacitor simulation for trusted CDP touch input."
@@ -89,11 +88,11 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
     await gotoSandboxDirectMessage(page);
 
     const drop = page.locator('[data-serial-no="1"]').first();
-    await openMobileDropMenu(page, drop);
-
     const quickReactButton = page
       .getByRole("button", { name: "Click to react" })
       .first();
+    await openMobileDropMenu(page, drop, quickReactButton);
+
     await expect(quickReactButton).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
@@ -178,7 +177,11 @@ async function seedQuickReaction(page: Page) {
   });
 }
 
-async function openMobileDropMenu(page: Page, drop: Locator) {
+async function openMobileDropMenu(
+  page: Page,
+  drop: Locator,
+  quickReactButton: Locator
+) {
   const point = await centerOf(drop);
   const cdp = await page.context().newCDPSession(page);
 
@@ -187,12 +190,17 @@ async function openMobileDropMenu(page: Page, drop: Locator) {
       type: "touchStart",
       touchPoints: [point],
     });
-    await page.waitForTimeout(DEFAULT_LONG_PRESS_DURATION_MS + 600);
-    await cdp.send("Input.dispatchTouchEvent", {
-      type: "touchEnd",
-      touchPoints: [],
+    await quickReactButton.waitFor({
+      state: "visible",
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
   } finally {
+    await cdp
+      .send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      })
+      .catch(() => undefined);
     await cdp.detach();
   }
 }
