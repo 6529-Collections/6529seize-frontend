@@ -800,6 +800,76 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
       .click();
     await expect(draftsSection).toBeHidden();
   });
+
+  test("manages multiple drafts newest-first without overflow", async ({
+    page,
+  }) => {
+    const nameField = page.locator("#create-wave-name");
+    // Distinct names, one long enough to force truncation in the card. Kept
+    // free of the literal "Wave Name" so it can't collide with the field's
+    // own accessible name in selectors.
+    const longName =
+      "Extremely Long Draft Title That Must Truncate In The Card Without Overflowing Even On The Narrowest Phone";
+    const drafts = ["Draft One", longName, "Draft Three"];
+
+    // Persist three drafts. A draft is armed by leaving Overview, and the
+    // autosave is debounced, so wait for each to land before starting the
+    // next fresh visit.
+    for (const name of drafts) {
+      await installExternalDataFixtures(page);
+      await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
+      await waitForRouteReady(page);
+      await dismissNextDevTools(page);
+      await expect(nameField).toBeVisible({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await nameField.fill(name);
+      await nextStepButton(page).click();
+      await expect(
+        page.getByRole("heading", { name: "Who can view" })
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await expect
+        .poll(
+          async () =>
+            page.evaluate(() =>
+              window.localStorage.getItem("create-wave-drafts:v1")
+            ),
+          { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+        )
+        .toContain(name);
+    }
+
+    await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    const draftsSection = page.getByRole("region", { name: "Draft waves" });
+    await expect(draftsSection).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+
+    // All three present, newest first (the last saved sits on top).
+    const cards = draftsSection.getByRole("listitem");
+    await expect(cards).toHaveCount(3);
+    await expect(cards.first()).toContainText("Draft Three");
+    await expectNoHorizontalOverflow(page);
+
+    // The long title truncates rather than stretching the card past the page.
+    const longTitle = draftsSection.getByText(longName);
+    const truncated = await longTitle.evaluate(
+      (el) => el.scrollWidth > el.clientWidth
+    );
+    expect(truncated).toBe(true);
+
+    // Deleting one leaves the rest intact.
+    await draftsSection
+      .getByRole("button", { name: new RegExp(`Delete draft.*Draft One`) })
+      .click();
+    await expect(cards).toHaveCount(2);
+    await expect(
+      draftsSection.getByRole("button", { name: /Delete draft.*Draft One/ })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+  });
 });
 
 async function gotoCreateWave(page: Page) {
