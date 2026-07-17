@@ -282,6 +282,19 @@ body.capacitor-native [contenteditable="true"] {
   touch-action: manipulation;
 }
 
+/* iOS Safari zooms the page (and pans horizontally) when a focused control's
+   font-size is under 16px. Keep create-wave text entry at 16px on coarse
+   pointers — same rule the native shell applies globally above. */
+@media (any-pointer: coarse) {
+  body:not([data-fine-pointer]) .create-wave-flow input,
+  body:not([data-fine-pointer]) .create-wave-flow textarea,
+  body:not([data-fine-pointer]) .create-wave-flow select,
+  body:not([data-fine-pointer]) .create-wave-flow [contenteditable="true"] {
+    font-size: max(1rem, 16px) !important;
+    touch-action: manipulation;
+  }
+}
+
 textarea,
 select,
 input,

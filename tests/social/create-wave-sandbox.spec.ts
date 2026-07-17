@@ -654,6 +654,9 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expect(timelineToggle).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    // Each step must start at the top: the layout scroller used to keep the
+    // previous step's offset, landing users mid-page on this tall step.
+    await expect(timelineToggle).toBeInViewport();
     await expect(timelineToggle).toHaveAttribute("aria-expanded", "true");
     await page.getByText("First Winners Announcement").first().click();
     await expect(timelineToggle).toHaveAttribute("aria-expanded", "true");
@@ -693,9 +696,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     const submissionsInputBox = await submissions.boundingBox();
     expect(submissionsLabelBox).not.toBeNull();
     expect(submissionsInputBox).not.toBeNull();
-    expect(submissionsLabelBox!.width).toBeLessThan(
-      submissionsInputBox!.width
-    );
+    expect(submissionsLabelBox!.width).toBeLessThan(submissionsInputBox!.width);
     await expectNoHorizontalOverflow(page);
     await nextStepButton(page).click();
 
@@ -727,6 +728,77 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
       savedLabelBox!.x + savedLabelBox!.width
     );
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("autosaves a draft after leaving Overview and resumes it", async ({
+    page,
+  }) => {
+    await installExternalDataFixtures(page);
+    await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    await expect(page.getByLabel(/Wave Name/)).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+
+    // On the very first visit there is nothing to resume.
+    await expect(
+      page.getByRole("region", { name: "Draft waves" })
+    ).toBeHidden();
+
+    const draftName = "Draft Resume Wave";
+    await page.getByLabel(/Wave Name/).fill(draftName);
+    // Leaving Overview is what arms autosave.
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Who can view" })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+
+    // Wait for the debounced autosave to actually land on disk before
+    // reloading — otherwise the test races the persist and the "tab death"
+    // wipes a draft that was never written.
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() =>
+            window.localStorage.getItem("create-wave-drafts:v1")
+          ),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      )
+      .toContain(draftName);
+
+    // Reload the page: a real tab death / crash. The in-memory config is
+    // gone, but the on-device draft must survive and be offered on Overview.
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    const draftsSection = page.getByRole("region", { name: "Draft waves" });
+    await expect(draftsSection).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    // The empty name field proves the reload really reset in-memory state.
+    await expect(page.getByLabel(/Wave Name/)).toHaveValue("");
+
+    // Resuming restores the saved name into the flow. Anchor on the start
+    // of the accessible name so the load button (name + "Saved …") wins
+    // over the delete button ("Delete draft …").
+    await draftsSection
+      .getByRole("button", { name: new RegExp(`^${draftName}`) })
+      .click();
+    await expect(page.getByLabel(/Wave Name/)).toHaveValue(draftName);
+
+    // Deleting the draft removes the section entirely.
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    await expect(draftsSection).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await draftsSection
+      .getByRole("button", { name: new RegExp(`Delete draft.*${draftName}`) })
+      .click();
+    await expect(draftsSection).toBeHidden();
   });
 });
 
