@@ -69,4 +69,31 @@ describe("WaveDropActionsEdit", () => {
       jest.useRealTimers();
     }
   });
+
+  it("keeps a far-future deadline visible past the setTimeout 32-bit cap", async () => {
+    // setTimeout treats delays over 2^31 - 1 ms as 0; a naive timer would
+    // fire immediately and hide an edit action that is valid for weeks.
+    jest.useFakeTimers();
+    try {
+      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+      renderAction(makeDrop(Date.now() + thirtyDaysMs));
+      expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+      await (
+        await import("react")
+      ).act(async () => {
+        // Past the 32-bit cap (~24.8 days) but before the deadline: the
+        // chunked timer re-arms and the action must remain visible.
+        jest.advanceTimersByTime(2 ** 31 - 1);
+      });
+      expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+      await (
+        await import("react")
+      ).act(async () => {
+        jest.advanceTimersByTime(thirtyDaysMs - (2 ** 31 - 1) + 1_000);
+      });
+      expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
