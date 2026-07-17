@@ -303,6 +303,7 @@ describe("useEnhancedWavesListCore", () => {
     );
 
     expect(result.current.waves[0]?.unreadDropsCount).toBe(3);
+    expect(result.current.waves[0]?.apiUnreadDropsCount).toBe(3);
     expect(result.current.waves[0]?.firstUnreadDropSerialNo).toBe(10);
   });
 });

@@ -36,9 +36,6 @@ export interface SidebarWaveTreeRow {
   readonly isLastSubwave: boolean;
 }
 
-const hasUnreadDrops = (wave: MinimalWave) =>
-  !wave.isMuted && (wave.unreadDropsCount > 0 || wave.newDropsCount.count > 0);
-
 const getUnreadDropsCount = (wave: MinimalWave) =>
   wave.isMuted ? 0 : Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
 
@@ -50,12 +47,20 @@ const getUnreadSubwaveDropsCount = (
     return 0;
   }
 
-  const loadedSubwaveUnreadCount = subwaves.reduce(
-    (total, subwave) => total + getUnreadDropsCount(subwave),
-    0
+  let loadedSubwaveUnreadCount = 0;
+  let loadedSubwaveApiUnreadCount = 0;
+  for (const subwave of subwaves) {
+    loadedSubwaveUnreadCount += getUnreadDropsCount(subwave);
+    loadedSubwaveApiUnreadCount += subwave.apiUnreadDropsCount;
+  }
+  // Replace the loaded children portion of the API aggregate with their live
+  // client counts, while preserving unread from children that are not loaded.
+  const unloadedSubwaveUnreadCount = Math.max(
+    0,
+    wave.unreadSubwaveDrops - loadedSubwaveApiUnreadCount
   );
 
-  return Math.max(wave.unreadSubwaveDrops, loadedSubwaveUnreadCount);
+  return unloadedSubwaveUnreadCount + loadedSubwaveUnreadCount;
 };
 
 const normalizeParentIds = (value: unknown): readonly string[] => {
@@ -324,9 +329,10 @@ export function useSidebarWaveTree({
 
   const getHasUnreadSubwaves = useCallback(
     (wave: MinimalWave) =>
-      !wave.isMuted &&
-      (wave.unreadSubwaveDrops > 0 ||
-        (subwavesByParentId.get(wave.id) ?? []).some(hasUnreadDrops)),
+      getUnreadSubwaveDropsCount(
+        wave,
+        subwavesByParentId.get(wave.id) ?? []
+      ) > 0,
     [subwavesByParentId]
   );
 

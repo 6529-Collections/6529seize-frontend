@@ -257,6 +257,141 @@ describe("useSidebarWaveTree", () => {
     });
   });
 
+  it("removes a locally cleared loaded subwave from the aggregate", () => {
+    const wavesWithClearedSubwave = [
+      createMockMinimalWave({
+        id: "parent",
+        hasSubwaves: true,
+        unreadSubwaveDrops: 27,
+      }),
+      createMockMinimalWave({
+        id: "cleared-child",
+        parentWaveId: "parent",
+        apiUnreadDropsCount: 7,
+        unreadDropsCount: 0,
+      }),
+      createMockMinimalWave({
+        id: "unread-child",
+        parentWaveId: "parent",
+        unreadDropsCount: 20,
+      }),
+    ];
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: wavesWithClearedSubwave,
+        activeWaveId: "cleared-child",
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows[0]).toMatchObject({
+      hasUnreadSubwaves: true,
+      unreadSubwaveDropsCount: 20,
+    });
+    expect(rows[1]).toMatchObject({
+      rowType: "subwaves-toggle",
+      unreadSubwaveDropsCount: 20,
+    });
+  });
+
+  it("clears the aggregate when all loaded subwave unread was read", () => {
+    const wavesWithClearedSubwave = [
+      createMockMinimalWave({
+        id: "parent",
+        hasSubwaves: true,
+        unreadSubwaveDrops: 27,
+      }),
+      createMockMinimalWave({
+        id: "cleared-child",
+        parentWaveId: "parent",
+        apiUnreadDropsCount: 27,
+        unreadDropsCount: 0,
+      }),
+    ];
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: wavesWithClearedSubwave,
+        activeWaveId: "cleared-child",
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows[0]).toMatchObject({
+      hasUnreadSubwaves: false,
+      unreadSubwaveDropsCount: 0,
+    });
+    expect(rows[1]).toMatchObject({
+      rowType: "subwaves-toggle",
+      hasUnreadSubwaves: false,
+      unreadSubwaveDropsCount: 0,
+    });
+  });
+
+  it("keeps the server aggregate remainder for subwaves that are not loaded", () => {
+    const wavesWithUnloadedSubwaveUnread = [
+      createMockMinimalWave({
+        id: "parent",
+        hasSubwaves: true,
+        unreadSubwaveDrops: 27,
+      }),
+      createMockMinimalWave({
+        id: "cleared-child",
+        parentWaveId: "parent",
+        apiUnreadDropsCount: 7,
+        unreadDropsCount: 0,
+      }),
+    ];
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: wavesWithUnloadedSubwaveUnread,
+        activeWaveId: "cleared-child",
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows[1]).toMatchObject({
+      rowType: "subwaves-toggle",
+      unreadSubwaveDropsCount: 20,
+    });
+  });
+
+  it("shows new websocket activity after a loaded subwave was cleared", () => {
+    const wavesWithNewSubwaveActivity = [
+      createMockMinimalWave({
+        id: "parent",
+        hasSubwaves: true,
+        unreadSubwaveDrops: 27,
+      }),
+      createMockMinimalWave({
+        id: "active-child",
+        parentWaveId: "parent",
+        apiUnreadDropsCount: 27,
+        unreadDropsCount: 0,
+        newDropsCount: {
+          count: 1,
+          latestDropTimestamp: 100,
+          firstUnreadSerialNo: 28,
+        },
+      }),
+    ];
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: wavesWithNewSubwaveActivity,
+        activeWaveId: null,
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows[1]).toMatchObject({
+      rowType: "subwaves-toggle",
+      unreadSubwaveDropsCount: 1,
+    });
+  });
+
   it("auto-expands the active subwave parent without local storage", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>

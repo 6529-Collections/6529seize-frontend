@@ -28,6 +28,7 @@ export interface MinimalWave {
   followedSubwavesCount: number;
   latestFollowedSubwaveDropTimestamp: number | null;
   unreadSubwaveDrops: number;
+  apiUnreadDropsCount: number;
   unreadDropsCount: number;
   latestReadTimestamp: number;
   firstUnreadDropSerialNo: number | null;
@@ -248,6 +249,7 @@ function useEnhancedWavesListCore(
         latestFollowedSubwaveDropTimestamp:
           wave.latestFollowedSubwaveDropTimestamp,
         unreadSubwaveDrops: wave.unreadSubwaveDrops,
+        apiUnreadDropsCount: wave.unreadDropsCount,
         unreadDropsCount,
         latestReadTimestamp: wave.latestReadTimestamp,
         firstUnreadDropSerialNo,

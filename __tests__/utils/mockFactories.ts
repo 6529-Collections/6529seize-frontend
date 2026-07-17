@@ -9,6 +9,8 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 export function createMockMinimalWave(
   overrides: Partial<MinimalWave> = {}
 ): MinimalWave {
+  const unreadDropsCount = overrides.unreadDropsCount ?? 0;
+
   return {
     id: "mock-wave-id",
     name: "Mock Wave",
@@ -26,7 +28,8 @@ export function createMockMinimalWave(
     isOfficial: false,
     parentWaveId: null,
     hasSubwaves: false,
-    unreadDropsCount: 0,
+    apiUnreadDropsCount: overrides.apiUnreadDropsCount ?? unreadDropsCount,
+    unreadDropsCount,
     latestReadTimestamp: 0,
     firstUnreadDropSerialNo: null,
     isMuted: false,
