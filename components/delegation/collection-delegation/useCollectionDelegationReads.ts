@@ -178,9 +178,17 @@ export function useCollectionDelegationReads(options: {
   return {
     outgoingDelegations,
     outgoingDelegationsLoaded,
+    outgoingDelegationsError:
+      !outgoingDelegationsLoaded &&
+      Boolean(retrieveOutgoingDelegations.isError),
+    retryOutgoingDelegations: retrieveOutgoingDelegations.refetch,
     outgoingActiveConsolidations,
     incomingDelegations,
     incomingDelegationsLoaded,
+    incomingDelegationsError:
+      !incomingDelegationsLoaded &&
+      Boolean(retrieveIncomingDelegations.isError),
+    retryIncomingDelegations: retrieveIncomingDelegations.refetch,
     incomingActiveConsolidations,
     resetDelegationReads,
   };

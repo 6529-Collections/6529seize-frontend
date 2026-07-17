@@ -151,7 +151,11 @@ export function CollectionDelegationLocks(
       locks.useCaseLockStatusesGlobal.data,
       locks.lockUseCaseIndex
     ) === true;
-  const canManageSelectedUseCase = !selectedUseCaseLockedGlobally;
+  const collectionLocked =
+    Boolean(locks.collectionLockRead.data) ||
+    Boolean(locks.collectionLockReadGlobal.data);
+  const canManageSelectedUseCase =
+    !collectionLocked && !selectedUseCaseLockedGlobally;
   const selectedUseCaseAction = selectedUseCaseLocked ? "Unlock" : "Lock";
   const selectedUseCaseActionInProgress = selectedUseCaseLocked
     ? "Unlocking"
@@ -167,6 +171,8 @@ export function CollectionDelegationLocks(
         This use case is unavailable. Select another use case and try again.
       </div>
     );
+  } else if (collectionLocked) {
+    useCaseAction = null;
   } else if (!canManageSelectedUseCase) {
     useCaseAction = (
       <div className="tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300">
@@ -186,7 +192,7 @@ export function CollectionDelegationLocks(
         type="button"
         className={PRIMARY_ACTION_CLASS}
         onClick={() => {
-          const title = `${selectedUseCaseActionInProgress} Wallet on Use Case #${selectedUseCase.use_case} - ${selectedUseCase.display}`;
+          const title = `${selectedUseCaseActionInProgress} Wallet on Use Case\n#${selectedUseCase.use_case} ${selectedUseCase.display}`;
           let toast: DelegationToastState = {
             status: "confirm_wallet",
             title,
@@ -261,10 +267,7 @@ export function CollectionDelegationLocks(
           <div className="md:tw-col-span-1">
             <select
               aria-label="Lock or unlock use case"
-              disabled={
-                Boolean(locks.collectionLockRead.data) ||
-                Boolean(locks.collectionLockReadGlobal.data)
-              }
+              disabled={collectionLocked}
               className={LOCK_SELECT_CLASS}
               value={locks.lockUseCaseValue}
               onChange={(e) => {
@@ -285,7 +288,7 @@ export function CollectionDelegationLocks(
               <CollectionLockUseCaseOptions locks={locks} />
             </select>
           </div>
-          {locks.lockUseCaseValue !== 0 && (
+          {locks.lockUseCaseValue !== 0 && useCaseAction && (
             <div className="tw-flex tw-items-center md:tw-col-span-2">
               {useCaseAction}
             </div>

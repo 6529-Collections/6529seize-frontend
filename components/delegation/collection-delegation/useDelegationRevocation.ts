@@ -212,7 +212,8 @@ export function useDelegationRevocation(options: {
     contractWriteBatchRevoke.reset();
   }
 
-  function resetRevocationParams() {
+  function resetRevocationState() {
+    setBulkRevocations([]);
     setRevokeDelegationParams(undefined);
     setBatchRevokeDelegationParams(undefined);
   }
@@ -227,7 +228,7 @@ export function useDelegationRevocation(options: {
       contractWriteBatchRevoke.isPending ||
       waitContractWriteBatchRevoke.isLoading,
     resetRevocationWrites,
-    resetRevocationParams,
+    resetRevocationState,
   };
 }
 

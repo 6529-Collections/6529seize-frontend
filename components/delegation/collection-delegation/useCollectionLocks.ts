@@ -20,6 +20,15 @@ import { ALL_USE_CASES } from "../delegation-constants";
 import type { DelegationToastState } from "../DelegationToast";
 import { getTransactionErrorToastMessage } from "./collection-delegation-helpers";
 
+function getFailedLockTitle(title: string) {
+  const lineBreakIndex = title.indexOf("\n");
+  if (lineBreakIndex === -1) {
+    return `${title} Failed`;
+  }
+
+  return `${title.slice(0, lineBreakIndex)} Failed${title.slice(lineBreakIndex)}`;
+}
+
 /**
  * Lock state for the collection-delegation screen: collection-level and
  * use-case-level lock reads (for this collection and the all-collections
@@ -159,7 +168,7 @@ export function useCollectionLocks(options: {
       } else if (waitCollectionLockWrite.isError) {
         showDelegationToast({
           status: "error",
-          title: `${title} Failed`,
+          title: getFailedLockTitle(title),
           message: getTransactionErrorToastMessage(
             waitCollectionLockWrite.error,
             "Transaction failed while waiting for confirmation."
@@ -207,7 +216,7 @@ export function useCollectionLocks(options: {
       } else if (waitUseCaseLockWrite.isError) {
         showDelegationToast({
           status: "error",
-          title: `${title} Failed`,
+          title: getFailedLockTitle(title),
           message: getTransactionErrorToastMessage(
             waitUseCaseLockWrite.error,
             "Transaction failed while waiting for confirmation."

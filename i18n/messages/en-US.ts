@@ -1180,6 +1180,11 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
   "search.emptyTitle": "No collections found for “{query}”",
 } as const);
 
+const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
+  "readError.message": "Unable to load delegation records for {collection}.",
+  "readError.retry": "Try Again",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.all": "All",
   "category.nfts": "NFTs",
@@ -1237,6 +1242,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
 export const EN_US_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
+  ...COLLECTION_DELEGATION_MESSAGES,
   ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
