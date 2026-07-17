@@ -411,8 +411,8 @@ export function DelegationSubmitGroups(
 
   function submitDelegation() {
     const newErrors = validate();
+    setErrors(newErrors);
     if (newErrors.length > 0 || gasError) {
-      setErrors(newErrors);
       window.scrollBy(0, 100);
     } else {
       const { functionName } = writeParams;

@@ -52,6 +52,44 @@ describe("DelegationSubmitGroups", () => {
     expect(screen.getByText("err")).toBeInTheDocument();
   });
 
+  it("clears validation errors before a valid resubmission", () => {
+    Object.defineProperty(globalThis, "scrollBy", {
+      value: jest.fn(),
+      writable: true,
+    });
+    const validate = jest
+      .fn()
+      .mockReturnValueOnce(["Missing or invalid New Address"])
+      .mockReturnValue([]);
+
+    render(
+      <DelegationSubmitGroups
+        title="Updating Delegation"
+        writeParams={{ functionName: "updateDelegationAddress" }}
+        showCancel={false}
+        gasError={undefined}
+        validate={validate}
+        onHide={jest.fn()}
+        onSetToast={jest.fn()}
+      />
+    );
+
+    const submitButton = screen.getByRole("button", { name: "Submit" });
+    fireEvent.click(submitButton);
+    expect(
+      screen.getByText("Missing or invalid New Address")
+    ).toBeInTheDocument();
+
+    fireEvent.click(submitButton);
+
+    expect(
+      screen.queryByText("Missing or invalid New Address")
+    ).not.toBeInTheDocument();
+    expect(mockWriteContract).toHaveBeenCalledWith({
+      functionName: "updateDelegationAddress",
+    });
+  });
+
   it("calls writeContract on valid submit", () => {
     const onSetToast = jest.fn();
     render(
