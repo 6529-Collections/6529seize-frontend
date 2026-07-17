@@ -17,7 +17,10 @@ import {
   fetchWaveMessages,
   formatWaveMessages,
 } from "../utils/wave-messages-utils";
-import { useWaveAbortController } from "./useWaveAbortController";
+import {
+  type WaveAbortTrigger,
+  useWaveAbortController,
+} from "./useWaveAbortController";
 import {
   createWaveFeedAbortError,
   createWaveFeedUnavailableError,
@@ -268,7 +271,7 @@ function useNativeInitialBackfill({
   updateData,
   updateEligibility,
 }: {
-  readonly cancelFetch: (waveId: string) => void;
+  readonly cancelFetch: (waveId: string, trigger: WaveAbortTrigger) => void;
   readonly cleanupController: (
     waveId: string,
     controller: AbortController
@@ -328,7 +331,7 @@ function useNativeInitialBackfill({
       }
 
       clearInitialBackfillTimeout(waveId);
-      cancelFetch(`${waveId}-initial-backfill`);
+      cancelFetch(`${waveId}-initial-backfill`, "request_replaced");
 
       initialBackfillTimeoutsRef.current[waveId] = setTimeout(() => {
         delete initialBackfillTimeoutsRef.current[waveId];
@@ -566,7 +569,7 @@ export function useWaveDataFetching({
   const { getLoadingState, setLoadingState, setPromise, clearLoadingState } =
     useWaveLoadingState();
   const { cancelFetch, createController, cleanupController } =
-    useWaveAbortController();
+    useWaveAbortController("feed");
   const { updateEligibility } = useWaveEligibility();
   const initialWaveDropsLimit = getWaveDropsInitialLimit(isCapacitor);
   const trackedCacheSuccessWaveIdsRef = useRef<Set<string>>(new Set());
@@ -776,9 +779,9 @@ export function useWaveDataFetching({
   const cancelWaveDataFetch = useCallback(
     (waveId: string) => {
       clearInitialBackfillTimeout(waveId);
-      cancelFetch(waveId);
-      cancelFetch(`${waveId}-initial-backfill`);
-      cancelFetch(getNewestSyncAbortKey(waveId));
+      cancelFetch(waveId, "wave_deactivated");
+      cancelFetch(`${waveId}-initial-backfill`, "wave_deactivated");
+      cancelFetch(getNewestSyncAbortKey(waveId), "wave_deactivated");
     },
     [cancelFetch, clearInitialBackfillTimeout]
   );
