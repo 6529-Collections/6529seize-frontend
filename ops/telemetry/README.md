@@ -67,6 +67,17 @@ redacts only the known WalletConnect stale-session-topic hash shape in JS error
 messages and stacks. It does not change product requests, response status,
 error classification, or external AWS configuration.
 
+AWS RUM HTTP telemetry uses the SDK's official fetch and XHR plugins behind a
+narrow record filter. It drops only HTTP failures whose error type is
+`AbortError` or whose message is exactly `signal is aborted without reason` or
+`Fetch is aborted`. Successful responses, non-2xx responses, timeouts, generic
+network failures, near-match messages, and non-HTTP telemetry remain visible.
+The filter runs before the privacy boundary, so every retained HTTP event still
+receives the existing URL sanitization.
+Classification failures fail open and preserve the original event. If the AWS
+recorder itself throws, the wrapper stays intentionally silent and non-blocking
+instead of recursively trying to report a monitoring-path failure.
+
 The AWS RUM compatibility event `drop_popup_ready` and the legacy AWS RUM-owned
 events `ab_card_impression`, `ab_card_link_out`, and `ab_card_live_open` keep
 their stable event names. The Art Blocks signals answer product questions, but
