@@ -7,6 +7,7 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 const MAX_TIMEOUT_MS = 60_000;
 const REQUIRED_SCOPES = ["ALL", "STAGING", "PRODUCTION"];
 const VALID_MODES = new Set(["OFF", "SHADOW", "STAGING", "PRODUCTION"]);
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "[::1]", "localhost"]);
 
 class SafeStatusError extends Error {}
 
@@ -66,7 +67,8 @@ function getTimeoutMs() {
 }
 
 function getStatusUrl() {
-  const configured = process.env.RELEASE_BUS_API_URL?.trim() || DEFAULT_API_URL;
+  const override = process.env.RELEASE_BUS_API_URL?.trim();
+  const configured = override || DEFAULT_API_URL;
   let baseUrl;
   try {
     baseUrl = new URL(configured);
@@ -75,6 +77,11 @@ function getStatusUrl() {
   }
   if (baseUrl.protocol !== "https:" && baseUrl.protocol !== "http:") {
     throw new SafeStatusError("RELEASE_BUS_API_URL must be a valid HTTP URL.");
+  }
+  if (override && !LOOPBACK_HOSTS.has(baseUrl.hostname)) {
+    throw new SafeStatusError(
+      "RELEASE_BUS_API_URL override may target only a loopback test server."
+    );
   }
   return new URL("/deploy/release-bus/controls", baseUrl);
 }
@@ -120,14 +127,14 @@ function sanitizeStatus(payload) {
   return { mode: payload.mode, controls };
 }
 
-async function requestStatus(token) {
+async function requestStatus(token, statusUrl, timeoutMs) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), getTimeoutMs());
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   timeout.unref();
 
   let response;
   try {
-    response = await fetch(getStatusUrl(), {
+    response = await fetch(statusUrl, {
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
@@ -167,8 +174,10 @@ async function requestStatus(token) {
 }
 
 try {
+  const timeoutMs = getTimeoutMs();
+  const statusUrl = getStatusUrl();
   const token = getGitHubToken();
-  const status = await requestStatus(token);
+  const status = await requestStatus(token, statusUrl, timeoutMs);
   process.stdout.write(`${JSON.stringify(status, null, 2)}\n`);
 } catch (error) {
   const message =

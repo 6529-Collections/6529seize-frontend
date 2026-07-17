@@ -61,7 +61,7 @@ afterAll(async () => {
 });
 
 function runHelper(overrides: NodeJS.ProcessEnv = {}): Promise<HelperResult> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     execFile(
       process.execPath,
       [HELPER_PATH],
@@ -78,18 +78,21 @@ function runHelper(overrides: NodeJS.ProcessEnv = {}): Promise<HelperResult> {
         timeout: 5_000,
       },
       (error, stdout, stderr) => {
-        const output = `${stdout}${stderr}`;
-        expect(output).not.toContain(TOKEN);
-        resolve({
-          code:
-            error === null
-              ? 0
-              : typeof error.code === "number"
-                ? error.code
-                : 1,
-          stdout,
-          stderr,
-        });
+        try {
+          expect(`${stdout}${stderr}`).not.toContain(TOKEN);
+          resolve({
+            code:
+              error === null
+                ? 0
+                : typeof error.code === "number"
+                  ? error.code
+                  : 1,
+            stdout,
+            stderr,
+          });
+        } catch (assertionError) {
+          reject(assertionError);
+        }
       }
     );
   });
@@ -191,6 +194,30 @@ describe("release-bus-status helper", () => {
     expect(result.stderr).toContain("Run gh auth login and retry");
   });
 
+  test.each([
+    ["not-a-url", "valid HTTP URL"],
+    ["ftp://127.0.0.1", "valid HTTP URL"],
+    ["http://example.com", "loopback test server"],
+    ["https://example.com", "loopback test server"],
+  ])("fails safely for API URL %s", async (apiUrl, expectedMessage) => {
+    const result = await runHelper({ RELEASE_BUS_API_URL: apiUrl });
+
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toContain(expectedMessage);
+  });
+
+  test.each(["", "0", "-1", "abc", "60001"])(
+    "fails safely for timeout value %j",
+    async (timeout) => {
+      const result = await runHelper({
+        RELEASE_BUS_STATUS_TIMEOUT_MS: timeout,
+      });
+
+      expect(result.code).not.toBe(0);
+      expect(result.stderr).toContain("must be an integer from 1 to 60000");
+    }
+  );
+
   test.each([401, 403, 500])("fails safely for HTTP %s", async (status) => {
     const result = await runWithResponse(
       { error: `response body containing ${TOKEN}` },
@@ -199,7 +226,27 @@ describe("release-bus-status helper", () => {
 
     expect(result.code).not.toBe(0);
     expect(result.stdout).toBe("");
-    expect(result.stderr).toContain(`HTTP ${status}`);
+    expect(result.stderr).toContain(
+      status === 500
+        ? "status API returned HTTP 500"
+        : `status authentication failed (HTTP ${status})`
+    );
+  });
+
+  it("fails without following a redirect", async () => {
+    const testServer = await startServer((_request, response) => {
+      response.writeHead(302, { Location: "https://example.com/redirect" });
+      response.end();
+    });
+    try {
+      const result = await runHelper({ RELEASE_BUS_API_URL: testServer.url });
+
+      expect(result.code).not.toBe(0);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("status API is unavailable");
+    } finally {
+      await stopServer(testServer.server);
+    }
   });
 
   it("fails on a network error", async () => {
@@ -247,12 +294,29 @@ describe("release-bus-status helper", () => {
     expect(result.stderr).toContain("invalid status data");
   });
 
+  test.each([null, 1, {}])("fails on non-string mode %j", async (mode) => {
+    const result = await runWithResponse({ mode, controls: VALID_CONTROLS });
+
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toContain("invalid status data");
+  });
+
   it("fails when a required control is missing", async () => {
     const result = await runWithResponse({
       mode: "OFF",
       controls: VALID_CONTROLS.filter(
         (control) => control.scope !== "PRODUCTION"
       ),
+    });
+
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toContain("incomplete control information");
+  });
+
+  it("fails when a required control is duplicated", async () => {
+    const result = await runWithResponse({
+      mode: "OFF",
+      controls: [...VALID_CONTROLS, VALID_CONTROLS[0]],
     });
 
     expect(result.code).not.toBe(0);
