@@ -1389,6 +1389,37 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("keeps mixed WebKit and app-owned exceptions", () => {
+    const beforeSend = loadBeforeSend();
+    const baseEvent = createWebKitExtensionMessagingTabNotFoundEvent();
+    const event = {
+      ...baseEvent,
+      exception: {
+        values: [
+          ...baseEvent.exception.values,
+          {
+            type: "TypeError",
+            value: "App-owned failure",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+                  function: "sendMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
   it.each([
     [
       "an altered message",

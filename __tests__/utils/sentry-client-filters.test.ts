@@ -6419,6 +6419,36 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter mixed WebKit and app-owned exceptions", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent();
+    event.exception = {
+      values: [
+        ...(event.exception?.values ?? []),
+        {
+          type: "TypeError",
+          value: "App-owned failure",
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+                function: "sendMessage",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter WebKit tab-not-found errors with app-owned frames", () => {
     // Arrange
     const event = createWebKitExtensionMessagingTabNotFoundEvent({

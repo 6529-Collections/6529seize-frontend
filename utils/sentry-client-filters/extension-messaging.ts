@@ -134,7 +134,7 @@ export function shouldFilterBrowserExtensionSendMessageError(
   }
 
   if (isWebKitExtensionTabNotFoundError) {
-    return true;
+    return event.exception?.values?.length === 1;
   }
 
   return hasOnlyInjectedSendMessageFrames(value.stacktrace?.frames);
