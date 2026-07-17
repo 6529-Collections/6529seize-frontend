@@ -1,6 +1,8 @@
 import type { Plugin, PluginContext } from "aws-rum-web";
 
 const AWS_RUM_HTTP_EVENT_TYPE = "com.amazon.rum.http_event";
+// These exact strings come from the pinned SDK/browser cancellation shapes.
+// Near matches intentionally fail open so new failure forms stay observable.
 const EXPECTED_ABORT_MESSAGES = new Set([
   "signal is aborted without reason",
   "Fetch is aborted",
