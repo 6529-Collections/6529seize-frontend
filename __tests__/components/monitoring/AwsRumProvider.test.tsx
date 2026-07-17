@@ -251,42 +251,48 @@ describe("AwsRumProvider", () => {
     ).not.toContain("private-profile-handle");
   });
 
-  it("filters exact aborts before retained HTTP events reach the privacy boundary", async () => {
-    render(
-      <AwsRumProvider>
-        <div>Child content</div>
-      </AwsRumProvider>
-    );
+  it.each([
+    { pluginName: "Fetch", pluginConstructor: mockFetchPlugin },
+    { pluginName: "XHR", pluginConstructor: mockXhrPlugin },
+  ])(
+    "filters exact $pluginName aborts before retained HTTP events reach the privacy boundary",
+    async ({ pluginConstructor }) => {
+      render(
+        <AwsRumProvider>
+          <div>Child content</div>
+        </AwsRumProvider>
+      );
 
-    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
 
-    const record = getMockAwsRumInstance().recordEvent;
-    const context = getMockHttpPlugin(mockFetchPlugin).getLoadedContext();
-    const retainedEvent = {
-      request: { method: "GET", url: MEDIA_URL },
-      error: { type: "TypeError", message: "Failed to fetch" },
-    };
+      const record = getMockAwsRumInstance().recordEvent;
+      const context = getMockHttpPlugin(pluginConstructor).getLoadedContext();
+      const retainedEvent = {
+        request: { method: "GET", url: MEDIA_URL },
+        error: { type: "TypeError", message: "Failed to fetch" },
+      };
 
-    context.record("com.amazon.rum.http_event", retainedEvent);
+      context.record("com.amazon.rum.http_event", retainedEvent);
 
-    expect(record).toHaveBeenCalledWith(
-      "com.amazon.rum.http_event",
-      expect.objectContaining({
-        request: expect.objectContaining({
-          url: expect.stringContaining("/author_id/"),
-        }),
-      })
-    );
-    expect(JSON.stringify(record.mock.calls)).not.toContain(TEST_AUTHOR_ID);
+      expect(record).toHaveBeenCalledWith(
+        "com.amazon.rum.http_event",
+        expect.objectContaining({
+          request: expect.objectContaining({
+            url: expect.stringContaining("/author_id/"),
+          }),
+        })
+      );
+      expect(JSON.stringify(record.mock.calls)).not.toContain(TEST_AUTHOR_ID);
 
-    const recordedEventCount = record.mock.calls.length;
-    context.record("com.amazon.rum.http_event", {
-      request: { method: "GET", url: MEDIA_URL },
-      error: { type: "AbortError", message: "The operation was aborted" },
-    });
+      const recordedEventCount = record.mock.calls.length;
+      context.record("com.amazon.rum.http_event", {
+        request: { method: "GET", url: MEDIA_URL },
+        error: { type: "AbortError", message: "The operation was aborted" },
+      });
 
-    expect(record).toHaveBeenCalledTimes(recordedEventCount);
-  });
+      expect(record).toHaveBeenCalledTimes(recordedEventCount);
+    }
+  );
 
   it("excludes third-party analytics noise without excluding app-owned APIs", async () => {
     render(
