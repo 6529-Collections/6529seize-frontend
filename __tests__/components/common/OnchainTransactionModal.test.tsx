@@ -29,7 +29,13 @@ describe("OnchainTransactionModal", () => {
     expect(
       screen.getByRole("dialog", { name: "Onchain action" })
     ).toBeInTheDocument();
-    expect(screen.getByText(DEFAULT_MESSAGES[status])).toBeInTheDocument();
+    if (status === "error") {
+      expect(
+        screen.getByRole("textbox", { name: "Transaction error details" })
+      ).toHaveValue(DEFAULT_MESSAGES[status]);
+    } else {
+      expect(screen.getByText(DEFAULT_MESSAGES[status])).toBeInTheDocument();
+    }
 
     const closeButton = screen.queryByRole("button", { name: "Close modal" });
     if (closable) {
@@ -105,7 +111,7 @@ describe("OnchainTransactionModal", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("updates focus and Escape behavior across an in-place status transition", () => {
+  it("updates Escape behavior without stealing focus from a nested modal", () => {
     const onClose = jest.fn();
     const { rerender } = render(
       <OnchainTransactionModal
@@ -119,9 +125,13 @@ describe("OnchainTransactionModal", () => {
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).not.toHaveBeenCalled();
 
-    const outsideControl = document.createElement("button");
-    document.body.appendChild(outsideControl);
-    outsideControl.focus();
+    const nestedDialog = document.createElement("dialog");
+    nestedDialog.setAttribute("open", "");
+    nestedDialog.setAttribute("aria-modal", "true");
+    const nestedControl = document.createElement("button");
+    nestedDialog.appendChild(nestedControl);
+    document.body.appendChild(nestedDialog);
+    nestedControl.focus();
 
     rerender(
       <OnchainTransactionModal
@@ -131,10 +141,88 @@ describe("OnchainTransactionModal", () => {
       />
     );
 
-    expect(dialog).toHaveFocus();
-    fireEvent.keyDown(document, { key: "Escape" });
+    expect(nestedControl).toHaveFocus();
+    fireEvent.keyDown(nestedControl, { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
+
+    nestedDialog.remove();
+    dialog.focus();
+    fireEvent.keyDown(dialog, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(1);
-    outsideControl.remove();
+  });
+
+  it("leaves nested-modal and already-handled Tab events alone", () => {
+    render(
+      <OnchainTransactionModal
+        status="success"
+        title="Onchain action"
+        transactionLink="https://explorer.example/tx/0xabc"
+        onClose={jest.fn()}
+      />
+    );
+
+    const nestedDialog = document.createElement("dialog");
+    nestedDialog.setAttribute("open", "");
+    nestedDialog.setAttribute("aria-modal", "true");
+    const nestedControl = document.createElement("button");
+    nestedDialog.appendChild(nestedControl);
+    document.body.appendChild(nestedDialog);
+    nestedControl.focus();
+
+    const nestedTabEvent = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+      cancelable: true,
+    });
+    nestedControl.dispatchEvent(nestedTabEvent);
+
+    expect(nestedTabEvent.defaultPrevented).toBe(false);
+    expect(nestedControl).toHaveFocus();
+
+    nestedDialog.remove();
+    const handledControl = document.createElement("button");
+    handledControl.addEventListener("keydown", (event) => {
+      event.preventDefault();
+    });
+    document.body.appendChild(handledControl);
+    handledControl.focus();
+
+    const handledTabEvent = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+      cancelable: true,
+    });
+    handledControl.dispatchEvent(handledTabEvent);
+
+    expect(handledTabEvent.defaultPrevented).toBe(true);
+    expect(handledControl).toHaveFocus();
+    handledControl.remove();
+  });
+
+  it("traps Tab focus inside the transaction dialog", async () => {
+    const user = userEvent.setup();
+    render(
+      <OnchainTransactionModal
+        status="success"
+        title="Onchain action"
+        transactionLink="https://explorer.example/tx/0xabc"
+        onClose={jest.fn()}
+      />
+    );
+
+    const dialog = screen.getByRole("dialog", { name: "Onchain action" });
+    const closeButton = screen.getByRole("button", { name: "Close modal" });
+    const transactionLink = screen.getByRole("link", { name: "View Tx" });
+
+    expect(dialog).toHaveFocus();
+    await user.tab();
+    expect(closeButton).toHaveFocus();
+    await user.tab();
+    expect(transactionLink).toHaveFocus();
+    await user.tab();
+    expect(closeButton).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(transactionLink).toHaveFocus();
   });
 
   it("links a transaction hash using the supplied chain", () => {
@@ -193,10 +281,43 @@ describe("OnchainTransactionModal", () => {
       />
     );
 
-    expect(screen.getByText(longError)).toBeInTheDocument();
+    const errorDetails = screen.getByRole("textbox", {
+      name: "Transaction error details",
+    });
+    expect(errorDetails).toHaveValue(longError);
+    expect(errorDetails).toHaveAttribute("readonly");
     expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
       "href",
       "https://explorer.example/tx/0xabc"
     );
+  });
+
+  it("falls back to the default error for an empty custom message", () => {
+    render(
+      <OnchainTransactionModal
+        status="error"
+        title="Onchain action"
+        message="   "
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Transaction failed");
+  });
+
+  it("uses native status semantics with phrasing-only content", () => {
+    render(
+      <OnchainTransactionModal
+        status="submitted"
+        title="Onchain action"
+        onClose={jest.fn()}
+      />
+    );
+
+    const status = screen.getByRole("status");
+    expect(status.tagName).toBe("OUTPUT");
+    expect(status.querySelector("div, p, section")).not.toBeInTheDocument();
   });
 });

@@ -45,6 +45,47 @@ const DEFAULT_STATUS_MESSAGE: Record<OnchainTransactionModalStatus, string> = {
 
 const TRANSACTION_LINK_CLASS_NAME =
   "tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black tw-no-underline tw-transition hover:tw-bg-[#d7d7d7] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+const ERROR_TEXTAREA_CHARS_PER_ROW = 48;
+const ERROR_TEXTAREA_MAX_ROWS = 6;
+
+function getStatusMessage(
+  status: OnchainTransactionModalStatus,
+  message: string | undefined
+): string {
+  const normalizedMessage = message?.trim();
+  if (normalizedMessage) {
+    return normalizedMessage;
+  }
+  return DEFAULT_STATUS_MESSAGE[status];
+}
+
+function getErrorMessageRows(message: string): number {
+  const estimatedRows = message.split("\n").reduce((total, line) => {
+    return (
+      total + Math.max(1, Math.ceil(line.length / ERROR_TEXTAREA_CHARS_PER_ROW))
+    );
+  }, 0);
+
+  return Math.min(ERROR_TEXTAREA_MAX_ROWS, estimatedRows);
+}
+
+function isEventFromNestedModal(
+  event: KeyboardEvent,
+  parentDialog: HTMLDialogElement | null
+): boolean {
+  if (!parentDialog) {
+    return false;
+  }
+
+  return event.composedPath().some((target) => {
+    if (!(target instanceof Element)) {
+      return false;
+    }
+
+    const nearestModal = target.closest('[aria-modal="true"], dialog[open]');
+    return nearestModal !== null && nearestModal !== parentDialog;
+  });
+}
 
 function StatusEmoji({
   status,
@@ -89,17 +130,21 @@ function ModalStatusContent({
   transactionUrl: string | null;
 }>) {
   if (status === "error") {
+    const errorMessage = getStatusMessage(status, message);
+
     return (
       <div className="tw-w-full tw-min-w-0 tw-max-w-full tw-text-center">
         <p className="tw-m-0 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-red">
           <span>Error</span>
           <StatusEmoji status={status} />
         </p>
-        <div className="tw-mx-auto tw-mt-4 tw-max-h-40 tw-w-full tw-max-w-full tw-overflow-y-auto tw-pr-1">
-          <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-iron-100 [overflow-wrap:anywhere]">
-            {message ?? DEFAULT_STATUS_MESSAGE.error}
-          </p>
-        </div>
+        <textarea
+          aria-label="Transaction error details"
+          readOnly
+          rows={getErrorMessageRows(errorMessage)}
+          value={errorMessage}
+          className="tw-mx-auto tw-mt-4 tw-block tw-max-h-40 tw-w-full tw-max-w-full tw-resize-none tw-overflow-y-auto tw-whitespace-pre-wrap tw-break-words tw-border-0 tw-bg-transparent tw-p-0 tw-pr-1 tw-text-center tw-text-iron-100 [overflow-wrap:anywhere] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        />
         {transactionUrl ? (
           <div className="tw-mt-3">
             <TransactionLink href={transactionUrl} />
@@ -109,25 +154,25 @@ function ModalStatusContent({
     );
   }
 
-  const statusMessage = message ?? DEFAULT_STATUS_MESSAGE[status];
+  const statusMessage = getStatusMessage(status, message);
 
   if (status === "submitted") {
     return (
-      <div className="tw-text-center">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
+      <span className="tw-block tw-text-center">
+        <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
           <StatusEmoji status={status} />
-          <p className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100">
+          <span className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100">
             {statusMessage}
-          </p>
+          </span>
           <TransactionLink href={transactionUrl} />
-        </div>
-        <div className="tw-mt-4 tw-flex tw-items-center tw-justify-center tw-gap-2">
-          <p className="tw-m-0 tw-text-md tw-font-medium tw-text-iron-100">
+        </span>
+        <span className="tw-mt-4 tw-flex tw-items-center tw-justify-center tw-gap-2">
+          <span className="tw-m-0 tw-text-md tw-font-medium tw-text-iron-100">
             Waiting for confirmation
-          </p>
+          </span>
           <CircleLoader size={CircleLoaderSize.MEDIUM} />
-        </div>
-      </div>
+        </span>
+      </span>
     );
   }
 
@@ -135,17 +180,17 @@ function ModalStatusContent({
     status === "success" ? "tw-text-green" : "tw-text-iron-100";
 
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center">
+    <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center">
       <StatusEmoji status={status} />
-      <p className={`tw-m-0 tw-text-lg tw-font-medium ${statusTextColor}`}>
+      <span className={`tw-m-0 tw-text-lg tw-font-medium ${statusTextColor}`}>
         {statusMessage}
-      </p>
+      </span>
       {status === "confirm_wallet" ? (
         <CircleLoader size={CircleLoaderSize.LARGE} />
       ) : (
         <TransactionLink href={transactionUrl} />
       )}
-    </div>
+    </span>
   );
 }
 
@@ -187,7 +232,7 @@ export default function OnchainTransactionModal({
 
   useEffect(() => {
     dialogRef.current?.focus();
-  }, [status]);
+  }, []);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -197,6 +242,17 @@ export default function OnchainTransactionModal({
     const handleKeyDown = (event: KeyboardEvent) => {
       const dialog = dialogRef.current;
       if (!dialog) {
+        return;
+      }
+
+      if (event.key !== "Escape" && event.key !== "Tab") {
+        return;
+      }
+
+      if (
+        event.defaultPrevented ||
+        isEventFromNestedModal(event, dialogRef.current)
+      ) {
         return;
       }
 
@@ -282,17 +338,30 @@ export default function OnchainTransactionModal({
           ) : null}
         </div>
 
-        <output
-          className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
-          role={status === "error" ? "alert" : undefined}
-          aria-live={status === "error" ? "assertive" : "polite"}
-        >
-          <ModalStatusContent
-            status={status}
-            message={message}
-            transactionUrl={transactionUrl}
-          />
-        </output>
+        {status === "error" ? (
+          <div
+            className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
+            role="alert"
+            aria-live="assertive"
+          >
+            <ModalStatusContent
+              status={status}
+              message={message}
+              transactionUrl={transactionUrl}
+            />
+          </div>
+        ) : (
+          <output
+            className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
+            aria-live="polite"
+          >
+            <ModalStatusContent
+              status={status}
+              message={message}
+              transactionUrl={transactionUrl}
+            />
+          </output>
+        )}
       </dialog>
     </div>,
     document.body

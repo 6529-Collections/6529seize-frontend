@@ -139,18 +139,46 @@ describe("UserPageSubscriptionsTopUp", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("normalizes wallet submission failures in the shared error modal", () => {
+    sendTransaction.error = new Error(
+      "User rejected the request\n\nRequest Arguments:\nfrom: 0xabc"
+    );
+
+    render(<UserPageSubscriptionsTopUp />);
+
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Error - User rejected the request");
+  });
+
   it("keeps receipt failures visible in a closable error modal", () => {
     sendTransaction.data = "0x123";
     waitSendTransaction.isError = true;
-    waitSendTransaction.error = new Error("Transaction receipt failed");
+    waitSendTransaction.error = new Error(
+      "Transaction receipt failed\n\nRequest Arguments:\nfrom: 0xabc"
+    );
 
     render(<UserPageSubscriptionsTopUp />);
 
     expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
-    expect(screen.getByText("Transaction receipt failed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Error - Transaction receipt failed");
     expect(
       screen.getByRole("button", { name: "Close modal" })
     ).toBeInTheDocument();
+  });
+
+  it("uses a useful fallback for an empty receipt error", () => {
+    sendTransaction.data = "0x123";
+    waitSendTransaction.isError = true;
+    waitSendTransaction.error = new Error("");
+
+    render(<UserPageSubscriptionsTopUp />);
+
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Transaction failed");
   });
 
   it("submits custom count when Other option is selected", async () => {

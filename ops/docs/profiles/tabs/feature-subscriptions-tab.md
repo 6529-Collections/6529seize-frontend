@@ -72,7 +72,8 @@ are documented in
   - keeps wallet-confirm and pending states open while work is in progress;
     success and error states can be dismissed with the close control, backdrop,
     or Escape
-  - keeps long transaction errors contained in a scrollable status panel
+  - keeps long transaction errors contained in a keyboard-focusable,
+    scrollable status panel
 - `Upcoming Drops`:
   - shows first 3 rows by default; `Show More` expands the list
   - first row can show phase metadata (phase, position, airdrop address,

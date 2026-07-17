@@ -42,6 +42,80 @@ function getEthForCards(count: number): number {
   return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
 }
 
+function getTopUpTransactionErrorMessage(
+  transactionError: Error | null | undefined
+): string {
+  const message = transactionError?.message
+    .split("Request Arguments")[0]
+    ?.trim();
+  return message ? `Error - ${message}` : "Transaction failed";
+}
+
+interface TopUpTransactionModalInput {
+  readonly localError: string;
+  readonly sendIsPending: boolean;
+  readonly sendErrorMessage: string | undefined;
+  readonly receiptIsLoading: boolean;
+  readonly receiptIsSuccess: boolean;
+  readonly receiptHasError: boolean;
+  readonly receiptErrorMessage: string | undefined;
+}
+
+interface TopUpTransactionModalState {
+  readonly closable: boolean;
+  readonly message: string | undefined;
+  readonly status: OnchainTransactionModalStatus | null;
+}
+
+function getTopUpTransactionModalStatus(
+  input: TopUpTransactionModalInput
+): OnchainTransactionModalStatus | null {
+  if (input.localError || input.sendErrorMessage || input.receiptHasError) {
+    return "error";
+  }
+  if (input.sendIsPending) {
+    return "confirm_wallet";
+  }
+  if (input.receiptIsLoading) {
+    return "submitted";
+  }
+  if (input.receiptIsSuccess) {
+    return "success";
+  }
+  return null;
+}
+
+function getTopUpTransactionModalMessage(
+  status: OnchainTransactionModalStatus | null,
+  input: TopUpTransactionModalInput
+): string | undefined {
+  if (status === "success") {
+    return "Top Up Successful!";
+  }
+  if (status !== "error") {
+    return undefined;
+  }
+  if (input.localError) {
+    return input.localError;
+  }
+  return input.sendErrorMessage ?? input.receiptErrorMessage;
+}
+
+function getTopUpTransactionModalState(
+  input: TopUpTransactionModalInput
+): TopUpTransactionModalState {
+  const status = getTopUpTransactionModalStatus(input);
+  return {
+    closable:
+      input.receiptIsSuccess ||
+      Boolean(input.localError) ||
+      input.sendErrorMessage !== undefined ||
+      input.receiptHasError,
+    message: getTopUpTransactionModalMessage(status, input),
+    status,
+  };
+}
+
 const TOP_UP_OPTION_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4";
 const TOP_UP_DEEP_GRID_CLASS =
@@ -147,29 +221,25 @@ export default function UserPageSubscriptionsTopUp() {
     });
   }
 
-  useEffect(() => {
-    if (sendTransaction.error) {
-      const errorMsg =
-        sendTransaction.error.message.split("Request Arguments")[0];
-      setError(`Error - ${errorMsg}`);
-    }
-  }, [sendTransaction.error]);
-
-  const receiptErrorMessage = waitSendTransaction.error?.message;
-  const hasReceiptError =
-    waitSendTransaction.isError || receiptErrorMessage !== undefined;
-  const showModal =
-    sendTransaction.isPending ||
-    waitSendTransaction.isLoading ||
-    waitSendTransaction.isSuccess ||
-    hasReceiptError ||
-    !!error;
-
-  const isClosable =
-    waitSendTransaction.isSuccess || hasReceiptError || !!error;
+  const sendTransactionErrorMessage = sendTransaction.error
+    ? getTopUpTransactionErrorMessage(sendTransaction.error)
+    : undefined;
+  const receiptErrorMessage = waitSendTransaction.error
+    ? getTopUpTransactionErrorMessage(waitSendTransaction.error)
+    : undefined;
+  const transactionModal = getTopUpTransactionModalState({
+    localError: error,
+    sendIsPending: sendTransaction.isPending,
+    sendErrorMessage: sendTransactionErrorMessage,
+    receiptIsLoading: waitSendTransaction.isLoading,
+    receiptIsSuccess: waitSendTransaction.isSuccess,
+    receiptHasError:
+      waitSendTransaction.isError || receiptErrorMessage !== undefined,
+    receiptErrorMessage,
+  });
 
   const closeModal = useCallback(() => {
-    if (isClosable) {
+    if (transactionModal.closable) {
       sendTransaction.reset();
       setError("");
       setTopUpAmount(null);
@@ -177,28 +247,12 @@ export default function UserPageSubscriptionsTopUp() {
       setSelectedOption(null);
       setMemeCount("");
     }
-  }, [isClosable, sendTransaction]);
+  }, [transactionModal.closable, sendTransaction]);
 
-  let modalStatus: OnchainTransactionModalStatus | null = null;
-  if (error || hasReceiptError) {
-    modalStatus = "error";
-  } else if (sendTransaction.isPending) {
-    modalStatus = "confirm_wallet";
-  } else if (waitSendTransaction.isLoading) {
-    modalStatus = "submitted";
-  } else if (waitSendTransaction.isSuccess) {
-    modalStatus = "success";
-  }
   const modalSubtitle =
     topUpAmount === null || topUpCardCount === null
       ? undefined
       : `${formatInteger(locale, topUpCardCount)} Cards - ${numberWithCommasFromString(topUpAmount.toString())} ETH`;
-  let modalMessage: string | undefined;
-  if (modalStatus === "error") {
-    modalMessage = error || receiptErrorMessage;
-  } else if (modalStatus === "success") {
-    modalMessage = "Top Up Successful!";
-  }
 
   if (hideSubscriptions) {
     return <></>;
@@ -399,12 +453,12 @@ export default function UserPageSubscriptionsTopUp() {
       >
         {isIos ? iOsContent : topUpContent}
       </UserPageSubscriptionsSection>
-      {mounted && showModal && modalStatus ? (
+      {mounted && transactionModal.status ? (
         <OnchainTransactionModal
-          status={modalStatus}
+          status={transactionModal.status}
           title="Top up"
           subtitle={modalSubtitle}
-          message={modalMessage}
+          message={transactionModal.message}
           transactionHash={sendTransaction.data}
           chain={SUBSCRIPTIONS_CHAIN}
           onClose={closeModal}
