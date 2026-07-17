@@ -2,21 +2,24 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { publicEnv } from "@/config/env";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
-import { AwsRum } from "aws-rum-web";
+import { AwsRum, FetchPlugin, XhrPlugin } from "aws-rum-web";
 
 const WAVE_ID = `${"a".repeat(8)}-${"b".repeat(4)}-4${"c".repeat(3)}-a${"d".repeat(3)}-${"e".repeat(12)}`;
 const OTHER_WAVE_ID = `${"f".repeat(8)}-${"1".repeat(4)}-4${"2".repeat(3)}-a${"3".repeat(3)}-${"4".repeat(12)}`;
+const TEST_AUTHOR_ID = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
+const MEDIA_URL = `https://media.example.cloudfront.net/renditions/drops/author_${TEST_AUTHOR_ID}/file.m3u8`;
 let mockPathname = `/waves/${WAVE_ID}`;
+
+type MockPluginContext = {
+  record: (eventType: string, eventData: object) => void;
+  recordPageView: (pageId: string) => void;
+};
 
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
 }));
 
 jest.mock("aws-rum-web", () => {
-  type MockPluginContext = {
-    record: (eventType: string, eventData: object) => void;
-    recordPageView: (pageId: string) => void;
-  };
   type MockPluginConfig = {
     readonly eventPluginsToLoad?: Array<{
       load?: (context: MockPluginContext) => void;
@@ -45,6 +48,26 @@ jest.mock("aws-rum-web", () => {
       }
     };
 
+  const createHttpPlugin = (pluginId: string, config?: unknown) => {
+    let loadedContext: MockPluginContext | undefined;
+
+    return {
+      config,
+      disable: jest.fn(),
+      enable: jest.fn(),
+      getLoadedContext: () => {
+        if (!loadedContext) {
+          throw new Error(`Expected the ${pluginId} plugin to be loaded`);
+        }
+        return loadedContext;
+      },
+      getPluginId: () => pluginId,
+      load: jest.fn((context: MockPluginContext) => {
+        loadedContext = context;
+      }),
+    };
+  };
+
   return {
     AwsRum: jest.fn(
       (
@@ -68,16 +91,20 @@ jest.mock("aws-rum-web", () => {
         return instance;
       }
     ),
-    FetchPlugin: createPlugin("fetch"),
+    FetchPlugin: jest.fn((config?: unknown) =>
+      createHttpPlugin("fetch", config)
+    ),
     JsErrorPlugin: createPlugin("js-error"),
     NavigationPlugin: createPlugin("navigation"),
     ResourcePlugin: createPlugin("resource"),
     WebVitalsPlugin: createPlugin("web-vitals"),
-    XhrPlugin: createPlugin("xhr"),
+    XhrPlugin: jest.fn((config?: unknown) => createHttpPlugin("xhr", config)),
   };
 });
 
 const mockAwsRum = AwsRum as jest.Mock;
+const mockFetchPlugin = FetchPlugin as unknown as jest.Mock;
+const mockXhrPlugin = XhrPlugin as unknown as jest.Mock;
 const originalPublicEnv = { ...publicEnv };
 
 type AwsRumHttpPluginConfig = {
@@ -88,6 +115,10 @@ type MockAwsRumInstance = {
   readonly disable: jest.Mock;
   readonly recordEvent: jest.Mock;
   readonly recordPageView: jest.Mock;
+};
+
+type MockHttpPlugin = {
+  readonly getLoadedContext: () => MockPluginContext;
 };
 
 describe("AwsRumProvider", () => {
@@ -103,6 +134,8 @@ describe("AwsRumProvider", () => {
     });
     mockPathname = `/waves/${WAVE_ID}`;
     mockAwsRum.mockClear();
+    mockFetchPlugin.mockClear();
+    mockXhrPlugin.mockClear();
     delete window.awsRum;
     warnSpy = jest.spyOn(console, "warn").mockImplementation();
   });
@@ -216,6 +249,43 @@ describe("AwsRumProvider", () => {
     expect(
       JSON.stringify(getMockAwsRumInstance().recordPageView.mock.calls)
     ).not.toContain("private-profile-handle");
+  });
+
+  it("filters exact aborts before retained HTTP events reach the privacy boundary", async () => {
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+
+    const record = getMockAwsRumInstance().recordEvent;
+    const context = getMockHttpPlugin(mockFetchPlugin).getLoadedContext();
+    const retainedEvent = {
+      request: { method: "GET", url: MEDIA_URL },
+      error: { type: "TypeError", message: "Failed to fetch" },
+    };
+
+    context.record("com.amazon.rum.http_event", retainedEvent);
+
+    expect(record).toHaveBeenCalledWith(
+      "com.amazon.rum.http_event",
+      expect.objectContaining({
+        request: expect.objectContaining({
+          url: expect.stringContaining("/author_id/"),
+        }),
+      })
+    );
+    expect(JSON.stringify(record.mock.calls)).not.toContain(TEST_AUTHOR_ID);
+
+    const recordedEventCount = record.mock.calls.length;
+    context.record("com.amazon.rum.http_event", {
+      request: { method: "GET", url: MEDIA_URL },
+      error: { type: "AbortError", message: "The operation was aborted" },
+    });
+
+    expect(record).toHaveBeenCalledTimes(recordedEventCount);
   });
 
   it("excludes third-party analytics noise without excluding app-owned APIs", async () => {
@@ -406,16 +476,29 @@ describe("AwsRumProvider", () => {
 });
 
 const getHttpUrlsToExclude = (): RegExp[] => {
-  const plugins = getAwsRumConfig().eventPluginsToLoad ?? [];
-  const xhrConfig = plugins.find((plugin) => plugin.getPluginId() === "xhr")
-    ?.config as AwsRumHttpPluginConfig | undefined;
-  const fetchConfig = plugins.find((plugin) => plugin.getPluginId() === "fetch")
-    ?.config as AwsRumHttpPluginConfig | undefined;
+  const xhrConfig = mockXhrPlugin.mock.calls[0]?.[0] as
+    | AwsRumHttpPluginConfig
+    | undefined;
+  const fetchConfig = mockFetchPlugin.mock.calls[0]?.[0] as
+    | AwsRumHttpPluginConfig
+    | undefined;
 
   expect(xhrConfig).toBeDefined();
   expect(fetchConfig?.urlsToExclude).toEqual(xhrConfig?.urlsToExclude);
 
   return xhrConfig?.urlsToExclude ?? [];
+};
+
+const getMockHttpPlugin = (pluginConstructor: jest.Mock): MockHttpPlugin => {
+  const plugin = pluginConstructor.mock.results[0]?.value as
+    | MockHttpPlugin
+    | undefined;
+
+  if (!plugin) {
+    throw new Error("AWS RUM HTTP plugin was not initialized");
+  }
+
+  return plugin;
 };
 
 const getAwsRumConfig = (): {
