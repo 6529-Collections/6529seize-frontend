@@ -28,6 +28,8 @@ describe("instrumentation-client", () => {
     "undefined is not an object (evaluating 'e.tags')";
   const gifPickerTenorUndefinedResultsMapMessage =
     "undefined is not an object (evaluating 'e.results.map')";
+  const instagramPageHideBridgeErrorMessage =
+    "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
   const reactDomRemoveChildMessage =
     "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
@@ -376,6 +378,56 @@ describe("instrumentation-client", () => {
           },
           stacktrace: {
             frames,
+          },
+        },
+      ],
+    },
+  });
+
+  const createInstagramPageHideBridgeEvent = (
+    columns: readonly [number, number, number] = [5517, 3808, 1208],
+    documentPath = "app:///example-profile/rep"
+  ) => ({
+    contexts: {
+      browser: { name: "Instagram" },
+      os: { name: "iOS" },
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: instagramPageHideBridgeErrorMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "?",
+                lineno: 1,
+                colno: columns[0],
+                in_app: true,
+              },
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "sendPageHideMessage",
+                lineno: 1,
+                colno: columns[1],
+                in_app: true,
+              },
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "sendDataToNative",
+                lineno: 1,
+                colno: columns[2],
+                in_app: true,
+              },
+            ],
           },
         },
       ],
@@ -1381,6 +1433,59 @@ describe("instrumentation-client", () => {
     ]);
 
     const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each([
+    ["latest", [5517, 3808, 1208] as const],
+    ["earlier", [6257, 4139, 1325] as const],
+  ])(
+    "drops the %s raw Instagram iOS page-hide bridge signature",
+    (_cohort, columns) => {
+      const beforeSend = loadBeforeSend();
+      const event = createInstagramPageHideBridgeEvent(columns);
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it("keeps an Instagram page-hide bridge error with changed coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent([5518, 3808, 1208]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the exact bridge shape outside Instagram", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createInstagramPageHideBridgeEvent(),
+      contexts: {
+        browser: { name: "Twitter" },
+        os: { name: "iOS" },
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the exact bridge shape with an app-owned original stack", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent();
+    const error = new Error(instagramPageHideBridgeErrorMessage);
+    error.stack = [
+      `TypeError: ${instagramPageHideBridgeErrorMessage}`,
+      "    at sendDataToNative (webpack-internal:///(app-pages-browser)/./utils/instagram-bridge.ts:10:1)",
+    ].join("\n");
+
+    const result = beforeSend(event, { originalException: error });
 
     expect(result).not.toBeNull();
   });
