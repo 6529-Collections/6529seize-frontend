@@ -1,7 +1,5 @@
 "use client";
 
-import { type ReactNode } from "react";
-
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { faEdit, faXmark } from "@fortawesome/free-solid-svg-icons";
@@ -38,7 +36,7 @@ export function OutgoingDelegationsTable(
     activeConsolidations: ActiveConsolidation[];
     revocation: DelegationRevocation;
     chainsMatch: () => boolean;
-    getSwitchToMessage: () => ReactNode;
+    getSwitchToMessage: () => string;
     showDelegationToast: (toast: DelegationToastState) => void;
     onEditDelegation: (params: {
       wallet: string;
@@ -132,7 +130,10 @@ export function OutgoingDelegationsTable(
                 data-tooltip-id={`revoke-${del.useCase.use_case}-${w.wallet}`}
                 onClick={() => {
                   const title = "Revoking Delegation";
-                  let message: ReactNode = "Confirm in your wallet...";
+                  let toast: DelegationToastState = {
+                    status: "confirm_wallet",
+                    title,
+                  };
                   if (chainsMatch()) {
                     revocation.setRevokeDelegationParams({
                       collection: areEqualAddresses(
@@ -145,9 +146,13 @@ export function OutgoingDelegationsTable(
                       use_case: del.useCase.use_case,
                     });
                   } else {
-                    message = getSwitchToMessage();
+                    toast = {
+                      status: "error",
+                      title,
+                      message: getSwitchToMessage(),
+                    };
                   }
-                  showDelegationToast({ title, message });
+                  showDelegationToast(toast);
                 }}
               >
                 <FontAwesomeIcon icon={faXmark} className="tw-h-4 tw-w-4" />
@@ -189,7 +194,10 @@ export function OutgoingDelegationsTable(
               className={DANGER_ACTION_CLASS}
               onClick={() => {
                 const title = "Batch Revoking Delegations";
-                let message: ReactNode = "Confirm in your wallet...";
+                let toast: DelegationToastState = {
+                  status: "confirm_wallet",
+                  title,
+                };
                 if (chainsMatch()) {
                   revocation.setBatchRevokeDelegationParams({
                     collections: [...bulkRevocations].map(() =>
@@ -204,9 +212,13 @@ export function OutgoingDelegationsTable(
                     use_cases: [...bulkRevocations].map((br) => br.use_case),
                   });
                 } else {
-                  message = getSwitchToMessage();
+                  toast = {
+                    status: "error",
+                    title,
+                    message: getSwitchToMessage(),
+                  };
                 }
-                showDelegationToast({ title, message });
+                showDelegationToast(toast);
               }}
             >
               Batch Revoke

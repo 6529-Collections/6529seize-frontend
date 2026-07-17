@@ -49,6 +49,10 @@ const SANDBOX_CREATED_WAVE_DESCRIPTION =
 const SANDBOX_PERPETUAL_WAVE_NAME = "Sandbox Perpetual Rank Wave";
 const SANDBOX_PERPETUAL_WAVE_DESCRIPTION =
   "Local-only perpetual rank wave description for Playwright.";
+const SANDBOX_SCHEDULED_WAVE_NAME = "Sandbox Scheduled Rank Wave";
+const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
+  "Local-only scheduled rank wave description for Playwright.";
+const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
 const SANDBOX_POLL_OPTIONS = [
   "A longer poll option that stays readable on a phone",
@@ -1171,7 +1175,22 @@ function isExpectedDescriptionDrop(
   );
 }
 
-function isExpectedCreateWaveVotingConfig(voting) {
+function isExpectedBoundedPeriodEndingAt(period, expectedMax) {
+  // Scheduled rank waves end when their final winners announcement fires, so
+  // the voting/participation periods must close at exactly that timestamp.
+  return (
+    hasOnlyKeys(period, ["max", "min"]) &&
+    typeof period.min === "number" &&
+    Number.isFinite(period.min) &&
+    period.min > 0 &&
+    period.max === expectedMax
+  );
+}
+
+function isExpectedCreateWaveVotingConfig(
+  voting,
+  periodCheck = isExpectedOpenEndedPeriod
+) {
   return (
     hasOnlyKeys(voting, [
       "credit_category",
@@ -1190,12 +1209,15 @@ function isExpectedCreateWaveVotingConfig(voting) {
     voting.credit_category === null &&
     voting.creditor_id === null &&
     voting.signature_required === false &&
-    isExpectedOpenEndedPeriod(voting.period) &&
+    periodCheck(voting.period) &&
     voting.forbid_negative_votes === false
   );
 }
 
-function isExpectedCreateWaveParticipationConfig(participation) {
+function isExpectedCreateWaveParticipationConfig(
+  participation,
+  periodCheck = isExpectedOpenEndedPeriod
+) {
   return (
     hasOnlyKeys(participation, [
       "no_of_applications_allowed_per_participant",
@@ -1214,7 +1236,7 @@ function isExpectedCreateWaveParticipationConfig(participation) {
     Array.isArray(participation.required_metadata) &&
     participation.required_metadata.length === 0 &&
     participation.signature_required === false &&
-    isExpectedOpenEndedPeriod(participation.period) &&
+    periodCheck(participation.period) &&
     participation.terms === null
   );
 }
@@ -1348,6 +1370,107 @@ function isExpectedCreatePerpetualRankWaveBody(body) {
   );
 }
 
+function isExpectedScheduledRankWaveConfig(wave) {
+  // A scheduled rank wave must carry exactly one non-rolling decision point
+  // (the Dates step's default first announcement) and nothing else.
+  return (
+    hasOnlyKeys(wave, [
+      "admin_drop_deletion_enabled",
+      "admin_group",
+      "decisions_strategy",
+      "max_votes_per_identity_to_drop",
+      "max_winners",
+      "time_lock_ms",
+      "type",
+      "winning_threshold",
+      "winning_threshold_min_duration_ms",
+    ]) &&
+    hasOnlyKeys(wave.admin_group, ["group_id"]) &&
+    wave.admin_group.group_id === SANDBOX_ADMIN_GROUP_ID &&
+    wave.type === "RANK" &&
+    wave.admin_drop_deletion_enabled === true &&
+    wave.winning_threshold === null &&
+    wave.winning_threshold_min_duration_ms === null &&
+    wave.max_winners === null &&
+    wave.max_votes_per_identity_to_drop === null &&
+    wave.time_lock_ms === null &&
+    hasOnlyKeys(wave.decisions_strategy, [
+      "first_decision_time",
+      "is_rolling",
+      "subsequent_decisions",
+    ]) &&
+    typeof wave.decisions_strategy.first_decision_time === "number" &&
+    Number.isFinite(wave.decisions_strategy.first_decision_time) &&
+    wave.decisions_strategy.first_decision_time > 0 &&
+    Array.isArray(wave.decisions_strategy.subsequent_decisions) &&
+    wave.decisions_strategy.subsequent_decisions.length === 0 &&
+    wave.decisions_strategy.is_rolling === false
+  );
+}
+
+function isExpectedScheduledRankOutcome(outcome) {
+  // The spec configures one manual outcome awarding position 1 only.
+  return (
+    hasOnlyKeys(outcome, ["description", "distribution", "type"]) &&
+    outcome.type === "MANUAL" &&
+    outcome.description === SANDBOX_SCHEDULED_OUTCOME_TITLE &&
+    Array.isArray(outcome.distribution) &&
+    outcome.distribution.length === 1 &&
+    hasOnlyKeys(outcome.distribution[0], ["amount", "description"]) &&
+    outcome.distribution[0].amount === 1 &&
+    outcome.distribution[0].description === SANDBOX_SCHEDULED_OUTCOME_TITLE
+  );
+}
+
+function isExpectedCreateScheduledRankWaveBody(body) {
+  if (
+    !hasOnlyKeys(body, [
+      "chat",
+      "description_drop",
+      "outcomes",
+      "participation",
+      "picture",
+      "visibility",
+      "voting",
+      "wave",
+      "name",
+    ])
+  ) {
+    return false;
+  }
+
+  if (!isExpectedScheduledRankWaveConfig(body.wave)) {
+    return false;
+  }
+
+  // The wave closes at its single announcement, so both periods must end at
+  // exactly the first (and only) decision time.
+  const endsAtDecision = (period) =>
+    isExpectedBoundedPeriodEndingAt(
+      period,
+      body.wave.decisions_strategy.first_decision_time
+    );
+
+  return (
+    body.name === SANDBOX_SCHEDULED_WAVE_NAME &&
+    body.picture === null &&
+    isExpectedDescriptionDrop(
+      body.description_drop,
+      SANDBOX_SCHEDULED_WAVE_DESCRIPTION
+    ) &&
+    hasNullGroupScope(body.visibility) &&
+    isExpectedCreateWaveParticipationConfig(
+      body.participation,
+      endsAtDecision
+    ) &&
+    isExpectedCreateWaveVotingConfig(body.voting, endsAtDecision) &&
+    isExpectedCreateWaveChatConfig(body.chat) &&
+    Array.isArray(body.outcomes) &&
+    body.outcomes.length === 1 &&
+    isExpectedScheduledRankOutcome(body.outcomes[0])
+  );
+}
+
 function notificationIdFromPath(pathname) {
   return pathname.match(/^\/api\/notifications\/(\d+)\/read$/)?.[1] ?? null;
 }
@@ -1472,7 +1595,8 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   if (pathname === "/api/waves") {
     return (
       isExpectedCreateWaveBody(body) ||
-      isExpectedCreatePerpetualRankWaveBody(body)
+      isExpectedCreatePerpetualRankWaveBody(body) ||
+      isExpectedCreateScheduledRankWaveBody(body)
     );
   }
 
@@ -1634,6 +1758,7 @@ function loggedRequestBody(pathname, body) {
       outcomes_count: Array.isArray(body.outcomes)
         ? body.outcomes.length
         : null,
+      outcomes: Array.isArray(body.outcomes) ? body.outcomes : null,
       keys: sortedKeys(body),
       description_drop_keys: isPlainObject(body.description_drop)
         ? sortedKeys(body.description_drop)

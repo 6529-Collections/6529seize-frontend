@@ -1,11 +1,8 @@
 "use client";
 
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-} from "@/constants/constants";
+import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -22,6 +19,7 @@ import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import type { DelegationWriteParams } from "./delegation-shared";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
+import type { DelegationToastState } from "./DelegationToast";
 
 const FORM_ROW_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-2 tw-pb-4 sm:tw-grid-cols-12 sm:tw-gap-4";
@@ -386,7 +384,7 @@ export function DelegationSubmitGroups(
     isDestructive?: boolean | undefined;
     validate: () => string[];
     onHide: () => void;
-    onSetToast: (toast: { title: string; message: ReactNode }) => void;
+    onSetToast: (toast: DelegationToastState) => void;
     submitBtnLabel?: string | undefined;
   }>
 ) {
@@ -407,11 +405,9 @@ export function DelegationSubmitGroups(
     hash: writeDelegation.data,
   });
   const [errors, setErrors] = useState<string[]>([]);
-  const emitToast = useEffectEvent(
-    (toast: { title: string; message: ReactNode }) => {
-      onSetToast(toast);
-    }
-  );
+  const emitToast = useEffectEvent((toast: DelegationToastState) => {
+    onSetToast(toast);
+  });
 
   function submitDelegation() {
     const newErrors = validate();
@@ -427,28 +423,16 @@ export function DelegationSubmitGroups(
       }
       writeDelegation.writeContract({ ...writeParams, functionName });
       onSetToast({
+        status: "confirm_wallet",
         title,
-        message: "Confirm in your wallet...",
       });
     }
-  }
-
-  function getTransactionAnchor(hash: `0x${string}`) {
-    return (
-      <a
-        href={getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="tw-font-semibold tw-text-primary-600 tw-underline tw-underline-offset-2 hover:tw-text-primary-500"
-      >
-        view
-      </a>
-    );
   }
 
   useEffect(() => {
     if (writeDelegation.error) {
       emitToast({
+        status: "error",
         title,
         message: getTransactionErrorToastMessage(
           writeDelegation.error,
@@ -459,33 +443,25 @@ export function DelegationSubmitGroups(
     if (writeDelegation.data) {
       if (waitWriteDelegation.isLoading) {
         emitToast({
+          status: "submitted",
           title,
-          message: (
-            <>
-              Transaction submitted...{" "}
-              {getTransactionAnchor(writeDelegation.data)}
-              <br />
-              Waiting for confirmation...
-            </>
-          ),
+          transactionHash: writeDelegation.data,
         });
       } else if (waitWriteDelegation.isSuccess) {
         emitToast({
+          status: "success",
           title,
-          message: (
-            <>
-              Transaction Successful!{" "}
-              {getTransactionAnchor(writeDelegation.data)}
-            </>
-          ),
+          transactionHash: writeDelegation.data,
         });
       } else if (waitWriteDelegation.isError) {
         emitToast({
+          status: "error",
           title: `${title} Failed`,
           message: getTransactionErrorToastMessage(
             waitWriteDelegation.error,
             "Transaction failed while waiting for confirmation."
           ),
+          transactionHash: writeDelegation.data,
         });
       }
     }

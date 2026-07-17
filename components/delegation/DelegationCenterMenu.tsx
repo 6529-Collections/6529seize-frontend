@@ -87,13 +87,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   });
   const showNavigation = !SECTIONS_WITHOUT_NAVIGATION.has(props.section);
 
-  const {
-    toastRef,
-    toast,
-    showToast,
-    showDelegationToast,
-    setToastVisibility,
-  } = useDelegationToast();
+  const { toast, showToast, showDelegationToast, setToastVisibility } =
+    useDelegationToast();
 
   function printContent() {
     switch (props.section) {
@@ -303,7 +298,6 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       <div className="tw-w-full">{printContent()}</div>
       {toast && (
         <DelegationToast
-          toastRef={toastRef}
           toast={toast}
           showToast={showToast}
           setShowToast={setToastVisibility}

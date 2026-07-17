@@ -31,7 +31,7 @@ interface CollectionDelegationLocksProps {
   collection: DelegationCollection;
   locks: CollectionLocks;
   chainsMatch: () => boolean;
-  getSwitchToMessage: () => ReactNode;
+  getSwitchToMessage: () => string;
   showDelegationToast: (toast: DelegationToastState) => void;
 }
 
@@ -95,7 +95,10 @@ function CollectionWalletLockButton(
         const title = `${
           locks.collectionLockRead.data ? `Unlocking` : `Locking`
         } Wallet`;
-        let message: ReactNode = "Confirm in your wallet...";
+        let toast: DelegationToastState = {
+          status: "confirm_wallet",
+          title,
+        };
         locks.setCollectionLockToastTitle(title);
         if (chainsMatch()) {
           locks.collectionLockWrite.writeContract({
@@ -106,9 +109,13 @@ function CollectionWalletLockButton(
             functionName: "setCollectionLock",
           });
         } else {
-          message = getSwitchToMessage();
+          toast = {
+            status: "error",
+            title,
+            message: getSwitchToMessage(),
+          };
         }
-        showDelegationToast({ title, message });
+        showDelegationToast(toast);
       }}
     >
       <FontAwesomeIcon
@@ -180,7 +187,10 @@ export function CollectionDelegationLocks(
         className={PRIMARY_ACTION_CLASS}
         onClick={() => {
           const title = `${selectedUseCaseActionInProgress} Wallet on Use Case #${selectedUseCase.use_case} - ${selectedUseCase.display}`;
-          let message: ReactNode = "Confirm in your wallet...";
+          let toast: DelegationToastState = {
+            status: "confirm_wallet",
+            title,
+          };
           locks.setUseCaseLockToastTitle(title);
 
           if (chainsMatch()) {
@@ -196,9 +206,13 @@ export function CollectionDelegationLocks(
               functionName: "setCollectionUsecaseLock",
             });
           } else {
-            message = getSwitchToMessage();
+            toast = {
+              status: "error",
+              title,
+              message: getSwitchToMessage(),
+            };
           }
-          showDelegationToast({ title, message });
+          showDelegationToast(toast);
         }}
       >
         <FontAwesomeIcon

@@ -18,10 +18,7 @@ import { getReadParams } from "../CollectionDelegation.utils";
 import type { DelegationCollection } from "../delegation-constants";
 import { ALL_USE_CASES } from "../delegation-constants";
 import type { DelegationToastState } from "../DelegationToast";
-import {
-  getTransactionErrorToastMessage,
-  getTransactionToastMessage,
-} from "./collection-delegation-helpers";
+import { getTransactionErrorToastMessage } from "./collection-delegation-helpers";
 
 /**
  * Lock state for the collection-delegation screen: collection-level and
@@ -138,6 +135,7 @@ export function useCollectionLocks(options: {
 
     if (collectionLockWrite.error) {
       showDelegationToast({
+        status: "error",
         title,
         message: getTransactionErrorToastMessage(
           collectionLockWrite.error,
@@ -148,21 +146,25 @@ export function useCollectionLocks(options: {
     if (collectionLockWrite.data) {
       if (waitCollectionLockWrite.isLoading) {
         showDelegationToast({
+          status: "submitted",
           title,
-          message: getTransactionToastMessage(collectionLockWrite.data, true),
+          transactionHash: collectionLockWrite.data,
         });
       } else if (waitCollectionLockWrite.isSuccess) {
         showDelegationToast({
+          status: "success",
           title,
-          message: getTransactionToastMessage(collectionLockWrite.data, false),
+          transactionHash: collectionLockWrite.data,
         });
       } else if (waitCollectionLockWrite.isError) {
         showDelegationToast({
+          status: "error",
           title: `${title} Failed`,
           message: getTransactionErrorToastMessage(
             waitCollectionLockWrite.error,
             "Transaction failed while waiting for confirmation."
           ),
+          transactionHash: collectionLockWrite.data,
         });
       }
     }
@@ -181,7 +183,8 @@ export function useCollectionLocks(options: {
 
     if (useCaseLockWrite.error) {
       showDelegationToast({
-        title: title,
+        status: "error",
+        title,
         message: getTransactionErrorToastMessage(
           useCaseLockWrite.error,
           "Failed to start use-case lock update."
@@ -191,21 +194,25 @@ export function useCollectionLocks(options: {
     if (useCaseLockWrite.data) {
       if (waitUseCaseLockWrite.isLoading) {
         showDelegationToast({
-          title: title,
-          message: getTransactionToastMessage(useCaseLockWrite.data, true),
+          status: "submitted",
+          title,
+          transactionHash: useCaseLockWrite.data,
         });
       } else if (waitUseCaseLockWrite.isSuccess) {
         showDelegationToast({
-          title: title,
-          message: getTransactionToastMessage(useCaseLockWrite.data, false),
+          status: "success",
+          title,
+          transactionHash: useCaseLockWrite.data,
         });
       } else if (waitUseCaseLockWrite.isError) {
         showDelegationToast({
+          status: "error",
           title: `${title} Failed`,
           message: getTransactionErrorToastMessage(
             waitUseCaseLockWrite.error,
             "Transaction failed while waiting for confirmation."
           ),
+          transactionHash: useCaseLockWrite.data,
         });
       }
     }
