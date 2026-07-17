@@ -14,7 +14,7 @@
       "automatic": ["performance", "errors", "http"],
       "sampling": "AWS_RUM_SAMPLE_RATE per browser session; default 0.2",
       "release": "public VERSION as releaseId",
-      "notes": "X-Ray, interaction telemetry, and raw automatic page views are disabled; a first-loaded privacy plugin establishes the normalized initial page before automatic telemetry plugins, manually recorded navigation uses allowlisted App Router families, author UUID media segments are bounded, and the exact WalletConnect stale-topic message shape is redacted"
+      "notes": "X-Ray, interaction telemetry, and raw automatic page views are disabled; a first-loaded privacy plugin establishes the normalized initial page before automatic telemetry plugins, manually recorded navigation uses allowlisted App Router families, author UUID media segments are bounded, the exact WalletConnect stale-topic message shape is redacted, and official fetch/XHR plugins drop only exact expected abort failures while preserving HTTP statuses, timeouts, and other network failures"
     },
     {
       "id": "sentry",
