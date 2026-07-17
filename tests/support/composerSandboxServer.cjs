@@ -39,6 +39,7 @@ const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
 const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
 const SANDBOX_SUBMITTED_CHAT_DROP_ID = "00000000-0000-4000-8000-000000000539";
+const SANDBOX_SUBMITTED_POLL_ID = "00000000-0000-4000-8000-000000000545";
 const SANDBOX_SIGNATURE_WAVE_ID = "00000000-0000-4000-8000-000000000540";
 const SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID =
   "00000000-0000-4000-8000-000000000541";
@@ -48,7 +49,17 @@ const SANDBOX_CREATED_WAVE_DESCRIPTION =
 const SANDBOX_PERPETUAL_WAVE_NAME = "Sandbox Perpetual Rank Wave";
 const SANDBOX_PERPETUAL_WAVE_DESCRIPTION =
   "Local-only perpetual rank wave description for Playwright.";
+const SANDBOX_SCHEDULED_WAVE_NAME = "Sandbox Scheduled Rank Wave";
+const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
+  "Local-only scheduled rank wave description for Playwright.";
+const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_POLL_OPTIONS = [
+  "A longer poll option that stays readable on a phone",
+  "A second poll option",
+];
+const SANDBOX_STORM_FIRST_PART = "Calm storm opening.";
+const SANDBOX_STORM_SECOND_PART = "Calm storm conclusion.";
 const SANDBOX_SIGNATURE_WAVE_NAME = "Local Signature Sandbox Wave";
 const SANDBOX_SIGNATURE_WAVE_DESCRIPTION =
   "Local-only signed drop sandbox wave for Playwright.";
@@ -329,7 +340,7 @@ const localWave = {
     max_votes_per_identity_to_drop: null,
     time_lock_ms: null,
     admin_group: publicScope,
-    authenticated_user_eligible_for_admin: false,
+    authenticated_user_eligible_for_admin: true,
     decisions_strategy: null,
     next_decision_time: null,
     admin_drop_deletion_enabled: false,
@@ -437,6 +448,30 @@ const submittedChatDrop = {
   nft_links: [],
 };
 
+const submittedPollDrop = {
+  ...submittedChatDrop,
+  parts: [
+    {
+      ...submittedChatDrop.parts[0],
+      content: null,
+    },
+  ],
+  poll: {
+    id: SANDBOX_SUBMITTED_POLL_ID,
+    options: SANDBOX_POLL_OPTIONS.map((option, index) => ({
+      option_no: index + 1,
+      option_string: option,
+      votes: 0,
+    })),
+    voted: [],
+    multichoice: true,
+    anonymous: true,
+    only_droppers_can_respond: true,
+    closing_time: Date.now() + 24 * 60 * 60 * 1000,
+    is_open: true,
+  },
+};
+
 function localProfileMin() {
   return {
     id: localProfile.id,
@@ -486,6 +521,13 @@ function currentLocalDrop() {
   return sandboxDropReaction === SANDBOX_REACTION
     ? reactedLocalDrop()
     : localDrop;
+}
+
+function currentDirectMessageDrop() {
+  return {
+    ...currentLocalDrop(),
+    content: "Synthetic local-only direct message body for Playwright.",
+  };
 }
 
 const createdWaveMin = {
@@ -607,7 +649,7 @@ const dmWaveOverview = {
     id: "local-dm-description-drop",
     content: "Synthetic local-only direct message for Playwright.",
   },
-  total_drops_count: 0,
+  total_drops_count: 1,
   is_private: true,
   is_dm_wave: true,
 };
@@ -650,6 +692,10 @@ const dmWave = {
   chat: {
     ...localWave.chat,
     scope: { group: { is_direct_message: true } },
+  },
+  metrics: {
+    ...localWave.metrics,
+    drops_count: dmWaveOverview.total_drops_count,
   },
 };
 
@@ -902,13 +948,56 @@ function isExpectedDirectMessageBody(body) {
   );
 }
 
-function isExpectedChatDropPart(part) {
+function isExpectedChatDropPart(part, expectedContent) {
   return (
     hasOnlyKeys(part, ["content", "media", "quoted_drop"]) &&
-    part.content === SANDBOX_CHAT_DROP_CONTENT &&
+    part.content === expectedContent &&
     part.quoted_drop === null &&
     Array.isArray(part.media) &&
     part.media.length === 0
+  );
+}
+
+function isExpectedChatDropParts(parts, hasPoll) {
+  if (!Array.isArray(parts)) {
+    return false;
+  }
+
+  if (hasPoll) {
+    return parts.length === 1 && isExpectedChatDropPart(parts[0], null);
+  }
+
+  if (parts.length === 1) {
+    return isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT);
+  }
+
+  return (
+    parts.length === 2 &&
+    isExpectedChatDropPart(parts[0], SANDBOX_STORM_FIRST_PART) &&
+    isExpectedChatDropPart(parts[1], SANDBOX_STORM_SECOND_PART)
+  );
+}
+
+function isExpectedPoll(poll) {
+  return (
+    hasOnlyKeys(poll, [
+      "anonymous",
+      "closing_time",
+      "multichoice",
+      "only_droppers_can_respond",
+      "options",
+    ]) &&
+    Array.isArray(poll.options) &&
+    poll.options.length === SANDBOX_POLL_OPTIONS.length &&
+    poll.options.every(
+      (option, index) => option === SANDBOX_POLL_OPTIONS[index]
+    ) &&
+    poll.multichoice === true &&
+    poll.anonymous === true &&
+    poll.only_droppers_can_respond === true &&
+    Number.isFinite(poll.closing_time) &&
+    poll.closing_time > Date.now() &&
+    poll.closing_time < Date.now() + 48 * 60 * 60 * 1000
   );
 }
 
@@ -917,6 +1006,7 @@ function isExpectedChatDropSignerAddress(signerAddress) {
 }
 
 function isExpectedChatDropBody(body) {
+  const hasPoll = isPlainObject(body?.poll);
   if (
     !hasOnlyKeys(body, [
       "drop_type",
@@ -926,6 +1016,7 @@ function isExpectedChatDropBody(body) {
       "mentioned_waves",
       "metadata",
       "parts",
+      ...(hasPoll ? ["poll"] : []),
       "referenced_nfts",
       "signature",
       "signer_address",
@@ -943,9 +1034,8 @@ function isExpectedChatDropBody(body) {
     body.signature === null &&
     body.is_safe_signature === false &&
     isExpectedChatDropSignerAddress(body.signer_address) &&
-    Array.isArray(body.parts) &&
-    body.parts.length === 1 &&
-    isExpectedChatDropPart(body.parts[0]) &&
+    isExpectedChatDropParts(body.parts, hasPoll) &&
+    (!hasPoll || isExpectedPoll(body.poll)) &&
     Array.isArray(body.referenced_nfts) &&
     body.referenced_nfts.length === 0 &&
     Array.isArray(body.mentioned_users) &&
@@ -1096,7 +1186,22 @@ function isExpectedDescriptionDrop(
   );
 }
 
-function isExpectedCreateWaveVotingConfig(voting) {
+function isExpectedBoundedPeriodEndingAt(period, expectedMax) {
+  // Scheduled rank waves end when their final winners announcement fires, so
+  // the voting/participation periods must close at exactly that timestamp.
+  return (
+    hasOnlyKeys(period, ["max", "min"]) &&
+    typeof period.min === "number" &&
+    Number.isFinite(period.min) &&
+    period.min > 0 &&
+    period.max === expectedMax
+  );
+}
+
+function isExpectedCreateWaveVotingConfig(
+  voting,
+  periodCheck = isExpectedOpenEndedPeriod
+) {
   return (
     hasOnlyKeys(voting, [
       "credit_category",
@@ -1115,12 +1220,15 @@ function isExpectedCreateWaveVotingConfig(voting) {
     voting.credit_category === null &&
     voting.creditor_id === null &&
     voting.signature_required === false &&
-    isExpectedOpenEndedPeriod(voting.period) &&
+    periodCheck(voting.period) &&
     voting.forbid_negative_votes === false
   );
 }
 
-function isExpectedCreateWaveParticipationConfig(participation) {
+function isExpectedCreateWaveParticipationConfig(
+  participation,
+  periodCheck = isExpectedOpenEndedPeriod
+) {
   return (
     hasOnlyKeys(participation, [
       "no_of_applications_allowed_per_participant",
@@ -1139,7 +1247,7 @@ function isExpectedCreateWaveParticipationConfig(participation) {
     Array.isArray(participation.required_metadata) &&
     participation.required_metadata.length === 0 &&
     participation.signature_required === false &&
-    isExpectedOpenEndedPeriod(participation.period) &&
+    periodCheck(participation.period) &&
     participation.terms === null
   );
 }
@@ -1273,6 +1381,107 @@ function isExpectedCreatePerpetualRankWaveBody(body) {
   );
 }
 
+function isExpectedScheduledRankWaveConfig(wave) {
+  // A scheduled rank wave must carry exactly one non-rolling decision point
+  // (the Dates step's default first announcement) and nothing else.
+  return (
+    hasOnlyKeys(wave, [
+      "admin_drop_deletion_enabled",
+      "admin_group",
+      "decisions_strategy",
+      "max_votes_per_identity_to_drop",
+      "max_winners",
+      "time_lock_ms",
+      "type",
+      "winning_threshold",
+      "winning_threshold_min_duration_ms",
+    ]) &&
+    hasOnlyKeys(wave.admin_group, ["group_id"]) &&
+    wave.admin_group.group_id === SANDBOX_ADMIN_GROUP_ID &&
+    wave.type === "RANK" &&
+    wave.admin_drop_deletion_enabled === true &&
+    wave.winning_threshold === null &&
+    wave.winning_threshold_min_duration_ms === null &&
+    wave.max_winners === null &&
+    wave.max_votes_per_identity_to_drop === null &&
+    wave.time_lock_ms === null &&
+    hasOnlyKeys(wave.decisions_strategy, [
+      "first_decision_time",
+      "is_rolling",
+      "subsequent_decisions",
+    ]) &&
+    typeof wave.decisions_strategy.first_decision_time === "number" &&
+    Number.isFinite(wave.decisions_strategy.first_decision_time) &&
+    wave.decisions_strategy.first_decision_time > 0 &&
+    Array.isArray(wave.decisions_strategy.subsequent_decisions) &&
+    wave.decisions_strategy.subsequent_decisions.length === 0 &&
+    wave.decisions_strategy.is_rolling === false
+  );
+}
+
+function isExpectedScheduledRankOutcome(outcome) {
+  // The spec configures one manual outcome awarding position 1 only.
+  return (
+    hasOnlyKeys(outcome, ["description", "distribution", "type"]) &&
+    outcome.type === "MANUAL" &&
+    outcome.description === SANDBOX_SCHEDULED_OUTCOME_TITLE &&
+    Array.isArray(outcome.distribution) &&
+    outcome.distribution.length === 1 &&
+    hasOnlyKeys(outcome.distribution[0], ["amount", "description"]) &&
+    outcome.distribution[0].amount === 1 &&
+    outcome.distribution[0].description === SANDBOX_SCHEDULED_OUTCOME_TITLE
+  );
+}
+
+function isExpectedCreateScheduledRankWaveBody(body) {
+  if (
+    !hasOnlyKeys(body, [
+      "chat",
+      "description_drop",
+      "outcomes",
+      "participation",
+      "picture",
+      "visibility",
+      "voting",
+      "wave",
+      "name",
+    ])
+  ) {
+    return false;
+  }
+
+  if (!isExpectedScheduledRankWaveConfig(body.wave)) {
+    return false;
+  }
+
+  // The wave closes at its single announcement, so both periods must end at
+  // exactly the first (and only) decision time.
+  const endsAtDecision = (period) =>
+    isExpectedBoundedPeriodEndingAt(
+      period,
+      body.wave.decisions_strategy.first_decision_time
+    );
+
+  return (
+    body.name === SANDBOX_SCHEDULED_WAVE_NAME &&
+    body.picture === null &&
+    isExpectedDescriptionDrop(
+      body.description_drop,
+      SANDBOX_SCHEDULED_WAVE_DESCRIPTION
+    ) &&
+    hasNullGroupScope(body.visibility) &&
+    isExpectedCreateWaveParticipationConfig(
+      body.participation,
+      endsAtDecision
+    ) &&
+    isExpectedCreateWaveVotingConfig(body.voting, endsAtDecision) &&
+    isExpectedCreateWaveChatConfig(body.chat) &&
+    Array.isArray(body.outcomes) &&
+    body.outcomes.length === 1 &&
+    isExpectedScheduledRankOutcome(body.outcomes[0])
+  );
+}
+
 function notificationIdFromPath(pathname) {
   return pathname.match(/^\/api\/notifications\/(\d+)\/read$/)?.[1] ?? null;
 }
@@ -1397,7 +1606,8 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   if (pathname === "/api/waves") {
     return (
       isExpectedCreateWaveBody(body) ||
-      isExpectedCreatePerpetualRankWaveBody(body)
+      isExpectedCreatePerpetualRankWaveBody(body) ||
+      isExpectedCreateScheduledRankWaveBody(body)
     );
   }
 
@@ -1505,7 +1715,19 @@ function loggedRequestBody(pathname, body) {
       wave_id: typeof body.wave_id === "string" ? body.wave_id : null,
       drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
       content: isPlainObject(firstPart) ? firstPart.content : null,
+      poll: isPlainObject(body.poll)
+        ? {
+            options: body.poll.options,
+            multichoice: body.poll.multichoice,
+            anonymous: body.poll.anonymous,
+            only_droppers_can_respond: body.poll.only_droppers_can_respond,
+            closing_time: body.poll.closing_time,
+          }
+        : null,
       part_count: Array.isArray(body.parts) ? body.parts.length : 0,
+      part_contents: Array.isArray(body.parts)
+        ? body.parts.map((part) => (isPlainObject(part) ? part.content : null))
+        : [],
       part_keys: isPlainObject(firstPart) ? sortedKeys(firstPart) : [],
       media_count: Array.isArray(firstPart?.media) ? firstPart.media.length : 0,
       has_attachments:
@@ -1545,6 +1767,7 @@ function loggedRequestBody(pathname, body) {
       outcomes_count: Array.isArray(body.outcomes)
         ? body.outcomes.length
         : null,
+      outcomes: Array.isArray(body.outcomes) ? body.outcomes : null,
       keys: sortedKeys(body),
       description_drop_keys: isPlainObject(body.description_drop)
         ? sortedKeys(body.description_drop)
@@ -1621,7 +1844,7 @@ const mockApiExactReadRoutes = new Map([
   [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
-    () => ({ wave: dmWaveOverview, drops: [] }),
+    () => ({ wave: dmWaveOverview, drops: [currentDirectMessageDrop()] }),
   ],
   [`/api/waves/${SANDBOX_NOTIFICATION_WAVE_ID}`, () => notificationWave],
   [
@@ -1795,7 +2018,7 @@ const mockApiKnownPostRoutes = [
   },
 ];
 
-function handleAllowedChatDropPost(method, pathname, requestKind, res) {
+function handleAllowedChatDropPost(method, pathname, body, requestKind, res) {
   if (method !== "POST" || pathname !== "/api/drops") {
     return false;
   }
@@ -1804,7 +2027,23 @@ function handleAllowedChatDropPost(method, pathname, requestKind, res) {
     return false;
   }
 
-  return writeJsonResponse(res, submittedChatDrop);
+  if (isPlainObject(body.poll)) {
+    return writeJsonResponse(res, submittedPollDrop);
+  }
+
+  const parts = body.parts.map((part, index) => ({
+    part_id: index + 1,
+    content: part.content,
+    media: [],
+    attachments: [],
+    quoted_drop: null,
+  }));
+
+  return writeJsonResponse(res, {
+    ...submittedChatDrop,
+    parts,
+    parts_count: parts.length,
+  });
 }
 
 function handleAllowedChatDropEditPost(method, pathname, requestKind, res) {
@@ -1872,7 +2111,7 @@ function handleKnownSandboxPost(method, pathname, url, body, res) {
 function handleMockApi(method, pathname, url, body, res, requestKind) {
   return (
     handleMockApiRead(method, pathname, url, res) ||
-    handleAllowedChatDropPost(method, pathname, requestKind, res) ||
+    handleAllowedChatDropPost(method, pathname, body, requestKind, res) ||
     handleAllowedChatDropEditPost(method, pathname, requestKind, res) ||
     handleAllowedReactionMutation(method, pathname, url, body, res) ||
     handleKnownSandboxPost(method, pathname, url, body, res)

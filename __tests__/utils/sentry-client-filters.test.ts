@@ -5,6 +5,7 @@ import {
   getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
   shouldFilterAnonymousUnsafeEvalCspError,
+  shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -20,6 +21,7 @@ import {
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
+  shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
   shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
@@ -32,6 +34,29 @@ import {
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
 type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
+type TwitterCurrentInsetEventOptions = {
+  request?: TestSentryClientEvent["request"];
+  mechanismType?: string;
+  handled?: boolean;
+};
+type AppleWebKitSortedTrackListOverrides = {
+  type?: string | undefined;
+  value?: string | undefined;
+  includeMechanism?: boolean | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  filename?: string | undefined;
+  functionName?: string | undefined;
+  includeAbsPath?: boolean | undefined;
+  absPath?: string | undefined;
+  includeStacktrace?: boolean | undefined;
+  additionalFrame?: SentryStackFrame | undefined;
+  includeAdditionalException?: boolean | undefined;
+  includeExceptionValue?: boolean | undefined;
+  includeBrowserContext?: boolean | undefined;
+  browserName?: string | undefined;
+  transaction?: string | undefined;
+};
 
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
@@ -59,6 +84,8 @@ describe("sentry-client-filters", () => {
     "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
+  const twitterForIphoneUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/20H392 Twitter for iPhone/12.9";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const gifPickerTenorUndefinedTagsMessage =
@@ -187,6 +214,38 @@ describe("sentry-client-filters", () => {
       "browser.name": "Twitter",
     },
     ...overrides,
+  });
+
+  const createTwitterCurrentInsetEvent = ({
+    request = {
+      headers: {
+        "User-Agent": twitterForIphoneUserAgent,
+      },
+    },
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+  }: TwitterCurrentInsetEventOptions = {}): TestSentryClientEvent => ({
+    request,
+    exception: {
+      values: [
+        {
+          type: "ReferenceError",
+          value: "Can't find variable: currentInset",
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+              },
+            ],
+          },
+        },
+      ],
+    },
   });
 
   const createInjectedWalletCollisionEvent = (
@@ -534,6 +593,85 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createObservedRawAnonymousUnsafeEvalFrames = (
+    wrapperOverrides: Partial<SentryStackFrame> = {}
+  ): SentryStackFrame[] => [
+    {
+      filename: "app:///_next/static/chunks/0example-chunk.js",
+      abs_path: "app:///_next/static/chunks/0example-chunk.js",
+      function: "n",
+      in_app: true,
+      lineno: 7,
+      colno: 4853,
+      ...wrapperOverrides,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "next",
+      in_app: true,
+      lineno: 234,
+      colno: 30,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "predicate",
+      in_app: true,
+      lineno: 234,
+      colno: 30,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "eval",
+      in_app: true,
+    },
+  ];
+
+  const createObservedRawAnonymousUnsafeEvalCspEvent = ({
+    frames = createObservedRawAnonymousUnsafeEvalFrames(),
+    handled = false,
+    message = anonymousUnsafeEvalCspMessage,
+    eventOverrides = {},
+  }: {
+    frames?: SentryStackFrame[];
+    handled?: boolean;
+    message?: string;
+    eventOverrides?: TestSentryClientEventOverrides;
+  } = {}): TestSentryClientEvent => ({
+    transaction: "/waves/:wave",
+    exception: {
+      values: [
+        {
+          type: "EvalError",
+          value: message,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled,
+          },
+          stacktrace: { frames },
+        },
+      ],
+    },
+    tags: {
+      transaction: "/waves/:wave",
+      url: "/waves/example",
+    },
+    ...eventOverrides,
+  });
+
+  const createObservedRawAnonymousUnsafeEvalStack = (
+    wrapperLine: number
+  ): string =>
+    [
+      `EvalError: ${anonymousUnsafeEvalCspMessage}`,
+      "    at eval (<anonymous>)",
+      "    at predicate (<anonymous>:234:30)",
+      "    at next (<anonymous>:234:30)",
+      `    at n (app:///_next/static/chunks/0example-chunk.js:${wrapperLine}:4853)`,
+    ].join("\n");
+
   const createObservedSentryE7WasmCspUnsafeEvalEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -660,6 +798,119 @@ describe("sentry-client-filters", () => {
     ],
     ...overrides,
   });
+
+  const createAppleWebKitSortedTrackListEvent = ({
+    type = "TypeError",
+    value = "Type error",
+    includeMechanism = true,
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+    filename = "[native code]",
+    functionName = "sortedTrackListForMenu",
+    includeAbsPath = false,
+    absPath = "[native code]",
+    includeStacktrace = true,
+    additionalFrame,
+    includeAdditionalException = false,
+    includeExceptionValue = true,
+    includeBrowserContext = true,
+    browserName = "Mobile Safari UI/WKWebView",
+    transaction = "/waves/:wave",
+  }: AppleWebKitSortedTrackListOverrides = {}): TestSentryClientEvent => {
+    const frame: SentryStackFrame = {
+      filename,
+      function: functionName,
+    };
+    if (includeAbsPath) {
+      frame.abs_path = absPath;
+    }
+
+    const frames = additionalFrame ? [frame, additionalFrame] : [frame];
+    const stacktrace = includeStacktrace ? { stacktrace: { frames } } : {};
+    const additionalValues = includeAdditionalException
+      ? [{ type: "Error", value: "Nearby application error" }]
+      : [];
+    const mechanism = includeMechanism
+      ? {
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+        }
+      : {};
+    const values = includeExceptionValue
+      ? [
+          {
+            type,
+            value,
+            ...mechanism,
+            ...stacktrace,
+          },
+          ...additionalValues,
+        ]
+      : [];
+    const contexts = includeBrowserContext
+      ? {
+          contexts: {
+            browser: {
+              name: browserName,
+            },
+          },
+        }
+      : {};
+
+    return {
+      transaction,
+      ...contexts,
+      exception: {
+        values,
+      },
+    };
+  };
+
+  const appleWebKitSortedTrackListNearMisses: Array<
+    [string, AppleWebKitSortedTrackListOverrides]
+  > = [
+    ["a changed exception type", { type: "Error" }],
+    ["a changed exception value", { value: "Type Error" }],
+    [
+      "a changed mechanism",
+      { mechanismType: "auto.browser.global_handlers.onunhandledrejection" },
+    ],
+    ["no mechanism", { includeMechanism: false }],
+    ["a handled exception", { handled: true }],
+    ["a changed function", { functionName: "sortedTrackList" }],
+    ["a changed filename", { filename: "https://example.test/app.js" }],
+    [
+      "a conflicting absolute path",
+      {
+        includeAbsPath: true,
+        absPath: "https://example.test/native.js",
+      },
+    ],
+    ["no stacktrace", { includeStacktrace: false }],
+    ["no exception values", { includeExceptionValue: false }],
+    ["another exception value", { includeAdditionalException: true }],
+    [
+      "another native frame",
+      {
+        additionalFrame: {
+          filename: "[native code]",
+          function: "dispatchEvent",
+        },
+      },
+    ],
+    [
+      "an application-owned frame",
+      {
+        additionalFrame: {
+          filename: "webpack-internal:///(app-pages-browser)/./app/page.tsx",
+          function: "renderPage",
+          in_app: true,
+        },
+      },
+    ],
+  ];
 
   const createSentryRouteParameterizationEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -967,6 +1218,21 @@ describe("sentry-client-filters", () => {
       ...overrides,
     }) as TestSentryClientEvent;
 
+  const createObservedRabbyRainbowKitRawFrames = () => [
+    {
+      filename: "app:///_next/static/chunks/observed-rabby-webview.js",
+      abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
+      function: "n",
+      in_app: true,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "Promise",
+      in_app: true,
+    },
+  ];
+
   const createRabbyMobileRainbowKitNotFoundEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
@@ -983,13 +1249,7 @@ describe("sentry-client-filters", () => {
               handled: false,
             },
             stacktrace: {
-              frames: [
-                {
-                  filename: "[native code]",
-                  function: "Promise",
-                  in_app: false,
-                },
-              ],
+              frames: createObservedRabbyRainbowKitRawFrames(),
             },
           },
         ],
@@ -1595,6 +1855,43 @@ describe("sentry-client-filters", () => {
     }
   );
 
+  it("filters production-shaped React DOM removeChild NotFoundError events on the parameterized profile transaction", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        transaction: "/:user",
+        request: {
+          url: "https://6529.io/profile-name",
+        },
+        tags: {
+          transaction: "/:user",
+          url: "/profile-name",
+        },
+      })
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it.each(["/profile-name", "/about", "/:user/", "/:user/subscriptions"])(
+    "keeps React DOM removeChild NotFoundError events for non-matching profile route candidate %s",
+    (route) => {
+      const result = shouldFilterReactDomRemoveChildNotFoundError(
+        createReactDomRemoveChildEvent({
+          transaction: route,
+          request: {
+            url: `https://6529.io${route}`,
+          },
+          tags: {
+            transaction: route,
+            url: route,
+          },
+        })
+      );
+
+      expect(result).toBe(false);
+    }
+  );
+
   it("filters React DOM removeChild NotFoundError events when request URL identifies a waves route", () => {
     const result = shouldFilterReactDomRemoveChildNotFoundError(
       createReactDomRemoveChildEvent({
@@ -1612,6 +1909,7 @@ describe("sentry-client-filters", () => {
   it("keeps React DOM removeChild NotFoundError events when an app frame is present", () => {
     const result = shouldFilterReactDomRemoveChildNotFoundError(
       createReactDomRemoveChildEvent({
+        transaction: "/:user",
         exception: {
           values: [
             {
@@ -1628,6 +1926,10 @@ describe("sentry-client-filters", () => {
               },
             },
           ],
+        },
+        tags: {
+          transaction: "/:user",
+          url: "/profile-name",
         },
       })
     );
@@ -1652,6 +1954,7 @@ describe("sentry-client-filters", () => {
   it("keeps different removeChild NotFoundError messages from React DOM runtime frames", () => {
     const result = shouldFilterReactDomRemoveChildNotFoundError(
       createReactDomRemoveChildEvent({
+        transaction: "/:user",
         exception: {
           values: [
             {
@@ -1662,6 +1965,35 @@ describe("sentry-client-filters", () => {
               },
             },
           ],
+        },
+        tags: {
+          transaction: "/:user",
+          url: "/profile-name",
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps profile removeChild NotFoundError events without stack frames", () => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRemoveChildEvent({
+        transaction: "/:user",
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomRemoveChildMessage,
+              stacktrace: {
+                frames: [],
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction: "/:user",
+          url: "/profile-name",
         },
       })
     );
@@ -3481,6 +3813,62 @@ describe("sentry-client-filters", () => {
     expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
+  it("filters Twitter currentInset errors from the production iPhone user agent", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent();
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Twitter currentInset errors from the runtime iPhone user agent", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent({ request: {} });
+
+    // Act
+    const result = withRuntimeUserAgent(twitterForIphoneUserAgent, () =>
+      shouldFilterTwitterCurrentInsetReferenceError(event)
+    );
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter currentInset errors from non-Twitter iPhone Safari", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent({
+      request: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["a different capture mechanism", { mechanismType: "generic" }],
+    ["a handled error", { handled: true }],
+  ])("does not filter Twitter currentInset errors from %s", (_label, options) => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent(options);
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters Twitter CONFIG reference errors with injected wave document frames", () => {
     // Arrange
     const event = createTwitterConfigEvent();
@@ -3521,6 +3909,59 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(true);
   });
+
+  it("filters the observed WKWebView native track-list TypeError before abs_path normalization", () => {
+    // Arrange
+    const event = createAppleWebKitSortedTrackListEvent();
+
+    // Act
+    const result = shouldFilterAppleWebKitSortedTrackListTypeError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the observed Apple Mail native track-list TypeError after abs_path normalization", () => {
+    // Arrange
+    const event = createAppleWebKitSortedTrackListEvent({
+      includeAbsPath: true,
+      browserName: "Apple Mail",
+      transaction: "/notifications",
+    });
+
+    // Act
+    const result = shouldFilterAppleWebKitSortedTrackListTypeError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the exact native track-list TypeError without browser context", () => {
+    // Arrange
+    const event = createAppleWebKitSortedTrackListEvent({
+      includeBrowserContext: false,
+    });
+
+    // Act
+    const result = shouldFilterAppleWebKitSortedTrackListTypeError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each(appleWebKitSortedTrackListNearMisses)(
+    "does not filter the native track-list TypeError with %s",
+    (_caseName, overrides) => {
+      // Arrange
+      const event = createAppleWebKitSortedTrackListEvent(overrides);
+
+      // Act
+      const result = shouldFilterAppleWebKitSortedTrackListTypeError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
 
   it("filters Sentry route parameterization cyclic JSON errors", () => {
     // Arrange
@@ -5807,9 +6248,8 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it("filters exact RabbyMobile RainbowKit lookup errors from the runtime user agent", () => {
+  it("filters the observed raw RainbowKit lookup error without wallet context", () => {
     // Arrange
-    setNavigatorUserAgent(rabbyMobileUserAgent);
     const event = createRabbyMobileRainbowKitNotFoundEvent();
 
     // Act
@@ -5817,6 +6257,47 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("keeps symbolicated RainbowKit lookup errors without the raw signature", () => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  abs_path:
+                    "turbopack:///[project]/node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                  in_app: false,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("filters injected WebAssembly CSP unsafe-eval errors", () => {
@@ -5851,6 +6332,27 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(true);
   });
+
+  it.each([3, 7])(
+    "filters the observed raw anonymous EvalError wrapper at line %i",
+    (wrapperLine) => {
+      // Arrange
+      const frames = createObservedRawAnonymousUnsafeEvalFrames({
+        lineno: wrapperLine,
+      });
+      const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
+      const error = new EvalError(anonymousUnsafeEvalCspMessage);
+      error.stack = createObservedRawAnonymousUnsafeEvalStack(wrapperLine);
+
+      // Act
+      const result = shouldFilterAnonymousUnsafeEvalCspError(event, {
+        originalException: error,
+      });
+
+      // Assert
+      expect(result).toBe(true);
+    }
+  );
 
   it("filters observed Sentry E7 WebAssembly CSP unsafe-eval errors from injected static chunks", () => {
     // Arrange
@@ -6328,6 +6830,10 @@ describe("sentry-client-filters", () => {
           {
             type: "Error",
             value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
                 {
@@ -6358,6 +6864,10 @@ describe("sentry-client-filters", () => {
           {
             type: "Error",
             value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
                 {
@@ -6378,12 +6888,152 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("does not filter RainbowKit lookup errors without RabbyMobile context", () => {
+  it("does not filter raw Next chunk lookalikes with an app-owned function", () => {
     // Arrange
-    setNavigatorUserAgent(
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile Safari/605.1.15"
-    );
-    const event = createRabbyMobileRainbowKitNotFoundEvent();
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "app:///_next/static/chunks/application-wallet.js",
+                  function: "initializeWallet",
+                  in_app: true,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed raw frames mixed with an app-owned source frame", () => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "app:///_next/static/chunks/observed-rabby-webview.js",
+                  function: "n",
+                  in_app: true,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: true,
+                },
+                {
+                  filename: "app:///components/providers/WagmiSetup.tsx",
+                  function: "initializeWallet",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter observed raw frames from a handled error", () => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: true,
+            },
+            stacktrace: {
+              frames: createObservedRabbyRainbowKitRawFrames(),
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "prefixed",
+      message: `Error: ${rainbowKitNotFoundMessage}`,
+    },
+    {
+      caseName: "suffixed",
+      message: `${rainbowKitNotFoundMessage} after retries`,
+    },
+    {
+      caseName: "case-changed",
+      message: "not found RainbowKit",
+    },
+    {
+      caseName: "unrelated",
+      message: "wallet provider unavailable",
+    },
+  ])("does not filter $caseName RainbowKit lookup messages", ({ message }) => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: message,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: createObservedRabbyRainbowKitRawFrames(),
+            },
+          },
+        ],
+      },
+    });
 
     // Act
     const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
@@ -6637,6 +7287,126 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterAnonymousUnsafeEvalCspError(event, {
       originalException: error,
     });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    [
+      "wrapper function",
+      createObservedRawAnonymousUnsafeEvalFrames({ function: "runTemplate" }),
+    ],
+    [
+      "wrapper line",
+      createObservedRawAnonymousUnsafeEvalFrames({ lineno: 8 }),
+    ],
+    [
+      "wrapper column",
+      createObservedRawAnonymousUnsafeEvalFrames({ colno: 4854 }),
+    ],
+  ])("does not filter raw unsafe-eval frames with a changed %s", (_, frames) => {
+    // Arrange
+    const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter incomplete raw anonymous unsafe-eval frame sequences", () => {
+    // Arrange
+    const frames = createObservedRawAnonymousUnsafeEvalFrames().slice(0, 3);
+    const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw anonymous unsafe-eval sequences with extra frames", () => {
+    // Arrange
+    const frames = [
+      ...createObservedRawAnonymousUnsafeEvalFrames(),
+      {
+        filename: "<anonymous>",
+        abs_path: "<anonymous>",
+        function: "afterEval",
+      },
+    ];
+    const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw anonymous unsafe-eval errors with app source stacks", () => {
+    // Arrange
+    const event = createObservedRawAnonymousUnsafeEvalCspEvent();
+    const error = new EvalError(anonymousUnsafeEvalCspMessage);
+    error.stack = [
+      `EvalError: ${anonymousUnsafeEvalCspMessage}`,
+      "    at runTemplate (webpack-internal:///(app-pages-browser)/./utils/eval-template.ts:10:1)",
+      "    at eval (<anonymous>)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw anonymous unsafe-eval errors with serialized app stacks", () => {
+    // Arrange
+    const event = createObservedRawAnonymousUnsafeEvalCspEvent({
+      eventOverrides: {
+        extra: {
+          __serialized__: {
+            stack:
+              "EvalError: unsafe eval\n    at runTemplate (app:///utils/eval-template.ts:10:1)",
+          },
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter handled raw anonymous unsafe-eval errors", () => {
+    // Arrange
+    const event = createObservedRawAnonymousUnsafeEvalCspEvent({
+      handled: true,
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw anonymous EvalErrors with non-matching CSP text", () => {
+    // Arrange
+    const event = createObservedRawAnonymousUnsafeEvalCspEvent({
+      message: "Refused to evaluate a string as JavaScript.",
+    });
+
+    // Act
+    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
 
     // Assert
     expect(result).toBe(false);

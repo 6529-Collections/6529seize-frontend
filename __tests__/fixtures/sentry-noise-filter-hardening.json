@@ -79,7 +79,7 @@
     "request": {
       "url": "https://6529.io/waves/00000000-0000-4000-8000-000000000002",
       "headers": {
-        "User-Agent": "Twitter/12.3 (iPhone; iOS 16.7.14)"
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/20H392 Twitter for iPhone/12.9"
       }
     },
     "exception": {

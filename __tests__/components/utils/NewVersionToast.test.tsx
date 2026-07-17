@@ -3,6 +3,7 @@ import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
 } from "@/helpers/navigation.helpers";
+import { preserveWaveScrollPositionForReload } from "@/helpers/waves/wave-visible-serial.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -14,6 +15,14 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
+const mockPreserveCallSearches: string[] = [];
+jest.mock("@/helpers/waves/wave-visible-serial.helpers", () => ({
+  preserveWaveScrollPositionForReload: jest.fn(() => {
+    mockPreserveCallSearches.push(globalThis.location.search);
+  }),
+}));
+const mockedPreserveWaveScrollPosition =
+  preserveWaveScrollPositionForReload as jest.Mock;
 const mockedUseIsVersionStale = useIsVersionStale as jest.Mock;
 const mockedUseDeviceInfo = useDeviceInfo as jest.Mock;
 const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
@@ -278,6 +287,20 @@ describe("NewVersionToast", () => {
 
     expect(globalThis.location.pathname).toBe("/waves");
     expect(globalThis.location.search).toBe("?wave=abc");
+  });
+
+  it("pins the wave reading position after the toast param strip, before reload", () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+    mockPreserveCallSearches.length = 0;
+
+    render(<NewVersionToast />);
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(mockedPreserveWaveScrollPosition).toHaveBeenCalledTimes(1);
+    // The pin must run against the cleaned URL so the toast override never
+    // survives into the pinned reload target.
+    expect(mockPreserveCallSearches[0]).not.toContain("showNewVersionToast");
+    expect(mockPreserveCallSearches[0]).toContain("wave=abc");
   });
 
   it("tracks the measured mobile dock top while the dock compacts", async () => {

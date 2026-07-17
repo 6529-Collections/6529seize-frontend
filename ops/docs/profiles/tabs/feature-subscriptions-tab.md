@@ -14,9 +14,15 @@ are documented in
 - Route: `/{user}/subscriptions`
 - Sections: `Subscribe`, `Top Up` (owner mode only), `Upcoming Drops`,
   `Subscription History`
-- `Learn More` link: `/about/subscriptions`
 
-## Access Modes
+## Entry Points
+
+- Open `/{user}/subscriptions` directly.
+- Open a profile and choose the `Subscriptions` tab.
+- Use `Learn More` in the `Subscribe` section to open
+  `/about/subscriptions`.
+
+## Common Scenarios
 
 - Owner mode:
   - connected profile matches the viewed profile
@@ -63,6 +69,11 @@ are documented in
   - shows modal states for wallet confirm, pending confirmation, success, and
     error
   - can show `View Tx` while pending or after success
+  - keeps wallet-confirm and pending states open while work is in progress;
+    success and error states can be dismissed with the close control, backdrop,
+    or Escape
+  - keeps long transaction errors contained in a keyboard-focusable,
+    scrollable status panel
 - `Upcoming Drops`:
   - shows first 3 rows by default; `Show More` expands the list
   - first row can show phase metadata (phase, position, airdrop address,
@@ -74,18 +85,34 @@ are documented in
   - `Top Up History`
   - pagination when a section has more than 10 rows
 
-## States and Recovery
+## Failure and Recovery
 
+- Balance, airdrop-address, upcoming-drop, and history content use stable
+  loading indicators until their requests finish; empty messages are not shown
+  while those sections are still loading.
+- When no airdrop address is available, the page shows
+  `No airdrop address found`; owners can use `Set airdrop address` to open the
+  existing delegation registration flow.
 - Auth rejection stops updates; no write call is submitted.
 - Failed settings or upcoming-drop updates keep current values and show an
   error toast.
 - Failed subscription-count updates reset the selector to the previous value.
 - Top-up without a connected wallet shows
   `You must have an active wallet connection to top up`.
+- When no upcoming cards are available, `Upcoming Drops` shows
+  `No upcoming drops found`.
 - Empty history states:
   - `No Redeemed Subscriptions found`
   - `No logs found`
   - `No Top Ups found`
+
+## Responsive Behavior
+
+- The four main sections use the same panel structure and spacing.
+- Subscription settings wrap without clipping on narrow screens.
+- Upcoming-drop content and controls stack on mobile so dates, toggles, and
+  quantity controls do not overlap.
+- Top-up options and history rows wrap without horizontal page overflow.
 
 ## Edge Cases
 
@@ -98,6 +125,26 @@ are documented in
     `Select a top-up option`
   - switching back to a preset clears `Other` input and top-up errors
 - Upcoming rows include season/date labels and can extend into future seasons.
+
+## Limitations / Notes
+
+### Localization fallback debt
+
+- Route or component: `/{user}/subscriptions`,
+  `components/user/subscriptions/*`, and the shared
+  `components/common/OnchainTransactionModal.tsx` status surface.
+- Untranslated surface: subscription controls plus the shared transaction
+  status, transaction-link, close-control, and backdrop accessible names.
+- Current fallback behavior: all supported locales use hardcoded canonical
+  `en-US`; the profile tab and shared modal do not yet expose a message family
+  for this content.
+- User impact: the English UI remains fully functional, but these controls and
+  states are not translated yet.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: move the complete subscriptions and on-chain
+  transaction message families into the shared i18n dictionaries together so
+  visible copy, empty/loading states, and accessible names stay aligned across
+  supported locales.
 
 ## Related Pages
 

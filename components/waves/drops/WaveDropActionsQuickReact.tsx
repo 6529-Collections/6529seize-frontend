@@ -25,12 +25,21 @@ const DEFAULT_QUICK_REACTION_ID = "+1";
 const WaveDropActionsQuickReact: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean;
-  readonly onReacted?: () => void;
-}> = ({ drop, isMobile = false, onReacted }) => {
-  const { react, canReact } = useDropReaction(drop, {
-    source: "quick-react",
-    onSuccess: onReacted,
-  });
+  readonly onReactionStarted?: () => void;
+}> = ({ drop, isMobile = false, onReactionStarted }) => {
+  const { react, canReact } = useDropReaction(drop, { source: "quick-react" });
+
+  const handleReaction = useCallback(
+    (reactionCode: string) => {
+      if (!canReact) {
+        return;
+      }
+
+      void react(reactionCode);
+      onReactionStarted?.();
+    },
+    [canReact, onReactionStarted, react]
+  );
 
   // Subscribe to localStorage changes (hydration-safe)
   useSyncExternalStore(
@@ -47,7 +56,7 @@ const WaveDropActionsQuickReact: React.FC<{
       reactionCode={code}
       dropId={drop.id}
       canReact={canReact}
-      onReact={react}
+      onReact={handleReaction}
       isMobile={isMobile}
     />
   ));
@@ -166,7 +175,7 @@ const QuickReactButton: React.FC<{
   return (
     <>
       <button
-        className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-[#FFCC22] ${
+        className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-[#FFCC22] ${
           canReact ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
         }`}
         onClick={handleClick}

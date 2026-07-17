@@ -1,6 +1,7 @@
 import { buildDropSubmissionMetadata } from "@/components/waves/utils/buildDropSubmissionMetadata";
 import {
   canAddDropPart,
+  canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
   handleComposerFileChange,
@@ -141,7 +142,7 @@ describe("CreateDropContent utilities", () => {
           ],
         } as any,
         files: [currentFile],
-        isWideContainer: true,
+        keepOptionsVisible: true,
         waveId: "wave-1",
         setToast,
         setFiles,
@@ -244,7 +245,7 @@ describe("CreateDropContent utilities", () => {
       ).toBe(false);
     });
 
-    it("preserves whitespace-only add-part behavior without making it submittable", () => {
+    it("rejects whitespace-only storm parts", () => {
       expect(
         canAddDropPart({
           markdown: "   ",
@@ -252,7 +253,7 @@ describe("CreateDropContent utilities", () => {
           drop: null,
           hasPendingInlineImageUpload: false,
         })
-      ).toBe(true);
+      ).toBe(false);
 
       expect(
         canSubmitDrop({
@@ -261,6 +262,26 @@ describe("CreateDropContent utilities", () => {
           parts: [],
         })
       ).toBe(false);
+    });
+
+    it("keeps save changes disabled when an edited part is empty", () => {
+      expect(
+        canSubmitComposerAction({
+          canAddPart: false,
+          canSubmit: true,
+          editingPartIndex: 0,
+          isStormMode: true,
+        })
+      ).toBe(false);
+
+      expect(
+        canSubmitComposerAction({
+          canAddPart: true,
+          canSubmit: true,
+          editingPartIndex: 0,
+          isStormMode: true,
+        })
+      ).toBe(true);
     });
   });
 

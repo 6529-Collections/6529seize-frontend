@@ -1,20 +1,18 @@
 "use client";
 
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence, motion } from "framer-motion";
+import { BoltIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { parseEther } from "viem";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
+import OnchainTransactionModal, {
+  type OnchainTransactionModalStatus,
+} from "@/components/common/OnchainTransactionModal";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
   displayedEonNumberFromIndex,
   displayedEpochNumberFromIndex,
@@ -33,41 +31,103 @@ import {
   SUBSCRIPTIONS_ADDRESS_ENS,
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
-import {
-  formatAddress,
-  getTransactionLink,
-  numberWithCommasFromString,
-} from "@/helpers/Helpers";
+import { formatAddress, numberWithCommasFromString } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import styles from "./UserPageSubscriptions.module.css";
+import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 function getEthForCards(count: number): number {
   return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
 }
 
-function getTopUpModalEmoji(
-  status: "confirm_wallet" | "submitted" | "success" | "error"
+function getTopUpTransactionErrorMessage(
+  transactionError: Error | null | undefined
 ): string {
-  const emojiByStatus: Record<
-    "confirm_wallet" | "submitted" | "success" | "error",
-    string
-  > = {
-    confirm_wallet: "/emojis/sgt_flushed.webp",
-    submitted: "/emojis/sgt_flushed.webp",
-    success: "/emojis/sgt_saluting_face.webp",
-    error: "/emojis/sgt_sob.webp",
+  const message = transactionError?.message
+    .split("Request Arguments")[0]
+    ?.trim();
+  return message ? `Error - ${message}` : "Transaction failed";
+}
+
+interface TopUpTransactionModalInput {
+  readonly localError: string;
+  readonly sendIsPending: boolean;
+  readonly sendErrorMessage: string | undefined;
+  readonly receiptIsLoading: boolean;
+  readonly receiptIsSuccess: boolean;
+  readonly receiptHasError: boolean;
+  readonly receiptErrorMessage: string | undefined;
+}
+
+interface TopUpTransactionModalState {
+  readonly closable: boolean;
+  readonly message: string | undefined;
+  readonly status: OnchainTransactionModalStatus | null;
+}
+
+function getTopUpTransactionModalStatus(
+  input: TopUpTransactionModalInput
+): OnchainTransactionModalStatus | null {
+  if (input.localError || input.sendErrorMessage || input.receiptHasError) {
+    return "error";
+  }
+  if (input.sendIsPending) {
+    return "confirm_wallet";
+  }
+  if (input.receiptIsLoading) {
+    return "submitted";
+  }
+  if (input.receiptIsSuccess) {
+    return "success";
+  }
+  return null;
+}
+
+function getTopUpTransactionModalMessage(
+  status: OnchainTransactionModalStatus | null,
+  input: TopUpTransactionModalInput
+): string | undefined {
+  if (status === "success") {
+    return "Top Up Successful!";
+  }
+  if (status !== "error") {
+    return undefined;
+  }
+  if (input.localError) {
+    return input.localError;
+  }
+  return input.sendErrorMessage ?? input.receiptErrorMessage;
+}
+
+function getTopUpTransactionModalState(
+  input: TopUpTransactionModalInput
+): TopUpTransactionModalState {
+  const status = getTopUpTransactionModalStatus(input);
+  return {
+    closable:
+      input.receiptIsSuccess ||
+      Boolean(input.localError) ||
+      input.sendErrorMessage !== undefined ||
+      input.receiptHasError,
+    message: getTopUpTransactionModalMessage(status, input),
+    status,
   };
-  return emojiByStatus[status];
 }
 
 const TOP_UP_OPTION_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 sm:tw-gap-x-6";
-const TOP_UP_OPTION_GRID_PADDED_CLASS = `${TOP_UP_OPTION_GRID_CLASS} tw-pt-2`;
-const TOP_UP_RADIO_GRID_CLASS =
-  "tw-grid tw-grid-cols-[8.333333%_1fr] tw-items-center";
+  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4";
+const TOP_UP_DEEP_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-3";
+const TOP_UP_OPTION_SURFACE_CLASS =
+  "tw-group tw-relative tw-overflow-hidden tw-rounded-xl tw-text-left tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-inset";
+const TOP_UP_OPTION_CLASS = `${TOP_UP_OPTION_SURFACE_CLASS} tw-w-full tw-p-4 tw-transition-all tw-duration-500 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-shadow-2xl desktop-hover:hover:tw-shadow-black/50`;
+const TOP_UP_CUSTOM_OPTION_CLASS = `${TOP_UP_OPTION_SURFACE_CLASS} tw-w-full tw-px-3 tw-py-2`;
 
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
+  const locale = useBrowserLocale();
   const { country } = useCookieConsent();
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -104,6 +164,7 @@ export default function UserPageSubscriptionsTopUp() {
   const [showDeep, setShowDeep] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState<number | null>(null);
+  const [topUpCardCount, setTopUpCardCount] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const otherInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -151,6 +212,7 @@ export default function UserPageSubscriptionsTopUp() {
     }
     const value = getEthForCards(count);
     setTopUpAmount(value);
+    setTopUpCardCount(count);
     sendTransaction.reset();
     sendTransaction.sendTransaction({
       chainId: SUBSCRIPTIONS_CHAIN.id,
@@ -159,180 +221,60 @@ export default function UserPageSubscriptionsTopUp() {
     });
   }
 
-  useEffect(() => {
-    if (sendTransaction.error) {
-      const errorMsg =
-        sendTransaction.error.message.split("Request Arguments")[0];
-      setError(`Error - ${errorMsg}`);
-    }
-  }, [sendTransaction.error]);
-
-  const showModal =
-    sendTransaction.isPending ||
-    waitSendTransaction.isLoading ||
-    waitSendTransaction.isSuccess ||
-    !!error;
-
-  const isClosable = waitSendTransaction.isSuccess || !!error;
-
-  useEffect(() => {
-    if (showModal) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [showModal]);
+  const sendTransactionErrorMessage = sendTransaction.error
+    ? getTopUpTransactionErrorMessage(sendTransaction.error)
+    : undefined;
+  const receiptErrorMessage = waitSendTransaction.error
+    ? getTopUpTransactionErrorMessage(waitSendTransaction.error)
+    : undefined;
+  const transactionModal = getTopUpTransactionModalState({
+    localError: error,
+    sendIsPending: sendTransaction.isPending,
+    sendErrorMessage: sendTransactionErrorMessage,
+    receiptIsLoading: waitSendTransaction.isLoading,
+    receiptIsSuccess: waitSendTransaction.isSuccess,
+    receiptHasError:
+      waitSendTransaction.isError || receiptErrorMessage !== undefined,
+    receiptErrorMessage,
+  });
 
   const closeModal = useCallback(() => {
-    if (isClosable) {
+    if (transactionModal.closable) {
       sendTransaction.reset();
       setError("");
       setTopUpAmount(null);
+      setTopUpCardCount(null);
       setSelectedOption(null);
       setMemeCount("");
     }
-  }, [isClosable, sendTransaction]);
+  }, [transactionModal.closable, sendTransaction]);
 
-  useEffect(() => {
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape" && isClosable && showModal) {
-        closeModal();
-      }
-    }
-
-    if (!showModal) return;
-    globalThis.addEventListener("keydown", handleEscape);
-    return () => {
-      globalThis.removeEventListener("keydown", handleEscape);
-    };
-  }, [showModal, isClosable, closeModal]);
-
-  function getModalContent() {
-    if (error) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-red">
-            <span>Error</span>
-            <img
-              src={getTopUpModalEmoji("error")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-          </p>
-          <p className="tw-mb-0 tw-text-iron-100">{error}</p>
-        </div>
-      );
-    }
-
-    if (sendTransaction.isPending) {
-      return (
-        <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-          <img
-            src={getTopUpModalEmoji("confirm_wallet")}
-            alt=""
-            role="presentation"
-            className="tw-h-6 tw-w-6"
-          />
-          <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-100">
-            Confirm in your wallet
-          </p>
-          <CircleLoader size={CircleLoaderSize.LARGE} />
-        </div>
-      );
-    }
-
-    if (waitSendTransaction.isLoading) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-iron-100">
-            <img
-              src={getTopUpModalEmoji("submitted")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-            Transaction Submitted
-            {sendTransaction.data && (
-              <a
-                className="tw-rounded-md tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black"
-                href={getTransactionLink(
-                  SUBSCRIPTIONS_CHAIN.id,
-                  sendTransaction.data
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Tx
-              </a>
-            )}
-          </p>
-          <p className="tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-md tw-font-medium tw-text-iron-100">
-            Waiting for confirmation{" "}
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          </p>
-        </div>
-      );
-    }
-
-    if (waitSendTransaction.isSuccess) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-green">
-            <img
-              src={getTopUpModalEmoji("success")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-            Top Up Successful!
-            {sendTransaction.data && (
-              <a
-                className="tw-rounded-md tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black"
-                href={getTransactionLink(
-                  SUBSCRIPTIONS_CHAIN.id,
-                  sendTransaction.data
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Tx
-              </a>
-            )}
-          </p>
-        </div>
-      );
-    }
-
-    return null;
-  }
+  const modalSubtitle =
+    topUpAmount === null || topUpCardCount === null
+      ? undefined
+      : `${formatInteger(locale, topUpCardCount)} Cards - ${numberWithCommasFromString(topUpAmount.toString())} ETH`;
 
   if (hideSubscriptions) {
     return <></>;
   }
 
-  const iOsContent = (
-    <div className="tw-pt-2">
-      <div>
-        <Link
-          href={window.location.href}
-          className="tw-block tw-py-2 tw-text-center"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <button
-            className="tw-w-full tw-rounded-lg tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-2 tw-font-semibold tw-text-iron-950"
-            type="button"
-          >
-            Top-up on 6529.io
-          </button>
-        </Link>
-      </div>
-    </div>
-  );
+  const isSending = sendTransaction.isPending || waitSendTransaction.isLoading;
+  const parsedMemeCount = Number.parseInt(memeCount, 10);
+  const isSendDisabled =
+    selectedOption === null ||
+    (selectedOption === "other" &&
+      (!memeCount || Number.isNaN(parsedMemeCount) || parsedMemeCount < 1));
+
+  const iOsContent = mounted ? (
+    <Link
+      href={window.location.href}
+      className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-2 tw-font-semibold tw-text-iron-950 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Top-up on 6529.io
+    </Link>
+  ) : null;
 
   const printRemainingMints = (
     count: number,
@@ -342,10 +284,11 @@ export default function UserPageSubscriptionsTopUp() {
   ) => {
     if (count > 0) {
       return (
-        <div className="tw-pt-2">
+        <div>
           <CardCountOption
+            id={`subscription-top-up-${optionId}`}
             count={count}
-            display={`Remaining ${label} ${value.toLocaleString()}`}
+            display={`Remaining ${label} ${formatInteger(locale, value)}`}
             selected={selectedOption === optionId}
             onSelect={() => {
               setSelectedOption(optionId);
@@ -362,8 +305,9 @@ export default function UserPageSubscriptionsTopUp() {
   const topUpContent = (
     <>
       <div className={TOP_UP_OPTION_GRID_CLASS}>
-        <div className="tw-pt-2">
+        <div>
           <CardCountOption
+            id="subscription-top-up-1"
             count={1}
             selected={selectedOption === "1"}
             onSelect={() => {
@@ -374,89 +318,70 @@ export default function UserPageSubscriptionsTopUp() {
           />
         </div>
         {printRemainingMints(remainingMintsForSeason, "SZN", szn, "szn")}
-      </div>
-      <div className={TOP_UP_OPTION_GRID_CLASS}>
         {printRemainingMints(remainingMintsForYear, "Year", year, "year")}
         {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch, "epoch")}
       </div>
-      {!showDeep && (
-        <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
-          <div className="tw-text-iron-400">
-            <div className="tw-pl-[calc(0.75rem+8.33%)]">
-              <ShowMoreButton
-                expanded={showDeep}
-                setExpanded={setShowDeep}
-                showMoreLabel="Show Deep Time Subscriptions"
-                showLessLabel="Hide Deep Time Subscriptions"
-              />
-            </div>
-          </div>
+      {showDeep && (
+        <div className={`${TOP_UP_DEEP_GRID_CLASS} tw-mt-3`}>
+          {printRemainingMints(
+            remainingMintsForPeriod,
+            "Period",
+            period,
+            "period"
+          )}
+          {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
+          {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
         </div>
       )}
-      {showDeep && (
-        <>
-          <div className={TOP_UP_OPTION_GRID_CLASS}>
-            {printRemainingMints(
-              remainingMintsForPeriod,
-              "Period",
-              period,
-              "period"
-            )}
-            {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
-          </div>
-          <div className={TOP_UP_OPTION_GRID_CLASS}>
-            {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
-          </div>
-          <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
-            <div className="tw-text-iron-400">
-              <div className="tw-pl-[calc(0.75rem+8.33%)]">
-                <ShowMoreButton
-                  expanded={showDeep}
-                  setExpanded={setShowDeep}
-                  showMoreLabel="Show Deep Time Subscriptions"
-                  showLessLabel="Hide Deep Time Subscriptions"
-                />
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-      <div className={TOP_UP_OPTION_GRID_PADDED_CLASS}>
-        <div className="tw-flex tw-items-center">
-          <button
-            type="button"
-            className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-p-3 tw-text-left tw-transition-colors ${
-              styles["cardCountOption"]
-            } ${
+      <div className="tw-mt-2 tw-flex tw-justify-start">
+        <ShowMoreButton
+          expanded={showDeep}
+          setExpanded={setShowDeep}
+          showMoreLabel="Show Deep Time Subscriptions"
+          showLessLabel="Hide Deep Time Subscriptions"
+          variant="inline"
+        />
+      </div>
+      <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center">
+          <div
+            className={`${TOP_UP_CUSTOM_OPTION_CLASS} ${
               selectedOption === "other"
-                ? "tw-bg-iron-800"
-                : "tw-bg-transparent hover:tw-bg-iron-900"
+                ? "tw-bg-iron-900 tw-ring-white/[0.05]"
+                : "tw-bg-iron-950 tw-ring-white/[0.03]"
             }`}
-            onClick={handleSelectOther}
           >
-            <div className={TOP_UP_RADIO_GRID_CLASS}>
-              <div className="tw-flex tw-items-center tw-justify-center">
+            <label
+              htmlFor="subscription-top-up-other"
+              className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-xl"
+            >
+              <span className="tw-sr-only">Select Other card count</span>
+            </label>
+            <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-pr-7">
+              <span className="tw-pointer-events-auto tw-absolute tw-right-0 tw-top-1/2 tw-flex -tw-translate-y-1/2">
                 <input
+                  id="subscription-top-up-other"
                   type="radio"
+                  name="subscription-top-up-card-count"
+                  value="other"
                   checked={selectedOption === "other"}
                   onChange={handleSelectOther}
                   aria-label="Other card count"
                   className={styles["radioInput"]}
                 />
-              </div>
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <span>Other</span>
+              </span>
+              <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+                Other
+              </span>
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
                 <input
                   ref={otherInputRef}
                   type="number"
                   min={1}
                   placeholder="count"
+                  aria-label="Custom card count"
                   value={memeCount}
-                  className="tw-w-[100px] tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 tw-py-0.5 tw-text-iron-50 tw-transition [color-scheme:dark] placeholder:tw-text-iron-500 placeholder:tw-opacity-100 focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/25"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedOption("other");
-                  }}
+                  className="tw-pointer-events-auto tw-min-h-10 tw-w-36 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black/30 tw-px-2.5 tw-py-1 tw-text-sm tw-text-iron-100 tw-transition [color-scheme:dark] placeholder:tw-text-iron-600 placeholder:tw-opacity-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/25"
                   onFocus={() => {
                     setSelectedOption("other");
                   }}
@@ -467,7 +392,10 @@ export default function UserPageSubscriptionsTopUp() {
                     setSelectedOption("other");
                   }}
                 />
-                <span className="tw-whitespace-nowrap">
+                <span
+                  aria-live="polite"
+                  className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400"
+                >
                   {!Number.isNaN(Number.parseInt(memeCount, 10)) &&
                     Number.parseInt(memeCount, 10) > 0 && (
                       <>
@@ -477,24 +405,19 @@ export default function UserPageSubscriptionsTopUp() {
                 </span>
               </div>
             </div>
-          </button>
+          </div>
         </div>
-        <div className="tw-flex tw-items-center tw-justify-center tw-pt-2 sm:tw-pt-0">
-          <button
-            type="button"
-            className={`${styles["sendBtn"]} tw-w-full sm:tw-w-auto`}
-            onClick={handleSend}
-            disabled={
-              sendTransaction.isPending ||
-              waitSendTransaction.isLoading ||
-              selectedOption === null ||
-              (selectedOption === "other" &&
-                (!memeCount || Number.parseInt(memeCount, 10) < 1))
-            }
-            aria-label="Send top up"
+        <div className="tw-flex tw-items-center tw-justify-end sm:tw-flex-shrink-0">
+          <PrimaryButton
+            loading={isSending}
+            disabled={isSendDisabled}
+            onClicked={handleSend}
+            ariaLabel="Send top up"
+            className="tw-min-h-11 tw-w-full sm:tw-w-auto"
           >
+            <BoltIcon className="tw-size-4" aria-hidden="true" />
             Send
-          </button>
+          </PrimaryButton>
         </div>
       </div>
     </>
@@ -502,133 +425,112 @@ export default function UserPageSubscriptionsTopUp() {
 
   return (
     <>
-      <div>
-        <div className="tw-pb-2">
-          <div className="tw-flex tw-items-end tw-gap-2 tw-whitespace-nowrap">
-            <h4 className="tw-mb-0 tw-font-semibold">Top Up</h4>
-            <span className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-text-[#9a9a9a]">
-              Sending to{" "}
-              <>
-                <span data-tooltip-id="subscription-address">
-                  {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
-                  {formatAddress(SUBSCRIPTIONS_ADDRESS)}
-                </span>
-                <Tooltip
-                  id="subscription-address"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  {SUBSCRIPTIONS_ADDRESS}
-                </Tooltip>
-              </>
+      <UserPageSubscriptionsSection
+        id="profile-subscriptions-top-up"
+        title="Top Up"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pb-4 tw-pt-8"
+        action={
+          <span className="tw-inline-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5 tw-rounded-full tw-bg-iron-900/60 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-500 tw-ring-1 tw-ring-white/10">
+            <span>Sending to</span>
+            <span
+              className="tw-break-all tw-text-iron-300"
+              data-tooltip-id="subscription-address"
+            >
+              {SUBSCRIPTIONS_ADDRESS_ENS} {formatAddress(SUBSCRIPTIONS_ADDRESS)}
             </span>
-          </div>
-        </div>
-        <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
+            <Tooltip
+              id="subscription-address"
+              style={{
+                backgroundColor: "#1F2937",
+                color: "white",
+                padding: "4px 8px",
+              }}
+            >
+              {SUBSCRIPTIONS_ADDRESS}
+            </Tooltip>
+          </span>
+        }
+      >
         {isIos ? iOsContent : topUpContent}
-      </div>
-      {mounted &&
-        createPortal(
-          <AnimatePresence>
-            {showModal && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
-                onClick={isClosable ? closeModal : undefined}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  className="tw-relative tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-3">
-                    <div>
-                      <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
-                        Top up
-                      </h2>
-                      {topUpAmount !== null && (
-                        <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
-                          {(topUpAmount / MEMES_MINT_PRICE).toLocaleString()}{" "}
-                          Cards -{" "}
-                          {numberWithCommasFromString(topUpAmount.toString())}{" "}
-                          ETH
-                        </p>
-                      )}
-                    </div>
-                    {isClosable && (
-                      <button
-                        onClick={closeModal}
-                        className="-tw-mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
-                        aria-label="Close modal"
-                      >
-                        <FontAwesomeIcon
-                          icon={faXmark}
-                          className="tw-size-5 tw-flex-shrink-0"
-                        />
-                      </button>
-                    )}
-                  </div>
-                  <div className="tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-2">
-                    {getModalContent()}
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+      </UserPageSubscriptionsSection>
+      {mounted && transactionModal.status ? (
+        <OnchainTransactionModal
+          status={transactionModal.status}
+          title="Top up"
+          subtitle={modalSubtitle}
+          message={transactionModal.message}
+          transactionHash={sendTransaction.data}
+          chain={SUBSCRIPTIONS_CHAIN}
+          onClose={closeModal}
+        />
+      ) : null}
     </>
   );
 }
 
 function CardCountOption(
   props: Readonly<{
+    id: string;
     count: number;
     display?: string | undefined;
     selected: boolean;
     onSelect: () => void;
   }>
 ) {
+  const locale = useBrowserLocale();
   const cardLabel = props.count > 1 ? "Cards" : "Card";
   const labelText = props.display
-    ? `${props.display} - ${props.count.toLocaleString()} Cards`
-    : `${props.count.toLocaleString()} ${cardLabel}`;
+    ? `${props.display} - ${formatInteger(locale, props.count)} Cards`
+    : `${formatInteger(locale, props.count)} ${cardLabel}`;
 
   return (
-    <button
-      type="button"
-      className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-p-3 tw-text-left tw-transition-colors ${
-        styles["cardCountOption"]
-      } ${
+    <label
+      htmlFor={props.id}
+      className={`${TOP_UP_OPTION_CLASS} ${
         props.selected
-          ? "tw-bg-iron-700"
-          : "tw-bg-transparent hover:tw-bg-iron-900"
-      }`}
-      onClick={props.onSelect}
+          ? "tw-bg-iron-900 tw-ring-white/[0.05]"
+          : "tw-bg-iron-950 tw-ring-white/[0.03]"
+      } tw-block tw-min-h-[122px] tw-cursor-pointer`}
     >
-      <div className={TOP_UP_RADIO_GRID_CLASS}>
-        <div className="tw-flex tw-items-center tw-justify-center">
-          <input
-            type="radio"
-            checked={props.selected}
-            onChange={props.onSelect}
-            aria-label={labelText}
-            className={styles["radioInput"]}
-          />
-        </div>
-        <div className="tw-flex tw-items-center">
-          {props.display && <span>{props.display}&nbsp;-&nbsp;</span>}
-          {props.count.toLocaleString()} Card{props.count > 1 && "s"} (
-          {numberWithCommasFromString(getEthForCards(props.count))} ETH)
+      <span className="tw-absolute tw-right-4 tw-top-4 tw-flex">
+        <input
+          id={props.id}
+          type="radio"
+          name="subscription-top-up-card-count"
+          value={props.count}
+          checked={props.selected}
+          onClick={() => {
+            if (props.selected) {
+              props.onSelect();
+            }
+          }}
+          onChange={props.onSelect}
+          aria-label={labelText}
+          className={styles["radioInput"]}
+        />
+      </span>
+      <div className="tw-flex tw-min-h-[90px] tw-min-w-0 tw-flex-col tw-justify-between tw-pr-8">
+        {props.display && (
+          <span
+            className={`tw-text-xs tw-font-medium tw-leading-4 ${
+              props.selected ? "tw-text-primary-300" : "tw-text-iron-500"
+            }`}
+          >
+            {props.display}
+          </span>
+        )}
+        <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+          <span className="tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
+            {formatInteger(locale, props.count)} Card{props.count > 1 && "s"}
+          </span>
+          <span className="tw-flex tw-items-center tw-gap-1.5">
+            <span className="tw-text-sm tw-leading-5 tw-text-iron-400">
+              {numberWithCommasFromString(getEthForCards(props.count))}
+            </span>
+            <span className="tw-text-xs tw-text-iron-600">ETH</span>
+          </span>
         </div>
       </div>
-    </button>
+    </label>
   );
 }
