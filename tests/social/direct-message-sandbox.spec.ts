@@ -212,7 +212,7 @@ async function centerOf(target: Locator) {
 }
 
 function reactionChip(drop: Locator) {
-  return drop.locator("button").filter({ hasText: /^\D*1$/ });
+  return drop.getByRole("button", { name: /^👍\s*1$/ });
 }
 
 async function getReactionMutationMethods(baseURL: string | undefined) {
