@@ -205,8 +205,18 @@ export function NextGenCollectionProvenanceRow(
   }>
 ) {
   const log = props.log;
-
-  const [isTransaction, setIsTransaction] = useState<boolean>(false);
+  const escapedCollectionName = props.collection.name.replace(
+    /[-\/\\^$*+?.()|[\]{}]/g,
+    "\\$&"
+  );
+  const transactionMatch = new RegExp(
+    `(${escapedCollectionName} #(\\d+))`
+  ).exec(log.log);
+  const isTransaction = Boolean(
+    transactionMatch?.[1] &&
+    transactionMatch[2] &&
+    typeof transactionMatch.index === "number"
+  );
 
   function printAddress(address: string, display?: string) {
     return (
@@ -215,18 +225,10 @@ export function NextGenCollectionProvenanceRow(
   }
 
   function printParsedLog() {
-    const escapedCollectionName = props.collection.name.replace(
-      /[-\/\\^$*+?.()|[\]{}]/g,
-      "\\$&"
-    );
-    const pattern = new RegExp("(" + escapedCollectionName + " #(\\d+))");
-    const match = pattern.exec(log.log);
+    const match = transactionMatch;
 
     try {
       if (match?.[1] && match?.[2] && typeof match.index === "number") {
-        if (!isTransaction) {
-          setIsTransaction(true);
-        }
         const startIndex = match.index;
         const endIndex = startIndex + match[1].length;
         const beforeMatch = log.log.substring(0, startIndex);
@@ -262,27 +264,24 @@ export function NextGenCollectionProvenanceRow(
           </>
         );
 
-        let fromTo: ReactNode;
-        if (isTransaction) {
-          fromTo = (
-            <span className="tw-flex tw-gap-1">
-              <span>
-                {areEqualAddresses(log.from_address, NULL_ADDRESS) ? (
-                  "Minted"
-                ) : (
-                  <>
-                    from&nbsp;
-                    {printAddress(log.from_address, log.from_display)}
-                  </>
-                )}
-              </span>
-              <span>
-                to&nbsp;
-                {printAddress(log.to_address, log.to_display)}
-              </span>
+        const fromTo: ReactNode = (
+          <span className="tw-flex tw-gap-1">
+            <span>
+              {areEqualAddresses(log.from_address, NULL_ADDRESS) ? (
+                "Minted"
+              ) : (
+                <>
+                  from&nbsp;
+                  {printAddress(log.from_address, log.from_display)}
+                </>
+              )}
             </span>
-          );
-        }
+            <span>
+              to&nbsp;
+              {printAddress(log.to_address, log.to_display)}
+            </span>
+          </span>
+        );
 
         const beforeMatchSpan = <span>{beforeMatch}</span>;
         const afterMatchSpan = afterMatch ? (

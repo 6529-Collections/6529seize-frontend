@@ -6,9 +6,14 @@ import {
   type NotificationDisplayItem,
   isGroupedReactionsItem,
 } from "@/types/feed.types";
-import { memo, useMemo } from "react";
+import { memo, useMemo, type CSSProperties } from "react";
 import NotificationDropReactedGroup from "./drop-reacted/NotificationDropReactedGroup";
 import NotificationItem from "./NotificationItem";
+
+const NOTIFICATION_ITEM_RENDERING_STYLE = {
+  containIntrinsicSize: "auto 400px",
+  contentVisibility: "auto",
+} satisfies CSSProperties;
 
 interface NotificationItemsProps {
   readonly items: NotificationDisplayItem[];
@@ -78,7 +83,7 @@ function NotificationItemsComponent({
         const itemActiveDrop = getActiveDropForItem(item, activeDrop);
 
         return (
-          <div key={key} id={domId}>
+          <div key={key} id={domId} style={NOTIFICATION_ITEM_RENDERING_STYLE}>
             {isGroupedReactionsItem(item) ? (
               <div className="tw-flex">
                 <div className="tw-relative lg:tw-hidden">
