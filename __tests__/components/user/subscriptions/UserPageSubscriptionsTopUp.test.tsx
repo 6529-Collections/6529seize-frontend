@@ -147,9 +147,8 @@ describe("UserPageSubscriptionsTopUp", () => {
     render(<UserPageSubscriptionsTopUp />);
 
     expect(
-      screen.getByText("Error - User rejected the request")
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/Request Arguments/)).not.toBeInTheDocument();
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Error - User rejected the request");
   });
 
   it("keeps receipt failures visible in a closable error modal", () => {
@@ -163,9 +162,8 @@ describe("UserPageSubscriptionsTopUp", () => {
 
     expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
     expect(
-      screen.getByText("Error - Transaction receipt failed")
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/Request Arguments/)).not.toBeInTheDocument();
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Error - Transaction receipt failed");
     expect(
       screen.getByRole("button", { name: "Close modal" })
     ).toBeInTheDocument();
@@ -178,7 +176,9 @@ describe("UserPageSubscriptionsTopUp", () => {
 
     render(<UserPageSubscriptionsTopUp />);
 
-    expect(screen.getByText("Transaction failed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Transaction failed");
   });
 
   it("submits custom count when Other option is selected", async () => {

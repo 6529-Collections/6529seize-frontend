@@ -63,7 +63,9 @@ describe("ClaimTransactionModal", () => {
         onClose={onClose}
       />
     );
-    expect(screen.getByText("Claim update failed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Claim update failed");
   });
 
   it("maps Drop Forge transaction state into the shared modal", () => {
@@ -83,7 +85,9 @@ describe("ClaimTransactionModal", () => {
     expect(
       screen.getByRole("dialog", { name: "Pay Artist" })
     ).toBeInTheDocument();
-    expect(screen.getByText("Artist payment failed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Artist payment failed");
     expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
       "href",
       "https://sepolia.etherscan.io/tx/0x123"

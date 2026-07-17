@@ -29,7 +29,13 @@ describe("OnchainTransactionModal", () => {
     expect(
       screen.getByRole("dialog", { name: "Onchain action" })
     ).toBeInTheDocument();
-    expect(screen.getByText(DEFAULT_MESSAGES[status])).toBeInTheDocument();
+    if (status === "error") {
+      expect(
+        screen.getByRole("textbox", { name: "Transaction error details" })
+      ).toHaveValue(DEFAULT_MESSAGES[status]);
+    } else {
+      expect(screen.getByText(DEFAULT_MESSAGES[status])).toBeInTheDocument();
+    }
 
     const closeButton = screen.queryByRole("button", { name: "Close modal" });
     if (closable) {
@@ -275,10 +281,11 @@ describe("OnchainTransactionModal", () => {
       />
     );
 
-    expect(screen.getByText(longError)).toBeInTheDocument();
-    expect(
-      screen.getByRole("region", { name: "Transaction error details" })
-    ).toHaveAttribute("tabindex", "0");
+    const errorDetails = screen.getByRole("textbox", {
+      name: "Transaction error details",
+    });
+    expect(errorDetails).toHaveValue(longError);
+    expect(errorDetails).toHaveAttribute("readonly");
     expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
       "href",
       "https://explorer.example/tx/0xabc"
@@ -295,10 +302,12 @@ describe("OnchainTransactionModal", () => {
       />
     );
 
-    expect(screen.getByText("Transaction failed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Transaction failed");
   });
 
-  it("uses valid block markup for live status content", () => {
+  it("uses native status semantics with phrasing-only content", () => {
     render(
       <OnchainTransactionModal
         status="submitted"
@@ -307,6 +316,8 @@ describe("OnchainTransactionModal", () => {
       />
     );
 
-    expect(screen.getByRole("status").tagName).toBe("DIV");
+    const status = screen.getByRole("status");
+    expect(status.tagName).toBe("OUTPUT");
+    expect(status.querySelector("div, p, section")).not.toBeInTheDocument();
   });
 });
