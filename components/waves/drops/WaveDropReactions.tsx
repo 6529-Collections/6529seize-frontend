@@ -36,7 +36,9 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
+import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import {
   cloneReactionEntries,
@@ -78,6 +80,8 @@ type OwnedOptimisticRollback = {
   readonly mutationId: string;
   readonly rollback: () => void;
 } | null;
+
+const REACTION_TOOLTIP_Z_INDEX = 999;
 
 const combineRollbacks = (
   rollbacks: readonly OptimisticRollback[]
@@ -365,6 +369,11 @@ function WaveDropReaction({
   readonly isDetailsLoading: boolean;
   readonly isTouchDevice: boolean;
 }) {
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
   const { getEligibility, updateEligibility } = useWaveEligibility();
@@ -852,21 +861,29 @@ function WaveDropReaction({
           </span>
         </div>
       </button>
-      {!isTouchDevice && (
-        <Tooltip
-          id={tooltipId}
-          delayShow={250}
-          place="bottom"
-          opacity={1}
-          clickable
-          style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}
-        >
-          <div className="tw-flex tw-items-center tw-gap-2">
-            {emojiNodeTooltip}
-            {tooltipContent}
-          </div>
-        </Tooltip>
-      )}
+      {!isTouchDevice &&
+        hydrated &&
+        createPortal(
+          <Tooltip
+            id={tooltipId}
+            delayShow={250}
+            place="bottom"
+            positionStrategy="fixed"
+            opacity={1}
+            clickable
+            style={{
+              backgroundColor: "#37373E",
+              color: "white",
+              zIndex: REACTION_TOOLTIP_Z_INDEX,
+            }}
+          >
+            <div className="tw-flex tw-items-center tw-gap-2">
+              {emojiNodeTooltip}
+              {tooltipContent}
+            </div>
+          </Tooltip>,
+          document.body
+        )}
     </>
   );
 }
