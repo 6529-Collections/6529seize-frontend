@@ -83,7 +83,7 @@ function getInternalDelegationHref(
 
 function getDelegationArticleSlug(href: string) {
   const { pathname } = new URL(href, window.location.origin);
-  const slug = pathname.split("/").filter(Boolean).at(-1);
+  const slug = pathname.split("/").findLast((segment) => segment.length > 0);
   return getDelegationArticle(slug) ? slug : undefined;
 }
 
@@ -159,17 +159,17 @@ function DelegationArticleView(
           aria-busy={props.loading}
         >
           {props.loading ? (
-            <div className="tw-min-h-48 tw-py-4" role="status">
+            <output className="tw-block tw-min-h-48 tw-py-4">
               <span className="tw-sr-only">Loading article...</span>
-              <div
+              <span
                 aria-hidden="true"
-                className="tw-space-y-3 motion-safe:tw-animate-pulse"
+                className="tw-block tw-space-y-3 motion-safe:tw-animate-pulse"
               >
-                <div className="tw-h-4 tw-w-4/5 tw-rounded-md tw-bg-iron-800"></div>
-                <div className="tw-h-4 tw-w-full tw-rounded-md tw-bg-iron-800"></div>
-                <div className="tw-h-4 tw-w-2/3 tw-rounded-md tw-bg-iron-800"></div>
-              </div>
-            </div>
+                <span className="tw-block tw-h-4 tw-w-4/5 tw-rounded-md tw-bg-iron-800"></span>
+                <span className="tw-block tw-h-4 tw-w-full tw-rounded-md tw-bg-iron-800"></span>
+                <span className="tw-block tw-h-4 tw-w-2/3 tw-rounded-md tw-bg-iron-800"></span>
+              </span>
+            </output>
           ) : (
             <div
               dangerouslySetInnerHTML={{
