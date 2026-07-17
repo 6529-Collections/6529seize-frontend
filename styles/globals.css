@@ -248,6 +248,12 @@
     scrollbar-gutter: stable both-edges;
   }
 }
+html {
+  /* iOS paints the root canvas (default white) wherever the layout viewport
+     extends past the body — most visibly when the software keyboard scrolls
+     the page. Keep it dark so those regions don't flash white. */
+  background-color: #000000;
+}
 body {
   background-color: #000000 !important;
   color: white !important;

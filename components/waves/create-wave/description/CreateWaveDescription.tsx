@@ -9,6 +9,7 @@ import { CreateDropEmojiPickerLayerProvider } from "@/components/waves/CreateDro
 import { profileAndConsolidationsToProfileMin } from "@/helpers/ProfileHelpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateDropType } from "@/components/drops/create/types";
+import { CreateDropScreenType } from "@/components/drops/create/utils/CreateDropWrapper";
 export interface CreateWaveDescriptionHandles {
   requestDrop: () => CreateDropConfig | null;
   getDropSnapshot: () => CreateDropConfig | null;
@@ -50,7 +51,20 @@ const CreateWaveDescription = forwardRef<
     }));
 
     if (!profileMin) {
-      return null;
+      // A profile without an id/handle cannot author the description drop.
+      // Say so instead of silently rendering a blank step with a dead
+      // Complete button.
+      return (
+        <div>
+          <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+            Description
+          </p>
+          <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-text-iron-400">
+            A profile handle is required to create a wave. Set up your profile,
+            then come back to finish this step.
+          </p>
+        </div>
+      );
     }
 
     return (
@@ -73,6 +87,9 @@ const CreateWaveDescription = forwardRef<
               waveId={null}
               profile={profileMin}
               quotedDrop={null}
+              // The step embeds the editor in the page flow; the MOBILE
+              // branch is a modal sheet and must never be used here.
+              forceScreenType={CreateDropScreenType.DESKTOP}
               type={CreateDropType.DROP}
               loading={submitting}
               showSubmit={false}
