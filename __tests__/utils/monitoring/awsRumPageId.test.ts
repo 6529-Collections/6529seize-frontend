@@ -12,12 +12,21 @@ describe("getAwsRumPageId", () => {
     [`/waves/${WAVE_ID}`, "/waves/[wave]"],
     [`/messages/${WAVE_ID}`, "/messages/[wave]"],
     [`/tools/app-wallets/${WALLET}`, "/tools/app-wallets/[app-wallet-address]"],
+    ["/alice", "/[user]"],
+    ["/alice/rep", "/[user]/rep"],
     [`/${WALLET}`, "/[user]"],
     [`/${WALLET}/collected`, "/[user]/collected"],
     [`/${WALLET}/private-cms-page`, "/[user]/[...cmsPath]"],
   ])("normalizes %s to the stable page ID %s", (route, expectedPageId) => {
     expect(getAwsRumPageId(route)).toBe(expectedPageId);
   });
+
+  it.each(["/author", "/notifications", "/rep", "/waves"])(
+    "keeps the known static root %s literal",
+    (route) => {
+      expect(getAwsRumPageId(route)).toBe(route);
+    }
+  );
 
   it("strips query strings and hashes before creating the page ID", () => {
     expect(
@@ -42,12 +51,14 @@ describe("getAwsRumPageId", () => {
       getAwsRumPageId(`/waves/${WAVE_ID}?drop=${OTHER_WAVE_ID}`),
       getAwsRumPageId(`/${WALLET}/collected#${WAVE_ID}`),
       getAwsRumPageId(`/tools/app-wallets/${WALLET}`),
+      getAwsRumPageId("/alice"),
     ];
     const payload = JSON.stringify(pageIds);
 
     expect(payload).not.toContain(WAVE_ID);
     expect(payload).not.toContain(OTHER_WAVE_ID);
     expect(payload).not.toContain(WALLET);
+    expect(payload).not.toContain("alice");
     expect(payload).not.toContain("?");
     expect(payload).not.toContain("#");
   });

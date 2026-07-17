@@ -32,8 +32,15 @@ async function loadProductImpactTelemetry(): Promise<{
 }
 
 describe("productImpactTelemetry", () => {
+  let randomSpy: jest.SpyInstance<number, []>;
+
   beforeEach(() => {
     globalThis.history.pushState({}, "", "/");
+    randomSpy = jest.spyOn(Math, "random").mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("tracks wave feed route families without raw wave or drop ids", async () => {
@@ -69,6 +76,7 @@ describe("productImpactTelemetry", () => {
       expect.objectContaining({
         duration_ms: 1200,
         route_family: "/waves/:waveId",
+        sentry_sample_rate: 0.05,
       })
     );
     expect(trackAnalyticsEventMock).toHaveBeenCalledWith(
@@ -102,35 +110,103 @@ describe("productImpactTelemetry", () => {
     );
   });
 
-  it("keeps destinations isolated when one provider throws", async () => {
+  it("samples only initial Wave successes and suppresses routine Sentry info", async () => {
+    const { telemetry, sentry } = await loadProductImpactTelemetry();
+    randomSpy.mockReset();
+    randomSpy.mockReturnValueOnce(0.049).mockReturnValueOnce(0.05);
+
+    telemetry.trackWaveFeedLoadSucceeded({
+      dropCount: 3,
+      durationMs: 1200,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "server_initial",
+    });
+    telemetry.trackWaveFeedLoadSucceeded({
+      dropCount: 3,
+      durationMs: 1200,
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "initial_visible",
+    });
+    telemetry.trackWaveFeedLoadSucceeded({
+      dropCount: 3,
+      durationMs: 1200,
+      hadCachedDrops: true,
+      isNative: false,
+      loadSource: "background_sync",
+    });
+    telemetry.trackWaveFeedLoadStarted({
+      hadCachedDrops: false,
+      isNative: false,
+      loadSource: "server_initial",
+    });
+    telemetry.trackWaveFeedLoadCancelled({
+      error: new DOMException("Aborted", "AbortError"),
+      hadCachedDrops: true,
+      isNative: false,
+      loadSource: "background_sync",
+      remainedUnavailable: false,
+    });
+
+    expect(sentry.logger.info).toHaveBeenCalledTimes(1);
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "wave_feed_load_succeeded",
+      expect.objectContaining({
+        load_source: "server_initial",
+        sentry_sample_rate: 0.05,
+      })
+    );
+    expect(randomSpy).toHaveBeenCalledTimes(2);
+    expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(5);
+  });
+
+  it("keeps destinations and sampling isolated when monitoring throws", async () => {
     const { telemetry, sentry } = await loadProductImpactTelemetry();
     trackAnalyticsEventMock.mockImplementationOnce(() => {
       throw new Error("Mixpanel unavailable");
     });
 
     expect(() =>
-      telemetry.trackWaveFeedLoadStarted({
+      telemetry.trackWaveFeedLoadFailed({
+        error: new Error("Unavailable"),
+        hadCachedDrops: false,
+        isNative: false,
+        loadSource: "initial_visible",
+        remainedUnavailable: true,
+      })
+    ).not.toThrow();
+    expect(sentry.logger.warn).toHaveBeenCalledWith(
+      "wave_feed_load_failed",
+      expect.any(Object)
+    );
+
+    sentry.logger.warn.mockImplementationOnce(() => {
+      throw new Error("Sentry unavailable");
+    });
+    expect(() =>
+      telemetry.trackWaveFeedLoadFailed({
+        error: new Error("Unavailable"),
+        hadCachedDrops: true,
+        isNative: false,
+        loadSource: "background_sync",
+        remainedUnavailable: false,
+      })
+    ).not.toThrow();
+    expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(2);
+
+    randomSpy.mockImplementationOnce(() => {
+      throw new Error("Sampler unavailable");
+    });
+    expect(() =>
+      telemetry.trackWaveFeedLoadSucceeded({
+        dropCount: 1,
         hadCachedDrops: false,
         isNative: false,
         loadSource: "initial_visible",
       })
     ).not.toThrow();
-    expect(sentry.logger.info).toHaveBeenCalledWith(
-      "wave_feed_load_started",
-      expect.any(Object)
-    );
-
-    sentry.logger.info.mockImplementationOnce(() => {
-      throw new Error("Sentry unavailable");
-    });
-    expect(() =>
-      telemetry.trackWaveFeedLoadStarted({
-        hadCachedDrops: true,
-        isNative: false,
-        loadSource: "cache",
-      })
-    ).not.toThrow();
-    expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(2);
+    expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(3);
   });
 
   it("tracks auth refresh route families without raw profile handles", async () => {
@@ -191,8 +267,9 @@ describe("productImpactTelemetry", () => {
     expect(sentry.logger.warn).toHaveBeenCalledTimes(3);
   });
 
-  it("classifies wave feed HTTP failures into status and error buckets", async () => {
-    const { telemetry } = await loadProductImpactTelemetry();
+  it("classifies and always retains wave feed HTTP failures", async () => {
+    const { telemetry, sentry } = await loadProductImpactTelemetry();
+    randomSpy.mockReturnValue(1);
     const serviceError = Object.assign(new Error("Service unavailable"), {
       status: 503,
     });
@@ -210,6 +287,13 @@ describe("productImpactTelemetry", () => {
       "Wave Feed Load Failed",
       expect.objectContaining({
         error_kind: "server",
+        product_failure: true,
+        status_bucket: "5xx",
+      })
+    );
+    expect(sentry.logger.warn).toHaveBeenCalledWith(
+      "wave_feed_load_failed",
+      expect.objectContaining({
         product_failure: true,
         status_bucket: "5xx",
       })
@@ -237,8 +321,8 @@ describe("productImpactTelemetry", () => {
     );
   });
 
-  it("tracks wave feed cancellations as expected aborts", async () => {
-    const { telemetry } = await loadProductImpactTelemetry();
+  it("keeps cancellations as non-failures without routine Sentry logs", async () => {
+    const { telemetry, sentry } = await loadProductImpactTelemetry();
     const abortError = new DOMException(
       "The operation was aborted",
       "AbortError"
@@ -263,6 +347,8 @@ describe("productImpactTelemetry", () => {
         status_bucket: "aborted",
       })
     );
+    expect(sentry.logger.info).not.toHaveBeenCalled();
+    expect(sentry.logger.warn).not.toHaveBeenCalled();
   });
 
   it("tracks auth refresh success and cancellation as reportable outcomes", async () => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { createAwsRumPrivacyPlugin } from "@/utils/monitoring/awsRumPrivacy";
 import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 import type { AwsRum as AwsRumInstance, AwsRumConfig } from "aws-rum-web";
 import { usePathname } from "next/navigation";
@@ -67,23 +68,35 @@ export default function AwsRumProvider({
           return;
         }
 
-        const { AwsRum } = await import("aws-rum-web");
+        const {
+          AwsRum,
+          FetchPlugin,
+          JsErrorPlugin,
+          NavigationPlugin,
+          ResourcePlugin,
+          WebVitalsPlugin,
+          XhrPlugin,
+        } = await import("aws-rum-web");
 
         if (cancelled) {
           return;
         }
 
+        const initialPageId = getAwsRumPageId(latestPathnameRef.current);
+        const httpPluginConfig = {
+          urlsToExclude: [...AWS_RUM_HTTP_URLS_TO_EXCLUDE],
+        };
         const config: AwsRumConfig = {
           sessionSampleRate: SAMPLE_RATE,
-          telemetries: [
-            "performance",
-            "errors",
-            [
-              "http",
-              {
-                urlsToExclude: [...AWS_RUM_HTTP_URLS_TO_EXCLUDE],
-              },
-            ],
+          telemetries: [],
+          eventPluginsToLoad: [
+            createAwsRumPrivacyPlugin(initialPageId),
+            new NavigationPlugin(),
+            new ResourcePlugin(),
+            new WebVitalsPlugin(),
+            new JsErrorPlugin(),
+            new XhrPlugin(httpPluginConfig),
+            new FetchPlugin(httpPluginConfig),
           ],
           allowCookies: true,
           enableXRay: false,

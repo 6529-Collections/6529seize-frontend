@@ -12,6 +12,8 @@ import {
 } from "@/utils/monitoring/dropReactionMonitoring";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 
+const mockSetExtras = jest.fn();
+
 jest.mock("@sentry/nextjs", () => ({
   __esModule: true,
   addBreadcrumb: jest.fn(),
@@ -20,7 +22,7 @@ jest.mock("@sentry/nextjs", () => ({
       setLevel: jest.fn(),
       setFingerprint: jest.fn(),
       setTag: jest.fn(),
-      setExtras: jest.fn(),
+      setExtras: mockSetExtras,
     };
     callback(scope);
   }),
@@ -35,6 +37,7 @@ describe("dropReactionMonitoring", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    globalThis.history.pushState({}, "", "/");
     __resetDropReactionMonitoringForTests();
     dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
   });
@@ -91,7 +94,7 @@ describe("dropReactionMonitoring", () => {
       expect.objectContaining({
         message: "reaction.request_succeeded",
         data: expect.objectContaining({
-          latency_ms: 150,
+          latency_bucket: "under_250ms",
         }),
       })
     );
@@ -157,7 +160,9 @@ describe("dropReactionMonitoring", () => {
       })
     );
     expect(withScopeMock).toHaveBeenCalled();
-    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+    expect(captureExceptionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Drop reaction request failed" })
+    );
     expect(addBreadcrumbMock).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "reaction.rollback_applied",
@@ -205,7 +210,6 @@ describe("dropReactionMonitoring", () => {
         data: expect.objectContaining({
           status_code: 403,
           error_kind: "auth",
-          error_message: "Proxy doesn't have permission to add reactions",
           captured: false,
         }),
       })
@@ -250,7 +254,6 @@ describe("dropReactionMonitoring", () => {
         data: expect.objectContaining({
           status_code: 403,
           error_kind: "auth",
-          error_message: "Chatting and reacting is not enabled in this wave",
           captured: false,
         }),
       })
@@ -298,48 +301,48 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestFailed(mutation, error);
 
     expect(withScopeMock).toHaveBeenCalled();
-    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+    expect(captureExceptionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Drop reaction request failed" })
+    );
   });
 
-  it.each(
-    [
-      {
-        caseName: "the same denial returned as 401",
-        endpoint: "drops/drop-proxy/reaction",
-        message: "Proxy doesn't have permission to add reactions",
-        method: "POST",
-        status: 401,
-      },
-      {
-        caseName: "an unexpected 403 auth message",
-        endpoint: "drops/drop-proxy/reaction",
-        message: "Forbidden",
-        method: "POST",
-        status: 403,
-      },
-      {
-        caseName: "the denial from a different endpoint",
-        endpoint: "drops/another-drop/reaction",
-        message: "Proxy doesn't have permission to add reactions",
-        method: "POST",
-        status: 403,
-      },
-      {
-        caseName: "the denial on a remove request",
-        endpoint: "drops/drop-proxy/reaction",
-        message: "Proxy doesn't have permission to add reactions",
-        method: "DELETE",
-        status: 403,
-      },
-      {
-        caseName: "the same message returned as a server error",
-        endpoint: "drops/drop-proxy/reaction",
-        message: "Proxy doesn't have permission to add reactions",
-        method: "POST",
-        status: 500,
-      },
-    ] as const
-  )("captures $caseName", ({ endpoint, message, method, status }) => {
+  it.each([
+    {
+      caseName: "the same denial returned as 401",
+      endpoint: "drops/drop-proxy/reaction",
+      message: "Proxy doesn't have permission to add reactions",
+      method: "POST",
+      status: 401,
+    },
+    {
+      caseName: "an unexpected 403 auth message",
+      endpoint: "drops/drop-proxy/reaction",
+      message: "Forbidden",
+      method: "POST",
+      status: 403,
+    },
+    {
+      caseName: "the denial from a different endpoint",
+      endpoint: "drops/another-drop/reaction",
+      message: "Proxy doesn't have permission to add reactions",
+      method: "POST",
+      status: 403,
+    },
+    {
+      caseName: "the denial on a remove request",
+      endpoint: "drops/drop-proxy/reaction",
+      message: "Proxy doesn't have permission to add reactions",
+      method: "DELETE",
+      status: 403,
+    },
+    {
+      caseName: "the same message returned as a server error",
+      endpoint: "drops/drop-proxy/reaction",
+      message: "Proxy doesn't have permission to add reactions",
+      method: "POST",
+      status: 500,
+    },
+  ] as const)("captures $caseName", ({ endpoint, message, method, status }) => {
     const mutation = beginReactionMutation({
       dropId: "drop-proxy",
       waveId: "wave-1",
@@ -364,7 +367,9 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestFailed(mutation, error);
 
     expect(withScopeMock).toHaveBeenCalled();
-    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+    expect(captureExceptionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Drop reaction request failed" })
+    );
   });
 
   it("records rate-limit warning metadata without capturing an exception", () => {
@@ -408,7 +413,7 @@ describe("dropReactionMonitoring", () => {
         data: expect.objectContaining({
           status_code: 429,
           error_kind: "rate-limit",
-          retry_after_ms: 2000,
+          retry_after_bucket: "1s_5s",
         }),
       })
     );
@@ -454,7 +459,6 @@ describe("dropReactionMonitoring", () => {
         data: expect.objectContaining({
           status_code: 404,
           error_kind: "endpoint-contract",
-          error_message: "Drop drop-stale not found",
         }),
       })
     );
@@ -464,7 +468,6 @@ describe("dropReactionMonitoring", () => {
         data: expect.objectContaining({
           status_code: 404,
           error_kind: "endpoint-contract",
-          error_message: "Drop drop-stale not found",
           captured: false,
         }),
       })
@@ -520,7 +523,9 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestFailed(mutation, error);
 
     expect(withScopeMock).toHaveBeenCalled();
-    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+    expect(captureExceptionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Drop reaction request failed" })
+    );
   });
 
   it("breadcrumbs an older success as superseded without capturing an issue", () => {
@@ -561,7 +566,6 @@ describe("dropReactionMonitoring", () => {
         message: "reaction.response_superseded",
         data: expect.objectContaining({
           superseded: true,
-          superseded_by_mutation_id: expect.any(String),
         }),
       })
     );
@@ -612,7 +616,6 @@ describe("dropReactionMonitoring", () => {
         message: "reaction.response_superseded",
         data: expect.objectContaining({
           superseded: true,
-          superseded_by_mutation_id: newerMutation.mutationId,
         }),
       })
     );
@@ -719,9 +722,10 @@ describe("dropReactionMonitoring", () => {
       expect.objectContaining({
         message: "reaction.realtime_superseded",
         data: expect.objectContaining({
-          expected_reaction: ":smile:",
-          server_reaction: ":wave:",
-          superseded_by_mutation_id: newerMutation.mutationId,
+          expected_reaction_present: true,
+          server_reaction_present: true,
+          server_matches_expected: false,
+          superseded: true,
         }),
       })
     );
@@ -771,7 +775,7 @@ describe("dropReactionMonitoring", () => {
       expect.objectContaining({
         message: "reaction.optimistic_reverted",
         data: expect.objectContaining({
-          time_since_mutation_ms: 217_657,
+          time_since_mutation_bucket: "over_15s",
         }),
       })
     );
@@ -1032,6 +1036,130 @@ describe("dropReactionMonitoring", () => {
     expect(latestMutation.dropMutationSeq).toBe(3);
   });
 
+  it("keeps Sentry payloads bounded and free of reaction identifiers", () => {
+    globalThis.history.pushState({}, "", "/private-handle/rep");
+    const mutation = beginReactionMutation({
+      dropId: "private-drop-id",
+      waveId: "private-wave-id",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":private-old-reaction:",
+      intendedReaction: ":private-new-reaction:",
+      optimisticReaction: ":private-new-reaction:",
+      profileId: "private-profile-id",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/private-drop-id/reaction",
+      method: "POST",
+    });
+    recordReactionRequestFailed(
+      mutation,
+      new Error("private-drop-id failed for private-profile-id")
+    );
+
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          endpoint_family: "drop_reaction",
+          has_profile_context: true,
+          route_family: "/[user]/rep",
+        }),
+      })
+    );
+    expect(mockSetExtras).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint_family: "drop_reaction",
+        intended_reaction_present: true,
+        optimistic_matches_intended: true,
+        route_family: "/[user]/rep",
+      })
+    );
+
+    const sentryPayload = JSON.stringify({
+      breadcrumbs: addBreadcrumbMock.mock.calls,
+      exceptions: captureExceptionMock.mock.calls,
+      extras: mockSetExtras.mock.calls,
+    });
+    for (const privateValue of [
+      "private-drop-id",
+      "private-wave-id",
+      "private-profile-id",
+      ":private-old-reaction:",
+      ":private-new-reaction:",
+      "/private-handle/rep",
+      "drops/private-drop-id/reaction",
+    ]) {
+      expect(sentryPayload).not.toContain(privateValue);
+    }
+
+    const sentryData = [
+      ...addBreadcrumbMock.mock.calls.map(
+        (call) =>
+          (call[0] as { readonly data?: Record<string, unknown> }).data ?? {}
+      ),
+      ...mockSetExtras.mock.calls.map(
+        (call) => call[0] as Record<string, unknown>
+      ),
+    ];
+    for (const removedKey of [
+      "mutation_id",
+      "drop_id",
+      "wave_id",
+      "profile_id",
+      "previous_reaction",
+      "intended_reaction",
+      "optimistic_reaction",
+      "pathname",
+      "endpoint",
+      "error_message",
+    ]) {
+      for (const data of sentryData) {
+        expect(data).not.toHaveProperty(removedKey);
+      }
+    }
+  });
+
+  it("keeps reaction behavior non-blocking when Sentry throws", () => {
+    addBreadcrumbMock.mockImplementationOnce(() => {
+      throw new Error("Breadcrumb transport unavailable");
+    });
+
+    expect(() =>
+      beginReactionMutation({
+        dropId: "drop-non-blocking",
+        waveId: "wave-1",
+        source: "quick-react",
+        action: "add",
+        previousReaction: null,
+        intendedReaction: ":smile:",
+        optimisticReaction: ":smile:",
+        profileId: "profile-1",
+        websocketStatus: WebSocketStatus.CONNECTED,
+      })
+    ).not.toThrow();
+
+    const mutation = beginReactionMutation({
+      dropId: "drop-capture-non-blocking",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    withScopeMock.mockImplementationOnce(() => {
+      throw new Error("Sentry scope unavailable");
+    });
+
+    expect(() =>
+      recordReactionRequestFailed(mutation, new TypeError("Failed to fetch"))
+    ).not.toThrow();
+  });
+
   it("does not let a stale failure consume the latest failure capture", () => {
     const firstMutation = beginReactionMutation({
       dropId: "drop-8",
@@ -1073,6 +1201,8 @@ describe("dropReactionMonitoring", () => {
     recordReactionRequestFailed(secondMutation, networkError);
 
     expect(captureExceptionMock).toHaveBeenCalledTimes(1);
-    expect(captureExceptionMock).toHaveBeenCalledWith(networkError);
+    expect(captureExceptionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Drop reaction request failed" })
+    );
   });
 });
