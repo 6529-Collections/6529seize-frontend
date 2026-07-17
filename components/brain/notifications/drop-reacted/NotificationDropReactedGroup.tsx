@@ -327,8 +327,8 @@ function NotificationDropReactedGroupComponent({
         </NotificationHeader>
       ) : (
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start tw-gap-y-2 min-[390px]:tw-flex-row min-[390px]:tw-items-center min-[390px]:tw-justify-between min-[390px]:tw-gap-x-2">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
+            <div className="tw-flex tw-min-w-[min(100%,16rem)] tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1">
               <span className="tw-mr-1 tw-text-sm tw-font-normal tw-text-iron-400">
                 New reactions
               </span>
@@ -383,7 +383,7 @@ function NotificationDropReactedGroupComponent({
               <NotificationTimestamp createdAt={createdAt} />
             </div>
             {fullReactors.length > 0 && (
-              <div className="tw-flex-shrink-0">
+              <div className="tw-max-w-full tw-flex-none">
                 <NotificationsFollowAllBtn
                   profiles={fullReactors}
                   size={UserFollowBtnSize.SMALL}
