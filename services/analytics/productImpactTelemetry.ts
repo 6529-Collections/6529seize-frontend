@@ -100,6 +100,13 @@ interface AuthRefreshImpactTelemetry extends AuthRefreshTelemetryBase {
 
 const TELEMETRY_VERSION = 1;
 const WAVE_FEED_INITIAL_SUCCESS_SENTRY_SAMPLE_RATE = 0.05;
+const UINT32_SAMPLE_SPACE = 2 ** 32;
+
+function getTelemetrySampleValue(): number {
+  const sample = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(sample);
+  return (sample[0] ?? 0) / UINT32_SAMPLE_SPACE;
+}
 const DEFAULT_AUTH_REFRESH_IMPACT_DEDUPE_SCOPE = "default";
 const authRefreshImpactDedupeKeysByScope = new Map<string, Set<string>>();
 
@@ -394,7 +401,7 @@ function logProductImpactEvent(
     }
     if (
       sentryDelivery === "sample_initial_success" &&
-      Math.random() >= WAVE_FEED_INITIAL_SUCCESS_SENTRY_SAMPLE_RATE
+      getTelemetrySampleValue() >= WAVE_FEED_INITIAL_SUCCESS_SENTRY_SAMPLE_RATE
     ) {
       return;
     }

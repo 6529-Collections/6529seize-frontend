@@ -32,11 +32,16 @@ async function loadProductImpactTelemetry(): Promise<{
 }
 
 describe("productImpactTelemetry", () => {
-  let randomSpy: jest.SpyInstance<number, []>;
+  let getRandomValuesSpy: jest.SpyInstance;
 
   beforeEach(() => {
     globalThis.history.pushState({}, "", "/");
-    randomSpy = jest.spyOn(Math, "random").mockReturnValue(0);
+    getRandomValuesSpy = jest
+      .spyOn(globalThis.crypto, "getRandomValues")
+      .mockImplementation((values) => {
+        (values as Uint32Array)[0] = 0;
+        return values;
+      });
   });
 
   afterEach(() => {
@@ -112,8 +117,16 @@ describe("productImpactTelemetry", () => {
 
   it("samples only initial Wave successes and suppresses routine Sentry info", async () => {
     const { telemetry, sentry } = await loadProductImpactTelemetry();
-    randomSpy.mockReset();
-    randomSpy.mockReturnValueOnce(0.049).mockReturnValueOnce(0.05);
+    getRandomValuesSpy.mockReset();
+    getRandomValuesSpy
+      .mockImplementationOnce((values) => {
+        (values as Uint32Array)[0] = 214_748_364;
+        return values;
+      })
+      .mockImplementationOnce((values) => {
+        (values as Uint32Array)[0] = 214_748_365;
+        return values;
+      });
 
     telemetry.trackWaveFeedLoadSucceeded({
       dropCount: 3,
@@ -157,7 +170,7 @@ describe("productImpactTelemetry", () => {
         sentry_sample_rate: 0.05,
       })
     );
-    expect(randomSpy).toHaveBeenCalledTimes(2);
+    expect(getRandomValuesSpy).toHaveBeenCalledTimes(2);
     expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(5);
   });
 
@@ -195,7 +208,7 @@ describe("productImpactTelemetry", () => {
     ).not.toThrow();
     expect(trackAnalyticsEventMock).toHaveBeenCalledTimes(2);
 
-    randomSpy.mockImplementationOnce(() => {
+    getRandomValuesSpy.mockImplementationOnce(() => {
       throw new Error("Sampler unavailable");
     });
     expect(() =>
@@ -269,7 +282,9 @@ describe("productImpactTelemetry", () => {
 
   it("classifies and always retains wave feed HTTP failures", async () => {
     const { telemetry, sentry } = await loadProductImpactTelemetry();
-    randomSpy.mockReturnValue(1);
+    getRandomValuesSpy.mockImplementation(() => {
+      throw new Error("Sampler should not run for failures");
+    });
     const serviceError = Object.assign(new Error("Service unavailable"), {
       status: 503,
     });
