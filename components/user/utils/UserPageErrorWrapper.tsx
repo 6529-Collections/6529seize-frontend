@@ -1,19 +1,26 @@
 export default function UserPageErrorWrapper({
   closeError,
   children,
+  closeLabel = "Close",
 }: {
   readonly closeError: () => void;
   readonly children: React.ReactNode;
+  readonly closeLabel?: string;
 }) {
+  // role="alert" announces the error to screen readers the moment it appears;
+  // the surrounding UI mounts this component conditionally on failure.
   return (
-    <div className="tw-relative tw-w-full md:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-red/5 tw-border tw-border-solid tw-border-red/30 tw-p-4">
+    <div
+      role="alert"
+      className="tw-relative tw-w-full md:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-red/5 tw-border tw-border-solid tw-border-red/30 tw-p-4"
+    >
       <div className="tw-absolute tw-right-2 tw-top-2">
         <button
           onClick={closeError}
           type="button"
-          title="Close"
-          aria-label="Close"
-          className="tw-group tw-bg-transparent tw-border-none tw-inline-flex tw-rounded-md focus:tw-outline-none"
+          title={closeLabel}
+          aria-label={closeLabel}
+          className="tw-group tw-bg-transparent tw-border-none tw-inline-flex tw-rounded-md focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-red"
         >
           <svg
             className="tw-w-6 tw-h-6 tw-text-iron-300 group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
