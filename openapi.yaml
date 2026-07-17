@@ -13090,6 +13090,14 @@ components:
           type: number
           format: int64
           nullable: true
+        editable_until:
+          description: >-
+            Latest time the author can still edit this drop in milliseconds
+            since 1-1-1970 00:00:00.0 UTC, or null when editing is not
+            available.
+          type: number
+          format: int64
+          nullable: true
         title:
           type: string
           maxLength: 250
@@ -13772,6 +13780,13 @@ components:
         updated_at:
           type: integer
           format: int64
+        editable_until:
+          description: >-
+            Latest time the author can still edit this drop in milliseconds
+            since 1-1-1970 00:00:00.0 UTC. Absent when editing is not
+            available.
+          type: integer
+          format: int64
         is_signed:
           type: boolean
         hide_link_preview:
@@ -14018,6 +14033,14 @@ components:
           description: >-
             Time when the drop was updated in milliseconds since 1-1-1970
             00:00:00.0 UTC
+          type: number
+          format: int64
+          nullable: true
+        editable_until:
+          description: >-
+            Latest time the author can still edit this drop in milliseconds
+            since 1-1-1970 00:00:00.0 UTC, or null when editing is not
+            available.
           type: number
           format: int64
           nullable: true
