@@ -69,7 +69,8 @@ stale, stop arriving, or do not recover after auth changes.
 - If transport drops repeatedly, event-driven surfaces can keep cached data but
   stop receiving fresh push events.
 - There is no global websocket status banner or reconnect button in the UI.
-- Subscribers attach only while websocket status is `connected`.
+- Live-update listeners remain registered while the websocket reconnects, but
+  events can only arrive while its status is `connected`.
 - Once token checks pass and the socket reconnects, live updates resume without
   a full app restart.
 - If issues persist across multiple health cycles, refresh the tab for a clean
