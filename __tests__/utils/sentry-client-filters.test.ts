@@ -21,6 +21,7 @@ import {
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
+  shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
   shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
@@ -32,6 +33,11 @@ import {
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
 type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
+type TwitterCurrentInsetEventOptions = {
+  request?: TestSentryClientEvent["request"];
+  mechanismType?: string;
+  handled?: boolean;
+};
 type AppleWebKitSortedTrackListOverrides = {
   type?: string | undefined;
   value?: string | undefined;
@@ -77,6 +83,8 @@ describe("sentry-client-filters", () => {
     "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
+  const twitterForIphoneUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/20H392 Twitter for iPhone/12.9";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const gifPickerTenorUndefinedTagsMessage =
@@ -205,6 +213,38 @@ describe("sentry-client-filters", () => {
       "browser.name": "Twitter",
     },
     ...overrides,
+  });
+
+  const createTwitterCurrentInsetEvent = ({
+    request = {
+      headers: {
+        "User-Agent": twitterForIphoneUserAgent,
+      },
+    },
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+  }: TwitterCurrentInsetEventOptions = {}): TestSentryClientEvent => ({
+    request,
+    exception: {
+      values: [
+        {
+          type: "ReferenceError",
+          value: "Can't find variable: currentInset",
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+              },
+            ],
+          },
+        },
+      ],
+    },
   });
 
   const createInjectedWalletCollisionEvent = (
@@ -3738,6 +3778,62 @@ describe("sentry-client-filters", () => {
     expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
     expect(getNetworkErrorMessageTargetUrl(event)).toBe("/notifications");
     expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("filters Twitter currentInset errors from the production iPhone user agent", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent();
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Twitter currentInset errors from the runtime iPhone user agent", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent({ request: {} });
+
+    // Act
+    const result = withRuntimeUserAgent(twitterForIphoneUserAgent, () =>
+      shouldFilterTwitterCurrentInsetReferenceError(event)
+    );
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter currentInset errors from non-Twitter iPhone Safari", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent({
+      request: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["a different capture mechanism", { mechanismType: "generic" }],
+    ["a handled error", { handled: true }],
+  ])("does not filter Twitter currentInset errors from %s", (_label, options) => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent(options);
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("filters Twitter CONFIG reference errors with injected wave document frames", () => {
