@@ -1064,7 +1064,7 @@ describe("dropReactionMonitoring", () => {
         data: expect.objectContaining({
           endpoint_family: "drop_reaction",
           has_profile_context: true,
-          route_family: "/[user]/rep",
+          route_family: "/[user]/[...cmsPath]",
         }),
       })
     );
@@ -1073,7 +1073,7 @@ describe("dropReactionMonitoring", () => {
         endpoint_family: "drop_reaction",
         intended_reaction_present: true,
         optimistic_matches_intended: true,
-        route_family: "/[user]/rep",
+        route_family: "/[user]/[...cmsPath]",
       })
     );
 

@@ -257,7 +257,7 @@
       "producer": "utils/monitoring/mobileLaunchTiming.ts",
       "destinations": ["sentry:owner"],
       "sampling": "5% normal; 100% focused non-desktop Waves, Messages, and Notifications routes; slow/timeout/error always",
-      "privacy": "route/endpoint families including /[user]/rep, bounded device/app cohorts, buckets, numeric durations, and auth cohort only",
+      "privacy": "route/endpoint families including /[user]/[...cmsPath] for profile CMS paths such as /[user]/rep, bounded device/app cohorts, buckets, numeric durations, and auth cohort only",
       "externalUsage": "unverified",
       "lifecycle": "keep",
       "replacement": null,

@@ -555,7 +555,7 @@ describe("mobileLaunchTiming", () => {
     ).toBe("/api/waves/:wallet/drops/:id");
     expect(sanitizers.sanitizeRouteFamily("/alice?jwt=secret")).toBe("/[user]");
     expect(sanitizers.sanitizeRouteFamily("/alice/rep?jwt=secret")).toBe(
-      "/[user]/rep"
+      "/[user]/[...cmsPath]"
     );
     expect(sanitizers.sanitizeRouteFamily("/messages/wave-123")).toBe(
       "/messages/[wave]"

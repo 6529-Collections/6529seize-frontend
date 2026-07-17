@@ -13,7 +13,7 @@ describe("getAwsRumPageId", () => {
     [`/messages/${WAVE_ID}`, "/messages/[wave]"],
     [`/tools/app-wallets/${WALLET}`, "/tools/app-wallets/[app-wallet-address]"],
     ["/alice", "/[user]"],
-    ["/alice/rep", "/[user]/rep"],
+    ["/alice/rep", "/[user]/[...cmsPath]"],
     [`/${WALLET}`, "/[user]"],
     [`/${WALLET}/collected`, "/[user]/collected"],
     [`/${WALLET}/private-cms-page`, "/[user]/[...cmsPath]"],

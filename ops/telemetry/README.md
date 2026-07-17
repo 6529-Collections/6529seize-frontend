@@ -56,10 +56,10 @@ SDK's automatic page-view plugin uses raw browser paths. A first-loaded privacy
 plugin establishes the normalized initial page before the SDK's performance,
 error, and HTTP plugins start; client navigation remains manually normalized.
 Query strings, hashes, profile/wallet values, UUIDs, and dynamic route
-parameters are excluded. Root profile handles collapse to `/[user]`, including
-their `/rep` tab family, while known static roots remain literal. Unknown
-subroutes collapse to a bounded top-level family, and consecutive equal
-families are deduplicated.
+parameters are excluded. Root profile handles collapse to `/[user]`, profile
+CMS paths such as `/[user]/rep` collapse to `/[user]/[...cmsPath]`, and known
+static roots remain literal. Unknown subroutes collapse to a bounded top-level
+family, and consecutive equal families are deduplicated.
 
 The same first-loaded AWS RUM boundary replaces exact CloudFront
 `author_<uuid>` path segments with `author_id` in HTTP/resource telemetry and

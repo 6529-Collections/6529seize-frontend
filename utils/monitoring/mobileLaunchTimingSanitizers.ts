@@ -133,7 +133,6 @@ const USER_ROUTE_TAB_SEGMENTS = new Set([
   "groups",
   "identity",
   "proxy",
-  "rep",
   "subscriptions",
   "waves",
   "xtdh",
@@ -375,7 +374,7 @@ function getUserRouteTemplate(segments: readonly string[]): string | undefined {
     return `/[user]/${segments[1]}`;
   }
 
-  return undefined;
+  return AWS_RUM_PROFILE_CMS_PAGE_ID;
 }
 
 function matchesRouteFamilyPattern(
