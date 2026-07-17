@@ -3,13 +3,13 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 import * as Sentry from "@sentry/nextjs";
 import {
   classifyReactionError,
   isExpectedProxyReactionPermissionDeniedError,
   isExpectedStaleDropNotFoundError,
   isExpectedWaveReactionDisabledError,
-  toCaptureExceptionInput,
   toErrorMessage,
 } from "./dropReactionErrorClassification";
 
@@ -24,24 +24,30 @@ const WEBSOCKET_STATUSES = new Set<string>(Object.values(WebSocketStatus));
 
 export type ReactionSource = "quick-react" | "picker" | "chip";
 type ReactionAction = "add" | "remove" | "replace";
+type ReactionRequestMethod = "POST" | "DELETE";
+type ReactionDurationBucket =
+  | "under_250ms"
+  | "250ms_1s"
+  | "1s_5s"
+  | "5s_15s"
+  | "over_15s";
 interface ReactionMutationContext {
   readonly mutationId: string;
   readonly dropMutationSeq: number;
   readonly dropId: string;
-  readonly waveId: string;
   readonly source: ReactionSource;
   readonly action: ReactionAction;
   readonly previousReaction: string | null;
   readonly intendedReaction: string | null;
   readonly optimisticReaction: string | null;
-  readonly profileId: string | null;
+  readonly hasProfileContext: boolean;
   readonly startedAt: number;
-  readonly pathname: string | null;
+  readonly routeFamily: string;
   readonly visibilityState: string | null;
   readonly online: boolean | null;
   readonly websocketStatus: WebSocketStatus | null;
   endpoint?: string | null;
-  method?: string | null;
+  method?: ReactionRequestMethod | null;
   requestSentAt: number | null;
   apiSucceededAt: number | null;
   apiFailedAt: number | null;
@@ -115,11 +121,12 @@ function createMutationId(): string {
   return `reaction-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function getCurrentPathname(): string | null {
+function getCurrentRouteFamily(): string {
   if (typeof window === "undefined") {
-    return null;
+    return "unknown";
   }
-  return window.location.pathname || null;
+
+  return getAwsRumPageId(window.location.pathname);
 }
 
 function getVisibilityState(): string | null {
@@ -150,36 +157,84 @@ function toWebsocketStatus(
   return null;
 }
 
+function getReactionDurationBucket(durationMs: number): ReactionDurationBucket {
+  if (durationMs < 250) {
+    return "under_250ms";
+  }
+  if (durationMs < 1_000) {
+    return "250ms_1s";
+  }
+  if (durationMs < 5_000) {
+    return "1s_5s";
+  }
+  if (durationMs < 15_000) {
+    return "5s_15s";
+  }
+
+  return "over_15s";
+}
+
+function getRetryAfterBucket(
+  retryAfterMs: number | null
+): ReactionDurationBucket | undefined {
+  return retryAfterMs === null
+    ? undefined
+    : getReactionDurationBucket(retryAfterMs);
+}
+
+function getEndpointFamily(
+  context: ReactionMutationContext
+): "drop_reaction" | "other" | undefined {
+  if (!context.endpoint) {
+    return undefined;
+  }
+
+  return context.endpoint === `drops/${context.dropId}/reaction`
+    ? "drop_reaction"
+    : "other";
+}
+
+function getReactionStateData(
+  context: ReactionMutationContext
+): Record<string, unknown> {
+  return {
+    mutation_sequence: context.dropMutationSeq,
+    source: context.source,
+    action: context.action,
+    previous_reaction_present: context.previousReaction !== null,
+    intended_reaction_present: context.intendedReaction !== null,
+    optimistic_reaction_present: context.optimisticReaction !== null,
+    optimistic_matches_intended:
+      context.optimisticReaction === context.intendedReaction,
+    has_profile_context: context.hasProfileContext,
+    route_family: context.routeFamily,
+    visibility_state: context.visibilityState ?? undefined,
+    online: context.online ?? undefined,
+    websocket_status: context.websocketStatus ?? undefined,
+    endpoint_family: getEndpointFamily(context),
+    method: context.method ?? undefined,
+  };
+}
+
 function addReactionBreadcrumb(
   message: string,
   context: ReactionMutationContext,
   data: Record<string, unknown> = {},
   level: "info" | "warning" | "error" = "info"
 ): void {
-  Sentry.addBreadcrumb({
-    category: "reactions",
-    level,
-    message,
-    data: {
-      mutation_id: context.mutationId,
-      drop_mutation_seq: context.dropMutationSeq,
-      drop_id: context.dropId,
-      wave_id: context.waveId,
-      source: context.source,
-      action: context.action,
-      previous_reaction: context.previousReaction,
-      intended_reaction: context.intendedReaction,
-      optimistic_reaction: context.optimisticReaction,
-      profile_id: context.profileId ?? undefined,
-      pathname: context.pathname ?? undefined,
-      visibility_state: context.visibilityState ?? undefined,
-      online: context.online ?? undefined,
-      websocket_status: context.websocketStatus ?? undefined,
-      endpoint: context.endpoint ?? undefined,
-      method: context.method ?? undefined,
-      ...data,
-    },
-  });
+  try {
+    Sentry.addBreadcrumb({
+      category: "reactions",
+      level,
+      message,
+      data: {
+        ...getReactionStateData(context),
+        ...data,
+      },
+    });
+  } catch {
+    // Reaction behavior must not depend on Sentry availability.
+  }
 }
 
 function captureReactionEvent({
@@ -195,15 +250,19 @@ function captureReactionEvent({
   tags: Record<string, string>;
   extra: Record<string, unknown>;
 }): void {
-  Sentry.withScope((scope) => {
-    scope.setLevel(level);
-    scope.setFingerprint(fingerprint);
-    Object.entries(tags).forEach(([key, value]) => {
-      scope.setTag(key, value);
+  try {
+    Sentry.withScope((scope) => {
+      scope.setLevel(level);
+      scope.setFingerprint(fingerprint);
+      Object.entries(tags).forEach(([key, value]) => {
+        scope.setTag(key, value);
+      });
+      scope.setExtras(extra);
+      Sentry.captureException(error);
     });
-    scope.setExtras(extra);
-    Sentry.captureException(error);
-  });
+  } catch {
+    // Reaction behavior must not depend on Sentry availability.
+  }
 }
 
 function recordSupersededResponse(
@@ -224,8 +283,9 @@ function recordSupersededResponse(
     context,
     {
       superseded: true,
-      superseded_by_mutation_id: latestMutationId,
-      time_since_mutation_ms: now - context.startedAt,
+      time_since_mutation_bucket: getReactionDurationBucket(
+        now - context.startedAt
+      ),
     },
     "warning"
   );
@@ -281,15 +341,15 @@ export function beginReactionMutation(params: {
     mutationId: createMutationId(),
     dropMutationSeq: nextSeq,
     dropId: params.dropId,
-    waveId: params.waveId,
     source: params.source,
     action: params.action,
     previousReaction: toNullableReaction(params.previousReaction),
     intendedReaction: toNullableReaction(params.intendedReaction),
     optimisticReaction: toNullableReaction(params.optimisticReaction),
-    profileId: params.profileId ?? null,
+    hasProfileContext:
+      params.profileId !== null && params.profileId !== undefined,
     startedAt: now,
-    pathname: getCurrentPathname(),
+    routeFamily: getCurrentRouteFamily(),
     visibilityState: getVisibilityState(),
     online: getOnlineStatus(),
     websocketStatus: toWebsocketStatus(params.websocketStatus),
@@ -318,7 +378,7 @@ export function recordReactionRequestSent(
   context: ReactionMutationContext,
   params: {
     endpoint: string;
-    method: "POST" | "DELETE";
+    method: ReactionRequestMethod;
   }
 ): void {
   context.endpoint = params.endpoint;
@@ -344,7 +404,9 @@ export function recordReactionRequestSucceeded(
   const result = recordSupersededResponse(context, now);
 
   addReactionBreadcrumb("reaction.request_succeeded", context, {
-    latency_ms: now - (context.requestSentAt ?? context.startedAt),
+    latency_bucket: getReactionDurationBucket(
+      now - (context.requestSentAt ?? context.startedAt)
+    ),
   });
 
   if (result.isLatestMutation && context.realtimeReconciledAt !== null) {
@@ -374,10 +436,9 @@ export function recordReactionRequestFailed(
     context,
     {
       status_code: statusCode ?? undefined,
-      latency_ms: latencyMs,
+      latency_bucket: getReactionDurationBucket(latencyMs),
       error_kind: errorKind,
-      error_message: errorMessage,
-      retry_after_ms: retryAfterMs ?? undefined,
+      retry_after_bucket: getRetryAfterBucket(retryAfterMs),
     },
     "warning"
   );
@@ -404,9 +465,8 @@ export function recordReactionRequestFailed(
       context,
       {
         status_code: statusCode ?? undefined,
-        latency_ms: latencyMs,
+        latency_bucket: getReactionDurationBucket(latencyMs),
         error_kind: errorKind,
-        error_message: errorMessage,
         captured: false,
       },
       "warning"
@@ -429,9 +489,8 @@ export function recordReactionRequestFailed(
       context,
       {
         status_code: statusCode ?? undefined,
-        latency_ms: latencyMs,
+        latency_bucket: getReactionDurationBucket(latencyMs),
         error_kind: errorKind,
-        error_message: errorMessage,
         captured: false,
       },
       "warning"
@@ -453,9 +512,8 @@ export function recordReactionRequestFailed(
       context,
       {
         status_code: statusCode ?? undefined,
-        latency_ms: latencyMs,
+        latency_bucket: getReactionDurationBucket(latencyMs),
         error_kind: errorKind,
-        error_message: errorMessage,
         captured: false,
       },
       "warning"
@@ -480,7 +538,7 @@ export function recordReactionRequestFailed(
   }
 
   captureReactionEvent({
-    error: toCaptureExceptionInput(error),
+    error: new Error("Drop reaction request failed"),
     level: errorKind === "server" ? "error" : "warning",
     fingerprint: [REACTION_FEATURE, errorKind],
     tags: {
@@ -491,25 +549,11 @@ export function recordReactionRequestFailed(
       error_kind: errorKind,
     },
     extra: {
-      mutation_id: context.mutationId,
-      drop_mutation_seq: context.dropMutationSeq,
-      drop_id: context.dropId,
-      wave_id: context.waveId,
-      previous_reaction: context.previousReaction,
-      intended_reaction: context.intendedReaction,
-      optimistic_reaction: context.optimisticReaction,
-      profile_id: context.profileId ?? undefined,
-      pathname: context.pathname ?? undefined,
-      visibility_state: context.visibilityState ?? undefined,
-      online: context.online ?? undefined,
-      websocket_status: context.websocketStatus ?? undefined,
-      endpoint: context.endpoint ?? undefined,
-      method: context.method ?? undefined,
+      ...getReactionStateData(context),
       status_code: statusCode ?? undefined,
-      latency_ms: latencyMs,
+      latency_bucket: getReactionDurationBucket(latencyMs),
       error_kind: errorKind,
-      error_message: errorMessage,
-      retry_after_ms: retryAfterMs ?? undefined,
+      retry_after_bucket: getRetryAfterBucket(retryAfterMs),
     },
   });
 
@@ -568,8 +612,11 @@ export function recordReactionRealtimeReconciliation(params: {
     context.realtimeReconciledAt = now;
     addReactionBreadcrumb("reaction.realtime_reconciled", context, {
       reconciled_from: "ws_refetch",
-      server_reaction: serverReaction ?? undefined,
-      time_since_mutation_ms: timeSinceMutationMs,
+      expected_reaction_present: expectedReaction !== null,
+      server_reaction_present: serverReaction !== null,
+      server_matches_expected: true,
+      time_since_mutation_bucket:
+        getReactionDurationBucket(timeSinceMutationMs),
       websocket_status: websocketStatus,
     });
     if (context.apiSucceededAt !== null) {
@@ -587,10 +634,12 @@ export function recordReactionRealtimeReconciliation(params: {
       context,
       {
         reconciled_from: "ws_refetch",
-        expected_reaction: expectedReaction ?? undefined,
-        server_reaction: serverReaction ?? undefined,
-        superseded_by_mutation_id: context.mutationId,
-        time_since_mutation_ms: timeSinceMutationMs,
+        expected_reaction_present: expectedReaction !== null,
+        server_reaction_present: serverReaction !== null,
+        server_matches_expected: false,
+        superseded: true,
+        time_since_mutation_bucket:
+          getReactionDurationBucket(timeSinceMutationMs),
         websocket_status: websocketStatus,
       },
       "warning"
@@ -615,8 +664,11 @@ export function recordReactionRealtimeReconciliation(params: {
     context,
     {
       reconciled_from: "ws_refetch",
-      server_reaction: serverReaction ?? undefined,
-      time_since_mutation_ms: timeSinceMutationMs,
+      expected_reaction_present: expectedReaction !== null,
+      server_reaction_present: serverReaction !== null,
+      server_matches_expected: false,
+      time_since_mutation_bucket:
+        getReactionDurationBucket(timeSinceMutationMs),
       websocket_status: websocketStatus,
     },
     "warning"
@@ -653,26 +705,17 @@ export function recordReactionRealtimeReconciliation(params: {
       action: context.action,
     },
     extra: {
-      mutation_id: context.mutationId,
-      drop_mutation_seq: context.dropMutationSeq,
-      drop_id: context.dropId,
-      wave_id: context.waveId,
-      previous_reaction: context.previousReaction,
-      intended_reaction: context.intendedReaction,
-      optimistic_reaction: context.optimisticReaction,
-      server_reaction: serverReaction ?? undefined,
-      profile_id: context.profileId ?? undefined,
-      pathname: context.pathname ?? undefined,
-      visibility_state: context.visibilityState ?? undefined,
-      online: context.online ?? undefined,
+      ...getReactionStateData(context),
+      expected_reaction_present: expectedReaction !== null,
+      server_reaction_present: serverReaction !== null,
+      server_matches_expected: false,
       websocket_status:
         toWebsocketStatus(params.websocketStatus) ??
         context.websocketStatus ??
         undefined,
-      endpoint: context.endpoint ?? undefined,
-      method: context.method ?? undefined,
       reconciled_from: "ws_refetch",
-      time_since_mutation_ms: timeSinceMutationMs,
+      time_since_mutation_bucket:
+        getReactionDurationBucket(timeSinceMutationMs),
       anomaly_kind: ANOMALY_OPTIMISTIC_REVERTED,
     },
   });

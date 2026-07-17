@@ -6,9 +6,23 @@ and `RELEASE_BUS_ENFORCEMENT` switch are enabled.
 
 ## What changes for developers
 
+The rollout mode is authoritative. Before submitting readiness, authenticate at
+`/deploy/ui/bus` and read its current mode:
+
+- `OFF`: readiness is rejected. Continue using the existing manual release
+  path.
+- `SHADOW`: readiness records a decision only. It does not create a GitHub
+  status, stage, merge, or deploy; use the manual path for an actual release.
+- `STAGING`: the bus owns staging readiness, while production remains on the
+  existing manual path.
+- `PRODUCTION`: the bus owns both staging and production readiness.
+
+Do not infer that the bus is live merely because its code, UI, or workflows are
+present. Agents must recheck the mode immediately before submission.
+
 Developers and agents no longer need to merge feature branches into
 `1a-staging`, dispatch staging deployments, merge source PRs to `main`, or
-dispatch production deployments on the normal path.
+dispatch production deployments on a lane currently owned by the bus.
 
 Instead, use the Release Bus panel at `/deploy/ui/bus`:
 
@@ -32,6 +46,11 @@ candidate and the new SHA must be marked ready explicitly.
 
 This process is universal repository behavior. It does not know about or call
 any developer's personal phase skill.
+
+Submitting live readiness creates a pending `Release Bus` commit status. A
+successful validation completes it, and cancelling a candidate with an
+existing live status completes it as `release readiness cancelled` so source
+PRs are not left with a permanent pending status.
 
 ## How a train departs
 
@@ -115,12 +134,16 @@ publishes release notes nor invokes the legacy GelatoBot skill.
 
 ## Failure behavior
 
-- Safe, allowlisted conflicts on temporary train branches may be offered to a
-  constrained Codex job. A separate deterministic job applies and fully tests
-  the patch. Deployment, schema, authentication, authorization, and instruction
-  conflicts are never auto-resolved.
-- Codex is read-only during failure diagnosis. Deterministic checks decide
-  whether a candidate is quarantined.
+- When `RELEASE_BUS_CODEX_ENABLED=true`, safe allowlisted conflicts on temporary
+  train branches may be offered to a constrained Codex job. Deterministic
+  validation checks the result. Deployment, schema, authentication,
+  authorization, and instruction conflicts are never auto-resolved.
+- Codex is optional and read-only during failure diagnosis. Without it, the
+  bus publishes the conflict-free candidate prefix (which can be empty when
+  the first candidate conflicts), verifies candidate ancestry, quarantines the
+  first omitted immutable candidate, and returns the others to the queue.
+  Deterministic isolation still works and its raw log remains the diagnostic
+  source of truth.
 - Isolation uses non-secret placeholder analytics and Sentry values. It helps
   diagnose deterministic candidate failures but does not replace the real
   preflight build or prove behavior that depends on credential value formats.

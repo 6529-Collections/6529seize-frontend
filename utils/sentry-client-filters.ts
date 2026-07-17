@@ -32,6 +32,9 @@ export {
   shouldFilterBrowserExtensionSendMessageError,
 } from "./sentry-client-filters/extension-messaging";
 export {
+  shouldFilterPoperBlockerOrphanFetchRejection,
+} from "./sentry-client-filters/extension-fetch";
+export {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,

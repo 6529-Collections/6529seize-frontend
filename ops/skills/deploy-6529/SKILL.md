@@ -5,17 +5,38 @@ description: Mark exact 6529 frontend or coordinated frontend/backend branch SHA
 
 # Deploy 6529
 
-Use the Release Bus as the normal staging and production path. Read
+Use the Release Bus as the normal path only for lanes enabled by its current
+rollout mode. Read
 `ops/docs/developer/deployment-bus-process.md` for lifecycle policy and
 `ops/docs/developer/deployment-bus-automation.md` for setup and recovery.
 
+## Rollout mode gate
+
+Before every staging or production action, authenticate at `/deploy/ui/bus`
+and read the mode shown by `/deploy/release-bus/controls`. Do not infer the
+mode from merged code, available workflows, or an existing candidate.
+
+- `OFF`: do not submit readiness. Use the existing manual staging or production
+  path under its normal authorization rules.
+- `SHADOW`: submit only when the user explicitly asks to record a shadow
+  decision. Shadow readiness does not stage or deploy anything; use the manual
+  path for an actual release.
+- `STAGING`: use the bus for staging only. Do not submit production readiness;
+  production remains on the existing manual path.
+- `PRODUCTION`: use the bus for both staging and production readiness.
+
+If the mode changes while working, re-read it before submission. Treat an API
+mode rejection as authoritative and do not work around it.
+
 ## Authority
 
-- Treat a user request to stage a development as authority to mark the exact
-  current branch SHA ready for `STAGING`; do not manually merge or deploy it.
-- Treat a user request to ship a staging-validated development as authority to
-  mark that same exact SHA ready for `PRODUCTION`. The bus needs no later human
-  approval on its normal successful path.
+- When the staging lane is enabled, treat a user request to stage a development
+  as authority to mark the exact current branch SHA ready for `STAGING`; do not
+  manually merge or deploy it.
+- When production mode is enabled, treat a user request to ship a
+  staging-validated development as authority to mark that same exact SHA ready
+  for `PRODUCTION`. The bus needs no later human approval on its normal
+  successful path.
 - Do not infer production readiness from staging readiness. These are separate
   actions.
 - Do not use personal phase systems, the legacy GelatoBot skill, or a manual
@@ -77,8 +98,13 @@ syncs `main` back into staging.
 ## Failure handling
 
 - If composition or preflight isolation proves this candidate fails, read the
-  linked deterministic logs and the read-only Codex diagnosis. Fix the source
-  branch, producing a new SHA, and mark the new SHA ready from the beginning.
+  linked deterministic logs and, when enabled, the read-only Codex diagnosis.
+  Fix the source branch, producing a new SHA, and mark the new SHA ready from
+  the beginning.
+- If Codex is disabled, a merge-conflicting candidate is quarantined and the
+  rest of the train is requeued automatically. Use the PR comment and release
+  branch to resolve the conflict; an OpenAI credential is not required for the
+  remaining candidates to continue.
 - Do not ask Codex diagnostics to eject another candidate. Deterministic checks
   own quarantine decisions.
 - If the train is cancelled because `main` or `1a-staging` moved, leave the

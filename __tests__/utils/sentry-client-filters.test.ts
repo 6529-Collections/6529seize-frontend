@@ -7,6 +7,7 @@ import {
   shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterBrowserExtensionMessagingConnectionError,
+  shouldFilterBrowserExtensionSendMessageError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
@@ -15,16 +16,19 @@ import {
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
+  shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
   shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
   type SentryClientEvent,
+  type SentryExceptionValue,
   type SentryStackFrame,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
@@ -32,6 +36,20 @@ import {
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
 type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
+type TwitterConfigRawEventOptions = {
+  exceptionType?: string | undefined;
+  exceptionValue?: string | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  frames?: SentryStackFrame[] | undefined;
+  userAgent?: string | undefined;
+  includeAdditionalException?: boolean | undefined;
+};
+type TwitterCurrentInsetEventOptions = {
+  request?: TestSentryClientEvent["request"];
+  mechanismType?: string;
+  handled?: boolean;
+};
 type AppleWebKitSortedTrackListOverrides = {
   type?: string | undefined;
   value?: string | undefined;
@@ -77,6 +95,8 @@ describe("sentry-client-filters", () => {
     "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
+  const twitterForIphoneUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/20H392 Twitter for iPhone/12.9";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const gifPickerTenorUndefinedTagsMessage =
@@ -138,6 +158,10 @@ describe("sentry-client-filters", () => {
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
   const extensionMessagingConnectionFailureMessage =
     "Could not establish connection. Receiving end does not exist.";
+  const poperBlockerNetworkErrorMessage =
+    "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
+  const webkitExtensionMessagingTabNotFoundMessage =
+    "Invalid call to runtime.sendMessage(). Tab not found.";
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
@@ -205,6 +229,168 @@ describe("sentry-client-filters", () => {
       "browser.name": "Twitter",
     },
     ...overrides,
+  });
+
+  const createTwitterConfigRawFrames = (): SentryStackFrame[] => [
+    {
+      filename: "app:///_next/static/chunks/11w902cjh4qgz.js",
+      function: "n",
+      lineno: 7,
+      colno: 4858,
+      in_app: true,
+    },
+    {
+      filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+      lineno: 464,
+      colno: 28,
+      in_app: true,
+    },
+    {
+      filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+      function: "updateFooterPositions",
+      lineno: 449,
+      colno: 18,
+      in_app: true,
+    },
+    {
+      filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+      function: "updateGapFiller",
+      lineno: 311,
+      colno: 46,
+      in_app: true,
+    },
+  ];
+
+  const createTwitterConfigRawEvent = ({
+    exceptionType = "ReferenceError",
+    exceptionValue = "Can't find variable: CONFIG",
+    mechanismType = "auto.browser.browserapierrors.addEventListener",
+    handled = false,
+    frames = createTwitterConfigRawFrames(),
+    userAgent = twitterForIphoneUserAgent,
+    includeAdditionalException = false,
+  }: TwitterConfigRawEventOptions = {}): TestSentryClientEvent => {
+    const additionalValues = includeAdditionalException
+      ? [{ type: "Error", value: "Nearby application error" }]
+      : [];
+
+    return {
+      request: {
+        headers: {
+          "User-Agent": userAgent,
+        },
+      },
+      exception: {
+        values: [
+          {
+            type: exceptionType,
+            value: exceptionValue,
+            mechanism: {
+              type: mechanismType,
+              handled,
+            },
+            stacktrace: { frames },
+          },
+          ...additionalValues,
+        ],
+      },
+    };
+  };
+
+  const overrideTwitterConfigRawFrame = (
+    index: number,
+    overrides: Partial<SentryStackFrame>
+  ): SentryStackFrame[] =>
+    createTwitterConfigRawFrames().map((frame, frameIndex) =>
+      frameIndex === index ? { ...frame, ...overrides } : frame
+    );
+
+  const reorderTwitterConfigRawFrames = (): SentryStackFrame[] => {
+    const frames = createTwitterConfigRawFrames();
+    return [frames[0], frames[2], frames[1], frames[3]].filter(
+      (frame): frame is SentryStackFrame => frame !== undefined
+    );
+  };
+
+  const twitterConfigRawNearMisses: Array<
+    [string, TwitterConfigRawEventOptions]
+  > = [
+    ["a changed exception type", { exceptionType: "TypeError" }],
+    [
+      "a changed exception message",
+      { exceptionValue: "Can't find variable: CONFIGURATION" },
+    ],
+    ["another exception value", { includeAdditionalException: true }],
+    ["a changed capture mechanism", { mechanismType: "generic" }],
+    ["a handled exception", { handled: true }],
+    [
+      "a changed wrapper function",
+      { frames: overrideTwitterConfigRawFrame(0, { function: "capture" }) },
+    ],
+    [
+      "changed wrapper coordinates",
+      { frames: overrideTwitterConfigRawFrame(0, { colno: 4859 }) },
+    ],
+    [
+      "a missing injected frame",
+      { frames: createTwitterConfigRawFrames().slice(0, 3) },
+    ],
+    [
+      "reordered injected frames",
+      { frames: reorderTwitterConfigRawFrames() },
+    ],
+    [
+      "an application-owned frame",
+      {
+        frames: overrideTwitterConfigRawFrame(2, {
+          filename:
+            "webpack-internal:///(app-pages-browser)/./components/waves/WaveLayout.tsx",
+        }),
+      },
+    ],
+    [
+      "plain iPhone Safari",
+      {
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+      },
+    ],
+    [
+      "a Twitter-lookalike user agent",
+      { userAgent: "ExampleTwitter/12.9 (iPhone; iOS 16.7.16)" },
+    ],
+  ];
+
+  const createTwitterCurrentInsetEvent = ({
+    request = {
+      headers: {
+        "User-Agent": twitterForIphoneUserAgent,
+      },
+    },
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+  }: TwitterCurrentInsetEventOptions = {}): TestSentryClientEvent => ({
+    request,
+    exception: {
+      values: [
+        {
+          type: "ReferenceError",
+          value: "Can't find variable: currentInset",
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+              },
+            ],
+          },
+        },
+      ],
+    },
   });
 
   const createInjectedWalletCollisionEvent = (
@@ -291,6 +477,38 @@ describe("sentry-client-filters", () => {
       ],
     },
     ...overrides,
+  });
+
+  const createCoinbaseWalletRequestRelayEvent = (
+    frameOverrides: Partial<SentryStackFrame> = {},
+    valueOverrides: Partial<SentryExceptionValue> = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "websocket error 1006:",
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            // Matches the Browser SDK frame shape available to beforeSend.
+            frames: [
+              {
+                filename: "app:///requestRelay.js",
+                function: "i.onclose",
+                lineno: 2,
+                colno: 248957,
+                in_app: true,
+                ...frameOverrides,
+              },
+            ],
+          },
+          ...valueOverrides,
+        },
+      ],
+    },
   });
 
   const createAppKitCoinbaseBreadcrumbs = (): NonNullable<
@@ -725,6 +943,87 @@ describe("sentry-client-filters", () => {
     ],
     ...overrides,
   });
+
+  const createPoperBlockerOrphanFetchRejectionEvent = ({
+    type = "TypeError",
+    value = poperBlockerNetworkErrorMessage,
+    mechanismType = "auto.browser.global_handlers.onunhandledrejection",
+    handled = false,
+    includeHandled = true,
+    frames = [
+      {
+        filename:
+          "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+        function: "e.prototype.handle",
+        in_app: false,
+      },
+      {
+        filename: "app:///injectScriptAdjust.js",
+        abs_path: "app:///injectScriptAdjust.js",
+        function: "window.fetch",
+        lineno: 1,
+        colno: 4520,
+        in_app: true,
+      },
+      {
+        filename: "app:///injectScriptAdjust.js",
+        abs_path: "app:///injectScriptAdjust.js",
+        function: "VihJ",
+        lineno: 1,
+        colno: 3159,
+        in_app: true,
+      },
+    ],
+  }: {
+    type?: string | undefined;
+    value?: string | undefined;
+    mechanismType?: string | undefined;
+    handled?: boolean | undefined;
+    includeHandled?: boolean | undefined;
+    frames?: SentryStackFrame[] | undefined;
+  } = {}): TestSentryClientEvent => ({
+    transaction: "/waves/:wave",
+    exception: {
+      values: [
+        {
+          type,
+          value,
+          mechanism: {
+            type: mechanismType,
+            ...(includeHandled ? { handled } : {}),
+          },
+          stacktrace: { frames },
+        },
+      ],
+    },
+  });
+
+  const createWebKitExtensionMessagingTabNotFoundEvent = (
+    valueOverrides: Record<string, unknown> = {},
+    eventOverrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => {
+    const value = {
+      type: "Error",
+      value: webkitExtensionMessagingTabNotFoundMessage,
+      mechanism: {
+        type: "auto.browser.global_handlers.onunhandledrejection",
+        handled: false,
+      },
+    };
+
+    return {
+      transaction: "/",
+      ...eventOverrides,
+      exception: {
+        values: [
+          {
+            ...value,
+            ...valueOverrides,
+          },
+        ],
+      },
+    };
+  };
 
   const createAppleWebKitSortedTrackListEvent = ({
     type = "TypeError",
@@ -3740,6 +4039,62 @@ describe("sentry-client-filters", () => {
     expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
+  it("filters Twitter currentInset errors from the production iPhone user agent", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent();
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Twitter currentInset errors from the runtime iPhone user agent", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent({ request: {} });
+
+    // Act
+    const result = withRuntimeUserAgent(twitterForIphoneUserAgent, () =>
+      shouldFilterTwitterCurrentInsetReferenceError(event)
+    );
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter currentInset errors from non-Twitter iPhone Safari", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent({
+      request: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["a different capture mechanism", { mechanismType: "generic" }],
+    ["a handled error", { handled: true }],
+  ])("does not filter Twitter currentInset errors from %s", (_label, options) => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent(options);
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters Twitter CONFIG reference errors with injected wave document frames", () => {
     // Arrange
     const event = createTwitterConfigEvent();
@@ -3750,6 +4105,49 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(true);
   });
+
+  it("filters the observed raw Twitter CONFIG event before source-map processing", () => {
+    // Arrange
+    const event = createTwitterConfigRawEvent();
+
+    // Act
+    const result = shouldFilterTwitterConfigReferenceError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each(twitterConfigRawNearMisses)(
+    "does not filter the raw Twitter CONFIG shape with %s",
+    (_label, options) => {
+      // Arrange
+      const event = createTwitterConfigRawEvent(options);
+
+      // Act
+      const result = shouldFilterTwitterConfigReferenceError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it.each([
+    ["a missing request", undefined],
+    ["missing request headers", {}],
+    ["an empty User-Agent", { headers: { "User-Agent": "" } }],
+  ] satisfies Array<[string, TestSentryClientEvent["request"]]>)(
+    "does not filter the raw Twitter CONFIG shape with %s",
+    (_label, request) => {
+      // Arrange
+      const event = { ...createTwitterConfigRawEvent(), request };
+
+      // Act
+      const result = shouldFilterTwitterConfigReferenceError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
 
   it("does not filter CONFIG reference errors outside Twitter", () => {
     // Arrange
@@ -4391,6 +4789,168 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters the browser-parsed Coinbase Wallet request relay signature", () => {
+    const event = createCoinbaseWalletRequestRelayEvent();
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the qualified request relay function from the latest occurrence", () => {
+    const event = createCoinbaseWalletRequestRelayEvent({
+      function:
+        "__webpack_modules__.67891.t.WalletLinkWebSocket.connect.i.onclose",
+    });
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the request relay signature with a websocket detail suffix", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "websocket error 1006: extra detail" }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["function", { function: "onclose" }],
+    ["qualified function", { function: "other.i.onclose" }],
+    ["line", { lineno: 3 }],
+    ["column", { colno: 248958 }],
+  ] as const)(
+    "does not filter a request relay signature with a different %s",
+    (_field, frameOverrides) => {
+      const event = createCoinbaseWalletRequestRelayEvent(frameOverrides);
+
+      const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("does not filter a request relay signature with a different mechanism", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      {
+        mechanism: {
+          type: "generic",
+          handled: false,
+        },
+      }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a handled request relay signature", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onunhandledrejection",
+          handled: true,
+        },
+      }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a request relay signature with a different message", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      {
+        value: "websocket error 1001:",
+      }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a request relay frame when only the event message matches", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "different exception" }
+    );
+    event.message = "websocket error 1006:";
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a request relay frame when only the hint message matches", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "different exception" }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: new Error("websocket error 1006:"),
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["missing filename", { filename: undefined }],
+    ["different filename", { filename: "app:///other.js" }],
+  ] as const)(
+    "does not filter a request relay signature with %s",
+    (_case, frameOverrides) => {
+      const event = createCoinbaseWalletRequestRelayEvent(frameOverrides);
+
+      const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("does not filter the exact request relay signature with an app-owned frame", () => {
+    const event = createCoinbaseWalletRequestRelayEvent();
+    event.exception!.values![0]!.stacktrace!.frames!.push({
+      filename: "services/websocket/WebSocketProvider.tsx",
+      in_app: true,
+    });
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the exact request relay signature with a separate app-owned exception", () => {
+    const event = createCoinbaseWalletRequestRelayEvent();
+    event.exception!.values!.push({
+      type: "Error",
+      value: "application error",
+      stacktrace: {
+        frames: [
+          {
+            filename: "services/websocket/WebSocketProvider.tsx",
+            in_app: true,
+          },
+        ],
+      },
+    });
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
   });
 
   it("filters Coinbase WalletLink websocket 1006 close errors without a detail suffix", () => {
@@ -6360,6 +6920,322 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters the observed Poper Blocker rejection with the short AWS RUM stack", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent();
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the observed Poper Blocker rejection with the expanded AWS RUM stack", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename:
+            "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/DataPlaneClient.js",
+          function: "ts.<anonymous>",
+          in_app: false,
+        },
+        {
+          filename:
+            "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/RetryHttpHandler.js",
+          function: "e.prototype.handle",
+          in_app: false,
+        },
+        {
+          filename: "<anonymous>",
+          function: "new Promise",
+          in_app: true,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+          in_app: true,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+          in_app: true,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["similar filename", { filename: "app:///injectScriptAdjustment.js" }],
+    ["changed function", { function: "window.fetchWrapper" }],
+    ["changed line", { lineno: 2 }],
+    ["changed column", { colno: 4519 }],
+  ])("keeps Poper Blocker near-misses with a %s", (_caseName, frameChange) => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+          ...frameChange,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Poper Blocker-shaped rejections with a missing signature frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Poper Blocker-shaped rejections with an extra injected frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["unrelated error", { value: "Application request validation failed." }],
+    ["non-TypeError", { type: "Error" }],
+    ["handled rejection", { handled: true }],
+    ["missing handled flag", { includeHandled: false }],
+    ["different mechanism", { mechanismType: "generic" }],
+  ])("keeps a Poper Blocker frame pair for an %s", (_caseName, overrides) => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent(overrides);
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Poper Blocker-shaped rejections with app-owned source evidence", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+        {
+          filename:
+            "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+          function: "executeApiRequest",
+          in_app: true,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps mixed-exception events with a Poper Blocker rejection first", () => {
+    const poperBlockerEvent = createPoperBlockerOrphanFetchRejectionEvent();
+    const event: TestSentryClientEvent = {
+      ...poperBlockerEvent,
+      exception: {
+        values: [
+          ...(poperBlockerEvent.exception?.values ?? []),
+          {
+            type: "Error",
+            value: "Application request validation failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+                  function: "executeApiRequest",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("filters the exact frame-less WebKit extension tab-not-found rejection", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent();
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter nearby WebKit extension messaging errors", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent({
+      value: "Invalid call to runtime.sendMessage(). No tab found.",
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter mixed WebKit and app-owned exceptions", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent();
+    event.exception = {
+      values: [
+        ...(event.exception?.values ?? []),
+        {
+          type: "TypeError",
+          value: "App-owned failure",
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+                function: "sendMessage",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WebKit tab-not-found errors with app-owned frames", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent({
+      stacktrace: {
+        frames: [
+          {
+            filename:
+              "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+            function: "sendMessage",
+            in_app: true,
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WebKit tab-not-found errors with app-owned original stacks", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent();
+    const error = new Error(webkitExtensionMessagingTabNotFoundMessage);
+    error.stack = [
+      `Error: ${webkitExtensionMessagingTabNotFoundMessage}`,
+      "    at sendMessage (webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WebKit tab-not-found errors with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent(
+      {},
+      {
+        extra: {
+          __serialized__: {
+            message: webkitExtensionMessagingTabNotFoundMessage,
+            stack: [
+              `Error: ${webkitExtensionMessagingTabNotFoundMessage}`,
+              "    at sendMessage (app:///services/messaging/sendMessage.ts:10:1)",
+            ].join("\n"),
+          },
+        },
+      }
+    );
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
 
     // Assert
     expect(result).toBe(false);
