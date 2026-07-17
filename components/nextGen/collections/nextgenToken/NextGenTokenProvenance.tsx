@@ -16,8 +16,8 @@ interface Props {
 const PAGE_SIZE = 25;
 
 export default function NextGenTokenProvenance(props: Readonly<Props>) {
-  const scrollTarget = useRef<HTMLImageElement>(null);
-  const logsScrollTarget = useRef<HTMLImageElement>(null);
+  const scrollTarget = useRef<HTMLDivElement>(null);
+  const logsScrollTarget = useRef<HTMLDivElement>(null);
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [transactionsLoaded, setTransactionsLoaded] = useState(false);
@@ -29,49 +29,67 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   const [logsTotalResults, setLogsTotalResults] = useState(0);
   const [logsPage, setLogsPage] = useState(1);
 
-  function fetchResults(mypage: number) {
+  useEffect(() => {
+    let isCurrentRequest = true;
     setTransactionsLoaded(false);
+
     commonApiFetch<{
       count: number;
       page: number;
       next: unknown;
       data: Transaction[];
     }>({
-      endpoint: `nextgen/tokens/${props.token_id}/transactions?page_size=${PAGE_SIZE}&page=${mypage}`,
-    }).then((response) => {
-      setTotalResults(response.count);
-      setTransactions(response.data);
-      setTransactionsLoaded(true);
-    });
-  }
+      endpoint: `nextgen/tokens/${props.token_id}/transactions?page_size=${PAGE_SIZE}&page=${page}`,
+    })
+      .then((response) => {
+        if (!isCurrentRequest) return;
+        setTotalResults(response.count);
+        setTransactions(response.data);
+        setTransactionsLoaded(true);
+      })
+      .catch((error) => {
+        if (!isCurrentRequest) return;
+        console.error("Failed to fetch NextGen token transactions", error);
+        setTotalResults(0);
+        setTransactions([]);
+        setTransactionsLoaded(true);
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [page, props.token_id]);
 
   useEffect(() => {
-    fetchResults(page);
-  }, [page]);
-
-  function fetchLogsResults(mypage: number) {
+    let isCurrentRequest = true;
     setLogsLoaded(false);
+
     commonApiFetch<{
       count: number;
       page: number;
       next: unknown;
       data: NextGenLog[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${mypage}`,
-    }).then((response) => {
-      setLogsTotalResults(response.count);
-      setLogs(response.data);
-      setLogsLoaded(true);
-    });
-  }
+      endpoint: `nextgen/collections/${props.collection.id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${logsPage}`,
+    })
+      .then((response) => {
+        if (!isCurrentRequest) return;
+        setLogsTotalResults(response.count);
+        setLogs(response.data);
+        setLogsLoaded(true);
+      })
+      .catch((error) => {
+        if (!isCurrentRequest) return;
+        console.error("Failed to fetch NextGen token logs", error);
+        setLogsTotalResults(0);
+        setLogs([]);
+        setLogsLoaded(true);
+      });
 
-  useEffect(() => {
-    fetchResults(page);
-  }, [page]);
-
-  useEffect(() => {
-    fetchLogsResults(logsPage);
-  }, [logsPage]);
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [logsPage, props.collection.id, props.token_id]);
 
   return (
     <>

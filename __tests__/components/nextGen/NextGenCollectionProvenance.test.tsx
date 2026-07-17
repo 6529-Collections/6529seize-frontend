@@ -1,6 +1,8 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import NextGenCollectionProvenance from "@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance";
+import NextGenCollectionProvenance, {
+  NextGenCollectionProvenanceRow,
+} from "@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance";
 import type { NextGenCollection, NextGenLog } from "@/entities/INextgen";
 
 jest.mock("next/image", () => ({
@@ -8,9 +10,9 @@ jest.mock("next/image", () => ({
   default: (p: any) => <img {...p} />,
 }));
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
-jest.mock(
-  "@/components/latest-activity/LatestActivityRow",
-  () => (props: any) => (
+jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
+  __esModule: true,
+  default: (props: any) => (
     <tr
       data-testid="activity-row"
       data-show-nft-identity={props.showNftIdentity ? "true" : "false"}
@@ -18,8 +20,10 @@ jest.mock(
     >
       <td>{props.tr.token_id}</td>
     </tr>
-  )
-);
+  ),
+  printGas: () => null,
+  printRoyalties: () => null,
+}));
 jest.mock("@/components/pagination/Pagination", () => (props: any) => (
   <button data-testid="page" onClick={() => props.setPage(props.page + 1)}>
     next
@@ -161,5 +165,36 @@ describe("NextGenCollectionProvenance", () => {
     expect(await screen.findByText("test")).toBeInTheDocument();
     expect(commonApiFetch).toHaveBeenCalledTimes(2);
     consoleError.mockRestore();
+  });
+
+  it("derives legacy transaction rendering from the current log", () => {
+    const transactionLog = {
+      ...log,
+      log: "Transfer of Coll #5",
+      from_address: "0xfrom",
+      from_display: "From",
+      to_address: "0xto",
+      to_display: "To",
+    };
+    const { container, rerender } = render(
+      <NextGenCollectionProvenanceRow
+        collection={collection}
+        log={transactionLog}
+      />
+    );
+
+    expect(container.querySelector("details")).not.toBeInTheDocument();
+    expect(container).toHaveTextContent("from From");
+    expect(container).toHaveTextContent("to To");
+
+    rerender(
+      <NextGenCollectionProvenanceRow
+        collection={collection}
+        log={{ ...transactionLog, log: "Metadata updated" }}
+      />
+    );
+
+    expect(container.querySelector("details")).toBeInTheDocument();
+    expect(container).toHaveTextContent("Metadata updated");
   });
 });
