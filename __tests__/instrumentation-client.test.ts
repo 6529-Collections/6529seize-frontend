@@ -63,6 +63,8 @@ describe("instrumentation-client", () => {
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
     "auto.browser.browserapierrors.setTimeout";
+  const browserUnhandledRejectionMechanismType =
+    "auto.browser.global_handlers.onunhandledrejection";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
@@ -76,7 +78,18 @@ describe("instrumentation-client", () => {
     fingerprint?: string[] | undefined;
     exception?:
       | {
-          values?: Array<{ value?: string | undefined } | undefined>;
+          values?: Array<
+            | {
+                value?: string | undefined;
+                mechanism?:
+                  | {
+                      type?: string | undefined;
+                      handled?: boolean | undefined;
+                    }
+                  | undefined;
+              }
+            | undefined
+          >;
         }
       | undefined;
     message?: string | undefined;
@@ -125,7 +138,7 @@ describe("instrumentation-client", () => {
           type: "Error",
           value: message,
           mechanism: {
-            type: "auto.browser.global_handlers.onunhandledrejection",
+            type: browserUnhandledRejectionMechanismType,
             handled: false,
           },
         },
@@ -310,12 +323,20 @@ describe("instrumentation-client", () => {
 
   it.each([
     {
-      description: "raw WebKit message",
+      description: "raw WebKit user-delete message",
       message: indexedDBUserDeleteMessage,
     },
     {
-      description: "Sentry-prefixed WebKit value",
+      description: "Sentry-prefixed WebKit user-delete value",
       message: `UnknownError: ${indexedDBUserDeleteMessage}`,
+    },
+    {
+      description: "raw WebKit open-failure message",
+      message: "Unable to open database file on disk",
+    },
+    {
+      description: "Sentry-prefixed WebKit open-failure value",
+      message: "UnknownError: Unable to open database file on disk",
     },
   ])(
     "classifies the $description as a handled IndexedDB warning",
@@ -332,6 +353,16 @@ describe("instrumentation-client", () => {
             handled: true,
           }),
           fingerprint: ["indexeddb-connection-lost"],
+          exception: expect.objectContaining({
+            values: [
+              expect.objectContaining({
+                mechanism: {
+                  type: browserUnhandledRejectionMechanismType,
+                  handled: true,
+                },
+              }),
+            ],
+          }),
         })
       );
     }
@@ -340,6 +371,7 @@ describe("instrumentation-client", () => {
   it.each([
     "UnknownError: Database deleted by request of the administrator",
     "UnknownError: Database deleted by request of the user during migration",
+    "UnknownError: Unable to open database file on disk because it is locked",
   ])("preserves the near-miss database failure %s", (message) => {
     const beforeSend = loadBeforeSend();
 
@@ -348,6 +380,10 @@ describe("instrumentation-client", () => {
     expect(result).toEqual(expect.objectContaining({ level: "error" }));
     expect(result?.tags).toBeUndefined();
     expect(result?.fingerprint).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.mechanism).toEqual({
+      type: browserUnhandledRejectionMechanismType,
+      handled: false,
+    });
   });
 
   it("drops disconnected wallet-provider object promise rejections", () => {

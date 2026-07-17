@@ -23,6 +23,10 @@ const SANDBOX_CREATED_WAVE_DESCRIPTION =
 const SANDBOX_PERPETUAL_WAVE_NAME = "Sandbox Perpetual Rank Wave";
 const SANDBOX_PERPETUAL_WAVE_DESCRIPTION =
   "Local-only perpetual rank wave description for Playwright.";
+const SANDBOX_SCHEDULED_WAVE_NAME = "Sandbox Scheduled Rank Wave";
+const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
+  "Local-only scheduled rank wave description for Playwright.";
+const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 
 test.describe.configure({ mode: "serial" });
 
@@ -265,6 +269,131 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
               voting_period_max: null,
               participation_period_max: null,
               outcomes_count: 0,
+            }),
+          }),
+        ])
+      );
+
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    );
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("creates a scheduled rank wave with an announcement and a manual outcome", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoCreateWave(page);
+
+    await page.getByLabel(/Wave Name/).fill(SANDBOX_SCHEDULED_WAVE_NAME);
+    await page.getByText("Rank", { exact: true }).click();
+
+    // "Announce Winners" is the default scheduling mode; keep it.
+    await expect(
+      page.getByRole("radio", { name: "Announce Winners" })
+    ).toBeChecked();
+    await nextStepButton(page).click();
+
+    await expect(
+      page.getByRole("heading", { name: "Who can vote" })
+    ).toBeVisible();
+    await nextStepButton(page).click();
+
+    // The Dates step mounts the announcement schedule expanded and defaults
+    // the first announcement to a valid future time.
+    await expect(page.getByText("Wave Timeline")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("button", { name: "Winners Announcements" })
+    ).toBeVisible();
+    await nextStepButton(page).click();
+
+    await expect(
+      page.locator("#no-of-applications-allowed-per-participant")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await nextStepButton(page).click();
+
+    await expect(
+      page.getByRole("heading", { name: "Rules", level: 2, exact: true })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await nextStepButton(page).click();
+
+    // Voting keeps its defaults; a scheduled rank wave then configures an
+    // outcome on the Outcomes step (present in the stepper, unlike perpetual).
+    await expect(
+      page.getByRole("navigation", { name: "Progress" }).getByText("Outcomes")
+    ).toBeVisible();
+    await nextStepButton(page).click();
+
+    await page.getByRole("button", { name: "Manual" }).click();
+    await page
+      .getByLabel("Manual action")
+      .fill(SANDBOX_SCHEDULED_OUTCOME_TITLE);
+    await page.getByLabel(/Winning Positions/).fill("1");
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(
+      page.getByText(SANDBOX_SCHEDULED_OUTCOME_TITLE).first()
+    ).toBeVisible();
+    await nextStepButton(page).click();
+
+    await expect(
+      page.getByText("Give a good description of your wave")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await fillDescription(page, SANDBOX_SCHEDULED_WAVE_DESCRIPTION);
+    await page.getByRole("button", { name: "Complete" }).click();
+
+    // The sandbox mock only whitelists a rank body with exactly one
+    // non-rolling decision point and exactly this manual outcome; anything
+    // else is rejected as an unsafe mutation and fails this poll.
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (request) =>
+              request.method === "POST" && request.path === "/api/waves"
+          ),
+        {
+          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          message:
+            "Expected the scheduled rank wave submit to reach the sandbox mock API.",
+        }
+      )
+      .toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "/api/waves",
+            kind: "allowed-sandbox-mutation",
+            body: expect.objectContaining({
+              name: SANDBOX_SCHEDULED_WAVE_NAME,
+              admin_group_id: SANDBOX_ADMIN_GROUP_ID,
+              description: SANDBOX_SCHEDULED_WAVE_DESCRIPTION,
+              wave_type: "RANK",
+              decisions_strategy: expect.objectContaining({
+                first_decision_time: expect.any(Number),
+                subsequent_decisions: [],
+                is_rolling: false,
+              }),
+              // The wave closes at its only announcement, so both periods
+              // carry that timestamp as their end (asserted exactly by the
+              // sandbox allowlist).
+              voting_period_max: expect.any(Number),
+              participation_period_max: expect.any(Number),
+              outcomes_count: 1,
+              outcomes: [
+                {
+                  type: "MANUAL",
+                  description: SANDBOX_SCHEDULED_OUTCOME_TITLE,
+                  distribution: [
+                    {
+                      amount: 1,
+                      description: SANDBOX_SCHEDULED_OUTCOME_TITLE,
+                    },
+                  ],
+                },
+              ],
             }),
           }),
         ])
