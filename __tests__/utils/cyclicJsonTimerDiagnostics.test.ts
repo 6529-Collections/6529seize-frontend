@@ -4,6 +4,10 @@ import {
   installCyclicJsonTimerDiagnostics,
   isIosWkWebViewUserAgent,
 } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
+import {
+  getProductionAssetPrefix,
+  PRODUCTION_ASSET_HOSTNAME,
+} from "@/config/assetPrefix";
 import type { Event } from "@sentry/nextjs";
 
 const CYCLIC_JSON_MESSAGE =
@@ -11,9 +15,7 @@ const CYCLIC_JSON_MESSAGE =
 const WKWEBVIEW_USER_AGENT =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
 const MOBILE_SAFARI_USER_AGENT = `${WKWEBVIEW_USER_AGENT} Version/18.7 Safari/604.1`;
-const PRODUCTION_ASSET_HOSTNAME = "dnclu2fna0b2b.cloudfront.net";
-const PRODUCTION_ASSET_PREFIX =
-  `https://${PRODUCTION_ASSET_HOSTNAME}/web_build/test-release`;
+const PRODUCTION_ASSET_PREFIX = getProductionAssetPrefix("test-release");
 
 type ScheduledTimer = {
   handler: ((...args: unknown[]) => unknown) | string;
@@ -235,9 +237,7 @@ describe("cyclic JSON timer diagnostics", () => {
     const { target, getOriginalReceiver } = createTimerHarness();
     const detachedSetTimeout = target.setTimeout;
 
-    expect(detachedSetTimeout.name).toBe(
-      "cyclicJsonTimerDiagnosticSetTimeout"
-    );
+    expect(detachedSetTimeout.name).toBe("cyclicJsonTimerDiagnosticSetTimeout");
     detachedSetTimeout(jest.fn(), 5);
 
     expect(getOriginalReceiver()).toBe(target);
@@ -301,10 +301,10 @@ describe("cyclic JSON timer diagnostics", () => {
     expect(serializedDiagnostics).not.toContain("secret-extension-id");
   });
 
-  it("recognizes production CDN chunks and removes a minified capture-site frame", () => {
+  it("recognizes production CDN chunks and removes the capture-site frame", () => {
     const diagnostics = captureDiagnostics([
       "Error: cyclic-json-timer-schedule",
-      `u@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/diagnostics.js:21:99680`,
+      `cyclicJsonTimerDiagnosticSetTimeout@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/diagnostics.js:21:99680`,
       "injectedCallback@https://wallet.example/inpage.js:790:281",
       `scheduleRefresh@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/app/waves.js:51:8567`,
     ]);
@@ -332,6 +332,40 @@ describe("cyclic JSON timer diagnostics", () => {
         },
       ],
     });
+  });
+
+  it("keeps the first scheduling frame when the wrapper frame is absent", () => {
+    const diagnostics = captureDiagnostics([
+      `u@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/app/waves.js:51:8567`,
+      "injectedCallback@https://wallet.example/inpage.js:790:281",
+    ]);
+
+    expect(diagnostics.scheduleOrigin).toBe("mixed");
+    expect(diagnostics.schedulingFrames).toEqual([
+      {
+        file: "/_next/static/chunks/app/waves.js",
+        function: "u",
+        line: 51,
+        column: 8567,
+        origin: "first_party",
+      },
+      {
+        file: "external/inpage.js",
+        function: "injectedCallback",
+        line: 790,
+        column: 281,
+        origin: "third_party",
+      },
+    ]);
+  });
+
+  it("reports unknown provenance when the wrapper is the only frame", () => {
+    const diagnostics = captureDiagnostics([
+      `cyclicJsonTimerDiagnosticSetTimeout@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/diagnostics.js:21:99680`,
+    ]);
+
+    expect(diagnostics.scheduleOrigin).toBe("unknown");
+    expect(diagnostics.schedulingFrames).toEqual([]);
   });
 
   it.each([
@@ -369,7 +403,7 @@ describe("cyclic JSON timer diagnostics", () => {
   ])("does not classify $name as a production app asset", (testCase) => {
     const diagnostics = captureDiagnostics([
       "Error: cyclic-json-timer-schedule",
-      `u@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/diagnostics.js:1:2`,
+      `cyclicJsonTimerDiagnosticSetTimeout@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/diagnostics.js:1:2`,
       `candidate@${testCase.location}`,
     ]);
 
