@@ -273,6 +273,10 @@ function filterNoisyThirdPartyTransactionSpans(
 }
 
 function handleIndexedDBError(event: Sentry.Event): void {
+  const mechanism = event.exception?.values?.[0]?.mechanism;
+  if (mechanism) {
+    mechanism.handled = true;
+  }
   event.level = "warning";
   event.tags = {
     ...event.tags,

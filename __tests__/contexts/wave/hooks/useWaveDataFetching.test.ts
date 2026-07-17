@@ -706,9 +706,15 @@ describe("useWaveDataFetching", () => {
       result.current.cancelWaveDataFetch("wave1");
     });
 
-    expect(cancelFetch).toHaveBeenCalledWith("wave1");
-    expect(cancelFetch).toHaveBeenCalledWith("wave1-initial-backfill");
-    expect(cancelFetch).toHaveBeenCalledWith("wave1-newest-sync");
+    expect(cancelFetch).toHaveBeenCalledWith("wave1", "wave_deactivated");
+    expect(cancelFetch).toHaveBeenCalledWith(
+      "wave1-initial-backfill",
+      "wave_deactivated"
+    );
+    expect(cancelFetch).toHaveBeenCalledWith(
+      "wave1-newest-sync",
+      "wave_deactivated"
+    );
   });
 
   it("does not schedule native initial backfill for targeted serial restores", async () => {

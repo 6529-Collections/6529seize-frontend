@@ -28,6 +28,7 @@ import {
   HELP_BOT_CREDIT_REP_CATEGORY,
   isHelpBotCreditRepCategory,
 } from "@/components/utils/input/rep-category/repCategoryConstants";
+import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -143,10 +144,30 @@ export default function UserPageRepNewRepSearch({
   };
 
   const onRepSelect = async (rep: string) => {
-    if (rep.length < SEARCH_LENGTH.MIN || rep.length > SEARCH_LENGTH.MAX)
-      return;
     if (isHelpBotCreditRepCategory(rep)) {
       showHelpBotCreditRepCategoryError();
+      return;
+    }
+    // Mirror the server's category rules locally so the user sees the exact
+    // broken rule, localized and instantly, instead of a server error blob.
+    // Runs before the search-length guard below so the over-length and
+    // leading-dash messages actually reach the user.
+    const violation = getRepCategoryViolation(rep);
+    if (violation) {
+      setErrorMsg(t(locale, violation.key, { ...violation.params }));
+      setShowErrorDetails(false);
+      return;
+    }
+    // Search-specific minimum (below the server's 1-char floor): surface it
+    // instead of silently dropping the input. Count code points to stay
+    // consistent with the validator's length semantics.
+    if (Array.from(rep).length < SEARCH_LENGTH.MIN) {
+      setErrorMsg(
+        t(locale, "rep.categories.validation.tooShort", {
+          min: SEARCH_LENGTH.MIN,
+        })
+      );
+      setShowErrorDetails(false);
       return;
     }
     if (checkingAvailability) return;

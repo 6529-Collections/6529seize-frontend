@@ -102,6 +102,21 @@ const writeExpansionState = (state: SidebarWaveTreeExpansionState) => {
   }
 };
 
+/**
+ * Parents the user left expanded (and did not later collapse), as persisted
+ * across a same-tab reload. Used to eagerly re-fetch their subwaves after a
+ * reload so the remembered expansion is visible again — expansion rendering
+ * requires the subwaves to be loaded, and they are otherwise only fetched on
+ * click.
+ */
+export const readPersistedExpandedParentIds = (): readonly string[] => {
+  const state = readExpansionState();
+  const collapsedParentIds = new Set(state.collapsedParentIds);
+  return state.expandedParentIds.filter(
+    (waveId) => !collapsedParentIds.has(waveId)
+  );
+};
+
 const buildSubwavesByParentId = (waves: readonly MinimalWave[]) => {
   const map = new Map<string, MinimalWave[]>();
 

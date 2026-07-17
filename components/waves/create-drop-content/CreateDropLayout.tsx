@@ -22,6 +22,7 @@ import CreateDropIdentityField from "../CreateDropIdentityField";
 import CreateDropIdentityPickerModal from "../CreateDropIdentityPickerModal";
 import type { CreateDropInputHandles } from "../CreateDropInput";
 import CreateDropInput from "../CreateDropInput";
+import { useWaveDraftPersistence } from "./useWaveDraftPersistence";
 import CreateDropMetadata from "../CreateDropMetadata";
 import CreateDropPoll, { type CreateDropPollDraft } from "../CreateDropPoll";
 import CreateDropReplyingWrapper from "../CreateDropReplyingWrapper";
@@ -218,6 +219,12 @@ export default function CreateDropLayout({
   termsSignatureFlowEnabled,
   suppressInitialHeightAnimation = false,
 }: CreateDropLayoutProps) {
+  const { initialDraftJson } = useWaveDraftPersistence({
+    waveId: wave.id,
+    activeDrop,
+    editorState,
+    dropEditorRefreshKey,
+  });
   const locale = useBrowserLocale();
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
@@ -355,6 +362,7 @@ export default function CreateDropLayout({
                 key={dropEditorRefreshKey}
                 ref={createDropInputRef}
                 editorState={editorState}
+                initialEditorStateJson={initialDraftJson}
                 type={activeDrop?.action ?? null}
                 submitting={submitting}
                 isStormMode={isStormModeActive}

@@ -105,6 +105,56 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("restores an in-progress chat draft across a full reload", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoSandboxWave(page);
+
+    const draftText = "Draft that must survive the new-version reload.";
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await composer.fill(draftText);
+    // The draft autosave is debounced (400ms); wait for it to persist.
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() =>
+            Object.keys(globalThis.sessionStorage).some((key) =>
+              key.startsWith("wave-draft:v1:")
+            )
+          ),
+        {
+          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          message: "Expected the chat draft to be persisted before reloading.",
+        }
+      )
+      .toBe(true);
+
+    // Simulate the new-version toast's full reload.
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    const restoredComposer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await expect(restoredComposer).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(restoredComposer).toContainText(draftText, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+
+    // Sending must still be possible, and the restore itself must not have
+    // produced any mutation.
+    await expect(
+      page.getByRole("button", { name: "Post" }).last()
+    ).toBeEnabled();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("keeps the ordinary chat composer within the viewport", async ({
     baseURL,
     page,

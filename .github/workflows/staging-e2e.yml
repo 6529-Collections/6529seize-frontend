@@ -178,6 +178,7 @@ jobs:
             test:e2e:staging:smoke
             test:e2e:staging
             test:e2e:staging:social-readonly
+            test:e2e:staging:input-detection-readonly
             test:e2e:staging:public-groups-tools-readonly
             test:e2e:staging:delegation-readonly
             test:e2e:staging:collections-readonly
