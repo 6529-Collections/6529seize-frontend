@@ -326,7 +326,11 @@ function NotificationDropReactedGroupComponent({
           <NotificationTimestamp createdAt={createdAt} />
         </NotificationHeader>
       ) : (
-        <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-items-start tw-gap-x-3">
+          <div
+            aria-hidden="true"
+            className="tw-h-7 tw-w-7 tw-flex-shrink-0"
+          />
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
             <div className="tw-flex tw-min-w-[min(100%,16rem)] tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1">
               <span className="tw-mr-1 tw-text-sm tw-font-normal tw-text-iron-400">
