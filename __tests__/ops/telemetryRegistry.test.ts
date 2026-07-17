@@ -129,12 +129,26 @@ describe("frontend telemetry registry", () => {
     }
   });
 
-  it("matches every product-impact dual write without duplicating ownership roles", () => {
+  it("matches product-impact delivery without duplicating provider roles", () => {
+    const sentryOmittedSignals = new Set([
+      "Wave Feed Load Started",
+      "Wave Feed Load Cancelled",
+    ]);
+
     for (const signalName of PRODUCT_IMPACT_EVENT_NAMES) {
-      const providers = getSignal(signalName)
-        .destinations.map((destination) => destination.split(":")[0])
+      const signal = getSignal(signalName);
+      const providers = signal.destinations
+        .map((destination) => destination.split(":")[0])
         .sort();
-      expect(providers).toEqual(["mixpanel", "sentry"]);
+      expect(providers).toEqual(
+        sentryOmittedSignals.has(signalName)
+          ? ["mixpanel"]
+          : ["mixpanel", "sentry"]
+      );
+
+      if (sentryOmittedSignals.has(signalName)) {
+        expect(signal.sampling).toContain("omitted from Sentry");
+      }
     }
   });
 

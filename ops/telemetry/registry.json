@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastReviewed": "2026-07-15",
+  "lastReviewed": "2026-07-17",
   "operationalOwner": "frontend-platform",
   "providers": [
     {
@@ -14,7 +14,7 @@
       "automatic": ["performance", "errors", "http"],
       "sampling": "AWS_RUM_SAMPLE_RATE per browser session; default 0.2",
       "release": "public VERSION as releaseId",
-      "notes": "X-Ray, interaction telemetry, and raw automatic page views are disabled; the provider manually records allowlisted App Router page families with query, hash, and dynamic identifiers removed"
+      "notes": "X-Ray, interaction telemetry, and raw automatic page views are disabled; a first-loaded privacy plugin establishes the normalized initial page before automatic telemetry plugins, manually recorded navigation uses allowlisted App Router families, author UUID media segments are bounded, and the exact WalletConnect stale-topic message shape is redacted"
     },
     {
       "id": "sentry",
@@ -183,15 +183,15 @@
       "name": "Wave Feed Load Started",
       "kind": "event-log",
       "question": "How many Wave feed load attempts start?",
-      "owner": "sentry",
+      "owner": "mixpanel-compatibility",
       "producer": "services/analytics/productImpactTelemetry.ts",
-      "destinations": ["sentry:owner", "mixpanel:compatibility"],
-      "sampling": "Sentry log transport plus consented production Mixpanel sessions",
+      "destinations": ["mixpanel:compatibility"],
+      "sampling": "consented production Mixpanel sessions; omitted from Sentry",
       "privacy": "route family, load source, cached/native booleans, and buckets only",
       "externalUsage": "repo Mixpanel runbook; live dashboard unverified",
       "lifecycle": "temporary",
-      "replacement": "Remove the Mixpanel destination after dashboard usage is verified absent or migrated",
-      "reviewBy": "2026-10-13"
+      "replacement": "Remove after dashboard usage is verified absent or migrate to an owned product denominator",
+      "reviewBy": "2026-10-17"
     },
     {
       "name": "Wave Feed Load Succeeded",
@@ -200,26 +200,26 @@
       "owner": "sentry-performance; mixpanel-product-outcome",
       "producer": "services/analytics/productImpactTelemetry.ts",
       "destinations": ["sentry:owner", "mixpanel:owner"],
-      "sampling": "Sentry log transport plus consented production Mixpanel sessions",
+      "sampling": "consented production Mixpanel sessions; Sentry samples 5% of server_initial and initial_visible successes and omits cache, background-sync, and native-backfill successes",
       "privacy": "Sentry receives numeric duration; Mixpanel receives duration/drop-count buckets and booleans; both use route families",
       "externalUsage": "repo Mixpanel runbook; live dashboard unverified",
       "lifecycle": "keep",
       "replacement": null,
-      "reviewBy": "2026-10-13"
+      "reviewBy": "2026-10-17"
     },
     {
       "name": "Wave Feed Load Cancelled",
       "kind": "event-log",
       "question": "How much load volume is normal navigation cancellation?",
-      "owner": "sentry",
+      "owner": "mixpanel-compatibility",
       "producer": "services/analytics/productImpactTelemetry.ts",
-      "destinations": ["sentry:owner", "mixpanel:compatibility"],
-      "sampling": "Sentry log transport plus consented production Mixpanel sessions",
+      "destinations": ["mixpanel:compatibility"],
+      "sampling": "consented production Mixpanel sessions; omitted from Sentry because cancellation is a normal non-failure",
       "privacy": "route family, load source, cached/native booleans, status, and duration bucket only",
       "externalUsage": "repo Mixpanel runbook; live dashboard unverified",
       "lifecycle": "temporary",
-      "replacement": "Remove the Mixpanel destination after dashboard usage is verified absent or migrated",
-      "reviewBy": "2026-10-13"
+      "replacement": "Remove after dashboard usage is verified absent or migrate to an owned cancellation-rate signal",
+      "reviewBy": "2026-10-17"
     },
     {
       "name": "Wave Feed Load Failed",
@@ -228,12 +228,12 @@
       "owner": "sentry-diagnostic; mixpanel-product-outcome",
       "producer": "services/analytics/productImpactTelemetry.ts",
       "destinations": ["mixpanel:owner", "sentry:owner"],
-      "sampling": "Sentry log transport plus consented production Mixpanel sessions",
+      "sampling": "all Sentry warnings plus consented production Mixpanel sessions; no custom failure sampler",
       "privacy": "route family, error/status buckets, load source, and booleans only",
       "externalUsage": "repo Mixpanel runbook; live dashboard unverified",
       "lifecycle": "keep",
       "replacement": null,
-      "reviewBy": "2026-10-13"
+      "reviewBy": "2026-10-17"
     },
     {
       "name": "auth_session_refresh",
@@ -257,7 +257,7 @@
       "producer": "utils/monitoring/mobileLaunchTiming.ts",
       "destinations": ["sentry:owner"],
       "sampling": "5% normal; 100% focused non-desktop Waves, Messages, and Notifications routes; slow/timeout/error always",
-      "privacy": "route/endpoint families, bounded device/app cohorts, buckets, numeric durations, and auth cohort only",
+      "privacy": "route/endpoint families including /[user]/[...cmsPath] for profile CMS paths such as /[user]/rep, bounded device/app cohorts, buckets, numeric durations, and auth cohort only",
       "externalUsage": "unverified",
       "lifecycle": "keep",
       "replacement": null,
@@ -404,6 +404,20 @@
       "reviewBy": "2026-10-15"
     },
     {
+      "name": "cyclic_json_timer_diagnostics",
+      "kind": "error-family",
+      "question": "Which code origin schedules exact cyclic JSON timer failures in iOS WKWebViews?",
+      "owner": "sentry",
+      "producer": "utils/monitoring/cyclicJsonTimerDiagnostics.ts",
+      "destinations": ["sentry:owner"],
+      "sampling": "eligible function timers in iOS WKWebViews are sampled independently at 1/16; only exact unhandled cyclic-JSON timer errors receive sampled provenance",
+      "privacy": "timer arguments are removed from every matching event; sampled extras contain bounded sanitized function names, script basenames, line and column numbers, origin enums, WebView family, and sample rate only",
+      "externalUsage": "v1 is live; Sentry dashboard, saved-search, and alert usage could not be verified because read-only endpoints returned 403",
+      "lifecycle": "temporary",
+      "replacement": "By the review date, verify or migrate every v1-keyed Sentry consumer to v2; remove the timer diagnostics after corrected provenance identifies the caller",
+      "reviewBy": "2026-08-17"
+    },
+    {
       "name": "reaction.*",
       "kind": "breadcrumb-family",
       "question": "What code-level sequence preceded a reaction failure or reconciliation anomaly?",
@@ -411,11 +425,11 @@
       "producer": "utils/monitoring/dropReactionMonitoring.ts",
       "destinations": ["sentry:owner"],
       "sampling": "breadcrumbs attach to captured Sentry events; error capture has a 60-second dedupe window",
-      "privacy": "legacy code-level identifiers remain under review; do not copy this attribute shape to new signals",
+      "privacy": "bounded route and endpoint families, source/action/status/error enums, booleans, mutation sequence, and duration buckets only; raw mutation/drop/wave/profile identifiers, reaction values, paths, endpoints, and error messages were removed 2026-07-17",
       "externalUsage": "unverified",
-      "lifecycle": "temporary",
-      "replacement": "Follow-up migration to route families and bounded state attributes",
-      "reviewBy": "2026-08-13"
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-10-17"
     },
     {
       "name": "notifications.* error diagnostics",
