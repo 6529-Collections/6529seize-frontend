@@ -11,8 +11,9 @@ import {
   useEffect,
   useRef,
 } from "react";
-import type { EditorState } from "lexical";
+import type { EditorState, LexicalEditor } from "lexical";
 import { $getRoot, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import { clearWaveDraft } from "@/helpers/waves/wave-draft.helpers";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -141,6 +142,32 @@ const EditorCommandsPlugin = forwardRef<
 });
 EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
 
+/**
+ * Pushes the editor's mount-time state up to the parent once. A draft
+ * restored through initialConfig.editorState never fires OnChangePlugin (it
+ * is the initial state, not an update), so without this the parent still
+ * believes the composer is empty — submit stays disabled until the user
+ * types. Rendered only when a restored draft seeded the editor.
+ */
+function NotifyInitialEditorStatePlugin({
+  onEditorState,
+}: {
+  readonly onEditorState: (editorState: EditorState) => void;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const notifiedRef = useRef(false);
+
+  useEffect(() => {
+    if (notifiedRef.current) {
+      return;
+    }
+    notifiedRef.current = true;
+    onEditorState(editor.getEditorState());
+  }, [editor, onEditorState]);
+
+  return null;
+}
+
 function InitialMarkdownPlugin({
   initialMarkdown,
   initialMarkdownKey,
@@ -178,6 +205,12 @@ const CreateDropInput = forwardRef<
   {
     readonly waveId: string;
     readonly editorState: EditorState | null;
+    /**
+     * Serialized editor state (JSON) to seed a fresh editor with — a restored
+     * draft. Lexical reads initialConfig.editorState once at creation, so this
+     * only takes effect on mount; live edits flow through `editorState`.
+     */
+    readonly initialEditorStateJson?: string | null | undefined;
     readonly type: ActiveDropAction | null;
     readonly canSubmit: boolean;
     readonly isStormMode: boolean;
@@ -206,6 +239,7 @@ const CreateDropInput = forwardRef<
     {
       waveId,
       editorState,
+      initialEditorStateJson,
       type,
       canSubmit,
       isStormMode,
@@ -253,7 +287,27 @@ const CreateDropInput = forwardRef<
         ImageNode,
         EmojiNode,
       ],
-      editorState,
+      // A restored draft (JSON string) wins at creation; otherwise the live
+      // editorState object. The draft is parsed inside a try/catch because a
+      // malformed or schema-incompatible draft (e.g. saved by an older app
+      // version whose node types have since changed) would otherwise throw
+      // through onError — which re-throws — and crash the composer mount. On
+      // failure the broken draft is removed from storage so it is not retried
+      // on every mount, and we silently fall back to an empty editor.
+      editorState:
+        typeof initialEditorStateJson === "string"
+          ? (editor: LexicalEditor) => {
+              try {
+                editor.setEditorState(
+                  editor.parseEditorState(initialEditorStateJson)
+                );
+              } catch {
+                // Unrestorable draft — clear it and start empty rather than
+                // crash or retry the same broken payload forever.
+                clearWaveDraft(waveId);
+              }
+            }
+          : editorState,
       editable: !submitting,
       onError(error: Error): void {
         throw error;
@@ -388,6 +442,11 @@ const CreateDropInput = forwardRef<
               />
               <HistoryPlugin />
               <OnChangePlugin onChange={onEditorStateChange} />
+              {typeof initialEditorStateJson === "string" && (
+                <NotifyInitialEditorStatePlugin
+                  onEditorState={onEditorStateChange}
+                />
+              )}
               <RootBlockGuardPlugin />
               <NewMentionsPlugin
                 waveId={waveId}

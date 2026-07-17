@@ -1,6 +1,7 @@
 "use client";
 
 import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigation.helpers";
+import { preserveWaveScrollPositionForReload } from "@/helpers/waves/wave-visible-serial.helpers";
 import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -40,6 +41,10 @@ const removeNewVersionToastOverrideFromCurrentPath = () => {
 
 const refreshWithoutToastOverride = () => {
   removeNewVersionToastOverrideFromCurrentPath();
+  // Wave readers who have scrolled up keep their place across the reload:
+  // pin the centered drop's serial into the URL so the standard deep-link
+  // restore path (fetch around + scroll to center) brings them back to it.
+  preserveWaveScrollPositionForReload();
   globalThis.location.reload();
 };
 
