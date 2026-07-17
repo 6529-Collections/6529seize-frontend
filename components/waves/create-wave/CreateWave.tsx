@@ -33,16 +33,19 @@ export default function CreateWave({
   // Each step renders fresh content, but the layout's scroll container keeps
   // the offset where the user tapped Next (the bottom of the previous step),
   // landing them mid-page on taller steps like the announce-wave Dates step.
-  // Reset every scrolled ancestor so each step starts at the top.
+  // scrollIntoView moves only the ancestors that actually need it, by the
+  // minimum amount — no walking into unrelated shells — and anchoring on the
+  // container keeps the result independent of late-mounting step content.
+  const previousStepRef = useRef(step);
   useEffect(() => {
-    let node: HTMLElement | null = containerRef.current;
-    while (node) {
-      if (node.scrollTop > 0) {
-        node.scrollTop = 0;
-      }
-      node = node.parentElement;
+    if (previousStepRef.current === step) {
+      return;
     }
-    window.scrollTo({ top: 0 });
+    previousStepRef.current = step;
+    const frame = requestAnimationFrame(() => {
+      containerRef.current?.scrollIntoView({ block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
   }, [step]);
 
   // The Next button can sit a full screen below the offending field on
