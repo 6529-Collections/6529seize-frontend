@@ -12,17 +12,16 @@ const LOOPBACK_HOSTS = new Set(["127.0.0.1", "[::1]", "localhost"]);
 class SafeStatusError extends Error {}
 
 function runGh(args) {
-  const result =
-    /* NOSONAR -- Local operator controls PATH; no Release Bus input selects the executable. */ spawnSync(
-      "gh",
-      args,
-      {
-        encoding: "utf8",
-        maxBuffer: 1024 * 1024,
-        stdio: ["ignore", "pipe", "pipe"],
-        timeout: 10_000,
-      }
-    );
+  const result = spawnSync(
+    "gh", // NOSONAR -- Local operator controls PATH; no Release Bus input selects the executable.
+    args,
+    {
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024,
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 10_000,
+    }
+  );
 
   if (result.error?.code === "ENOENT") {
     throw new SafeStatusError(
