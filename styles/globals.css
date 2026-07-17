@@ -69,7 +69,11 @@
   /* Android keyboard height adjustments */
   :root {
     --android-keyboard-height: 0px;
-    --layout-viewport-height: 100dvh;
+    /* Small viewport height: the app shell disables document scroll, so
+       mobile browser chrome never collapses; iOS still reports dvh as the
+       larger viewport in that state, pushing bottom bars behind Safari's
+       toolbar. svh always fits the visible area with chrome expanded. */
+    --layout-viewport-height: 100svh;
     --native-keyboard-inset-bottom: 0px;
     --native-keyboard-layout-transition-duration: 0ms;
     --native-keyboard-composer-bottom-padding: max(
@@ -243,6 +247,12 @@
   html {
     scrollbar-gutter: stable both-edges;
   }
+}
+html {
+  /* iOS paints the root canvas (default white) wherever the layout viewport
+     extends past the body — most visibly when the software keyboard scrolls
+     the page. Keep it dark so those regions don't flash white. */
+  background-color: #000000;
 }
 body {
   background-color: #000000 !important;

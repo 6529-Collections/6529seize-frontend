@@ -174,12 +174,17 @@ describe("CreateWaveDescription", () => {
     expect(screen.getByTestId("wave-id-prop")).toHaveTextContent("");
   });
 
-  it("returns null when profile has no id or handle", () => {
+  it("explains the missing profile instead of rendering a blank step", () => {
     mockProfileAndConsolidationsToProfileMin.mockReturnValue(null);
 
-    const { container } = render(<CreateWaveDescription {...defaultProps} />);
+    render(<CreateWaveDescription {...defaultProps} />);
 
-    expect(container.firstChild).toBeNull();
+    // Rendering nothing left users staring at a dead Complete button; the
+    // step must say why it cannot continue.
+    expect(
+      screen.getByText(/A profile handle is required to create a wave/)
+    ).toBeVisible();
+    expect(screen.queryByTestId("drop-editor")).not.toBeInTheDocument();
   });
 
   it("exposes requestDrop through ref", () => {

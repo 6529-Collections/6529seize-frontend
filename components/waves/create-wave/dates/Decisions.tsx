@@ -20,7 +20,6 @@ interface DecisionsProps {
   readonly onRollingEnabled: () => void;
   readonly isExpanded: boolean;
   readonly setIsExpanded: (expanded: boolean) => void;
-  readonly onInteraction: () => void;
 }
 
 interface DecisionsCollapsedContentProps {
@@ -63,7 +62,6 @@ export default function Decisions({
   onRollingEnabled,
   isExpanded,
   setIsExpanded,
-  onInteraction,
 }: DecisionsProps) {
   const isRollingMode = dates.isRolling;
   const hasRankFutureDateError = errors.includes(
@@ -216,10 +214,7 @@ export default function Decisions({
           </p>
         </div>
       </div>
-      <div
-        className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-6 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-px-5 tw-pb-5 md:tw-grid-cols-2"
-        onClick={onInteraction}
-      >
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-6 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-px-5 tw-pb-5 md:tw-grid-cols-2">
         {/* First Decision Date and Time */}
         <DecisionsFirst
           firstDecisionTime={dates.firstDecisionTime}

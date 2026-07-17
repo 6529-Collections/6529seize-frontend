@@ -617,6 +617,117 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
+
+  test("keeps rank date and outcome layouts stable on phone screens", async ({
+    page,
+  }) => {
+    // Regression pack for the 2026-07 iPhone device-testing round: every
+    // assertion here maps to a bug that shipped past desktop-only review.
+    await installExternalDataFixtures(page);
+    await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    await expect(page.getByLabel(/Wave Name/)).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+
+    // Next on an empty Wave Name used to do nothing visible on phones (the
+    // field and its error sit a full screen above the button): it must
+    // surface the error and hand focus back to the field.
+    await nextStepButton(page).click();
+    await expect(page.getByText("Name is required")).toBeVisible();
+    await expect(page.getByLabel(/Wave Name/)).toBeFocused();
+
+    await page.getByLabel(/Wave Name/).fill("Mobile Rank Layout Wave");
+    await page.getByText("Rank", { exact: true }).click();
+    await nextStepButton(page).click();
+
+    await expect(
+      page.getByRole("heading", { name: "Who can vote" })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await nextStepButton(page).click();
+
+    // Dates: interacting inside the announcements section must not
+    // auto-collapse the Wave Timeline section above it — that collapse
+    // shifted the whole page mid-tap ("calendar jumping around").
+    const timelineToggle = page.getByRole("button", { name: /Wave Timeline/ });
+    await expect(timelineToggle).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(timelineToggle).toHaveAttribute("aria-expanded", "true");
+    await page.getByText("First Winners Announcement").first().click();
+    await expect(timelineToggle).toHaveAttribute("aria-expanded", "true");
+
+    // The Add to Timeline button used to overflow its card on 390px screens.
+    const addToTimeline = page.getByRole("button", { name: "Add to Timeline" });
+    await addToTimeline.scrollIntoViewIfNeeded();
+    const addToTimelineBox = await addToTimeline.boundingBox();
+    const viewport = page.viewportSize();
+    expect(addToTimelineBox).not.toBeNull();
+    expect(viewport).not.toBeNull();
+    expect(addToTimelineBox!.x + addToTimelineBox!.width).toBeLessThanOrEqual(
+      viewport!.width
+    );
+    await expectNoHorizontalOverflow(page);
+
+    // Collapsing a dates card must not paint summary chips over the title.
+    await timelineToggle.click();
+    await expect(timelineToggle).toHaveAttribute("aria-expanded", "false");
+    await expectNoHorizontalOverflow(page);
+    await timelineToggle.click();
+    await nextStepButton(page).click();
+
+    // Drops: the submissions-per-participant label used to wrap over the
+    // input and hide the typed value at phone width.
+    const submissions = page.locator(
+      "#no-of-applications-allowed-per-participant"
+    );
+    await expect(submissions).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await submissions.fill("5");
+    await expect(submissions).toHaveValue("5");
+    const submissionsLabelBox = await page
+      .locator('label[for="no-of-applications-allowed-per-participant"]')
+      .boundingBox();
+    const submissionsInputBox = await submissions.boundingBox();
+    expect(submissionsLabelBox).not.toBeNull();
+    expect(submissionsInputBox).not.toBeNull();
+    expect(submissionsLabelBox!.width).toBeLessThan(
+      submissionsInputBox!.width
+    );
+    await expectNoHorizontalOverflow(page);
+    await nextStepButton(page).click();
+
+    await expect(
+      page.getByRole("heading", { name: "Rules", level: 2, exact: true })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await nextStepButton(page).click();
+    await nextStepButton(page).click();
+
+    // Outcomes: the saved row's type label and entered name used to overlap
+    // at phone width, hiding what was entered.
+    const manualOption = page.getByRole("button", { name: "Manual" });
+    await expect(manualOption).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await manualOption.click();
+    await page.getByLabel("Manual action").fill("Mobile manual outcome");
+    await page.getByLabel(/Winning Positions/).fill("1");
+    await page.getByRole("button", { name: "Save" }).click();
+    const savedOutcomeTitle = page.getByText("Mobile manual outcome").first();
+    await expect(savedOutcomeTitle).toBeVisible();
+    const savedLabelBox = await page
+      .getByRole("heading", { name: "Manual" })
+      .boundingBox();
+    const savedTitleBox = await savedOutcomeTitle.boundingBox();
+    expect(savedLabelBox).not.toBeNull();
+    expect(savedTitleBox).not.toBeNull();
+    expect(savedTitleBox!.x).toBeGreaterThanOrEqual(
+      savedLabelBox!.x + savedLabelBox!.width
+    );
+    await expectNoHorizontalOverflow(page);
+  });
 });
 
 async function gotoCreateWave(page: Page) {

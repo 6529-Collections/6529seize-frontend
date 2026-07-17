@@ -55,7 +55,6 @@ describe("Decisions", () => {
         onRollingEnabled={jest.fn()}
         isExpanded={true}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
     fireEvent.click(screen.getByTestId("sub"));
@@ -76,7 +75,6 @@ describe("Decisions", () => {
         onRollingEnabled={onRollingEnabled}
         isExpanded={true}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
     fireEvent.click(screen.getByRole("switch"));
@@ -97,7 +95,6 @@ describe("Decisions", () => {
         onRollingEnabled={jest.fn()}
         isExpanded={false}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
 
@@ -121,7 +118,6 @@ describe("Decisions", () => {
         onRollingEnabled={jest.fn()}
         isExpanded={false}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
 
@@ -145,7 +141,6 @@ describe("Decisions", () => {
         onRollingEnabled={jest.fn()}
         isExpanded={false}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
 

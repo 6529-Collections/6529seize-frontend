@@ -9,17 +9,15 @@ export default function CreateWaveOutcomesRowManualRank({
   readonly removeOutcome: () => void;
 }) {
   return (
-    <div className="tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-primary-400/10 tw-px-5 tw-py-2">
-      <div className="tw-grid tw-grid-cols-10 tw-gap-x-4 tw-justify-between tw-items-center tw-w-full">
-        <div className="tw-col-span-1">
-          <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
-            Manual
-          </h3>
-        </div>
-        <div className="tw-col-span-8">
+    <div className="tw-rounded-lg tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-px-5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-primary-400/10">
+      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-4">
+        <h3 className="tw-mb-0 tw-shrink-0 tw-text-sm tw-font-semibold tw-text-white">
+          Manual
+        </h3>
+        <div className="tw-min-w-0 tw-flex-1">
           <>
-            <p 
-              className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-truncate"
+            <p
+              className="tw-mb-0 tw-truncate tw-text-sm tw-font-normal tw-text-white"
               data-tooltip-id={`manual-title-${outcome.title}`}
             >
               {outcome.title}
@@ -36,14 +34,14 @@ export default function CreateWaveOutcomesRowManualRank({
             </Tooltip>
           </>
         </div>
-        <div className="tw-col-span-1 tw-flex tw-justify-end">
+        <div className="tw-flex tw-shrink-0 tw-justify-end">
           <button
             onClick={removeOutcome}
             aria-label="Remove"
-            className="tw-h-8 tw-w-8 tw-text-error tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-error/10 focus:tw-scale-90 tw-transform tw-transition tw-duration-300 tw-ease-out"
+            className="tw-flex tw-h-8 tw-w-8 tw-transform tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-error tw-transition tw-duration-300 tw-ease-out hover:tw-bg-error/10 focus:tw-scale-90"
           >
             <svg
-              className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
