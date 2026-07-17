@@ -73,6 +73,7 @@ export function useActivityData(
       return; // Use initial data, no fetch needed
     }
 
+    let isCurrentRequest = true;
     setFetching(true);
     let url = `${publicEnv.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
 
@@ -111,17 +112,25 @@ export function useActivityData(
 
     fetchUrl(url)
       .then((response: DBResponse) => {
+        if (!isCurrentRequest) return;
         setTotalResults(response.count);
         setActivity(response.data);
       })
       .catch((error) => {
+        if (!isCurrentRequest) return;
         console.error("Failed to fetch activity data", error);
         setTotalResults(0);
         setActivity([]);
       })
       .finally(() => {
-        setFetching(false);
+        if (isCurrentRequest) {
+          setFetching(false);
+        }
       });
+
+    return () => {
+      isCurrentRequest = false;
+    };
   }, [page, typeFilter, selectedContract, pageSize, initialData, initialPage]);
 
   return {

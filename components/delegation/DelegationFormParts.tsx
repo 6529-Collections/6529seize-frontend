@@ -17,7 +17,10 @@ import { Tooltip } from "react-tooltip";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
-import type { DelegationWriteParams } from "./delegation-shared";
+import type {
+  DelegationWriteParams,
+  DelegationWriteSettledHandler,
+} from "./delegation-shared";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
 import type { DelegationToastState } from "./DelegationToast";
 
@@ -381,6 +384,7 @@ export function DelegationSubmitGroups(
     writeParams: DelegationWriteParams;
     showCancel: boolean;
     gasError?: string | undefined;
+    onWriteSettled?: DelegationWriteSettledHandler | undefined;
     isDestructive?: boolean | undefined;
     validate: () => string[];
     onHide: () => void;
@@ -393,6 +397,7 @@ export function DelegationSubmitGroups(
     writeParams,
     showCancel,
     gasError,
+    onWriteSettled,
     isDestructive = false,
     validate,
     onHide,
@@ -412,7 +417,7 @@ export function DelegationSubmitGroups(
   function submitDelegation() {
     const newErrors = validate();
     setErrors(newErrors);
-    if (newErrors.length > 0 || gasError) {
+    if (newErrors.length > 0) {
       window.scrollBy(0, 100);
     } else {
       const { functionName } = writeParams;
@@ -421,7 +426,14 @@ export function DelegationSubmitGroups(
         // the form components use to decide whether functionName is set.
         return;
       }
-      writeDelegation.writeContract({ ...writeParams, functionName });
+      const contractParams = { ...writeParams, functionName };
+      if (onWriteSettled) {
+        writeDelegation.writeContract(contractParams, {
+          onSettled: onWriteSettled,
+        });
+      } else {
+        writeDelegation.writeContract(contractParams);
+      }
       onSetToast({
         status: "confirm_wallet",
         title,

@@ -8,7 +8,10 @@ import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import { ALL_USE_CASES } from "./delegation-constants";
-import { getGasError } from "./delegation-shared";
+import {
+  getGasError,
+  type DelegationWriteSettledHandler,
+} from "./delegation-shared";
 import type { DelegationToastState } from "./DelegationToast";
 import {
   DelegationAddressDisabledInput,
@@ -50,6 +53,9 @@ export default function RevokeDelegationWithSubComponent(
   });
 
   const [gasError, setGasError] = useState<string>();
+  const handleWriteSettled: DelegationWriteSettledHandler = (_data, error) => {
+    setGasError(error ? getGasError(error) : undefined);
+  };
 
   const contractWriteDelegationConfigParams = {
     address: DELEGATION_CONTRACT.contract,
@@ -65,14 +71,6 @@ export default function RevokeDelegationWithSubComponent(
       validate().length === 0
         ? "revokeDelegationAddressUsingSubdelegation"
         : undefined,
-    onSettled(data: unknown, error: Error | null) {
-      if (data) {
-        setGasError(undefined);
-      }
-      if (error) {
-        setGasError(getGasError(error));
-      }
-    },
   };
 
   function clearErrors() {
@@ -182,6 +180,7 @@ export default function RevokeDelegationWithSubComponent(
           writeParams={contractWriteDelegationConfigParams}
           showCancel={true}
           gasError={gasError}
+          onWriteSettled={handleWriteSettled}
           isDestructive
           validate={validate}
           onHide={props.onHide}

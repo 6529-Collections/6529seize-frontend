@@ -21,6 +21,14 @@ export function DelegationRowDetails(
 ) {
   const { label, walletDelegation: w } = props;
   const { consolidationStatus, pending, isConsolidation } = props;
+  const statusUnavailable =
+    consolidationStatus === "consolidation status unavailable";
+  let consolidationStatusClass = "tw-text-primary-300";
+  if (statusUnavailable) {
+    consolidationStatusClass = "tw-text-error";
+  } else if (pending) {
+    consolidationStatusClass = "tw-text-amber-300";
+  }
 
   return (
     <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
@@ -38,9 +46,7 @@ export function DelegationRowDetails(
         </span>
         {isConsolidation && (
           <span
-            className={`tw-inline-flex tw-items-center tw-font-semibold ${
-              pending ? "tw-text-amber-300" : "tw-text-primary-300"
-            }`}
+            className={`tw-inline-flex tw-items-center tw-font-semibold ${consolidationStatusClass}`}
           >
             {consolidationStatus}
             {pending && (

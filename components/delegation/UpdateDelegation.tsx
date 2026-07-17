@@ -12,7 +12,10 @@ import {
   CONSOLIDATION_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
-import { getGasError } from "./delegation-shared";
+import {
+  getGasError,
+  type DelegationWriteSettledHandler,
+} from "./delegation-shared";
 import type { DelegationToastState } from "./DelegationToast";
 import {
   DelegationAddressDisabledInput,
@@ -61,6 +64,9 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
   } = useEnsResolution({ chainId: 1 });
 
   const [gasError, setGasError] = useState<string>();
+  const handleWriteSettled: DelegationWriteSettledHandler = (_data, error) => {
+    setGasError(error ? getGasError(error) : undefined);
+  };
 
   const previousDelegationEns = useEnsName({
     address: props.delegation.wallet as `0x${string}`,
@@ -84,14 +90,6 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
     ],
     functionName:
       validate().length === 0 ? "updateDelegationAddress" : undefined,
-    onSettled(data: unknown, error: Error | null) {
-      if (data) {
-        setGasError(undefined);
-      }
-      if (error) {
-        setGasError(getGasError(error));
-      }
-    },
   };
 
   function validate() {
@@ -278,6 +276,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
           writeParams={contractWriteDelegationConfigParams}
           showCancel={props.showCancel}
           gasError={gasError}
+          onWriteSettled={handleWriteSettled}
           validate={validate}
           onHide={props.onHide}
           onSetToast={props.onSetToast}
