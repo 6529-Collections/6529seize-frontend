@@ -882,6 +882,32 @@ describe("push registration behavior", () => {
     );
   });
 
+  it("records Firebase request backoff as a transient native registration error", async () => {
+    const sentry = require("@sentry/nextjs");
+    const errorMessage =
+      "The operation couldn’t be completed. Too many server requests.";
+    const nativeError = { error: errorMessage };
+    const { registrationErrorCallback } = await setupRegistrationCallback();
+
+    act(() => {
+      registrationErrorCallback(nativeError);
+    });
+
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        level: "warning",
+        message: "Push registration transient error.",
+        data: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "pushRegistrationError",
+          retryable: true,
+          error_message: errorMessage,
+        }),
+      })
+    );
+  });
+
   it.each([
     "The request timed out.",
     "A server with the specified hostname could not be found.",
@@ -918,6 +944,7 @@ describe("push registration behavior", () => {
     "Network request failed: unauthorized.",
     "The request timed out because the device token is invalid.",
     "A server with the specified hostname could not be found because the push configuration is invalid.",
+    "Too many server requests because the push configuration is invalid.",
   ])(
     "captures permanent native registration near-miss %s",
     async (errorMessage) => {

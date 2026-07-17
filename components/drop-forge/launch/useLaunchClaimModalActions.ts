@@ -285,42 +285,18 @@ export function useLaunchClaimModalActions({
     if (!payArtistTxModalClosable) return;
     setPayArtistTxModal(null);
   }, [payArtistTxModalClosable]);
-  const { activeTxModal, activeTxModalClosable, closeActiveTxModal } =
-    getActiveTxModalState({
-      payArtistTxModal,
-      claimTxModal,
-      payArtistTxModalClosable,
-      claimTxModalClosable,
-      closePayArtistTxModal,
-      closeClaimTxModal,
-    });
+  const { activeTxModal, closeActiveTxModal } = getActiveTxModalState({
+    payArtistTxModal,
+    claimTxModal,
+    closePayArtistTxModal,
+    closeClaimTxModal,
+  });
 
   const mintingClaimActionViewState = getMintingClaimActionViewState(
     isClaimsAdmin,
     mintingClaimActionsByName,
     mintingClaimActionPending
   );
-
-  useEffect(() => {
-    if (!activeTxModal) return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [activeTxModal]);
-
-  useEffect(() => {
-    if (!activeTxModalClosable) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeActiveTxModal();
-      }
-    };
-    globalThis.addEventListener("keydown", onKeyDown);
-    return () => globalThis.removeEventListener("keydown", onKeyDown);
-  }, [activeTxModalClosable, closeActiveTxModal]);
 
   useEffect(() => {
     if (onChainClaimFetching) {

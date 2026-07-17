@@ -34,13 +34,6 @@ export function toErrorMessage(error: unknown): string {
   return String(error);
 }
 
-export function toCaptureExceptionInput(error: unknown): Error {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(toErrorMessage(error));
-}
-
 function isNetworkError(error: unknown): boolean {
   if (error instanceof TypeError) {
     return true;

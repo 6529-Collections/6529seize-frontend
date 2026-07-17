@@ -12,23 +12,77 @@ jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
 }));
 
-jest.mock("aws-rum-web", () => ({
-  AwsRum: jest.fn(() => ({
-    disable: jest.fn(),
-    recordEvent: jest.fn(),
-    recordPageView: jest.fn(),
-  })),
-}));
+jest.mock("aws-rum-web", () => {
+  type MockPluginContext = {
+    record: (eventType: string, eventData: object) => void;
+    recordPageView: (pageId: string) => void;
+  };
+  type MockPluginConfig = {
+    readonly eventPluginsToLoad?: Array<{
+      load?: (context: MockPluginContext) => void;
+    }>;
+  };
+  const createPlugin = (
+    pluginId: string
+  ): new (config?: unknown) => {
+    readonly config: unknown;
+    getPluginId: () => string;
+    load: (context: MockPluginContext) => void;
+  } =>
+    class {
+      readonly config: unknown;
+
+      constructor(config?: unknown) {
+        this.config = config;
+      }
+
+      getPluginId(): string {
+        return pluginId;
+      }
+
+      load(context: MockPluginContext): void {
+        void context;
+      }
+    };
+
+  return {
+    AwsRum: jest.fn(
+      (
+        _applicationId: string,
+        _applicationVersion: string,
+        _region: string,
+        config: MockPluginConfig
+      ) => {
+        const instance = {
+          disable: jest.fn(),
+          recordEvent: jest.fn(),
+          recordPageView: jest.fn(),
+        };
+        const pluginContext: MockPluginContext = {
+          record: instance.recordEvent,
+          recordPageView: instance.recordPageView,
+        };
+        config.eventPluginsToLoad?.forEach((plugin) => {
+          plugin.load?.(pluginContext);
+        });
+        return instance;
+      }
+    ),
+    FetchPlugin: createPlugin("fetch"),
+    JsErrorPlugin: createPlugin("js-error"),
+    NavigationPlugin: createPlugin("navigation"),
+    ResourcePlugin: createPlugin("resource"),
+    WebVitalsPlugin: createPlugin("web-vitals"),
+    XhrPlugin: createPlugin("xhr"),
+  };
+});
 
 const mockAwsRum = AwsRum as jest.Mock;
 const originalPublicEnv = { ...publicEnv };
 
-type AwsRumHttpTelemetry = [
-  "http",
-  {
-    urlsToExclude: RegExp[];
-  },
-];
+type AwsRumHttpPluginConfig = {
+  readonly urlsToExclude: RegExp[];
+};
 
 type MockAwsRumInstance = {
   readonly disable: jest.Mock;
@@ -77,18 +131,22 @@ describe("AwsRumProvider", () => {
         sessionSampleRate: 0.5,
         releaseId: "test-version",
         disableAutoPageView: true,
-        telemetries: [
-          "performance",
-          "errors",
-          [
-            "http",
-            {
-              urlsToExclude: expect.arrayContaining([expect.any(RegExp)]),
-            },
-          ],
-        ],
+        telemetries: [],
       })
     );
+    expect(
+      getAwsRumConfig().eventPluginsToLoad?.map((plugin) =>
+        plugin.getPluginId()
+      )
+    ).toEqual([
+      "6529-aws-rum-privacy",
+      "navigation",
+      "resource",
+      "web-vitals",
+      "js-error",
+      "xhr",
+      "fetch",
+    ]);
     expect(window.awsRum).toBe(mockAwsRum.mock.results[0]?.value);
     expect(getMockAwsRumInstance().recordPageView).toHaveBeenCalledWith(
       "/waves/[wave]"
@@ -137,6 +195,29 @@ describe("AwsRumProvider", () => {
     expect(payload).not.toContain(OTHER_WAVE_ID);
   });
 
+  it("normalizes a root profile before automatic telemetry plugins load", async () => {
+    mockPathname = "/private-profile-handle";
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+
+    expect(getAwsRumConfig().eventPluginsToLoad?.[0]?.getPluginId()).toBe(
+      "6529-aws-rum-privacy"
+    );
+    expect(getMockAwsRumInstance().recordPageView).toHaveBeenCalledWith(
+      "/[user]"
+    );
+    expect(getMockAwsRumInstance().recordPageView).toHaveBeenCalledTimes(1);
+    expect(
+      JSON.stringify(getMockAwsRumInstance().recordPageView.mock.calls)
+    ).not.toContain("private-profile-handle");
+  });
+
   it("excludes third-party analytics noise without excluding app-owned APIs", async () => {
     render(
       <AwsRumProvider>
@@ -150,32 +231,30 @@ describe("AwsRumProvider", () => {
     const isExcluded = (url: string): boolean =>
       urlsToExclude.some((urlPattern) => urlPattern.test(url));
 
-    expect(
-      isExcluded("https://www.google-analytics.com/g/collect?v=2")
-    ).toBe(true);
+    expect(isExcluded("https://www.google-analytics.com/g/collect?v=2")).toBe(
+      true
+    );
     expect(
       isExcluded("https://region7.google-analytics.com/g/collect?v=2")
     ).toBe(true);
-    expect(isExcluded("https://analytics.google.com/g/collect?v=2")).toBe(
-      true
-    );
+    expect(isExcluded("https://analytics.google.com/g/collect?v=2")).toBe(true);
     expect(isExcluded("https://www.google.com/g/collect?v=2")).toBe(true);
     expect(isExcluded("https://cca-lite.coinbase.com/amp?event=load")).toBe(
       true
     );
-    expect(
-      isExcluded("https://cca-lite.coinbase.com/metrics?event=load")
-    ).toBe(true);
+    expect(isExcluded("https://cca-lite.coinbase.com/metrics?event=load")).toBe(
+      true
+    );
     expect(isExcluded("https://api-js.mixpanel.com/track/?ip=1")).toBe(true);
     expect(isExcluded("https://api-js.mixpanel.com/engage/?verbose=1")).toBe(
       true
     );
-    expect(isExcluded("https://rpc.walletconnect.org/v1/?chainId=eip155:1")).toBe(
-      true
-    );
-    expect(isExcluded("https://rpc.walletconnect.com/v1/?chainId=eip155:1")).toBe(
-      true
-    );
+    expect(
+      isExcluded("https://rpc.walletconnect.org/v1/?chainId=eip155:1")
+    ).toBe(true);
+    expect(
+      isExcluded("https://rpc.walletconnect.com/v1/?chainId=eip155:1")
+    ).toBe(true);
     expect(isExcluded("https://rpc.walletconnect.com/v1/sessions/abc")).toBe(
       true
     );
@@ -183,16 +262,16 @@ describe("AwsRumProvider", () => {
       isExcluded("https://identity.walletconnect.org/v1/profile?projectId=test")
     ).toBe(true);
     expect(isExcluded("https://sts.amazonaws.com/")).toBe(true);
-    expect(isExcluded("https://cognito-identity.us-east-1.amazonaws.com/")).toBe(
-      true
-    );
+    expect(
+      isExcluded("https://cognito-identity.us-east-1.amazonaws.com/")
+    ).toBe(true);
     expect(
       isExcluded("https://dataplane.rum.us-east-1.amazonaws.com/appmonitors")
     ).toBe(true);
 
-    expect(
-      isExcluded("https://api.6529.io/api/auth/session-refresh")
-    ).toBe(false);
+    expect(isExcluded("https://api.6529.io/api/auth/session-refresh")).toBe(
+      false
+    );
     expect(
       isExcluded("https://api.6529.io/api/v2/waves/123/drops?limit=50")
     ).toBe(false);
@@ -327,19 +406,38 @@ describe("AwsRumProvider", () => {
 });
 
 const getHttpUrlsToExclude = (): RegExp[] => {
+  const plugins = getAwsRumConfig().eventPluginsToLoad ?? [];
+  const xhrConfig = plugins.find((plugin) => plugin.getPluginId() === "xhr")
+    ?.config as AwsRumHttpPluginConfig | undefined;
+  const fetchConfig = plugins.find((plugin) => plugin.getPluginId() === "fetch")
+    ?.config as AwsRumHttpPluginConfig | undefined;
+
+  expect(xhrConfig).toBeDefined();
+  expect(fetchConfig?.urlsToExclude).toEqual(xhrConfig?.urlsToExclude);
+
+  return xhrConfig?.urlsToExclude ?? [];
+};
+
+const getAwsRumConfig = (): {
+  readonly eventPluginsToLoad?: Array<{
+    readonly config?: unknown;
+    getPluginId: () => string;
+  }>;
+} => {
   const config = mockAwsRum.mock.calls[0]?.[3] as
     | {
-        telemetries?: Array<string | AwsRumHttpTelemetry>;
+        readonly eventPluginsToLoad?: Array<{
+          readonly config?: unknown;
+          getPluginId: () => string;
+        }>;
       }
     | undefined;
-  const httpTelemetry = config?.telemetries?.find(
-    (telemetry): telemetry is AwsRumHttpTelemetry =>
-      Array.isArray(telemetry) && telemetry[0] === "http"
-  );
 
-  expect(httpTelemetry).toBeDefined();
+  if (!config) {
+    throw new Error("AWS RUM config was not provided");
+  }
 
-  return httpTelemetry?.[1].urlsToExclude ?? [];
+  return config;
 };
 
 const getMockAwsRumInstance = (): MockAwsRumInstance => {

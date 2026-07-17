@@ -17,7 +17,7 @@ interface UseStormPartActionsParams {
   readonly finalizeAndAddDropPartDraft: (
     replacePartIndex?: number | null
   ) => CreateDropConfig;
-  readonly isWideContainer: boolean;
+  readonly keepOptionsVisible: boolean;
   readonly refreshState: () => void;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setEditingPartIndex: Dispatch<SetStateAction<number | null>>;
@@ -35,7 +35,7 @@ export const useStormPartActions = ({
   drop,
   editingPartIndex,
   finalizeAndAddDropPartDraft,
-  isWideContainer,
+  keepOptionsVisible,
   refreshState,
   setDrop,
   setEditingPartIndex,
@@ -161,13 +161,13 @@ export const useStormPartActions = ({
   const breakIntoStorm = useCallback(() => {
     finalizeAndAddDropPart();
     setIsStormMode(true);
-    if (!isWideContainer) {
+    if (!keepOptionsVisible) {
       collapseOptions();
     }
   }, [
     collapseOptions,
     finalizeAndAddDropPart,
-    isWideContainer,
+    keepOptionsVisible,
     setIsStormMode,
   ]);
 

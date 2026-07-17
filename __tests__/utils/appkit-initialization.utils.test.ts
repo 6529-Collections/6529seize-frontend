@@ -88,4 +88,20 @@ describe("AppKit initialization", () => {
       })
     );
   });
+
+  it("keeps AppKit above app-owned transaction modals", () => {
+    initializeAppKit({
+      adapter,
+      isCapacitor: false,
+      chains: [mainnet],
+    });
+
+    expect(createAppKit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        themeVariables: expect.objectContaining({
+          "--w3m-z-index": 10000,
+        }),
+      })
+    );
+  });
 });
