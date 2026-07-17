@@ -21,6 +21,8 @@ run-name: Compose frontend train ${{ inputs.release_train_id }} [${{ inputs.oper
 jobs:
   compose:
     runs-on: ubuntu-latest
+    outputs:
+      composition_complete: ${{ steps.finish-composition.outputs.composition_complete }}
     steps:
       - name: Validate immutable inputs
         env:
@@ -65,6 +67,7 @@ jobs:
         id: compose-candidates
         env:
           CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
+          CODEX_ENABLED: ${{ vars.RELEASE_BUS_CODEX_ENABLED || 'false' }}
           RELEASE_BRANCH: ${{ inputs.release_branch }}
           RELEASE_BUS_GIT_NAME: ${{ vars.RELEASE_BUS_GIT_NAME || '6529 Release Bus' }}
           RELEASE_BUS_GIT_EMAIL: ${{ vars.RELEASE_BUS_GIT_EMAIL || 'release-bus@users.noreply.github.com' }}
@@ -95,7 +98,7 @@ jobs:
               printf '%s\n' "$sha" > .release-bus/conflicted-sha.txt
               git diff --name-only HEAD | sort -u > .release-bus/allowed-paths.txt
               git diff --name-only --diff-filter=U | sort -u > .release-bus/conflict-paths.txt
-              if grep -Eq '^(\.github/|AGENTS\.md$|ops/|bin/)' .release-bus/conflict-paths.txt; then
+              if [ "$CODEX_ENABLED" = true ] && grep -Eq '^(\.github/|AGENTS\.md$|ops/|bin/)' .release-bus/conflict-paths.txt; then
                 echo 'Codex is not allowed to resolve conflicts in deployment or instruction surfaces.' >&2
                 exit 1
               fi
@@ -115,7 +118,7 @@ jobs:
           done < <(cp .release-bus/candidates.txt /tmp/release-bus-candidates && cat /tmp/release-bus-candidates)
           echo "has_conflict=$has_conflict" >> "$GITHUB_OUTPUT"
       - name: Resolve one bounded merge conflict with Codex
-        if: steps.compose-candidates.outputs.has_conflict == 'true'
+        if: steps.compose-candidates.outputs.has_conflict == 'true' && vars.RELEASE_BUS_CODEX_ENABLED == 'true'
         uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
@@ -130,9 +133,11 @@ jobs:
             Preserve both sides' intended behavior with the smallest coherent resolution.
             Do not run network commands, do not change workflow/configuration/instruction files, do not commit, and do not start another merge.
             Finish with every current conflict resolved in the working tree and briefly explain the resolution.
-      - name: Validate Codex resolution and finish composition
+      - name: Validate optional Codex resolution and finish composition
+        id: finish-composition
         env:
           BASE_SHA: ${{ inputs.base_sha }}
+          CODEX_ENABLED: ${{ vars.RELEASE_BUS_CODEX_ENABLED || 'false' }}
           HAS_CONFLICT: ${{ steps.compose-candidates.outputs.has_conflict }}
           RELEASE_BUS_GIT_NAME: ${{ vars.RELEASE_BUS_GIT_NAME || '6529 Release Bus' }}
           RELEASE_BUS_GIT_EMAIL: ${{ vars.RELEASE_BUS_GIT_EMAIL || 'release-bus@users.noreply.github.com' }}
@@ -143,61 +148,80 @@ jobs:
           [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          composition_complete=true
           if [ "$HAS_CONFLICT" = true ]; then
-            git diff --name-only HEAD | sort -u > /tmp/actual-paths.txt
-            unexpected="$(comm -13 .release-bus/allowed-paths.txt /tmp/actual-paths.txt)"
-            test -z "$unexpected" || { echo "Codex changed unexpected paths: $unexpected" >&2; exit 1; }
-            while IFS= read -r path; do
-              if [ -L "$path" ]; then
-                digest="symlink:$(readlink "$path")"
-              elif [ -f "$path" ]; then
-                digest="file:$(git hash-object --no-filters "$path")"
-              else
-                digest=missing
-              fi
-              printf '%s\t%s\n' "$path" "$digest"
-            done < .release-bus/non-conflict-paths.txt > /tmp/non-conflict-hashes.txt
-            cmp .release-bus/non-conflict-hashes.txt /tmp/non-conflict-hashes.txt || {
-              echo 'Codex changed an automatically merged non-conflict path.' >&2
-              exit 1
-            }
-            while IFS= read -r path; do
-              if grep -En '^(<<<<<<<|=======|>>>>>>>)' "$path"; then
-                echo "Unresolved conflict marker in $path" >&2
+            if [ "$CODEX_ENABLED" != true ]; then
+              git rev-parse -q --verify MERGE_HEAD >/dev/null || {
+                echo 'Expected an active merge before deferring the conflicting candidate.' >&2
                 exit 1
-              fi
-              git add -- "$path"
-            done < .release-bus/conflict-paths.txt
-            test -z "$(git ls-files -u)"
-            git diff --check --cached
-            current_sha="$(cat .release-bus/conflicted-sha.txt)"
-            test "$current_sha" = "$(head -n1 .release-bus/candidates.txt)" || {
-              echo 'The recorded conflict is no longer the first pending candidate.' >&2
-              exit 1
-            }
-            git config user.name "$RELEASE_BUS_GIT_NAME"
-            git config user.email "$RELEASE_BUS_GIT_EMAIL"
-            git -c core.hooksPath=/dev/null commit -s \
-              -m "Release train $TRAIN_ID: resolve candidate conflict" \
-              -m "Candidate-SHA: $current_sha" \
-              -m "Release-Bus-Train: $TRAIN_ID" \
-              -m "Release-Bus-Revision: $TRAIN_REVISION"
-            sed -i '1d' .release-bus/candidates.txt
+              }
+              git merge --abort
+              git config user.name "$RELEASE_BUS_GIT_NAME"
+              git config user.email "$RELEASE_BUS_GIT_EMAIL"
+              git -c core.hooksPath=/dev/null commit --allow-empty -s \
+                -m "Release train $TRAIN_ID: defer conflicting candidate" \
+                -m "Release-Bus-Train: $TRAIN_ID" \
+                -m "Release-Bus-Revision: $TRAIN_REVISION" \
+                -m "Release-Bus-Defer: true"
+              composition_complete=false
+            else
+              git diff --name-only HEAD | sort -u > /tmp/actual-paths.txt
+              unexpected="$(comm -13 .release-bus/allowed-paths.txt /tmp/actual-paths.txt)"
+              test -z "$unexpected" || { echo "Codex changed unexpected paths: $unexpected" >&2; exit 1; }
+              while IFS= read -r path; do
+                if [ -L "$path" ]; then
+                  digest="symlink:$(readlink "$path")"
+                elif [ -f "$path" ]; then
+                  digest="file:$(git hash-object --no-filters "$path")"
+                else
+                  digest=missing
+                fi
+                printf '%s\t%s\n' "$path" "$digest"
+              done < .release-bus/non-conflict-paths.txt > /tmp/non-conflict-hashes.txt
+              cmp .release-bus/non-conflict-hashes.txt /tmp/non-conflict-hashes.txt || {
+                echo 'Codex changed an automatically merged non-conflict path.' >&2
+                exit 1
+              }
+              while IFS= read -r path; do
+                if grep -En '^(<<<<<<<|=======|>>>>>>>)' "$path"; then
+                  echo "Unresolved conflict marker in $path" >&2
+                  exit 1
+                fi
+                git add -- "$path"
+              done < .release-bus/conflict-paths.txt
+              test -z "$(git ls-files -u)"
+              git diff --check --cached
+              current_sha="$(cat .release-bus/conflicted-sha.txt)"
+              test "$current_sha" = "$(head -n1 .release-bus/candidates.txt)" || {
+                echo 'The recorded conflict is no longer the first pending candidate.' >&2
+                exit 1
+              }
+              git config user.name "$RELEASE_BUS_GIT_NAME"
+              git config user.email "$RELEASE_BUS_GIT_EMAIL"
+              git -c core.hooksPath=/dev/null commit -s \
+                -m "Release train $TRAIN_ID: resolve candidate conflict" \
+                -m "Candidate-SHA: $current_sha" \
+                -m "Release-Bus-Train: $TRAIN_ID" \
+                -m "Release-Bus-Revision: $TRAIN_REVISION"
+              sed -i '1d' .release-bus/candidates.txt
+            fi
           fi
-          while IFS= read -r sha; do
-            [ -n "$sha" ] || continue
-            git fetch --no-tags origin "$sha"
-            git merge --no-ff --no-commit "$sha"
-            git -c core.hooksPath=/dev/null commit -s \
-              -m "Release train $TRAIN_ID: merge candidate" \
-              -m "Candidate-SHA: $sha" \
-              -m "Release-Bus-Train: $TRAIN_ID" \
-              -m "Release-Bus-Revision: $TRAIN_REVISION"
-          done < .release-bus/candidates.txt
+          if [ "$composition_complete" = true ]; then
+            while IFS= read -r sha; do
+              [ -n "$sha" ] || continue
+              git fetch --no-tags origin "$sha"
+              git merge --no-ff --no-commit "$sha"
+              git -c core.hooksPath=/dev/null commit -s \
+                -m "Release train $TRAIN_ID: merge candidate" \
+                -m "Candidate-SHA: $sha" \
+                -m "Release-Bus-Train: $TRAIN_ID" \
+                -m "Release-Bus-Revision: $TRAIN_REVISION"
+            done < .release-bus/candidates.txt
+          fi
           test -z "$(git ls-files -u)"
-          while IFS= read -r sha; do git merge-base --is-ancestor "$sha" HEAD; done < .release-bus/candidates.txt
           git fsck --no-dangling
           git bundle create release-bus-composition.bundle HEAD "^$BASE_SHA"
+          echo "composition_complete=$composition_complete" >> "$GITHUB_OUTPUT"
       - name: Upload isolated composition
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -227,6 +251,7 @@ jobs:
         env:
           BASE_SHA: ${{ inputs.base_sha }}
           CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
+          COMPOSITION_COMPLETE: ${{ needs.compose.outputs.composition_complete }}
         run: |
           set -euo pipefail
           git bundle verify .release-bus-publish/release-bus-composition.bundle
@@ -234,7 +259,26 @@ jobs:
           head_sha="$(git rev-parse refs/remotes/release-bus/composed)"
           [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
           git merge-base --is-ancestor "$BASE_SHA" "$head_sha"
-          while IFS= read -r sha; do git merge-base --is-ancestor "$sha" "$head_sha"; done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
+          if [ "$COMPOSITION_COMPLETE" = true ]; then
+            while IFS= read -r sha; do git merge-base --is-ancestor "$sha" "$head_sha"; done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
+          else
+            test "$(git rev-list --parents -n1 "$head_sha" | awk '{print NF}')" -eq 2
+            parent_sha="$(git rev-parse "$head_sha^1")"
+            test "$(git rev-parse "$head_sha^{tree}")" = "$(git rev-parse "$parent_sha^{tree}")"
+            git log -1 --format=%B "$head_sha" | grep -Fx 'Release-Bus-Defer: true'
+            missing_seen=false
+            while IFS= read -r sha; do
+              if git merge-base --is-ancestor "$sha" "$head_sha"; then
+                test "$missing_seen" = false || {
+                  echo 'Incomplete composition does not contain a strict candidate prefix.' >&2
+                  exit 1
+                }
+              else
+                missing_seen=true
+              fi
+            done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
+            test "$missing_seen" = true
+          fi
           git fsck --no-dangling
           echo "head_sha=$head_sha" >> "$GITHUB_ENV"
       - name: Claim the idempotent publish operation
