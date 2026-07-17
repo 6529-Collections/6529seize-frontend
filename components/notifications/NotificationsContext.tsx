@@ -92,6 +92,7 @@ const TRANSIENT_ERROR_PATTERNS = [
   "network request failed",
   "network error",
   "server with the specified hostname could not be found",
+  "too many server requests",
   "timed out",
   "timeout",
 ];
