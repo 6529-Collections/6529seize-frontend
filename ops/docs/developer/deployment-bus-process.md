@@ -1,30 +1,71 @@
 # Staging and Production Deployment Bus
 
-Status: implemented behind rollout controls. The normal path becomes authoritative
-only after the release-bus infrastructure, GitHub App, secrets, repository rules,
-and `RELEASE_BUS_ENFORCEMENT` switch are enabled.
+Status: implemented behind rollout controls. The live API mode selects the
+release route; repository enforcement separately controls whether a manual
+route requires audited break glass.
 
 ## What changes for developers
 
-The rollout mode is authoritative. Before submitting readiness, authenticate at
-`/deploy/ui/bus` and read its current mode:
+The live rollout mode is authoritative. The canonical agent preflight in both
+repositories is:
 
-- `OFF`: readiness is rejected. Continue using the existing manual release
-  path.
-- `SHADOW`: readiness records a decision only. It does not create a GitHub
-  status, stage, merge, or deploy; use the manual path for an actual release.
-- `STAGING`: the bus owns staging readiness, while production remains on the
-  existing manual path.
-- `PRODUCTION`: the bus owns both staging and production readiness.
+```bash
+node ops/scripts/release-bus-status.mjs
+```
 
-Do not infer that the bus is live merely because its code, UI, or workflows are
-present. Agents must recheck the mode immediately before submission.
+The helper requires an installed, authenticated `gh`, obtains its token
+internally, calls the production controls API, validates the mode plus `ALL`,
+`STAGING`, and `PRODUCTION`, and prints only sanitized state:
+
+```json
+{
+  "mode": "OFF",
+  "controls": {
+    "ALL": "RUNNING",
+    "STAGING": "RUNNING",
+    "PRODUCTION": "RUNNING"
+  }
+}
+```
+
+Run it when a release request arrives, immediately before readiness, immediately
+before a manual merge or workflow dispatch, and again before production after a
+significant wait. Do not substitute documentation, conversation state, a
+previous release's mode, workflow configuration, AWS assumptions, repository
+files, or the browser UI. A signed-in browser session alone does not authenticate
+the Release Bus API; the helper deliberately uses the developer's authenticated
+`gh` session.
+
+Status discovery is fail-closed. Missing or unauthenticated `gh`, timeouts,
+network or authentication errors, malformed JSON, unknown modes, and incomplete
+controls all stop the release before mutation. Failure never means `OFF` and
+never means “bus enabled.” Agents must not fall back to AWS CLI, queue a
+candidate, merge, or deploy while status is unknown.
+
+| Live mode    | Staging behavior                                                 | Production behavior                                                         |
+| ------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `OFF`        | Use the legacy manual path; do not queue in the bus              | Use the legacy manual path                                                  |
+| `SHADOW`     | Record the candidate for shadow evaluation, then deploy manually | Record shadow evidence as designed, then deploy manually                    |
+| `STAGING`    | Submit through the Release Bus and wait for validation           | Follow the operator/manual production path; do not queue a production train |
+| `PRODUCTION` | Submit through the Release Bus                                   | Submit the staging-validated SHA through the Release Bus                    |
+
+If `ALL` or the relevant lane is paused, stop and report the paused scope.
+After an active bus lane accepts a candidate, do not start a parallel manual
+deployment.
+
+For a manual route, inspect `RELEASE_BUS_ENFORCEMENT` in every affected
+repository with authenticated `gh`. `OFF` or `SHADOW` combined with enabled
+enforcement is a configuration mismatch and requires an operator. If the
+manual route is enforced, only an organization owner or active
+`release-bus-operators` member may continue, with a non-empty audited
+break-glass reason. Never bypass a blocked workflow.
 
 Developers and agents no longer need to merge feature branches into
 `1a-staging`, dispatch staging deployments, merge source PRs to `main`, or
 dispatch production deployments on a lane currently owned by the bus.
 
-Instead, use the Release Bus panel at `/deploy/ui/bus`:
+When the table selects a bus route, use the Release Bus panel at
+`/deploy/ui/bus`:
 
 1. Select frontend or backend and enter the developer branch.
 2. Resolve and review its exact 40-character head SHA.
