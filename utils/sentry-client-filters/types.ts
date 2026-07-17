@@ -57,6 +57,7 @@ export type SentryTags = Record<string, unknown>;
 
 export type SentryClientEvent = {
   event_id?: string | undefined;
+  level?: string | undefined;
   transaction?: string | undefined;
   message?: string | undefined;
   exception?:

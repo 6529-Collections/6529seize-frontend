@@ -22,6 +22,7 @@ import {
   hasAppOwnedSourceStackValue,
   hasLikelyAppOwnedFrame,
 } from "./app-frame-utils";
+import { hasDropReactionFailure } from "./drop-reaction";
 import {
   getBooleanValue,
   getBreadcrumbValues,
@@ -43,9 +44,6 @@ import {
 } from "./value-utils";
 
 const injectedFrameAntFramePath = "app:///frame_ant/frame_ant.js";
-const dropReactionRequestFailedMessage = "Drop reaction request failed";
-const dropReactionFeature = "drop-reaction";
-const dropReactionRequestOperation = "reaction-request";
 
 function isFirstPartyApiTarget(candidate: NetworkTargetCandidate): boolean {
   if (candidate.isFirstPartyApi === true) {
@@ -525,23 +523,12 @@ function hasMatchingFailedTransportBreadcrumb(
   return getLowValueNetworkErrorTargetUrl(event) !== null;
 }
 
-function isSyntheticDropReactionNetworkError(
-  event: SentryClientEvent
-): boolean {
-  const exceptionValues = event.exception?.values;
-  return (
-    exceptionValues?.length === 1 &&
-    exceptionValues[0].type === "Error" &&
-    getEventMessage(event) === dropReactionRequestFailedMessage &&
-    event.tags?.["feature"] === dropReactionFeature &&
-    event.tags["operation"] === dropReactionRequestOperation &&
-    event.tags["error_kind"] === "network"
-  );
-}
-
 function isLowValueFirstPartyNetworkError(event: SentryClientEvent): boolean {
-  if (isSyntheticDropReactionNetworkError(event)) {
-    return hasMatchingFailedTransportBreadcrumb(event);
+  if (
+    event.tags?.["feature"] === "drop-reaction" &&
+    hasDropReactionFailure(event)
+  ) {
+    return true;
   }
 
   if (event.tags?.["errorType"] !== "network") {

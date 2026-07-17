@@ -36,11 +36,24 @@ Cancellation remains a non-failure classification.
 Drop-reaction error telemetry has one narrower transport-noise policy. After
 the producer's 60-second dedupe window, only the exact privacy-safe
 `Drop reaction request failed` warning with the `drop-reaction` feature,
-`reaction-request` operation, `network` error kind, one `Error` exception, and
-a failed no-status first-party API breadcrumb enters the shared deterministic
-10% low-value network sampler. Retained samples receive the existing
+`reaction-request` operation, `network` error kind, one handled `Error`
+exception, and a failed `POST` or `DELETE` first-party API breadcrumb for the
+`/api/drops/<id>/reaction` family whose HTTP status is absent or zero enters the
+shared deterministic 10% low-value network sampler. The transport breadcrumb
+must fall between the current `reaction.request_sent` and
+`reaction.request_failed` breadcrumbs; older reaction failures do not qualify,
+ambiguous unresolved concurrent lifecycles using the same HTTP method remain
+outside the sampler, transport failures inside completed concurrent lifecycle
+windows cannot qualify the current request, and later unrelated transport
+failures do not hide a qualifying current failure. Retained samples receive the
+existing
 `network_failure_kind=browser_transport` and `network_noise_sampled=true`
-tags. Auth, rate-limit, endpoint-contract, server, real HTTP-status,
+tags. After classification, retained samples remove request context and the
+SDK URL tag and replace identifier- or endpoint-bearing breadcrumb messages
+and recursively nested data values (including URL, `from`, and `to` fields)
+with `[Filtered]`; normalized `route_family` values and bounded method, status,
+origin, and reaction lifecycle fields remain available. Auth,
+rate-limit, endpoint-contract, server, real HTTP-status,
 different-message, different-tag, third-party, extra-exception, and
 missing-transport-breadcrumb cases remain outside this sampler.
 
