@@ -194,7 +194,7 @@ export function DelegationFormLabel(
 
   return (
     <label
-      className={`tw-flex tw-items-center tw-text-sm tw-font-semibold tw-text-iron-200 sm:tw-min-h-11 ${getLabelSpanClass(
+      className={`tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-min-h-11 ${getLabelSpanClass(
         props.span ?? 3
       )}`}
     >
