@@ -40,8 +40,11 @@ export const useCreateWaveDrafts = ({
   readonly step: CreateWaveStep;
 }) => {
   const [drafts, setDrafts] = useState<CreateWaveDraft[]>([]);
-  // Only the setter's functional form is used; the id itself never renders.
-  const [, setActiveDraftId] = useState<string | null>(null);
+  // The active draft id never renders, and load/save/clear must read and
+  // write it synchronously within a single event — a ref avoids any
+  // cross-render timing where a debounce could fork a duplicate before a
+  // loaded id has committed.
+  const activeDraftIdRef = useRef<string | null>(null);
   // Autosave is armed only while tracking a draft. It arms on the
   // Overview→next transition (or when a draft is loaded) and disarms on
   // clear/delete — so a discarded draft is never immediately re-saved.
@@ -70,17 +73,15 @@ export const useCreateWaveDrafts = ({
       clearTimeout(debounceRef.current);
     }
     debounceRef.current = setTimeout(() => {
-      setActiveDraftId((currentId) => {
-        const id = currentId ?? getRandomObjectId();
-        upsertCreateWaveDraft({
-          id,
-          updatedAt: Date.now(),
-          config,
-          endDateConfig,
-        });
-        setDrafts(readCreateWaveDrafts());
-        return id;
+      const id = activeDraftIdRef.current ?? getRandomObjectId();
+      activeDraftIdRef.current = id;
+      upsertCreateWaveDraft({
+        id,
+        updatedAt: Date.now(),
+        config,
+        endDateConfig,
       });
+      setDrafts(readCreateWaveDrafts());
     }, AUTOSAVE_DEBOUNCE_MS);
     return () => {
       if (debounceRef.current) {
@@ -93,20 +94,17 @@ export const useCreateWaveDrafts = ({
     // Editing continues under the loaded draft's identity, so subsequent
     // autosaves update it rather than forking a copy.
     isTrackingRef.current = true;
-    setActiveDraftId(draft.id);
+    activeDraftIdRef.current = draft.id;
   }, []);
 
   const deleteDraft = useCallback((id: string) => {
     deleteCreateWaveDraft(id);
     setDrafts(readCreateWaveDrafts());
-    setActiveDraftId((currentId) => {
-      if (currentId === id) {
-        // Do not immediately re-save what the user just discarded.
-        isTrackingRef.current = false;
-        return null;
-      }
-      return currentId;
-    });
+    if (activeDraftIdRef.current === id) {
+      // Do not immediately re-save what the user just discarded.
+      activeDraftIdRef.current = null;
+      isTrackingRef.current = false;
+    }
   }, []);
 
   /** Called after the server confirms the wave exists. */
@@ -115,13 +113,11 @@ export const useCreateWaveDrafts = ({
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
-    setActiveDraftId((currentId) => {
-      if (currentId !== null) {
-        deleteCreateWaveDraft(currentId);
-        setDrafts(readCreateWaveDrafts());
-      }
-      return null;
-    });
+    if (activeDraftIdRef.current !== null) {
+      deleteCreateWaveDraft(activeDraftIdRef.current);
+      activeDraftIdRef.current = null;
+      setDrafts(readCreateWaveDrafts());
+    }
   }, []);
 
   return { drafts, loadDraft, deleteDraft, clearActiveDraft };
