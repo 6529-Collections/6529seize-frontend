@@ -15,6 +15,7 @@ export default function CreateWaveOutcomesRepCategoryField({
     <div className="tw-w-full">
       <RepCategorySearch
         error={errorMessage !== null}
+        hideDefaultError
         category={category}
         setCategory={setCategory}
       />
