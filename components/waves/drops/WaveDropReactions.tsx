@@ -36,6 +36,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
@@ -79,6 +80,8 @@ type OwnedOptimisticRollback = {
   readonly mutationId: string;
   readonly rollback: () => void;
 } | null;
+
+const REACTION_TOOLTIP_Z_INDEX = 999;
 
 const combineRollbacks = (
   rollbacks: readonly OptimisticRollback[]
@@ -366,6 +369,11 @@ function WaveDropReaction({
   readonly isDetailsLoading: boolean;
   readonly isTouchDevice: boolean;
 }) {
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
   const { getEligibility, updateEligibility } = useWaveEligibility();
@@ -854,7 +862,7 @@ function WaveDropReaction({
         </div>
       </button>
       {!isTouchDevice &&
-        typeof document !== "undefined" &&
+        hydrated &&
         createPortal(
           <Tooltip
             id={tooltipId}
@@ -866,7 +874,7 @@ function WaveDropReaction({
             style={{
               backgroundColor: "#37373E",
               color: "white",
-              zIndex: 99999,
+              zIndex: REACTION_TOOLTIP_Z_INDEX,
             }}
           >
             <div className="tw-flex tw-items-center tw-gap-2">

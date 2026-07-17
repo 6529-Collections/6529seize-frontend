@@ -1069,8 +1069,9 @@ describe("WaveDropReactions", () => {
     fireEvent.mouseEnter(reactionButton);
 
     await waitFor(() => {
-      const moreButton = screen.queryByText(/and 2 others/);
+      const moreButton = screen.getByText(/and 2 others/);
       expect(moreButton).toBeInTheDocument();
+      expect(moreButton.closest("body")).toBe(document.body);
       expect(container.contains(moreButton)).toBe(false);
     });
   });
