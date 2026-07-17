@@ -51,7 +51,9 @@ const getUnreadSubwaveDropsCount = (
   let loadedSubwaveApiUnreadCount = 0;
   for (const subwave of subwaves) {
     loadedSubwaveUnreadCount += getUnreadDropsCount(subwave);
-    loadedSubwaveApiUnreadCount += subwave.apiUnreadDropsCount;
+    if (!subwave.isMuted) {
+      loadedSubwaveApiUnreadCount += subwave.apiUnreadDropsCount;
+    }
   }
   // Replace the loaded children portion of the API aggregate with their live
   // client counts, while preserving unread from children that are not loaded.

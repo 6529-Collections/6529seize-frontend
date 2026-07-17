@@ -249,7 +249,7 @@ function useEnhancedWavesListCore(
         latestFollowedSubwaveDropTimestamp:
           wave.latestFollowedSubwaveDropTimestamp,
         unreadSubwaveDrops: wave.unreadSubwaveDrops,
-        apiUnreadDropsCount: wave.unreadDropsCount,
+        apiUnreadDropsCount: forcedCount ?? wave.unreadDropsCount,
         unreadDropsCount,
         latestReadTimestamp: wave.latestReadTimestamp,
         firstUnreadDropSerialNo,

@@ -358,6 +358,36 @@ describe("useSidebarWaveTree", () => {
     });
   });
 
+  it("does not subtract a loaded muted subwave from the server aggregate", () => {
+    const wavesWithMutedSubwave = [
+      createMockMinimalWave({
+        id: "parent",
+        hasSubwaves: true,
+        unreadSubwaveDrops: 20,
+      }),
+      createMockMinimalWave({
+        id: "muted-child",
+        parentWaveId: "parent",
+        apiUnreadDropsCount: 7,
+        unreadDropsCount: 7,
+        isMuted: true,
+      }),
+    ];
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: wavesWithMutedSubwave,
+        activeWaveId: null,
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(rows[1]).toMatchObject({
+      rowType: "subwaves-toggle",
+      unreadSubwaveDropsCount: 20,
+    });
+  });
+
   it("shows new websocket activity after a loaded subwave was cleared", () => {
     const wavesWithNewSubwaveActivity = [
       createMockMinimalWave({

@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import useEnhancedWavesListCore from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
 
@@ -305,5 +305,26 @@ describe("useEnhancedWavesListCore", () => {
     expect(result.current.waves[0]?.unreadDropsCount).toBe(3);
     expect(result.current.waves[0]?.apiUnreadDropsCount).toBe(3);
     expect(result.current.waves[0]?.firstUnreadDropSerialNo).toBe(10);
+  });
+
+  it("uses a forced API unread count as the aggregate baseline", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [createSidebarWave({ unreadDropsCount: 0 })],
+    });
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: true,
+      })
+    );
+
+    act(() => {
+      result.current.restoreWaveUnreadCount("wave-1", 1);
+    });
+
+    expect(result.current.waves[0]?.apiUnreadDropsCount).toBe(1);
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
   });
 });
