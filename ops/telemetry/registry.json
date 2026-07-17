@@ -404,6 +404,20 @@
       "reviewBy": "2026-10-15"
     },
     {
+      "name": "cyclic_json_timer_diagnostics",
+      "kind": "error-family",
+      "question": "Which code origin schedules exact cyclic JSON timer failures in iOS WKWebViews?",
+      "owner": "sentry",
+      "producer": "utils/monitoring/cyclicJsonTimerDiagnostics.ts",
+      "destinations": ["sentry:owner"],
+      "sampling": "eligible function timers in iOS WKWebViews are sampled independently at 1/16; only exact unhandled cyclic-JSON timer errors receive sampled provenance",
+      "privacy": "timer arguments are removed from every matching event; sampled extras contain bounded sanitized function names, script basenames, line and column numbers, origin enums, WebView family, and sample rate only",
+      "externalUsage": "v1 is live; Sentry dashboard, saved-search, and alert usage could not be verified because read-only endpoints returned 403",
+      "lifecycle": "temporary",
+      "replacement": "By the review date, verify or migrate every v1-keyed Sentry consumer to v2; remove the timer diagnostics after corrected provenance identifies the caller",
+      "reviewBy": "2026-08-17"
+    },
+    {
       "name": "reaction.*",
       "kind": "breadcrumb-family",
       "question": "What code-level sequence preceded a reaction failure or reconciliation anomaly?",
