@@ -134,6 +134,7 @@ it("shows storm placeholder", () => {
       type={null}
       canSubmit={false}
       isStormMode={true}
+      stormPartNumber={2}
       isDropMode={false}
       submitting={false}
       onEditorState={jest.fn()}
@@ -142,9 +143,7 @@ it("shows storm placeholder", () => {
       onMentionedWave={jest.fn()}
     />
   );
-  expect(screen.getByTestId("placeholder")).toHaveTextContent(
-    "Add to the storm"
-  );
+  expect(screen.getByTestId("placeholder")).toHaveTextContent("Write part 2");
 });
 
 it("shows reply placeholder", () => {
