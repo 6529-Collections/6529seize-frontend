@@ -231,6 +231,8 @@ export const extensionMessagingContentScriptPaths = new Set([
 export const injectedScriptBundlePathToken = "injectedscript.bundle.js";
 export const injectedScriptSendMessageError =
   "Cannot read properties of undefined (reading 'sendMessage')";
+export const webkitExtensionMessagingTabNotFoundMessage =
+  "Invalid call to runtime.sendMessage(). Tab not found.";
 export const sentryBrowserHelperPathToken = "/helpers.ts";
 export const sentryBrowserPackagePathTokens = [
   "@sentry/browser",

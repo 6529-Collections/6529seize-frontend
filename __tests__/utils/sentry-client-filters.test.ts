@@ -7,6 +7,7 @@ import {
   shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterBrowserExtensionMessagingConnectionError,
+  shouldFilterBrowserExtensionSendMessageError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
@@ -147,6 +148,8 @@ describe("sentry-client-filters", () => {
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
   const extensionMessagingConnectionFailureMessage =
     "Could not establish connection. Receiving end does not exist.";
+  const webkitExtensionMessagingTabNotFoundMessage =
+    "Invalid call to runtime.sendMessage(). Tab not found.";
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
@@ -798,6 +801,33 @@ describe("sentry-client-filters", () => {
     ],
     ...overrides,
   });
+
+  const createWebKitExtensionMessagingTabNotFoundEvent = (
+    valueOverrides: Record<string, unknown> = {},
+    eventOverrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => {
+    const value = {
+      type: "Error",
+      value: webkitExtensionMessagingTabNotFoundMessage,
+      mechanism: {
+        type: "auto.browser.global_handlers.onunhandledrejection",
+        handled: false,
+      },
+    };
+
+    return {
+      transaction: "/",
+      ...eventOverrides,
+      exception: {
+        values: [
+          {
+            ...value,
+            ...valueOverrides,
+          },
+        ],
+      },
+    };
+  };
 
   const createAppleWebKitSortedTrackListEvent = ({
     type = "TypeError",
@@ -6651,6 +6681,124 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters the exact frame-less WebKit extension tab-not-found rejection", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent();
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter nearby WebKit extension messaging errors", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent({
+      value: "Invalid call to runtime.sendMessage(). No tab found.",
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter mixed WebKit and app-owned exceptions", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent();
+    event.exception = {
+      values: [
+        ...(event.exception?.values ?? []),
+        {
+          type: "TypeError",
+          value: "App-owned failure",
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+                function: "sendMessage",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WebKit tab-not-found errors with app-owned frames", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent({
+      stacktrace: {
+        frames: [
+          {
+            filename:
+              "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+            function: "sendMessage",
+            in_app: true,
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WebKit tab-not-found errors with app-owned original stacks", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent();
+    const error = new Error(webkitExtensionMessagingTabNotFoundMessage);
+    error.stack = [
+      `Error: ${webkitExtensionMessagingTabNotFoundMessage}`,
+      "    at sendMessage (webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter WebKit tab-not-found errors with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createWebKitExtensionMessagingTabNotFoundEvent(
+      {},
+      {
+        extra: {
+          __serialized__: {
+            message: webkitExtensionMessagingTabNotFoundMessage,
+            stack: [
+              `Error: ${webkitExtensionMessagingTabNotFoundMessage}`,
+              "    at sendMessage (app:///services/messaging/sendMessage.ts:10:1)",
+            ].join("\n"),
+          },
+        },
+      }
+    );
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
 
     // Assert
     expect(result).toBe(false);
