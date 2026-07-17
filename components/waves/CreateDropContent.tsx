@@ -151,8 +151,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
   }
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
+  const keepDesktopOptionsVisible = !isMobile && isWideContainer;
+  // Keep the scoped collapse state live so resizing back to a narrow layout
+  // restores the chevron immediately.
   const showOptions =
-    (!isMobile && isWideContainer) ||
+    keepDesktopOptionsVisible ||
     (showOptionsState?.scopeKey === wave.id && showOptionsState.value);
 
   useLayoutEffect(() => {

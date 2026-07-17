@@ -731,7 +731,7 @@ describe("CreateDropContent identity picker flow", () => {
     }
   });
 
-  it("keeps wide composer options visible across repeated content changes", async () => {
+  it("ignores the collapsed options state in a wide desktop composer", async () => {
     const rectSpy = mockComposerWidth(501);
 
     try {
@@ -872,20 +872,24 @@ describe("CreateDropContent identity picker flow", () => {
         window.dispatchEvent(new Event("resize"));
       });
 
-      expect(screen.getByTestId("actions")).toHaveAttribute(
-        "data-show-options",
-        "true"
-      );
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "true"
+        );
+      });
 
       act(() => {
         window.innerWidth = 750;
         window.dispatchEvent(new Event("resize"));
       });
 
-      expect(screen.getByTestId("actions")).toHaveAttribute(
-        "data-show-options",
-        "false"
-      );
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
     } finally {
       rectSpy.mockRestore();
     }
