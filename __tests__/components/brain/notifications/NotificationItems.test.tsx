@@ -38,13 +38,15 @@ describe("NotificationItems", () => {
         items={items as never[]}
         activeDrop={active as never}
         onReply={onReply}
-        scrollContainerRef={{ current: null }}
         onDropContentClick={onClick}
       />
     );
 
     expect(NotificationItem).toHaveBeenCalledTimes(3);
     expect(container.querySelector("#feed-item-fallback-2")).not.toBeNull();
+    const firstRow = container.querySelector("#feed-item-1") as HTMLElement;
+    expect(firstRow.style.contentVisibility).toBe("auto");
+    expect(firstRow.style.containIntrinsicSize).toBe("auto 400px");
     const firstCall = NotificationItem.mock.calls.at(0);
     const secondCall = NotificationItem.mock.calls.at(1);
     expect(firstCall?.[0]).toEqual(

@@ -6,16 +6,19 @@ import {
   type NotificationDisplayItem,
   isGroupedReactionsItem,
 } from "@/types/feed.types";
-import { memo, useMemo, type RefObject } from "react";
+import { memo, useMemo, type CSSProperties } from "react";
 import NotificationDropReactedGroup from "./drop-reacted/NotificationDropReactedGroup";
 import NotificationItem from "./NotificationItem";
-import NotificationVirtualizedItem from "./NotificationVirtualizedItem";
+
+const NOTIFICATION_ITEM_RENDERING_STYLE = {
+  containIntrinsicSize: "auto 400px",
+  contentVisibility: "auto",
+} satisfies CSSProperties;
 
 interface NotificationItemsProps {
   readonly items: NotificationDisplayItem[];
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onMarkGroupAsRead?: ((ids: number[]) => Promise<void>) | undefined;
 }
@@ -56,7 +59,6 @@ function NotificationItemsComponent({
   items,
   activeDrop,
   onReply,
-  scrollContainerRef,
   onDropContentClick,
   onMarkGroupAsRead,
 }: NotificationItemsProps) {
@@ -81,12 +83,7 @@ function NotificationItemsComponent({
         const itemActiveDrop = getActiveDropForItem(item, activeDrop);
 
         return (
-          <NotificationVirtualizedItem
-            key={key}
-            domId={domId}
-            forceRender={itemActiveDrop !== null}
-            scrollContainerRef={scrollContainerRef}
-          >
+          <div key={key} id={domId} style={NOTIFICATION_ITEM_RENDERING_STYLE}>
             {isGroupedReactionsItem(item) ? (
               <div className="tw-flex">
                 <div className="tw-relative lg:tw-hidden">
@@ -110,7 +107,7 @@ function NotificationItemsComponent({
                 onDropContentClick={onDropContentClick}
               />
             )}
-          </NotificationVirtualizedItem>
+          </div>
         );
       })}
     </div>
@@ -124,7 +121,6 @@ const NotificationItems = memo(
       prevProps.items === nextProps.items &&
       prevProps.activeDrop === nextProps.activeDrop &&
       prevProps.onReply === nextProps.onReply &&
-      prevProps.scrollContainerRef === nextProps.scrollContainerRef &&
       prevProps.onDropContentClick === nextProps.onDropContentClick &&
       prevProps.onMarkGroupAsRead === nextProps.onMarkGroupAsRead
     );

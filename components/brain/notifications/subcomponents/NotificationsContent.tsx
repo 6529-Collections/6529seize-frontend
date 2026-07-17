@@ -3,7 +3,7 @@
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { NotificationDisplayItem } from "@/types/feed.types";
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode } from "react";
 import MyStreamNoItems from "../../my-stream/layout/MyStreamNoItems";
 import NotificationsWrapper from "../NotificationsWrapper";
 import NotificationsStateMessage from "./NotificationsStateMessage";
@@ -24,7 +24,6 @@ interface NotificationsContentProps {
   readonly loadingOlder: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
-  readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly markNotificationIdsAsRead?: (ids: number[]) => Promise<void>;
 }
 
@@ -44,7 +43,6 @@ export default function NotificationsContent({
   loadingOlder,
   activeDrop,
   setActiveDrop,
-  scrollContainerRef,
   markNotificationIdsAsRead,
 }: NotificationsContentProps): ReactNode {
   if (isLoadingProfile) {
@@ -116,7 +114,6 @@ export default function NotificationsContent({
       loadingOlder={loadingOlder}
       activeDrop={activeDrop}
       setActiveDrop={setActiveDrop}
-      scrollContainerRef={scrollContainerRef}
       {...(markNotificationIdsAsRead !== undefined && {
         markNotificationIdsAsRead,
       })}
