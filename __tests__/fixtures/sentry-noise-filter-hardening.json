@@ -159,7 +159,9 @@
             "frames": [
               {
                 "filename": "app:///requestRelay.js",
-                "function": "i.onclose",
+                "function": "__webpack_modules__.67891.t.WalletLinkWebSocket.connect.i.onclose",
+                "lineno": 2,
+                "colno": 248957,
                 "in_app": true
               }
             ]
