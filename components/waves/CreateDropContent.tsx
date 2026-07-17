@@ -3,6 +3,7 @@
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { EditorState } from "lexical";
 import React, {
@@ -113,6 +114,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
+  const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
   const { actionsContainerRef, isWideContainer, setActionsContainerRef } =
     useCreateDropContainerWidth();
@@ -150,9 +152,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
   const showOptions =
-    showOptionsState?.scopeKey === wave.id
-      ? showOptionsState.value
-      : isWideContainer;
+    (!isMobile && isWideContainer) ||
+    (showOptionsState?.scopeKey === wave.id && showOptionsState.value);
 
   useLayoutEffect(() => {
     if (prevIsDropModeRef.current && !isDropMode) {
