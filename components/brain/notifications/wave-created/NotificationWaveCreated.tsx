@@ -64,7 +64,7 @@ export default function NotificationWaveCreated({
       <NotificationHeader
         author={notification.related_identity}
         actions={
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
             {waveAction}
             <NotificationsFollowBtn
               profile={notification.related_identity}
