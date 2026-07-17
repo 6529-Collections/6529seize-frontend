@@ -83,7 +83,11 @@ const getChatSubmitDropRestrictionMessage = ({
 
 type MemesHeaderDropActionState = Pick<
   HeaderWaveDropAction,
-  "canOpen" | "label" | "compactLabel" | "restrictionMessage"
+  | "canOpen"
+  | "label"
+  | "compactLabel"
+  | "restrictionMessage"
+  | "restrictionKind"
 >;
 
 interface MemesHeaderParticipationState {
@@ -161,6 +165,7 @@ const getMemesHeaderDropActionState = ({
       label: "How to Submit",
       compactLabel: "Submit",
       restrictionMessage: `Reach ${formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP)} MemesNominee REP to become eligible to submit work.`,
+      restrictionKind: "memes-nomination",
     };
   }
 
@@ -267,14 +272,20 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   }, [waves.list, directMessages.list, waveId]);
 
   const newDropsCount = enhancedData.newDropsCount;
+  const currentWaveId = wave?.id ?? null;
+  const currentWaveName = wave?.name ?? null;
 
   // Update wave data in title context
   const waveTitleData = useMemo(
     () =>
-      wave?.id === waveId
-        ? { id: wave.id, name: wave.name, newItemsCount: newDropsCount }
+      currentWaveId === waveId && currentWaveName !== null
+        ? {
+            id: currentWaveId,
+            name: currentWaveName,
+            newItemsCount: newDropsCount,
+          }
         : null,
-    [newDropsCount, wave?.id, wave?.name, waveId]
+    [currentWaveId, currentWaveName, newDropsCount, waveId]
   );
   useSetWaveData(waveTitleData);
 
@@ -503,6 +514,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         label: memesHeaderDropActionState.label,
         compactLabel: memesHeaderDropActionState.compactLabel,
         restrictionMessage: memesHeaderDropActionState.restrictionMessage,
+        restrictionKind: memesHeaderDropActionState.restrictionKind,
         onOpen: openAppMemesSubmit,
       };
     }

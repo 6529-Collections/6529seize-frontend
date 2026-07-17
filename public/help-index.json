@@ -2279,7 +2279,7 @@
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
         "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
-        "On The Memes Main Stage, the native app lock explains the current 50,000 MemesNominee REP eligibility requirement; the desktop How to Submit panel also shows live REP progress and a Get nominated action.",
+        "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",
