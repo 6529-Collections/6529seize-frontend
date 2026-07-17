@@ -51,7 +51,7 @@ export default function CreateWaveOutcomesRepRank({
   const categoryErrorMessage = categoryViolation
     ? t(locale, categoryViolation.key, { ...categoryViolation.params })
     : showCategoryRequired
-      ? "Rep category is required"
+      ? t(locale, "rep.categories.validation.required")
       : null;
 
   const setCategory = (category: string | null) => {
