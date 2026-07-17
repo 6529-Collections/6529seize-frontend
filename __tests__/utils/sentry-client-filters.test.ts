@@ -22,10 +22,12 @@ import {
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
+  shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
   shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
   type SentryClientEvent,
+  type SentryExceptionValue,
   type SentryStackFrame,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
@@ -33,6 +35,11 @@ import {
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
 type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
+type TwitterCurrentInsetEventOptions = {
+  request?: TestSentryClientEvent["request"];
+  mechanismType?: string;
+  handled?: boolean;
+};
 type AppleWebKitSortedTrackListOverrides = {
   type?: string | undefined;
   value?: string | undefined;
@@ -78,6 +85,8 @@ describe("sentry-client-filters", () => {
     "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
+  const twitterForIphoneUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/20H392 Twitter for iPhone/12.9";
   const reactDomInsertBeforeMessage =
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const gifPickerTenorUndefinedTagsMessage =
@@ -210,6 +219,38 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createTwitterCurrentInsetEvent = ({
+    request = {
+      headers: {
+        "User-Agent": twitterForIphoneUserAgent,
+      },
+    },
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+  }: TwitterCurrentInsetEventOptions = {}): TestSentryClientEvent => ({
+    request,
+    exception: {
+      values: [
+        {
+          type: "ReferenceError",
+          value: "Can't find variable: currentInset",
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
+
   const createInjectedWalletCollisionEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -294,6 +335,38 @@ describe("sentry-client-filters", () => {
       ],
     },
     ...overrides,
+  });
+
+  const createCoinbaseWalletRequestRelayEvent = (
+    frameOverrides: Partial<SentryStackFrame> = {},
+    valueOverrides: Partial<SentryExceptionValue> = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "websocket error 1006:",
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            // Matches the Browser SDK frame shape available to beforeSend.
+            frames: [
+              {
+                filename: "app:///requestRelay.js",
+                function: "i.onclose",
+                lineno: 2,
+                colno: 248957,
+                in_app: true,
+                ...frameOverrides,
+              },
+            ],
+          },
+          ...valueOverrides,
+        },
+      ],
+    },
   });
 
   const createAppKitCoinbaseBreadcrumbs = (): NonNullable<
@@ -3770,6 +3843,62 @@ describe("sentry-client-filters", () => {
     expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
+  it("filters Twitter currentInset errors from the production iPhone user agent", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent();
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Twitter currentInset errors from the runtime iPhone user agent", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent({ request: {} });
+
+    // Act
+    const result = withRuntimeUserAgent(twitterForIphoneUserAgent, () =>
+      shouldFilterTwitterCurrentInsetReferenceError(event)
+    );
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter currentInset errors from non-Twitter iPhone Safari", () => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent({
+      request: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["a different capture mechanism", { mechanismType: "generic" }],
+    ["a handled error", { handled: true }],
+  ])("does not filter Twitter currentInset errors from %s", (_label, options) => {
+    // Arrange
+    const event = createTwitterCurrentInsetEvent(options);
+
+    // Act
+    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters Twitter CONFIG reference errors with injected wave document frames", () => {
     // Arrange
     const event = createTwitterConfigEvent();
@@ -4421,6 +4550,168 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters the browser-parsed Coinbase Wallet request relay signature", () => {
+    const event = createCoinbaseWalletRequestRelayEvent();
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the qualified request relay function from the latest occurrence", () => {
+    const event = createCoinbaseWalletRequestRelayEvent({
+      function:
+        "__webpack_modules__.67891.t.WalletLinkWebSocket.connect.i.onclose",
+    });
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the request relay signature with a websocket detail suffix", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "websocket error 1006: extra detail" }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["function", { function: "onclose" }],
+    ["qualified function", { function: "other.i.onclose" }],
+    ["line", { lineno: 3 }],
+    ["column", { colno: 248958 }],
+  ] as const)(
+    "does not filter a request relay signature with a different %s",
+    (_field, frameOverrides) => {
+      const event = createCoinbaseWalletRequestRelayEvent(frameOverrides);
+
+      const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("does not filter a request relay signature with a different mechanism", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      {
+        mechanism: {
+          type: "generic",
+          handled: false,
+        },
+      }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a handled request relay signature", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onunhandledrejection",
+          handled: true,
+        },
+      }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a request relay signature with a different message", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      {
+        value: "websocket error 1001:",
+      }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a request relay frame when only the event message matches", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "different exception" }
+    );
+    event.message = "websocket error 1006:";
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter a request relay frame when only the hint message matches", () => {
+    const event = createCoinbaseWalletRequestRelayEvent(
+      {},
+      { value: "different exception" }
+    );
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event, {
+      originalException: new Error("websocket error 1006:"),
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    ["missing filename", { filename: undefined }],
+    ["different filename", { filename: "app:///other.js" }],
+  ] as const)(
+    "does not filter a request relay signature with %s",
+    (_case, frameOverrides) => {
+      const event = createCoinbaseWalletRequestRelayEvent(frameOverrides);
+
+      const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("does not filter the exact request relay signature with an app-owned frame", () => {
+    const event = createCoinbaseWalletRequestRelayEvent();
+    event.exception!.values![0]!.stacktrace!.frames!.push({
+      filename: "services/websocket/WebSocketProvider.tsx",
+      in_app: true,
+    });
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the exact request relay signature with a separate app-owned exception", () => {
+    const event = createCoinbaseWalletRequestRelayEvent();
+    event.exception!.values!.push({
+      type: "Error",
+      value: "application error",
+      stacktrace: {
+        frames: [
+          {
+            filename: "services/websocket/WebSocketProvider.tsx",
+            in_app: true,
+          },
+        ],
+      },
+    });
+
+    const result = shouldFilterCoinbaseWalletLinkWebSocket1006(event);
+
+    expect(result).toBe(false);
   });
 
   it("filters Coinbase WalletLink websocket 1006 close errors without a detail suffix", () => {

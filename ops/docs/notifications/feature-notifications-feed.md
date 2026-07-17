@@ -23,6 +23,10 @@ with cause filters, grouped reactions, and inline drop previews.
 
 ## Before Rows Render
 
+- Wallet session restoration or connection: a centered loading indicator
+  remains visible while the site restores an existing wallet in a new tab or
+  completes an active connect/reconnect attempt. The disconnected wallet prompt
+  is shown only after that process finishes without valid auth.
 - Wallet missing: `Connect your wallet to view notifications.` with
   `Reconnect wallet`.
 - Profile loading: `Loading profile...`.
@@ -111,6 +115,19 @@ with cause filters, grouped reactions, and inline drop previews.
 - Cause filters only affect `/notifications` results.
 - If auth expires, the page can trigger one re-auth request automatically after
   an unauthorized notifications error.
+
+### Localization fallback debt
+
+- Route or component: `/notifications` wallet connection loader.
+- Untranslated surface: the loader's accessible status label.
+- Current fallback behavior: all supported locales use the canonical `en-US`
+  `Loading notifications` status while this route has no local message family.
+- User impact: the loading state remains accessible and functional, but its
+  announcement is English-only.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: move the notifications loading and recovery copy,
+  including accessible names, into one shared message family and verify its
+  fallback behavior across all supported locales.
 
 ## Related Pages
 
