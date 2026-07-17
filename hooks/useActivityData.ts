@@ -53,8 +53,9 @@ export function useActivityData(
     totalResults: number;
   }
 ): UseActivityDataReturn {
+  const initialActivity = initialData?.activity;
   const [activity, setActivity] = useState<Transaction[]>(
-    initialData?.activity || []
+    initialActivity || []
   );
   const [page, setPage] = useState(initialPage);
   const [totalResults, setTotalResults] = useState(
@@ -64,7 +65,7 @@ export function useActivityData(
 
   useEffect(() => {
     // Skip initial fetch if we have initial data and filters are at defaults
-    const hasInitialData = initialData && initialData.activity.length > 0;
+    const hasInitialData = initialActivity && initialActivity.length > 0;
     const isDefaultFilters =
       typeFilter === TypeFilter.ALL && selectedContract === ContractFilter.ALL;
     const isInitialPage = page === initialPage;
@@ -131,7 +132,14 @@ export function useActivityData(
     return () => {
       isCurrentRequest = false;
     };
-  }, [page, typeFilter, selectedContract, pageSize, initialData, initialPage]);
+  }, [
+    page,
+    typeFilter,
+    selectedContract,
+    pageSize,
+    initialActivity,
+    initialPage,
+  ]);
 
   return {
     activity,

@@ -19,16 +19,18 @@ export function useNFTCollections(initialCollections?: {
   nfts: NFT[];
   nextgenCollections: NextGenCollection[];
 }): UseNFTCollectionsReturn {
-  const [nfts, setNfts] = useState<NFT[]>(initialCollections?.nfts || []);
+  const initialNfts = initialCollections?.nfts;
+  const initialNextgenCollections = initialCollections?.nextgenCollections;
+  const [nfts, setNfts] = useState<NFT[]>(initialNfts || []);
   const [nextgenCollections, setNextgenCollections] = useState<
     NextGenCollection[]
-  >(initialCollections?.nextgenCollections || []);
+  >(initialNextgenCollections || []);
   const [loading, setLoading] = useState(!initialCollections);
 
   // Fetch Memes, MemeLab, and Gradients collections
   useEffect(() => {
     // Skip fetch if we have initial data
-    if (initialCollections && initialCollections.nfts.length > 0) {
+    if (initialNfts && initialNfts.length > 0) {
       return;
     }
 
@@ -79,15 +81,12 @@ export function useNFTCollections(initialCollections?: {
     return () => {
       cancelled = true;
     };
-  }, [initialCollections]);
+  }, [initialNfts]);
 
   // Fetch NextGen collections
   useEffect(() => {
     // Skip fetch if we have initial data
-    if (
-      initialCollections &&
-      initialCollections.nextgenCollections.length > 0
-    ) {
+    if (initialNextgenCollections && initialNextgenCollections.length > 0) {
       return;
     }
 
@@ -106,7 +105,7 @@ export function useNFTCollections(initialCollections?: {
         console.error("Failed to fetch NextGen collections list", error);
         setNextgenCollections([]);
       });
-  }, [initialCollections]);
+  }, [initialNextgenCollections]);
 
   return {
     nfts,

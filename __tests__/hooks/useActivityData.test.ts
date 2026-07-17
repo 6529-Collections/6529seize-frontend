@@ -567,6 +567,23 @@ describe("useActivityData", () => {
   });
 
   describe("Effect Dependencies", () => {
+    it("does not refetch when only the initial-data wrapper is recreated", async () => {
+      const initialActivity = [{ transaction: "0xinitial" } as Transaction];
+
+      const { result } = renderHook(() =>
+        useActivityData(1, 20, TypeFilter.SALES, ContractFilter.ALL, {
+          activity: initialActivity,
+          totalResults: 1,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.fetching).toBe(false);
+      });
+
+      expect(mockFetchUrl).toHaveBeenCalledTimes(1);
+    });
+
     it("refetches when typeFilter changes", async () => {
       const { rerender } = renderHook(
         ({ typeFilter }) => useActivityData(1, 20, typeFilter, "All" as any),

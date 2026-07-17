@@ -386,6 +386,26 @@ describe("useNFTCollections", () => {
   });
 
   describe("Hook Behavior with Initial Collections", () => {
+    it("does not refetch when only the initial-collections wrapper is recreated", async () => {
+      const initialNfts: NFT[] = [];
+      const initialNextgenCollections: NextGenCollection[] = [];
+
+      const { result } = renderHook(() =>
+        useNFTCollections({
+          nfts: initialNfts,
+          nextgenCollections: initialNextgenCollections,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockFetchUrl).toHaveBeenCalledTimes(2);
+      expect(mockFetchAllPages).toHaveBeenCalledTimes(1);
+      expect(mockCommonApiFetch).toHaveBeenCalledTimes(1);
+    });
+
     it("does not refetch when initialCollections prop changes (by design)", () => {
       // The hook only reads initialCollections on mount - it doesn't watch for changes
       // This is correct behavior as initialCollections is meant to be SSR data
