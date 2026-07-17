@@ -121,11 +121,7 @@ export default function AwsRumProvider({
         awsRumRef.current = awsRum;
         // Optional: Store the instance globally for manual tracking if needed
         window.awsRum = awsRum;
-        lastRecordedPageIdRef.current = recordAwsRumPageView(
-          awsRum,
-          latestPathnameRef.current,
-          lastRecordedPageIdRef.current
-        );
+        lastRecordedPageIdRef.current = initialPageId;
       } catch (error) {
         // Silently handle errors to prevent breaking the application
         console.warn("AWS RUM: Failed to initialize", error);

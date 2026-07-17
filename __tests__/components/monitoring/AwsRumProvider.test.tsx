@@ -13,11 +13,21 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("aws-rum-web", () => {
+  type MockPluginContext = {
+    record: (eventType: string, eventData: object) => void;
+    recordPageView: (pageId: string) => void;
+  };
+  type MockPluginConfig = {
+    readonly eventPluginsToLoad?: Array<{
+      load?: (context: MockPluginContext) => void;
+    }>;
+  };
   const createPlugin = (
     pluginId: string
   ): new (config?: unknown) => {
     readonly config: unknown;
     getPluginId: () => string;
+    load: (context: MockPluginContext) => void;
   } =>
     class {
       readonly config: unknown;
@@ -29,14 +39,35 @@ jest.mock("aws-rum-web", () => {
       getPluginId(): string {
         return pluginId;
       }
+
+      load(context: MockPluginContext): void {
+        void context;
+      }
     };
 
   return {
-    AwsRum: jest.fn(() => ({
-      disable: jest.fn(),
-      recordEvent: jest.fn(),
-      recordPageView: jest.fn(),
-    })),
+    AwsRum: jest.fn(
+      (
+        _applicationId: string,
+        _applicationVersion: string,
+        _region: string,
+        config: MockPluginConfig
+      ) => {
+        const instance = {
+          disable: jest.fn(),
+          recordEvent: jest.fn(),
+          recordPageView: jest.fn(),
+        };
+        const pluginContext: MockPluginContext = {
+          record: instance.recordEvent,
+          recordPageView: instance.recordPageView,
+        };
+        config.eventPluginsToLoad?.forEach((plugin) => {
+          plugin.load?.(pluginContext);
+        });
+        return instance;
+      }
+    ),
     FetchPlugin: createPlugin("fetch"),
     JsErrorPlugin: createPlugin("js-error"),
     NavigationPlugin: createPlugin("navigation"),
@@ -181,6 +212,7 @@ describe("AwsRumProvider", () => {
     expect(getMockAwsRumInstance().recordPageView).toHaveBeenCalledWith(
       "/[user]"
     );
+    expect(getMockAwsRumInstance().recordPageView).toHaveBeenCalledTimes(1);
     expect(
       JSON.stringify(getMockAwsRumInstance().recordPageView.mock.calls)
     ).not.toContain("private-profile-handle");
