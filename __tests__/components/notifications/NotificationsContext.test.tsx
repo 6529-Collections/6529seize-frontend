@@ -219,7 +219,7 @@ describe("NotificationsContext initialization", () => {
     expect(PushNotifications.register).not.toHaveBeenCalled();
   });
 
-  it("records a recovered iOS push permission helper error as a warning breadcrumb", async () => {
+  it("records a denied permission response after retrying the exact iOS helper error", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
     const sentry = require("@sentry/nextjs");
     const helperApplicationError = new Error(
@@ -236,12 +236,14 @@ describe("NotificationsContext initialization", () => {
       expect(sentry.addBreadcrumb).toHaveBeenCalledWith({
         category: "notifications",
         level: "warning",
-        message: "Push permission request recovered after native error.",
+        message:
+          "Push permission request completed after native error retry.",
         data: {
           component: "NotificationsProvider",
           operation: "requestPermissions",
           retryable: true,
-          recovered: true,
+          retry_succeeded: true,
+          permission_status: "denied",
           error_name: "Error",
           error_message: "Couldn’t communicate with a helper application.",
         },
@@ -252,6 +254,40 @@ describe("NotificationsContext initialization", () => {
     expect(sentry.addBreadcrumb).toHaveBeenCalledTimes(1);
     expect(sentry.captureException).not.toHaveBeenCalled();
     expect(PushNotifications.register).not.toHaveBeenCalled();
+  });
+
+  it("continues registration when the exact iOS helper error retry grants permission", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const sentry = require("@sentry/nextjs");
+    const helperApplicationError = new Error(
+      "Couldn’t communicate with a helper application."
+    );
+
+    PushNotifications.requestPermissions
+      .mockRejectedValueOnce(helperApplicationError)
+      .mockResolvedValueOnce({ receive: "granted" });
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(
+      () => {
+        expect(PushNotifications.register).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 2000 }
+    );
+
+    expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(2);
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message:
+          "Push permission request completed after native error retry.",
+        data: expect.objectContaining({
+          retry_succeeded: true,
+          permission_status: "granted",
+        }),
+      })
+    );
+    expect(sentry.captureException).not.toHaveBeenCalled();
   });
 
   it("captures a persistent iOS push permission helper error", async () => {
@@ -285,7 +321,8 @@ describe("NotificationsContext initialization", () => {
     expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(2);
     expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        message: "Push permission request recovered after native error.",
+        message:
+          "Push permission request completed after native error retry.",
       })
     );
   });
@@ -319,7 +356,8 @@ describe("NotificationsContext initialization", () => {
     expect(PushNotifications.requestPermissions).not.toHaveBeenCalled();
     expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        message: "Push permission request recovered after native error.",
+        message:
+          "Push permission request completed after native error retry.",
       })
     );
   });
@@ -354,7 +392,8 @@ describe("NotificationsContext initialization", () => {
 
     expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        message: "Push permission request recovered after native error.",
+        message:
+          "Push permission request completed after native error retry.",
       })
     );
     expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(1);
