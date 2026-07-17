@@ -168,9 +168,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           type="button"
           aria-label="Previous token"
           disabled={!hasPreviousToken}
-          data-tooltip-id={
-            hasPreviousToken ? `prev-token-${props.token.id}` : undefined
-          }
+          {...(hasPreviousToken && {
+            "data-tooltip-id": `prev-token-${props.token.id}`,
+          })}
           onClick={() => {
             if (!hasPreviousToken) {
               return;
@@ -207,9 +207,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           type="button"
           aria-label="Next token"
           disabled={!hasNextToken}
-          data-tooltip-id={
-            hasNextToken ? `next-token-${props.token.id}` : undefined
-          }
+          {...(hasNextToken && {
+            "data-tooltip-id": `next-token-${props.token.id}`,
+          })}
           onClick={() => {
             if (!hasNextToken) {
               return;

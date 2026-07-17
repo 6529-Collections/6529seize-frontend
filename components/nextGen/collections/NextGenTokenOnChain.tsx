@@ -55,7 +55,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
 
   useEffect(() => {
     if (tokenUriRead.isLoading) {
-      return;
+      return undefined;
     }
 
     const data = tokenUriRead.data;
@@ -92,6 +92,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
 
     setTokenNotFound(true);
     setFetchingMetadata(false);
+    return undefined;
   }, [tokenUriRead.data, tokenUriRead.isLoading]);
 
   const ownerRead = useReadContract({
