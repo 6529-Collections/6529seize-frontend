@@ -532,6 +532,7 @@ function hasTwitterConfigRawFrameSignature(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   // beforeSend receives this Sentry wrapper before source-map processing.
+  // Keep the cohort-backed coordinates exact so signature drift fails open.
   return (
     Array.isArray(frames) &&
     frames.length === 4 &&

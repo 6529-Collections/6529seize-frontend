@@ -3917,6 +3917,24 @@ describe("sentry-client-filters", () => {
     }
   );
 
+  it.each([
+    ["a missing request", undefined],
+    ["missing request headers", {}],
+    ["an empty User-Agent", { headers: { "User-Agent": "" } }],
+  ] satisfies Array<[string, TestSentryClientEvent["request"]]>)(
+    "does not filter the raw Twitter CONFIG shape with %s",
+    (_label, request) => {
+      // Arrange
+      const event = { ...createTwitterConfigRawEvent(), request };
+
+      // Act
+      const result = shouldFilterTwitterConfigReferenceError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
   it("does not filter CONFIG reference errors outside Twitter", () => {
     // Arrange
     const event = createTwitterConfigEvent({
