@@ -1,130 +1,130 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
+    "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
 
-  // 1) Tell Knip where your code lives (project graph)
-  "project": [
-    "**/*.{ts,tsx,js,jsx,cjs,mjs}",
-    "!{node_modules,.next,coverage,public}/**",
-    "!{tmp_gen_outp,tmp_gen_final}/**",
-    "!.generated-backup-*/**",
-  ],
-
-  // 2) Optionally add entries Knip can't infer from scripts/configs
-  //    (Next.js entries are auto-added by the Next plugin)
-  "entry": [
-    "scripts/**/*.{ts,js,cjs,mjs}", // local CLIs used via package.json scripts
-    "bin/**/*.mjs", // repo-local Node CLIs launched from shell helpers
-    "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
-    "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
-    "ops/scripts/release-bus-status.mjs", // deployment CLI invoked by deploy-6529 instructions
-    "app/**/route.{ts,tsx}", // Next App Router route handlers (if used)
-    "standalone/standalone-memes-mint/src/app/layout.tsx",
-    "standalone/standalone-memes-mint/src/app/page.tsx",
-    "standalone/standalone-memes-mint/src/next.config.ts",
-    "standalone/standalone-memes-mint/src/postcss.config.js",
-    "standalone/standalone-memes-mint/src/tailwind.config.cjs",
-    "eslint.config.single.mjs",
-    "eslint.config.tight.mjs",
-    "eslint.config.diff.mjs",
-    "eslint.config.single.mjs",
-    ".deepsec/deepsec.config.ts",
-    "jest.config.js",
-    "jest.setup.js",
-    "next-sitemap.build.cjs",
-    "next-sitemap.config.ts",
-    "ops/scripts/build-delegation-docs-content.mjs",
-    "playwright.config.ts",
-    "tests/support/composerSandboxServer.cjs",
-    "services/**/index.{ts,tsx}",
-  ],
-
-  // 3) Paths: Knip auto-imports TS path aliases from tsconfig,
-  //    but you can add manual aliases here if needed.
-  // "paths": { "@/*": ["./src/*"] },
-
-  // 4) Report unused exports even in entry files (private repos benefit from this)
-  "includeEntryExports": true,
-
-  // Ignore exports explicitly tagged as API endpoints (e.g. /** @api */)
-  "tags": ["-api"],
-
-  // 5) Generated code: keep analyzing, but avoid noisy "unused exports/files" here
-  "ignoreIssues": {
-    "__mocks__/**": ["files", "exports", "types"],
-    "__tests__/**": ["files", "exports", "types"],
-    "tests/**": ["files", "exports", "types"],
-    ".deepsec/deepsec.config.ts": ["unlisted", "exports"],
-    "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
-    // Backend operation-code catalog; several codes are intentionally
-    // declared before the tool implements them (see inline comments).
-    "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
-    // Public auth facades preserve pre-split type exports for stable imports.
-    "components/auth/Auth.tsx": ["types"],
-    "components/auth/SeizeConnectContext.tsx": ["types"],
-    "components/brain/left-sidebar/waves/HighlyRatedWavesToggle.tsx": [
-      "exports",
-      "types",
+    // 1) Tell Knip where your code lives (project graph)
+    "project": [
+      "**/*.{ts,tsx,js,jsx,cjs,mjs}",
+      "!{node_modules,.next,coverage,public}/**",
+      "!{tmp_gen_outp,tmp_gen_final}/**",
+      "!.generated-backup-*/**"
     ],
-    "components/drops/create/lexical/utils/rootContent.ts": ["exports"],
-    "components/utils/toast/AppToast.tsx": ["exports"],
-    "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
-    "hooks/useWavePreviewById.ts": ["exports"],
-    "services/**": ["files"],
-    "lib/storage/idb-keyval.ts": ["files"],
-    "playwright.config.ts": ["exports"],
-    "next-sitemap.build.cjs": ["exports"],
-    "next-sitemap.config.ts": ["exports"],
-    "jest.config.js": ["exports"],
-    "eslint.config.single.mjs": ["exports"],
-    "eslint.config.tight.mjs": ["exports"],
-    "eslint.config.diff.mjs": ["exports"],
-    "eslint.config.single.mjs": ["exports"],
-    "standalone/standalone-memes-mint/src/app/layout.tsx": ["exports"],
-    "standalone/standalone-memes-mint/src/app/page.tsx": ["exports"],
-    "standalone/standalone-memes-mint/src/next.config.ts": ["exports"],
-    "standalone/standalone-memes-mint/src/postcss.config.js": ["exports"],
-    "standalone/standalone-memes-mint/src/tailwind.config.cjs": ["exports"],
-    "utils/sentry-client-filters.ts": ["exports", "types"],
-    "lib/fetch/ssrFetch.ts": ["exports"],
-    "config/serverEnv.ts": ["exports"],
-  },
-  "ignoreFiles": [
-    "__mocks__/**",
-    "__tests__/**",
-    "**/*.test.{ts,tsx,js,jsx}",
-    "**/*.spec.{ts,tsx,js,jsx}",
-    "generated/**", // don't list generated files as "Unused files"
-    "tests/**",
-    "stubs/empty.js",
-  ],
-  "ignoreBinaries": [
-    "coderabbit",
-    // Capacitor CLI, run via npx inside the 6529-core-mobile checkout in
-    // .github/workflows/device-farm-qa.yml — not a dependency of this repo.
-    "cap",
-  ],
-  "ignoreDependencies": [
-    "pino-pretty",
-    "babel-jest",
-    "eslint-plugin-jsx-a11y",
-    "identity-obj-proxy",
-    "istanbul-lib-coverage",
-    "jest-environment-jsdom",
-    "nodemon",
-    "@openapitools/openapi-generator-cli",
-    "ts-jest",
-    "ts-morph",
-    "baseline-browser-mapping",
-    "react-doctor",
-  ],
 
-  // Disable Jest and Playwright plugins so test-only usages are reported
-  "jest": false,
-  "playwright": false,
+    // 2) Optionally add entries Knip can't infer from scripts/configs
+    //    (Next.js entries are auto-added by the Next plugin)
+    "entry": [
+      "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
+      "bin/**/*.mjs",                // repo-local Node CLIs launched from shell helpers
+      "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
+      "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
+      "ops/scripts/release-bus-status.mjs", // deployment CLI invoked by deploy-6529 instructions
+      "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
+      "standalone/standalone-memes-mint/src/app/layout.tsx",
+      "standalone/standalone-memes-mint/src/app/page.tsx",
+      "standalone/standalone-memes-mint/src/next.config.ts",
+      "standalone/standalone-memes-mint/src/postcss.config.js",
+      "standalone/standalone-memes-mint/src/tailwind.config.cjs",
+      "eslint.config.single.mjs",
+      "eslint.config.tight.mjs",
+      "eslint.config.diff.mjs",
+      "eslint.config.single.mjs",
+      ".deepsec/deepsec.config.ts",
+      "jest.config.js",
+      "jest.setup.js",
+      "next-sitemap.build.cjs",
+      "next-sitemap.config.ts",
+      "ops/scripts/build-delegation-docs-content.mjs",
+      "playwright.config.ts",
+      "tests/support/composerSandboxServer.cjs",
+      "services/**/index.{ts,tsx}"
+    ],
 
-  // 6) Make config mistakes visible in CI
-  "treatConfigHintsAsErrors": true,
+    // 3) Paths: Knip auto-imports TS path aliases from tsconfig,
+    //    but you can add manual aliases here if needed.
+    // "paths": { "@/*": ["./src/*"] },
 
-  // Plugins: usually automatic. Example to force-enable if needed:
-  // "playwright": true
-}
+    // 4) Report unused exports even in entry files (private repos benefit from this)
+    "includeEntryExports": true,
+
+    // Ignore exports explicitly tagged as API endpoints (e.g. /** @api */)
+    "tags": ["-api"],
+
+    // 5) Generated code: keep analyzing, but avoid noisy "unused exports/files" here
+    "ignoreIssues": {
+      "__mocks__/**": ["files", "exports", "types"],
+      "__tests__/**": ["files", "exports", "types"],
+      "tests/**": ["files", "exports", "types"],
+      ".deepsec/deepsec.config.ts": ["unlisted", "exports"],
+      "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
+      // Backend operation-code catalog; several codes are intentionally
+      // declared before the tool implements them (see inline comments).
+      "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
+      // Public auth facades preserve pre-split type exports for stable imports.
+      "components/auth/Auth.tsx": ["types"],
+      "components/auth/SeizeConnectContext.tsx": ["types"],
+      "components/brain/left-sidebar/waves/HighlyRatedWavesToggle.tsx": [
+        "exports",
+        "types"
+      ],
+      "components/drops/create/lexical/utils/rootContent.ts": ["exports"],
+      "components/utils/toast/AppToast.tsx": ["exports"],
+      "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
+      "hooks/useWavePreviewById.ts": ["exports"],
+      "services/**": ["files"],
+      "lib/storage/idb-keyval.ts": ["files"],
+      "playwright.config.ts": ["exports"],
+      "next-sitemap.build.cjs": ["exports"],
+      "next-sitemap.config.ts": ["exports"],
+      "jest.config.js": ["exports"],
+      "eslint.config.single.mjs": ["exports"],
+      "eslint.config.tight.mjs": ["exports"],
+      "eslint.config.diff.mjs": ["exports"],
+      "eslint.config.single.mjs": ["exports"],
+      "standalone/standalone-memes-mint/src/app/layout.tsx": ["exports"],
+      "standalone/standalone-memes-mint/src/app/page.tsx": ["exports"],
+      "standalone/standalone-memes-mint/src/next.config.ts": ["exports"],
+      "standalone/standalone-memes-mint/src/postcss.config.js": ["exports"],
+      "standalone/standalone-memes-mint/src/tailwind.config.cjs": ["exports"],
+      "utils/sentry-client-filters.ts": ["exports", "types"],
+      "lib/fetch/ssrFetch.ts": ["exports"],
+      "config/serverEnv.ts": ["exports"]
+    },
+    "ignoreFiles": [
+      "__mocks__/**",
+      "__tests__/**",
+      "**/*.test.{ts,tsx,js,jsx}",
+      "**/*.spec.{ts,tsx,js,jsx}",
+      "generated/**",        // don't list generated files as "Unused files"
+      "tests/**",
+      "stubs/empty.js"
+    ],
+    "ignoreBinaries": [
+      "coderabbit",
+      // Capacitor CLI, run via npx inside the 6529-core-mobile checkout in
+      // .github/workflows/device-farm-qa.yml — not a dependency of this repo.
+      "cap"
+    ],
+    "ignoreDependencies": [
+      "pino-pretty",
+      "babel-jest",
+      "eslint-plugin-jsx-a11y",
+      "identity-obj-proxy",
+      "istanbul-lib-coverage",
+      "jest-environment-jsdom",
+      "nodemon",
+      "@openapitools/openapi-generator-cli",
+      "ts-jest",
+      "ts-morph",
+      "baseline-browser-mapping",
+      "react-doctor"
+    ],
+
+    // Disable Jest and Playwright plugins so test-only usages are reported
+    "jest": false,
+    "playwright": false,
+
+    // 6) Make config mistakes visible in CI
+    "treatConfigHintsAsErrors": true
+
+    // Plugins: usually automatic. Example to force-enable if needed:
+    // "playwright": true
+  }
