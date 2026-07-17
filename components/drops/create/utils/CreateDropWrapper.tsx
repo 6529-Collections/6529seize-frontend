@@ -78,6 +78,12 @@ interface CreateDropWrapperProps {
   readonly showDropError?: boolean | undefined;
   readonly wave: CreateDropWrapperWaveProps | null;
   readonly waveId: string | null;
+  /**
+   * Pins the rendering branch regardless of breakpoint. Embedded usages
+   * (the create-wave Description step) must stay inline (DESKTOP): the
+   * MOBILE branch is a modal sheet that cannot host a page-flow step.
+   */
+  readonly forceScreenType?: CreateDropScreenType | undefined;
   readonly children: React.ReactNode;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
@@ -137,6 +143,7 @@ const CreateDropWrapper = forwardRef<
       showDropError = false,
       wave: waveProps,
       waveId,
+      forceScreenType,
       children,
       setIsStormMode,
       setViewType,
@@ -170,15 +177,22 @@ const CreateDropWrapper = forwardRef<
       }
     }, [hasValidWalletAuth, address]);
     const [screenType, setScreenType] = useState<CreateDropScreenType>(
-      CreateDropScreenType.DESKTOP
+      forceScreenType ?? CreateDropScreenType.DESKTOP
     );
     useEffect(() => {
+      // Embedded usages (the create-wave Description step) pin the inline
+      // rendering: the MOBILE branch wraps the editor in a modal sheet, which
+      // cannot host a page-flow step (dismissing it would kill the step).
+      if (forceScreenType) {
+        setScreenType(forceScreenType);
+        return;
+      }
       if (breakpoint === "LG") {
         setScreenType(CreateDropScreenType.DESKTOP);
       } else {
         setScreenType(CreateDropScreenType.MOBILE);
       }
-    }, [breakpoint]);
+    }, [breakpoint, forceScreenType]);
 
     const prevWaveIdRef = useRef<string | null>(waveProps?.id ?? null);
     const isWaveSwitch = prevWaveIdRef.current !== (waveProps?.id ?? null);

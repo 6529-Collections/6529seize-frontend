@@ -249,6 +249,20 @@ export function useWaveConfig() {
       });
       if (newErrors.length) {
         setErrors(newErrors);
+        // The Next button can sit a full screen below the offending field on
+        // phones, where a validation failure with no visible reaction reads
+        // as a dead button. Focus the first invalid field and bring it back
+        // on screen once the error state has rendered.
+        setTimeout(() => {
+          const invalidField = document.querySelector<HTMLElement>(
+            '[aria-invalid="true"]'
+          );
+          if (!invalidField) {
+            return;
+          }
+          invalidField.focus({ preventScroll: true });
+          invalidField.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
         return;
       }
     }

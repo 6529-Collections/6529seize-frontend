@@ -72,7 +72,11 @@ export default function DateAccordion({
             {!isExpanded &&
               collapsedContent !== undefined &&
               collapsedContent !== null && (
-                <div className="tw-opacity-80 tw-transition-opacity tw-duration-200 hover:tw-opacity-100">
+                // The summary mini-cards need more room than the fixed-height
+                // header offers on small screens, where they overflow and
+                // paint over the title; the collapsed title alone carries the
+                // state there.
+                <div className="tw-hidden tw-opacity-80 tw-transition-opacity tw-duration-200 hover:tw-opacity-100 lg:tw-block">
                   {collapsedContent}
                 </div>
               )}

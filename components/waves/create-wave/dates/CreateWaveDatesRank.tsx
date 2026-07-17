@@ -38,7 +38,6 @@ export default function CreateWaveDatesRank({
     decisions: true,
     rolling: dates.isRolling,
   });
-  const [hasAutoCollapsedStart, setHasAutoCollapsedStart] = useState(false);
   const rankFutureDateError =
     CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE;
   const endDateBeforeVotingStartError =
@@ -137,16 +136,6 @@ export default function CreateWaveDatesRank({
     setDates(normalizedDates);
   };
 
-  const handleDecisionsInteraction = () => {
-    if (!hasAutoCollapsedStart) {
-      setExpandedSections((prev) => ({
-        ...prev,
-        start: false,
-      }));
-      setHasAutoCollapsedStart(true);
-    }
-  };
-
   const handleRollingEnabled = () => {
     setExpandedSections((prev) =>
       prev.rolling
@@ -177,7 +166,6 @@ export default function CreateWaveDatesRank({
             onRollingEnabled={handleRollingEnabled}
             isExpanded={expandedSections.decisions}
             setIsExpanded={() => toggleSection("decisions")}
-            onInteraction={handleDecisionsInteraction}
           />
 
           {dates.subsequentDecisions.length > 0 && isRollingMode && (
