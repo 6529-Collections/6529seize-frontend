@@ -21,9 +21,9 @@ export {
   shouldFilterByFilenameExceptions,
   shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
-  shouldFilterSentryRouteParameterizationError,
   shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";

@@ -54,10 +54,8 @@ import {
   hasAppOwnedFrame,
   hasGifPickerTenorManagerFrame,
   hasInjectedWasmCspFrameSignature,
-  hasLikelyAppOwnedFrame,
   hasNativeJsonStringifyFrame,
   hasReactDomNotFoundErrorSignature,
-  hasSentryRouteParameterizationFrame,
   isSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
 
@@ -69,6 +67,14 @@ const twitterUserAgentPattern =
   /(?:^|[\s;(])twitter(?:android| for iphone)?\//i;
 const twitterConfigAddEventListenerMechanism =
   "auto.browser.browserapierrors.addEventListener";
+const messagesRoutePath = "/messages";
+const metaMaskNavigationMinimumDelaySeconds = 0.075;
+const metaMaskNavigationMaximumDelaySeconds = 0.25;
+const cyclicJsonTimerScheduleOriginTag =
+  "cyclic_json_timer_schedule_origin";
+const sentryBrowserHelpersPathToken = "@sentry/browser/src/helpers.ts";
+const sentryBrowserRawTimerWrapperLineNumber = 7;
+const sentryBrowserRawTimerWrapperColumnNumber = 4858;
 
 function shouldFilterFilenameExceptions(
   frames: SentryStackFrame[] | undefined
@@ -212,16 +218,6 @@ function matchesContextToken(value: string, tokens: string[]): boolean {
   return tokens.some((token) => normalized.includes(token));
 }
 
-function isIosWebViewUserAgent(value: string): boolean {
-  const normalized = value.toLowerCase();
-  return (
-    /\b(?:iphone|ipad|ipod)\b/.test(normalized) &&
-    normalized.includes("applewebkit/") &&
-    normalized.includes("mobile/") &&
-    !normalized.includes("safari/")
-  );
-}
-
 export function hasMetaMaskMobileWebViewContext(
   event: SentryClientEvent
 ): boolean {
@@ -241,19 +237,109 @@ export function hasMetaMaskMobileWebViewContext(
   );
 }
 
-function hasMobileSafariWebViewContext(event: SentryClientEvent): boolean {
-  const contextValues = getRouteParameterizationContextValues(event);
-  const userAgentValues = getRouteParameterizationUserAgentValues(event);
+function hasIosContext(event: SentryClientEvent): boolean {
+  const values = [
+    ...getRouteParameterizationContextValues(event),
+    ...getRouteParameterizationUserAgentValues(event),
+  ];
+
+  return values.some((value) => {
+    const normalized = value.toLowerCase();
+    return (
+      /\bios(?:\s|$)/.test(normalized) ||
+      /\b(?:iphone|ipad|ipod)\b/.test(normalized)
+    );
+  });
+}
+
+function isMessagesRoute(value: string | undefined): boolean {
+  if (!value) {
+    return false;
+  }
+
+  const path = getRoutePathFromString(value);
   return (
-    contextValues.some((value) =>
-      matchesContextToken(value, mobileSafariWebViewContextTokens)
-    ) ||
-    userAgentValues.some(
-      (value) =>
-        matchesContextToken(value, mobileSafariWebViewContextTokens) ||
-        isIosWebViewUserAgent(value)
-    )
+    path === messagesRoutePath ||
+    path === `${messagesRoutePath}/` ||
+    path?.startsWith(`${messagesRoutePath}/`) === true
   );
+}
+
+function hasMessagesRoute(event: SentryClientEvent): boolean {
+  return [
+    event.transaction,
+    getStringValue(event.tags?.["transaction"]),
+    getStringValue(event.tags?.["url"]),
+    event.request?.url,
+  ].some(isMessagesRoute);
+}
+
+function isSentryBrowserTimerWrapperFrame(frame: SentryStackFrame): boolean {
+  const paths = getFramePaths(frame);
+  if (paths.length === 0) {
+    return false;
+  }
+
+  const isSymbolicatedWrapper =
+    frame.function === "r" &&
+    frame.lineno === 111 &&
+    frame.colno === 58 &&
+    paths.every((path) => path.includes(sentryBrowserHelpersPathToken));
+  if (isSymbolicatedWrapper) {
+    return true;
+  }
+
+  return (
+    frame.function === "n" &&
+    frame.lineno === sentryBrowserRawTimerWrapperLineNumber &&
+    frame.colno === sentryBrowserRawTimerWrapperColumnNumber &&
+    paths.every((path) => anonymousUnsafeEvalRawChunkPathPattern.test(path))
+  );
+}
+
+function hasMetaMaskNavigationFrameSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.length === 2 &&
+    hasNativeJsonStringifyFrame(frames) &&
+    frames.some(isSentryBrowserTimerWrapperFrame)
+  );
+}
+
+function hasFirstPartyDiagnosticProvenance(event: SentryClientEvent): boolean {
+  const scheduleOrigin = event.tags?.[cyclicJsonTimerScheduleOriginTag];
+  return scheduleOrigin === "first_party" || scheduleOrigin === "mixed";
+}
+
+function hasRecentMessagesNavigation(event: SentryClientEvent): boolean {
+  const eventTimestamp = event.timestamp;
+  if (typeof eventTimestamp !== "number" || !Number.isFinite(eventTimestamp)) {
+    return false;
+  }
+
+  return getBreadcrumbValues(event).some((breadcrumb) => {
+    const breadcrumbTimestamp = breadcrumb.timestamp;
+    const data = breadcrumb.data;
+    if (
+      breadcrumb.category !== "navigation" ||
+      typeof breadcrumbTimestamp !== "number" ||
+      !Number.isFinite(breadcrumbTimestamp) ||
+      !data ||
+      typeof data["from"] !== "string" ||
+      typeof data["to"] !== "string" ||
+      !isMessagesRoute(data["to"])
+    ) {
+      return false;
+    }
+
+    const delaySeconds = eventTimestamp - breadcrumbTimestamp;
+    return (
+      delaySeconds >= metaMaskNavigationMinimumDelaySeconds &&
+      delaySeconds <= metaMaskNavigationMaximumDelaySeconds
+    );
+  });
 }
 
 function matchesWasmCspUnsafeEvalMessage(value: string): boolean {
@@ -671,12 +757,15 @@ export function shouldFilterGifPickerTenorCategoriesError(
   );
 }
 
-export function shouldFilterSentryRouteParameterizationError(
+export function shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(
   event: SentryClientEvent
 ): boolean {
-  // Sentry SDK route parameterization noise observed in iOS WKWebView;
-  // keep app-owned and generic browser cyclic JSON errors.
-  const value = event.exception?.values?.[0];
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
   if (
     value?.type !== "TypeError" ||
     value.value !== sentryRouteParameterizationMessage
@@ -692,22 +781,16 @@ export function shouldFilterSentryRouteParameterizationError(
     return false;
   }
 
-  const frames = value.stacktrace?.frames;
-  const framesWithoutSentryRouteParameterization = frames?.filter(
-    (frame) => !isSentryRouteParameterizationFrame(frame)
-  );
-  if (
-    hasLikelyAppOwnedFrame(framesWithoutSentryRouteParameterization) ||
-    !hasNativeJsonStringifyFrame(frames)
-  ) {
+  if (hasFirstPartyDiagnosticProvenance(event)) {
     return false;
   }
 
   return (
-    (hasSentryRouteParameterizationFrame(frames) ||
-      hasRouteParameterizationRouteEvidence(event)) &&
-    (hasMetaMaskMobileWebViewContext(event) ||
-      hasMobileSafariWebViewContext(event))
+    hasMetaMaskNavigationFrameSignature(value.stacktrace?.frames) &&
+    hasMetaMaskMobileWebViewContext(event) &&
+    hasIosContext(event) &&
+    hasMessagesRoute(event) &&
+    hasRecentMessagesNavigation(event)
   );
 }
 

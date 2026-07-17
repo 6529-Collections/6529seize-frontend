@@ -429,6 +429,55 @@ describe("instrumentation-client", () => {
     ...overrides,
   });
 
+  const createMetaMaskMobileSpaNavigationCyclicJsonEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    createSentryRouteParameterizationEvent(
+      [
+        {
+          filename: "app:///_next/static/chunks/observed-metamask.js",
+          abs_path: "app:///_next/static/chunks/observed-metamask.js",
+          function: "n",
+          lineno: 7,
+          colno: 4858,
+          in_app: true,
+        },
+        nativeJsonStringifyFrame,
+      ],
+      {
+        timestamp: 1000.115,
+        transaction: "/messages",
+        request: {
+          url: "https://6529.io/messages/example",
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebView MetaMaskMobile",
+          },
+        },
+        contexts: {
+          browser: { name: "Mobile Safari UI/WKWebView" },
+          device: { family: "iPhone" },
+          os: { name: "iOS", version: "18.7" },
+        },
+        tags: {
+          browser: "Mobile Safari UI/WKWebView",
+          "browser.name": "Mobile Safari UI/WKWebView",
+          os: "iOS 18.7",
+          "os.name": "iOS",
+          transaction: "/messages",
+          url: "/messages/example",
+        },
+        breadcrumbs: [
+          {
+            timestamp: 1000,
+            category: "navigation",
+            data: { from: "/waves/example", to: "/messages/example" },
+          },
+        ],
+        ...overrides,
+      }
+    );
+
   const createAppKitCoinbaseBreadcrumbs = () => [
     {
       category: "console",
@@ -1388,6 +1437,48 @@ describe("instrumentation-client", () => {
   it("keeps cyclic JSON timer errors for origin diagnostics", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("drops the exact MetaMask Mobile messages navigation error", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it.each(["first_party", "mixed"])(
+    "keeps exact MetaMask navigation errors with %s diagnostic provenance",
+    (scheduleOrigin) => {
+      const beforeSend = loadBeforeSend();
+      const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        tags: {
+          cyclic_json_timer_schedule_origin: scheduleOrigin,
+        },
+      });
+
+      const result = beforeSend(event);
+
+      expect(result).not.toBeNull();
+    }
+  );
+
+  it("keeps a MetaMask navigation near miss outside the timing window", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+      breadcrumbs: [
+        {
+          timestamp: 999,
+          category: "navigation",
+          data: { from: "/waves/example", to: "/messages/example" },
+        },
+      ],
+    });
 
     const result = beforeSend(event);
 

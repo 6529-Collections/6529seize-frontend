@@ -19,7 +19,7 @@ import {
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
-  shouldFilterSentryRouteParameterizationError,
+  shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -1138,10 +1138,57 @@ describe("sentry-client-filters", () => {
     ],
   ];
 
-  const createSentryRouteParameterizationEvent = (
-    overrides: TestSentryClientEventOverrides = {}
-  ): TestSentryClientEvent => ({
-    transaction: "/waves/:wave",
+  const processedMetaMaskNavigationFrames: SentryStackFrame[] = [
+    {
+      filename:
+        "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+      abs_path:
+        "turbopack:///[project]/node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+      function: "r",
+      lineno: 111,
+      colno: 58,
+      in_app: false,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "stringify",
+      in_app: false,
+    },
+  ];
+
+  const rawMetaMaskNavigationFrames: SentryStackFrame[] = [
+    {
+      filename: "app:///_next/static/chunks/observed-metamask.js",
+      abs_path: "app:///_next/static/chunks/observed-metamask.js",
+      function: "n",
+      lineno: 7,
+      colno: 4858,
+      in_app: true,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "stringify",
+      in_app: true,
+    },
+  ];
+
+  type MetaMaskNavigationEventOptions = {
+    frames?: SentryStackFrame[] | undefined;
+    valueOverrides?: Partial<SentryExceptionValue> | undefined;
+    additionalException?: boolean | undefined;
+    eventOverrides?: TestSentryClientEventOverrides | undefined;
+  };
+
+  const createMetaMaskMobileSpaNavigationCyclicJsonEvent = ({
+    frames = processedMetaMaskNavigationFrames,
+    valueOverrides = {},
+    additionalException = false,
+    eventOverrides = {},
+  }: MetaMaskNavigationEventOptions = {}): TestSentryClientEvent => ({
+    timestamp: 1000.115,
+    transaction: "/messages",
     exception: {
       values: [
         {
@@ -1152,48 +1199,70 @@ describe("sentry-client-filters", () => {
             handled: false,
           },
           stacktrace: {
-            frames: [
-              {
-                filename: "[native code]",
-                function: "stringify",
-                in_app: true,
-              },
-            ],
+            frames,
           },
+          ...valueOverrides,
         },
+        ...(additionalException
+          ? [
+              {
+                type: "Error",
+                value: "A separate application failure",
+              },
+            ]
+          : []),
       ],
     },
     request: {
-      url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+      url: "https://6529.io/messages/example",
+      headers: {
+        "User-Agent": metaMaskMobileWebViewUserAgent,
+      },
     },
     contexts: {
-      app: {
-        app_name: "MetaMaskMobile",
-      },
       browser: {
         name: "Mobile Safari UI/WKWebView",
+      },
+      device: {
+        family: "iPhone",
+      },
+      os: {
+        name: "iOS",
+        version: "18.7",
       },
     },
     tags: {
       browser: "Mobile Safari UI/WKWebView",
       "browser.name": "Mobile Safari UI/WKWebView",
+      os: "iOS 18.7",
+      "os.name": "iOS",
+      transaction: "/messages",
+      url: "/messages/example",
     },
     breadcrumbs: [
       {
+        timestamp: 1000,
         category: "navigation",
         data: {
-          from: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
-          to: "/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+          from: "/waves/example",
+          to: "/messages/example",
         },
       },
     ],
-    ...overrides,
+    ...eventOverrides,
   });
+
+  const createCyclicJsonTimerEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+      eventOverrides: overrides,
+    });
 
   const createObservedSentryRouteParameterizationEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
-    createSentryRouteParameterizationEvent({
+    createCyclicJsonTimerEvent({
       transaction: "/:user",
       request: {
         url: "https://6529.io/york",
@@ -1249,7 +1318,7 @@ describe("sentry-client-filters", () => {
   const createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
-    createSentryRouteParameterizationEvent({
+    createCyclicJsonTimerEvent({
       transaction: "/waves/:wave",
       request: {
         url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
@@ -1283,7 +1352,7 @@ describe("sentry-client-filters", () => {
   const createObservedIosWkWebViewWaveRouteParameterizationEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
-    createSentryRouteParameterizationEvent({
+    createCyclicJsonTimerEvent({
       transaction: "/waves",
       request: {
         url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
@@ -4232,49 +4301,171 @@ describe("sentry-client-filters", () => {
     }
   );
 
-  it("filters Sentry route parameterization cyclic JSON errors", () => {
+  it("filters the exact processed MetaMask Mobile messages navigation error", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent();
+    const event = createCyclicJsonTimerEvent();
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(true);
   });
 
-  it("filters observed MetaMaskMobile WKWebView wave route parameterization cyclic JSON errors", () => {
+  it("filters the exact raw MetaMask Mobile messages navigation error", () => {
+    // Arrange
+    const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+      frames: rawMetaMaskNavigationFrames,
+    });
+
+    // Act
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    [
+      "a different message",
+      createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        valueOverrides: { value: "Converting circular structure to JSON" },
+      }),
+    ],
+    [
+      "a different mechanism",
+      createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        valueOverrides: {
+          mechanism: {
+            type: "auto.browser.browserapierrors.requestAnimationFrame",
+            handled: false,
+          },
+        },
+      }),
+    ],
+    [
+      "a handled exception",
+      createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        valueOverrides: {
+          mechanism: {
+            type: __testing.sentryRouteParameterizationMechanismType,
+            handled: true,
+          },
+        },
+      }),
+    ],
+    [
+      "multiple exceptions",
+      createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        additionalException: true,
+      }),
+    ],
+    [
+      "no event timestamp",
+      createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        eventOverrides: { timestamp: undefined },
+      }),
+    ],
+    [
+      "stale navigation timing",
+      createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        eventOverrides: {
+          breadcrumbs: [
+            {
+              timestamp: 999,
+              category: "navigation",
+              data: { from: "/waves/example", to: "/messages/example" },
+            },
+          ],
+        },
+      }),
+    ],
+    [
+      "a mismatched navigation destination",
+      createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        eventOverrides: {
+          breadcrumbs: [
+            {
+              timestamp: 1000,
+              category: "navigation",
+              data: { from: "/messages", to: "/waves/example" },
+            },
+          ],
+        },
+      }),
+    ],
+    [
+      "a near-miss Sentry wrapper coordinate",
+      createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        frames: [
+          { ...processedMetaMaskNavigationFrames[0], colno: 59 },
+          processedMetaMaskNavigationFrames[1]!,
+        ],
+      }),
+    ],
+  ] satisfies Array<[string, TestSentryClientEvent]>)(
+    "preserves the MetaMask messages cyclic JSON near miss with %s",
+    (_caseName, event) => {
+      // Act
+      const result =
+        shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it.each(["first_party", "mixed"])(
+    "preserves exact events with %s diagnostic provenance",
+    (scheduleOrigin) => {
+      // Arrange
+      const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+        eventOverrides: {
+          tags: { cyclic_json_timer_schedule_origin: scheduleOrigin },
+        },
+      });
+
+      // Act
+      const result =
+        shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it("preserves MetaMask Mobile cyclic JSON errors on a waves route", () => {
     // Arrange
     const event =
       createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent();
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters observed iOS WKWebView wave route parameterization cyclic JSON errors without app context", () => {
+  it("preserves generic iOS WKWebView cyclic JSON errors", () => {
     // Arrange
     const event = createObservedIosWkWebViewWaveRouteParameterizationEvent();
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters the observed Sentry CP notifications event when the SDK frame is marked in-app", () => {
+  it("preserves the Sentry route-parameterization notifications event", () => {
     // Arrange
     const event = createObservedSentryCpNotificationsEvent();
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("preserves the observed Sentry CP event when a real app-owned frame is present", () => {
@@ -4290,13 +4481,13 @@ describe("sentry-client-filters", () => {
     ]);
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
   });
 
-  it("filters the observed Sentry CP event when native stringify is marked in-app", () => {
+  it("preserves the Sentry notifications event when native stringify is marked in-app", () => {
     // Arrange
     const frames = observedSentryCpNotificationsFrames.map((frame) =>
       frame.function === "stringify" ? { ...frame, in_app: true } : frame
@@ -4304,26 +4495,26 @@ describe("sentry-client-filters", () => {
     const event = createObservedSentryCpNotificationsEvent({}, frames);
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters Sentry route parameterization errors with the Sentry parameterization frame outside route bounds", () => {
+  it("preserves Sentry route-parameterization errors outside messages", () => {
     // Arrange
     const event = createObservedSentryRouteParameterizationEvent();
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters MetaMaskMobile WebView route parameterization errors on the memes mint route", () => {
+  it("preserves MetaMask Mobile cyclic JSON errors on the memes mint route", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       transaction: "/the-memes/mint",
       request: {
         url: "https://6529.io/the-memes/mint",
@@ -4337,15 +4528,15 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("uses the runtime user agent for MetaMaskMobile WebView route parameterization errors", () => {
+  it("preserves cyclic JSON errors on another route despite a MetaMask runtime user agent", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       transaction: "/the-memes/mint",
       request: {
         url: "https://6529.io/the-memes/mint",
@@ -4357,16 +4548,16 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = withRuntimeUserAgent(metaMaskMobileWebViewUserAgent, () =>
-      shouldFilterSentryRouteParameterizationError(event)
+      shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event)
     );
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("does not filter cyclic JSON errors with app-owned frames", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       exception: {
         values: [
           {
@@ -4396,7 +4587,7 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
@@ -4404,7 +4595,7 @@ describe("sentry-client-filters", () => {
 
   it("does not filter cyclic JSON errors with app-owned source frames", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       transaction: "/the-memes/mint",
       request: {
         url: "https://6529.io/the-memes/mint",
@@ -4444,7 +4635,7 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
@@ -4488,7 +4679,7 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
@@ -4496,7 +4687,7 @@ describe("sentry-client-filters", () => {
 
   it("does not filter cyclic JSON errors without the Sentry browser API mechanism", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       exception: {
         values: [
           {
@@ -4521,28 +4712,28 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
   });
 
-  it("filters cyclic JSON errors without navigation breadcrumbs when MetaMaskMobile WebView context is present", () => {
+  it("preserves cyclic JSON errors without navigation timing evidence", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       breadcrumbs: [],
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("does not filter cyclic JSON route parameterization errors without MetaMaskMobile WKWebView context", () => {
+  it("preserves cyclic JSON errors without MetaMask Mobile context", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       contexts: {
         browser: {
           name: "Mobile Safari",
@@ -4552,10 +4743,17 @@ describe("sentry-client-filters", () => {
         browser: "Mobile Safari",
         "browser.name": "Mobile Safari",
       },
+      request: {
+        url: "https://6529.io/messages/example",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+        },
+      },
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
@@ -4563,7 +4761,7 @@ describe("sentry-client-filters", () => {
 
   it("does not filter MetaMaskMobile route parameterization errors without WKWebView evidence", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       request: {
         url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
         headers: {
@@ -4576,13 +4774,13 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
   });
 
-  it("filters WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
+  it("preserves WKWebView cyclic JSON errors without MetaMask Mobile evidence", () => {
     // Arrange
     const event =
       createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent({
@@ -4596,15 +4794,15 @@ describe("sentry-client-filters", () => {
       });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("does not filter MetaMaskMobile route parameterization errors without route evidence", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       transaction: undefined,
       request: {
         headers: {
@@ -4617,7 +4815,7 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
@@ -4625,7 +4823,7 @@ describe("sentry-client-filters", () => {
 
   it("does not filter MetaMaskMobile route parameterization errors outside known route bounds", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       transaction: "/about",
       request: {
         url: "https://6529.io/about",
@@ -4642,15 +4840,15 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
     expect(result).toBe(false);
   });
 
-  it("filters MetaMaskMobile route parameterization errors when waves route appears only in navigation breadcrumbs", () => {
+  it("preserves MetaMask Mobile cyclic JSON errors without messages route evidence", () => {
     // Arrange
-    const event = createSentryRouteParameterizationEvent({
+    const event = createCyclicJsonTimerEvent({
       transaction: undefined,
       request: undefined,
       tags: {
@@ -4660,10 +4858,10 @@ describe("sentry-client-filters", () => {
     });
 
     // Act
-    const result = shouldFilterSentryRouteParameterizationError(event);
+    const result = shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("filters injected wallet collisions for tronlinkParams in app URI stacks", () => {

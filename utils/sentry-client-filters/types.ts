@@ -17,6 +17,7 @@ export type SentryTransactionSpan = {
 export type SentryContext = Record<string, unknown>;
 
 export type SentryBreadcrumb = {
+  timestamp?: number | undefined;
   type?: string | undefined;
   category?: string | undefined;
   level?: string | undefined;
@@ -57,6 +58,7 @@ export type SentryTags = Record<string, unknown>;
 
 export type SentryClientEvent = {
   event_id?: string | undefined;
+  timestamp?: number | undefined;
   transaction?: string | undefined;
   message?: string | undefined;
   exception?:
