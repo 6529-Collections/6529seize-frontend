@@ -21,12 +21,14 @@ export {
   shouldFilterByFilenameExceptions,
   shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWasmCspUnsafeEval,
-  shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
+export {
+  shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError,
+} from "./sentry-client-filters/metamask-mobile";
 export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,

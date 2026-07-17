@@ -355,15 +355,6 @@ export function isSentryRouteParameterizationFrame(
   return getFramePaths(frame).some(isSentryRouteParameterizationPath);
 }
 
-export function hasSentryRouteParameterizationFrame(
-  frames: SentryStackFrame[] | undefined
-): boolean {
-  return (
-    Array.isArray(frames) &&
-    frames.some(isSentryRouteParameterizationFrame)
-  );
-}
-
 function isGifPickerTenorManagerPath(path: string | undefined): boolean {
   return (
     typeof path === "string" &&
