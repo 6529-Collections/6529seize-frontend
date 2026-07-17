@@ -223,6 +223,8 @@ describe("instrumentation-client", () => {
     },
     ...poperBlockerInjectedFetchFrames,
   ];
+  const webkitExtensionMessagingTabNotFoundMessage =
+    "Invalid call to runtime.sendMessage(). Tab not found.";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
@@ -325,6 +327,28 @@ describe("instrumentation-client", () => {
       ],
     },
   });
+
+  const createWebKitExtensionMessagingTabNotFoundEvent = (
+    valueOverrides: Record<string, unknown> = {},
+    eventOverrides: Record<string, unknown> = {}
+  ) => {
+    const event = createUnhandledRejectionEvent(
+      webkitExtensionMessagingTabNotFoundMessage
+    );
+
+    return {
+      ...event,
+      ...eventOverrides,
+      exception: {
+        values: [
+          {
+            ...event.exception.values[0],
+            ...valueOverrides,
+          },
+        ],
+      },
+    };
+  };
 
   const createAppleWebKitSortedTrackListEvent = (
     frames: Array<Record<string, unknown>> = [
@@ -1533,6 +1557,129 @@ describe("instrumentation-client", () => {
     const result = beforeSend(noiseFilterFixtures.threeV);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the exact frame-less WebKit extension tab-not-found rejection", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createWebKitExtensionMessagingTabNotFoundEvent()
+    );
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps mixed WebKit and app-owned exceptions", () => {
+    const beforeSend = loadBeforeSend();
+    const baseEvent = createWebKitExtensionMessagingTabNotFoundEvent();
+    const event = {
+      ...baseEvent,
+      exception: {
+        values: [
+          ...baseEvent.exception.values,
+          {
+            type: "TypeError",
+            value: "App-owned failure",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+                  function: "sendMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each([
+    [
+      "an altered message",
+      { value: "Invalid call to runtime.sendMessage(). No tab found." },
+      {},
+    ],
+    ["a different exception type", { type: "TypeError" }, {}],
+    [
+      "a different mechanism",
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onerror",
+          handled: false,
+        },
+      },
+      {},
+    ],
+    [
+      "a handled mechanism",
+      {
+        mechanism: {
+          type: browserUnhandledRejectionMechanismType,
+          handled: true,
+        },
+      },
+      {},
+    ],
+    [
+      "an app-owned frame",
+      {
+        stacktrace: {
+          frames: [
+            {
+              filename:
+                "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+              function: "sendMessage",
+              in_app: true,
+            },
+          ],
+        },
+      },
+      {},
+    ],
+    [
+      "an app-owned serialized stack",
+      {},
+      {
+        extra: {
+          __serialized__: {
+            message: webkitExtensionMessagingTabNotFoundMessage,
+            stack:
+              "Error: Invalid call to runtime.sendMessage(). Tab not found.\n    at sendMessage (app:///services/messaging/sendMessage.ts:10:1)",
+          },
+        },
+      },
+    ],
+  ])("keeps the WebKit tab-not-found near miss with %s", (_, value, event) => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createWebKitExtensionMessagingTabNotFoundEvent(value, event)
+    );
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps WebKit tab-not-found rejections with app-owned original stacks", () => {
+    const beforeSend = loadBeforeSend();
+    const error = new Error(webkitExtensionMessagingTabNotFoundMessage);
+    error.stack = [
+      `Error: ${webkitExtensionMessagingTabNotFoundMessage}`,
+      "    at sendMessage (webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts:10:1)",
+    ].join("\n");
+
+    const result = beforeSend(
+      createWebKitExtensionMessagingTabNotFoundEvent(),
+      { originalException: error }
+    );
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the raw DK Coinbase request-relay websocket event", () => {
