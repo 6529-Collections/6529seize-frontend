@@ -142,7 +142,7 @@ describe("CreateDropContent utilities", () => {
           ],
         } as any,
         files: [currentFile],
-        isWideContainer: true,
+        keepOptionsVisible: true,
         waveId: "wave-1",
         setToast,
         setFiles,
