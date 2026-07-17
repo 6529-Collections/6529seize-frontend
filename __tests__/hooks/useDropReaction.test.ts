@@ -416,7 +416,7 @@ describe("useDropReaction", () => {
     expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
   });
 
-  it("shows structured API error messages for quick react failures", async () => {
+  it("resolves after surfacing a structured quick react failure", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
         body: JSON.stringify({ error: "Reaction not allowed" }),
@@ -430,7 +430,7 @@ describe("useDropReaction", () => {
     );
 
     await act(async () => {
-      await result.current.react(":smile:");
+      await expect(result.current.react(":smile:")).resolves.toBeUndefined();
     });
 
     expect(commonApi.commonApiPost).toHaveBeenCalledWith({
@@ -714,6 +714,50 @@ describe("useDropReaction", () => {
     ).not.toHaveBeenCalled();
     expect(setToastMock).not.toHaveBeenCalled();
     expect(rollbackMock).not.toHaveBeenCalled();
+  });
+
+  it("applies the optimistic reaction without waiting for request success", async () => {
+    const request = createDeferred<ApiDrop>();
+    (commonApi.commonApiPost as jest.Mock).mockReturnValueOnce(request.promise);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    let reaction!: Promise<void>;
+    act(() => {
+      reaction = result.current.react(":smile:");
+    });
+
+    expect(
+      dropReactionMonitoring.recordReactionOptimisticApplied
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      (dropReactionMonitoring.recordReactionOptimisticApplied as jest.Mock).mock
+        .invocationCallOrder[0]
+    ).toBeLessThan(
+      (commonApi.commonApiPost as jest.Mock).mock.invocationCallOrder[0]!
+    );
+    const optimisticUpdate = applyOptimisticDropUpdateMock.mock.calls[0]![0];
+    const optimisticDrop = {
+      ...mockDrop,
+      context_profile_context: { ...mockDrop.context_profile_context },
+      reactions: [...mockDrop.reactions],
+    };
+    optimisticUpdate.update(optimisticDrop);
+    expect(optimisticDrop.context_profile_context?.reaction).toBe(":smile:");
+    expect(optimisticDrop.reactions).toEqual([
+      expect.objectContaining({
+        reaction: ":smile:",
+        count: 1,
+        profiles: [expect.objectContaining({ id: "identity-1" })],
+      }),
+    ]);
+
+    await act(async () => {
+      request.resolve({} as ApiDrop);
+      await reaction;
+    });
   });
 
   it("falls back for unsafe structured quick react failures", async () => {
