@@ -21,8 +21,9 @@ These rules apply to non-curation thread composer flows in both `Post` and
 ## Entry Points
 
 1. Open a wave or DM thread composer and type in the body input.
-2. Use the storm button (`Break into storm` / `Add a part`) to split content.
-3. Use submit (`Post` / `Drop`) or desktop `Enter` submit behavior.
+2. Select `Break into storm` to save the first part.
+3. Use the primary `Add part` action for later parts and `Post storm` from an
+   empty current editor to publish the completed storm.
 
 ## Rules in Practice
 
@@ -30,15 +31,16 @@ These rules apply to non-curation thread composer flows in both `Post` and
 - Storm add uses the `24,000` total-text rule, not the `240` submit rule.
 - With existing storm parts, submit can only finalize when current draft text is
   `240` chars or less.
-- When submit is enabled and existing storm parts plus current draft content are
-  present, submit adds the current draft as another part (it does not finalize
-  the storm).
+- When current content is eligible, the primary action is `Add part`; it saves
+  the current draft instead of publishing the storm.
 - To finalize and send the storm, submit from an empty current draft.
+- Blank or whitespace-only text is not saved as a storm part. Media-only parts
+  remain valid.
 
 ## Common Scenarios
 
 - A `24,500`-char draft can submit as one part, but cannot be split into storm.
-- In storm mode, a `500`-char draft can still be added with the storm button
+- In storm mode, a `500`-char draft can still be added with `Add part`
   (if total text stays under `24,000`), but submit stays blocked until the
   draft is shortened or cleared.
 - In `Drop` mode, required media/metadata can still block submit even when
@@ -69,6 +71,7 @@ These rules apply to non-curation thread composer flows in both `Post` and
 ## Related Pages
 
 - [Wave Composer Index](README.md)
+- [Storm Composer](feature-storm-composer.md)
 - [Waves Index](../README.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)

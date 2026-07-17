@@ -11,10 +11,15 @@ import {
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 
 interface UseUnreadNotificationsOptions {
   readonly enabled?: boolean | undefined;
+  readonly profileId?: string | null | undefined;
 }
+
+const FALLBACK_POLL_INTERVAL_MS = 30_000;
+const REALTIME_RECONCILIATION_INTERVAL_MS = 5 * 60_000;
 
 type MissingAuthPollingError = Error & {
   readonly status: 401;
@@ -36,13 +41,17 @@ export function useUnreadNotifications(
   options: UseUnreadNotificationsOptions = {}
 ) {
   const { isCapacitor } = useCapacitor();
+  const notificationRealtimeState = useNotificationRealtimeState();
   const authJwt = getAuthJwt();
   const hasUsableAuthJwt = isAuthJwtUsable(authJwt);
   const authFingerprint = getAuthTokenFingerprint(authJwt);
-  const isEnabled =
-    !!handle && options.enabled !== false && hasUsableAuthJwt;
+  const isEnabled = !!handle && options.enabled !== false && hasUsableAuthJwt;
+  const isRealtimeCovered =
+    notificationRealtimeState.connected &&
+    !!options.profileId &&
+    notificationRealtimeState.syncedProfileIds.includes(options.profileId);
 
-  const { data: notifications, error } = useQuery<ApiNotificationsResponseV2>({
+  const notificationQuery = useQuery<ApiNotificationsResponseV2>({
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
       {
@@ -66,12 +75,19 @@ export function useUnreadNotifications(
         params: {
           limit: "1",
         },
+        cache: "no-store",
         errorMode: "structured",
       });
     },
     enabled: isEnabled,
-    refetchInterval: (query) =>
-      isTerminalNotificationAuthQueryError(query.state.error) ? false : 30000,
+    refetchInterval: (query) => {
+      if (isTerminalNotificationAuthQueryError(query.state.error)) {
+        return false;
+      }
+      return isRealtimeCovered
+        ? REALTIME_RECONCILIATION_INTERVAL_MS
+        : FALLBACK_POLL_INTERVAL_MS;
+    },
     refetchOnWindowFocus: (query) =>
       !isTerminalNotificationAuthQueryError(query.state.error),
     refetchOnMount: (query) =>
@@ -79,11 +95,11 @@ export function useUnreadNotifications(
     refetchOnReconnect: (query) =>
       !isTerminalNotificationAuthQueryError(query.state.error),
     refetchIntervalInBackground: !isCapacitor,
-    retry: (failureCount: number, error: unknown) => {
-      if (isTerminalNotificationAuthQueryError(error)) {
+    retry: (failureCount: number, retryError: unknown) => {
+      if (isTerminalNotificationAuthQueryError(retryError)) {
         return false;
       }
-      if (shouldStopPollingRetry(error)) {
+      if (shouldStopPollingRetry(retryError)) {
         return false;
       }
 
@@ -94,9 +110,11 @@ export function useUnreadNotifications(
     },
   });
 
-  const isTerminalAuthError = isTerminalNotificationAuthQueryError(error);
+  const isTerminalAuthError = isTerminalNotificationAuthQueryError(
+    notificationQuery.error
+  );
   const effectiveNotifications =
-    isEnabled && !isTerminalAuthError ? notifications : undefined;
+    isEnabled && !isTerminalAuthError ? notificationQuery.data : undefined;
   const haveUnreadNotifications =
     (effectiveNotifications?.unread_count ?? 0) > 0;
 

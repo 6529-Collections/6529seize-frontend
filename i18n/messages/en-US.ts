@@ -222,6 +222,25 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "wave.loadingMore": "Loading...",
 } as const);
 
+// Rep-category validation copy. Kept as its own group with unquoted keys
+// (not merged into the big REP block above) so its lines don't extend that
+// block's quoted-key run — which the duplication detector matches against
+// the parallel key blocks in the locale dictionaries.
+const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
+  "rep.categories.validation",
+  {
+    errorTitle: "That category name won't work",
+    tooShort: "Use at least {min} characters.",
+    tooLong: "It's {length} characters long — the maximum is {max}.",
+    leadingDash: "A category can't start with a dash.",
+    disallowedChars:
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+    aiFilterDetails:
+      "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
+    closeErrorLabel: "Dismiss error",
+  } as const
+);
+
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
   {
@@ -836,6 +855,38 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyTargetUnavailableToast.detailsKept":
     "Your current draft was not changed.",
   "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
+} as const);
+
+const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
+  draftTitle: "Storm draft",
+  privateDraftHint: "Only you can see this until you post it.",
+  partsCountOne: "{count} part",
+  partsCountOther: "{count} parts",
+  discard: "Discard",
+  discardConfirmation: "Discard every saved part and the part you are writing?",
+  keepDraft: "Keep draft",
+  discardDraft: "Discard draft",
+  part: "Part {number}",
+  mediaOnlyPart: "Media-only part",
+  edit: "Edit",
+  editPart: "Edit part {number}",
+  finishCurrentPartBeforeEditing:
+    "Add or clear the current part before editing another part",
+  editing: "Editing",
+  movePartEarlier: "Move part {number} earlier",
+  movePartLater: "Move part {number} later",
+  moveEarlier: "Move earlier",
+  moveLater: "Move later",
+  remove: "Remove",
+  removePart: "Remove part {number}",
+  nextPart: "Next: Part {number}",
+  editingPart: "Editing Part {number}",
+  cancelEdit: "Cancel edit",
+  writePart: "Write part {number}",
+  breakIntoStorm: "Break into storm",
+  addPart: "Add part",
+  saveChanges: "Save changes",
+  postStorm: "Post storm",
 } as const);
 
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
@@ -1904,6 +1955,7 @@ export const EN_US_MESSAGES = {
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
   ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
@@ -1930,6 +1982,7 @@ export const EN_US_MESSAGES = {
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
+  ...REP_CATEGORY_VALIDATION_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
