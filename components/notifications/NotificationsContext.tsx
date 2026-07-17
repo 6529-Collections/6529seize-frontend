@@ -3,6 +3,7 @@
 import { Device, type DeviceInfo } from "@capacitor/device";
 import {
   PushNotifications,
+  type PermissionStatus,
   type PushNotificationSchema,
 } from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
@@ -76,6 +77,8 @@ const PUSH_REGISTRATION_BASE_DELAY_MS = 500;
 const PUSH_REGISTRATION_MAX_DELAY_MS = 4000;
 const PUSH_REGISTRATION_JITTER_FACTOR = 0.2;
 const PUSH_REGISTRATION_MAX_RETRY_AFTER_MS = 10000;
+const IOS_PUSH_PERMISSION_HELPER_APPLICATION_ERROR_MESSAGE =
+  "Couldn’t communicate with a helper application.";
 
 const DELEGATE_ERROR_PATTERNS = [
   "capacitorDidRegisterForRemoteNotifications",
@@ -410,6 +413,39 @@ const toCaptureExceptionInput = (
     return error;
   }
   return new Error(toErrorMessage(error, fallbackMessage));
+};
+
+const isIosPushPermissionHelperApplicationError = (error: unknown): boolean =>
+  toErrorMessage(error) ===
+  IOS_PUSH_PERMISSION_HELPER_APPLICATION_ERROR_MESSAGE;
+
+const requestPushNotificationPermissions = async (
+  isIos: boolean
+): Promise<PermissionStatus> => {
+  try {
+    return await PushNotifications.requestPermissions();
+  } catch (error: unknown) {
+    if (!isIos || !isIosPushPermissionHelperApplicationError(error)) {
+      throw error;
+    }
+
+    const permissionStatus = await PushNotifications.requestPermissions();
+    const errorExtra = createErrorTelemetryExtra(error);
+    console.warn("iOS push permission request recovered after retry", errorExtra);
+    Sentry.addBreadcrumb({
+      category: "notifications",
+      level: "warning",
+      message: "Push permission request recovered after native error.",
+      data: {
+        component: "NotificationsProvider",
+        operation: "requestPermissions",
+        retryable: true,
+        recovered: true,
+        ...errorExtra,
+      },
+    });
+    return permissionStatus;
+  }
 };
 
 const getUsableProfileId = (profile?: ApiIdentity): string | null => {
@@ -1181,7 +1217,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         );
 
-        const permStatus = await PushNotifications.requestPermissions();
+        const permStatus = await requestPushNotificationPermissions(isIos);
 
         if (permStatus.receive === "granted") {
           if (isIos) {

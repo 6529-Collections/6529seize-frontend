@@ -125,6 +125,9 @@ describe("NotificationsContext initialization", () => {
   beforeEach(() => {
     mockIsActive = true;
     const { PushNotifications } = require("@capacitor/push-notifications");
+    const {
+      getStableDeviceId,
+    } = require("@/components/notifications/stable-device-id");
     const sentry = require("@sentry/nextjs");
     jest.clearAllMocks();
     mockSeizeConnectContext.address = "0xaaa";
@@ -139,7 +142,13 @@ describe("NotificationsContext initialization", () => {
     ];
     PushNotifications.removeAllListeners.mockClear();
     PushNotifications.addListener.mockClear();
+    PushNotifications.requestPermissions.mockReset();
+    PushNotifications.requestPermissions.mockResolvedValue({
+      receive: "granted",
+    });
     PushNotifications.register.mockClear();
+    getStableDeviceId.mockReset();
+    getStableDeviceId.mockResolvedValue("test-device-id");
     sentry.captureException.mockClear();
     sentry.addBreadcrumb.mockClear();
   });
@@ -208,6 +217,147 @@ describe("NotificationsContext initialization", () => {
     });
 
     expect(PushNotifications.register).not.toHaveBeenCalled();
+  });
+
+  it("records a recovered iOS push permission helper error as a warning breadcrumb", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const sentry = require("@sentry/nextjs");
+    const helperApplicationError = new Error(
+      "Couldn’t communicate with a helper application."
+    );
+
+    PushNotifications.requestPermissions
+      .mockRejectedValueOnce(helperApplicationError)
+      .mockResolvedValueOnce({ receive: "denied" });
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(sentry.addBreadcrumb).toHaveBeenCalledWith({
+        category: "notifications",
+        level: "warning",
+        message: "Push permission request recovered after native error.",
+        data: {
+          component: "NotificationsProvider",
+          operation: "requestPermissions",
+          retryable: true,
+          recovered: true,
+          error_name: "Error",
+          error_message: "Couldn’t communicate with a helper application.",
+        },
+      });
+    });
+
+    expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(2);
+    expect(sentry.addBreadcrumb).toHaveBeenCalledTimes(1);
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(PushNotifications.register).not.toHaveBeenCalled();
+  });
+
+  it("captures a persistent iOS push permission helper error", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const sentry = require("@sentry/nextjs");
+    const initialError = new Error(
+      "Couldn’t communicate with a helper application."
+    );
+    const retryError = new Error(
+      "Couldn’t communicate with a helper application."
+    );
+
+    PushNotifications.requestPermissions
+      .mockRejectedValueOnce(initialError)
+      .mockRejectedValue(retryError);
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(sentry.captureException).toHaveBeenCalledWith(
+        retryError,
+        expect.objectContaining({
+          tags: {
+            component: "NotificationsProvider",
+            operation: "initializeNotifications",
+          },
+        })
+      );
+    });
+
+    expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(2);
+    expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push permission request recovered after native error.",
+      })
+    );
+  });
+
+  it("captures the helper-application error from another initialization step", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const {
+      getStableDeviceId,
+    } = require("@/components/notifications/stable-device-id");
+    const sentry = require("@sentry/nextjs");
+    const secureStorageError = new Error(
+      "Couldn’t communicate with a helper application."
+    );
+
+    getStableDeviceId.mockRejectedValue(secureStorageError);
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(sentry.captureException).toHaveBeenCalledWith(
+        secureStorageError,
+        expect.objectContaining({
+          tags: {
+            component: "NotificationsProvider",
+            operation: "initializeNotifications",
+          },
+        })
+      );
+    });
+
+    expect(PushNotifications.requestPermissions).not.toHaveBeenCalled();
+    expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push permission request recovered after native error.",
+      })
+    );
+  });
+
+  it.each([
+    "Couldn't communicate with a helper application.",
+    "Couldn’t communicate with a helper application. Retry later.",
+  ])("captures push permission helper-error near-miss %s", async (errorMessage) => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const sentry = require("@sentry/nextjs");
+    const nearMiss = new Error(errorMessage);
+
+    PushNotifications.requestPermissions.mockRejectedValueOnce(nearMiss);
+
+    renderHook(() => useNotificationsContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(sentry.captureException).toHaveBeenCalledWith(
+        nearMiss,
+        expect.objectContaining({
+          tags: {
+            component: "NotificationsProvider",
+            operation: "initializeNotifications",
+          },
+          extra: expect.objectContaining({
+            error_name: "Error",
+            error_message: errorMessage,
+          }),
+        })
+      );
+    });
+
+    expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push permission request recovered after native error.",
+      })
+    );
+    expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(1);
   });
 });
 
