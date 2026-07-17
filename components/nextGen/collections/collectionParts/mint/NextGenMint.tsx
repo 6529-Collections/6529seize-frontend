@@ -352,9 +352,7 @@ export default function NextGenMint(props: Readonly<Props>) {
             src="/SummerGlasses.svg"
             alt=""
           />
-          <b className="tw-font-semibold tw-text-white">
-            Allowlist not found
-          </b>
+          <b className="tw-font-semibold tw-text-white">Allowlist not found</b>
         </span>
       );
     }

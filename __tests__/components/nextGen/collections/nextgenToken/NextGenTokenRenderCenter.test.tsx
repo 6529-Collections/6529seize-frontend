@@ -40,7 +40,9 @@ describe("NextGenTokenRenderCenter", () => {
     // @ts-ignore
     window.open = open;
     setup();
-    await userEvent.click(screen.getByText("GO!"));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Open Render" })
+    );
     expect(open).toHaveBeenCalledWith(
       "https://generator.6529.io/mainnet/html/42",
       "_blank"
@@ -63,7 +65,9 @@ describe("NextGenTokenRenderCenter", () => {
     );
     const input = screen.getByPlaceholderText("enter height");
     await userEvent.type(input, "400");
-    await userEvent.click(screen.getByText("GO!"));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Open Render" })
+    );
     expect(open).toHaveBeenCalledWith(
       "https://generator.6529.io/mainnet/html/42?render_static=true&render_og=true&height=400",
       "_blank"

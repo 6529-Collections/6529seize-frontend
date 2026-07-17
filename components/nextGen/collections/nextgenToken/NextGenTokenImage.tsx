@@ -236,8 +236,7 @@ export function NextGenTokenImage(
   function getImage() {
     let heightClassName = "tw-h-auto";
     if (props.is_fullscreen) {
-      heightClassName =
-        "tw-h-[calc(100dvh-2rem)] tw-w-[calc(100vw-2rem)]";
+      heightClassName = "tw-h-[calc(100dvh-2rem)] tw-w-[calc(100vw-2rem)]";
     } else if (props.token_art) {
       if (isMobileScreen) {
         heightClassName = "tw-h-[55vh]";

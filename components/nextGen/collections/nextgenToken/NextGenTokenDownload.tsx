@@ -96,13 +96,15 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
           !imageLoaded
             ? "tw-cursor-wait tw-text-iron-300"
             : imageExists
-            ? "tw-cursor-pointer tw-text-white hover:tw-bg-iron-800"
-            : "tw-cursor-not-allowed tw-text-iron-500"
+              ? "tw-cursor-pointer tw-text-white hover:tw-bg-iron-800"
+              : "tw-cursor-not-allowed tw-text-iron-500"
         }`}
       >
         {props.resolution}
         {!imageLoaded && " Loading…"}
-        {imageLoaded && imageExists && imageSize > 0 &&
+        {imageLoaded &&
+          imageExists &&
+          imageSize > 0 &&
           ` (${numberWithCommas(imageSize)} MB)`}
         {imageLoaded && !imageExists && " Coming Soon"}
       </button>
@@ -167,9 +169,7 @@ export default function NextGenTokenDownload(
     <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-black/20 tw-px-3 tw-py-2">
       <span className="tw-min-w-0 tw-text-sm tw-text-white">
         {props.resolution}
-        {imageExists &&
-          imageSize > 0 &&
-          ` (${numberWithCommas(imageSize)} MB)`}
+        {imageExists && imageSize > 0 && ` (${numberWithCommas(imageSize)} MB)`}
       </span>
       <span className="tw-flex tw-flex-none tw-items-center tw-text-sm tw-text-iron-400">
         {getDisplay()}

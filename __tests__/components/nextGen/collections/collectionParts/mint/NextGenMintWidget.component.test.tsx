@@ -1,21 +1,21 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import NextGenMintWidget from '@/components/nextGen/collections/collectionParts/mint/NextGenMintWidget';
-import { Status } from '@/components/nextGen/nextgen_entities';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import NextGenMintWidget from "@/components/nextGen/collections/collectionParts/mint/NextGenMintWidget";
+import { Status } from "@/components/nextGen/nextgen_entities";
 
 let minting = false;
-jest.mock('@/components/nextGen/nextgen_helpers', () => ({
+jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   useMintSharedState: () => ({
     proofResponse: [],
     setProofResponse: jest.fn(),
-    mintForAddress: '',
+    mintForAddress: "",
     setMintForAddress: jest.fn(),
     salt: 0,
     mintCount: 1,
     setMintCount: jest.fn(),
-    mintToInput: '',
+    mintToInput: "",
     setMintToInput: jest.fn(),
-    mintToAddress: '',
+    mintToAddress: "",
     setMintToAddress: jest.fn(),
     isMinting: minting,
     setIsMinting: jest.fn(),
@@ -25,12 +25,14 @@ jest.mock('@/components/nextGen/nextgen_helpers', () => ({
   getStatusFromDates: () => Status.LIVE,
 }));
 
-jest.mock('@/services/6529api', () => ({ fetchUrl: jest.fn() }));
-jest.mock('@/components/nextGen/NextGenContractWriteStatus', () => () => <div />);
-jest.mock('@/components/auth/SeizeConnectContext', () => ({
+jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
+jest.mock("@/components/nextGen/NextGenContractWriteStatus", () => () => (
+  <div />
+));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
-jest.mock('wagmi', () => ({
+jest.mock("wagmi", () => ({
   useChainId: jest.fn(),
   useEnsAddress: () => ({ data: undefined }),
   useEnsName: () => ({ data: undefined }),
@@ -44,26 +46,30 @@ jest.mock('wagmi', () => ({
     error: undefined,
   }),
 }));
-jest.mock('@/components/dotLoader/DotLoader', () => () => <div />);
-jest.mock('@/components/nextGen/collections/collectionParts/mint/NextGenMintShared', () => ({
-  MINT_ACTION_BUTTON_CLASSNAME: '',
-  MINT_INPUT_CLASSNAME: '',
-  MINT_SELECT_CLASSNAME: '',
-  MintInfoTooltip: () => null,
-  NextGenMintErrors: () => null,
-  NextGenMintingFor: () => <div />,
-}));
-jest.mock('@/helpers/Helpers', () => {
-  const original = jest.requireActual('../../../../../../helpers/Helpers');
-  return { ...original, getNetworkName: () => 'Ethereum' };
+jest.mock("@/components/dotLoader/DotLoader", () => () => <div />);
+jest.mock(
+  "@/components/nextGen/collections/collectionParts/mint/NextGenMintShared",
+  () => ({
+    MINT_ACTION_BUTTON_CLASSNAME: "",
+    MINT_INPUT_CLASSNAME: "",
+    MINT_SELECT_CLASSNAME: "",
+    MintInfoTooltip: () => null,
+    NextGenMintErrors: () => null,
+    NextGenMintingFor: () => <div />,
+  })
+);
+jest.mock("@/helpers/Helpers", () => {
+  const original = jest.requireActual("../../../../../../helpers/Helpers");
+  return { ...original, getNetworkName: () => "Ethereum" };
 });
-jest.mock('@/components/nextGen/nextgen_contracts', () => ({
+jest.mock("@/components/nextGen/nextgen_contracts", () => ({
   NEXTGEN_CHAIN_ID: 1,
-  NEXTGEN_MINTER: { 1: '0x0', abi: [] },
+  NEXTGEN_MINTER: { 1: "0x0", abi: [] },
 }));
 
-const useChainId = require('wagmi').useChainId as jest.Mock;
-const useSeizeConnectContext = require('@/components/auth/SeizeConnectContext').useSeizeConnectContext as jest.Mock;
+const useChainId = require("wagmi").useChainId as jest.Mock;
+const useSeizeConnectContext = require("@/components/auth/SeizeConnectContext")
+  .useSeizeConnectContext as jest.Mock;
 
 const baseProps = {
   collection: {
@@ -72,7 +78,7 @@ const baseProps = {
     allowlist_end: 0,
     public_start: 0,
     public_end: 0,
-    merkle_root: '',
+    merkle_root: "",
     max_purchases: 1,
   } as any,
   available_supply: 1,
@@ -88,25 +94,37 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-test('shows connect wallet when not connected', () => {
+test("shows connect wallet when not connected", () => {
   useChainId.mockReturnValue(1);
-  useSeizeConnectContext.mockReturnValue({ isConnected: false, address: undefined, seizeConnect: jest.fn() });
+  useSeizeConnectContext.mockReturnValue({
+    isConnected: false,
+    address: undefined,
+    seizeConnect: jest.fn(),
+  });
   render(<NextGenMintWidget {...baseProps} />);
-  expect(screen.getByRole('button')).toHaveTextContent('Connect Wallet');
+  expect(screen.getByRole("button")).toHaveTextContent("Connect Wallet");
 });
 
-test('shows switch network when wrong chain', () => {
+test("shows switch network when wrong chain", () => {
   useChainId.mockReturnValue(5);
-  useSeizeConnectContext.mockReturnValue({ isConnected: true, address: '0x1', seizeConnect: jest.fn() });
+  useSeizeConnectContext.mockReturnValue({
+    isConnected: true,
+    address: "0x1",
+    seizeConnect: jest.fn(),
+  });
   render(<NextGenMintWidget {...baseProps} />);
-  expect(screen.getByRole('button')).toHaveTextContent('Switch to Ethereum');
+  expect(screen.getByRole("button")).toHaveTextContent("Switch to Ethereum");
 });
 
-test('shows processing state when minting', () => {
+test("shows processing state when minting", () => {
   useChainId.mockReturnValue(1);
-  useSeizeConnectContext.mockReturnValue({ isConnected: true, address: '0x1', seizeConnect: jest.fn() });
+  useSeizeConnectContext.mockReturnValue({
+    isConnected: true,
+    address: "0x1",
+    seizeConnect: jest.fn(),
+  });
   minting = true;
   render(<NextGenMintWidget {...baseProps} />);
   minting = false;
-  expect(screen.getByRole('button')).toHaveTextContent('Processing...');
+  expect(screen.getByRole("button")).toHaveTextContent("Processing...");
 });

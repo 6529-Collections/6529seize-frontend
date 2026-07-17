@@ -138,9 +138,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
             <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
               End
             </dt>
-            <dd className="tw-m-0 tw-text-sm">
-              {printPhaseDateTime(endTime)}
-            </dd>
+            <dd className="tw-m-0 tw-text-sm">{printPhaseDateTime(endTime)}</dd>
           </div>
         </dl>
       </article>
@@ -206,7 +204,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                   );
                   setSelectedPhase(nextPhase);
                 }}
-                className="tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-[color-scheme:dark] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                className="tw-[color-scheme:dark] tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-base tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 <option value="" className="tw-bg-black tw-text-white">
                   All Phases

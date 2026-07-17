@@ -58,7 +58,7 @@ function TraitAccordion(
     <details className="tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80">
       <summary className="tw-cursor-pointer tw-list-none tw-p-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-          <span className="tw-flex tw-items-center tw-gap-3 tw-font-semibold tw-text-white before:tw-content-['›'] group-open:before:tw-rotate-90 before:tw-text-xl before:tw-text-iron-400 before:tw-transition-transform">
+          <span className="tw-flex tw-items-center tw-gap-3 tw-font-semibold tw-text-white before:tw-text-xl before:tw-text-iron-400 before:tw-transition-transform before:tw-content-['›'] group-open:before:tw-rotate-90">
             {props.title}
           </span>
           <span className="tw-grid tw-grid-cols-2 tw-gap-4 tw-text-sm sm:tw-gap-8">
@@ -76,69 +76,69 @@ function TraitAccordion(
       {props.traits && (
         <div className="tw-overflow-x-auto tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/20">
           <table className="tw-w-full tw-min-w-[720px] tw-border-collapse">
-              <thead>
-                <tr className="tw-border-b tw-border-solid tw-border-white/10 tw-text-sm tw-text-iron-400">
-                  <th
-                    scope="col"
-                    className="tw-w-5/12 tw-px-3 tw-py-2 tw-text-left tw-font-normal"
+            <thead>
+              <tr className="tw-border-b tw-border-solid tw-border-white/10 tw-text-sm tw-text-iron-400">
+                <th
+                  scope="col"
+                  className="tw-w-5/12 tw-px-3 tw-py-2 tw-text-left tw-font-normal"
+                >
+                  Trait
+                </th>
+                <th
+                  scope="col"
+                  className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center tw-font-normal"
+                >
+                  Quantity
+                </th>
+                <th
+                  scope="col"
+                  className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center tw-font-normal"
+                >
+                  Rank
+                </th>
+                <th
+                  scope="col"
+                  className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center tw-font-normal"
+                >
+                  Score
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {props.traits
+                .filter((t) => t.score !== -1)
+                .map((t) => (
+                  <tr
+                    className="tw-border-0 tw-border-b tw-border-solid tw-border-white/5 last:tw-border-b-0"
+                    key={`trait-${t.trait.replaceAll(
+                      " ",
+                      "-"
+                    )}-${t.value.replaceAll(" ", "-")}`}
                   >
-                    Trait
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center tw-font-normal"
-                  >
-                    Quantity
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center tw-font-normal"
-                  >
-                    Rank
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center tw-font-normal"
-                  >
-                    Score
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {props.traits
-                  .filter((t) => t.score !== -1)
-                  .map((t) => (
-                    <tr
-                      className="tw-border-0 tw-border-b tw-border-solid tw-border-white/5 last:tw-border-b-0"
-                      key={`trait-${t.trait.replaceAll(
-                        " ",
-                        "-"
-                      )}-${t.value.replaceAll(" ", "-")}`}
-                    >
-                      <td className="tw-w-5/12 tw-px-3 tw-py-2">
-                        <span className="tw-text-iron-400">{t.trait}:</span>{" "}
-                        <Link
-                          href={`/nextgen/collection/${formatNameForUrl(
-                            props.collection.name
-                          )}/art?traits=${t.trait}:${t.value}`}
-                        >
-                          {t.value}
-                        </Link>
-                      </td>
-                      <td className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center">
-                        {t.value_count.toLocaleString()} (
-                        {((t.value_count / props.token_count) * 100).toFixed(1)}
-                        %)
-                      </td>
-                      <td className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center">
-                        {t.rank}/{t.trait_count}
-                      </td>
-                      <td className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center">
-                        {displayScore(t.score)}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
+                    <td className="tw-w-5/12 tw-px-3 tw-py-2">
+                      <span className="tw-text-iron-400">{t.trait}:</span>{" "}
+                      <Link
+                        href={`/nextgen/collection/${formatNameForUrl(
+                          props.collection.name
+                        )}/art?traits=${t.trait}:${t.value}`}
+                      >
+                        {t.value}
+                      </Link>
+                    </td>
+                    <td className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center">
+                      {t.value_count.toLocaleString()} (
+                      {((t.value_count / props.token_count) * 100).toFixed(1)}
+                      %)
+                    </td>
+                    <td className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center">
+                      {t.rank}/{t.trait_count}
+                    </td>
+                    <td className="tw-w-1/6 tw-px-3 tw-py-2 tw-text-center">
+                      {displayScore(t.score)}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
           </table>
         </div>
       )}
@@ -317,55 +317,55 @@ export default function NextgenTokenRarity(props: Readonly<Props>) {
           </div>
         </div>
         <div className="tw-grid tw-gap-3">
-        <TraitAccordion
-          title={"Rarity"}
-          score={getRarityScore()}
-          rank={getRarityRank()}
-          collection={props.collection}
-          token_count={props.tokenCount}
-          traits={props.traits
-            .map((t) => ({
+          <TraitAccordion
+            title={"Rarity"}
+            score={getRarityScore()}
+            rank={getRarityRank()}
+            collection={props.collection}
+            token_count={props.tokenCount}
+            traits={props.traits
+              .map((t) => ({
+                trait: t.trait,
+                value: t.value,
+                score: getTraitRarityScore(t),
+                rank: getTraitRarityRank(t),
+                trait_count: t.trait_count,
+                value_count: t.value_count,
+              }))
+              .sort((a, b) => b.score - a.score)}
+          />
+          <TraitAccordion
+            title={"Statistical Rarity"}
+            score={getStatisticalScore()}
+            rank={getStatisticalRank()}
+            collection={props.collection}
+            token_count={props.tokenCount}
+            traits={props.traits
+              .map((t) => ({
+                trait: t.trait,
+                value: t.value,
+                score: getTraitStatisticalScore(t),
+                rank: getTraitStatisticalRank(t),
+                trait_count: t.trait_count,
+                value_count: t.value_count,
+              }))
+              .sort((a, b) => b.score - a.score)}
+          />
+          <TraitAccordion
+            title={"Single Trait Rarity"}
+            score={getSingleTraitRarityScore()}
+            rank={getSingleTraitRarityRank()}
+            collection={props.collection}
+            token_count={props.tokenCount}
+            traits={props.traits.map((t) => ({
               trait: t.trait,
               value: t.value,
-              score: getTraitRarityScore(t),
-              rank: getTraitRarityRank(t),
+              score: getTraitSingleRarityScore(t),
+              rank: getTraitSingleRarityRank(t),
               trait_count: t.trait_count,
               value_count: t.value_count,
-            }))
-            .sort((a, b) => b.score - a.score)}
-        />
-        <TraitAccordion
-          title={"Statistical Rarity"}
-          score={getStatisticalScore()}
-          rank={getStatisticalRank()}
-          collection={props.collection}
-          token_count={props.tokenCount}
-          traits={props.traits
-            .map((t) => ({
-              trait: t.trait,
-              value: t.value,
-              score: getTraitStatisticalScore(t),
-              rank: getTraitStatisticalRank(t),
-              trait_count: t.trait_count,
-              value_count: t.value_count,
-            }))
-            .sort((a, b) => b.score - a.score)}
-        />
-        <TraitAccordion
-          title={"Single Trait Rarity"}
-          score={getSingleTraitRarityScore()}
-          rank={getSingleTraitRarityRank()}
-          collection={props.collection}
-          token_count={props.tokenCount}
-          traits={props.traits.map((t) => ({
-            trait: t.trait,
-            value: t.value,
-            score: getTraitSingleRarityScore(t),
-            rank: getTraitSingleRarityRank(t),
-            trait_count: t.trait_count,
-            value_count: t.value_count,
-          }))}
-        />
+            }))}
+          />
         </div>
       </div>
     </section>

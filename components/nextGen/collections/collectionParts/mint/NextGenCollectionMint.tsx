@@ -95,12 +95,12 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
           !hasError &&
           burnAmountRead.isSuccess &&
           mintPriceRead.isSuccess && (
-          <NextGenMint
-            collection={props.collection}
-            mint_price={mintPrice}
-            burn_amount={burnAmount}
-          />
-        )}
+            <NextGenMint
+              collection={props.collection}
+              mint_price={mintPrice}
+              burn_amount={burnAmount}
+            />
+          )}
       </section>
     </div>
   );

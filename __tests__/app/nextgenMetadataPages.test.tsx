@@ -171,27 +171,30 @@ describe("NextGen metadata", () => {
     ["collections", "Collections | NextGen"],
     ["artists", "Artists | NextGen"],
     ["about", "About | NextGen"],
-  ])("uses consistent metadata for the %s landing view", async (view, title) => {
-    const metadata = await generateNextGenMetadata({
-      params: Promise.resolve({ view: view ? [view] : undefined }),
-    });
-    const image = getSocialImage(metadata);
-    const url = new URL(image.url);
+  ])(
+    "uses consistent metadata for the %s landing view",
+    async (view, title) => {
+      const metadata = await generateNextGenMetadata({
+        params: Promise.resolve({ view: view ? [view] : undefined }),
+      });
+      const image = getSocialImage(metadata);
+      const url = new URL(image.url);
 
-    expect(metadata.title).toBe(title);
-    expect(metadata.openGraph?.title).toBe(title);
-    expect(metadata.twitter?.card).toBe("summary_large_image");
-    expect(image).toMatchObject({
-      alt: `${title} social card`,
-      height: 630,
-      width: 1200,
-    });
-    expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-    expect(url.searchParams.get("subtitle")).toBe(
-      "Generative art collections from 6529"
-    );
-    expect(url.searchParams.get("title")).toBe(title);
-  });
+      expect(metadata.title).toBe(title);
+      expect(metadata.openGraph?.title).toBe(title);
+      expect(metadata.twitter?.card).toBe("summary_large_image");
+      expect(image).toMatchObject({
+        alt: `${title} social card`,
+        height: 630,
+        width: 1200,
+      });
+      expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
+      expect(url.searchParams.get("subtitle")).toBe(
+        "Generative art collections from 6529"
+      );
+      expect(url.searchParams.get("title")).toBe(title);
+    }
+  );
 
   it("uses a route-specific NextGen collection card for admin metadata", async () => {
     const metadata = await generateNextGenAdminMetadata();

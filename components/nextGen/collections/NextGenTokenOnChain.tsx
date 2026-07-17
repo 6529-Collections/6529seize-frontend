@@ -234,7 +234,9 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   wallets={[owner as `0x${string}`]}
                   display={profile?.handle ?? ownerENS}
                 />
-                {areEqualAddresses(owner, account.address) && <span>(you)</span>}
+                {areEqualAddresses(owner, account.address) && (
+                  <span>(you)</span>
+                )}
               </dd>
             </div>
             <div className="tw-min-w-0">

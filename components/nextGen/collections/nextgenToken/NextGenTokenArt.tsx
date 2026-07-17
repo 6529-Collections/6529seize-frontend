@@ -278,10 +278,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             className={iconButtonClassName}
             onClick={() => setShowBlackbox(true)}
           >
-            <Lightbulb
-              mode="black"
-              className="tw-h-5 tw-w-5 tw-fill-current"
-            />
+            <Lightbulb mode="black" className="tw-h-5 tw-w-5 tw-fill-current" />
           </button>
           <button
             type="button"
@@ -289,10 +286,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             className={iconButtonClassName}
             onClick={() => setShowLightbox(true)}
           >
-            <Lightbulb
-              mode="light"
-              className="tw-h-5 tw-w-5 tw-fill-current"
-            />
+            <Lightbulb mode="light" className="tw-h-5 tw-w-5 tw-fill-current" />
           </button>
           <div className="tw-relative tw-flex" ref={downloadMenuRef}>
             <button

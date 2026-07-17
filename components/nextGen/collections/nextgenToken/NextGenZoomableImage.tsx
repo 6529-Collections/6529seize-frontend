@@ -201,9 +201,7 @@ export default function NextGenZoomableImage(
         className={`tw-relative tw-flex tw-items-center tw-justify-center tw-overflow-hidden ${viewportClassName}`}
       >
         {loading && (
-          <span
-            className="tw-absolute tw-inset-0 tw-z-[2] tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-bg-black"
-          >
+          <span className="tw-absolute tw-inset-0 tw-z-[2] tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-bg-black">
             <span className="tw-flex tw-flex-wrap tw-text-center">
               {isMobileDevice ? "8K" : "16K"} Pebbles are very large
             </span>
