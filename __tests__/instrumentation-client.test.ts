@@ -34,6 +34,21 @@ describe("instrumentation-client", () => {
     filename:
       "node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
   };
+  const createReactDomRawInsertBeforeFrames = () => {
+    const chunkPath =
+      "app:///_next/static/chunks/0example-react-dom-runtime.js";
+    const createFrame = (functionName: string) => ({
+      filename: chunkPath,
+      abs_path: chunkPath,
+      function: functionName,
+      in_app: true,
+    });
+    const repeatedFrames = Array.from({ length: 24 }, () => [
+      createFrame("lr"),
+      createFrame("li"),
+    ]).flat();
+    return [...repeatedFrames, createFrame("lo"), createFrame("sN")];
+  };
   const gifPickerTenorManagerFrame = {
     filename:
       "node_modules/.pnpm/gif-picker-react@1.5.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/gif-picker-react/src/managers/TenorManager.ts",
@@ -638,6 +653,33 @@ describe("instrumentation-client", () => {
       tags: {
         transaction: "/waves",
         url: "/waves/633b5f84-3461-461d-b6d1-4d0cc03e7099",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the production-shaped raw React DOM insertBefore stack", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "raw-react-dom-insert-before-event",
+      transaction: "/waves",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomInsertBeforeMessage,
+            stacktrace: {
+              frames: createReactDomRawInsertBeforeFrames(),
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/waves",
+        url: "/waves",
       },
     };
 

@@ -56,6 +56,7 @@ import {
   hasInjectedWasmCspFrameSignature,
   hasLikelyAppOwnedFrame,
   hasNativeJsonStringifyFrame,
+  hasReactDomInsertBeforeNotFoundErrorSignature,
   hasReactDomNotFoundErrorSignature,
   hasSentryRouteParameterizationFrame,
   isSentryRouteParameterizationFrame,
@@ -619,7 +620,7 @@ export function shouldFilterReactDomInsertBeforeNotFoundError(
     return false;
   }
 
-  return hasReactDomNotFoundErrorSignature(
+  return hasReactDomInsertBeforeNotFoundErrorSignature(
     event,
     REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE
   );

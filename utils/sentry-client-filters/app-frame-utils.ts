@@ -31,6 +31,17 @@ import {
   isFirstPartyHost,
 } from "./value-utils";
 
+const reactDomInsertBeforeRawFrameCount = 50;
+const reactDomInsertBeforeRawRuntimeFunctions = new Set([
+  "sN",
+  "sR",
+  "lo",
+  "li",
+  "lr",
+]);
+const reactDomInsertBeforeRawRequiredFunctions = ["lo", "li", "lr"];
+const reactDomInsertBeforeRawTerminalFunctions = new Set(["sN", "sR"]);
+
 function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
   const paths = getFramePaths(frame);
   if (
@@ -64,20 +75,113 @@ function hasOnlyReactDomRuntimeFrames(
   );
 }
 
+function hasOnlyOneNextStaticChunk(frames: SentryStackFrame[]): boolean {
+  const [firstFrame] = frames;
+  if (!firstFrame) {
+    return false;
+  }
+
+  const chunkPathToken = `${nextStaticFramePathToken}chunks/`;
+  const firstFramePaths = getFramePaths(firstFrame).map((path) => path.trim());
+  if (
+    firstFramePaths.length === 0 ||
+    firstFramePaths.some((path) => !path.includes(chunkPathToken))
+  ) {
+    return false;
+  }
+
+  const chunkPaths = new Set(firstFramePaths);
+  if (chunkPaths.size !== 1) {
+    return false;
+  }
+
+  return frames.every((frame) => {
+    const paths = getFramePaths(frame).map((path) => path.trim());
+    return (
+      paths.length > 0 &&
+      paths.every(
+        (path) => path.includes(chunkPathToken) && chunkPaths.has(path)
+      )
+    );
+  });
+}
+
+function hasRawReactDomInsertBeforeFrameSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  // beforeSend sees this minified stack before Sentry applies source maps.
+  // Keep the cohort-backed shape exact so minifier drift fails open.
+  if (
+    !Array.isArray(frames) ||
+    frames.length !== reactDomInsertBeforeRawFrameCount
+  ) {
+    return false;
+  }
+
+  const terminalFunction = frames[frames.length - 1]?.function?.trim();
+  if (
+    !terminalFunction ||
+    !reactDomInsertBeforeRawTerminalFunctions.has(terminalFunction)
+  ) {
+    return false;
+  }
+
+  const functionNames = new Set<string>();
+  for (const frame of frames) {
+    const functionName = frame.function?.trim();
+    if (
+      !functionName ||
+      !reactDomInsertBeforeRawRuntimeFunctions.has(functionName)
+    ) {
+      return false;
+    }
+    functionNames.add(functionName);
+  }
+
+  return (
+    functionNames.size ===
+      reactDomInsertBeforeRawRequiredFunctions.length + 1 &&
+    reactDomInsertBeforeRawRequiredFunctions.every((functionName) =>
+      functionNames.has(functionName)
+    ) && hasOnlyOneNextStaticChunk(frames)
+  );
+}
+
+function getReactDomNotFoundErrorFrames(
+  event: SentryClientEvent,
+  message: string
+): SentryStackFrame[] | undefined {
+  const values = event.exception?.values;
+  if (values?.length !== 1) {
+    return undefined;
+  }
+
+  const [value] = values;
+  if (value?.type !== "NotFoundError" || value.value !== message) {
+    return undefined;
+  }
+
+  return value.stacktrace?.frames;
+}
+
 export function hasReactDomNotFoundErrorSignature(
   event: SentryClientEvent,
   message: string
 ): boolean {
-  const value = event.exception?.values?.[0];
-  if (value?.type !== "NotFoundError") {
-    return false;
-  }
+  return hasOnlyReactDomRuntimeFrames(
+    getReactDomNotFoundErrorFrames(event, message)
+  );
+}
 
-  if (value.value !== message) {
-    return false;
-  }
-
-  return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
+export function hasReactDomInsertBeforeNotFoundErrorSignature(
+  event: SentryClientEvent,
+  message: string
+): boolean {
+  const frames = getReactDomNotFoundErrorFrames(event, message);
+  return (
+    hasOnlyReactDomRuntimeFrames(frames) ||
+    hasRawReactDomInsertBeforeFrameSignature(frames)
+  );
 }
 
 function isAppUriFrame(frame: SentryStackFrame): boolean {
