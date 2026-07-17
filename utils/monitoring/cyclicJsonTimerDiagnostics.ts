@@ -1,6 +1,6 @@
 import type { Event, EventHint } from "@sentry/nextjs";
 
-const CYCLIC_JSON_TIMER_DIAGNOSTICS_VERSION = "v1";
+const CYCLIC_JSON_TIMER_DIAGNOSTICS_VERSION = "v2";
 export const CYCLIC_JSON_TIMER_DIAGNOSTICS_TAG =
   "cyclic_json_timer_diagnostics";
 
@@ -13,6 +13,9 @@ const DEFAULT_TIMER_SAMPLE_RATE = 1 / 16;
 const MAX_SCHEDULING_FRAMES = 8;
 const INTERNAL_TIMER_FUNCTION = "cyclicJsonTimerDiagnosticSetTimeout";
 const INTERNAL_STACK_FUNCTIONS = new Set([INTERNAL_TIMER_FUNCTION]);
+const PRODUCTION_ASSET_HOSTNAME = "dnclu2fna0b2b.cloudfront.net";
+const PRODUCTION_ASSET_PATH_PATTERN =
+  /^\/web_build\/[^/]+\/_next\/static\//;
 const SAFE_NAME_PATTERN = /[^\w$<>. -]/g;
 // Privacy wins over callback-name fidelity: long minified names can be
 // redacted because they are indistinguishable from identifier-shaped secrets.
@@ -135,6 +138,15 @@ function getStaticAssetPath(pathname: string): string | null {
   return pathname.slice(staticIndex).slice(0, 512);
 }
 
+function isProductionNextAssetUrl(url: URL): boolean {
+  return (
+    url.protocol === "https:" &&
+    url.hostname === PRODUCTION_ASSET_HOSTNAME &&
+    url.port === "" &&
+    PRODUCTION_ASSET_PATH_PATTERN.test(url.pathname)
+  );
+}
+
 function getSanitizedFile(
   rawLocation: string,
   firstPartyHostname: string
@@ -159,7 +171,8 @@ function getSanitizedFile(
       isHttp &&
       (parsed.hostname === firstPartyHostname ||
         parsed.hostname === "6529.io" ||
-        parsed.hostname.endsWith(".6529.io"));
+        parsed.hostname.endsWith(".6529.io") ||
+        isProductionNextAssetUrl(parsed));
 
     if (isFirstParty) {
       return {
@@ -280,10 +293,15 @@ function createDiagnostics(
   sampleRate: number,
   stack: string | undefined
 ): CyclicJsonTimerDiagnostics {
-  const schedulingFrames = (stack ?? "")
+  const parsedFrames = (stack ?? "")
     .split("\n")
     .map((line) => parseStackLine(line, firstPartyHostname))
-    .filter((frame): frame is CyclicJsonTimerSchedulingFrame => frame !== null)
+    .filter((frame): frame is CyclicJsonTimerSchedulingFrame => frame !== null);
+  // Error.stack starts at this diagnostic wrapper. Drop that capture-site frame
+  // by position because production minification can rename the function. Keep
+  // the name filter for engines that emit an additional internal frame.
+  const schedulingFrames = parsedFrames
+    .slice(1)
     .filter((frame) => !INTERNAL_STACK_FUNCTIONS.has(frame.function))
     .slice(0, MAX_SCHEDULING_FRAMES);
 
@@ -405,8 +423,8 @@ export function installCyclicJsonTimerDiagnostics(
   };
 
   try {
-    // Preserve the diagnostic frame name through production minification so
-    // stack cleanup does not rely on a fixed frame position.
+    // Preserve a recognizable name where the runtime allows it so duplicate
+    // internal frames can still be removed after the capture-site frame.
     Object.defineProperty(diagnosticSetTimeout, "name", {
       configurable: true,
       value: INTERNAL_TIMER_FUNCTION,

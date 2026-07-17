@@ -11,6 +11,9 @@ const CYCLIC_JSON_MESSAGE =
 const WKWEBVIEW_USER_AGENT =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
 const MOBILE_SAFARI_USER_AGENT = `${WKWEBVIEW_USER_AGENT} Version/18.7 Safari/604.1`;
+const PRODUCTION_ASSET_HOSTNAME = "dnclu2fna0b2b.cloudfront.net";
+const PRODUCTION_ASSET_PREFIX =
+  `https://${PRODUCTION_ASSET_HOSTNAME}/web_build/test-release`;
 
 type ScheduledTimer = {
   handler: ((...args: unknown[]) => unknown) | string;
@@ -87,6 +90,37 @@ function createTimerHarness(options?: {
     target,
     getScheduled: () => scheduled,
     getOriginalReceiver: () => originalReceiver,
+  };
+}
+
+function captureDiagnostics(stackLines: string[]) {
+  const { target, getScheduled } = createTimerHarness({
+    stackFactory: () => stackLines.join("\n"),
+  });
+  const expectedError = new TypeError(CYCLIC_JSON_MESSAGE);
+  target.setTimeout(() => {
+    throw expectedError;
+  }, 0);
+
+  const scheduled = getScheduled();
+  try {
+    (scheduled?.handler as (...args: unknown[]) => unknown)();
+  } catch (error) {
+    expect(error).toBe(expectedError);
+  }
+
+  const event = createCyclicJsonEvent();
+  enrichCyclicJsonTimerEvent(event, { originalException: expectedError });
+  return event.extra?.["cyclicJsonTimerDiagnostics"] as {
+    schemaVersion: string;
+    scheduleOrigin: string;
+    schedulingFrames: Array<{
+      file: string;
+      function: string;
+      line: number;
+      column: number;
+      origin: string;
+    }>;
   };
 }
 
@@ -232,11 +266,11 @@ describe("cyclic JSON timer diagnostics", () => {
     enrichCyclicJsonTimerEvent(event, { originalException: expectedError });
 
     expect(event.tags).toMatchObject({
-      [CYCLIC_JSON_TIMER_DIAGNOSTICS_TAG]: "v1",
+      [CYCLIC_JSON_TIMER_DIAGNOSTICS_TAG]: "v2",
       cyclic_json_timer_schedule_origin: "mixed",
     });
     expect(event.extra?.["cyclicJsonTimerDiagnostics"]).toEqual({
-      schemaVersion: "v1",
+      schemaVersion: "v2",
       timerSampleRate: 1 / 16,
       callbackName: "failingTimerCallback",
       webViewFamily: "ios-wkwebview",
@@ -265,6 +299,90 @@ describe("cyclic JSON timer diagnostics", () => {
     expect(serializedDiagnostics).not.toContain("0xprivate");
     expect(serializedDiagnostics).not.toContain("private");
     expect(serializedDiagnostics).not.toContain("secret-extension-id");
+  });
+
+  it("recognizes production CDN chunks and removes a minified capture-site frame", () => {
+    const diagnostics = captureDiagnostics([
+      "Error: cyclic-json-timer-schedule",
+      `u@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/diagnostics.js:21:99680`,
+      "injectedCallback@https://wallet.example/inpage.js:790:281",
+      `scheduleRefresh@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/app/waves.js:51:8567`,
+    ]);
+
+    expect(diagnostics).toEqual({
+      schemaVersion: "v2",
+      timerSampleRate: 1 / 16,
+      callbackName: "anonymous",
+      webViewFamily: "ios-wkwebview",
+      scheduleOrigin: "mixed",
+      schedulingFrames: [
+        {
+          file: "external/inpage.js",
+          function: "injectedCallback",
+          line: 790,
+          column: 281,
+          origin: "third_party",
+        },
+        {
+          file: "/_next/static/chunks/app/waves.js",
+          function: "scheduleRefresh",
+          line: 51,
+          column: 8567,
+          origin: "first_party",
+        },
+      ],
+    });
+  });
+
+  it.each([
+    {
+      name: "a lookalike hostname",
+      location: `https://${PRODUCTION_ASSET_HOSTNAME}.example.com/web_build/test-release/_next/static/chunks/app.js:3:4`,
+      expectedFile: "external/app.js",
+      expectedOrigin: "third_party",
+    },
+    {
+      name: "an unrelated path on the app asset CDN",
+      location: `https://${PRODUCTION_ASSET_HOSTNAME}/_next/static/chunks/app.js:3:4`,
+      expectedFile: "external/app.js",
+      expectedOrigin: "third_party",
+    },
+    {
+      name: "the separate media CDN",
+      location:
+        "https://d3lqz0a4bldqgf.cloudfront.net/web_build/test-release/_next/static/chunks/app.js:3:4",
+      expectedFile: "external/app.js",
+      expectedOrigin: "third_party",
+    },
+    {
+      name: "a non-HTTP script",
+      location: "data:text/javascript,fixture:3:4",
+      expectedFile: "non-http-script",
+      expectedOrigin: "unknown",
+    },
+    {
+      name: "a generic external script",
+      location: "https://scripts.example/vendor.js:3:4",
+      expectedFile: "external/vendor.js",
+      expectedOrigin: "third_party",
+    },
+  ])("does not classify $name as a production app asset", (testCase) => {
+    const diagnostics = captureDiagnostics([
+      "Error: cyclic-json-timer-schedule",
+      `u@${PRODUCTION_ASSET_PREFIX}/_next/static/chunks/diagnostics.js:1:2`,
+      `candidate@${testCase.location}`,
+    ]);
+
+    expect(diagnostics.scheduleOrigin).toBe(testCase.expectedOrigin);
+    expect(diagnostics.schedulingFrames).toEqual([
+      {
+        file: testCase.expectedFile,
+        function: "candidate",
+        line: 3,
+        column: 4,
+        origin: testCase.expectedOrigin,
+      },
+    ]);
   });
 
   it("does not tag unrelated errors or create a second event", () => {
