@@ -1,4 +1,8 @@
+"use client";
+
 import UserPageErrorWrapper from "@/components/user/utils/UserPageErrorWrapper";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function UserPageRepNewRepError({
   msg,
@@ -9,23 +13,24 @@ export default function UserPageRepNewRepError({
   readonly showDetails?: boolean;
   readonly closeError: () => void;
 }) {
+  const locale = useBrowserLocale();
   return (
-    <UserPageErrorWrapper closeError={closeError}>
-      <div className="tw-flex">
-        <div className="tw-ml-3 tw-self-center tw-flex tw-flex-col lg:tw-max-w-xl">
-          <h3 className="tw-text-sm tw-mb-0 tw-font-semibold tw-text-red">
-            {msg}
-          </h3>
-          {showDetails && (
-            <p className="tw-text-justify tw-mt-2 tw-mb-0 tw-text-sm tw-text-iron-300 tw-font-normal">
-              Rep is not meant for insults or doxxing so we run proposed rep
-              categories through an AI filter. If you think the filter got your
-              proposed category wrong, hop into Brain on 6529.io and let us
-              know. In the meantime, perhaps you can rephrase that you are
-              trying to say.
-            </p>
-          )}
-        </div>
+    <UserPageErrorWrapper
+      closeError={closeError}
+      closeLabel={t(locale, "rep.categories.validation.closeErrorLabel")}
+    >
+      <div className="tw-ml-3 tw-flex tw-min-w-0 tw-flex-col">
+        <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-leading-snug tw-text-red">
+          {t(locale, "rep.categories.validation.errorTitle")}
+        </h3>
+        <p className="tw-mb-0 tw-mt-1 tw-break-words tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-100">
+          {msg}
+        </p>
+        {showDetails && (
+          <p className="tw-mb-0 tw-mt-2 tw-break-words tw-text-left tw-text-xs tw-font-normal tw-leading-relaxed tw-text-iron-300 sm:tw-text-sm">
+            {t(locale, "rep.categories.validation.aiFilterDetails")}
+          </p>
+        )}
       </div>
     </UserPageErrorWrapper>
   );
