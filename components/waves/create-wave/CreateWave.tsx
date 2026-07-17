@@ -8,9 +8,12 @@ import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
+import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
+import { useCreateWaveDrafts } from "./hooks/useCreateWaveDrafts";
 import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
 import useKeyboardFocusScroll from "./hooks/useKeyboardFocusScroll";
 import { useWaveConfig } from "./hooks/useWaveConfig";
+import CreateWaveDraftsSection from "./overview/CreateWaveDraftsSection";
 
 export default function CreateWave({
   profile,
@@ -24,8 +27,16 @@ export default function CreateWave({
   readonly parentWaveId?: string | null | undefined;
 }) {
   const waveConfig = useWaveConfig();
-  const { config, step, selectedOutcomeType, onStep, errorFocusRequest } =
-    waveConfig;
+  const {
+    config,
+    step,
+    selectedOutcomeType,
+    onStep,
+    errorFocusRequest,
+    setConfig,
+    endDateConfig,
+    setEndDateConfig,
+  } = waveConfig;
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   useKeyboardFocusScroll(containerRef);
@@ -66,6 +77,15 @@ export default function CreateWave({
     invalidField.focus({ preventScroll: true });
     invalidField.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [errorFocusRequest]);
+  const { drafts, loadDraft, deleteDraft, clearActiveDraft } =
+    useCreateWaveDrafts({ config, endDateConfig, step });
+
+  const onLoadDraft = (draft: CreateWaveDraft) => {
+    setConfig(draft.config);
+    setEndDateConfig(draft.endDateConfig);
+    loadDraft(draft);
+  };
+
   const {
     submitting,
     showDropError,
@@ -75,7 +95,12 @@ export default function CreateWave({
   } = useCreateWaveSubmission({
     config,
     descriptionRef,
-    onSuccess,
+    // The draft is discarded only once the server has confirmed the wave —
+    // a failed submit keeps the work recoverable.
+    onSuccess: () => {
+      clearActiveDraft();
+      onSuccess?.();
+    },
     parentWaveId,
   });
 
@@ -114,6 +139,13 @@ export default function CreateWave({
             descriptionRef={descriptionRef}
             submitting={submitting}
             showDropError={showDropError}
+            overviewLeading={
+              <CreateWaveDraftsSection
+                drafts={drafts}
+                onLoad={onLoadDraft}
+                onDelete={deleteDraft}
+              />
+            }
             onHaveDropToSubmitChange={onHaveDropToSubmitChange}
             onInlineGroupCreate={onInlineGroupCreate}
           />

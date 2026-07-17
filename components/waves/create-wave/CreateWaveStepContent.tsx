@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -22,6 +22,7 @@ export default function CreateWaveStepContent({
   descriptionRef,
   submitting,
   showDropError,
+  overviewLeading,
   onHaveDropToSubmitChange,
   onInlineGroupCreate,
 }: {
@@ -30,6 +31,8 @@ export default function CreateWaveStepContent({
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
   readonly submitting: boolean;
   readonly showDropError: boolean;
+  /** Rendered above the Overview step's fields (e.g. saved drafts). */
+  readonly overviewLeading?: ReactNode;
   readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
   readonly onInlineGroupCreate: (
     payload: ApiCreateGroup
@@ -68,17 +71,20 @@ export default function CreateWaveStepContent({
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       return (
-        <CreateWaveOverview
-          overview={config.overview}
-          display={config.display}
-          errors={errors}
-          ongoingRanking={config.dates.ongoingRanking ?? false}
-          setOverview={setOverview}
-          setDisplay={setDisplay}
-          onOngoingRankingChange={(ongoingRanking) =>
-            setDates({ ...config.dates, ongoingRanking })
-          }
-        />
+        <div className="tw-flex tw-flex-col tw-gap-y-6">
+          {overviewLeading}
+          <CreateWaveOverview
+            overview={config.overview}
+            display={config.display}
+            errors={errors}
+            ongoingRanking={config.dates.ongoingRanking ?? false}
+            setOverview={setOverview}
+            setDisplay={setDisplay}
+            onOngoingRankingChange={(ongoingRanking) =>
+              setDates({ ...config.dates, ongoingRanking })
+            }
+          />
+        </div>
       );
     case CreateWaveStep.GROUPS:
       return (
