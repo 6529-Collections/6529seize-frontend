@@ -92,6 +92,7 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Click to react" })
       .first();
     await openMobileDropMenu(page, drop, quickReactButton);
+    const delayedReaction = await delayReactionResponse(page);
 
     await expect(quickReactButton).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -101,6 +102,12 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
     );
 
     const optimisticReactionChip = reactionChip(drop);
+    try {
+      await delayedReaction.requestStarted;
+      await expect(quickReactButton).toHaveCount(0);
+    } finally {
+      delayedReaction.release();
+    }
     await expect(optimisticReactionChip).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
@@ -149,7 +156,89 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
+
+  test("closes the mobile reaction menu before a failed response rolls back", async ({
+    baseURL,
+    browserName,
+    page,
+  }, testInfo) => {
+    testInfo.skip(
+      !isCapacitorSimulationProject(testInfo.project.name) ||
+        browserName !== "chromium",
+      "This regression requires a Chromium Capacitor simulation for trusted CDP touch input."
+    );
+
+    await seedQuickReaction(page);
+    await gotoSandboxDirectMessage(page);
+
+    const drop = page.locator('[data-serial-no="1"]').first();
+    const quickReactButton = page
+      .getByRole("button", { name: "Click to react" })
+      .first();
+    await openMobileDropMenu(page, drop, quickReactButton);
+    const delayedReaction = await delayReactionResponse(page, {
+      failureMessage: "Sandbox reaction rejected",
+    });
+
+    await quickReactButton.evaluate((button: HTMLButtonElement) =>
+      button.click()
+    );
+
+    const optimisticReactionChip = reactionChip(drop);
+    try {
+      await delayedReaction.requestStarted;
+      await expect(quickReactButton).toHaveCount(0);
+    } finally {
+      delayedReaction.release();
+    }
+
+    await expect(optimisticReactionChip).toHaveCount(0, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(page.getByText("Sandbox reaction rejected")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    expect(await getReactionMutationMethods(baseURL)).toEqual([]);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 });
+
+async function delayReactionResponse(
+  page: Page,
+  options?: { readonly failureMessage?: string }
+) {
+  let release!: () => void;
+  const responseGate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let markRequestStarted!: () => void;
+  const requestStarted = new Promise<void>((resolve) => {
+    markRequestStarted = resolve;
+  });
+
+  await page.route(`**${REACTION_PATH}`, async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+
+    markRequestStarted();
+    await responseGate;
+
+    if (options?.failureMessage) {
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ error: options.failureMessage }),
+      });
+      return;
+    }
+
+    await route.fallback();
+  });
+
+  return { release, requestStarted };
+}
 
 async function gotoSandboxDirectMessage(page: Page) {
   await page.goto(`/messages/${SANDBOX_DM_WAVE_ID}`, {
@@ -197,7 +286,7 @@ async function openMobileDropMenu(
   } finally {
     await cdp
       .send("Input.dispatchTouchEvent", {
-        type: "touchEnd",
+        type: "touchCancel",
         touchPoints: [],
       })
       .catch(() => undefined);
