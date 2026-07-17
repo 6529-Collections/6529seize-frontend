@@ -1,13 +1,17 @@
 "use client";
 
-import {
+import LatestActivityRow, {
   printGas,
   printRoyalties,
 } from "@/components/latest-activity/LatestActivityRow";
-import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "@/components/nextGen/nextgen_contracts";
 import Pagination from "@/components/pagination/Pagination";
 import { NULL_ADDRESS } from "@/constants/constants";
 import type { NextGenCollection, NextGenLog } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
 import {
   areEqualAddresses,
   formatAddress,
@@ -32,6 +36,32 @@ interface Props {
 }
 
 const PAGE_SIZE = 20;
+
+function getActivityTransaction(log: NextGenLog): Transaction | undefined {
+  if (typeof log.token_id !== "number") {
+    return undefined;
+  }
+
+  return {
+    created_at: new Date(log.created_at),
+    transaction: log.transaction,
+    block: log.block,
+    transaction_date: new Date(log.block_timestamp * 1000),
+    from_address: log.from_address as `0x${string}`,
+    from_display: log.from_display || undefined,
+    to_address: log.to_address as `0x${string}`,
+    to_display: log.to_display || undefined,
+    contract: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
+    token_id: log.token_id,
+    token_count: 1,
+    value: log.value,
+    royalties: log.royalties,
+    gas_gwei: log.gas_gwei,
+    gas_price: log.gas_price,
+    gas_price_gwei: log.gas_price_gwei,
+    gas: log.gas,
+  };
+}
 
 export default function NextGenCollectionProvenance(props: Readonly<Props>) {
   const scrollTarget = useRef<HTMLImageElement>(null);
@@ -66,20 +96,41 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
       className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
       ref={scrollTarget}
     >
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
+      <div className="tw-overflow-x-auto tw-pt-2">
         <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          {logs.map((log, index) => (
-            <NextGenCollectionProvenanceRow
-              collection={props.collection}
-              log={log}
-              key={`${log.id}`}
-              odd={index % 2 !== 0}
-            />
-          ))}
+          <table className="tw-w-full tw-min-w-[900px] tw-border-collapse">
+            <tbody>
+              {logs.map((log, index) => {
+                const transaction = getActivityTransaction(log);
+                if (transaction) {
+                  return (
+                    <LatestActivityRow
+                      key={`${log.id}`}
+                      tr={transaction}
+                      nextgen_collection={props.collection}
+                      showNftIdentity
+                    />
+                  );
+                }
+
+                return (
+                  <tr key={`${log.id}`}>
+                    <td colSpan={4} className="tw-border-0 tw-p-0">
+                      <NextGenCollectionProvenanceRow
+                        collection={props.collection}
+                        log={log}
+                        odd={index % 2 !== 0}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
       {totalResults > PAGE_SIZE && logsLoaded && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-6 tw-text-center">
+        <div className="tw-pb-3 tw-pt-2 tw-text-center">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}

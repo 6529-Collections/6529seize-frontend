@@ -42,6 +42,8 @@ export function IncomingDelegationsTable(
     myDelegations: ContractDelegation[];
     collection: DelegationCollection;
     delegationsLoaded: boolean;
+    delegationsError: boolean;
+    onRetry: () => void;
     activeConsolidations: ActiveConsolidation[];
     isSubdelegation?: boolean | undefined;
     subDelegationOriginalDelegator: string | undefined;
@@ -188,6 +190,8 @@ export function IncomingDelegationsTable(
       myDelegations={myDelegations}
       collection={collection}
       delegationsLoaded={delegationsLoaded}
+      delegationsError={props.delegationsError}
+      onRetry={props.onRetry}
       activeConsolidations={activeConsolidations}
       renderRow={printIncomingDelegationRow}
       renderFooter={printSubDelegationActionsFooter}

@@ -540,7 +540,7 @@ export const handleComposerFileChange = ({
   newFiles,
   drop,
   files,
-  isWideContainer,
+  keepOptionsVisible,
   waveId,
   setToast,
   setFiles,
@@ -551,7 +551,7 @@ export const handleComposerFileChange = ({
   readonly newFiles: File[];
   readonly drop: CreateDropConfig | null;
   readonly files: File[];
-  readonly isWideContainer: boolean;
+  readonly keepOptionsVisible: boolean;
   readonly waveId: string;
   readonly setToast: (toast: AppToastInput) => void;
   readonly setFiles: React.Dispatch<React.SetStateAction<File[]>>;
@@ -622,7 +622,7 @@ export const handleComposerFileChange = ({
     });
   }
 
-  if (!isWideContainer) {
+  if (!keepOptionsVisible) {
     shouldAnimateOptionsRef.current = true;
     setShowOptionsState({ scopeKey: waveId, value: false });
     closeOnNextInputRef.current = false;

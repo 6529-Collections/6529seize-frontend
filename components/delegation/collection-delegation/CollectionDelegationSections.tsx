@@ -148,6 +148,10 @@ export function CollectionDelegationSections(
         myDelegations={myDelegations}
         collection={collection}
         delegationsLoaded={reads.outgoingDelegationsLoaded}
+        delegationsError={reads.outgoingDelegationsError}
+        onRetry={() => {
+          void reads.retryOutgoingDelegations();
+        }}
         activeConsolidations={reads.outgoingActiveConsolidations}
         revocation={revocation}
         chainsMatch={chainsMatch}
@@ -169,6 +173,10 @@ export function CollectionDelegationSections(
         myDelegations={myDelegations}
         collection={collection}
         delegationsLoaded={reads.incomingDelegationsLoaded}
+        delegationsError={reads.incomingDelegationsError}
+        onRetry={() => {
+          void reads.retryIncomingDelegations();
+        }}
         activeConsolidations={reads.incomingActiveConsolidations}
         isSubdelegation={isSubdelegation}
         subDelegationOriginalDelegator={subDelegationOriginalDelegator}

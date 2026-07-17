@@ -3,6 +3,8 @@
 import { Fragment, type ReactNode } from "react";
 
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   ContractDelegation,
   ContractWalletDelegation,
@@ -36,6 +38,8 @@ export function DelegationsTable(
     myDelegations: ContractDelegation[];
     collection: DelegationCollection;
     delegationsLoaded: boolean;
+    delegationsError: boolean;
+    onRetry: () => void;
     activeConsolidations: ActiveConsolidation[];
     renderRow: (args: DelegationRowRenderArgs) => ReactNode;
     renderFooter?: ((delegationsCount: number) => ReactNode) | undefined;
@@ -81,6 +85,30 @@ export function DelegationsTable(
         </Fragment>
       );
     });
+  } else if (props.delegationsError) {
+    body = (
+      <tr>
+        <td colSpan={4} className="tw-rounded-lg tw-bg-iron-900 tw-p-4">
+          <div
+            role="alert"
+            className="tw-flex tw-flex-wrap tw-items-center tw-gap-3"
+          >
+            <span className="tw-text-base tw-text-error">
+              {t(DEFAULT_LOCALE, "delegation.collection.readError.message", {
+                collection: collection.title,
+              })}
+            </span>
+            <button
+              type="button"
+              className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              onClick={props.onRetry}
+            >
+              {t(DEFAULT_LOCALE, "delegation.collection.readError.retry")}
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
   } else if (delegationsLoaded) {
     body = (
       <tr>

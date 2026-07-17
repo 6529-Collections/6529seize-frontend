@@ -313,7 +313,7 @@ export default function OnchainTransactionModal({
           <div className="tw-min-w-0">
             <h2
               id={titleId}
-              className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
+              className="tw-m-0 tw-whitespace-pre-line tw-text-xl tw-font-semibold tw-text-white"
             >
               {title}
             </h2>

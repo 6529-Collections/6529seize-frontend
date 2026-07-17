@@ -33,6 +33,8 @@ export function OutgoingDelegationsTable(
     myDelegations: ContractDelegation[];
     collection: DelegationCollection;
     delegationsLoaded: boolean;
+    delegationsError: boolean;
+    onRetry: () => void;
     activeConsolidations: ActiveConsolidation[];
     revocation: DelegationRevocation;
     chainsMatch: () => boolean;
@@ -242,6 +244,8 @@ export function OutgoingDelegationsTable(
       myDelegations={myDelegations}
       collection={collection}
       delegationsLoaded={delegationsLoaded}
+      delegationsError={props.delegationsError}
+      onRetry={props.onRetry}
       activeConsolidations={activeConsolidations}
       renderRow={printOutgoingDelegationRow}
       renderFooter={printBatchRevokeFooter}

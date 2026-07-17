@@ -30,6 +30,11 @@ interface Props {
   collection: DelegationCollection;
 }
 
+interface AccountSnapshot {
+  readonly address: string | undefined;
+  readonly isConnected: boolean;
+}
+
 function getSwitchToMessage() {
   return `Switch to ${
     DELEGATION_CONTRACT.chain_id === 1 ? "Ethereum Mainnet" : "Sepolia Network"
@@ -38,7 +43,9 @@ function getSwitchToMessage() {
 
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const accountResolution = useSeizeConnectContext();
-  const previousAccountAddressRef = useRef<string | undefined>(undefined);
+  const previousAccountSnapshotRef = useRef<AccountSnapshot | undefined>(
+    undefined
+  );
   const networkResolution = useChainId();
   const ensResolution = useEnsName({
     address: accountResolution.address as `0x${string}`,
@@ -116,10 +123,22 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     }
   }
 
+  function resetActionForms() {
+    setShowUpdateDelegation(false);
+    setUpdateDelegationParams(undefined);
+    setSubDelegationOriginalDelegator(undefined);
+    setShowCreateNewDelegationWithSub(false);
+    setShowCreateNewSubDelegationWithSub(false);
+    setShowCreateNewConsolidationWithSub(false);
+    setShowAssignPrimaryAddressWithSub(false);
+    setShowRevokeDelegationWithSub(false);
+  }
+
   const reset = useEffectEvent((options?: { clearToast?: boolean }) => {
     delegationReads.resetDelegationReads();
 
-    revocation.resetRevocationParams();
+    revocation.resetRevocationState();
+    resetActionForms();
     if (options?.clearToast) {
       clearDelegationToast();
     }
@@ -128,17 +147,22 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   });
 
   useEffect(() => {
-    const previousAddress = previousAccountAddressRef.current;
-    const currentAddress = accountResolution.address;
+    const previousAccount = previousAccountSnapshotRef.current;
+    const currentAccount = {
+      address: accountResolution.address,
+      isConnected: accountResolution.isConnected,
+    };
+    const accountChanged =
+      previousAccount !== undefined &&
+      (previousAccount.address !== currentAccount.address ||
+        previousAccount.isConnected !== currentAccount.isConnected);
 
-    previousAccountAddressRef.current = currentAddress;
+    previousAccountSnapshotRef.current = currentAccount;
 
     reset({
-      clearToast: Boolean(
-        previousAddress && previousAddress !== currentAddress
-      ),
+      clearToast: accountChanged,
     });
-  }, [accountResolution.address]);
+  }, [accountResolution.address, accountResolution.isConnected]);
 
   function handleEditDelegation(params: {
     wallet: string;
