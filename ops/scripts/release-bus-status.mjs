@@ -11,12 +11,17 @@ const VALID_MODES = new Set(["OFF", "SHADOW", "STAGING", "PRODUCTION"]);
 class SafeStatusError extends Error {}
 
 function runGh(args) {
-  const result = spawnSync("gh", args, {
-    encoding: "utf8",
-    maxBuffer: 1024 * 1024,
-    stdio: ["ignore", "pipe", "pipe"],
-    timeout: 10_000,
-  });
+  const result =
+    /* NOSONAR -- Local operator controls PATH; no Release Bus input selects the executable. */ spawnSync(
+      "gh",
+      args,
+      {
+        encoding: "utf8",
+        maxBuffer: 1024 * 1024,
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 10_000,
+      }
+    );
 
   if (result.error?.code === "ENOENT") {
     throw new SafeStatusError(
@@ -161,17 +166,15 @@ async function requestStatus(token) {
   return sanitizeStatus(payload);
 }
 
-async function main() {
+try {
   const token = getGitHubToken();
   const status = await requestStatus(token);
   process.stdout.write(`${JSON.stringify(status, null, 2)}\n`);
-}
-
-main().catch((error) => {
+} catch (error) {
   const message =
     error instanceof SafeStatusError
       ? error.message
       : "Unable to determine Release Bus status.";
   process.stderr.write(`${message}\n`);
   process.exitCode = 1;
-});
+}
