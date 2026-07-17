@@ -72,8 +72,8 @@ describe("DelegationSubmitGroups", () => {
       functionName: "registerDelegationAddress",
     });
     expect(onSetToast).toHaveBeenCalledWith({
+      status: "confirm_wallet",
       title: "T",
-      message: "Confirm in your wallet...",
     });
   });
 
@@ -94,6 +94,45 @@ describe("DelegationSubmitGroups", () => {
     expect(mockWriteContract).not.toHaveBeenCalled();
     expect(onSetToast).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ["submitted", true, false],
+    ["success", false, true],
+  ] as const)(
+    "maps a confirmed transaction to the shared %s modal state",
+    (status, isLoading, isSuccess) => {
+      const onSetToast = jest.fn();
+      mockUseWriteContract.mockReturnValue({
+        writeContract: mockWriteContract,
+        data: "0xabc",
+        error: undefined,
+      });
+      mockUseWaitForTransactionReceipt.mockReturnValue({
+        isLoading,
+        isSuccess,
+        isError: false,
+        error: undefined,
+      });
+
+      render(
+        <DelegationSubmitGroups
+          title="Register Delegation"
+          writeParams={{ foo: "bar" }}
+          showCancel={false}
+          gasError={undefined}
+          validate={() => []}
+          onHide={jest.fn()}
+          onSetToast={onSetToast}
+        />
+      );
+
+      expect(onSetToast).toHaveBeenCalledWith({
+        status,
+        title: "Register Delegation",
+        transactionHash: "0xabc",
+      });
+    }
+  );
 
   it("shows receipt errors instead of success toast", () => {
     const onSetToast = jest.fn();
@@ -122,13 +161,15 @@ describe("DelegationSubmitGroups", () => {
     );
 
     expect(onSetToast).toHaveBeenCalledWith({
+      status: "error",
       title: "Register Delegation Failed",
       message: "receipt failed",
+      transactionHash: "0xabc",
     });
     expect(onSetToast).not.toHaveBeenCalledWith(
       expect.objectContaining({
+        status: "success",
         title: "Register Delegation",
-        message: expect.any(Object),
       })
     );
   });

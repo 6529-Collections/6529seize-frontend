@@ -1,13 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
-
 import { DELEGATION_ABI } from "@/abis/abis";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
 } from "@/constants/constants";
-import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import {
   getParams,
   type ContractDelegation,
@@ -24,38 +22,6 @@ import {
 export interface Revocation {
   use_case: number;
   wallet: string;
-}
-
-type TransactionHash = `0x${string}`;
-
-function getTransactionAnchor(hash: TransactionHash) {
-  return (
-    <a
-      href={getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-2 tw-transition-colors"
-    >
-      view
-    </a>
-  );
-}
-
-export function getTransactionToastMessage(
-  hash: TransactionHash,
-  waiting: boolean
-): ReactNode {
-  if (waiting) {
-    return (
-      <>
-        Transaction submitted... {getTransactionAnchor(hash)}
-        <br />
-        Waiting for confirmation...
-      </>
-    );
-  }
-
-  return <>Transaction Successful! {getTransactionAnchor(hash)}</>;
 }
 
 export function getTransactionErrorToastMessage(

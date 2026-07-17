@@ -1,6 +1,6 @@
 import { DelegationCenterSection } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { createRef, type ComponentProps } from "react";
+import { type ComponentProps } from "react";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -92,8 +92,8 @@ describe("DelegationCenterMenu links", () => {
 
     render(
       <DelegationToast
-        toastRef={createRef<HTMLDialogElement>()}
         toast={{
+          status: "error",
           title: "Wallet Error",
           message: '<img src="x" onerror="alert(1)" />',
         }}
@@ -103,7 +103,7 @@ describe("DelegationCenterMenu links", () => {
     );
 
     expect(
-      screen.getByText('<img src="x" onerror="alert(1)" />')
+      screen.getByDisplayValue('<img src="x" onerror="alert(1)" />')
     ).toBeInTheDocument();
     expect(document.querySelector('img[src="x"]')).toBeNull();
   });
@@ -115,10 +115,11 @@ describe("DelegationCenterMenu links", () => {
     render(
       <div style={{ transform: "translateZ(0)" }}>
         <DelegationToast
-          toastRef={createRef<HTMLDialogElement>()}
           toast={{
+            status: "success",
             title: "Viewport Notice",
             message: "Visible without scrolling",
+            transactionHash: "0xabc",
           }}
           showToast={true}
           setShowToast={jest.fn()}
@@ -127,8 +128,12 @@ describe("DelegationCenterMenu links", () => {
     );
 
     const dialog = screen.getByRole("dialog", { name: "Viewport Notice" });
-    expect(dialog.parentElement).toBe(document.body);
-    expect(dialog).toHaveClass("tw-fixed", "tw-h-[100dvh]");
+    expect(dialog.parentElement?.parentElement).toBe(document.body);
+    expect(dialog.parentElement).toHaveClass("tw-fixed", "tw-inset-0");
+    expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("etherscan.io/tx/0xabc")
+    );
   });
 
   it("reopens shared delegation toasts after a dismiss", async () => {
@@ -144,6 +149,7 @@ describe("DelegationCenterMenu links", () => {
             type="button"
             onClick={() =>
               toastState.showDelegationToast({
+                status: "success",
                 title: "First Toast",
                 message: "First body",
               })
@@ -161,6 +167,7 @@ describe("DelegationCenterMenu links", () => {
             type="button"
             onClick={() =>
               toastState.showDelegationToast({
+                status: "success",
                 title: "Second Toast",
                 message: "Second body",
               })
@@ -170,7 +177,6 @@ describe("DelegationCenterMenu links", () => {
           </button>
           {toastState.toast && (
             <DelegationToast
-              toastRef={toastState.toastRef}
               toast={toastState.toast}
               showToast={toastState.showToast}
               setShowToast={toastState.setToastVisibility}

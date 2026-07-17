@@ -10,7 +10,6 @@ import type { ContractDelegation } from "../CollectionDelegation.utils";
 import type { DelegationToastState } from "../DelegationToast";
 import {
   getTransactionErrorToastMessage,
-  getTransactionToastMessage,
   type Revocation,
 } from "./collection-delegation-helpers";
 
@@ -61,6 +60,7 @@ export function useDelegationRevocation(options: {
   useEffect(() => {
     if (contractWriteRevoke.error) {
       showDelegationToast({
+        status: "error",
         title: "Revoking Delegation Failed",
         message: getTransactionErrorToastMessage(
           contractWriteRevoke.error,
@@ -71,21 +71,25 @@ export function useDelegationRevocation(options: {
     if (contractWriteRevoke.data) {
       if (waitContractWriteRevoke.isLoading) {
         showDelegationToast({
+          status: "submitted",
           title: "Revoking Delegation",
-          message: getTransactionToastMessage(contractWriteRevoke.data, true),
+          transactionHash: contractWriteRevoke.data,
         });
       } else if (waitContractWriteRevoke.isSuccess) {
         showDelegationToast({
+          status: "success",
           title: "Revoking Delegation",
-          message: getTransactionToastMessage(contractWriteRevoke.data, false),
+          transactionHash: contractWriteRevoke.data,
         });
       } else if (waitContractWriteRevoke.isError) {
         showDelegationToast({
+          status: "error",
           title: "Revoking Delegation Failed",
           message: getTransactionErrorToastMessage(
             waitContractWriteRevoke.error,
             "Transaction failed while waiting for confirmation."
           ),
+          transactionHash: contractWriteRevoke.data,
         });
       }
     }
@@ -102,6 +106,7 @@ export function useDelegationRevocation(options: {
   useEffect(() => {
     if (contractWriteBatchRevoke.error) {
       showDelegationToast({
+        status: "error",
         title: "Revoking Delegations Failed",
         message: getTransactionErrorToastMessage(
           contractWriteBatchRevoke.error,
@@ -112,28 +117,26 @@ export function useDelegationRevocation(options: {
     if (contractWriteBatchRevoke.data) {
       if (waitContractWriteBatchRevoke.isLoading) {
         showDelegationToast({
+          status: "submitted",
           title: "Batch Revoking Delegations",
-          message: getTransactionToastMessage(
-            contractWriteBatchRevoke.data,
-            true
-          ),
+          transactionHash: contractWriteBatchRevoke.data,
         });
       } else if (waitContractWriteBatchRevoke.isSuccess) {
         setBulkRevocations([]);
         showDelegationToast({
+          status: "success",
           title: "Batch Revoking Delegations",
-          message: getTransactionToastMessage(
-            contractWriteBatchRevoke.data,
-            false
-          ),
+          transactionHash: contractWriteBatchRevoke.data,
         });
       } else if (waitContractWriteBatchRevoke.isError) {
         showDelegationToast({
+          status: "error",
           title: "Revoking Delegations Failed",
           message: getTransactionErrorToastMessage(
             waitContractWriteBatchRevoke.error,
             "Transaction failed while waiting for confirmation."
           ),
+          transactionHash: contractWriteBatchRevoke.data,
         });
       }
     }

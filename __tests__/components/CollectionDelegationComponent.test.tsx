@@ -401,7 +401,7 @@ describe("CollectionDelegationComponent", () => {
     );
 
     expect(screen.getByText("Locking Wallet Failed")).toBeInTheDocument();
-    expect(screen.getByText("receipt failed")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("receipt failed")).toBeInTheDocument();
     expect(
       screen.queryByText(/Transaction Successful!/i)
     ).not.toBeInTheDocument();

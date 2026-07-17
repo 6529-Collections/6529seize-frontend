@@ -67,14 +67,11 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }
 
   function getSwitchToMessage() {
-    return (
-      <span className="tw-font-medium tw-text-error">
-        Switch to{" "}
-        {DELEGATION_CONTRACT.chain_id === 1
-          ? "Ethereum Mainnet"
-          : "Sepolia Network"}
-      </span>
-    );
+    return `Switch to ${
+      DELEGATION_CONTRACT.chain_id === 1
+        ? "Ethereum Mainnet"
+        : "Sepolia Network"
+    }`;
   }
 
   const delegationReads = useCollectionDelegationReads({
@@ -84,7 +81,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   });
 
   const {
-    toastRef,
     toast,
     showToast,
     showDelegationToast,
@@ -380,7 +376,6 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       </div>
       {toast && (
         <DelegationToast
-          toastRef={toastRef}
           toast={toast}
           showToast={showToast}
           setShowToast={setCollectionToastVisibility}

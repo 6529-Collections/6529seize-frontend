@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-} from "react";
+import { useEffect, useMemo, type Dispatch, type SetStateAction } from "react";
 
 import type { ContractDelegation } from "../CollectionDelegation.utils";
 import type { DelegationCollection } from "../delegation-constants";
@@ -72,7 +66,7 @@ export function CollectionDelegationSections(
     reads: CollectionDelegationReads;
     revocation: DelegationRevocation;
     chainsMatch: () => boolean;
-    getSwitchToMessage: () => ReactNode;
+    getSwitchToMessage: () => string;
     showDelegationToast: (toast: DelegationToastState) => void;
     onEditDelegation: (params: {
       wallet: string;
