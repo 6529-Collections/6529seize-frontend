@@ -20,9 +20,11 @@ import type { Period } from "@/helpers/Types";
 const STORAGE_KEY = "create-wave-drafts:v1";
 
 // Drafts are a few KB each; the caps guard against pathological growth, not
-// real use. Oldest drafts are evicted first.
+// real use. Oldest drafts are evicted first. The size cap counts UTF-16
+// code units (string length), not bytes — a coarse bound, which is all it
+// needs to be next to the hard 8-draft cap.
 const MAX_DRAFTS = 8;
-const MAX_TOTAL_BYTES = 512 * 1024;
+const MAX_TOTAL_CHARS = 512 * 1024;
 
 export interface CreateWaveDraftEndDateConfig {
   readonly time: number | null;
@@ -99,7 +101,7 @@ const writeAll = (drafts: CreateWaveDraft[]): void => {
     .slice(0, MAX_DRAFTS);
   try {
     let serialized = JSON.stringify(retained);
-    while (serialized.length > MAX_TOTAL_BYTES && retained.length > 1) {
+    while (serialized.length > MAX_TOTAL_CHARS && retained.length > 1) {
       retained = retained.slice(0, retained.length - 1);
       serialized = JSON.stringify(retained);
     }

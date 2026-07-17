@@ -44,9 +44,10 @@ export default function CreateWave({
   // Each step renders fresh content, but the layout's scroll container keeps
   // the offset where the user tapped Next (the bottom of the previous step),
   // landing them mid-page on taller steps like the announce-wave Dates step.
-  // scrollIntoView moves only the ancestors that actually need it, by the
-  // minimum amount — no walking into unrelated shells — and anchoring on the
-  // container keeps the result independent of late-mounting step content.
+  // That scroller is the shared layout content container — the very element
+  // holding the stale offset — so anchoring the create flow to its top is
+  // exactly the fix, and is a no-op when the user is already at the top
+  // (so it never yanks an unscrolled desktop page).
   const previousStepRef = useRef(step);
   useEffect(() => {
     if (previousStepRef.current === step) {

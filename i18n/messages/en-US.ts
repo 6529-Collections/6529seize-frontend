@@ -242,6 +242,15 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
   } as const
 );
 
+const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
+  heading: "Draft waves",
+  description:
+    "Saved on this device as you work. Tap one to pick up where you left off — the wave picture and description aren't kept, everything else is.",
+  savedAt: "Saved {timeAgo}",
+  untitled: "Untitled wave",
+  deleteLabel: 'Delete draft "{name}"',
+} as const);
+
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
   {
@@ -2001,6 +2010,7 @@ export const EN_US_MESSAGES = {
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
   ...REP_CATEGORY_VALIDATION_MESSAGES,
+  ...CREATE_WAVE_DRAFTS_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,

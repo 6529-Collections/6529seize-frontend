@@ -2,6 +2,8 @@
 
 import { getTimeAgo } from "@/helpers/Helpers";
 import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function CreateWaveDraftsSection({
   drafts,
@@ -12,18 +14,23 @@ export default function CreateWaveDraftsSection({
   readonly onLoad: (draft: CreateWaveDraft) => void;
   readonly onDelete: (id: string) => void;
 }) {
+  const locale = useBrowserLocale();
+
   if (drafts.length === 0) {
     return null;
   }
 
+  const draftName = (draft: CreateWaveDraft): string =>
+    draft.config.overview.name.trim() ||
+    t(locale, "wave.create.drafts.untitled");
+
   return (
-    <section aria-label="Draft waves">
+    <section aria-label={t(locale, "wave.create.drafts.heading")}>
       <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
-        Draft waves
+        {t(locale, "wave.create.drafts.heading")}
       </p>
       <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-font-normal tw-text-iron-400">
-        Saved on this device as you work. Tap one to pick up where you left off
-        — the wave picture and description aren&apos;t kept, everything else is.
+        {t(locale, "wave.create.drafts.description")}
       </p>
       <ul className="tw-mt-3 tw-flex tw-list-none tw-flex-col tw-gap-y-2 tw-pl-0">
         {drafts.map((draft) => (
@@ -37,18 +44,20 @@ export default function CreateWaveDraftsSection({
               className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start tw-gap-y-0.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
             >
               <span className="tw-w-full tw-truncate tw-text-sm tw-font-medium tw-text-white">
-                {draft.config.overview.name.trim() || "Untitled wave"}
+                {draftName(draft)}
               </span>
               <span className="tw-text-xs tw-text-iron-400">
-                Saved {getTimeAgo(draft.updatedAt)}
+                {t(locale, "wave.create.drafts.savedAt", {
+                  timeAgo: getTimeAgo(draft.updatedAt),
+                })}
               </span>
             </button>
             <button
               type="button"
               onClick={() => onDelete(draft.id)}
-              aria-label={`Delete draft "${
-                draft.config.overview.name.trim() || "Untitled wave"
-              }"`}
+              aria-label={t(locale, "wave.create.drafts.deleteLabel", {
+                name: draftName(draft),
+              })}
               className="tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-error tw-transition tw-duration-300 tw-ease-out hover:tw-bg-error/10"
             >
               <svg
