@@ -38,6 +38,7 @@ describe("NotificationItems", () => {
         items={items as never[]}
         activeDrop={active as never}
         onReply={onReply}
+        scrollContainerRef={{ current: null }}
         onDropContentClick={onClick}
       />
     );

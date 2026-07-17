@@ -147,6 +147,7 @@ export default function Notifications({
             loadingOlder={isFetchingNextPage}
             activeDrop={activeDrop}
             setActiveDrop={setActiveDrop}
+            scrollContainerRef={scrollContainerRef}
             markNotificationIdsAsRead={markNotificationIdsAsRead}
           />
         </WaveDropsReverseContainer>

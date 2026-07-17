@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { flushSync } from "react-dom";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { NotificationDisplayItem } from "@/types/feed.types";
@@ -38,6 +38,7 @@ interface NotificationsWrapperProps {
   readonly loadingOlder: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (drop: ActiveDropState | null) => void;
+  readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly markNotificationIdsAsRead?: (ids: number[]) => Promise<void>;
 }
 
@@ -46,6 +47,7 @@ export default function NotificationsWrapper({
   loadingOlder,
   activeDrop,
   setActiveDrop,
+  scrollContainerRef,
   markNotificationIdsAsRead,
 }: NotificationsWrapperProps) {
   const router = useRouter();
@@ -140,6 +142,7 @@ export default function NotificationsWrapper({
         items={items}
         activeDrop={activeDrop}
         onReply={onReply}
+        scrollContainerRef={scrollContainerRef}
         onDropContentClick={onDropContentClick}
         onMarkGroupAsRead={markNotificationIdsAsRead}
       />
