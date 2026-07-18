@@ -53,6 +53,7 @@ export default function CreateWaveOutcomesWinnersRow({
         <div className="tw-relative">
           <input
             type="text"
+            inputMode="numeric"
             value={winner.value}
             onChange={onValueChange}
             autoComplete="off"
