@@ -98,6 +98,7 @@ export default function CreateWaveDrops({
           <div className="tw-group tw-relative tw-w-full">
             <input
               type="text"
+              inputMode="numeric"
               value={
                 drops.noOfApplicationsAllowedPerParticipant !== null
                   ? drops.noOfApplicationsAllowedPerParticipant.toString()

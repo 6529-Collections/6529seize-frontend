@@ -136,6 +136,7 @@ export default function CreateWaveOutcomesWinners({
             <div className="tw-relative">
               <input
                 type="text"
+                inputMode="numeric"
                 value={winnersConfig.totalAmount}
                 onChange={onTotalAmountChange}
                 autoComplete="off"
