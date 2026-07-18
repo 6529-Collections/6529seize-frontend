@@ -46,10 +46,16 @@ export default function CreateWaveModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="tw-max-h-[90vh] tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-3xl tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)]"
+            // svh, not vh: iOS reports vh as the large (chrome-collapsed)
+            // viewport, but the app shell disables document scroll so Safari's
+            // chrome never collapses. Sizing to vh made the modal taller than
+            // the visible area, hiding the footer (Next) behind the chrome.
+            // flex-col keeps the header fixed and lets the body scroll within
+            // the guaranteed-visible height.
+            className="tw-flex tw-max-h-[calc(100svh-env(safe-area-inset-top)-2rem)] tw-w-full tw-max-w-5xl tw-flex-col tw-overflow-hidden tw-rounded-3xl tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-8 tw-py-5">
+            <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-8 tw-py-5">
               <h2 className="tw-mb-0 tw-text-[17px] tw-font-bold tw-tracking-wide tw-text-white">
                 {parentWaveId ? "Create subwave" : "Create Wave"}
               </h2>
@@ -64,7 +70,7 @@ export default function CreateWaveModal({
 
             {/* Modal Content */}
             <div
-              className="tw-max-h-[calc(90vh-80px)] tw-overflow-y-scroll tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
+              className="tw-min-h-0 tw-flex-1 tw-overflow-y-scroll tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
               style={{ scrollbarGutter: "stable" }}
             >
               <CreateWave
