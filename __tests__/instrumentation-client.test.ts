@@ -63,6 +63,9 @@ describe("instrumentation-client", () => {
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
     "auto.browser.browserapierrors.setTimeout";
+  const genericIosWkWebViewUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
+  const metaMaskMobileUserAgent = `${genericIosWkWebViewUserAgent} MetaMaskMobile/1.0`;
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
   const poperBlockerNetworkErrorMessage =
@@ -276,8 +279,9 @@ describe("instrumentation-client", () => {
     ) => BeforeSendResult;
   };
 
-  const loadBeforeSendWithAssociatedMetaMaskDiagnostics = (
-    originalException: TypeError
+  const loadBeforeSendWithAssociatedCyclicJsonDiagnostics = (
+    originalException: TypeError,
+    userAgent = metaMaskMobileUserAgent
   ) => {
     let beforeSend:
       | ((
@@ -304,8 +308,7 @@ describe("instrumentation-client", () => {
           }
         ),
         navigator: {
-          userAgent:
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MetaMaskMobile/1.0",
+          userAgent,
         },
         location: { hostname: "6529.io" },
       };
@@ -1543,7 +1546,7 @@ describe("instrumentation-client", () => {
   it("enriches the exact MetaMask timer error before filtering it", () => {
     const originalException = new TypeError(sentryRouteParameterizationMessage);
     const beforeSend =
-      loadBeforeSendWithAssociatedMetaMaskDiagnostics(originalException);
+      loadBeforeSendWithAssociatedCyclicJsonDiagnostics(originalException);
     const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
       tags: {
         browser: "Mobile Safari UI/WKWebView",
@@ -1566,6 +1569,42 @@ describe("instrumentation-client", () => {
       cyclic_json_timer_schedule_origin: "first_party",
     });
     expect(event.extra).toHaveProperty("cyclicJsonTimerDiagnostics");
+  });
+
+  it("keeps a sampled v2 non-MetaMask timer error with sanitized diagnostics", () => {
+    const originalException = new TypeError(sentryRouteParameterizationMessage);
+    const beforeSend = loadBeforeSendWithAssociatedCyclicJsonDiagnostics(
+      originalException,
+      genericIosWkWebViewUserAgent
+    );
+    const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+      contexts: {
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+      },
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+      },
+      extra: {
+        arguments: ["synthetic-timer-argument"],
+      },
+    });
+
+    const result = beforeSend(event, { originalException });
+
+    expect(result).not.toBeNull();
+    expect(event.extra).not.toHaveProperty("arguments");
+    expect(event.tags).toMatchObject({
+      cyclic_json_timer_diagnostics: "v2",
+      cyclic_json_timer_schedule_origin: "first_party",
+    });
+    expect(event.extra).toMatchObject({
+      cyclicJsonTimerDiagnostics: {
+        webViewFamily: "ios-wkwebview",
+      },
+    });
   });
 
   it("keeps a v2 MetaMask timing near miss with sanitized diagnostics", () => {
