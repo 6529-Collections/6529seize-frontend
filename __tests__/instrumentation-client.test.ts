@@ -276,6 +276,83 @@ describe("instrumentation-client", () => {
     ) => BeforeSendResult;
   };
 
+  const loadBeforeSendWithAssociatedMetaMaskDiagnostics = (
+    originalException: TypeError
+  ) => {
+    let beforeSend:
+      | ((
+          event: Record<string, unknown>,
+          hint?: Record<string, unknown>
+        ) => BeforeSendResult)
+      | undefined;
+    let scheduledHandler: ((...args: unknown[]) => unknown) | undefined;
+
+    jest.isolateModules(() => {
+      const { installCyclicJsonTimerDiagnostics } =
+        require("@/utils/monitoring/cyclicJsonTimerDiagnostics") as typeof import("@/utils/monitoring/cyclicJsonTimerDiagnostics");
+      const target = {
+        setTimeout: jest.fn(
+          (
+            handler: ((...args: unknown[]) => unknown) | string,
+            _timeout?: number,
+            ..._args: unknown[]
+          ) => {
+            if (typeof handler === "function") {
+              scheduledHandler = handler;
+            }
+            return 73;
+          }
+        ),
+        navigator: {
+          userAgent:
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MetaMaskMobile/1.0",
+        },
+        location: { hostname: "6529.io" },
+      };
+
+      expect(
+        installCyclicJsonTimerDiagnostics({
+          target,
+          sampleRate: 1 / 16,
+          random: () => 0,
+          stackFactory: () =>
+            [
+              "anonymous@data:text/javascript,synthetic-navigation:286:15",
+              "pushState@https://6529.io/_next/static/chunks/0synthetic-navigation.js:2:47863",
+            ].join("\n"),
+        })
+      ).toBe(true);
+
+      const anonymousCallback = () => {
+        throw originalException;
+      };
+      Object.defineProperty(anonymousCallback, "name", {
+        configurable: true,
+        value: "",
+      });
+      target.setTimeout(anonymousCallback, 100);
+
+      let thrownException: unknown;
+      try {
+        scheduledHandler?.();
+      } catch (error) {
+        thrownException = error;
+      }
+      expect(thrownException).toBe(originalException);
+
+      require("@/instrumentation-client");
+      const config = mockInit.mock.calls[0]?.[0];
+      expect(typeof config?.beforeSend).toBe("function");
+      beforeSend = config.beforeSend;
+    });
+
+    expect(typeof beforeSend).toBe("function");
+    return beforeSend as (
+      event: Record<string, unknown>,
+      hint?: Record<string, unknown>
+    ) => BeforeSendResult;
+  };
+
   const loadBeforeSendTransaction = () => {
     const config = loadSentryConfig();
     expect(typeof config.beforeSendTransaction).toBe("function");
@@ -428,6 +505,75 @@ describe("instrumentation-client", () => {
     ],
     ...overrides,
   });
+
+  const createMetaMaskMobileSpaNavigationCyclicJsonEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    createSentryRouteParameterizationEvent(
+      [
+        {
+          filename: "app:///_next/static/chunks/0synthetic-monitoring.js",
+          abs_path: "app:///_next/static/chunks/0synthetic-monitoring.js",
+          function: "n",
+          lineno: 7,
+          colno: 4858,
+          in_app: true,
+        },
+        {
+          filename: "app:///_next/static/chunks/0synthetic-monitoring.js",
+          abs_path: "app:///_next/static/chunks/0synthetic-monitoring.js",
+          lineno: 21,
+          colno: 90001,
+          in_app: true,
+        },
+        nativeJsonStringifyFrame,
+      ],
+      {
+        timestamp: 1000.103,
+        transaction: "/waves",
+        tags: {
+          cyclic_json_timer_diagnostics: "v2",
+          cyclic_json_timer_schedule_origin: "first_party",
+        },
+        extra: {
+          arguments: ["synthetic-timer-argument"],
+          cyclicJsonTimerDiagnostics: {
+            schemaVersion: "v2",
+            timerSampleRate: 1 / 16,
+            callbackName: "anonymous",
+            webViewFamily: "metamask-mobile",
+            scheduleOrigin: "first_party",
+            schedulingFrames: [
+              {
+                file: "non-http-script",
+                function: "anonymous",
+                line: 286,
+                column: 15,
+                origin: "unknown",
+              },
+              {
+                file: "/_next/static/chunks/0synthetic-navigation.js",
+                function: "navigate",
+                line: 2,
+                column: 47863,
+                origin: "first_party",
+              },
+            ],
+          },
+        },
+        breadcrumbs: [
+          {
+            timestamp: 1000,
+            category: "navigation",
+            data: {
+              from: "/notifications",
+              to: "/waves/synthetic-wave",
+            },
+          },
+        ],
+        ...overrides,
+      }
+    );
 
   const createAppKitCoinbaseBreadcrumbs = () => [
     {
@@ -1385,13 +1531,54 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps cyclic JSON timer errors for origin diagnostics", () => {
+  it("keeps unsampled cyclic JSON timer errors for origin diagnostics", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
 
     const result = beforeSend(event);
 
     expect(result).not.toBeNull();
+  });
+
+  it("enriches the exact MetaMask timer error before filtering it", () => {
+    const originalException = new TypeError(sentryRouteParameterizationMessage);
+    const beforeSend =
+      loadBeforeSendWithAssociatedMetaMaskDiagnostics(originalException);
+    const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+      },
+      extra: {
+        arguments: ["synthetic-timer-argument"],
+      },
+    });
+
+    expect(event.tags).not.toHaveProperty("cyclic_json_timer_diagnostics");
+    expect(event.extra).not.toHaveProperty("cyclicJsonTimerDiagnostics");
+
+    const result = beforeSend(event, { originalException });
+
+    expect(result).toBeNull();
+    expect(event.extra).not.toHaveProperty("arguments");
+    expect(event.tags).toMatchObject({
+      cyclic_json_timer_diagnostics: "v2",
+      cyclic_json_timer_schedule_origin: "first_party",
+    });
+    expect(event.extra).toHaveProperty("cyclicJsonTimerDiagnostics");
+  });
+
+  it("keeps a v2 MetaMask timing near miss with sanitized diagnostics", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+      timestamp: 1000.5,
+    });
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+    expect(event.extra).not.toHaveProperty("arguments");
+    expect(event.extra).toHaveProperty("cyclicJsonTimerDiagnostics");
   });
 
   it("keeps iOS WKWebView cyclic JSON timer errors without app context", () => {

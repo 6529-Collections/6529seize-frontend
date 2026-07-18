@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastReviewed": "2026-07-17",
+  "lastReviewed": "2026-07-18",
   "operationalOwner": "frontend-platform",
   "providers": [
     {
@@ -406,15 +406,15 @@
     {
       "name": "cyclic_json_timer_diagnostics",
       "kind": "error-family",
-      "question": "Which code origin schedules exact cyclic JSON timer failures in iOS WKWebViews?",
+      "question": "Which code origin schedules exact cyclic JSON timer failures in iOS WKWebViews, and does v2 provenance match the narrow MetaMask Mobile SPA-navigation suppression signature?",
       "owner": "sentry",
       "producer": "utils/monitoring/cyclicJsonTimerDiagnostics.ts",
       "destinations": ["sentry:owner"],
       "sampling": "eligible function timers in iOS WKWebViews are sampled independently at 1/16; only exact unhandled cyclic-JSON timer errors receive sampled provenance",
       "privacy": "timer arguments are removed from every matching event; sampled extras contain bounded sanitized function names, script basenames, line and column numbers, origin enums, WebView family, and sample rate only",
-      "externalUsage": "v1 is live; Sentry dashboard, saved-search, and alert usage could not be verified because read-only endpoints returned 403",
+      "externalUsage": "Repository runtime consumer: instrumentation-client.ts enriches exact timer errors before shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError requires the v2 tags and extra; v1 Sentry dashboard, saved-search, and alert usage could not be verified because read-only endpoints returned 403",
       "lifecycle": "temporary",
-      "replacement": "By the review date, verify or migrate every v1-keyed Sentry consumer to v2; remove the timer diagnostics after corrected provenance identifies the caller",
+      "replacement": "Keep v2 diagnostics while the MetaMask Mobile runtime filter depends on them. Before removal, replace that filter with an equally narrow independent signature or retire it; by the review date, also verify or migrate every v1-keyed Sentry consumer to v2",
       "reviewBy": "2026-08-17"
     },
     {

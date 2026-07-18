@@ -28,6 +28,9 @@ export {
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
 export {
+  shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError,
+} from "./sentry-client-filters/metamask-mobile";
+export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
 } from "./sentry-client-filters/extension-messaging";
