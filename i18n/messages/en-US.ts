@@ -233,9 +233,8 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
     required: "Rep category is required.",
     tooShort: "Use at least {min} characters.",
     tooLong: "It's {length} characters long — the maximum is {max}.",
-    leadingDash: "A category can't start with a dash.",
     disallowedChars:
-      "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces and , . ? ! ' ( )",
     aiFilterDetails:
       "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
     closeErrorLabel: "Dismiss error",
