@@ -741,13 +741,15 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
 
-    // On the very first visit there is nothing to resume.
-    await expect(
-      page.getByRole("region", { name: "Draft waves" })
-    ).toBeHidden();
+    // On the very first visit there is nothing to resume: no Saved Drafts
+    // card at all.
+    const savedDraftsToggle = page.getByRole("button", {
+      name: "Saved Drafts",
+    });
+    await expect(savedDraftsToggle).toBeHidden();
 
     const draftName = "Draft Resume Wave";
-    await page.getByLabel(/Wave Name/).fill(draftName);
+    await page.locator("#create-wave-name").fill(draftName);
     // Leaving Overview is what arms autosave.
     await nextStepButton(page).click();
     await expect(
@@ -773,32 +775,34 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await waitForRouteReady(page);
     await dismissNextDevTools(page);
 
-    const draftsSection = page.getByRole("region", { name: "Draft waves" });
-    await expect(draftsSection).toBeVisible({
+    // The Saved Drafts card appears, collapsed by default.
+    await expect(savedDraftsToggle).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    await expect(savedDraftsToggle).toHaveAttribute("aria-expanded", "false");
     // The empty name field proves the reload really reset in-memory state.
-    await expect(page.getByLabel(/Wave Name/)).toHaveValue("");
+    await expect(page.locator("#create-wave-name")).toHaveValue("");
 
-    // Resuming restores the saved name into the flow. Anchor on the start
-    // of the accessible name so the load button (name + "Saved …") wins
-    // over the delete button ("Delete draft …").
-    await draftsSection
+    // Expand, then resume — the load button's name starts with the draft
+    // name (then "Saved …"), so anchoring wins over the delete button.
+    await savedDraftsToggle.click();
+    await page
       .getByRole("button", { name: new RegExp(`^${draftName}`) })
       .click();
-    await expect(page.getByLabel(/Wave Name/)).toHaveValue(draftName);
+    await expect(page.locator("#create-wave-name")).toHaveValue(draftName);
 
-    // Deleting the draft removes the section entirely.
+    // Deleting the only draft removes the whole Saved Drafts card.
     await page.reload({ waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await dismissNextDevTools(page);
-    await expect(draftsSection).toBeVisible({
+    await expect(savedDraftsToggle).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
-    await draftsSection
+    await savedDraftsToggle.click();
+    await page
       .getByRole("button", { name: new RegExp(`Delete draft.*${draftName}`) })
       .click();
-    await expect(draftsSection).toBeHidden();
+    await expect(savedDraftsToggle).toBeHidden();
   });
 
   test("manages multiple drafts newest-first without overflow", async ({
@@ -842,31 +846,41 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await dismissNextDevTools(page);
-    const draftsSection = page.getByRole("region", { name: "Draft waves" });
-    await expect(draftsSection).toBeVisible({
+
+    // The Saved Drafts card is collapsed by default (its count is shown in
+    // the header); expand it to reveal the list.
+    const savedDraftsToggle = page.getByRole("button", {
+      name: "Saved Drafts",
+    });
+    await expect(savedDraftsToggle).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    await expect(savedDraftsToggle).toHaveAttribute("aria-expanded", "false");
+    await savedDraftsToggle.click();
 
-    // All three present, newest first (the last saved sits on top).
-    const cards = draftsSection.getByRole("listitem");
+    // All three present, newest first (the last saved sits on top). Scope to
+    // the drafts list so the count isn't polluted by other page list items.
+    const cards = page
+      .getByRole("list", { name: "Saved Drafts" })
+      .getByRole("listitem");
     await expect(cards).toHaveCount(3);
     await expect(cards.first()).toContainText("Draft Three");
     await expectNoHorizontalOverflow(page);
 
     // The long title truncates rather than stretching the card past the page.
-    const longTitle = draftsSection.getByText(longName);
+    const longTitle = page.getByText(longName);
     const truncated = await longTitle.evaluate(
       (el) => el.scrollWidth > el.clientWidth
     );
     expect(truncated).toBe(true);
 
     // Deleting one leaves the rest intact.
-    await draftsSection
+    await page
       .getByRole("button", { name: new RegExp(`Delete draft.*Draft One`) })
       .click();
     await expect(cards).toHaveCount(2);
     await expect(
-      draftsSection.getByRole("button", { name: /Delete draft.*Draft One/ })
+      page.getByRole("button", { name: /Delete draft.*Draft One/ })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });

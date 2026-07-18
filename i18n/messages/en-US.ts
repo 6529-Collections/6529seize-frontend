@@ -243,12 +243,13 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
 );
 
 const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
-  heading: "Draft waves",
+  heading: "Saved Drafts",
   description:
     "Saved on this device as you work. Tap one to pick up where you left off — the wave picture and description aren't kept, everything else is.",
   savedAt: "Saved {timeAgo}",
   untitled: "Untitled wave",
   deleteLabel: 'Delete draft "{name}"',
+  newWave: "New Wave",
 } as const);
 
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
