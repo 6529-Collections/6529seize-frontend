@@ -33,7 +33,12 @@ export default function CreateWaveDraftsSection({
     <DateAccordion
       title={t(locale, "wave.create.drafts.heading")}
       titleActions={
-        <span className="tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-text-iron-300">
+        <span
+          aria-label={t(locale, "wave.create.drafts.count", {
+            count: drafts.length,
+          })}
+          className="tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-text-iron-300"
+        >
           {drafts.length}
         </span>
       }

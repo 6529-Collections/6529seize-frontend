@@ -78,26 +78,24 @@ export default function CreateWaveStepContent({
           {overviewLeading}
           {/* Mirror the Dates-step card chrome so New Wave reads as a
               sibling of the collapsible Saved Drafts card — but it stays
-              open, since it is the step the user is actively filling. */}
-          <div className="tw-rounded-xl tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
-            <div className="tw-flex tw-h-16 tw-items-center tw-px-5">
-              <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-                {t(locale, "wave.create.drafts.newWave")}
-              </span>
-            </div>
-            <div className="tw-px-5 tw-pb-5">
-              <CreateWaveOverview
-                overview={config.overview}
-                display={config.display}
-                errors={errors}
-                ongoingRanking={config.dates.ongoingRanking ?? false}
-                setOverview={setOverview}
-                setDisplay={setDisplay}
-                onOngoingRankingChange={(ongoingRanking) =>
-                  setDates({ ...config.dates, ongoingRanking })
-                }
-              />
-            </div>
+              open (it is the step the user is actively filling) and its
+              label is a static heading, not a fixed-height toggle header,
+              so it doesn't waste vertical space on phones. */}
+          <div className="tw-rounded-xl tw-bg-iron-900 tw-p-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+            <h3 className="tw-mb-4 tw-text-base tw-font-semibold tw-text-iron-300">
+              {t(locale, "wave.create.drafts.newWave")}
+            </h3>
+            <CreateWaveOverview
+              overview={config.overview}
+              display={config.display}
+              errors={errors}
+              ongoingRanking={config.dates.ongoingRanking ?? false}
+              setOverview={setOverview}
+              setDisplay={setDisplay}
+              onOngoingRankingChange={(ongoingRanking) =>
+                setDates({ ...config.dates, ongoingRanking })
+              }
+            />
           </div>
         </div>
       );

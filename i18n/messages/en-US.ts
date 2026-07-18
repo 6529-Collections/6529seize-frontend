@@ -250,6 +250,7 @@ const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
   untitled: "Untitled wave",
   deleteLabel: 'Delete draft "{name}"',
   newWave: "New Wave",
+  count: "{count} saved drafts",
 } as const);
 
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
