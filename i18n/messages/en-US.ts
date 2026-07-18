@@ -233,9 +233,8 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
     required: "Rep category is required.",
     tooShort: "Use at least {min} characters.",
     tooLong: "It's {length} characters long — the maximum is {max}.",
-    leadingDash: "A category can't start with a dash.",
     disallowedChars:
-      "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces and , . ? ! ' ( )",
     aiFilterDetails:
       "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
     closeErrorLabel: "Dismiss error",
@@ -243,12 +242,14 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
 );
 
 const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
-  heading: "Draft waves",
+  heading: "Saved Drafts",
   description:
     "Saved on this device as you work. Tap one to pick up where you left off — the wave picture and description aren't kept, everything else is.",
   savedAt: "Saved {timeAgo}",
   untitled: "Untitled wave",
   deleteLabel: 'Delete draft "{name}"',
+  newWave: "New Wave",
+  count: "{count} saved drafts",
 } as const);
 
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(

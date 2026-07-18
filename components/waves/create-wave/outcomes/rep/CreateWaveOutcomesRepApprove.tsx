@@ -85,6 +85,7 @@ export default function CreateWaveOutcomesRepApprove({
             <div className="tw-group tw-relative tw-w-full">
               <input
                 type="text"
+                inputMode="decimal"
                 value={outcome.credit !== null ? outcome.credit.toString() : ""}
                 onChange={setCredit}
                 id="outcome-rep-credit"

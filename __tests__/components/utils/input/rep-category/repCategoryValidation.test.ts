@@ -2,21 +2,27 @@ import { getRepCategoryViolation } from "@/components/utils/input/rep-category/r
 import { t } from "@/i18n/messages";
 
 describe("getRepCategoryViolation", () => {
-  it("returns null for valid categories, including dashed ones", () => {
+  it("returns null for valid categories", () => {
     for (const category of [
       "Solidity Programming",
-      "hey-jude",
-      "state-of-the-art",
       "History of Carthage, vol. 1 (annotated)?!'",
-      "Ω-木 mixed unicode",
+      "Ω 木 mixed unicode",
     ]) {
       expect(getRepCategoryViolation(category)).toBeNull();
     }
   });
 
-  it("names the leading-dash rule", () => {
+  it("rejects dashes, matching the backend pattern", () => {
+    // The backend REP_CATEGORY_PATTERN excludes the dash entirely, so a
+    // category containing one anywhere is a disallowed-character violation —
+    // catch it here rather than let it 400 on submit.
+    expect(getRepCategoryViolation("hey-jude")).toEqual({
+      key: "rep.categories.validation.disallowedChars",
+      params: { chars: '"-"' },
+    });
     expect(getRepCategoryViolation("-Unreliable")).toEqual({
-      key: "rep.categories.validation.leadingDash",
+      key: "rep.categories.validation.disallowedChars",
+      params: { chars: '"-"' },
     });
   });
 
