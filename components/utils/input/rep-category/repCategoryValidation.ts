@@ -1,12 +1,11 @@
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 /**
- * Client-side mirror of the backend rep-category rules
- * (6529seize-backend src/entities/IAbusivenessDetectionResult.ts and
- * src/profiles/rep-category-rules.ts): 1-100 characters of unicode
- * letters/numbers, spaces, dashes and , . ? ! ' ( ) — with the dash allowed
- * anywhere except first position (leading dashes are spreadsheet formula
- * triggers in exports and read as negative signs next to rep amounts).
+ * Client-side mirror of the backend rep-category rule
+ * (6529seize-backend src/entities/IAbusivenessDetectionResult.ts,
+ * REP_CATEGORY_PATTERN): 1-100 characters of unicode letters/numbers,
+ * spaces and , . ? ! ' ( ). Dashes are NOT allowed — the backend rejects
+ * them, so the FE must too or it accepts categories that 400 on submit.
  *
  * Mirroring here lets the UI name the exact broken rule in the user's
  * locale instantly, instead of round-tripping for an English server error.
@@ -16,7 +15,7 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 
 const MAX_LENGTH = 100;
 
-const ALLOWED_CHAR = /^[\p{L}\p{N}?!,.'() -]$/u;
+const ALLOWED_CHAR = /^[\p{L}\p{N}?!,.'() ]$/u;
 
 interface RepCategoryViolation {
   readonly key: MessageKey;
@@ -52,17 +51,14 @@ export function getRepCategoryViolation(
 ): RepCategoryViolation | null {
   // Code points, not UTF-16 units — matching the server pattern's u-flag.
   const chars = Array.from(category);
-  // Precedence is intentional and single-message: length → leading dash →
-  // disallowed characters. The error surface shows one reason at a time, so
-  // do not "fix" this into multi-error output.
+  // Precedence is intentional and single-message: length → disallowed
+  // characters. The error surface shows one reason at a time, so do not
+  // "fix" this into multi-error output.
   if (chars.length > MAX_LENGTH) {
     return {
       key: "rep.categories.validation.tooLong",
       params: { length: chars.length, max: MAX_LENGTH },
     };
-  }
-  if (category.startsWith("-")) {
-    return { key: "rep.categories.validation.leadingDash" };
   }
   const disallowed = Array.from(
     new Set(chars.filter((char) => !ALLOWED_CHAR.test(char)))
