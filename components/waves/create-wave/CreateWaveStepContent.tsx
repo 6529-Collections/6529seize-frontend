@@ -13,6 +13,8 @@ import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveRules from "./CreateWaveRules";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 type WaveConfigController = ReturnType<typeof useWaveConfig>;
 
@@ -38,6 +40,7 @@ export default function CreateWaveStepContent({
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
 }) {
+  const locale = useBrowserLocale();
   const {
     config,
     step,
@@ -71,19 +74,31 @@ export default function CreateWaveStepContent({
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       return (
-        <div className="tw-flex tw-flex-col tw-gap-y-6">
+        <div className="tw-flex tw-flex-col tw-gap-y-4">
           {overviewLeading}
-          <CreateWaveOverview
-            overview={config.overview}
-            display={config.display}
-            errors={errors}
-            ongoingRanking={config.dates.ongoingRanking ?? false}
-            setOverview={setOverview}
-            setDisplay={setDisplay}
-            onOngoingRankingChange={(ongoingRanking) =>
-              setDates({ ...config.dates, ongoingRanking })
-            }
-          />
+          {/* Mirror the Dates-step card chrome so New Wave reads as a
+              sibling of the collapsible Saved Drafts card — but it stays
+              open, since it is the step the user is actively filling. */}
+          <div className="tw-rounded-xl tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+            <div className="tw-flex tw-h-16 tw-items-center tw-px-5">
+              <span className="tw-text-base tw-font-semibold tw-text-iron-300">
+                {t(locale, "wave.create.drafts.newWave")}
+              </span>
+            </div>
+            <div className="tw-px-5 tw-pb-5">
+              <CreateWaveOverview
+                overview={config.overview}
+                display={config.display}
+                errors={errors}
+                ongoingRanking={config.dates.ongoingRanking ?? false}
+                setOverview={setOverview}
+                setDisplay={setDisplay}
+                onOngoingRankingChange={(ongoingRanking) =>
+                  setDates({ ...config.dates, ongoingRanking })
+                }
+              />
+            </div>
+          </div>
         </div>
       );
     case CreateWaveStep.GROUPS:
