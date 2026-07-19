@@ -96,13 +96,25 @@ describe("useIdentitiesSearch", () => {
     await waitFor(() => expect(commonApiFetch).not.toHaveBeenCalled());
   });
 
-  it("skips fetch when there is no wave to derive eligibility from", async () => {
+  it("falls back to the global identities search while creating a wave", async () => {
+    // During wave creation there is no wave yet, so the wave-scoped
+    // mention-search cannot be used. The step must still be able to tag
+    // people via the global identities search.
+    (commonApiFetch as jest.Mock).mockResolvedValue([
+      { id: "profile-1", handle: "alice", display: "Alice", pfp: null },
+    ]);
     render(
       <QueryClientProvider client={queryClient}>
         <TestComponent handle="alice" waveId={null} />
       </QueryClientProvider>
     );
 
-    await waitFor(() => expect(commonApiFetch).not.toHaveBeenCalled());
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "identities",
+      params: { handle: "alice", limit: "5" },
+      signal: expect.any(AbortSignal),
+    });
+    await screen.findByText("alice");
   });
 });
