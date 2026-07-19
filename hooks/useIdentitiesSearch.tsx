@@ -15,7 +15,7 @@ interface UseIdentitiesSearchProps {
  * mention-search endpoint and the global identities search map onto it, so
  * the caller does not care which one produced a given suggestion.
  */
-export interface MentionSearchIdentity {
+interface MentionSearchIdentity {
   readonly id: string;
   readonly handle: string;
   readonly display: string | null;
