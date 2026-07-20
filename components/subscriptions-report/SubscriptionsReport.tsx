@@ -23,6 +23,7 @@ import type { MemeSeason } from "@/entities/ISeason";
 import type { SeasonMintRow } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   getCardsRemainingUntilEndOf,
+  getMintTimelineDetails,
   getUpcomingMintsAcrossSeasons,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Paginated } from "@/components/pagination/Pagination";
@@ -55,6 +56,11 @@ type MemeCalendarCurrentResponse = {
   };
 };
 
+function getUtcDateKey(value: string): string | null {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+}
+
 function getReportActiveMintNumber(
   currentMint: MemeCalendarCurrentResponse,
   now: Date = new Date()
@@ -65,9 +71,26 @@ function getReportActiveMintNumber(
 
   const nextMint = currentMint.next;
   const todayUtc = now.toISOString().slice(0, 10);
-  return currentMint.status === "none" && nextMint?.mint_date === todayUtc
+  return currentMint.status === "none" &&
+    nextMint &&
+    getUtcDateKey(nextMint.mint_date) === todayUtc
     ? normalizeMemeTokenId(nextMint.mint_number)
     : null;
+}
+
+function getMintRowForTokenId(tokenId: unknown): SeasonMintRow | null {
+  const normalizedTokenId = normalizeMemeTokenId(tokenId);
+  if (normalizedTokenId === null) {
+    return null;
+  }
+
+  const timeline = getMintTimelineDetails(normalizedTokenId);
+  return {
+    meme: timeline.mintNumber,
+    utcDay: timeline.mintDayUtc,
+    instantUtc: timeline.instantUtc,
+    seasonIndex: timeline.seasonIndex,
+  };
 }
 
 function getActiveRedeemedDrop(
@@ -168,6 +191,19 @@ export default function SubscriptionsReportComponent() {
   const rowsByMeme = useMemo(
     () => new Map(rows.map((row) => [row.meme, row])),
     [rows]
+  );
+  const upcomingRows = useMemo(
+    () =>
+      upcomingCounts.flatMap((count, index) => {
+        const tokenId = normalizeMemeTokenId(count.token_id);
+        const date =
+          (tokenId === null ? null : rowsByMeme.get(tokenId)) ??
+          getMintRowForTokenId(count.token_id) ??
+          rows[index];
+
+        return date ? [{ count, date }] : [];
+      }),
+    [rows, rowsByMeme, upcomingCounts]
   );
 
   async function fetchUpcomingCounts(count: number) {
@@ -456,7 +492,7 @@ export default function SubscriptionsReportComponent() {
         data-testid="subscriptions-report-upcoming-drops"
       >
         <div>
-          {upcomingCounts?.length > 0 ? (
+          {upcomingRows.length > 0 ? (
             <>
               <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
                 <span className="tw-sr-only">
@@ -470,15 +506,12 @@ export default function SubscriptionsReportComponent() {
                   <span className="tw-text-center">Subscriptions</span>
                 </div>
                 <div>
-                  {upcomingCounts
+                  {upcomingRows
                     .slice(0, upcomingVisible)
-                    .map((count, index) => {
+                    .map(({ count, date }, index) => {
                       const isNew =
                         animateFromIndex !== null && index >= animateFromIndex;
-                      const tokenId = normalizeMemeTokenId(count.token_id);
-                      const date =
-                        tokenId === null ? undefined : rowsByMeme.get(tokenId);
-                      return date ? (
+                      return (
                         <SubscriptionDayRow
                           key={getMemeTokenIdKey(count.token_id)}
                           ref={
@@ -493,13 +526,13 @@ export default function SubscriptionsReportComponent() {
                           date={date}
                           count={count}
                         />
-                      ) : null;
+                      );
                     })}
                 </div>
               </div>
-              {upcomingCounts.length > UPCOMING_PAGE_SIZE && (
+              {upcomingRows.length > UPCOMING_PAGE_SIZE && (
                 <div ref={upcomingToggleRef} className="tw-pt-3 tw-text-center">
-                  {upcomingVisible < upcomingCounts.length ? (
+                  {upcomingVisible < upcomingRows.length ? (
                     <ShowMoreButton
                       expanded={false}
                       setExpanded={() => {
@@ -507,7 +540,7 @@ export default function SubscriptionsReportComponent() {
                         setUpcomingVisible((prev) =>
                           Math.min(
                             prev + UPCOMING_PAGE_SIZE,
-                            upcomingCounts.length
+                            upcomingRows.length
                           )
                         );
                       }}

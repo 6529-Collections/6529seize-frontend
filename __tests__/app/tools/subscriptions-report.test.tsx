@@ -29,6 +29,12 @@ jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   displayedSeasonNumberFromIndex: jest.fn((index: number) => index + 1),
   formatFullDate: jest.fn((date: Date) => date.toISOString().slice(0, 10)),
   getCardsRemainingUntilEndOf: jest.fn(() => 2),
+  getMintTimelineDetails: jest.fn((mintNumber: number) => ({
+    mintNumber,
+    mintDayUtc: new Date("2026-07-22T00:00:00.000Z"),
+    instantUtc: new Date("2026-07-22T14:40:00.000Z"),
+    seasonIndex: 15,
+  })),
   getUpcomingMintsAcrossSeasons: jest.fn(() => []),
 }));
 
@@ -61,6 +67,7 @@ jest.mock("@/services/api/common-api", () => ({
 const { commonApiFetch } = require("@/services/api/common-api");
 const {
   getCardsRemainingUntilEndOf,
+  getMintTimelineDetails,
   getUpcomingMintsAcrossSeasons,
 } = require("@/components/meme-calendar/meme-calendar.helpers");
 
@@ -326,7 +333,7 @@ describe("Subscriptions report page", () => {
     });
   });
 
-  it("keeps a redeemed mint-day card active before minting starts without shifting upcoming dates", async () => {
+  it("keeps a redeemed mint-day card active and derives a missing upcoming calendar row by token id", async () => {
     const todayUtc = new Date().toISOString().slice(0, 10);
     getUpcomingMintsAcrossSeasons.mockReturnValue([
       {
@@ -334,18 +341,19 @@ describe("Subscriptions report page", () => {
         seasonIndex: 15,
         utcDay: new Date("2026-07-20T00:00:00.000Z"),
       },
-      {
-        meme: 701,
-        seasonIndex: 15,
-        utcDay: new Date("2026-07-22T00:00:00.000Z"),
-      },
     ]);
+    getMintTimelineDetails.mockReturnValue({
+      mintNumber: 701,
+      mintDayUtc: new Date("2026-07-22T00:00:00.000Z"),
+      instantUtc: new Date("2026-07-22T14:40:00.000Z"),
+      seasonIndex: 15,
+    });
     mockCurrentMemeCalendar({
       status: "none",
       current: null,
       next: {
         mint_number: 700,
-        mint_date: todayUtc,
+        mint_date: `${todayUtc}T14:40:00.000Z`,
       },
     });
     commonApiFetch.mockImplementation(buildReportCountsApiMock({}));
@@ -372,6 +380,7 @@ describe("Subscriptions report page", () => {
     expect(upcomingDrops).toHaveTextContent("The Memes #701");
     expect(upcomingDrops).toHaveTextContent("2026-07-22");
     expect(upcomingDrops).not.toHaveTextContent("2026-07-20");
+    expect(getMintTimelineDetails).toHaveBeenCalledWith(701);
   });
 
   it("exposes semantic row-wide meme card links", async () => {
