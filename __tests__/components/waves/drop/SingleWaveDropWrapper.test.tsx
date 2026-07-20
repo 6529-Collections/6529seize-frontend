@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { SingleWaveDropWrapper } from "@/components/waves/drop/SingleWaveDropWrapper";
 
 const mockChatProps: any[] = [];
@@ -61,5 +61,31 @@ describe("SingleWaveDropWrapper", () => {
         isVotingControlsLocked: true,
       }),
     ]);
+  });
+
+  it("docks the mobile chat panel above the native keyboard inset", () => {
+    const { container } = render(
+      <SingleWaveDropWrapper
+        drop={{ id: "d1" } as any}
+        wave={{ id: "w1" } as any}
+        onClose={jest.fn()}
+      >
+        <div />
+      </SingleWaveDropWrapper>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Show chat" }));
+
+    const mobileChatPanel = container.querySelector<HTMLElement>(
+      'div[style*="--native-keyboard-inset-bottom"]'
+    );
+
+    expect(mobileChatPanel?.style.bottom).toBe(
+      "var(--native-keyboard-inset-bottom, 0px)"
+    );
+    expect(mobileChatPanel?.style.transition).toBe(
+      "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+    );
+    expect(mobileChatPanel).toHaveClass("tw-max-h-[100dvh]");
   });
 });

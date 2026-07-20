@@ -154,7 +154,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
       <CompactModeProvider compact={true}>
         <Transition.Root show={isChatOpen} as={Fragment}>
           <div
-            className="tw-fixed tw-left-[var(--left-rail,0px)] tw-right-0 tw-top-0 tw-z-[90] tw-overflow-hidden tw-overscroll-none lg:tw-hidden"
+            className="tw-fixed tw-left-[var(--left-rail,0px)] tw-right-0 tw-top-0 tw-z-[90] tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none lg:tw-hidden"
             style={mobileChatPanelStyle}
           >
             <Transition.Child
