@@ -30,6 +30,12 @@ interface SingleWaveDropWrapperProps {
   readonly isVotingControlsLocked?: boolean | undefined;
 }
 
+const mobileChatPanelStyle: React.CSSProperties = {
+  bottom: "var(--native-keyboard-inset-bottom, 0px)",
+  transition:
+    "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out",
+};
+
 export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   drop,
   wave,
@@ -147,7 +153,10 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
 
       <CompactModeProvider compact={true}>
         <Transition.Root show={isChatOpen} as={Fragment}>
-          <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[90] tw-h-[100dvh] tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none lg:tw-hidden">
+          <div
+            className="tw-fixed tw-left-[var(--left-rail,0px)] tw-right-0 tw-top-0 tw-z-[90] tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none lg:tw-hidden"
+            style={mobileChatPanelStyle}
+          >
             <Transition.Child
               as={Fragment}
               enter="tw-duration-150 tw-ease-out"
