@@ -143,8 +143,11 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     };
   }, []);
 
+  // tw-min-h-0 lets this flex item shrink below its content height so a child
+  // (e.g. the create-wave flow) can own an internal scroll region instead of
+  // overflowing the scroll-locked app shell.
   const containerClassName =
-    "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
+    "tw-relative tw-flex tw-min-h-0 tw-flex-col tw-flex-1 tailwind-scope";
   const connectPrompt = getConnectPrompt(contentState);
   const shouldRenderWavesContent =
     contentState === WAVES_CONTENT_STATE_READY ||
