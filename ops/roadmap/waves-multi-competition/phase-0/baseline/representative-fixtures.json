@@ -1,0 +1,210 @@
+{
+  "fixture_version": 1,
+  "synthetic_only": true,
+  "purpose": "Declarative cases for permanent legacy GET contract factories and native parity tests. The frozen OpenAPI snapshot supplies complete required fields and types; overrides and assertions below define competition-sensitive behavior.",
+  "fixed_clock_ms": 1900000000000,
+  "actors": {
+    "viewer": { "profile_id": "profile-viewer", "wallet": "0x0000000000000000000000000000000000000001" },
+    "admin": { "profile_id": "profile-admin", "wallet": "0x0000000000000000000000000000000000000002" },
+    "entrant_a": { "profile_id": "profile-entrant-a", "wallet": "0x0000000000000000000000000000000000000003" },
+    "entrant_b": { "profile_id": "profile-entrant-b", "wallet": "0x0000000000000000000000000000000000000004" }
+  },
+  "cases": [
+    {
+      "id": "legacy-chat-zero-competitions",
+      "wave": { "id": "wave-chat", "type": "CHAT", "legacy_primary_competition_id": null },
+      "native_competitions": [],
+      "legacy_assertions": {
+        "wave.wave.type": "CHAT",
+        "wave.wave.decisions_strategy": null,
+        "wave.wave.next_decision_time": null,
+        "wave.wave.winning_threshold": null,
+        "wave.wave.max_winners": null,
+        "wave.wave.max_votes_per_identity_to_drop": null,
+        "wave.pauses": [],
+        "leaderboard.drops": [],
+        "decisions.data": [],
+        "outcomes.data": []
+      }
+    },
+    {
+      "id": "legacy-rank-open",
+      "wave": { "id": "wave-rank", "type": "RANK", "legacy_primary_competition_id": "competition-legacy-rank" },
+      "primary": {
+        "id": "competition-legacy-rank",
+        "storage_mode": "LEGACY_ADAPTER",
+        "lifecycle": "PUBLISHED",
+        "participation": { "start_ms": 1899000000000, "end_ms": 1901000000000 },
+        "voting": { "start_ms": 1899000000000, "end_ms": 1902000000000, "credit_type": "TDH", "credit_scope": "WAVE", "forbid_negative_votes": false },
+        "decision": { "first_ms": 1902000000000, "subsequent_ms": [], "rolling": false }
+      },
+      "entries": [
+        { "entry_id": "entry-rank-a", "drop_id": "drop-rank-a", "status": "ACTIVE", "rating": 21, "rank": 1 },
+        { "entry_id": "entry-rank-b", "drop_id": "drop-rank-b", "status": "ACTIVE", "rating": 13, "rank": 2 }
+      ],
+      "legacy_assertions": {
+        "wave.wave.type": "RANK",
+        "drop-rank-a.drop_type": "PARTICIPATORY",
+        "drop-rank-a.rank": 1,
+        "leaderboard.ordered_drop_ids": ["drop-rank-a", "drop-rank-b"],
+        "leaderboard.wave.id": "wave-rank"
+      }
+    },
+    {
+      "id": "legacy-approve-open",
+      "wave": { "id": "wave-approve", "type": "APPROVE", "legacy_primary_competition_id": "competition-legacy-approve" },
+      "primary": {
+        "id": "competition-legacy-approve",
+        "storage_mode": "LEGACY_ADAPTER",
+        "lifecycle": "PUBLISHED",
+        "voting": { "credit_type": "REP", "credit_scope": "WAVE", "credit_category": "Builder", "creditor_profile_id": "profile-admin", "forbid_negative_votes": true },
+        "decision": { "winning_threshold": 100, "winning_threshold_min_duration_ms": 86400000, "max_winners": 2, "first_ms": 1902000000000 }
+      },
+      "entries": [{ "entry_id": "entry-approve-a", "drop_id": "drop-approve-a", "status": "ACTIVE", "rating": 60, "rank": null }],
+      "legacy_assertions": {
+        "wave.wave.type": "APPROVE",
+        "wave.wave.winning_threshold": 100,
+        "wave.wave.max_winners": 2,
+        "wave.voting.credit_category": "Builder",
+        "drop-approve-a.drop_type": "PARTICIPATORY"
+      }
+    },
+    {
+      "id": "legacy-rank-paused",
+      "wave": { "id": "wave-paused", "type": "RANK", "legacy_primary_competition_id": "competition-paused" },
+      "primary": { "id": "competition-paused", "storage_mode": "LEGACY_ADAPTER", "lifecycle": "PUBLISHED" },
+      "pauses": [{ "start_ms": 1899900000000, "end_ms": 1900100000000 }],
+      "legacy_assertions": {
+        "wave.pauses.length": 1,
+        "decisions.exclude_scheduled_inside_pause": true,
+        "native_adapter.must_not_shift_historical_decision_times": true
+      }
+    },
+    {
+      "id": "legacy-rank-completed-with-winner",
+      "wave": { "id": "wave-completed", "type": "RANK", "legacy_primary_competition_id": "competition-completed" },
+      "primary": { "id": "competition-completed", "storage_mode": "LEGACY_ADAPTER", "lifecycle": "ENDED" },
+      "entries": [{ "entry_id": "entry-winner", "drop_id": "drop-winner", "status": "WINNER", "rating": 144, "rank": 1, "decision_id": "decision-1", "won_at_ms": 1899000000000 }],
+      "outcomes": [{ "legacy_index": 0, "type": "REP", "distribution_count": 1 }],
+      "legacy_assertions": {
+        "drop-winner.drop_type": "WINNER",
+        "drop-winner.rank": 1,
+        "drop-winner.winning_context.decision_time": 1899000000000,
+        "decisions.ordered_ids": ["decision-1"],
+        "outcomes.ordered_indexes": [0]
+      }
+    },
+    {
+      "id": "legacy-main-stage-capability",
+      "wave": { "id": "wave-main-stage", "type": "RANK", "legacy_primary_competition_id": "competition-main-stage" },
+      "primary": { "id": "competition-main-stage", "storage_mode": "LEGACY_ADAPTER", "lifecycle": "PUBLISHED", "capabilities": ["MAIN_STAGE"] },
+      "entries": [{ "entry_id": "entry-main-stage", "drop_id": "drop-main-stage", "status": "WINNER", "rank": 1, "decision_id": "decision-main-stage" }],
+      "legacy_assertions": {
+        "meme_card_drop_mapping.drop_id": "drop-main-stage",
+        "claim_source.entry_id": "entry-main-stage",
+        "claim_and_mint_idempotency_key": "competition-main-stage:decision-main-stage:entry-main-stage",
+        "another_competition_in_same_wave_has_main_stage_behavior": false
+      }
+    },
+    {
+      "id": "legacy-large-leaderboard-tie",
+      "wave": { "id": "wave-large", "type": "RANK", "legacy_primary_competition_id": "competition-large" },
+      "primary": { "id": "competition-large", "storage_mode": "LEGACY_ADAPTER", "lifecycle": "PUBLISHED" },
+      "generated_entry_count": 1001,
+      "tie_case": { "drop_ids": ["drop-tie-older", "drop-tie-newer"], "rating": 55, "serial_nos": [100, 101] },
+      "legacy_assertions": {
+        "page_size": 50,
+        "page_1_count": 50,
+        "last_page_count": 1,
+        "no_duplicate_or_missing_ids_across_pages": true,
+        "tie_order_matches_current_database_query": true
+      }
+    },
+    {
+      "id": "legacy-unusual-card-set-credit",
+      "wave": { "id": "wave-card-credit", "type": "RANK", "legacy_primary_competition_id": "competition-card-credit" },
+      "primary": {
+        "id": "competition-card-credit",
+        "storage_mode": "LEGACY_ADAPTER",
+        "lifecycle": "PUBLISHED",
+        "voting": {
+          "credit_type": "CARD_SET_TDH",
+          "credit_scope": "WAVE",
+          "credit_nfts": [{ "contract": "0x0000000000000000000000000000000000000010", "token_id": 7 }],
+          "max_votes_per_identity_to_drop": 3,
+          "forbid_negative_votes": false
+        }
+      },
+      "legacy_assertions": {
+        "credit_nfts_preserved": true,
+        "null_credit_category_preserved": true,
+        "negative_and_positive_vote_math_matches": true,
+        "remaining_credit_matches_current_calculation": true
+      }
+    },
+    {
+      "id": "native-hub-one-competition-legacy-chat-projection",
+      "wave": { "id": "wave-native-one", "type": "CHAT", "legacy_primary_competition_id": null },
+      "native_competitions": [{ "id": "competition-native-one", "storage_mode": "NATIVE", "lifecycle": "PUBLISHED", "type": "RANK" }],
+      "entries": [{ "entry_id": "entry-native-one", "competition_id": "competition-native-one", "drop_id": "drop-native-one", "status": "ACTIVE", "rating": 99 }],
+      "legacy_assertions": {
+        "wave.wave.type": "CHAT",
+        "wave.wave.decisions_strategy": null,
+        "drop-native-one.drop_type": "CHAT",
+        "drop-native-one.rank": null,
+        "drop-native-one.winning_context": null,
+        "leaderboard.drops": [],
+        "decisions.data": [],
+        "outcomes.data": []
+      },
+      "native_assertions": { "listed_competition_ids": ["competition-native-one"], "listed_entry_ids": ["entry-native-one"] }
+    },
+    {
+      "id": "native-hub-parallel-isolated-credits",
+      "wave": { "id": "wave-native-parallel", "type": "CHAT", "legacy_primary_competition_id": null },
+      "native_competitions": [
+        { "id": "competition-parallel-a", "storage_mode": "NATIVE", "execution_mode": "ACTIVE", "lifecycle": "PUBLISHED", "type": "RANK" },
+        { "id": "competition-parallel-b", "storage_mode": "NATIVE", "execution_mode": "ACTIVE", "lifecycle": "PUBLISHED", "type": "APPROVE" }
+      ],
+      "credit_spend": [
+        { "competition_id": "competition-parallel-a", "voter_profile_id": "profile-viewer", "spent": 8, "remaining": 2 },
+        { "competition_id": "competition-parallel-b", "voter_profile_id": "profile-viewer", "spent": 1, "remaining": 9 }
+      ],
+      "legacy_assertions": { "wave.wave.type": "CHAT", "native_competitions_discoverable": false },
+      "native_assertions": { "credits_are_independent": true, "both_competitions_listed": true, "no_global_active_competition": true }
+    },
+    {
+      "id": "legacy-wave-with-additional-native-competition",
+      "wave": { "id": "wave-mixed", "type": "RANK", "legacy_primary_competition_id": "competition-original" },
+      "primary": { "id": "competition-original", "storage_mode": "LEGACY_ADAPTER", "lifecycle": "ENDED" },
+      "native_competitions": [{ "id": "competition-newer", "storage_mode": "NATIVE", "lifecycle": "PUBLISHED", "type": "APPROVE" }],
+      "legacy_assertions": {
+        "selected_competition_id": "competition-original",
+        "wave.wave.type": "RANK",
+        "must_not_select_competition-newer": true
+      }
+    },
+    {
+      "id": "cancelled-native-preserves-history",
+      "wave": { "id": "wave-cancelled", "type": "CHAT", "legacy_primary_competition_id": null },
+      "native_competitions": [{ "id": "competition-cancelled", "storage_mode": "NATIVE", "execution_mode": "DISABLED", "lifecycle": "CANCELLED", "type": "RANK" }],
+      "entries": [{ "entry_id": "entry-cancelled", "drop_id": "drop-cancelled", "status": "ACTIVE" }],
+      "votes": [{ "entry_id": "entry-cancelled", "voter_profile_id": "profile-viewer", "value": 4 }],
+      "native_assertions": { "entries_readable": true, "votes_readable": true, "new_entries_rejected": 409, "new_votes_rejected": 409, "decisions_created": 0, "claims_created": 0, "mints_created": 0 }
+    }
+  ],
+  "error_cases": [
+    { "id": "invalid-page-size", "request": { "query": { "page_size": 0 } }, "assert": { "status": 400, "error_envelope_matches_operation_snapshot": true } },
+    { "id": "missing-required-jwt", "request": { "auth": null, "route_auth": "required" }, "assert": { "status": 401, "error_envelope_matches_runtime": true } },
+    { "id": "private-wave-masked", "request": { "wave_id": "wave-private", "viewer": "ineligible" }, "assert": { "status": 404, "does_not_disclose_competition_count": true } },
+    { "id": "missing-wave", "request": { "wave_id": "wave-does-not-exist" }, "assert": { "status": 404, "error_envelope_matches_operation_snapshot": true } },
+    { "id": "cross-wave-entry-id", "request": { "wave_id": "wave-a", "competition_id": "competition-a", "entry_id": "entry-owned-by-wave-b" }, "assert": { "status": 404, "no_existence_leak": true } },
+    { "id": "conditional-api-gate", "request": { "path": "/api/waves", "activate_api_password": true, "x-6529-auth": null }, "assert": { "status": 401, "route_handler_not_reached": true } }
+  ],
+  "pagination_cases": [
+    { "id": "legacy-page", "style": "page/page_size", "assert": { "defaults_and_bounds_from_openapi": true, "stable_order": true } },
+    { "id": "legacy-offset", "style": "offset/limit", "assert": { "defaults_and_bounds_from_openapi": true, "stable_order": true } },
+    { "id": "legacy-serial-cursor", "style": "serial_no_limit/search_strategy", "assert": { "no_duplicates": true, "no_gaps": true } },
+    { "id": "native-cursor", "style": "opaque_cursor/limit", "assert": { "cursor_is_resource_and_sort_specific": true, "stable_order": true, "invalid_cursor_status": 400 } }
+  ]
+}
