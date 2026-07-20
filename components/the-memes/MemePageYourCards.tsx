@@ -150,8 +150,6 @@ export function MemePageYourCardsSubMenu(props: {
                 {props.transactions.map((tr) => (
                   <LatestActivityRow
                     tr={tr}
-                    variant="tailwind"
-                    rowStyle="striped"
                     key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                   />
                 ))}

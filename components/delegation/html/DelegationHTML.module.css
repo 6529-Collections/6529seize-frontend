@@ -19,40 +19,6 @@
   text-decoration: none;
 }
 
-.breadcrumbNav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  color: rgb(154, 154, 154);
-  font-size: 0.9rem;
-}
-
-.breadcrumbNav a {
-  color: rgb(154, 154, 154);
-  text-decoration: none;
-}
-
-.breadcrumbNav a:hover {
-  color: white;
-  text-decoration: underline;
-}
-
-.articleSummary {
-  max-width: 780px;
-  margin-bottom: 0.5rem;
-  color: rgb(154, 154, 154);
-}
-
-.articleBackLink {
-  color: rgb(154, 154, 154);
-  text-decoration: none;
-}
-
-.articleBackLink:hover {
-  color: white;
-  text-decoration: underline;
-}
-
 .articlePager {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
