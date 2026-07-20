@@ -174,13 +174,24 @@ describe("useNativeKeyboard", () => {
     }
   });
 
-  it("keeps the native iOS inset authoritative while the keyboard opens", async () => {
+  it("keeps the native iOS inset authoritative after did-show", async () => {
     const originalInnerHeight = globalThis.innerHeight;
+    const originalVisualViewport = globalThis.visualViewport;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
     const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    let visualViewportHeight = 800;
+    const visualViewport = new EventTarget();
+    Object.defineProperties(visualViewport, {
+      height: { get: () => visualViewportHeight },
+      offsetTop: { value: 0 },
+    });
     Object.defineProperty(globalThis, "innerHeight", {
       configurable: true,
       value: 800,
+    });
+    Object.defineProperty(globalThis, "visualViewport", {
+      configurable: true,
+      value: visualViewport,
     });
     window.requestAnimationFrame = (callback: FrameRequestCallback) => {
       callback(0);
@@ -210,10 +221,32 @@ describe("useNativeKeyboard", () => {
           "--native-keyboard-inset-bottom"
         )
       ).toBe("320px");
+
+      act(() => {
+        listeners["keyboardDidShow"]?.({ keyboardHeight: 336 });
+      });
+
+      visualViewportHeight = 620;
+
+      act(() => {
+        visualViewport.dispatchEvent(new Event("resize"));
+      });
+
+      expect(result.current.phase).toBe("visible");
+      expect(result.current.keyboardHeight).toBe(336);
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--native-keyboard-inset-bottom"
+        )
+      ).toBe("336px");
     } finally {
       Object.defineProperty(globalThis, "innerHeight", {
         configurable: true,
         value: originalInnerHeight,
+      });
+      Object.defineProperty(globalThis, "visualViewport", {
+        configurable: true,
+        value: originalVisualViewport,
       });
       window.requestAnimationFrame = originalRequestAnimationFrame;
       window.cancelAnimationFrame = originalCancelAnimationFrame;
