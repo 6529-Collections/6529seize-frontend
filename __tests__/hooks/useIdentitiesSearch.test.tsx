@@ -9,11 +9,17 @@ jest.mock("@/services/api/common-api");
 function TestComponent({
   handle,
   waveId,
+  visibilityGroupId,
 }: {
   handle: string;
   waveId: string | null;
+  visibilityGroupId?: string | null | undefined;
 }) {
-  const { identities } = useIdentitiesSearch({ handle, waveId });
+  const { identities } = useIdentitiesSearch({
+    handle,
+    visibilityGroupId,
+    waveId,
+  });
   return <div>{identities.map((i) => i.handle).join(",")}</div>;
 }
 
@@ -96,7 +102,47 @@ describe("useIdentitiesSearch", () => {
     await waitFor(() => expect(commonApiFetch).not.toHaveBeenCalled());
   });
 
-  it("skips fetch when there is no wave to derive eligibility from", async () => {
+  it("searches the selected visibility group for a private draft wave", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TestComponent
+          handle="ali"
+          waveId={null}
+          visibilityGroupId="visibility-group"
+        />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "v2/waves/mention-search",
+      params: {
+        handle: "ali",
+        limit: "5",
+        visibility_group_id: "visibility-group",
+      },
+      signal: expect.any(AbortSignal),
+    });
+    await screen.findByText("alice");
+  });
+
+  it("searches the public audience for a public draft wave", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TestComponent handle="ali" waveId={null} visibilityGroupId={null} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "v2/waves/mention-search",
+      params: { handle: "ali", limit: "5" },
+      signal: expect.any(AbortSignal),
+    });
+    await screen.findByText("alice");
+  });
+
+  it("skips fetch when there is no wave or draft visibility scope", async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <TestComponent handle="alice" waveId={null} />

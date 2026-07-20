@@ -22,6 +22,10 @@ jest.mock("@/components/drops/create/DropEditor", () =>
       useCreateDropEmojiPickerLayer,
     } = require("@/components/waves/CreateDropEmojiPickerLayerContext");
     const emojiPickerLayer = useCreateDropEmojiPickerLayer();
+    const {
+      useDraftMentionVisibilityGroupId,
+    } = require("@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext");
+    const visibilityGroupId = useDraftMentionVisibilityGroupId();
 
     React.useImperativeHandle(ref, () => ({
       getDropSnapshot: () => ({ content: "snapshot drop" }),
@@ -45,6 +49,7 @@ jest.mock("@/components/drops/create/DropEditor", () =>
         <div data-testid="wave-name">{props.wave?.name}</div>
         <div data-testid="wave-image">{props.wave?.image}</div>
         <div data-testid="wave-id-prop">{props.wave?.id}</div>
+        <div data-testid="visibility-group-id">{visibilityGroupId}</div>
         <div data-testid="emoji-picker-desktop-z-index">
           {emojiPickerLayer.desktopZIndex}
         </div>
@@ -89,6 +94,7 @@ describe("CreateWaveDescription", () => {
     wave: mockWave,
     submitting: false,
     showDropError: false,
+    visibilityGroupId: "visibility-group",
     onHaveDropToSubmitChange: jest.fn(),
   };
 
@@ -133,6 +139,9 @@ describe("CreateWaveDescription", () => {
       "https://example.com/image.png"
     );
     expect(screen.getByTestId("wave-id-prop")).toHaveTextContent("wave-123");
+    expect(screen.getByTestId("visibility-group-id")).toHaveTextContent(
+      "visibility-group"
+    );
   });
 
   it("scopes emoji picker layer above the create-wave modal", () => {

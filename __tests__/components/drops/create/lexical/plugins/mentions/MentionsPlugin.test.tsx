@@ -3,6 +3,7 @@ import { render, act } from "@testing-library/react";
 import NewMentionsPlugin, {
   MentionTypeaheadOption,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 
 jest.mock("@lexical/react/LexicalComposerContext", () => ({
   useLexicalComposerContext: () => [{ update: (fn: any) => fn() }],
@@ -45,6 +46,10 @@ const {
 } = require("@/components/drops/create/lexical/nodes/GroupMentionNode");
 
 describe("MentionsPlugin", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("builds options from identities and exposes open state", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
       identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
@@ -84,6 +89,26 @@ describe("MentionsPlugin", () => {
       handle_in_content: option.handle,
     });
     expect(close).toHaveBeenCalled();
+  });
+
+  it("passes the draft visibility group to identity search", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <MentionSearchScopeProvider visibilityGroupId="visibility-group">
+        <NewMentionsPlugin
+          waveId={null}
+          onSelect={jest.fn()}
+          ref={createRef()}
+        />
+      </MentionSearchScopeProvider>
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      handle: "",
+      visibilityGroupId: "visibility-group",
+      waveId: null,
+    });
   });
 
   it("renders the menu wrapper on the raised typeahead layer", () => {

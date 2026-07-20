@@ -29,6 +29,9 @@ You write the first wave drop here, then click `Complete`.
 - Same editor features as wave drop composer:
   mentions, wave mentions, hashtag/NFT references, markdown, emoji, metadata,
   drag/paste media, and optional storm mode (`Break into storm`)
+- Individual `@` mention suggestions use the draft wave's `Who can view`
+  group. Public drafts search all profiles; private drafts suggest only profiles
+  eligible for the selected visibility group.
 
 ## Submit Flow
 
