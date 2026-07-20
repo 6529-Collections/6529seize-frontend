@@ -80,12 +80,15 @@ describe("SingleWaveDropWrapper", () => {
       'div[style*="--native-keyboard-inset-bottom"]'
     );
 
-    expect(mobileChatPanel?.style.bottom).toBe(
+    expect(mobileChatPanel).toBeInstanceOf(HTMLElement);
+    const panel = mobileChatPanel as HTMLElement;
+
+    expect(panel.style.bottom).toBe(
       "var(--native-keyboard-inset-bottom, 0px)"
     );
-    expect(mobileChatPanel?.style.transition).toBe(
+    expect(panel.style.transition).toBe(
       "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
     );
-    expect(mobileChatPanel).toHaveClass("tw-max-h-[100dvh]");
+    expect(panel).toHaveClass("tw-max-h-[100dvh]");
   });
 });
