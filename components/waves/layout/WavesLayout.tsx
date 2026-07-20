@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -133,15 +134,27 @@ function getWavesContent({
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
+  const pathname = usePathname();
+
+  // The chat/feed views manage their own internal scroll, so WavesLayout locks
+  // document scroll and clips its content. The create-wave route is a plain
+  // form page with no internal scroll — in the native shell that leaves the
+  // footer (Next/Complete) below the fold with nothing to scroll. Let the
+  // app's own viewport-bounded page scroll handle that one route instead; this
+  // is reserve-free and adapts to any device/safe-area, unlike a fixed offset.
+  const useNativePageScroll = isApp && pathname === "/waves/create";
 
   useEffect(() => {
+    if (useNativePageScroll) {
+      return;
+    }
     const previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = previousBodyOverflow;
     };
-  }, []);
+  }, [useNativePageScroll]);
 
   // tw-min-h-0 lets this flex item shrink below its content height so a child
   // (e.g. the create-wave flow) can own an internal scroll region instead of
@@ -210,7 +223,11 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   }, [contentState]);
 
   return (
-    <div className="tailwind-scope tw-flex tw-flex-col tw-overflow-hidden tw-bg-black">
+    <div
+      className={`tailwind-scope tw-flex tw-flex-col tw-bg-black ${
+        useNativePageScroll ? "" : "tw-overflow-hidden"
+      }`}
+    >
       {content}
     </div>
   );

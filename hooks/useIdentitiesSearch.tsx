@@ -13,7 +13,6 @@ interface UseIdentitiesSearchProps {
 
 export const IDENTITY_SEARCH_MIN_HANDLE_LENGTH = 3;
 const IDENTITY_SEARCH_MAX_HANDLE_LENGTH = 15;
-const IDENTITY_SEARCH_LIMIT = "5";
 
 const isSearchableHandle = (handle: string) =>
   /^\w+$/.test(handle) &&
@@ -44,7 +43,7 @@ export function useIdentitiesSearch({
 
       const params: Record<string, string> = {
         handle: debouncedHandle,
-        limit: IDENTITY_SEARCH_LIMIT,
+        limit: "5",
       };
       if (!waveId && draftScope.kind === "group") {
         params["visibility_group_id"] = draftScope.visibilityGroupId;
