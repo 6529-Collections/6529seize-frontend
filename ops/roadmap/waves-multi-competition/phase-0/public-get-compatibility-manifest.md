@@ -37,6 +37,11 @@ The complete contract is split into two checked-in snapshots:
    evidence, and linkage to the OpenAPI operation. All 183 OpenAPI operations
    link to a runtime route; 113 runtime routes are not published in OpenAPI.
 
+Both snapshots record the inspected backend source revision. The OpenAPI
+snapshot uses stable two-space JSON; the runtime manifest keeps one complete
+route record per line. Structural contract changes remain reviewable without
+making the package exceed automated-review limits.
+
 The runtime-only set includes public aliases, legacy data reads, authenticated
 operational reads, health/raw-contract endpoints, and route-only APIs. They
 remain covered even if they are documented later. The Swagger UI rendering at
@@ -63,6 +68,9 @@ route requires JWT. Permanent tests use this order:
 
 The global gate cannot be silently broadened beyond `/api/*`, and route auth
 cannot become stricter or looser for an existing GET without a new endpoint.
+CI must exercise the gate both disabled and enabled; enabled-mode tests cover
+missing, invalid, and valid `x-6529-auth` before each route's none/optional/
+required auth matrix.
 
 ## Wave-Competition-Sensitive GET Families
 
@@ -150,7 +158,10 @@ Permanent CI should combine:
    validation, authentication, authorization/masking, and not-found responses;
 4. ordered parity tests comparing legacy storage and native primary adapters;
 5. old generated-client smoke tests that deserialize all three wave types and
-   ignore additive fields.
+   ignore additive fields;
+6. static consistency tests that reconcile the documented operation/schema/
+   route counts and inventory table names with the machine manifests and
+   `src/constants/db-tables.ts`.
 
 ## Mutation Compatibility Policy
 

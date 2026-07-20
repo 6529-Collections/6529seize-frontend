@@ -7,6 +7,10 @@
 - Status: Complete
 - Delivery target: Repository delivery Phase 3 for this frontend-owned
   documentation/contract package; no runtime or schema deployment
+- Staging validation: prove the signed documentation commit is present on
+  `1a-staging` and that the ordinary frontend deploy, HTTP version check, and
+  repository health gates remain green. It is delivery evidence, not runtime
+  acceptance of the future competition design.
 - Owner: Frontend, backend, product, security, and operations domain owners
 - Evidence: [Phase 0 evidence index](./phase-0/README.md),
   [decision register](./phase-0/decision-register.md),
@@ -158,9 +162,10 @@ Draft OpenAPI resources for review. The proposal should cover at least:
   exposing implementation details unnecessarily to public clients.
 - Event payload additions for competition and entry identity.
 
-Resolve whether wave endpoints use a new API version or additive resources
-within the current version. Never define a legacy projection that chooses one
-of several native competitions implicitly.
+Decision D-18 resolves native resources to
+`/v3/waves/{wave_id}/competitions...`; existing unversioned and v2 GETs remain
+permanent compatibility façades. Never define a legacy projection that chooses
+one of several native competitions implicitly.
 
 The proposal must retain every endpoint in the permanent GET manifest. For an
 existing competition wave, wave-scoped GETs resolve its immutable original

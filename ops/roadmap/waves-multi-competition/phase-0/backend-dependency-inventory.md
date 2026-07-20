@@ -9,13 +9,13 @@ backend-repository relative. Classification uses `wave-only`,
 | Area | Current evidence | Classification | Native responsibility |
 | --- | --- | --- | --- |
 | Wave/configuration | `src/entities/IWave.ts`; `waves` | Mixed | Keep hub fields on wave; move participation, voting, timing, decisions, outcomes, lifecycle, and capability configuration to competition/version tables. |
-| Archives and pauses | `wave_archives`, `wave_decision_pauses` | Competition-specific | Competition lifecycle audit and competition pauses; preserve legacy adapter reads. |
+| Archives and pauses | `waves_archive`, `waves_decision_pauses` | Competition-specific | Competition lifecycle audit and competition pauses; preserve legacy adapter reads. |
 | Outcomes/distributions | `wave_outcomes`, `wave_outcome_distribution_items` | Competition-specific | Key by competition/outcome; retain outcome index projection for primary. |
 | Drops/content | `src/entities/IDrop.ts`; `drops`, parts, mentions, reactions, polls, boosts, bookmarks | Mixed | Drop remains wave content. New entry association carries competition meaning. |
-| Vote spend/state | `drop_vote_credit_spendings`, `drop_voter_states`, `drop_ranks` | Competition-specific | Key spend/state/rank by competition and entry; never infer scope from drop alone. |
-| Vote history | `drop_real_votes_in_time`, `drop_real_voter_votes_in_time`, `winner_drop_voter_votes` | Competition-specific | Competition/entry history with unchanged primary projection. |
+| Vote spend/state | `drops_votes_credit_spendings`, `drop_voter_states`, `drop_ranks` | Competition-specific | Key spend/state/rank by competition and entry; never infer scope from drop alone. |
+| Vote history | `drop_real_vote_in_time`, `drop_real_voter_vote_in_time`, `winner_drop_voter_votes` | Competition-specific | Competition/entry history with unchanged primary projection. |
 | Leaderboard/snapshots | `wave_leaderboard_entries` | Competition-specific | Competition leaderboard entries and snapshot identity; preserve ordering/tie semantics. |
-| Decisions/winners | `wave_decisions`, `wave_decision_winners` | Competition-specific | Idempotent competition decision and entry winner rows. |
+| Decisions/winners | `wave_decisions`, `wave_decision_winner_drops` | Competition-specific | Idempotent competition decision and entry winner rows. |
 | Voting-credit NFTs | `wave_voting_credit_nfts` | Competition-specific | Competition policy/version relation. |
 | Metrics | `wave_metrics`, `wave_dropper_metrics`, `wave_reader_metrics` | Mixed | Wave aggregates remain; competition metrics add competition/mode dimensions. |
 | Notifications | `identity_notifications`, `wave_group_notification_subscriptions` | Mixed | Retain wave/cause/related-drop fields; add optional competition and entry identity. |
@@ -93,9 +93,13 @@ remain part of the contract.
   signed, voting, winning, and Main Stage context to external drop responses.
 
 Native entry creation must transactionally prove `(drop.wave_id =
-competition.wave_id)`, validate the active config version, and write an entry
-without changing the drop. Legacy adapters continue deriving entries from
-participatory/winner drops.
+competition.wave_id)`, validate the active config version, reject a terminal
+legacy `WINNER` drop, and enforce one immutable `(competition_id, drop_id)`
+association. The first-release policy also rejects another active, non-terminal
+competition entry for the same drop; a later policy may relax only that
+cross-competition guard as allowed by D-01. It writes the entry without changing
+the drop. Legacy adapters continue deriving entries from participatory/winner
+drops.
 
 ## Voting, Credits, and Leaderboards
 

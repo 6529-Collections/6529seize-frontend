@@ -43,8 +43,8 @@ For each selected legacy competition, capture at a consistent read snapshot:
 | Main Stage | explicit capability, claim/mint/mapping | special projection, mapping and claim reads, idempotency keys |
 | Large leaderboard | paging, tie order, performance | first/middle/last pages in both directions, filters |
 | Unusual credit | CARD_SET_TDH, null categories, negative votes/caps | config, credit, votes, voter state |
-| Native hub / one | chat legacy projection hides competition | old wave/drop/leaderboard/decision plus v3 native reads |
-| Native hub / parallel | no global active competition, isolated credits | two v3 detail/entry/leaderboard/credit sets plus old chat projection |
+| Native hub / one | chat legacy projection hides competition | old wave/drop/leaderboard/decision plus native `/v3` reads |
+| Native hub / parallel | no global active competition, isolated credits | two native `/v3` detail/entry/leaderboard/credit sets plus old chat projection |
 | Legacy plus newer native | immutable primary selection | every affected old GET must remain tied to original |
 | Cancelled | preserved history and disabled execution | native reads; entry/vote/decision/claim rejection/no-op |
 
@@ -62,6 +62,11 @@ The concrete fictional IDs, timestamps, values, and expected assertions are in
 - Traverse the Express mount graph and compare 296 baseline GET route shapes,
   auth classification, and OpenAPI linkage. A missing or stricter/looser route
   fails.
+- Assert that the cited 183 OpenAPI operations, 296 runtime route shapes, 357
+  reachable schemas, and 113 runtime-only routes equal the machine manifests;
+  documentation/count drift fails CI.
+- Validate every canonical table identifier in the dependency inventory against
+  `src/constants/db-tables.ts` before schema or adapter estimation consumes it.
 
 ### Golden integration
 
@@ -70,6 +75,10 @@ overrides. Execute old endpoints through the same middleware stack and assert:
 
 - exact status and error envelope for success, empty, 400, 401, 403 where
   applicable, masked 404, and conditional API-gate 401;
+- both global-gate modes: with `ACTIVATE_API_PASSWORD=false`, route auth alone
+  applies; with it `true`, missing/invalid `x-6529-auth` returns the frozen 401
+  envelope and a valid deployment credential falls through to the unchanged
+  route-auth behavior;
 - schema validation and old generated-client deserialization;
 - fields/types/enums/required/null semantics;
 - exact ordered page contents, metadata, filters, and tie behavior;
@@ -98,6 +107,7 @@ cannot acquire active executor leases.
 CONFIG_FIELD
 ENTRY_MEMBERSHIP
 ENTRY_STATUS
+PRIMARY_COMPETITION_SELECTION
 CREDIT_AVAILABLE
 CREDIT_SPEND
 VOTE_TOTAL
@@ -119,6 +129,23 @@ storage modes, config versions, worker/API version, category, canonical value
 hashes, and trace/event IDs. Payloads and wallet/profile data are not emitted
 to broad metrics.
 
+## Current Operational Threshold Baseline
+
+The repository currently defines no decision-lag p95/p99 alarm for
+`waveDecisionExecutionLoop` and no endpoint p95 SLO alarm for the API. The
+worker is scheduled once per minute with reserved concurrency 1 and a 900-second
+timeout; its checked-in CloudWatch threshold is only the out-of-memory alarm at
+one event in one 60-second period. API request logging treats a request as slow
+at `SLOW_API_REQUEST_THRESHOLD`, defaulting to 1,000 ms, but that warning cutoff
+is not an endpoint p95 SLO. These are current-state observations from the worker
+Serverless configuration and API request middleware, not proposed cutover
+budgets.
+
+Before roadmap Phase 4 can enable native execution, operations must measure and
+record production decision-lag p95/p99 and endpoint-specific GET p95/error-rate
+budgets, then configure alerts and rollback gates. Absence of those measured
+budgets blocks cutover; it does not authorize a weaker default.
+
 ## Acceptance Thresholds
 
 - Frozen GET contract tests: 100% pass; zero unreviewed snapshot drift.
@@ -128,12 +155,12 @@ to broad metrics.
   duplicate-side-effect, winner, claim, or mint mismatch.
 - Non-critical read mismatch rate: zero for seven consecutive full comparison
   windows before a competition mode cutover; any mismatch resets the window.
-- Decision lag: native shadow p95/p99 no worse than the existing alert budget;
-  exact numeric budgets are set from measured pre-rollout production baseline,
-  not invented in documentation.
-- API latency: compatibility-adapter p95 must stay within the existing endpoint
-  SLO and no more than 10% or 25 ms above its measured baseline, whichever is
-  greater; error rate must not increase materially.
+- Decision lag: native shadow p95/p99 no worse than the measured pre-rollout
+  budget required above; there is no checked-in decision-lag budget to inherit.
+- API latency: compatibility-adapter p95 must stay within the endpoint
+  baseline/SLO established above and no more than 10% or 25 ms above its
+  measured baseline, whichever is greater; error rate must not increase
+  materially.
 - Backfill: 100% eligible rows processed, zero unresolved orphans, stable
   rerun checksum, and checkpoint resume tested.
 

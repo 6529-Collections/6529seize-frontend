@@ -161,9 +161,14 @@ headers, or full response payloads are logged.
 | Frontend load/error/retry | hub/list/detail/action, viewport | Native context errors or old-route regressions block cohort expansion. |
 | Flag/mode transition | actor, previous/new, reason | Unauthorized or invalid transition pages and is rejected. |
 
-Numeric SLO/alert thresholds use measured current endpoint and worker baselines.
-Documentation does not invent weaker budgets. The parity plan defines the
-additional relative latency guard and exact-integrity gates.
+The checked-in baseline has no decision-lag p95/p99 alarm and no endpoint p95
+SLO alarm. It has a one-event/60-second OOM alarm for
+`waveDecisionExecutionLoop`, plus a configurable API slow-request log threshold
+that defaults to 1,000 ms; neither substitutes for a cutover SLO. Numeric
+decision-lag and endpoint thresholds therefore require measured production
+baselines and configured alerts before roadmap Phase 4. Documentation does not
+invent weaker budgets. The parity plan defines the measurement gate, additional
+relative latency guard, and exact-integrity gates.
 
 ## Runbook Gates
 

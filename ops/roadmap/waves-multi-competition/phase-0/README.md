@@ -20,6 +20,11 @@ original competition. Native multi-competition hubs always project as
 contract-valid chat waves to legacy GET clients. Mutation support is governed
 separately.
 
+The machine baselines record the refreshed backend source revision used for
+reproducibility. The OpenAPI snapshot is stable two-space JSON and the runtime
+manifest keeps one route per line, so future contract drift is reviewable at
+path, operation, schema, and route level.
+
 ## Evidence Index
 
 | Deliverable | Evidence |
