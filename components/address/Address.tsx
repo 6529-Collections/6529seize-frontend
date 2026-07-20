@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import styles from "./Address.module.css";
 import { WalletAddress } from "./WalletAddress";
 
 interface Props {
@@ -57,6 +56,10 @@ const SZN_5_ICON = "";
 const SZN_6_ICON = "";
 
 const GRADIENT_ICON = "";
+
+const ADDRESS_TAG_CLASS_NAME =
+  "tw-mr-2.5 tw-whitespace-nowrap tw-bg-iron-700 tw-px-1.5 tw-py-0.5 tw-font-bold tw-text-white tw-shadow-md tw-text-xs lg:tw-text-sm xl:tw-text-base";
+const ADDRESS_TAG_ICON_CLASS_NAME = "tw-mx-1 tw-max-h-10 tw-max-w-10 tw-py-0.5";
 
 export default function Address(props: Readonly<Props>) {
   const [consolidationExpanded, setConsolidationExpanded] = useState(
@@ -108,7 +111,7 @@ export default function Address(props: Readonly<Props>) {
           setLinkQueryAddress={props.setLinkQueryAddress}
         />
       ) : (
-        <span className={styles["consolidationDropdown"]}>
+        <span className="tw-inline-flex tw-items-center">
           <button
             type="button"
             name="consolidation-toggle"
@@ -119,6 +122,7 @@ export default function Address(props: Readonly<Props>) {
                 setConsolidationExpanded(!consolidationExpanded);
               }
             }}
+            className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-white focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           >
             <Image
               unoptimized
@@ -128,12 +132,9 @@ export default function Address(props: Readonly<Props>) {
               alt="consolidation"
               width={25}
               height={25}
-              style={{
-                transition: "transform 0.2s ease",
-                transform: consolidationExpanded
-                  ? "rotate(90deg)"
-                  : "rotate(0deg)",
-              }}
+              className={`tw-transition-transform tw-duration-200 ${
+                consolidationExpanded ? "tw-rotate-90" : "tw-rotate-0"
+              }`}
             />
           </button>
           &nbsp;&nbsp;
@@ -142,8 +143,8 @@ export default function Address(props: Readonly<Props>) {
             href={getProfileLink()}
           >
             <span
-              className={`${styles["consolidationDisplay"]} ${
-                props.isUserPage ? styles["consolidationDisplayUserPage"] : ""
+              className={`tw-whitespace-break-spaces tw-font-bold tw-text-white ${
+                props.isUserPage ? "tw-text-3xl" : ""
               }`}
               dangerouslySetInnerHTML={{
                 __html: props.display ? parseEmojis(props.display) : ``,
@@ -165,14 +166,14 @@ export default function Address(props: Readonly<Props>) {
             <div
               key={w}
               className={`tw-flex tw-items-center tw-justify-start ${
-                props.isUserPage ? styles["consolidationDiv"] : ""
+                props.isUserPage ? "tw-text-lg" : ""
               }`}
             >
               <FontAwesomeIcon
                 icon={faArrowsTurnRight}
                 name={`arrow-turn-right`}
                 aria-label={`arrow-turn-right`}
-                className={`${styles["arrowTurnRight"]}`}
+                className="tw-ml-1.5 tw-mr-2.5 tw-w-[15px] tw-scale-y-[-1] tw-text-[15px]"
               />
               <WalletAddress
                 wallet={w}
@@ -186,24 +187,20 @@ export default function Address(props: Readonly<Props>) {
           ))}
       </span>
       {props.tags && (
-        <span className={styles["noWrap"]}>
+        <span className="tw-whitespace-nowrap">
           {(props.tags.tdh_rank || props.tags.balance_rank) && (
             <>
               {props.tags.balance_rank &&
                 props.tags.balance_rank > 0 &&
                 props.expandedTags && (
-                  <span
-                    className={`${styles["addressTag"]} ${styles["rankTag"]}`}
-                  >
+                  <span className={ADDRESS_TAG_CLASS_NAME}>
                     All Cards Rank #{numberWithCommas(props.tags.balance_rank)}
                   </span>
                 )}
               {props.tags.unique_rank &&
                 props.tags.unique_rank > 0 &&
                 props.expandedTags && (
-                  <span
-                    className={`${styles["addressTag"]} ${styles["rankTag"]}`}
-                  >
+                  <span className={ADDRESS_TAG_CLASS_NAME}>
                     Unique Cards Rank #
                     {numberWithCommas(props.tags.unique_rank)}
                   </span>
@@ -211,9 +208,7 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.tdh_rank &&
                 props.tags.tdh_rank > 0 &&
                 props.expandedTags && (
-                  <span
-                    className={`${styles["addressTag"]} ${styles["rankTag"]}`}
-                  >
+                  <span className={ADDRESS_TAG_CLASS_NAME}>
                     TDH Rank #{numberWithCommas(props.tags.tdh_rank)}
                   </span>
                 )}
@@ -222,25 +217,21 @@ export default function Address(props: Readonly<Props>) {
           )}
           {props.tags.memesCardsSets > 0 ? (
             <span
-              className={`${styles["addressTag"]} ${
-                !MEMES_SETS_ICON ? styles["memesSetTag"] : ""
-              }`}
+              className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#da2089] tw-leading-6`}
             >
               {(props.isUserPage || !MEMES_SETS_ICON) && `Memes Sets x`}
               {props.tags.memesCardsSets}
               {MEMES_SETS_ICON && (
                 <img
                   src={MEMES_SETS_ICON}
-                  className={styles["addressTagIcon"]}
+                  className={ADDRESS_TAG_ICON_CLASS_NAME}
                   alt="Memes Sets"
                 />
               )}
             </span>
           ) : props.tags.memesBalance > 0 ? (
             <span
-              className={`${styles["addressTag"]} ${
-                !UNIQUE_MEMES_ICON ? styles["memesTag"] : ""
-              }`}
+              className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#c51d34] tw-leading-6`}
             >
               {(props.isUserPage || !UNIQUE_MEMES_ICON) && `Memes x`}
               {props.tags.memesBalance}
@@ -248,7 +239,7 @@ export default function Address(props: Readonly<Props>) {
               {UNIQUE_MEMES_ICON && (
                 <img
                   src={UNIQUE_MEMES_ICON}
-                  className={styles["addressTagIcon"]}
+                  className={ADDRESS_TAG_ICON_CLASS_NAME}
                   alt="Unique Memes"
                 />
               )}
@@ -258,16 +249,14 @@ export default function Address(props: Readonly<Props>) {
           )}
           {props.tags.gradientsBalance > 0 && !props.expandedTags ? (
             <span
-              className={`${styles["addressTag"]} ${
-                !GRADIENT_ICON ? styles["gradientTag"] : ""
-              }`}
+              className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#444] tw-leading-6`}
             >
               {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
               {props.tags.gradientsBalance}
               {GRADIENT_ICON && (
                 <img
                   src={GRADIENT_ICON}
-                  className={styles["addressTagIcon"]}
+                  className={ADDRESS_TAG_ICON_CLASS_NAME}
                   alt="6529 Gradient"
                 />
               )}
@@ -277,16 +266,14 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.memesCardsSetS1 > 0 &&
                 (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
-                    className={`${styles["addressTag"]} ${
-                      !SZN_1_ICON ? styles["memeSzn1Tag"] : ""
-                    }`}
+                    className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#208359] tw-leading-6`}
                   >
                     {(props.isUserPage || !SZN_1_ICON) && `SZN1 Sets x`}
                     {props.tags.memesCardsSetS1}
                     {SZN_1_ICON && (
                       <img
                         src={SZN_1_ICON}
-                        className={styles["addressTagIcon"]}
+                        className={ADDRESS_TAG_ICON_CLASS_NAME}
                         alt="Memes SZN1"
                       />
                     )}
@@ -295,16 +282,14 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.memesCardsSetS2 > 0 &&
                 (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
-                    className={`${styles["addressTag"]} ${
-                      !SZN_2_ICON ? styles["memeSzn2Tag"] : ""
-                    }`}
+                    className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#267c93] tw-leading-6`}
                   >
                     {(props.isUserPage || !SZN_2_ICON) && `SZN2 Sets x`}
                     {props.tags.memesCardsSetS2}
                     {SZN_2_ICON && (
                       <img
                         src={SZN_2_ICON}
-                        className={styles["addressTagIcon"]}
+                        className={ADDRESS_TAG_ICON_CLASS_NAME}
                         alt="Memes SZN2"
                       />
                     )}
@@ -313,16 +298,14 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.memesCardsSetS3 > 0 &&
                 (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
-                    className={`${styles["addressTag"]} ${
-                      !SZN_3_ICON ? styles["memeSzn3Tag"] : ""
-                    }`}
+                    className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#d7710d] tw-leading-6`}
                   >
                     {(props.isUserPage || !SZN_3_ICON) && `SZN3 Sets x`}
                     {props.tags.memesCardsSetS3}
                     {SZN_3_ICON && (
                       <img
                         src={SZN_3_ICON}
-                        className={styles["addressTagIcon"]}
+                        className={ADDRESS_TAG_ICON_CLASS_NAME}
                         alt="Memes SZN3"
                       />
                     )}
@@ -331,16 +314,14 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.memesCardsSetS4 > 0 &&
                 (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
-                    className={`${styles["addressTag"]} ${
-                      !SZN_4_ICON ? styles["memeSzn4Tag"] : ""
-                    }`}
+                    className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#a8a800] tw-leading-6`}
                   >
                     {(props.isUserPage || !SZN_4_ICON) && `SZN4 Sets x`}
                     {props.tags.memesCardsSetS4}
                     {SZN_4_ICON && (
                       <img
                         src={SZN_4_ICON}
-                        className={styles["addressTagIcon"]}
+                        className={ADDRESS_TAG_ICON_CLASS_NAME}
                         alt="Memes SZN4"
                       />
                     )}
@@ -349,16 +330,14 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.memesCardsSetS5 > 0 &&
                 (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
-                    className={`${styles["addressTag"]} ${
-                      !SZN_5_ICON ? styles["memeSzn5Tag"] : ""
-                    }`}
+                    className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#8c00a8] tw-leading-6`}
                   >
                     {(props.isUserPage || !SZN_5_ICON) && `SZN5 Sets x`}
                     {props.tags.memesCardsSetS5}
                     {SZN_5_ICON && (
                       <img
                         src={SZN_5_ICON}
-                        className={styles["addressTagIcon"]}
+                        className={ADDRESS_TAG_ICON_CLASS_NAME}
                         alt="Memes SZN5"
                       />
                     )}
@@ -367,16 +346,14 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.memesCardsSetS6 > 0 &&
                 (props.tags.memesCardsSets === 0 || props.expandedTags) && (
                   <span
-                    className={`${styles["addressTag"]} ${
-                      !SZN_6_ICON ? styles["memeSzn6Tag"] : ""
-                    }`}
+                    className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#110b54] tw-leading-6`}
                   >
                     {(props.isUserPage || !SZN_6_ICON) && `SZN6 Sets x`}
                     {props.tags.memesCardsSetS6}
                     {SZN_6_ICON && (
                       <img
                         src={SZN_6_ICON}
-                        className={styles["addressTagIcon"]}
+                        className={ADDRESS_TAG_ICON_CLASS_NAME}
                         alt="Memes SZN6"
                       />
                     )}
@@ -384,16 +361,14 @@ export default function Address(props: Readonly<Props>) {
                 )}
               {props.tags.gradientsBalance > 0 && props.expandedTags && (
                 <span
-                  className={`${styles["addressTag"]} ${
-                    !GRADIENT_ICON ? styles["gradientTag"] : ""
-                  }`}
+                  className={`${ADDRESS_TAG_CLASS_NAME} tw-bg-[#444] tw-leading-6`}
                 >
                   {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
                   {props.tags.gradientsBalance}
                   {GRADIENT_ICON && (
                     <img
                       src={GRADIENT_ICON}
-                      className={styles["addressTagIcon"]}
+                      className={ADDRESS_TAG_ICON_CLASS_NAME}
                       alt="6529 Gradient"
                     />
                   )}

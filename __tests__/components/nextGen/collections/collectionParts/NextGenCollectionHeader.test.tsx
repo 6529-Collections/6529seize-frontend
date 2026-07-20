@@ -3,6 +3,7 @@ import React from "react";
 import NextGenCollectionHeader, {
   NextGenBackToCollectionPageLink,
 } from "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader";
+import { fetchUrl } from "@/services/6529api";
 
 jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(() => Promise.resolve({})),
@@ -78,5 +79,20 @@ describe("NextGenCollectionHeader", () => {
     expect(screen.getByText(collection.name)).toBeInTheDocument();
     // countdown from allowlist_start should render
     expect(screen.getByText(/Allowlist Starting/)).toBeInTheDocument();
+  });
+
+  it("names the mint link while its details are loading", () => {
+    (fetchUrl as jest.Mock).mockReturnValue(new Promise(() => {}));
+    render(
+      <NextGenCollectionHeader
+        collection={collection}
+        show_links
+        collection_link={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Loading mint details" })
+    ).toBeInTheDocument();
   });
 });

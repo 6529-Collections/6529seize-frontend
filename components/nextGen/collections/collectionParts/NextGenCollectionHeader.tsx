@@ -132,6 +132,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
               props.collection.name
             )}/mint`}
             className={ACTION_LINK_CLASSES}
+            aria-label={collectionLoaded ? undefined : "Loading mint details"}
           >
             {getButtonLabel()}
           </Link>

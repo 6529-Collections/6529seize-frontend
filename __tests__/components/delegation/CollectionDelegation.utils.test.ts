@@ -1,6 +1,7 @@
 import { DELEGATION_ABI } from "@/abis/abis";
 import {
   getDelegationsFromData,
+  getDelegationsFromSuccessfulData,
   getParams,
   getReadParams,
 } from "@/components/delegation/CollectionDelegation.utils";
@@ -52,6 +53,26 @@ describe("CollectionDelegation utility functions", () => {
   it("returns empty when no result present", () => {
     const res = getDelegationsFromData([{ result: null } as any]);
     expect(res).toEqual([]);
+  });
+
+  it("rejects partial multicall results instead of treating them as empty", () => {
+    expect(
+      getDelegationsFromSuccessfulData([
+        { status: "success", result: [[], [], [], []] },
+        { status: "failure" },
+      ])
+    ).toBeUndefined();
+  });
+
+  it("parses a multicall snapshot when every read succeeds", () => {
+    expect(
+      getDelegationsFromSuccessfulData([
+        {
+          status: "success",
+          result: [["0x4"], [NEVER_DATE + 1], [true], [1]],
+        },
+      ])
+    ).toHaveLength(1);
   });
 
   it("marks expired delegations correctly", () => {

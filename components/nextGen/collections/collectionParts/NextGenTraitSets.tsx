@@ -58,8 +58,8 @@ export default function NextGenTraitSets(
 
   const availableTraits: string[] = TRAITS[props.collection.id] ?? [];
 
-  const [selectedTrait, setSelectedTrait] = useState<string>(
-    availableTraits[0]!
+  const [selectedTrait, setSelectedTrait] = useState<string | null>(
+    availableTraits[0] ?? null
   );
 
   const [selectedTraitValues, setSelectedTraitValues] = useState<string[]>([]);
@@ -157,12 +157,12 @@ export default function NextGenTraitSets(
     let content;
     if (!setsLoaded) {
       content = (
-        <div
-          role="status"
+        <output
+          aria-label="Loading ultimate trait sets"
           className="tw-flex tw-min-h-[40vh] tw-items-center tw-justify-center tw-gap-2 tw-py-8 tw-text-sm tw-text-iron-400"
         >
           Loading ultimate trait sets <DotLoader />
-        </div>
+        </output>
       );
     } else if (totalResults == 0) {
       content = (
@@ -192,6 +192,35 @@ export default function NextGenTraitSets(
       );
     }
     return <div className="tw-pt-5">{content}</div>;
+  }
+
+  function printTraitSetResults(selected: string) {
+    if (!setsLoaded) {
+      return (
+        <output
+          aria-label="Loading trait sets"
+          className="tw-flex tw-items-center tw-justify-center tw-gap-2 tw-py-8 tw-text-sm tw-text-iron-400"
+        >
+          Loading trait sets <DotLoader />
+        </output>
+      );
+    }
+    if (sets.length === 0) {
+      return (
+        <div className="tw-py-8 tw-text-sm tw-text-iron-400">
+          No trait sets match the selected filters.
+        </div>
+      );
+    }
+    return sets.map((set) => (
+      <TraitSetAccordion
+        key={`collector-sets-${set.owner}`}
+        collection={props.collection}
+        trait={selected}
+        set={set}
+        values={selectedTraitValues}
+      />
+    ));
   }
 
   return (
@@ -244,9 +273,16 @@ export default function NextGenTraitSets(
       </div>
       <div className="tw-mt-5 tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4">
         {availableTraits.map((trait) => printTraitPill(trait))}
-        {printTraitPill(ULTIMATE)}
+        {availableTraits.length > 0 && printTraitPill(ULTIMATE)}
       </div>
-      {selectedTrait !== ULTIMATE && (
+      {availableTraits.length === 0 && (
+        <div className="tw-mt-5 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-900/50 tw-px-6 tw-py-12 tw-text-center">
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            No trait sets are configured for this collection.
+          </p>
+        </div>
+      )}
+      {selectedTrait !== null && selectedTrait !== ULTIMATE && (
         <div className="tw-mt-5 tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
           <span className="tw-text-sm tw-text-iron-300">
             {traitsLoaded ? (
@@ -267,7 +303,7 @@ export default function NextGenTraitSets(
           </span>
         </div>
       )}
-      {selectedTrait === ULTIMATE && (
+      {selectedTrait === ULTIMATE && availableTraits.length > 0 && (
         <div className="tw-mt-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-4">
           <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white">
             {ULTIMATE} Set
@@ -275,33 +311,14 @@ export default function NextGenTraitSets(
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-300">{`All ${availableTraits.join(", All ")} Types`}</p>
         </div>
       )}
-      {selectedTrait !== ULTIMATE && (
+      {selectedTrait !== null && selectedTrait !== ULTIMATE && (
         <div className="tw-min-h-[50vh] tw-pt-4">
-          {!setsLoaded ? (
-            <div
-              role="status"
-              className="tw-flex tw-items-center tw-justify-center tw-gap-2 tw-py-8 tw-text-sm tw-text-iron-400"
-            >
-              Loading trait sets <DotLoader />
-            </div>
-          ) : sets.length === 0 ? (
-            <div className="tw-py-8 tw-text-sm tw-text-iron-400">
-              No trait sets match the selected filters.
-            </div>
-          ) : (
-            sets.map((s) => (
-              <TraitSetAccordion
-                key={`collector-sets-${s.owner}`}
-                collection={props.collection}
-                trait={selectedTrait}
-                set={s}
-                values={selectedTraitValues}
-              />
-            ))
-          )}
+          {printTraitSetResults(selectedTrait)}
         </div>
       )}
-      {selectedTrait === ULTIMATE && printUltimate()}
+      {selectedTrait === ULTIMATE &&
+        availableTraits.length > 0 &&
+        printUltimate()}
       {!props.preview &&
         totalResults > 0 &&
         totalResults / PAGE_SIZE > 1 &&
@@ -477,8 +494,6 @@ function TraitSetAccordion(
                     <>
                       <Image
                         unoptimized
-                        priority
-                        loading="eager"
                         width={50}
                         height={50}
                         className="tw-h-[50px] tw-w-auto tw-rounded-md tw-object-cover"

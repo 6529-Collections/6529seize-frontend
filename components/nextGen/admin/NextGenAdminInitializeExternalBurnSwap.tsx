@@ -22,7 +22,6 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
-import styles from "./NextGenAdmin.module.css";
 import {
   Button,
   Col,
@@ -263,7 +262,6 @@ export default function NextGenAdminInitializeExternalBurnSwap(
             <Form.Group className="tw-mb-4">
               <Form.Label>Mint Collection ID</Form.Label>
               <Form.Select
-                className={`${styles["formInput"]}`}
                 value={mintCollectionID}
                 onChange={(e) => {
                   setStatus(false);

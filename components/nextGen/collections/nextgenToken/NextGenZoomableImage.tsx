@@ -228,14 +228,10 @@ export default function NextGenZoomableImage(
           loading={"eager"}
           width="0"
           height="0"
+          className={`${
+            imageLoaded ? "tw-block" : "tw-hidden"
+          } tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-object-contain tw-transition-transform tw-duration-200 tw-ease-out`}
           style={{
-            display: imageLoaded ? "block" : "none",
-            height: "auto",
-            width: "auto",
-            maxHeight: "100%",
-            maxWidth: "100%",
-            transition: "transform 0.2s ease-out",
-            objectFit: "contain",
             transform: `scale(${props.zoom_scale})`,
             transformOrigin: objectPosition,
             cursor: cursor,

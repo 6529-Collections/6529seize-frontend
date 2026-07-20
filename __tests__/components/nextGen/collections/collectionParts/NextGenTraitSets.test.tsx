@@ -77,4 +77,22 @@ describe("NextGenTraitSets", () => {
     expect(screen.getByText("Collectors Count: 1")).toBeInTheDocument();
     expect(screen.getByText("alice")).toBeInTheDocument();
   });
+
+  it("shows an empty state without requesting undefined trait sets", async () => {
+    const unsupportedCollection = { id: 999, name: "Unsupported" } as any;
+    (commonApiFetch as jest.Mock).mockReset();
+    (commonApiFetch as jest.Mock).mockResolvedValueOnce([]);
+
+    render(<NextGenTraitSets collection={unsupportedCollection} preview />);
+
+    expect(
+      await screen.findByText(
+        "No trait sets are configured for this collection."
+      )
+    ).toBeInTheDocument();
+    expect(commonApiFetch).toHaveBeenCalledTimes(1);
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "nextgen/collections/999/traits",
+    });
+  });
 });

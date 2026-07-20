@@ -55,8 +55,8 @@ Parent: [NextGen Index](README.md)
 - `Display Center` includes rendered downloads (`1K`, `2K`, `4K`, `8K`, `16K`),
   thumbnail-use variants (`Thumbnail`, `0.5K`), and custom render launch
   options (`Animated|Static`, `Final|OG`, optional custom height).
-- `Provenance` shows explicit loading and no-entry states for both token and
-  collection history.
+- `Provenance` presents token and collection history with the shared activity-row
+  treatment and explicit loading, error/retry, and no-entry states.
 - Download items show `Loading…` while checking source availability, then show
   a file size when available or `Coming Soon` when the output is missing.
 - The on-chain fallback uses the same responsive token-page frame, artwork

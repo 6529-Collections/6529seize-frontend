@@ -74,7 +74,7 @@ export default function NextGenCollectionComponent({
       const pathSegments = globalThis.location.pathname
         .split("/")
         .filter(Boolean);
-      setView(getCollectionView(pathSegments.at(-1) ?? ""));
+      setView(getCollectionView(pathSegments[3] ?? ""));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);

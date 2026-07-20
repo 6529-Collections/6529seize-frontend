@@ -1,14 +1,16 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import NextgenTokenRarity from '@/components/nextGen/collections/nextgenToken/NextGenTokenProperties';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import NextgenTokenRarity from "@/components/nextGen/collections/nextgenToken/NextGenTokenProperties";
 
-jest.mock('react-toggle', () => (props: any) => <input type="checkbox" {...props} />);
+jest.mock("react-toggle", () => (props: any) => (
+  <input type="checkbox" {...props} />
+));
 
 const baseProps = {
-  collection: { name: 'Cool' } as any,
+  collection: { name: "Cool" } as any,
   tokenCount: 100,
   token: {
-    name: 'Token',
+    name: "Token",
     rarity_score_trait_count_normalised: 1,
     rarity_score_normalised: 2,
     rarity_score_trait_count: 3,
@@ -36,8 +38,8 @@ const baseProps = {
   } as any,
   traits: [
     {
-      trait: 'Background',
-      value: 'Red',
+      trait: "Background",
+      value: "Red",
       rarity_score_trait_count_normalised: 0.1,
       rarity_score_normalised: 0.2,
       rarity_score: 0.3,
@@ -65,12 +67,16 @@ function renderComp() {
   return render(<NextgenTokenRarity {...baseProps} />);
 }
 
-describe('NextgenTokenRarity', () => {
+describe("NextgenTokenRarity", () => {
   beforeEach(() => {
     // Mock toLocaleString to ensure English locale for consistent decimal formatting
     const originalToLocaleString = Number.prototype.toLocaleString;
-    jest.spyOn(Number.prototype, 'toLocaleString').mockImplementation(function(this: number, locales?: string | string[], options?: Intl.NumberFormatOptions) {
-      return originalToLocaleString.call(this, 'en-US', options);
+    jest.spyOn(Number.prototype, "toLocaleString").mockImplementation(function (
+      this: number,
+      locales?: string | string[],
+      options?: Intl.NumberFormatOptions
+    ) {
+      return originalToLocaleString.call(this, "en-US", options);
     });
   });
 
@@ -78,18 +84,18 @@ describe('NextgenTokenRarity', () => {
     jest.restoreAllMocks();
   });
 
-  it('shows token count and initial score', () => {
+  it("shows token count and initial score", () => {
     renderComp();
-    expect(screen.getByText('Token Count: 100')).toBeInTheDocument();
-    expect(screen.getByText('1.000')).toBeInTheDocument();
+    expect(screen.getByText(/Token count:\s*100/i)).toBeInTheDocument();
+    expect(screen.getByText("1.000")).toBeInTheDocument();
   });
 
-  it('updates score when toggling trait count', async () => {
+  it("updates score when toggling trait count", async () => {
     const user = userEvent.setup();
     renderComp();
-    const toggle = screen.getByLabelText('Trait Count');
+    const toggle = screen.getByLabelText("Trait Count");
     await user.click(toggle);
     expect(toggle).not.toBeChecked();
-    expect(screen.getByText('2.000')).toBeInTheDocument();
+    expect(screen.getByText("2.000")).toBeInTheDocument();
   });
 });

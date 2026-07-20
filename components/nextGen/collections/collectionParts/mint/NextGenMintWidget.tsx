@@ -430,9 +430,12 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
         </div>
         {alStatus === Status.LIVE &&
           (fetchingProofs ? (
-            <span role="status" className="tw-text-sm tw-text-iron-400">
+            <output
+              aria-label="Loading allowlist proofs"
+              className="tw-text-sm tw-text-iron-400"
+            >
               Loading allowlist proofs <DotLoader />
-            </span>
+            </output>
           ) : (
             proofResponse.map((response, index) => (
               <div

@@ -357,9 +357,12 @@ export default function NextGenMint(props: Readonly<Props>) {
       );
     }
     return (
-      <span role="status" className="tw-text-sm tw-text-iron-400">
+      <output
+        aria-label="Loading mint options"
+        className="tw-text-sm tw-text-iron-400"
+      >
         Loading mint options <DotLoader />
-      </span>
+      </output>
     );
   }
 
