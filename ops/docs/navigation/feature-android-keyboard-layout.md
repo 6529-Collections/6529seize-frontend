@@ -13,7 +13,7 @@ blank space.
 
 - Native app routes rendered through `AppLayout` (`isApp` context).
 - Wave/message stream surfaces that use mobile nav-space calculations.
-- Single-drop reply composer in app mode (Android padding change).
+- Single-drop reply chat in app mode.
 - Create-wave flow in app mode (iOS margin change).
 
 ## Entry Points
@@ -38,8 +38,9 @@ blank space.
 
 - Wave or message composing: bottom navigation hides while typing and returns
   after keyboard close, restoring reserve spacing.
-- Single-drop reply on Android: composer bottom safe-area padding becomes `0`
-  while keyboard is open.
+- Single-drop reply chat on iOS and Android: the full-screen chat panel docks
+  above the keyboard, and composer bottom safe-area padding becomes `0` while
+  the keyboard is open.
 - Create Wave flow on iOS: extra bottom margin used in non-keyboard state is
   removed while typing.
 

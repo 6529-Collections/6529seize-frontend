@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { commonApiFetch } from "@/services/api/common-api";
-import Pagination from "@/components/pagination/Pagination";
-import type { Transaction } from "@/entities/ITransaction";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import Pagination from "@/components/pagination/Pagination";
 import type { NextGenCollection, NextGenLog } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useEffect, useRef, useState } from "react";
 import { NextGenCollectionProvenanceRow } from "../collectionParts/NextGenCollectionProvenance";
 
 interface Props {
@@ -14,26 +14,34 @@ interface Props {
 }
 
 const PAGE_SIZE = 25;
+const ERROR_ACTION_CLASSES =
+  "tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
 export default function NextGenTokenProvenance(props: Readonly<Props>) {
-  const scrollTarget = useRef<HTMLDivElement>(null);
-  const logsScrollTarget = useRef<HTMLDivElement>(null);
+  const scrollTarget = useRef<HTMLElement>(null);
+  const logsScrollTarget = useRef<HTMLElement>(null);
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [transactionsLoaded, setTransactionsLoaded] = useState(false);
+  const [transactionsError, setTransactionsError] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
+  const [transactionsRequestVersion, setTransactionsRequestVersion] =
+    useState(0);
 
   const [logs, setLogs] = useState<NextGenLog[]>([]);
   const [logsLoaded, setLogsLoaded] = useState(false);
+  const [logsError, setLogsError] = useState(false);
   const [logsTotalResults, setLogsTotalResults] = useState(0);
   const [logsPage, setLogsPage] = useState(1);
+  const [logsRequestVersion, setLogsRequestVersion] = useState(0);
 
   useEffect(() => {
     let isCurrentRequest = true;
     setTransactionsLoaded(false);
+    setTransactionsError(false);
 
-    commonApiFetch<{
+    void commonApiFetch<{
       count: number;
       page: number;
       next: unknown;
@@ -52,19 +60,21 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
         console.error("Failed to fetch NextGen token transactions", error);
         setTotalResults(0);
         setTransactions([]);
+        setTransactionsError(true);
         setTransactionsLoaded(true);
       });
 
     return () => {
       isCurrentRequest = false;
     };
-  }, [page, props.token_id]);
+  }, [page, props.token_id, transactionsRequestVersion]);
 
   useEffect(() => {
     let isCurrentRequest = true;
     setLogsLoaded(false);
+    setLogsError(false);
 
-    commonApiFetch<{
+    void commonApiFetch<{
       count: number;
       page: number;
       next: unknown;
@@ -83,98 +93,164 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
         console.error("Failed to fetch NextGen token logs", error);
         setLogsTotalResults(0);
         setLogs([]);
+        setLogsError(true);
         setLogsLoaded(true);
       });
 
     return () => {
       isCurrentRequest = false;
     };
-  }, [logsPage, props.collection.id, props.token_id]);
+  }, [logsPage, logsRequestVersion, props.collection.id, props.token_id]);
 
   return (
-    <>
-      <div
-        className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
-        ref={scrollTarget}
-      >
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <h3>Token Provenance</h3>
-          </div>
-        </div>
-        <div className="tw-overflow-x-auto tw-pt-2">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
-              <tbody>
-                {transactions.map((tr) => (
-                  <LatestActivityRow
-                    tr={tr}
-                    hideNextgenTokenId={true}
-                    key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        {totalResults > PAGE_SIZE && transactionsLoaded && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-6 tw-pt-6 tw-text-center">
-            <Pagination
-              page={page}
-              pageSize={PAGE_SIZE}
-              totalResults={totalResults}
-              setPage={function (newPage: number) {
-                setPage(newPage);
-                if (scrollTarget.current) {
-                  scrollTarget.current.scrollIntoView({
+    <section>
+      <h2 className="tw-mb-5 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+        Provenance
+      </h2>
+      <div className="tw-grid tw-gap-5">
+        <section
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5"
+          ref={scrollTarget}
+        >
+          <h3 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white">
+            Token Provenance
+          </h3>
+          {!transactionsLoaded && (
+            <output
+              aria-label="Loading token provenance"
+              className="tw-block tw-py-5 tw-text-iron-400"
+            >
+              Loading token provenance…
+            </output>
+          )}
+          {transactionsError && (
+            <div
+              role="alert"
+              className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-py-5 tw-text-error"
+            >
+              <span>Unable to load token provenance.</span>
+              <button
+                type="button"
+                className={ERROR_ACTION_CLASSES}
+                onClick={() =>
+                  setTransactionsRequestVersion((value) => value + 1)
+                }
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          {transactionsLoaded &&
+            !transactionsError &&
+            transactions.length === 0 && (
+              <p className="tw-mb-0 tw-py-5 tw-text-iron-400">
+                No token provenance entries found.
+              </p>
+            )}
+          {transactionsLoaded &&
+            !transactionsError &&
+            transactions.length > 0 && (
+              <div className="tw-overflow-x-auto">
+                <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
+                  <tbody>
+                    {transactions.map((transaction) => (
+                      <LatestActivityRow
+                        tr={transaction}
+                        hideNextgenTokenId
+                        key={`${transaction.from_address}-${transaction.to_address}-${transaction.transaction}-${transaction.token_id}`}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          {totalResults > PAGE_SIZE &&
+            transactionsLoaded &&
+            !transactionsError && (
+              <div className="tw-pt-5 tw-text-center">
+                <Pagination
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  totalResults={totalResults}
+                  setPage={(newPage: number) => {
+                    setPage(newPage);
+                    scrollTarget.current?.scrollIntoView({
+                      behavior: "smooth",
+                    });
+                  }}
+                />
+              </div>
+            )}
+        </section>
+
+        <section
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5"
+          ref={logsScrollTarget}
+        >
+          <h3 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white">
+            Collection Provenance
+          </h3>
+          {!logsLoaded && (
+            <output
+              aria-label="Loading collection provenance"
+              className="tw-block tw-py-5 tw-text-iron-400"
+            >
+              Loading collection provenance…
+            </output>
+          )}
+          {logsError && (
+            <div
+              role="alert"
+              className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-py-5 tw-text-error"
+            >
+              <span>Unable to load collection provenance.</span>
+              <button
+                type="button"
+                className={ERROR_ACTION_CLASSES}
+                onClick={() => setLogsRequestVersion((value) => value + 1)}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          {logsLoaded && !logsError && logs.length === 0 && (
+            <p className="tw-mb-0 tw-py-5 tw-text-iron-400">
+              No collection provenance entries found.
+            </p>
+          )}
+          {logsLoaded && !logsError && logs.length > 0 && (
+            <div className="tw-overflow-x-auto">
+              <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
+                <tbody>
+                  {logs.map((log) => (
+                    <NextGenCollectionProvenanceRow
+                      collection={props.collection}
+                      log={log}
+                      key={`${log.block}-${log.id}`}
+                      disable_link
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {logsTotalResults > PAGE_SIZE && logsLoaded && !logsError && (
+            <div className="tw-pt-5 tw-text-center">
+              <Pagination
+                page={logsPage}
+                pageSize={PAGE_SIZE}
+                totalResults={logsTotalResults}
+                setPage={(newPage: number) => {
+                  setLogsPage(newPage);
+                  logsScrollTarget.current?.scrollIntoView({
                     behavior: "smooth",
                   });
-                }
-              }}
-            />
-          </div>
-        )}
-      </div>
-      <div
-        className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 tw-pt-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
-        ref={logsScrollTarget}
-      >
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <h3>Collection Provenance</h3>
-          </div>
-        </div>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            {logs.map((log, index) => (
-              <NextGenCollectionProvenanceRow
-                collection={props.collection}
-                log={log}
-                key={`${log.block}-${log.id}`}
-                disable_link={true}
-                odd={index % 2 !== 0}
+                }}
               />
-            ))}
-          </div>
-        </div>
-        {logsTotalResults > PAGE_SIZE && logsLoaded && (
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-6 tw-pt-6 tw-text-center">
-            <Pagination
-              page={logsPage}
-              pageSize={PAGE_SIZE}
-              totalResults={logsTotalResults}
-              setPage={function (newPage: number) {
-                setLogsPage(newPage);
-                if (logsScrollTarget.current) {
-                  logsScrollTarget.current.scrollIntoView({
-                    behavior: "smooth",
-                  });
-                }
-              }}
-            />
-          </div>
-        )}
+            </div>
+          )}
+        </section>
       </div>
-    </>
+    </section>
   );
 }

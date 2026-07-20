@@ -1,15 +1,16 @@
 import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
+import { NEXTGEN_PAGE_FRAME_CLASSNAME } from "@/components/nextGen/collections/NextGenPageFrame";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildNextgenCollectionPageJsonLd } from "@/lib/structured-data/nextgen";
-import styles from "@/styles/Home.module.css";
-import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   fetchCollection,
   getCollectionView,
+  getNextgenCollectionDocumentTitle,
+  getNextgenCollectionSocialCardTitle,
   getNextgenCollectionMetadata,
 } from "../page-utils";
 
@@ -25,13 +26,16 @@ export async function generateMetadata({
     return getAppMetadata({ title: "NextGen" });
   }
   const resolvedView = getCollectionView(view?.[0] ?? "");
-  let title = resolvedCollection.name;
-  if (resolvedView !== NextgenCollectionView.OVERVIEW) {
-    title += ` | ${resolvedView}`;
-  }
+  const title = getNextgenCollectionSocialCardTitle(
+    resolvedCollection.name,
+    resolvedView
+  );
   return getNextgenCollectionMetadata({
     collection: resolvedCollection,
-    documentTitle: `${title} | NextGen`,
+    documentTitle: getNextgenCollectionDocumentTitle(
+      resolvedCollection.name,
+      resolvedView
+    ),
     title,
   });
 }
@@ -52,7 +56,7 @@ export default async function NextGenCollectionPage({
     view?.[0] ? `/${view[0]}` : ""
   }`;
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className={NEXTGEN_PAGE_FRAME_CLASSNAME}>
       <JsonLdScript
         data={buildNextgenCollectionPageJsonLd({
           collection: resolvedCollection,

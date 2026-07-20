@@ -11,7 +11,6 @@ import type { TextNode } from "lexical";
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -29,6 +28,7 @@ import {
   useIdentitiesSearch,
 } from "@/hooks/useIdentitiesSearch";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
+import { useDraftMentionSearchScope } from "./MentionSearchScopeContext";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -92,19 +92,10 @@ const AtSignMentionsRegexAliasRegex = new RegExp(
 
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
-// Default: keep mentions above single-drop mobile chat menus/dialogs while
-// below global modal layers (z-1020, within the 1000-1200 modal band).
-// Elevated: the editor lives inside a high z-index modal shell (the
-// create-wave modal is z-9999), where the typeahead anchor — appended to
-// document.body, a sibling of that modal — would otherwise render behind it.
-// z-[10000] lifts just the active mention menu above that shell.
-const DEFAULT_MENTION_Z_INDEX = 1020;
+// Keep mentions above single-drop mobile chat menus/dialogs while below global modal layers.
 const TYPEAHEAD_ANCHOR_CLASS_NAME = "tailwind-scope tw-z-[1020]";
-const TYPEAHEAD_ANCHOR_CLASS_NAME_ELEVATED = "tailwind-scope tw-z-[10000]";
 const TYPEAHEAD_MENU_WRAPPER_CLASS_NAME =
   "tw-absolute -tw-top-12 tw-left-0 tw-z-[1020]";
-const TYPEAHEAD_MENU_WRAPPER_CLASS_NAME_ELEVATED =
-  "tw-absolute -tw-top-12 tw-left-0 tw-z-[10000]";
 
 function checkForAtSignMentions(
   text: string,
@@ -182,37 +173,10 @@ const NewMentionsPlugin = forwardRef<
   }
 >(({ waveId, onSelect, canMentionAll = false, onSelectGroupMention }, ref) => {
   const [editor] = useLexicalComposerContext();
-  // The typeahead anchor is appended to document.body. When the editor lives
-  // inside a stacking context that outranks the default mention band — e.g.
-  // the create-wave modal at z-9999, a body sibling — that shell paints over
-  // the body-level menu. Detect such a host and lift only the active menu
-  // above it (default behaviour is otherwise unchanged).
-  const [elevated, setElevated] = useState(false);
-  useEffect(() => {
-    return editor.registerRootListener((rootElement) => {
-      if (!rootElement) {
-        return;
-      }
-      let node: HTMLElement | null = rootElement.parentElement;
-      let hostZIndex = 0;
-      while (node && node !== document.body) {
-        const z = Number.parseInt(globalThis.getComputedStyle(node).zIndex, 10);
-        if (!Number.isNaN(z)) {
-          hostZIndex = Math.max(hostZIndex, z);
-        }
-        node = node.parentElement;
-      }
-      setElevated(hostZIndex > DEFAULT_MENTION_Z_INDEX);
-    });
-  }, [editor]);
-  const anchorClassName = elevated
-    ? TYPEAHEAD_ANCHOR_CLASS_NAME_ELEVATED
-    : TYPEAHEAD_ANCHOR_CLASS_NAME;
-  const menuWrapperClassName = elevated
-    ? TYPEAHEAD_MENU_WRAPPER_CLASS_NAME_ELEVATED
-    : TYPEAHEAD_MENU_WRAPPER_CLASS_NAME;
   const [queryString, setQueryString] = useState<string | null>(null);
+  const draftScope = useDraftMentionSearchScope();
   const { identities } = useIdentitiesSearch({
+    draftScope,
     handle: queryString ?? "",
     waveId,
   });
@@ -325,14 +289,14 @@ const NewMentionsPlugin = forwardRef<
         options={options}
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
-        anchorClassName={anchorClassName}
+        anchorClassName={TYPEAHEAD_ANCHOR_CLASS_NAME}
         menuRenderFn={(
           anchorElementRef,
           { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
         ) => {
           return anchorElementRef.current && options.length
             ? ReactDOM.createPortal(
-                <div className={menuWrapperClassName}>
+                <div className={TYPEAHEAD_MENU_WRAPPER_CLASS_NAME}>
                   <MentionsTypeaheadMenu
                     selectedIndex={selectedIndex}
                     options={options}

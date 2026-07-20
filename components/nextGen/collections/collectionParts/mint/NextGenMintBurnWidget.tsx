@@ -2,7 +2,6 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
-import styles from "@/components/nextGen/collections/NextGen.module.css";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -24,13 +23,16 @@ import { areEqualAddresses, getNetworkName } from "@/helpers/Helpers";
 import { fetchOwnerNfts } from "@/hooks/useAlchemyNftQueries";
 import { fetchUrl } from "@/services/6529api";
 import type { OwnerNft } from "@/services/alchemy/types";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Tooltip } from "react-tooltip";
 import { useChainId, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
-import { NextGenMintErrors, NextGenMintingFor } from "./NextGenMintShared";
+import {
+  MINT_ACTION_BUTTON_CLASSNAME,
+  MINT_SELECT_CLASSNAME,
+  MintInfoTooltip,
+  NextGenMintErrors,
+  NextGenMintingFor,
+} from "./NextGenMintShared";
 
 interface Props {
   collection: NextGenCollection;
@@ -266,76 +268,72 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
   return (
     <div>
       <form
+        className="tw-grid tw-gap-4"
         onChange={() => {
           setErrors([]);
           setIsMinting(false);
         }}
       >
-        <div>
-          <div>
-            <u>Burn Details</u>
-          </div>
-          <div>
-            <table className="tw-mb-0 tw-w-full">
-              <tbody>
-                <tr>
-                  <td>Contract</td>
-                  <td>{props.collection_merkle.burn_collection}</td>
-                </tr>
-                {!!props.collection_merkle.burn_collection_id && (
-                  <tr>
-                    <td>Collection</td>
-                    <td>{props.collection_merkle.burn_collection_id}</td>
-                  </tr>
-                )}
-                {props.collection_merkle.max_token_index > 0 && (
-                  <tr>
-                    <td>Tokens</td>
-                    <td>
-                      #{props.collection_merkle.min_token_index} - #
-                      {props.collection_merkle.max_token_index}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <section className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-black/20 tw-p-3">
+          <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-white">
+            Burn Details
+          </h3>
+          <dl className="tw-m-0 tw-grid tw-gap-3">
+            <div className="tw-grid tw-gap-1 sm:tw-grid-cols-[8rem_minmax(0,1fr)]">
+              <dt className="tw-text-sm tw-text-iron-400">Contract</dt>
+              <dd className="tw-m-0 tw-break-all tw-text-sm tw-text-white">
+                {props.collection_merkle.burn_collection}
+              </dd>
+            </div>
+            {!!props.collection_merkle.burn_collection_id && (
+              <div className="tw-grid tw-gap-1 sm:tw-grid-cols-[8rem_minmax(0,1fr)]">
+                <dt className="tw-text-sm tw-text-iron-400">Collection</dt>
+                <dd className="tw-m-0 tw-text-sm tw-text-white">
+                  {props.collection_merkle.burn_collection_id}
+                </dd>
+              </div>
+            )}
+            {props.collection_merkle.max_token_index > 0 && (
+              <div className="tw-grid tw-gap-1 sm:tw-grid-cols-[8rem_minmax(0,1fr)]">
+                <dt className="tw-text-sm tw-text-iron-400">Tokens</dt>
+                <dd className="tw-m-0 tw-text-sm tw-text-white">
+                  #{props.collection_merkle.min_token_index} – #
+                  {props.collection_merkle.max_token_index}
+                </dd>
+              </div>
+            )}
+          </dl>
+        </section>
         <NextGenMintingFor
           title="Burn and Mint For"
           delegators={props.delegators}
           mintForAddress={mintForAddress}
           setMintForAddress={setMintForAddress}
         />
-        <div className="tw-py-1">
-          <label className="tw-flex tw-items-center">
-            Mint To
-            <FontAwesomeIcon
-              className={styles["infoIcon"]}
-              icon={faInfoCircle}
-              data-tooltip-id={`mint-to-info-${props.collection.id}`}
-            ></FontAwesomeIcon>
-            <Tooltip
+        <div className="tw-grid tw-gap-1">
+          <div className="tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-iron-300">
+            <span>Mint To</span>
+            <MintInfoTooltip
               id={`mint-to-info-${props.collection.id}`}
+              label="Burn-to-mint recipient help"
               content="In burns to mint, the token is minted to the address that burns the token."
-              place="top"
-              style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
-              }}
             />
-          </label>
-          <div>{mintForAddress}</div>
+          </div>
+          <div className="tw-break-all tw-text-base tw-text-white">
+            {mintForAddress || "—"}
+          </div>
         </div>
-        <div className="tw-py-1">
-          <label htmlFor={`burn-token-${props.collection.id}`}>
-            <span>Select token from Burn collection</span>
+        <div className="tw-grid tw-gap-2">
+          <label
+            htmlFor={`burn-token-${props.collection.id}`}
+            className="tw-text-sm tw-font-medium tw-text-iron-300"
+          >
+            Select token from Burn collection
           </label>
           <select
             id={`burn-token-${props.collection.id}`}
             disabled={!tokensOwnedForBurnAddressLoaded}
-            className={`${styles["mintSelect"]} tw-form-select tw-block tw-w-full tw-rounded-none`}
+            className={MINT_SELECT_CLASSNAME}
             value={tokenId}
             onChange={(e) => setTokenId(e.currentTarget.value)}
           >
@@ -353,10 +351,10 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
             ))}
           </select>
         </div>
-        <div className="tw-mb-3 tw-pt-4">
+        <div>
           <button
             type="button"
-            className={styles["mintBtn"]}
+            className={MINT_ACTION_BUTTON_CLASSNAME}
             disabled={disableMint()}
             onClick={handleMintClick}
           >

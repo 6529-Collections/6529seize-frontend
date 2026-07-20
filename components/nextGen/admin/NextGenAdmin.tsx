@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import styles from "./NextGenAdmin.module.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Col, Container, Row } from "./NextGenAdminShared";
 import {
@@ -85,6 +84,12 @@ enum ArtistFocus {
   SIGN_COLLECTION = "sign_collection",
   PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES = "propose_primary_addresses_and_percentages",
   PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES = "propose_secondary_addresses_and_percentages",
+}
+
+function getAdminTabClassName(active: boolean): string {
+  return active
+    ? "tw-cursor-pointer tw-scale-[1.01] tw-text-white"
+    : "tw-cursor-pointer tw-text-iron-400 hover:tw-scale-[1.01] hover:tw-text-white";
 }
 
 export function printAdminErrors(errors: string[]) {
@@ -227,11 +232,7 @@ export default function NextGenAdmin() {
       <Container className="!tw-p-0">
         <Row className="tw-pb-2 tw-pt-2">
           <Col
-            className={
-              focus === Focus.GLOBAL
-                ? styles["tabLeftActive"]
-                : styles["tabLeft"]
-            }
+            className={getAdminTabClassName(focus === Focus.GLOBAL)}
             onClick={() => setFocus(Focus.GLOBAL)}
           >
             <b>Global</b>
@@ -239,11 +240,7 @@ export default function NextGenAdmin() {
         </Row>
         <Row className="tw-pb-2 tw-pt-2">
           <Col
-            className={
-              focus === Focus.COLLECTION
-                ? styles["tabLeftActive"]
-                : styles["tabLeft"]
-            }
+            className={getAdminTabClassName(focus === Focus.COLLECTION)}
             onClick={() => setFocus(Focus.COLLECTION)}
           >
             <b>Collection</b>
@@ -251,11 +248,7 @@ export default function NextGenAdmin() {
         </Row>
         <Row className="tw-pb-2 tw-pt-2">
           <Col
-            className={
-              focus === Focus.ARTIST
-                ? styles["tabLeftActive"]
-                : styles["tabLeft"]
-            }
+            className={getAdminTabClassName(focus === Focus.ARTIST)}
             onClick={() => setFocus(Focus.ARTIST)}
           >
             <b>Artist</b>
@@ -284,8 +277,7 @@ export default function NextGenAdmin() {
 
   function printCreateCollection() {
     return (
-      (isGlobalAdmin() ||
-        createCollectionFunctionAdmin.data === true) && (
+      (isGlobalAdmin() || createCollectionFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.CREATE_COLLECTION)}
@@ -298,8 +290,7 @@ export default function NextGenAdmin() {
 
   function printAirdropTokens() {
     return (
-      (isGlobalAdmin() ||
-        airdropTokensFunctionAdmin.data === true) && (
+      (isGlobalAdmin() || airdropTokensFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.AIRDROP_TOKENS)}
@@ -326,8 +317,7 @@ export default function NextGenAdmin() {
 
   function printSetFinalSupply() {
     return (
-      (isGlobalAdmin() ||
-        setFinalSupplyFunctionAdmin.data === true) && (
+      (isGlobalAdmin() || setFinalSupplyFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.SET_FINAL_SUPPLY)}
@@ -340,8 +330,7 @@ export default function NextGenAdmin() {
 
   function printInitBurn() {
     return (
-      (isGlobalAdmin() ||
-        initializeBurnFunctionAdmin.data === true) && (
+      (isGlobalAdmin() || initializeBurnFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.INITIALIZE_BURN)}
@@ -370,8 +359,7 @@ export default function NextGenAdmin() {
 
   function printMintAuction() {
     return (
-      (isGlobalAdmin() ||
-        mintAndAuctionFunctionAdmin.data === true) && (
+      (isGlobalAdmin() || mintAndAuctionFunctionAdmin.data === true) && (
         <Button
           className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
           onClick={() => setGlobalFocus(GlobalFocus.MINT_AND_AUCTION)}
@@ -672,8 +660,7 @@ export default function NextGenAdmin() {
             </Row>
           </>
         )}
-        {(isGlobalAdmin() ||
-          addRandomizerFunctionAdmin.data === true) && (
+        {(isGlobalAdmin() || addRandomizerFunctionAdmin.data === true) && (
           <>
             <Row className="tw-pt-6">
               <Col xs={12}>

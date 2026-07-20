@@ -10,6 +10,7 @@ import { buildNextgenTokenPageJsonLd } from "@/lib/structured-data/nextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getNextgenTitle } from "../../../title-utils";
 import NextGenTokenPageClient from "./NextGenTokenPageClient";
 import { fetchTokenData, getContentView } from "./page-utils";
 
@@ -53,8 +54,7 @@ export async function generateMetadata({
   const displayId = data.token?.normalised_id;
   const baseTitle =
     data.token?.name ?? `${data.collection.name} - #${data.tokenId}`;
-  const title =
-    viewDisplay.length > 0 ? `${baseTitle} | ${viewDisplay}` : baseTitle;
+  const title = getNextgenTitle(viewDisplay, baseTitle);
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title,

@@ -10,6 +10,7 @@ import { profileAndConsolidationsToProfileMin } from "@/helpers/ProfileHelpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateDropType } from "@/components/drops/create/types";
 import { CreateDropScreenType } from "@/components/drops/create/utils/CreateDropWrapper";
+import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 export interface CreateWaveDescriptionHandles {
   requestDrop: () => CreateDropConfig | null;
   getDropSnapshot: () => CreateDropConfig | null;
@@ -26,6 +27,7 @@ interface CreateWaveDescriptionProps {
   readonly wave: CreateWaveDescriptionWaveProps;
   readonly submitting: boolean;
   readonly showDropError: boolean;
+  readonly visibilityGroupId: string | null;
   readonly onHaveDropToSubmitChange: (canSubmit: boolean) => void;
 }
 
@@ -34,7 +36,14 @@ const CreateWaveDescription = forwardRef<
   CreateWaveDescriptionProps
 >(
   (
-    { profile, submitting, showDropError, wave, onHaveDropToSubmitChange },
+    {
+      profile,
+      submitting,
+      showDropError,
+      visibilityGroupId,
+      wave,
+      onHaveDropToSubmitChange,
+    },
     ref
   ) => {
     const dropEditorRef = useRef<DropEditorHandles | null>(null);
@@ -82,24 +91,26 @@ const CreateWaveDescription = forwardRef<
             desktopZIndex={10000}
             mobileZIndexClassName="tw-z-[10000]"
           >
-            <DropEditor
-              ref={dropEditorRef}
-              waveId={null}
-              profile={profileMin}
-              quotedDrop={null}
-              // The step embeds the editor in the page flow; the MOBILE
-              // branch is a modal sheet and must never be used here.
-              forceScreenType={CreateDropScreenType.DESKTOP}
-              type={CreateDropType.DROP}
-              loading={submitting}
-              showSubmit={false}
-              submitOnEnter={false}
-              dropEditorRefreshKey={1}
-              showDropError={showDropError}
-              wave={wave}
-              onSubmitDrop={() => {}}
-              onCanSubmitChange={onHaveDropToSubmitChange}
-            />
+            <MentionSearchScopeProvider visibilityGroupId={visibilityGroupId}>
+              <DropEditor
+                ref={dropEditorRef}
+                waveId={null}
+                profile={profileMin}
+                quotedDrop={null}
+                // The step embeds the editor in the page flow; the MOBILE
+                // branch is a modal sheet and must never be used here.
+                forceScreenType={CreateDropScreenType.DESKTOP}
+                type={CreateDropType.DROP}
+                loading={submitting}
+                showSubmit={false}
+                submitOnEnter={false}
+                dropEditorRefreshKey={1}
+                showDropError={showDropError}
+                wave={wave}
+                onSubmitDrop={() => {}}
+                onCanSubmitChange={onHaveDropToSubmitChange}
+              />
+            </MentionSearchScopeProvider>
           </CreateDropEmojiPickerLayerProvider>
         </div>
       </div>

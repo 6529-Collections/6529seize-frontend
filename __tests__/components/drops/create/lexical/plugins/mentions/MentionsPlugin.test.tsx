@@ -3,20 +3,10 @@ import { render, act } from "@testing-library/react";
 import NewMentionsPlugin, {
   MentionTypeaheadOption,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 
-// The root element the mocked editor hands to registerRootListener; tests set
-// it to control the elevation-detection ancestor walk.
-let mockRootElement: HTMLElement | null = null;
 jest.mock("@lexical/react/LexicalComposerContext", () => ({
-  useLexicalComposerContext: () => [
-    {
-      update: (fn: any) => fn(),
-      registerRootListener: (cb: (root: HTMLElement | null) => void) => {
-        cb(mockRootElement);
-        return () => {};
-      },
-    },
-  ],
+  useLexicalComposerContext: () => [{ update: (fn: any) => fn() }],
 }));
 
 let capturedProps: any;
@@ -57,7 +47,7 @@ const {
 
 describe("MentionsPlugin", () => {
   beforeEach(() => {
-    mockRootElement = null;
+    jest.clearAllMocks();
   });
 
   it("builds options from identities and exposes open state", () => {
@@ -80,36 +70,6 @@ describe("MentionsPlugin", () => {
     expect(ref.current.isMentionsOpen()).toBe(false);
   });
 
-  it("elevates the anchor above a high z-index modal host", () => {
-    (useIdentitiesSearch as jest.Mock).mockReturnValue({
-      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
-    });
-    // Editor mounted inside a z-9999 shell (the create-wave modal); the
-    // typeahead must render above it rather than behind it.
-    const shell = document.createElement("div");
-    shell.style.zIndex = "9999";
-    const root = document.createElement("div");
-    shell.appendChild(root);
-    document.body.appendChild(shell);
-    mockRootElement = root;
-    // jsdom's getComputedStyle does not resolve z-index; surface the inline
-    // value the detection walk reads (in the browser this comes from the
-    // modal's Tailwind class).
-    const gcs = jest
-      .spyOn(window, "getComputedStyle")
-      .mockImplementation(
-        (el) => ({ zIndex: (el as HTMLElement).style.zIndex || "auto" }) as any
-      );
-
-    render(
-      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
-    );
-    expect(capturedProps.anchorClassName).toBe("tailwind-scope tw-z-[10000]");
-
-    gcs.mockRestore();
-    document.body.removeChild(shell);
-  });
-
   it("calls onSelect with mention info", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
       identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
@@ -129,6 +89,43 @@ describe("MentionsPlugin", () => {
       handle_in_content: option.handle,
     });
     expect(close).toHaveBeenCalled();
+  });
+
+  it("passes the draft visibility group to identity search", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <MentionSearchScopeProvider visibilityGroupId="visibility-group">
+        <NewMentionsPlugin
+          waveId={null}
+          onSelect={jest.fn()}
+          ref={createRef()}
+        />
+      </MentionSearchScopeProvider>
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: {
+        kind: "group",
+        visibilityGroupId: "visibility-group",
+      },
+      handle: "",
+      waveId: null,
+    });
+  });
+
+  it("uses an explicit disabled draft scope without a provider", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <NewMentionsPlugin waveId={null} onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: { kind: "disabled" },
+      handle: "",
+      waveId: null,
+    });
   });
 
   it("renders the menu wrapper on the raised typeahead layer", () => {

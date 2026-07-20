@@ -9,7 +9,7 @@ export default function HomePageTextSection() {
       </div>
 
       <div className="tw-relative tw-z-10 tw-py-4 md:tw-py-8">
-        <div className="tw-mx-auto tw-grid tw-grid-cols-1 md:tw-max-w-2xl lg:tw-max-w-none lg:tw-grid-cols-12 lg:tw-gap-x-8 tw-gap-y-1 md:tw-gap-y-2 lg:tw-gap-y-0 xl:tw-gap-x-12">
+        <div className="tw-mx-auto tw-grid tw-grid-cols-1 tw-gap-y-1 md:tw-max-w-2xl md:tw-gap-y-2 lg:tw-max-w-none lg:tw-grid-cols-12 lg:tw-gap-x-8 lg:tw-gap-y-0 xl:tw-gap-x-12">
           <header className="md:tw-text-center lg:tw-col-span-7 lg:tw-row-start-1 lg:tw-text-left">
             <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl">
               6529 is a network society
@@ -17,13 +17,13 @@ export default function HomePageTextSection() {
           </header>
 
           <div className="tw-flex tw-flex-col md:tw-text-center lg:tw-col-span-7 lg:tw-row-start-2 lg:tw-text-left xl:tw-pr-8">
-            <p className="tw-mb-0 tw-text-lg tw-text-balance lg:tw-text-pretty tw-font-normal tw-text-iron-300 sm:tw-text-xl">
+            <p className="tw-mb-0 tw-text-balance tw-text-lg tw-font-normal tw-text-iron-300 sm:tw-text-xl lg:tw-text-pretty">
               a decentralized, permissionless global network that funds, builds,
               and coordinates public-goods work across art, science, culture,
               and technology.
             </p>
 
-            <p className="tw-mb-0 tw-mt-6 tw-text-xs tw-uppercase tw-text-pretty tw-tracking-widest tw-text-iron-400 md:tw-mt-8 lg:tw-whitespace-nowrap">
+            <p className="tw-mb-0 tw-mt-6 tw-text-pretty tw-text-xs tw-uppercase tw-tracking-widest tw-text-iron-400 md:tw-mt-8 lg:tw-whitespace-nowrap">
               The long-term goal is nation-scale positive impact.
             </p>
           </div>
@@ -38,7 +38,7 @@ export default function HomePageTextSection() {
                 aria-hidden="true"
               />
               <blockquote className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/70 tw-bg-iron-950/80 tw-px-4 tw-py-5 tw-shadow-lg tw-backdrop-blur-xl">
-                <p className="tw-mb-0 tw-font-mono tw-text-sm tw-leading-relaxed tw-text-iron-400 md:tw-text-center lg:tw-text-left">
+                <p className="tw-mb-0 tw-mt-0 tw-font-mono tw-text-sm tw-leading-relaxed tw-text-iron-400 md:tw-text-center lg:tw-text-left">
                   We're extending what Bitcoin and Ethereum proved for money and
                   code to human coordination itself, so any activity can be
                   organized permissionlessly.

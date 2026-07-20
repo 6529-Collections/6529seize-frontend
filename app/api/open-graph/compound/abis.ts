@@ -8,7 +8,7 @@ export const cTokenAbi = parseAbi([
   "function totalBorrows() view returns (uint256)",
   "function totalReserves() view returns (uint256)",
   "function totalSupply() view returns (uint256)",
-  "function cash() view returns (uint256)",
+  "function getCash() view returns (uint256)",
   "function reserveFactorMantissa() view returns (uint256)",
   "function supplyRatePerBlock() view returns (uint256)",
   "function borrowRatePerBlock() view returns (uint256)",
@@ -38,13 +38,14 @@ export const cometAbi = parseAbi([
   "function symbol() view returns (string)",
   "function decimals() view returns (uint8)",
   "function baseToken() view returns (address)",
-  "function totalsBasic() view returns (uint64 baseSupplyIndex, uint64 baseBorrowIndex, uint64 trackingSupplyIndex, uint64 trackingBorrowIndex, uint128 totalSupplyBase, uint128 totalBorrowBase, uint64 lastAccrualTime)",
+  "function totalsBasic() view returns (uint64 baseSupplyIndex, uint64 baseBorrowIndex, uint64 trackingSupplyIndex, uint64 trackingBorrowIndex, uint104 totalSupplyBase, uint104 totalBorrowBase, uint40 lastAccrualTime, uint8 pauseFlags)",
   "function getUtilization() view returns (uint256)",
   "function getSupplyRate(uint256 utilization) view returns (uint64)",
   "function getBorrowRate(uint256 utilization) view returns (uint64)",
   "function numAssets() view returns (uint8)",
   "function getAssetInfo(uint8) view returns (uint8 offset, address asset, address priceFeed, uint64 scale, uint64 borrowCollateralFactor, uint64 liquidateCollateralFactor, uint64 liquidationFactor, uint128 supplyCap)",
-  "function priceFeed() view returns (address)",
+  "function baseTokenPriceFeed() view returns (address)",
+  "function getPrice(address priceFeed) view returns (uint256)",
   "function balanceOf(address) view returns (uint256)",
   "function borrowBalanceOf(address) view returns (uint256)",
   "function collateralBalanceOf(address, address) view returns (uint128)",
@@ -53,9 +54,4 @@ export const cometAbi = parseAbi([
   "event AbsorbCollateral(address indexed absorber, address indexed borrower, address indexed asset, uint256 collateralAbsorbed, uint256 usdValue)",
   "event AbsorbDebt(address indexed absorber, address indexed borrower, uint256 basePaidOut, uint256 usdValue)",
   "event BuyCollateral(address indexed buyer, address indexed asset, uint256 baseAmount, uint256 collateralAmount)",
-]);
-
-export const priceFeedAbi = parseAbi([
-  "function getPrice(address) view returns (uint256)",
-  "function decimals() view returns (uint8)",
 ]);

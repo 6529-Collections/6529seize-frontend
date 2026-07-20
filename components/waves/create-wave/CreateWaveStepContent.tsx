@@ -197,6 +197,7 @@ export default function CreateWaveStepContent({
           profile={profile}
           submitting={submitting}
           showDropError={showDropError}
+          visibilityGroupId={config.groups.canView}
           wave={{
             name: config.overview.name,
             image: config.overview.image

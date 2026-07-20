@@ -16,7 +16,9 @@ jest.mock(
   "@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance",
   () => ({
     NextGenCollectionProvenanceRow: (props: any) => (
-      <div data-testid="log-row">{props.log.id}</div>
+      <tr data-testid="log-row">
+        <td>{props.log.id}</td>
+      </tr>
     ),
   })
 );
@@ -94,6 +96,19 @@ describe("NextGenTokenProvenance", () => {
     });
   });
 
+  it("announces token and collection loading states", () => {
+    (commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+    render(<NextGenTokenProvenance collection={collection} token_id={7} />);
+
+    expect(screen.getByLabelText("Loading token provenance").tagName).toBe(
+      "OUTPUT"
+    );
+    expect(screen.getByLabelText("Loading collection provenance").tagName).toBe(
+      "OUTPUT"
+    );
+  });
+
   it("ignores stale transaction and log responses after the token changes", async () => {
     const resolvers: Record<string, (value: any) => void> = {};
     (commonApiFetch as jest.Mock).mockImplementation(
@@ -142,5 +157,30 @@ describe("NextGenTokenProvenance", () => {
     expect(screen.queryByText("l7")).not.toBeInTheDocument();
     expect(screen.getByText("t8")).toBeInTheDocument();
     expect(screen.getByText("l8")).toBeInTheDocument();
+  });
+
+  it("shows retryable token and collection errors instead of empty states", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+    (commonApiFetch as jest.Mock).mockRejectedValue(new Error("offline"));
+
+    render(<NextGenTokenProvenance collection={collection} token_id={7} />);
+
+    expect(
+      await screen.findByText("Unable to load token provenance.")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("Unable to load collection provenance.")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("No token provenance entries found.")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("No collection provenance entries found.")
+    ).not.toBeInTheDocument();
+
+    (commonApiFetch as jest.Mock).mockResolvedValue({ count: 1, data: [log] });
+    await userEvent.click(screen.getAllByRole("button", { name: "Retry" })[1]!);
+    expect(await screen.findByTestId("log-row")).toBeInTheDocument();
+    consoleError.mockRestore();
   });
 });

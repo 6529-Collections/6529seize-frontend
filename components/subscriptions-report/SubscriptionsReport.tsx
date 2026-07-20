@@ -23,6 +23,7 @@ import type { MemeSeason } from "@/entities/ISeason";
 import type { SeasonMintRow } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   getCardsRemainingUntilEndOf,
+  getMintTimelineDetails,
   getUpcomingMintsAcrossSeasons,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Paginated } from "@/components/pagination/Pagination";
@@ -49,19 +50,47 @@ type MemeCalendarCurrentResponse = {
   readonly current: {
     readonly mint_number: number;
   } | null;
+  readonly next?: {
+    readonly mint_number: number;
+    readonly mint_date: string;
+  };
 };
 
-function getCurrentLiveMintNumber(
-  currentMint: MemeCalendarCurrentResponse
+function getUtcDateKey(value: string): string | null {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+}
+
+function getReportActiveMintNumber(
+  currentMint: MemeCalendarCurrentResponse,
+  now: Date = new Date()
 ): number | null {
-  if (currentMint.status !== "live") {
+  if (currentMint.status === "live") {
+    return normalizeMemeTokenId(currentMint.current?.mint_number);
+  }
+
+  const nextMint = currentMint.next;
+  const todayUtc = now.toISOString().slice(0, 10);
+  return currentMint.status === "none" &&
+    nextMint &&
+    getUtcDateKey(nextMint.mint_date) === todayUtc
+    ? normalizeMemeTokenId(nextMint.mint_number)
+    : null;
+}
+
+function getMintRowForTokenId(tokenId: unknown): SeasonMintRow | null {
+  const normalizedTokenId = normalizeMemeTokenId(tokenId);
+  if (normalizedTokenId === null) {
     return null;
   }
 
-  const mintNumber = currentMint.current?.mint_number;
-  return typeof mintNumber === "number" && Number.isSafeInteger(mintNumber)
-    ? mintNumber
-    : null;
+  const timeline = getMintTimelineDetails(normalizedTokenId);
+  return {
+    meme: timeline.mintNumber,
+    utcDay: timeline.mintDayUtc,
+    instantUtc: timeline.instantUtc,
+    seasonIndex: timeline.seasonIndex,
+  };
 }
 
 function getActiveRedeemedDrop(
@@ -101,7 +130,7 @@ function getDisplayedRedeemedTotal(
   return Math.max(totalRedeemed - 1, 0);
 }
 
-async function fetchCurrentLiveMintNumber() {
+async function fetchReportActiveMintNumber(now: Date) {
   const response = await fetch("/api/meme-calendar/current");
 
   if (!response.ok) {
@@ -111,7 +140,7 @@ async function fetchCurrentLiveMintNumber() {
   }
 
   const currentMint = (await response.json()) as MemeCalendarCurrentResponse;
-  return getCurrentLiveMintNumber(currentMint);
+  return getReportActiveMintNumber(currentMint, now);
 }
 
 export default function SubscriptionsReportComponent() {
@@ -159,6 +188,23 @@ export default function SubscriptionsReportComponent() {
     () => getUpcomingMintsAcrossSeasons(upcomingCounts.length || 50, now),
     [now, upcomingCounts.length]
   );
+  const rowsByMeme = useMemo(
+    () => new Map(rows.map((row) => [row.meme, row])),
+    [rows]
+  );
+  const upcomingRows = useMemo(
+    () =>
+      upcomingCounts.flatMap((count, index) => {
+        const tokenId = normalizeMemeTokenId(count.token_id);
+        const date =
+          (tokenId === null ? null : rowsByMeme.get(tokenId)) ??
+          getMintRowForTokenId(count.token_id) ??
+          rows[index];
+
+        return date ? [{ count, date }] : [];
+      }),
+    [rows, rowsByMeme, upcomingCounts]
+  );
 
   async function fetchUpcomingCounts(count: number) {
     return await commonApiFetch<SubscriptionCounts[]>({
@@ -193,23 +239,23 @@ export default function SubscriptionsReportComponent() {
       let remainingCountForSeason = getCardsRemainingUntilEndOf("szn");
       let activeRedeemedDrop: RedeemedSubscriptionCounts | null = null;
       let activeTokenId: number | null = null;
-      let currentLiveMintNumber: number | null = null;
-      const currentLiveMintNumberPromise = fetchCurrentLiveMintNumber().catch(
-        (error: unknown) => {
-          console.error("Failed to fetch current meme calendar mint:", error);
-          return null;
-        }
-      );
+      let reportActiveMintNumber: number | null = null;
+      const reportActiveMintNumberPromise = fetchReportActiveMintNumber(
+        now
+      ).catch((error: unknown) => {
+        console.error("Failed to fetch current meme calendar mint:", error);
+        return null;
+      });
 
       try {
-        const [redeemed, liveMintNumber] = await Promise.all([
+        const [redeemed, activeMintNumber] = await Promise.all([
           fetchRedeemedCounts(1),
-          currentLiveMintNumberPromise,
+          reportActiveMintNumberPromise,
         ]);
-        currentLiveMintNumber = liveMintNumber;
+        reportActiveMintNumber = activeMintNumber;
         activeRedeemedDrop = getActiveRedeemedDrop(
           redeemed.data,
-          currentLiveMintNumber
+          reportActiveMintNumber
         );
         activeTokenId = activeRedeemedDrop
           ? normalizeMemeTokenId(activeRedeemedDrop.token_id)
@@ -229,7 +275,7 @@ export default function SubscriptionsReportComponent() {
         setTotalRedeemed(0);
       }
 
-      if (currentLiveMintNumber !== null && !activeRedeemedDrop) {
+      if (reportActiveMintNumber !== null && !activeRedeemedDrop) {
         remainingCountForSeason += 1;
       }
 
@@ -446,7 +492,7 @@ export default function SubscriptionsReportComponent() {
         data-testid="subscriptions-report-upcoming-drops"
       >
         <div>
-          {upcomingCounts?.length > 0 ? (
+          {upcomingRows.length > 0 ? (
             <>
               <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
                 <span className="tw-sr-only">
@@ -460,9 +506,9 @@ export default function SubscriptionsReportComponent() {
                   <span className="tw-text-center">Subscriptions</span>
                 </div>
                 <div>
-                  {upcomingCounts
+                  {upcomingRows
                     .slice(0, upcomingVisible)
-                    .map((count, index) => {
+                    .map(({ count, date }, index) => {
                       const isNew =
                         animateFromIndex !== null && index >= animateFromIndex;
                       return (
@@ -477,16 +523,16 @@ export default function SubscriptionsReportComponent() {
                               : "tw-bg-iron-900",
                             isNew ? styles["upcomingRowNew"] : "",
                           ].join(" ")}
-                          date={rows[index]!}
+                          date={date}
                           count={count}
                         />
                       );
                     })}
                 </div>
               </div>
-              {upcomingCounts.length > UPCOMING_PAGE_SIZE && (
+              {upcomingRows.length > UPCOMING_PAGE_SIZE && (
                 <div ref={upcomingToggleRef} className="tw-pt-3 tw-text-center">
-                  {upcomingVisible < upcomingCounts.length ? (
+                  {upcomingVisible < upcomingRows.length ? (
                     <ShowMoreButton
                       expanded={false}
                       setExpanded={() => {
@@ -494,7 +540,7 @@ export default function SubscriptionsReportComponent() {
                         setUpcomingVisible((prev) =>
                           Math.min(
                             prev + UPCOMING_PAGE_SIZE,
-                            upcomingCounts.length
+                            upcomingRows.length
                           )
                         );
                       }}

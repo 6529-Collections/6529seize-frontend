@@ -388,6 +388,20 @@ describe("frontend i18n helpers", () => {
     );
   });
 
+  it("backs NextGen navigation and home copy with source-locale fallbacks", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(t(locale, "nextgen.navigation.featured")).toBe("Featured");
+      expect(t(locale, "nextgen.navigation.sectionsAriaLabel")).toBe(
+        "NextGen sections"
+      );
+      expect(
+        t(locale, "nextgen.home.exploreNamedCollection", {
+          collectionName: "Pebbles",
+        })
+      ).toBe("Explore Pebbles");
+    }
+  });
+
   it("falls back consistently for wave voter connect copy", () => {
     for (const locale of SUPPORTED_LOCALES) {
       expect(t(locale, "waves.sidebar.rightPanel.voters.connectTitle")).toBe(
