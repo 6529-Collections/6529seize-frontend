@@ -9,6 +9,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 jest.mock(
   "@/components/nextGen/collections/collectionParts/mint/NextGenMintShared",
   () => ({
+    MINT_ACTION_BUTTON_CLASSNAME: "",
+    MINT_SELECT_CLASSNAME: "",
+    MintInfoTooltip: () => null,
+    NextGenMintErrors: () => null,
     NextGenMintingFor: () => <div data-testid="minting-for" />,
   })
 );

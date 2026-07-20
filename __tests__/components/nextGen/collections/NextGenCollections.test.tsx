@@ -14,6 +14,25 @@ jest.mock(
     ({ collection }: any) => <div data-testid="preview">{collection.name}</div>
 );
 
+jest.mock(
+  "@/components/utils/select/dropdown/FilterGridDropdown",
+  () =>
+    ({ items, onSelect, selectedValue, triggerAriaLabel }: any) => (
+      <select
+        aria-label={triggerAriaLabel}
+        value={selectedValue ?? ""}
+        onChange={(event) => onSelect(event.target.value || null)}
+      >
+        <option value="">All statuses</option>
+        {items.map((item: any) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+    )
+);
+
 jest.mock("@/components/pagination/Pagination", () => (props: any) => (
   <div data-testid="pagination">
     <button onClick={() => props.setPage(props.page + 1)}>next</button>
@@ -29,7 +48,7 @@ it("fetches collections on mount and displays them", async () => {
   fetchUrl.mockResolvedValue({ count: 1, data: [{ id: 1, name: "A" }] });
   render(<NextGenCollections />);
 
-  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
   expect(fetchUrl).toHaveBeenCalledWith(
     "https://api.test.6529.io/api/nextgen/collections?page_size=25&page=1"
   );
@@ -42,6 +61,16 @@ it("shows message when no collections found", async () => {
   await screen.findByText("No collections found");
 });
 
+it("shows an error instead of an empty result when loading fails", async () => {
+  fetchUrl.mockRejectedValue(new Error("offline"));
+  render(<NextGenCollections />);
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Unable to load collections"
+  );
+  expect(screen.queryByText("No collections found")).not.toBeInTheDocument();
+});
+
 it("filters by status and resets page", async () => {
   fetchUrl.mockResolvedValue({ count: 1, data: [{ id: 1, name: "A" }] });
   fetchUrl
@@ -50,14 +79,14 @@ it("filters by status and resets page", async () => {
     .mockResolvedValueOnce({ count: 1, data: [{ id: 2, name: "B" }] });
 
   render(<NextGenCollections />);
-  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
 
   await userEvent.selectOptions(
     screen.getByRole("combobox", { name: /status/i }),
     "LIVE"
   );
 
-  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(3));
+  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
   expect(fetchUrl).toHaveBeenLastCalledWith(
     "https://api.test.6529.io/api/nextgen/collections?page_size=25&page=1&status=LIVE"
   );
@@ -71,11 +100,11 @@ it("requests next page with pagination", async () => {
     .mockResolvedValueOnce({ count: 26, data: [{ id: 2, name: "B" }] });
 
   render(<NextGenCollections />);
-  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
 
   await userEvent.click(await screen.findByText("next"));
 
-  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(3));
+  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
   expect(fetchUrl).toHaveBeenLastCalledWith(
     "https://api.test.6529.io/api/nextgen/collections?page_size=25&page=2"
   );

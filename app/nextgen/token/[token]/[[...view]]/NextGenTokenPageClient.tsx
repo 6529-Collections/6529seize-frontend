@@ -1,6 +1,7 @@
 "use client";
 
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
+import { NEXTGEN_PAGE_FRAME_CLASSNAME } from "@/components/nextGen/collections/NextGenPageFrame";
 import NextGenTokenComponent from "@/components/nextGen/collections/nextgenToken/NextGenToken";
 import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
 import { useTitle } from "@/contexts/TitleContext";
@@ -9,9 +10,9 @@ import type {
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
-import styles from "@/styles/Home.module.css";
 import { NextgenCollectionView } from "@/types/enums";
 import { useEffect, useState } from "react";
+import { getNextgenTitle } from "../../../title-utils";
 
 function getTokenViewFromPathname(pathname: string): NextgenCollectionView {
   const viewSegment = pathname.split("/").filter(Boolean)[3] ?? "";
@@ -57,8 +58,7 @@ export default function NextGenTokenPageClient({
     const baseTitle = token?.name ?? `${collection.name} - #${tokenId}`;
     const viewDisplay =
       tokenView !== NextgenCollectionView.ABOUT ? tokenView : "";
-    const title = viewDisplay ? `${baseTitle} | ${viewDisplay}` : baseTitle;
-    setTitle(title);
+    setTitle(getNextgenTitle(viewDisplay, baseTitle));
   }, [tokenView, token?.name, collection.name, tokenId, setTitle]);
 
   const updateView = (newView?: NextgenCollectionView) => {
@@ -76,7 +76,7 @@ export default function NextGenTokenPageClient({
   };
 
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className={NEXTGEN_PAGE_FRAME_CLASSNAME}>
       <NextGenNavigationHeader />
       {token ? (
         <NextGenTokenComponent
