@@ -55,11 +55,10 @@ export function NextGenBackToCollectionPageLink(
 ) {
   const pathname = usePathname() || "";
   const isArtPage =
-    (pathname.endsWith("/art") ||
-      pathname.endsWith("/trait-sets") ||
-      pathname.endsWith("/distribution-plan") ||
-      pathname.endsWith("/mint")) ??
-    false;
+    pathname.endsWith("/art") ||
+    pathname.endsWith("/trait-sets") ||
+    pathname.endsWith("/distribution-plan") ||
+    pathname.endsWith("/mint");
   const content = isArtPage
     ? "Back to collection page"
     : "Back to collection art";

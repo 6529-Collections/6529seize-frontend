@@ -26,6 +26,8 @@ interface Props {
   token_id: number;
 }
 
+const TOKEN_METADATA_FETCH_TIMEOUT_MS = 10_000;
+
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -66,10 +68,17 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
       setFetchingMetadata(true);
 
       const controller = new AbortController();
+      let active = true;
+      const timeoutId = globalThis.setTimeout(() => {
+        controller.abort();
+      }, TOKEN_METADATA_FETCH_TIMEOUT_MS);
       const fetchMetadata = async () => {
         try {
           const response = await fetch(tokenUri, { signal: controller.signal });
           const metadata = (await response.json()) as { image?: unknown };
+          if (!active) {
+            return;
+          }
           const image =
             typeof metadata.image === "string" ? metadata.image.trim() : "";
           if (!image) {
@@ -78,18 +87,23 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
           }
           setTokenImage(image);
         } catch {
-          if (!controller.signal.aborted) {
+          if (active) {
             setTokenNotFound(true);
           }
         } finally {
-          if (!controller.signal.aborted) {
+          globalThis.clearTimeout(timeoutId);
+          if (active) {
             setFetchingMetadata(false);
           }
         }
       };
 
       void fetchMetadata();
-      return () => controller.abort();
+      return () => {
+        active = false;
+        globalThis.clearTimeout(timeoutId);
+        controller.abort();
+      };
     }
 
     setTokenNotFound(true);

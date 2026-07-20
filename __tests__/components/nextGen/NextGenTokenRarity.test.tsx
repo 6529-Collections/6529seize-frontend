@@ -86,7 +86,7 @@ describe("NextgenTokenRarity", () => {
 
   it("shows token count and initial score", () => {
     renderComp();
-    expect(screen.getByText(/Token count:\s*100/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Token count:\s*100$/i)).toBeInTheDocument();
     expect(screen.getByText("1.000")).toBeInTheDocument();
   });
 
