@@ -66,12 +66,18 @@ describe('NextGenZoomableImage', () => {
       />
     );
     const img = screen.getByTestId('img');
-    Object.defineProperty(img, 'getBoundingClientRect', {
+    const viewport = screen.getByTestId('zoom-viewport');
+    Object.defineProperty(viewport, 'getBoundingClientRect', {
       value: () => ({ left: 0, top: 0, width: 100, height: 100 }),
     });
     fireEvent.wheel(img, { deltaY: -1, clientX: 50, clientY: 60 });
     expect(setZoomScale).toHaveBeenCalledWith(4);
-    expect(img.style.transformOrigin).toBe('50% 60%');
+    expect(screen.getByTestId('zoom-canvas')).toHaveClass(
+      'tw-h-[500%]',
+      'tw-w-[500%]'
+    );
+    expect(img).toHaveClass('tw-cursor-grab');
+    expect(img).not.toHaveAttribute('style');
   });
 
   it('runs image load workflow', () => {
