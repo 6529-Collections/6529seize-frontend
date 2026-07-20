@@ -71,7 +71,12 @@ export default function NextGenCollectionComponent({
 
   useEffect(() => {
     const onPopState = () => {
-      setView(getCollectionViewFromPathname(globalThis.location.pathname));
+      // A collection slug can itself be a view name, so only parse the
+      // segment after the slug instead of reading the last path segment.
+      const restoredView = getCollectionViewFromPathname(
+        globalThis.location.pathname
+      );
+      setView(restoredView);
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
