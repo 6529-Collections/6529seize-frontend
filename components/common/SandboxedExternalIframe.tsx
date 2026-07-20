@@ -14,7 +14,6 @@ interface SandboxedExternalIframeProps {
   readonly className?: string | undefined;
   readonly fallback?: React.ReactNode | undefined;
   readonly containerClassName?: string | undefined;
-  readonly viewportClassName?: string | undefined;
   readonly onLoad?:
     | React.IframeHTMLAttributes<HTMLIFrameElement>["onLoad"]
     | undefined;
@@ -41,7 +40,6 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   className,
   fallback = null,
   containerClassName,
-  viewportClassName,
   onLoad,
   onError,
   iframeRef,
@@ -180,22 +178,16 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   const containerClasses = [
     "tw-flex",
     "tw-flex-col",
-    viewportClassName ? "tw-h-auto" : "tw-h-full",
+    "tw-h-full",
     containerClassName,
   ]
     .filter((value): value is string => Boolean(value))
     .join(" ");
 
-  const viewportClasses = [
-    "tw-min-h-0",
-    "tw-overflow-hidden",
-    viewportClassName ?? "tw-flex-1",
-  ].join(" ");
-
   return (
     <div ref={containerRef} className={containerClasses}>
       {banner}
-      <div className={viewportClasses}>
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
         {isVisible ? (
           <iframe
             {...iframeProps}

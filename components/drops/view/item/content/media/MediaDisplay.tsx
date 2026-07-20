@@ -41,14 +41,12 @@ function InteractiveHtmlMediaDisplay({
   imageScale = ImageScale.AUTOx1080,
   requireInteractionToLoad = false,
   iframeContainerClassName,
-  iframeViewportClassName,
 }: {
   readonly media_url: string;
   readonly previewImageUrl?: string | null | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
   readonly iframeContainerClassName?: string | undefined;
-  readonly iframeViewportClassName?: string | undefined;
 }) {
   const { isCapacitor } = useCapacitor();
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -139,7 +137,6 @@ function InteractiveHtmlMediaDisplay({
         src={activeUrl}
         className="tw-h-full tw-w-full"
         containerClassName={iframeContainerClassName}
-        viewportClassName={iframeViewportClassName}
         iframeRef={iframeRef}
         onLoad={() => {
           setDidLoadCurrentUrl(true);
@@ -173,7 +170,6 @@ export default function MediaDisplay({
   previewImageUrl,
   requireInteractionToLoad = false,
   iframeContainerClassName,
-  htmlIframeViewportClassName,
   fillVideoContainer = false,
   loadStrategy = "in-view",
 }: {
@@ -184,7 +180,6 @@ export default function MediaDisplay({
   readonly previewImageUrl?: string | null | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
   readonly iframeContainerClassName?: string | undefined;
-  readonly htmlIframeViewportClassName?: string | undefined;
   readonly fillVideoContainer?: boolean | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
 }) {
@@ -243,7 +238,6 @@ export default function MediaDisplay({
         imageScale={imageScale}
         requireInteractionToLoad={requireInteractionToLoad}
         iframeContainerClassName={iframeContainerClassName}
-        iframeViewportClassName={htmlIframeViewportClassName}
       />
     );
   }

@@ -39,7 +39,6 @@ export default function DropListItemContentMedia({
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
   htmlIframeContainerClassName,
-  htmlIframeViewportClassName,
   htmlPreviewImageUrl,
   loadStrategy = "in-view",
   galleryItemId,
@@ -54,7 +53,6 @@ export default function DropListItemContentMedia({
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly htmlIframeContainerClassName?: string | undefined;
-  readonly htmlIframeViewportClassName?: string | undefined;
   readonly htmlPreviewImageUrl?: string | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
   readonly galleryItemId?: string | undefined;
@@ -125,7 +123,6 @@ export default function DropListItemContentMedia({
           previewImageUrl={htmlPreviewImageUrl}
           requireInteractionToLoad={disableAutoPlay}
           iframeContainerClassName={htmlIframeContainerClassName}
-          htmlIframeViewportClassName={htmlIframeViewportClassName}
           loadStrategy={loadStrategy}
         />
       );

@@ -41,9 +41,6 @@
    - host banner (`Untrusted interactive content` + host link)
    - iframe with `sandbox="allow-scripts"`, empty `allow`,
      `referrerPolicy="no-referrer"`, and `credentialless`.
-   - a centered responsive viewport in wave chat/drop cards: portrait on small
-     screens and square on wider layouts, capped by the device viewport height
-     so interactive artwork stays usable without making the feed unbounded.
 5. Shared renderer iframes mount only after the surface enters the viewport.
 6. Touch-gated home contexts require `Tap to load`; when preview artwork
    exists, that image stays visible behind the gate until activation.
@@ -65,8 +62,6 @@
 
 - Shared wave/drop cards without a preview-image override render the host
   banner plus sandboxed iframe.
-- Live HTML in wave chat/drop cards uses a responsive portrait-to-square
-  viewport; ordinary image and video sizing is unchanged.
 - Gallery, leaderboard, and other card surfaces that already have preview
   artwork can show a static preview image for HTML media instead of a live
   iframe.
