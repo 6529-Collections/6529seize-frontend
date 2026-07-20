@@ -75,4 +75,13 @@ describe("isDirectImageUrl", () => {
       )
     ).toBe(true);
   });
+
+  it("does not treat Wikimedia Commons file pages as direct images", () => {
+    expect(
+      isDirectImageUrl("https://commons.wikimedia.org/wiki/File:Example.jpg")
+    ).toBe(false);
+    expect(
+      isDirectImageUrl("https://commons.wikimedia.org/wiki/File%3AExample.jpg")
+    ).toBe(false);
+  });
 });
