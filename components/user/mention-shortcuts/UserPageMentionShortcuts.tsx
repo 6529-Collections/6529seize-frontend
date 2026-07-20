@@ -7,28 +7,31 @@ import type {
   MentionAliasInput,
   MentionAliasMember,
 } from "@/entities/IMentionAlias";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   isReservedMentionAlias,
   normalizeMentionAlias,
 } from "@/helpers/mentions/mention-aliases.helpers";
-import { useIdentitiesSearch } from "@/hooks/useIdentitiesSearch";
 import { useMentionAliases } from "@/hooks/useMentionAliases";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import {
   createMentionAlias,
   deleteMentionAlias,
   updateMentionAlias,
 } from "@/services/api/mention-aliases-api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useMemo, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const MAX_MEMBERS = 25;
+const MIN_SEARCH_LENGTH = 3;
 
 const getAvailableIdentities = (
-  identities: ApiIdentity[],
+  identities: CommunityMemberMinimal[],
   members: MentionAliasMember[]
 ) => {
   const selectedProfileIds = new Set(
@@ -36,7 +39,9 @@ const getAvailableIdentities = (
   );
   return identities.filter(
     (identity) =>
-      !!identity.id && !!identity.handle && !selectedProfileIds.has(identity.id)
+      !!identity.profile_id &&
+      !!identity.handle &&
+      !selectedProfileIds.has(identity.profile_id)
   );
 };
 
@@ -75,7 +80,7 @@ function DeleteShortcutDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
+            className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white"
           >
             {t(locale, "user.mentionShortcuts.cancel")}
           </button>
@@ -84,7 +89,7 @@ function DeleteShortcutDialog({
             disabled={isPending}
             aria-busy={isPending}
             onClick={onConfirm}
-            className="tw-rounded-lg tw-border-0 tw-bg-red tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white disabled:tw-opacity-50"
+            className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-red tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white disabled:tw-opacity-50"
           >
             {t(locale, "user.mentionShortcuts.delete")}
           </button>
@@ -109,7 +114,23 @@ function AliasEditor({
     initialAlias?.members ?? []
   );
   const [search, setSearch] = useState("");
-  const { identities } = useIdentitiesSearch({ handle: search, waveId: null });
+  const debouncedSearch = useDebouncedValue(search, 200);
+  const { data: identities = [] } = useQuery<CommunityMemberMinimal[]>({
+    queryKey: [
+      QueryKey.PROFILE_SEARCH,
+      { param: debouncedSearch, only_profile_owners: "true" },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<CommunityMemberMinimal[]>({
+        endpoint: "community-members",
+        params: {
+          param: debouncedSearch,
+          only_profile_owners: "true",
+        },
+      }),
+    enabled:
+      debouncedSearch.length >= MIN_SEARCH_LENGTH && debouncedSearch === search,
+  });
   const normalizedAlias = normalizeMentionAlias(alias);
   const aliasIsValid = /^\w{3,15}$/.test(normalizedAlias);
   const reserved = isReservedMentionAlias(normalizedAlias);
@@ -162,13 +183,13 @@ function AliasEditor({
           });
   }
 
-  const addMember = (identity: ApiIdentity) => {
-    const { id, handle } = identity;
-    if (!id || !handle || members.length >= MAX_MEMBERS) return;
+  const addMember = (identity: CommunityMemberMinimal) => {
+    const { profile_id: profileId, handle } = identity;
+    if (!profileId || !handle || members.length >= MAX_MEMBERS) return;
     setMembers((current) => [
       ...current,
       {
-        profile_id: id,
+        profile_id: profileId,
         handle,
         pfp: identity.pfp ?? null,
       },
@@ -206,7 +227,7 @@ function AliasEditor({
         <button
           type="button"
           onClick={onClose}
-          className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200"
+          className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200"
         >
           {t(locale, "user.mentionShortcuts.cancel")}
         </button>
@@ -230,7 +251,7 @@ function AliasEditor({
             onChange={(event) => setAlias(event.target.value)}
             maxLength={15}
             autoComplete="off"
-            className="tw-w-full tw-border-0 tw-bg-transparent tw-px-1 tw-py-2.5 tw-text-sm tw-text-white tw-outline-none"
+            className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-1 tw-py-2.5 tw-text-sm tw-text-white tw-outline-none"
           />
         </div>
       </label>
@@ -270,7 +291,7 @@ function AliasEditor({
           onChange={(event) => setSearch(event.target.value)}
           placeholder={t(locale, "user.mentionShortcuts.searchPlaceholder")}
           autoComplete="off"
-          className="tw-mt-2 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-white tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-ring-primary-400"
+          className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-white tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-ring-primary-400"
         />
       </label>
       <p aria-live="polite" className="tw-sr-only">
@@ -279,11 +300,11 @@ function AliasEditor({
       {search.length >= 3 && availableIdentities.length > 0 && (
         <ul className="tw-mx-0 tw-mt-2 tw-list-none tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-iron-700">
           {availableIdentities.slice(0, 5).map((identity) => (
-            <li key={identity.id}>
+            <li key={identity.profile_id}>
               <button
                 type="button"
                 onClick={() => addMember(identity)}
-                className="tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-white desktop-hover:hover:tw-bg-iron-800"
+                className="tw-min-h-11 tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-white desktop-hover:hover:tw-bg-iron-800"
               >
                 @{identity.handle}
                 {identity.display && (
@@ -306,7 +327,7 @@ function AliasEditor({
             aria-label={t(locale, "user.mentionShortcuts.removeProfile", {
               handle: member.handle,
             })}
-            className="tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-text-iron-100"
+            className="tw-min-h-11 tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-text-iron-100"
           >
             @{member.handle} <span aria-hidden="true">×</span>
           </button>
@@ -317,7 +338,7 @@ function AliasEditor({
         type="button"
         disabled={!canSave || mutation.isPending}
         onClick={save}
-        className="tw-mt-5 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+        className="tw-mt-5 tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
       >
         {mutation.isPending
           ? t(locale, "user.mentionShortcuts.saving")
@@ -377,9 +398,20 @@ export default function UserPageMentionShortcuts({
 
   if (!isOwner) {
     return (
-      <div className="tailwind-scope tw-py-8 tw-text-center tw-text-iron-400">
-        {t(locale, "user.mentionShortcuts.private")}
-      </div>
+      <section
+        aria-labelledby="mention-shortcuts-private-title"
+        className="tailwind-scope tw-py-8 tw-text-center"
+      >
+        <h1
+          id="mention-shortcuts-private-title"
+          className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
+        >
+          {t(locale, "user.mentionShortcuts.title")}
+        </h1>
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+          {t(locale, "user.mentionShortcuts.private")}
+        </p>
+      </section>
     );
   }
 
@@ -406,7 +438,7 @@ export default function UserPageMentionShortcuts({
           <button
             type="button"
             onClick={() => setEditorAlias(null)}
-            className="tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white"
+            className="tw-min-h-11 tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white"
           >
             {t(locale, "user.mentionShortcuts.new")}
           </button>
@@ -461,7 +493,7 @@ export default function UserPageMentionShortcuts({
               <button
                 type="button"
                 onClick={() => setEditorAlias(item)}
-                className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100"
+                className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100"
               >
                 {t(locale, "user.mentionShortcuts.editAction")}
               </button>
@@ -470,7 +502,7 @@ export default function UserPageMentionShortcuts({
                 onClick={() => setAliasToDelete(item)}
                 disabled={deleteMutation.isPending}
                 aria-busy={deleteMutation.isPending}
-                className="tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-red disabled:tw-opacity-50"
+                className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-red disabled:tw-opacity-50"
               >
                 {t(locale, "user.mentionShortcuts.deleteAction")}
               </button>

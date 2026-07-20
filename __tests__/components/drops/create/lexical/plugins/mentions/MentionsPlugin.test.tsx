@@ -225,4 +225,38 @@ describe("MentionsPlugin", () => {
       })
     );
   });
+
+  it("keeps an exact profile match visible when its handle collides with an alias", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [
+        { id: "1", handle: "frens-one", display: null, pfp: null },
+        { id: "2", handle: "frens-two", display: null, pfp: null },
+        { id: "3", handle: "frens-three", display: null, pfp: null },
+        { id: "4", handle: "frens-four", display: null, pfp: null },
+        { id: "5", handle: "frens", display: "Exact profile", pfp: null },
+      ],
+    });
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [
+        {
+          id: "alias-1",
+          alias: "frens",
+          members: [{ profile_id: "6", handle: "alice", pfp: null }],
+        },
+      ],
+    });
+
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+    act(() => capturedProps.onQueryChange("FRENS"));
+
+    expect(capturedProps.options).toHaveLength(5);
+    expect(capturedProps.options[0]).toEqual(
+      expect.objectContaining({ type: "alias", handle: "@frens" })
+    );
+    expect(capturedProps.options[1]).toEqual(
+      expect.objectContaining({ type: "identity", handle: "frens" })
+    );
+  });
 });

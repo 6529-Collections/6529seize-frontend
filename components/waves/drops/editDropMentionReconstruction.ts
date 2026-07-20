@@ -58,6 +58,7 @@ function reconstructSplitWaveMention(
   if (!mentionMatch) return false;
 
   const waveName = mentionMatch[1];
+  if (!waveName) return false;
   const mentionNode = $createWaveMentionNode(`#${waveName}`);
 
   const currentText = currentNode.getTextContent();
@@ -141,6 +142,15 @@ export function processSplitMentions(
     const currentNode = textNodes[index];
     const nextNode = textNodes[index + 1];
     if (!currentNode || !nextNode) {
+      continue;
+    }
+
+    const currentParent = currentNode.getParent();
+    if (
+      !currentParent ||
+      currentParent !== nextNode.getParent() ||
+      currentNode.getNextSibling() !== nextNode
+    ) {
       continue;
     }
 

@@ -52,65 +52,11 @@ import { $isLinkNode } from "@lexical/link";
 import { AuthContext } from "@/components/auth/Auth";
 import { GROUP_MENTION_TEXT } from "@/helpers/waves/drop-group-mentions";
 
-const PUNCTUATION =
-  "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
-const NAME = "\\b[A-Z][^\\s" + PUNCTUATION + "]";
+const AtSignMentionsRegex =
+  /(^|\s|\()([@]((?:[^@\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;\s](?:\.[ |$]| |[\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;]|)){0,75}))$/;
 
-const DocumentMentionsRegex = {
-  NAME,
-  PUNCTUATION,
-};
-
-const PUNC = DocumentMentionsRegex.PUNCTUATION;
-
-const TRIGGERS = ["@"].join("");
-
-// Chars we expect to see in a mention (non-space, non-punctuation).
-const VALID_CHARS = "[^" + TRIGGERS + PUNC + "\\s]";
-
-// Non-standard series of chars. Each series must be preceded and followed by
-// a valid char.
-const VALID_JOINS =
-  "(?:" +
-  "\\.[ |$]|" + // E.g. "r. " in "Mr. Smith"
-  " |" + // E.g. " " in "Josh Duck"
-  "[" +
-  PUNC +
-  "]|" + // E.g. "-' in "Salier-Hellendag"
-  ")";
-
-const LENGTH_LIMIT = 75;
-
-const AtSignMentionsRegex = new RegExp(
-  "(^|\\s|\\()(" +
-    "[" +
-    TRIGGERS +
-    "]" +
-    "((?:" +
-    VALID_CHARS +
-    VALID_JOINS +
-    "){0," +
-    LENGTH_LIMIT +
-    "})" +
-    ")$"
-);
-
-// 50 is the longest alias length limit.
-const ALIAS_LENGTH_LIMIT = 50;
-
-// Regex used to match alias.
-const AtSignMentionsRegexAliasRegex = new RegExp(
-  "(^|\\s|\\()(" +
-    "[" +
-    TRIGGERS +
-    "]" +
-    "((?:" +
-    VALID_CHARS +
-    "){0," +
-    ALIAS_LENGTH_LIMIT +
-    "})" +
-    ")$"
-);
+const AtSignMentionsRegexAliasRegex =
+  /(^|\s|\()([@]((?:[^@\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;\s]){0,50}))$/;
 
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
@@ -125,9 +71,7 @@ function checkForAtSignMentions(
 ): MenuTextMatch | null {
   let match = AtSignMentionsRegex.exec(text);
 
-  if (match === null) {
-    match = AtSignMentionsRegexAliasRegex.exec(text);
-  }
+  match ??= AtSignMentionsRegexAliasRegex.exec(text);
   if (match !== null) {
     // The strategy ignores leading whitespace but we need to know it's
     // length to add it to the leadOffset
@@ -354,30 +298,24 @@ export const expandPlainAliasTokens = ({
   readonly editor: LexicalEditor;
   readonly aliases: MentionAlias[];
   readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
-}): Promise<EditorState> =>
-  new Promise((resolve) => {
-    if (!aliases.length) {
-      resolve(editor.getEditorState());
-      return;
-    }
+}): Promise<EditorState> => {
+  if (aliases.length) {
     const aliasesByName = new Map(
       aliases.map((alias) => [alias.alias.toLowerCase(), alias])
     );
-    let expanded = false;
     editor.update(
       () => {
-        expanded = expandAliasTextNodes({
+        expandAliasTextNodes({
           aliasesByName,
           existingHandles: getExistingMentionHandles(),
           onSelect,
         });
       },
-      { onUpdate: () => resolve(editor.getEditorState()) }
+      { discrete: true }
     );
-    if (!expanded) {
-      resolve(editor.getEditorState());
-    }
-  });
+  }
+  return Promise.resolve(editor.getEditorState());
+};
 
 const NewMentionsPlugin = forwardRef<
   NewMentionsPluginHandles,
@@ -484,6 +422,14 @@ const NewMentionsPlugin = forwardRef<
             picture: identity.pfp,
           })
       )
+      .sort((first, second) => {
+        const firstIsExactMatch =
+          first.handle.toLowerCase() === normalizedQuery;
+        const secondIsExactMatch =
+          second.handle.toLowerCase() === normalizedQuery;
+        if (firstIsExactMatch === secondIsExactMatch) return 0;
+        return firstIsExactMatch ? -1 : 1;
+      })
       .slice(0, identityLimit);
 
     return [...groupOptions, ...aliasOptions, ...identityOptions].slice(

@@ -344,24 +344,30 @@ describe("EditDropLexical", () => {
   });
 
   it("preserves profile ids when reconstructing split initial mentions", () => {
+    const parentNode = {};
     const currentNode = {
       getTextContent: jest.fn(() => "hello @["),
+      getParent: jest.fn(() => parentNode),
+      getNextSibling: jest.fn(),
       setTextContent: jest.fn(),
       insertAfter: jest.fn(),
       remove: jest.fn(),
     };
     const nextNode = {
       getTextContent: jest.fn(() => "alice]!"),
+      getParent: jest.fn(() => parentNode),
       setTextContent: jest.fn(),
       insertBefore: jest.fn(),
       remove: jest.fn(),
     };
+    currentNode.getNextSibling.mockReturnValue(nextNode);
     editorMock.update.mockImplementationOnce((callback: () => void) =>
       callback()
     );
-    rootMock.getAllTextNodes
-      .mockReturnValueOnce([currentNode, nextNode] as any)
-      .mockReturnValueOnce([]);
+    rootMock.getAllTextNodes.mockReturnValueOnce([
+      currentNode,
+      nextNode,
+    ] as any);
 
     render(
       <EditDropLexical
@@ -380,6 +386,41 @@ describe("EditDropLexical", () => {
       "@alice",
       "profile-alice"
     );
+  });
+
+  it("does not reconstruct split mentions across block boundaries", () => {
+    const currentNode = {
+      getTextContent: jest.fn(() => "hello @["),
+      getParent: jest.fn(() => ({ key: "first-block" })),
+      getNextSibling: jest.fn(),
+    };
+    const nextNode = {
+      getTextContent: jest.fn(() => "alice]!"),
+      getParent: jest.fn(() => ({ key: "second-block" })),
+    };
+    currentNode.getNextSibling.mockReturnValue(nextNode);
+    editorMock.update.mockImplementationOnce((callback: () => void) =>
+      callback()
+    );
+    rootMock.getAllTextNodes.mockReturnValueOnce([
+      currentNode,
+      nextNode,
+    ] as any);
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        initialContent="hello @[\nalice]!"
+        initialMentions={[
+          {
+            mentioned_profile_id: "profile-alice",
+            handle_in_content: "Alice",
+          },
+        ]}
+      />
+    );
+
+    expect(createMentionNodeMock).not.toHaveBeenCalled();
   });
 
   it("saves updated markdown together with unique mentions", async () => {
