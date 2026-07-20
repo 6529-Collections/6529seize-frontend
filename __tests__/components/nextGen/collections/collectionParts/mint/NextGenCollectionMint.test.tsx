@@ -79,4 +79,23 @@ describe("NextGenCollectionMint", () => {
     });
     expect(screen.getByTestId("mint-props").textContent).toBe("0:3");
   });
+
+  it("renders refreshed contract values without an effect-lagged frame", () => {
+    let burnResult = { data: "10", isSuccess: true };
+    let priceResult = { data: "5", isSuccess: true };
+    readMock.mockImplementation(({ functionName }) =>
+      functionName === "burnAmount" ? burnResult : priceResult
+    );
+
+    const { rerender } = render(
+      <NextGenCollectionMint collection={collection} />
+    );
+    expect(screen.getByTestId("mint-props")).toHaveTextContent("5:10");
+
+    burnResult = { data: "12", isSuccess: true };
+    priceResult = { data: "7", isSuccess: true };
+    rerender(<NextGenCollectionMint collection={collection} />);
+
+    expect(screen.getByTestId("mint-props")).toHaveTextContent("7:12");
+  });
 });
