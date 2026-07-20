@@ -3,6 +3,7 @@ import { render, act } from "@testing-library/react";
 import NewMentionsPlugin, {
   MentionTypeaheadOption,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 
 // The root element the mocked editor hands to registerRootListener; tests set
 // it to control the elevation-detection ancestor walk.
@@ -58,6 +59,7 @@ const {
 describe("MentionsPlugin", () => {
   beforeEach(() => {
     mockRootElement = null;
+    jest.clearAllMocks();
   });
 
   it("builds options from identities and exposes open state", () => {
@@ -129,6 +131,43 @@ describe("MentionsPlugin", () => {
       handle_in_content: option.handle,
     });
     expect(close).toHaveBeenCalled();
+  });
+
+  it("passes the draft visibility group to identity search", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <MentionSearchScopeProvider visibilityGroupId="visibility-group">
+        <NewMentionsPlugin
+          waveId={null}
+          onSelect={jest.fn()}
+          ref={createRef()}
+        />
+      </MentionSearchScopeProvider>
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: {
+        kind: "group",
+        visibilityGroupId: "visibility-group",
+      },
+      handle: "",
+      waveId: null,
+    });
+  });
+
+  it("uses an explicit disabled draft scope without a provider", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <NewMentionsPlugin waveId={null} onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: { kind: "disabled" },
+      handle: "",
+      waveId: null,
+    });
   });
 
   it("renders the menu wrapper on the raised typeahead layer", () => {
