@@ -27,7 +27,7 @@ jest.mock("@/components/about/AboutSubscriptionsProfileButton", () => ({
 jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   __esModule: true,
   displayedSeasonNumberFromIndex: jest.fn((index: number) => index + 1),
-  formatFullDate: jest.fn(() => "Jan 1, 2026"),
+  formatFullDate: jest.fn((date: Date) => date.toISOString().slice(0, 10)),
   getCardsRemainingUntilEndOf: jest.fn(() => 2),
   getUpcomingMintsAcrossSeasons: jest.fn(() => []),
 }));
@@ -89,7 +89,11 @@ const mockDefaultCommonApiFetch = (opts: any) => {
 };
 
 const mockCurrentMemeCalendar = (
-  body: { status: string; current: { mint_number: number } | null },
+  body: {
+    status: string;
+    current: { mint_number: number } | null;
+    next?: { mint_number: number; mint_date: string };
+  },
   ok = true
 ) => {
   mockFetch.mockResolvedValue({
@@ -262,6 +266,7 @@ describe("Subscriptions report page", () => {
   it("moves the live calendar mint into the active drop section", async () => {
     getUpcomingMintsAcrossSeasons.mockReturnValue([
       {
+        meme: 701,
         seasonIndex: 15,
         utcDay: new Date("2026-01-03T00:00:00.000Z"),
       },
@@ -321,9 +326,58 @@ describe("Subscriptions report page", () => {
     });
   });
 
+  it("keeps a redeemed mint-day card active before minting starts without shifting upcoming dates", async () => {
+    const todayUtc = new Date().toISOString().slice(0, 10);
+    getUpcomingMintsAcrossSeasons.mockReturnValue([
+      {
+        meme: 700,
+        seasonIndex: 15,
+        utcDay: new Date("2026-07-20T00:00:00.000Z"),
+      },
+      {
+        meme: 701,
+        seasonIndex: 15,
+        utcDay: new Date("2026-07-22T00:00:00.000Z"),
+      },
+    ]);
+    mockCurrentMemeCalendar({
+      status: "none",
+      current: null,
+      next: {
+        mint_number: 700,
+        mint_date: todayUtc,
+      },
+    });
+    commonApiFetch.mockImplementation(buildReportCountsApiMock({}));
+
+    render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <CookieConsentProvider>
+          <Page />
+        </CookieConsentProvider>
+      </AuthContext.Provider>
+    );
+
+    const activeDrop = await screen.findByTestId(
+      "subscriptions-report-active-drop"
+    );
+    expect(activeDrop).toHaveTextContent("#700 - Active Meme");
+
+    const pastDrops = screen.getByTestId("subscriptions-report-past-drops");
+    expect(within(pastDrops).queryByText("#700 - Active Meme")).toBeNull();
+
+    const upcomingDrops = screen.getByTestId(
+      "subscriptions-report-upcoming-drops"
+    );
+    expect(upcomingDrops).toHaveTextContent("The Memes #701");
+    expect(upcomingDrops).toHaveTextContent("2026-07-22");
+    expect(upcomingDrops).not.toHaveTextContent("2026-07-20");
+  });
+
   it("exposes semantic row-wide meme card links", async () => {
     getUpcomingMintsAcrossSeasons.mockReturnValue([
       {
+        meme: 701,
         seasonIndex: 15,
         utcDay: new Date("2026-01-03T00:00:00.000Z"),
       },
@@ -407,6 +461,7 @@ describe("Subscriptions report page", () => {
   it("formats active, upcoming, and past counts with locale separators", async () => {
     getUpcomingMintsAcrossSeasons.mockReturnValue([
       {
+        meme: 701,
         seasonIndex: 15,
         utcDay: new Date("2026-01-03T00:00:00.000Z"),
       },

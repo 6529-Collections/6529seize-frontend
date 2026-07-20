@@ -49,18 +49,24 @@ type MemeCalendarCurrentResponse = {
   readonly current: {
     readonly mint_number: number;
   } | null;
+  readonly next?: {
+    readonly mint_number: number;
+    readonly mint_date: string;
+  };
 };
 
-function getCurrentLiveMintNumber(
-  currentMint: MemeCalendarCurrentResponse
+function getReportActiveMintNumber(
+  currentMint: MemeCalendarCurrentResponse,
+  now: Date = new Date()
 ): number | null {
-  if (currentMint.status !== "live") {
-    return null;
+  if (currentMint.status === "live") {
+    return normalizeMemeTokenId(currentMint.current?.mint_number);
   }
 
-  const mintNumber = currentMint.current?.mint_number;
-  return typeof mintNumber === "number" && Number.isSafeInteger(mintNumber)
-    ? mintNumber
+  const nextMint = currentMint.next;
+  const todayUtc = now.toISOString().slice(0, 10);
+  return currentMint.status === "none" && nextMint?.mint_date === todayUtc
+    ? normalizeMemeTokenId(nextMint.mint_number)
     : null;
 }
 
@@ -101,7 +107,7 @@ function getDisplayedRedeemedTotal(
   return Math.max(totalRedeemed - 1, 0);
 }
 
-async function fetchCurrentLiveMintNumber() {
+async function fetchReportActiveMintNumber() {
   const response = await fetch("/api/meme-calendar/current");
 
   if (!response.ok) {
@@ -111,7 +117,7 @@ async function fetchCurrentLiveMintNumber() {
   }
 
   const currentMint = (await response.json()) as MemeCalendarCurrentResponse;
-  return getCurrentLiveMintNumber(currentMint);
+  return getReportActiveMintNumber(currentMint);
 }
 
 export default function SubscriptionsReportComponent() {
@@ -159,6 +165,10 @@ export default function SubscriptionsReportComponent() {
     () => getUpcomingMintsAcrossSeasons(upcomingCounts.length || 50, now),
     [now, upcomingCounts.length]
   );
+  const rowsByMeme = useMemo(
+    () => new Map(rows.map((row) => [row.meme, row])),
+    [rows]
+  );
 
   async function fetchUpcomingCounts(count: number) {
     return await commonApiFetch<SubscriptionCounts[]>({
@@ -193,8 +203,8 @@ export default function SubscriptionsReportComponent() {
       let remainingCountForSeason = getCardsRemainingUntilEndOf("szn");
       let activeRedeemedDrop: RedeemedSubscriptionCounts | null = null;
       let activeTokenId: number | null = null;
-      let currentLiveMintNumber: number | null = null;
-      const currentLiveMintNumberPromise = fetchCurrentLiveMintNumber().catch(
+      let reportActiveMintNumber: number | null = null;
+      const reportActiveMintNumberPromise = fetchReportActiveMintNumber().catch(
         (error: unknown) => {
           console.error("Failed to fetch current meme calendar mint:", error);
           return null;
@@ -202,14 +212,14 @@ export default function SubscriptionsReportComponent() {
       );
 
       try {
-        const [redeemed, liveMintNumber] = await Promise.all([
+        const [redeemed, activeMintNumber] = await Promise.all([
           fetchRedeemedCounts(1),
-          currentLiveMintNumberPromise,
+          reportActiveMintNumberPromise,
         ]);
-        currentLiveMintNumber = liveMintNumber;
+        reportActiveMintNumber = activeMintNumber;
         activeRedeemedDrop = getActiveRedeemedDrop(
           redeemed.data,
-          currentLiveMintNumber
+          reportActiveMintNumber
         );
         activeTokenId = activeRedeemedDrop
           ? normalizeMemeTokenId(activeRedeemedDrop.token_id)
@@ -229,7 +239,7 @@ export default function SubscriptionsReportComponent() {
         setTotalRedeemed(0);
       }
 
-      if (currentLiveMintNumber !== null && !activeRedeemedDrop) {
+      if (reportActiveMintNumber !== null && !activeRedeemedDrop) {
         remainingCountForSeason += 1;
       }
 
@@ -465,7 +475,10 @@ export default function SubscriptionsReportComponent() {
                     .map((count, index) => {
                       const isNew =
                         animateFromIndex !== null && index >= animateFromIndex;
-                      return (
+                      const tokenId = normalizeMemeTokenId(count.token_id);
+                      const date =
+                        tokenId === null ? undefined : rowsByMeme.get(tokenId);
+                      return date ? (
                         <SubscriptionDayRow
                           key={getMemeTokenIdKey(count.token_id)}
                           ref={
@@ -477,10 +490,10 @@ export default function SubscriptionsReportComponent() {
                               : "tw-bg-iron-900",
                             isNew ? styles["upcomingRowNew"] : "",
                           ].join(" ")}
-                          date={rows[index]!}
+                          date={date}
                           count={count}
                         />
-                      );
+                      ) : null;
                     })}
                 </div>
               </div>
