@@ -1,5 +1,5 @@
 import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 
 // Mock Next.js Image component
 jest.mock("next/image", () => ({
@@ -112,6 +112,10 @@ describe("NextGenTokenOnChain", () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       json: () => Promise.resolve({ image: "https://example.com/image.png" }),
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("shows token not found when data is undefined", () => {
@@ -276,6 +280,63 @@ describe("NextGenTokenOnChain", () => {
       );
       expect(tokenImage).toHaveAttribute("src", imageUrl);
     });
+  });
+
+  it("rejects whitespace-only metadata image URLs", async () => {
+    mockUseReadContract.mockImplementation(({ functionName }) => {
+      if (functionName === "tokenURI") {
+        return { data: "https://example.com/metadata.json" };
+      }
+      return { data: null };
+    });
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: () => Promise.resolve({ image: "   " }),
+    });
+
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    expect(await screen.findByText("Token not found")).toBeInTheDocument();
+  });
+
+  it("stops loading when the metadata request times out", async () => {
+    jest.useFakeTimers();
+    mockUseReadContract.mockImplementation(({ functionName }) => {
+      if (functionName === "tokenURI") {
+        return { data: "https://example.com/metadata.json" };
+      }
+      return { data: null };
+    });
+    (globalThis.fetch as jest.Mock).mockImplementation(
+      (_url: string, options: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          options.signal?.addEventListener("abort", () => {
+            reject(new DOMException("Aborted", "AbortError"));
+          });
+        })
+    );
+
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(10_000);
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText("Token not found")).toBeInTheDocument();
+  });
+
+  it("shows an owner placeholder until ownerOf resolves", async () => {
+    mockUseReadContract.mockImplementation(({ functionName }) => {
+      if (functionName === "tokenURI") {
+        return { data: "https://example.com/metadata.json" };
+      }
+      return { data: undefined, isLoading: true };
+    });
+
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    expect(await screen.findByText("Fetching owner…")).toBeInTheDocument();
+    expect(screen.queryByTestId("address")).not.toBeInTheDocument();
   });
 
   it("shows external link icon for metadata", async () => {

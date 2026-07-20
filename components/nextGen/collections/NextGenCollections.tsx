@@ -31,12 +31,14 @@ export default function NextGenCollections() {
   );
   const [collections, setCollections] = useState<NextGenCollection[]>([]);
   const [collectionsLoaded, setCollectionsLoaded] = useState(false);
+  const [collectionsError, setCollectionsError] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
     setCollectionsLoaded(false);
+    setCollectionsError(false);
     const statusFilter =
       selectedStatus !== null ? `&status=${selectedStatus}` : "";
     const url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${page}${statusFilter}`;
@@ -55,6 +57,7 @@ export default function NextGenCollections() {
         if (!cancelled) {
           setTotalResults(0);
           setCollections([]);
+          setCollectionsError(true);
           setCollectionsLoaded(true);
         }
       });
@@ -106,6 +109,7 @@ export default function NextGenCollections() {
           ))}
 
         {collectionsLoaded &&
+          !collectionsError &&
           collections.map((collection) => (
             <NextGenCollectionPreview
               collection={collection}
@@ -114,7 +118,16 @@ export default function NextGenCollections() {
           ))}
       </div>
 
-      {collectionsLoaded && collections.length === 0 && (
+      {collectionsError && (
+        <div
+          role="alert"
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-px-6 tw-py-12 tw-text-center tw-text-error"
+        >
+          Unable to load collections. Refresh the page to try again.
+        </div>
+      )}
+
+      {collectionsLoaded && !collectionsError && collections.length === 0 && (
         <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-900/50 tw-px-6 tw-py-12 tw-text-center">
           <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-200">
             No collections found
@@ -122,7 +135,7 @@ export default function NextGenCollections() {
         </div>
       )}
 
-      {totalResults > PAGE_SIZE && collectionsLoaded && (
+      {totalResults > PAGE_SIZE && collectionsLoaded && !collectionsError && (
         <div className="tw-flex tw-justify-center tw-py-6">
           <Pagination
             page={page}

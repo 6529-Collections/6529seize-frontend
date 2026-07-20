@@ -1,7 +1,6 @@
 "use client";
 
 import NextGenMint from "./NextGenMint";
-import { useEffect, useState } from "react";
 import { useReadContract } from "wagmi";
 import {
   NEXTGEN_CORE,
@@ -17,10 +16,12 @@ interface Props {
   collection: NextGenCollection;
 }
 
-export default function NextGenCollectionMint(props: Readonly<Props>) {
-  const [burnAmount, setBurnAmount] = useState<number>(0);
-  const [mintPrice, setMintPrice] = useState<number>(0);
+function getReadNumber(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
+export default function NextGenCollectionMint(props: Readonly<Props>) {
   const burnAmountRead = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
@@ -32,13 +33,6 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     args: [props.collection.id],
   });
 
-  useEffect(() => {
-    const data = burnAmountRead.data;
-    if (data) {
-      setBurnAmount(parseInt((data as bigint).toString()));
-    }
-  }, [burnAmountRead.data]);
-
   const mintPriceRead = useReadContract({
     address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_MINTER.abi,
@@ -49,13 +43,6 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
     },
     args: [props.collection.id],
   });
-
-  useEffect(() => {
-    const data = mintPriceRead.data;
-    if (!isNaN(parseInt(String(data)))) {
-      setMintPrice(parseInt(String(data)));
-    }
-  }, [mintPriceRead.data]);
 
   const isLoading = burnAmountRead.isLoading || mintPriceRead.isLoading;
   const hasError = burnAmountRead.isError || mintPriceRead.isError;
@@ -79,12 +66,12 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
           Mint
         </h2>
         {isLoading && (
-          <div
-            role="status"
+          <output
+            aria-label="Loading mint details"
             className="tw-flex tw-items-center tw-gap-2 tw-py-8 tw-text-sm tw-text-iron-400"
           >
             Loading mint details…
-          </div>
+          </output>
         )}
         {hasError && (
           <div role="alert" className="tw-py-8 tw-text-sm tw-text-error">
@@ -97,8 +84,8 @@ export default function NextGenCollectionMint(props: Readonly<Props>) {
           mintPriceRead.isSuccess && (
             <NextGenMint
               collection={props.collection}
-              mint_price={mintPrice}
-              burn_amount={burnAmount}
+              mint_price={getReadNumber(mintPriceRead.data)}
+              burn_amount={getReadNumber(burnAmountRead.data)}
             />
           )}
       </section>

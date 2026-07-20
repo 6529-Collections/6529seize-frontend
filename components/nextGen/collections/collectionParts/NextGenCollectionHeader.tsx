@@ -33,6 +33,13 @@ const ACTION_LINK_CLASSES =
 const PHASE_TAG_BASE_CLASSES =
   "tw-inline-flex tw-min-h-7 tw-items-center tw-rounded-full tw-border tw-border-solid tw-bg-black/40 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-tracking-wide";
 
+const COLLECTION_ART_ROUTE_SUFFIXES = [
+  "/art",
+  "/trait-sets",
+  "/distribution-plan",
+  "/mint",
+] as const;
+
 interface Props {
   collection: NextGenCollection;
   collection_link?: boolean | undefined;
@@ -54,12 +61,9 @@ export function NextGenBackToCollectionPageLink(
   props: Readonly<{ collection: NextGenCollection }>
 ) {
   const pathname = usePathname() || "";
-  const isArtPage =
-    (pathname.endsWith("/art") ||
-      pathname.endsWith("/trait-sets") ||
-      pathname.endsWith("/distribution-plan") ||
-      pathname.endsWith("/mint")) ??
-    false;
+  const isArtPage = COLLECTION_ART_ROUTE_SUFFIXES.some((suffix) =>
+    pathname.endsWith(suffix)
+  );
   const content = isArtPage
     ? "Back to collection page"
     : "Back to collection art";
@@ -132,6 +136,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
               props.collection.name
             )}/mint`}
             className={ACTION_LINK_CLASSES}
+            aria-label={collectionLoaded ? undefined : "Loading mint details"}
           >
             {getButtonLabel()}
           </Link>

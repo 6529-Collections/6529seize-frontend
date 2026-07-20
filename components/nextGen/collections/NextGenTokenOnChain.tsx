@@ -26,6 +26,8 @@ interface Props {
   token_id: number;
 }
 
+const TOKEN_METADATA_FETCH_TIMEOUT_MS = 10_000;
+
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -66,28 +68,44 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
       setFetchingMetadata(true);
 
       const controller = new AbortController();
+      let active = true;
+      const timeoutId = globalThis.setTimeout(() => {
+        if (active) {
+          controller.abort();
+        }
+      }, TOKEN_METADATA_FETCH_TIMEOUT_MS);
       const fetchMetadata = async () => {
         try {
           const response = await fetch(tokenUri, { signal: controller.signal });
           const metadata = (await response.json()) as { image?: unknown };
-          if (typeof metadata.image !== "string" || !metadata.image) {
+          if (!active) {
+            return;
+          }
+          const image =
+            typeof metadata.image === "string" ? metadata.image.trim() : "";
+          if (!image) {
             setTokenNotFound(true);
             return;
           }
-          setTokenImage(metadata.image);
+          setTokenImage(image);
         } catch {
-          if (!controller.signal.aborted) {
+          if (active) {
             setTokenNotFound(true);
           }
         } finally {
-          if (!controller.signal.aborted) {
+          globalThis.clearTimeout(timeoutId);
+          if (active) {
             setFetchingMetadata(false);
           }
         }
       };
 
       void fetchMetadata();
-      return () => controller.abort();
+      return () => {
+        active = false;
+        globalThis.clearTimeout(timeoutId);
+        controller.abort();
+      };
     }
 
     setTokenNotFound(true);
@@ -230,11 +248,15 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 Owner
               </dt>
               <dd className="tw-m-0 tw-mt-1 tw-flex tw-min-w-0 tw-items-center tw-gap-1 tw-text-base tw-text-white">
-                <Address
-                  wallets={[owner as `0x${string}`]}
-                  display={profile?.handle ?? ownerENS}
-                />
-                {areEqualAddresses(owner, account.address) && (
+                {owner ? (
+                  <Address
+                    wallets={[owner]}
+                    display={profile?.handle ?? ownerENS}
+                  />
+                ) : (
+                  <span>Fetching owner…</span>
+                )}
+                {owner && areEqualAddresses(owner, account.address) && (
                   <span>(you)</span>
                 )}
               </dd>

@@ -67,4 +67,31 @@ describe("NextGenCollectionArtist", () => {
       `/nextgen/collection/${formatNameForUrl("More")}`
     );
   });
+
+  it("clears the previous biography while a new artist loads", async () => {
+    const pendingBio = new Promise(() => {});
+    const { rerender } = render(
+      <NextGenCollectionArtist collection={collection} />
+    );
+
+    expect(await screen.findByText("bio text")).toBeInTheDocument();
+
+    (commonApiFetch as jest.Mock).mockReturnValueOnce(pendingBio);
+    rerender(
+      <NextGenCollectionArtist
+        collection={{
+          ...collection,
+          artist: "Next Artist",
+          artist_address: "0x2",
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText("bio text")).not.toBeInTheDocument();
+    });
+    expect(commonApiFetch).toHaveBeenLastCalledWith({
+      endpoint: "profiles/0x2/cic/statements",
+    });
+  });
 });

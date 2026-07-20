@@ -23,9 +23,7 @@ import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import styles from "../NextGen.module.css";
 import {
   getNextGenIconUrl,
   getNextGenImageUrl,
@@ -36,6 +34,8 @@ interface Props {
 }
 
 const PAGE_SIZE = 20;
+const CELL_CLASSES =
+  "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5";
 
 function getActivityTransaction(log: NextGenLog): Transaction | undefined {
   if (typeof log.token_id !== "number") {
@@ -65,7 +65,6 @@ function getActivityTransaction(log: NextGenLog): Transaction | undefined {
 
 export default function NextGenCollectionProvenance(props: Readonly<Props>) {
   const scrollTarget = useRef<HTMLDivElement>(null);
-
   const [logs, setLogs] = useState<NextGenLog[]>([]);
   const [logsLoaded, setLogsLoaded] = useState(false);
   const [logsError, setLogsError] = useState(false);
@@ -79,7 +78,7 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
     setLogsError(false);
     setLogs([]);
 
-    commonApiFetch<{
+    void commonApiFetch<{
       count: number;
       page: number;
       next: unknown;
@@ -107,87 +106,80 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
   }, [page, props.collection.id, requestVersion]);
 
   return (
-    <div
-      className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
-      ref={scrollTarget}
-    >
-      <div className="tw-overflow-x-auto tw-pt-2">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <table className="tw-w-full tw-min-w-[900px] tw-border-collapse">
-            <tbody>
-              {!logsLoaded && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="tw-border-0 tw-p-6 tw-text-center tw-text-base tw-text-iron-300"
+    <div className="tw-w-full" ref={scrollTarget}>
+      <div className="tw-overflow-x-auto">
+        <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
+          <tbody>
+            {!logsLoaded && (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="tw-border-0 tw-p-6 tw-text-center tw-text-base tw-text-iron-300"
+                >
+                  Loading provenance…
+                </td>
+              </tr>
+            )}
+            {logsError && (
+              <tr>
+                <td colSpan={4} className="tw-border-0 tw-p-6">
+                  <div
+                    role="alert"
+                    className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 tw-text-base tw-text-error"
                   >
-                    Loading provenance…
-                  </td>
-                </tr>
-              )}
-              {logsError && (
-                <tr>
-                  <td colSpan={4} className="tw-border-0 tw-p-6">
-                    <div
-                      role="alert"
-                      className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 tw-text-base tw-text-error"
+                    <span>Unable to load collection provenance.</span>
+                    <button
+                      type="button"
+                      className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                      onClick={() =>
+                        setRequestVersion((version) => version + 1)
+                      }
                     >
-                      <span>Unable to load collection provenance.</span>
-                      <button
-                        type="button"
-                        className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                        onClick={() =>
-                          setRequestVersion((version) => version + 1)
-                        }
-                      >
-                        Retry
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {logs.map((log, index) => {
-                const transaction = getActivityTransaction(log);
-                if (transaction) {
-                  return (
-                    <LatestActivityRow
-                      key={`${log.id}`}
-                      tr={transaction}
-                      nextgen_collection={props.collection}
-                      showNftIdentity
-                    />
-                  );
-                }
-
-                return (
-                  <tr key={`${log.id}`}>
-                    <td colSpan={4} className="tw-border-0 tw-p-0">
-                      <NextGenCollectionProvenanceRow
-                        collection={props.collection}
-                        log={log}
-                        odd={index % 2 !== 0}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      Retry
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )}
+            {logsLoaded && !logsError && logs.length === 0 && (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="tw-border-0 tw-p-6 tw-text-center tw-text-base tw-text-iron-300"
+                >
+                  No collection provenance entries found.
+                </td>
+              </tr>
+            )}
+            {logs.map((log) => {
+              const transaction = getActivityTransaction(log);
+              return transaction ? (
+                <LatestActivityRow
+                  key={`${log.id}`}
+                  tr={transaction}
+                  nextgen_collection={props.collection}
+                  showNftIdentity
+                />
+              ) : (
+                <NextGenCollectionProvenanceRow
+                  key={`${log.id}`}
+                  collection={props.collection}
+                  log={log}
+                />
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-      {totalResults > PAGE_SIZE && logsLoaded && (
+      {totalResults > PAGE_SIZE && logsLoaded && !logsError && (
         <div className="tw-pb-3 tw-pt-2 tw-text-center">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
             totalResults={totalResults}
-            setPage={function (newPage: number) {
+            setPage={(newPage: number) => {
               setPage(newPage);
-              if (scrollTarget.current) {
-                scrollTarget.current.scrollIntoView({
-                  behavior: "smooth",
-                });
-              }
+              scrollTarget.current?.scrollIntoView({ behavior: "smooth" });
             }}
           />
         </div>
@@ -218,202 +210,141 @@ export function NextGenCollectionProvenanceRow(
     typeof transactionMatch.index === "number"
   );
 
-  function printAddress(address: string, display?: string) {
-    return (
-      <Link href={`/${address}`}>{display ?? formatAddress(address)}</Link>
-    );
-  }
-
-  function printParsedLog() {
-    const match = transactionMatch;
-
-    try {
-      if (match?.[1] && match?.[2] && typeof match.index === "number") {
-        const startIndex = match.index;
-        const endIndex = startIndex + match[1].length;
-        const beforeMatch = log.log.substring(0, startIndex);
-        let afterMatch = log.log.substring(endIndex);
-        if (afterMatch.startsWith(" ")) {
-          afterMatch = afterMatch.substring(1);
-        }
-        const normalisedTokenId = parseInt(match[2], 10);
-        const tokenId = props.collection.id * 10000000000 + normalisedTokenId;
-
-        const content = (
-          <>
-            {match[1]}
-            <Image
-              unoptimized
-              width={0}
-              height={0}
-              style={{
-                height: "40px",
-                width: "auto",
-                marginLeft: "8px",
-                marginRight: "8px",
-              }}
-              src={getNextGenIconUrl(tokenId)}
-              alt={`#${tokenId.toString()}`}
-              className={styles["nftImage"]}
-              onError={({ currentTarget }) => {
-                if (currentTarget.src === getNextGenIconUrl(tokenId)) {
-                  currentTarget.src = getNextGenImageUrl(tokenId);
-                }
-              }}
-            />
-          </>
-        );
-
-        const fromTo: ReactNode = (
-          <span className="tw-flex tw-gap-1">
-            <span>
-              {areEqualAddresses(log.from_address, NULL_ADDRESS) ? (
-                "Minted"
-              ) : (
-                <>
-                  from&nbsp;
-                  {printAddress(log.from_address, log.from_display)}
-                </>
-              )}
-            </span>
-            <span>
-              to&nbsp;
-              {printAddress(log.to_address, log.to_display)}
-            </span>
-          </span>
-        );
-
-        const beforeMatchSpan = <span>{beforeMatch}</span>;
-        const afterMatchSpan = afterMatch ? (
-          <span>{afterMatch}&nbsp;</span>
-        ) : (
-          <></>
-        );
-        if (props.disable_link) {
-          return (
-            <>
-              {beforeMatchSpan}
-              {content}
-              {afterMatchSpan}
-              {fromTo}
-            </>
-          );
-        } else {
-          return (
-            <>
-              {beforeMatchSpan}
-              &nbsp;
-              <Link
-                href={`/nextgen/token/${tokenId}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {content}
-              </Link>
-              {afterMatchSpan}
-              {fromTo}
-            </>
-          );
-        }
-      }
-    } catch (e) {
-      console.error("Error processing log:", e);
-    }
-
-    return <>{log.heading}</>;
-  }
-
-  function printBody() {
-    if (!isTransaction) {
-      const logSpan = <span>{log.log}</span>;
-      if (log.log.startsWith("Script at index")) {
-        return (
-          <span className="tw-flex tw-flex-col">
-            <span className="tw-pb-2 tw-text-sm tw-text-[#9a9a9a]">
-              * The script of each collection is split into manageable chunks
-              due to Ethereum&apos;s transaction size limits. Each chunk of the
-              script is updated individually in a separate transaction.
-            </span>
-            {logSpan}
-          </span>
-        );
-      }
-      return logSpan;
-    }
-    return;
-  }
-
-  const rowClassName = props.odd
-    ? styles["collectionProvenanceAccordionOdd"]
-    : styles["collectionProvenanceAccordion"];
-  const rowBackgroundClassName = props.odd
-    ? "tw-bg-[rgb(34,34,34)]"
-    : "tw-bg-[rgb(30,30,30)]";
-  const bodyClassName = props.odd
-    ? styles["collectionProvenanceAccordionBodyOdd"]
-    : styles["collectionProvenanceAccordionBody"];
-  const headerContent = (
-    <div
-      className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["collectionProvenanceAccordionButton"]}`}
+  const printAddress = (address: string, display?: string) => (
+    <Link
+      href={`/${address}`}
+      className="tw-font-semibold tw-text-white tw-underline tw-underline-offset-2 hover:tw-text-white hover:tw-opacity-80"
     >
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-          <span className="tw-flex tw-items-center tw-justify-between">
-            <span className="tw-flex tw-items-center tw-gap-6">
-              <span className="tw-min-w-fit tw-whitespace-nowrap">
-                {getDateDisplay(new Date(log.block_timestamp * 1000))}
-              </span>
-              <span className="tw-flex tw-items-center">
-                {printParsedLog()}
-              </span>
-            </span>
-            <span className="tw-flex tw-items-center tw-gap-2">
-              {isTransaction &&
-                printGas(log.gas, log.gas_price, log.gas_price_gwei)}
-              {isTransaction &&
-                printRoyalties(log.value, log.royalties, log.from_address)}
-              <Link
-                href={getTransactionLink(NEXTGEN_CHAIN_ID, log.transaction)}
-                onClick={(e) => e.stopPropagation()}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FontAwesomeIcon
-                  style={{
-                    height: "25px",
-                    cursor: "pointer",
-                  }}
-                  icon={faExternalLinkSquare}
-                ></FontAwesomeIcon>
-              </Link>
-            </span>
-          </span>
-        </div>
-      </div>
-    </div>
+      {display ?? formatAddress(address)}
+    </Link>
   );
 
-  if (isTransaction) {
-    return (
-      <div className={`${rowClassName} ${rowBackgroundClassName}`}>
-        {headerContent}
-      </div>
+  const printParsedLog = () => {
+    const match = transactionMatch;
+    if (!match?.[1] || !match[2] || typeof match.index !== "number") {
+      return log.heading;
+    }
+
+    const beforeMatch = log.log.substring(0, match.index);
+    const afterMatch = log.log
+      .substring(match.index + match[1].length)
+      .trimStart();
+    const tokenId = props.collection.id * 10000000000 + Number(match[2]);
+    const tokenContent = (
+      <span className="tw-inline-flex tw-items-center tw-gap-2">
+        <span>{match[1]}</span>
+        <Image
+          unoptimized
+          width={40}
+          height={40}
+          src={getNextGenIconUrl(tokenId)}
+          alt={`${props.collection.name} #${match[2]}`}
+          className="tw-h-10 tw-w-12 tw-rounded-sm tw-object-contain"
+          onError={({ currentTarget }) => {
+            if (currentTarget.src === getNextGenIconUrl(tokenId)) {
+              currentTarget.src = getNextGenImageUrl(tokenId);
+            }
+          }}
+        />
+      </span>
     );
-  }
+
+    return (
+      <span className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+        {beforeMatch && <span>{beforeMatch}</span>}
+        {props.disable_link ? (
+          tokenContent
+        ) : (
+          <Link
+            href={`/nextgen/token/${tokenId}`}
+            className="tw-rounded-sm tw-text-white tw-no-underline hover:tw-text-white hover:tw-opacity-80 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {tokenContent}
+          </Link>
+        )}
+        {afterMatch && <span>{afterMatch}</span>}
+        <span>
+          {areEqualAddresses(log.from_address, NULL_ADDRESS)
+            ? "Minted "
+            : "from "}
+        </span>
+        {!areEqualAddresses(log.from_address, NULL_ADDRESS) &&
+          printAddress(log.from_address, log.from_display)}
+        <span>to </span>
+        {printAddress(log.to_address, log.to_display)}
+      </span>
+    );
+  };
+
+  const transactionTools = (
+    <span className="tw-flex tw-items-center tw-gap-3 tw-pl-4">
+      {isTransaction &&
+        printRoyalties(log.value, log.royalties, log.from_address, "22px")}
+      {isTransaction &&
+        printGas(
+          log.gas,
+          log.gas_gwei,
+          log.gas_price_gwei,
+          "tw-h-4 tw-w-4 tw-cursor-pointer tw-text-iron-400 tw-transition-colors hover:tw-text-white"
+        )}
+      <Link
+        href={getTransactionLink(NEXTGEN_CHAIN_ID, log.transaction)}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="View transaction on Etherscan"
+        className="tw-flex tw-rounded-sm tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <FontAwesomeIcon
+          className="tw-h-5 tw-w-5"
+          icon={faExternalLinkSquare}
+        />
+      </Link>
+    </span>
+  );
+
+  const body = log.log.startsWith("Script at index") ? (
+    <span className="tw-flex tw-flex-col tw-gap-2">
+      <span className="tw-text-xs tw-text-iron-400">
+        The script is split into chunks because of Ethereum transaction-size
+        limits.
+      </span>
+      <span>{log.log}</span>
+    </span>
+  ) : (
+    log.log
+  );
 
   return (
-    <details className={`${rowClassName} ${rowBackgroundClassName}`}>
-      <summary className="tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400">
-        {headerContent}
-      </summary>
-      <div className={bodyClassName}>
-        <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-2">
-            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-              {printBody()}
-            </div>
-          </div>
+    <tr className="tw-h-16 odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70">
+      <td
+        className={`${CELL_CLASSES} tw-w-px tw-whitespace-nowrap tw-text-iron-400`}
+      >
+        {getDateDisplay(new Date(log.block_timestamp * 1000))}
+      </td>
+      <td className={`${CELL_CLASSES} tw-w-14 tw-text-center tw-text-iron-400`}>
+        <span aria-hidden="true">•</span>
+      </td>
+      <td className={`${CELL_CLASSES} tw-text-white`}>
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+          {isTransaction ? (
+            printParsedLog()
+          ) : (
+            <details className="tw-group tw-min-w-0 tw-flex-1">
+              <summary className="tw-cursor-pointer tw-list-none tw-rounded-sm tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
+                <span className="tw-flex tw-items-center tw-gap-2 before:tw-text-lg before:tw-text-iron-400 before:tw-transition-transform before:tw-content-['›'] group-open:before:tw-rotate-90">
+                  {log.heading}
+                </span>
+              </summary>
+              <div className="tw-pb-1 tw-pl-5 tw-pt-2 tw-text-sm tw-font-normal tw-text-iron-300">
+                {body}
+              </div>
+            </details>
+          )}
+          {transactionTools}
         </div>
-      </div>
-    </details>
+      </td>
+    </tr>
   );
 }

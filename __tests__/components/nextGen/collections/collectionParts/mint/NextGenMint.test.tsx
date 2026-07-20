@@ -83,8 +83,8 @@ describe("NextGenMint", () => {
   });
 
   it("Spinner renders output element", () => {
-    const { container } = render(<Spinner />);
-    expect(container.querySelector("output")).toBeInTheDocument();
+    render(<Spinner />);
+    expect(screen.getByLabelText("Processing")).toBeInTheDocument();
   });
 });
 

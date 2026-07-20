@@ -13,9 +13,12 @@ export default function NextGenArtists() {
     { address: string; collections: NextGenCollection[] }[]
   >([]);
   const [artistsLoaded, setArtistsLoaded] = useState(false);
+  const [artistsError, setArtistsError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    setArtistsLoaded(false);
+    setArtistsError(false);
     const url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections`;
     void fetchUrl<DBResponse<NextGenCollection>>(url)
       .then((response) => {
@@ -52,6 +55,7 @@ export default function NextGenArtists() {
       .catch(() => {
         if (!cancelled) {
           setArtistCollections([]);
+          setArtistsError(true);
           setArtistsLoaded(true);
         }
       });
@@ -85,6 +89,7 @@ export default function NextGenArtists() {
           ))}
 
         {artistsLoaded &&
+          !artistsError &&
           artistCollections.map((artist) => (
             <NextGenCollectionArtist
               key={`nextgen-artist-${artist.address}`}
@@ -93,7 +98,16 @@ export default function NextGenArtists() {
             />
           ))}
 
-        {artistsLoaded && artistCollections.length === 0 && (
+        {artistsError && (
+          <div
+            role="alert"
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-px-6 tw-py-12 tw-text-center tw-text-error"
+          >
+            Unable to load artists. Refresh the page to try again.
+          </div>
+        )}
+
+        {artistsLoaded && !artistsError && artistCollections.length === 0 && (
           <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-900/50 tw-px-6 tw-py-12 tw-text-center">
             <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-200">
               No artists found

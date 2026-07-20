@@ -77,6 +77,13 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
     props.resolution
   );
   const downloader = useDownloader();
+  let availabilityClassName = "tw-cursor-not-allowed tw-text-iron-500";
+  if (!imageLoaded) {
+    availabilityClassName = "tw-cursor-wait tw-text-iron-300";
+  } else if (imageExists) {
+    availabilityClassName =
+      "tw-cursor-pointer tw-text-white hover:tw-bg-iron-800";
+  }
 
   return (
     <li>
@@ -92,13 +99,7 @@ export function NextGenTokenDownloadDropdownItem(props: NextGenTokenProps) {
             props.onSelect?.();
           }
         }}
-        className={`tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
-          !imageLoaded
-            ? "tw-cursor-wait tw-text-iron-300"
-            : imageExists
-              ? "tw-cursor-pointer tw-text-white hover:tw-bg-iron-800"
-              : "tw-cursor-not-allowed tw-text-iron-500"
-        }`}
+        className={`tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${availabilityClassName}`}
       >
         {props.resolution}
         {!imageLoaded && " Loading…"}
@@ -171,9 +172,9 @@ export default function NextGenTokenDownload(
         {props.resolution}
         {imageExists && imageSize > 0 && ` (${numberWithCommas(imageSize)} MB)`}
       </span>
-      <span className="tw-flex tw-flex-none tw-items-center tw-text-sm tw-text-iron-400">
+      <div className="tw-flex tw-flex-none tw-items-center tw-text-sm tw-text-iron-400">
         {getDisplay()}
-      </span>
+      </div>
     </div>
   );
 }

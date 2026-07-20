@@ -25,6 +25,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
 
   useEffect(() => {
     let cancelled = false;
+    setBio("");
 
     void commonApiFetch<CicStatement[]>({
       endpoint: `profiles/${props.collection.artist_address}/cic/statements`,

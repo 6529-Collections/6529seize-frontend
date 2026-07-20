@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  getCollectionView,
+  getCollectionViewFromPathname,
   getContentViewKeyByValue,
   getNextgenCollectionDocumentTitle,
 } from "@/app/nextgen/collection/[collection]/page-utils";
@@ -71,10 +71,7 @@ export default function NextGenCollectionComponent({
 
   useEffect(() => {
     const onPopState = () => {
-      const pathSegments = globalThis.location.pathname
-        .split("/")
-        .filter(Boolean);
-      setView(getCollectionView(pathSegments.at(-1) ?? ""));
+      setView(getCollectionViewFromPathname(globalThis.location.pathname));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);

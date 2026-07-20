@@ -1,4 +1,6 @@
 import type { NextGenCollection } from "@/entities/INextgen";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { NextgenView } from "@/types/enums";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
@@ -22,6 +24,7 @@ const PRIMARY_LINK_CLASSES =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-bg-white tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-iron-950 tw-no-underline tw-shadow-sm tw-transition-colors tw-duration-200 hover:tw-bg-iron-300 hover:tw-text-iron-900 active:tw-bg-iron-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950";
 
 export default function NextGen(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const available = props.collection.total_supply - props.collection.mint_count;
   const collectionHref = `/nextgen/collection/${formatNameForUrl(
     props.collection.name
@@ -58,12 +61,13 @@ export default function NextGen(props: Readonly<Props>) {
               </Link>
             </h1>
             <p className="tw-mb-0 tw-mt-2 tw-text-2xl tw-font-light tw-leading-tight tw-text-iron-100 sm:tw-text-3xl md:tw-text-4xl">
-              by{" "}
               <Link
                 href={`/${props.collection.artist_address}`}
                 className="tw-text-inherit tw-no-underline hover:tw-text-white hover:tw-underline focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
-                {props.collection.artist}
+                {t(locale, "nextgen.home.byArtist", {
+                  artist: props.collection.artist,
+                })}
               </Link>
             </p>
             <div className="tw-mt-5 tw-text-base tw-font-medium tw-text-iron-100 sm:tw-text-lg">
@@ -71,7 +75,7 @@ export default function NextGen(props: Readonly<Props>) {
             </div>
             <div className="tw-mt-5">
               <Link href={collectionHref} className={PRIMARY_LINK_CLASSES}>
-                Explore Collection
+                {t(locale, "nextgen.home.exploreCollection")}
               </Link>
             </div>
             <div className="tw-mt-5 tw-max-w-xl">
@@ -83,10 +87,7 @@ export default function NextGen(props: Readonly<Props>) {
 
       <section className="tw-pb-5 tw-pt-7 sm:tw-pb-6 sm:tw-pt-8">
         <p className="tw-mx-auto tw-my-0 tw-max-w-5xl tw-text-center tw-text-base tw-leading-7 tw-text-iron-200 sm:tw-text-lg">
-          <strong className="tw-font-semibold tw-text-white">NextGen</strong> is
-          an on-chain generative art NFT contract. It is also a tool to support
-          the ambitious aspirations of the 6529 community in the areas of art
-          experimentation and decentralized social organization.
+          {t(locale, "nextgen.home.summary")}
         </p>
         <div className="tw-mt-4 tw-text-center">
           <Link
@@ -109,21 +110,23 @@ export default function NextGen(props: Readonly<Props>) {
             }}
             className={PRIMARY_LINK_CLASSES}
           >
-            Learn More
+            {t(locale, "nextgen.home.learnMore")}
           </Link>
         </div>
       </section>
 
       <section>
         <h2 className="tw-mb-5 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl">
-          Explore {props.collection.name}
+          {t(locale, "nextgen.home.exploreNamedCollection", {
+            collectionName: props.collection.name,
+          })}
         </h2>
         <NextGenCollectionSlideshow collection={props.collection} />
       </section>
 
       <section className="tw-pt-10 sm:tw-pt-12">
         <h2 className="tw-mb-5 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl">
-          Featured Artist
+          {t(locale, "nextgen.home.featuredArtist")}
         </h2>
         <NextGenCollectionArtist
           collection={props.collection}
@@ -141,6 +144,7 @@ export function DistributionLink(
     emphasized?: boolean | undefined;
   }>
 ) {
+  const locale = useBrowserLocale();
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
     props.collection.allowlist_end
@@ -167,7 +171,7 @@ export function DistributionLink(
               : "tw-inline-flex tw-min-h-10 tw-items-center tw-rounded-md tw-px-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-bg-white/5 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           }
         >
-          <span>Distribution Plan</span>
+          <span>{t(locale, "nextgen.home.distributionPlan")}</span>
           {props.emphasized && (
             <ArrowUpRightIcon
               aria-hidden="true"

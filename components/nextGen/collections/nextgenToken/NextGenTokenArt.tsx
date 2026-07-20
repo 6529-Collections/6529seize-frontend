@@ -399,23 +399,26 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   }, [mode]);
 
   const isBoxOpen = showLightbox || showBlackbox;
+  const viewerName = showLightbox ? "lightbox" : "blackbox";
+  const viewerBackgroundClassName = showLightbox
+    ? "tw-bg-iron-50"
+    : "tw-bg-black";
+  const ArtworkPanel = isBoxOpen ? "dialog" : "div";
+  const artworkPanelClassName = isBoxOpen
+    ? `tailwind-scope tw-fixed tw-inset-0 tw-z-[2147483647] tw-m-0 tw-flex tw-h-[100dvh] tw-max-h-none tw-w-screen tw-max-w-none tw-items-center tw-justify-center tw-overflow-hidden tw-border-0 tw-p-4 ${viewerBackgroundClassName}`
+    : "tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80";
+  const artworkPanelDialogProps = isBoxOpen
+    ? {
+        open: true,
+        "aria-modal": true as const,
+        "aria-label": `${props.token.name} ${viewerName}`,
+      }
+    : {};
 
   const artworkPanel = (
-    <div
-      role={isBoxOpen ? "dialog" : undefined}
-      aria-modal={isBoxOpen ? true : undefined}
-      aria-label={
-        isBoxOpen
-          ? `${props.token.name} ${showLightbox ? "lightbox" : "blackbox"}`
-          : undefined
-      }
-      className={
-        isBoxOpen
-          ? `tailwind-scope tw-fixed tw-inset-0 tw-z-[2147483647] tw-flex tw-h-[100dvh] tw-w-screen tw-items-center tw-justify-center tw-overflow-hidden tw-p-4 ${
-              showLightbox ? "tw-bg-iron-50" : "tw-bg-black"
-            }`
-          : "tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80"
-      }
+    <ArtworkPanel
+      {...artworkPanelDialogProps}
+      className={artworkPanelClassName}
       onMouseDown={(event) => {
         if (!isBoxOpen) {
           return;
@@ -476,7 +479,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           {printModeIcons()}
         </div>
       )}
-    </div>
+    </ArtworkPanel>
   );
 
   return (

@@ -61,6 +61,16 @@ it("shows message when no collections found", async () => {
   await screen.findByText("No collections found");
 });
 
+it("shows an error instead of an empty result when loading fails", async () => {
+  fetchUrl.mockRejectedValue(new Error("offline"));
+  render(<NextGenCollections />);
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Unable to load collections"
+  );
+  expect(screen.queryByText("No collections found")).not.toBeInTheDocument();
+});
+
 it("filters by status and resets page", async () => {
   fetchUrl.mockResolvedValue({ count: 1, data: [{ id: 1, name: "A" }] });
   fetchUrl

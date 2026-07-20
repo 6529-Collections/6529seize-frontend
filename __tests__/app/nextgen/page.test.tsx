@@ -135,6 +135,23 @@ describe("NextGen page component", () => {
     );
   });
 
+  it("restores an enum-cased view from popstate history", async () => {
+    const jsx = await NextGenPage({
+      params: Promise.resolve({ view: undefined }),
+    } as any);
+
+    render(jsx);
+
+    const nav = await screen.findByTestId("nav");
+    expect(nav).toBeEmptyDOMElement();
+
+    fireEvent.popState(window, {
+      state: { view: NextgenView.COLLECTIONS },
+    });
+
+    expect(nav).toHaveTextContent(NextgenView.COLLECTIONS);
+  });
+
   it("shows placeholder when collection missing", async () => {
     mockedFetch.mockResolvedValueOnce(null); // no featured collection
 
