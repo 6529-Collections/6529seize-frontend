@@ -54,7 +54,7 @@ const decodeFragment = (
   }
 
   const raw = fragment;
-  let decoded = fragment;
+  let decoded: string;
   try {
     decoded = decodeURIComponent(fragment);
   } catch {

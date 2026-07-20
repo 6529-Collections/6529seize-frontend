@@ -1,5 +1,6 @@
 import { load } from "cheerio";
 
+import { fetchPublicUrl } from "@/lib/security/urlGuard";
 import type {
   GoogleDocsLinkPreview,
   GoogleSheetsLinkPreview,
@@ -19,6 +20,9 @@ const GOOGLE_THUMBNAIL_BASE = "https://drive.google.com/thumbnail";
 const GOOGLE_PREVIEW_TIMEOUT_MS = 3000;
 const GOOGLE_PREVIEW_BYTE_LIMIT = 64 * 1024;
 const GOOGLE_TITLE_MAX_LENGTH = 160;
+const GOOGLE_PREVIEW_HOST_POLICY = {
+  allowedHosts: [GOOGLE_DOCS_HOST],
+} as const;
 type GoogleWorkspaceKind = "docs" | "sheets" | "slides";
 const GOOGLE_RESOURCE_KIND: Record<string, GoogleWorkspaceKind | undefined> = {
   document: "docs",
@@ -346,20 +350,21 @@ async function fetchGooglePreviewHtml(url: string): Promise<{
     return { html: null, ok: false };
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(
-    () => controller.abort(),
-    GOOGLE_PREVIEW_TIMEOUT_MS
-  );
-
   try {
-    const response = await fetch(validatedUrl.toString(), {
-      headers: {
-        "user-agent": LINK_PREVIEW_USER_AGENT,
-        accept: HTML_ACCEPT_HEADER,
+    const response = await fetchPublicUrl(
+      validatedUrl,
+      {
+        headers: {
+          accept: HTML_ACCEPT_HEADER,
+        },
       },
-      signal: controller.signal,
-    });
+      {
+        maxRedirects: 0,
+        policy: GOOGLE_PREVIEW_HOST_POLICY,
+        timeoutMs: GOOGLE_PREVIEW_TIMEOUT_MS,
+        userAgent: LINK_PREVIEW_USER_AGENT,
+      }
+    );
 
     if (!response.ok) {
       return { html: null, ok: false };
@@ -369,8 +374,6 @@ async function fetchGooglePreviewHtml(url: string): Promise<{
     return { html, ok: true };
   } catch {
     return { html: null, ok: false };
-  } finally {
-    clearTimeout(timeout);
   }
 }
 

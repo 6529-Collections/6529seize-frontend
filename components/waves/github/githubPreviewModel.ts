@@ -29,7 +29,7 @@ export const isStatusPreview = (
 ): preview is GithubStatusPreviewResponse =>
   preview?.type === "github.issue" || preview?.type === "github.pull_request";
 
-export const formatCompactNumber = (
+const formatCompactNumber = (
   value: number | null | undefined
 ): string | null =>
   typeof value === "number"
@@ -39,12 +39,10 @@ export const formatCompactNumber = (
       }).format(value)
     : null;
 
-export const formatInteger = (
-  value: number | null | undefined
-): string | null =>
+const formatInteger = (value: number | null | undefined): string | null =>
   typeof value === "number" ? new Intl.NumberFormat().format(value) : null;
 
-export const formatDate = (value: string | null | undefined): string | null => {
+const formatDate = (value: string | null | undefined): string | null => {
   if (!value) {
     return null;
   }
@@ -61,7 +59,7 @@ export const formatDate = (value: string | null | undefined): string | null => {
   }).format(date);
 };
 
-export const formatCount = (
+const formatCount = (
   value: number | null | undefined,
   singular: string,
   plural = `${singular}s`
@@ -74,7 +72,7 @@ export const formatCount = (
   return `${formatInteger(value)} ${noun}`;
 };
 
-export const formatDiff = (
+const formatDiff = (
   additions: number | null | undefined,
   deletions: number | null | undefined
 ): string | null => {
@@ -85,11 +83,11 @@ export const formatDiff = (
   return `+${formatInteger(additions ?? 0)} / -${formatInteger(deletions ?? 0)}`;
 };
 
-export const normalizeStatusText = (
+const normalizeStatusText = (
   value: string | null | undefined
 ): string | null => (value ? value.replaceAll("_", " ") : null);
 
-export const titleCase = (value: string | null | undefined): string | null => {
+const titleCase = (value: string | null | undefined): string | null => {
   const normalized = normalizeStatusText(value);
   if (!normalized) {
     return null;
@@ -98,15 +96,14 @@ export const titleCase = (value: string | null | undefined): string | null => {
   return normalized.replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
 
-export const joinDetailParts = (
+const joinDetailParts = (
   parts: readonly (string | null | undefined)[]
 ): string => parts.filter((part): part is string => Boolean(part)).join(" - ");
 
-export const joinMetaParts = (
-  parts: readonly (string | null | undefined)[]
-): string => parts.filter((part): part is string => Boolean(part)).join(" / ");
+const joinMetaParts = (parts: readonly (string | null | undefined)[]): string =>
+  parts.filter((part): part is string => Boolean(part)).join(" / ");
 
-export const getChecksLabel = (
+const getChecksLabel = (
   checks: GithubPreviewChecks | null | undefined
 ): string | null => {
   if (!checks) {
@@ -128,7 +125,7 @@ export const getChecksLabel = (
   return titleCase(checks.state);
 };
 
-export const getChecksTone = (
+const getChecksTone = (
   checks: GithubPreviewChecks | null | undefined
 ): GithubFact["tone"] => {
   switch (checks?.state) {
@@ -143,7 +140,7 @@ export const getChecksTone = (
   }
 };
 
-export const compactFacts = (
+const compactFacts = (
   facts: readonly (GithubFact | null)[]
 ): readonly GithubFact[] =>
   facts.filter(
@@ -219,7 +216,7 @@ export const getKindLabelFromPreview = (
   }
 };
 
-export const getAccentKind = (
+const getAccentKind = (
   link: ParsedGithubLink,
   preview: GithubPreviewResponse | null
 ): GithubLinkKind => {
@@ -255,7 +252,7 @@ export const getAccent = (
   return { kind, ...GITHUB_ACCENTS[kind] };
 };
 
-export const getFallbackTitle = (link: ParsedGithubLink): string => {
+const getFallbackTitle = (link: ParsedGithubLink): string => {
   switch (link.kind) {
     case "pull":
       return `Pull request #${link.number}`;
@@ -289,10 +286,13 @@ export const getCardTitle = (
   return title && title.length > 0 ? title : getFallbackTitle(link);
 };
 
-type GithubPreviewOf<TType extends GithubPreviewResponse["type"]> = Extract<
-  GithubPreviewResponse,
-  { readonly type: TType }
->;
+type GithubPreviewOf<TType extends GithubPreviewResponse["type"]> =
+  TType extends "github.file" | "github.directory"
+    ? Extract<
+        GithubPreviewResponse,
+        { readonly type: "github.file" | "github.directory" }
+      > & { readonly type: TType }
+    : Extract<GithubPreviewResponse, { readonly type: TType }>;
 
 const getRepositoryDetail = (
   repoLabel: string,
@@ -404,41 +404,58 @@ export const getDetailText = (
   }
 };
 
+const formatGithubAuthor = (
+  author: string | null | undefined
+): string | null => (author ? `by @${author}` : null);
+
+const formatGithubDate = (
+  prefix: string,
+  value: string | null | undefined
+): string | null => (value ? `${prefix} ${formatDate(value)}` : null);
+
+const formatGithubBranches = (
+  headRef: string | null | undefined,
+  baseRef: string | null | undefined
+): string | null => (headRef && baseRef ? `${headRef} -> ${baseRef}` : null);
+
+const formatGithubPrefix = (
+  prefix: string,
+  value: string | null | undefined
+): string | null => (value ? `${prefix} ${value}` : null);
+
 export const getMetaText = (
   preview: GithubPreviewResponse | null
 ): string | null => {
   switch (preview?.type) {
     case "github.pull_request":
       return joinMetaParts([
-        preview.author ? `by @${preview.author}` : null,
-        preview.updatedAt ? `updated ${formatDate(preview.updatedAt)}` : null,
-        preview.headRef && preview.baseRef
-          ? `${preview.headRef} -> ${preview.baseRef}`
-          : null,
+        formatGithubAuthor(preview.author),
+        formatGithubDate("updated", preview.updatedAt),
+        formatGithubBranches(preview.headRef, preview.baseRef),
       ]);
     case "github.issue":
       return joinMetaParts([
-        preview.author ? `by @${preview.author}` : null,
-        preview.updatedAt ? `updated ${formatDate(preview.updatedAt)}` : null,
+        formatGithubAuthor(preview.author),
+        formatGithubDate("updated", preview.updatedAt),
       ]);
     case "github.repository":
       return joinMetaParts([
         preview.visibility,
-        preview.defaultBranch ? `default ${preview.defaultBranch}` : null,
-        preview.pushedAt ? `pushed ${formatDate(preview.pushedAt)}` : null,
+        formatGithubPrefix("default", preview.defaultBranch),
+        formatGithubDate("pushed", preview.pushedAt),
       ]);
     case "github.file":
     case "github.directory":
       return joinMetaParts([
         preview.path,
-        preview.ref ? `ref ${preview.ref}` : null,
+        formatGithubPrefix("ref", preview.ref),
       ]);
     default:
       return null;
   }
 };
 
-export const getAssigneeLabel = (
+const getAssigneeLabel = (
   assignees: readonly string[] | null | undefined
 ): string | null => {
   if (!assignees || assignees.length === 0) {
@@ -479,7 +496,7 @@ export const getPreviewLabels = (
 
 const createFact = (
   label: string,
-  value: string | null,
+  value: string | null | undefined,
   tone?: GithubFact["tone"]
 ): GithubFact | null => (value ? { label, value, tone } : null);
 

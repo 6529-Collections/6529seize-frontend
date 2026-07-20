@@ -22,13 +22,11 @@ import {
   getExchangeRateScale,
   isPossibleTxHash,
   normalizeAddress,
+  pow10BigInt,
   type CompoundTarget,
   type PreviewPlan,
 } from "./markets";
 export type { PreviewPlan } from "./markets";
-
-const BLOCKS_PER_YEAR = 2_365_200;
-const SECONDS_PER_YEAR = 31_536_000;
 
 const V2_MARKET_TTL_MS = 90_000;
 const V3_MARKET_TTL_MS = 90_000;

@@ -7,6 +7,7 @@ import type {
   ArtistPreview,
   AssetPreview,
   CollectionPreview,
+  PepeKind,
   Preview,
   SetPreview,
 } from "./types";

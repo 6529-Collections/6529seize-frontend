@@ -23,9 +23,6 @@ import {
 import { sanitizeHtmlToText } from "@/lib/text/html";
 import LruTtlCache from "@/lib/cache/lruTtl";
 
-const USER_AGENT = "6529seize-wikimedia-preview/1.0 (+https://6529.io)";
-const REQUEST_TIMEOUT_MS = 8000;
-const SHORT_LINK_MAX_REDIRECTS = 5;
 const CACHE_MAX_ITEMS = 1000;
 
 const TTL_BY_KIND: Record<WikimediaCardResponse["kind"], number> = {

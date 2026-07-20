@@ -31,7 +31,7 @@ export const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
 const BIGINT_TEN = BigInt(10);
 
-function pow10BigInt(exponent: number): bigint {
+export function pow10BigInt(exponent: number): bigint {
   let result = BIGINT_ONE;
   for (let index = 0; index < exponent; index += 1) {
     result *= BIGINT_TEN;

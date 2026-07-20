@@ -102,7 +102,7 @@ export function readAttributes(
   return Array.isArray(attributes) ? (attributes as AttributeRecord[]) : [];
 }
 
-export function normalizeTraitType(value: string | null | undefined): string {
+function normalizeTraitType(value: string | null | undefined): string {
   return (value ?? "").trim().toLowerCase().replaceAll(/\s+/g, " ");
 }
 
@@ -192,7 +192,7 @@ export function compactFacts(
   );
 }
 
-export function normalizeHttpsImageUrl(value: unknown): string | undefined {
+function normalizeHttpsImageUrl(value: unknown): string | undefined {
   const url = readString(value);
   if (!url) {
     return undefined;
@@ -219,9 +219,7 @@ export function selectHttpsImageUrl(
   return undefined;
 }
 
-export function createImageMedia(
-  url: string | undefined
-): LinkPreviewMedia | null {
+function createImageMedia(url: string | undefined): LinkPreviewMedia | null {
   const normalizedUrl = normalizeHttpsImageUrl(url);
   return normalizedUrl
     ? { url: normalizedUrl, secureUrl: normalizedUrl }
@@ -311,7 +309,7 @@ export function compactPeople(
   );
 }
 
-export function profileLookupCandidate(value: unknown): string | null {
+function profileLookupCandidate(value: unknown): string | null {
   const normalized = readString(value)?.replace(/^@/, "");
   if (!normalized || normalized.includes(",") || normalized.includes(" ")) {
     return null;
@@ -320,7 +318,7 @@ export function profileLookupCandidate(value: unknown): string | null {
   return normalized;
 }
 
-export function identityProfileHandle(
+function identityProfileHandle(
   profile: IdentityResponse | null | undefined
 ): string | undefined {
   return firstNonEmptyString(profile?.handle, profile?.normalised_handle);

@@ -1,6 +1,6 @@
 export const TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN = /0x(?:\{id\}|%7Bid%7D)/i;
 
-export const normalizeTokenIdCandidate = (tokenId: string): string => {
+const normalizeTokenIdCandidate = (tokenId: string): string => {
   const trimmed = tokenId.trim();
   if (trimmed.startsWith("0x") || trimmed.startsWith("0X")) {
     try {
@@ -13,7 +13,7 @@ export const normalizeTokenIdCandidate = (tokenId: string): string => {
   return trimmed;
 };
 
-export const toHexTokenId = (tokenId: string): string | null => {
+const toHexTokenId = (tokenId: string): string | null => {
   const trimmed = tokenId.trim();
   if (!trimmed) {
     return null;

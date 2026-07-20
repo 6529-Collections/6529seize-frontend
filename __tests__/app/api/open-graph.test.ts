@@ -42,13 +42,10 @@ const createMockFetchResponse = (status: number, body: string, url: string) => {
 
 beforeEach(() => {
   lookup.mockReset();
+  lookup.mockResolvedValue([{ address: "142.250.72.14", family: 4 }]);
   mockFetch.mockReset();
   mockUndiciFetch.mockReset();
   global.fetch = mockFetch as unknown as typeof fetch;
-});
-
-afterEach(() => {
-  expect(mockUndiciFetch).not.toHaveBeenCalled();
 });
 
 afterAll(() => {
@@ -211,7 +208,7 @@ describe("open-graph route helpers", () => {
     const previewHtml =
       "<html><head><title>Preview Title</title></head><body></body></html>";
 
-    mockFetch.mockResolvedValueOnce(
+    mockUndiciFetch.mockResolvedValueOnce(
       Promise.resolve(
         createMockFetchResponse(
           200,
@@ -239,14 +236,13 @@ describe("open-graph route helpers", () => {
       },
     });
 
-    expect(mockFetch).toHaveBeenCalledWith(
+    expect(mockUndiciFetch).toHaveBeenCalledWith(
       "https://docs.google.com/document/d/abc/preview",
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          "user-agent": expect.stringContaining("6529seize-link-preview"),
-        }),
-      })
+      expect.objectContaining({ redirect: "manual" })
     );
+    const headers = mockUndiciFetch.mock.calls[0]?.[1]?.headers as Headers;
+    expect(headers.get("user-agent")).toContain("6529seize-link-preview");
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it("avoids fetching previews for non-canonical Google Docs identifiers", async () => {
@@ -261,6 +257,7 @@ describe("open-graph route helpers", () => {
     );
 
     expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockUndiciFetch).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       type: "google.docs",
       availability: "restricted",
@@ -269,7 +266,7 @@ describe("open-graph route helpers", () => {
   });
 
   it("builds a Google Sheets preview and marks restricted access on failure", async () => {
-    mockFetch.mockResolvedValueOnce(
+    mockUndiciFetch.mockResolvedValueOnce(
       Promise.resolve(
         createMockFetchResponse(
           403,

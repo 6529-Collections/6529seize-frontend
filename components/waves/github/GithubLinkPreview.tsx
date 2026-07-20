@@ -14,6 +14,7 @@ import {
 } from "@/services/api/github-preview-api";
 import {
   parseGithubLink,
+  type GithubFact,
   type GithubPreviewState,
 } from "./githubPreviewParser";
 import {
@@ -28,7 +29,6 @@ import {
   getPreviewLabels,
   isStatusPreview,
   shouldFetchGithubPreview,
-  type GithubFact,
 } from "./githubPreviewModel";
 
 export { parseGithubLink } from "./githubPreviewParser";
