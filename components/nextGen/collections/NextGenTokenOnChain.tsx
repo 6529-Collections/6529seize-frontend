@@ -70,7 +70,9 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
       const controller = new AbortController();
       let active = true;
       const timeoutId = globalThis.setTimeout(() => {
-        controller.abort();
+        if (active) {
+          controller.abort();
+        }
       }, TOKEN_METADATA_FETCH_TIMEOUT_MS);
       const fetchMetadata = async () => {
         try {

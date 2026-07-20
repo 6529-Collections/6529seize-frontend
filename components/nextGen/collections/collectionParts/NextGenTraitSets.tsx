@@ -57,6 +57,7 @@ export default function NextGenTraitSets(
   const PAGE_SIZE = props.preview ? 10 : 25;
 
   const availableTraits: string[] = TRAITS[props.collection.id] ?? [];
+  const hasAvailableTraits = availableTraits.length > 0;
 
   const [selectedTrait, setSelectedTrait] = useState<string | null>(
     availableTraits[0] ?? null
@@ -273,9 +274,9 @@ export default function NextGenTraitSets(
       </div>
       <div className="tw-mt-5 tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4">
         {availableTraits.map((trait) => printTraitPill(trait))}
-        {availableTraits.length > 0 && printTraitPill(ULTIMATE)}
+        {hasAvailableTraits && printTraitPill(ULTIMATE)}
       </div>
-      {availableTraits.length === 0 && (
+      {!hasAvailableTraits && (
         <div className="tw-mt-5 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-900/50 tw-px-6 tw-py-12 tw-text-center">
           <p className="tw-m-0 tw-text-sm tw-text-iron-300">
             No trait sets are configured for this collection.
@@ -303,7 +304,7 @@ export default function NextGenTraitSets(
           </span>
         </div>
       )}
-      {selectedTrait === ULTIMATE && availableTraits.length > 0 && (
+      {selectedTrait === ULTIMATE && hasAvailableTraits && (
         <div className="tw-mt-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-4">
           <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white">
             {ULTIMATE} Set
@@ -316,9 +317,7 @@ export default function NextGenTraitSets(
           {printTraitSetResults(selectedTrait)}
         </div>
       )}
-      {selectedTrait === ULTIMATE &&
-        availableTraits.length > 0 &&
-        printUltimate()}
+      {selectedTrait === ULTIMATE && hasAvailableTraits && printUltimate()}
       {!props.preview &&
         totalResults > 0 &&
         totalResults / PAGE_SIZE > 1 &&

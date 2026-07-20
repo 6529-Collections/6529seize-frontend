@@ -18,6 +18,8 @@ import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 
+const COLLECTION_VIEW_PATH_SEGMENT_INDEX = 3;
+
 export function printViewButton(
   currentView: NextgenCollectionView,
   v: NextgenCollectionView,
@@ -45,7 +47,8 @@ function getCollectionViewFromPathname(
   pathname: string
 ): NextgenCollectionView {
   const pathSegments = pathname.split("/").filter(Boolean);
-  return getCollectionView(pathSegments[3] ?? "");
+  const viewSegment = pathSegments[COLLECTION_VIEW_PATH_SEGMENT_INDEX] ?? "";
+  return getCollectionView(viewSegment);
 }
 
 export default function NextGenCollectionComponent({
