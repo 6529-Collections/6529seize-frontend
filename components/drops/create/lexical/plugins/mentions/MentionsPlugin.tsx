@@ -29,6 +29,7 @@ import {
   useIdentitiesSearch,
 } from "@/hooks/useIdentitiesSearch";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
+import { useDraftMentionSearchScope } from "./MentionSearchScopeContext";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -212,7 +213,9 @@ const NewMentionsPlugin = forwardRef<
     ? TYPEAHEAD_MENU_WRAPPER_CLASS_NAME_ELEVATED
     : TYPEAHEAD_MENU_WRAPPER_CLASS_NAME;
   const [queryString, setQueryString] = useState<string | null>(null);
+  const draftScope = useDraftMentionSearchScope();
   const { identities } = useIdentitiesSearch({
+    draftScope,
     handle: queryString ?? "",
     waveId,
   });
