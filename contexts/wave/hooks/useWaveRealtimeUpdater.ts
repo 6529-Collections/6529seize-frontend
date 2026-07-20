@@ -21,9 +21,7 @@ import {
 } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
-import {
-  updateAttachmentInCachedDrops,
-} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import { updateAttachmentInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { isWaveDropNearViewport } from "@/contexts/wave/drop-visibility";
 import {
   ProcessIncomingDropType,

@@ -166,7 +166,7 @@ const getTouchEventClientY = (event: TouchLikeEvent): number | null =>
   getTouchListClientY(event.targetTouches) ??
   getTouchListClientY(event.changedTouches);
 
-const clampSwipeOffset = (swipeOffset: number) =>
+export const clampSwipeOffset = (swipeOffset: number) =>
   Math.max(-MAX_SWIPE_OFFSET, Math.min(swipeOffset, MAX_SWIPE_OFFSET));
 
 function startTouchSurfaceTracking({

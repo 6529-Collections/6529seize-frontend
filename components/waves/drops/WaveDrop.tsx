@@ -11,14 +11,7 @@ import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";

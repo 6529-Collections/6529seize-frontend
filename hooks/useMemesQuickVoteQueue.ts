@@ -20,9 +20,7 @@ import {
   restoreOptimisticRemainingVotePower,
   type KeyedOptimisticRemainingVotePowerState,
 } from "@/hooks/memesQuickVote.queue.state";
-import {
-  MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY,
-} from "@/hooks/memesQuickVote.query";
+import { MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY } from "@/hooks/memesQuickVote.query";
 import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
 import { useMemesQuickVoteStorage } from "@/hooks/useMemesQuickVoteStorage";
 import { useMemesQuickVoteSubmit } from "@/hooks/useMemesQuickVoteSubmit";

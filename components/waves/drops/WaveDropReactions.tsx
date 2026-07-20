@@ -4,20 +4,11 @@ import { useEmoji } from "@/contexts/EmojiContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 
-
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  getReactionCount,
-} from "./reaction-utils";
-
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { getReactionCount } from "./reaction-utils";
 
 import { fetchDropReactionDetailsV2 } from "@/services/api/wave-drops-v2-api";
 import WaveDropReaction from "./WaveDropReaction";

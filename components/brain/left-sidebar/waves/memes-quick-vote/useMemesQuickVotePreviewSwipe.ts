@@ -11,6 +11,7 @@ import {
 } from "./useMemesQuickVotePreviewSwipe.helpers";
 import {
   SWIPE_TRIGGER_THRESHOLD,
+  clampSwipeOffset,
   commitSwipeAction,
   getCardTransform,
   getCardTransitionDuration,
