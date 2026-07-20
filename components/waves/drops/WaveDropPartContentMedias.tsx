@@ -32,6 +32,16 @@ function isRenderableMedia(mimeType: string, url: string): boolean {
   );
 }
 
+function getInteractiveHtmlViewportClassName(
+  mimeType: string
+): string | undefined {
+  if (!isInteractiveHtmlMedia(mimeType)) {
+    return undefined;
+  }
+
+  return INTERACTIVE_HTML_MEDIA_VIEWPORT_CLASS_NAME;
+}
+
 function isMediaProcessing(media: ApiDropPart["media"][number]): boolean {
   return (
     media.media_status === ApiDropMediaStatus.Uploading ||
@@ -195,7 +205,9 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
     const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
-    const useInteractiveHtmlLayout = isInteractiveHtmlMedia(media.mime_type);
+    const htmlIframeViewportClassName =
+      getInteractiveHtmlViewportClassName(media.mime_type);
+    const useInteractiveHtmlLayout = Boolean(htmlIframeViewportClassName);
     const isImageMedia = media.mime_type.includes("image");
     const isProcessingMedia = isMediaProcessing(media);
     const isFailedMedia = isMediaFailed(media);
@@ -223,11 +235,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           media_url={media.url}
           disableMediaInteraction={disableMediaInteraction}
           imageScale={imageScale}
-          htmlIframeViewportClassName={
-            useInteractiveHtmlLayout
-              ? INTERACTIVE_HTML_MEDIA_VIEWPORT_CLASS_NAME
-              : undefined
-          }
+          htmlIframeViewportClassName={htmlIframeViewportClassName}
         />
       );
     } else if (useNaturalHeightImage || useImageReservedHeight) {
@@ -251,11 +259,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           imageScale={imageScale}
           galleryItemId={galleryItemId}
           fillVideoContainer={useVideoReservedHeight}
-          htmlIframeViewportClassName={
-            useInteractiveHtmlLayout
-              ? INTERACTIVE_HTML_MEDIA_VIEWPORT_CLASS_NAME
-              : undefined
-          }
+          htmlIframeViewportClassName={htmlIframeViewportClassName}
         />
       );
     }
