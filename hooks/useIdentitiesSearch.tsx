@@ -2,12 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import type { ApiWaveMentionSearchResult } from "@/generated/models/ApiWaveMentionSearchResult";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { DraftMentionSearchScope } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 import { useDebouncedValue } from "./useDebouncedValue";
 
 interface UseIdentitiesSearchProps {
+  readonly draftScope: DraftMentionSearchScope;
   readonly handle: string;
   readonly waveId: string | null;
-  readonly visibilityGroupId?: string | null | undefined;
 }
 
 export const IDENTITY_SEARCH_MIN_HANDLE_LENGTH = 3;
@@ -19,17 +20,21 @@ const isSearchableHandle = (handle: string) =>
   handle.length <= IDENTITY_SEARCH_MAX_HANDLE_LENGTH;
 
 export function useIdentitiesSearch({
+  draftScope,
   handle,
   waveId,
-  visibilityGroupId,
 }: UseIdentitiesSearchProps) {
   const debouncedHandle = useDebouncedValue(handle, 200);
-  const hasSearchScope = !!waveId || visibilityGroupId !== undefined;
+  const draftScopeKey =
+    draftScope.kind === "group"
+      ? `group:${draftScope.visibilityGroupId}`
+      : draftScope.kind;
+  const hasSearchScope = !!waveId || draftScope.kind !== "disabled";
 
   const { data: identities } = useQuery<ApiWaveMentionSearchResult[]>({
     queryKey: [
       QueryKey.IDENTITY_SEARCH,
-      { handle: debouncedHandle, visibilityGroupId, waveId },
+      { draftScopeKey, handle: debouncedHandle, waveId },
     ],
     queryFn: async ({ signal }) => {
       if (!hasSearchScope) {
@@ -40,8 +45,8 @@ export function useIdentitiesSearch({
         handle: debouncedHandle,
         limit: "5",
       };
-      if (!waveId && visibilityGroupId) {
-        params["visibility_group_id"] = visibilityGroupId;
+      if (!waveId && draftScope.kind === "group") {
+        params["visibility_group_id"] = draftScope.visibilityGroupId;
       }
       return await commonApiFetch<ApiWaveMentionSearchResult[]>({
         endpoint: waveId
@@ -54,12 +59,12 @@ export function useIdentitiesSearch({
     placeholderData: (previousData, previousQuery) => {
       const previousParams = previousQuery?.queryKey[1] as
         | {
-            visibilityGroupId?: string | null;
+            draftScopeKey?: string;
             waveId?: string | null;
           }
         | undefined;
       return previousParams?.waveId === waveId &&
-        previousParams.visibilityGroupId === visibilityGroupId
+        previousParams.draftScopeKey === draftScopeKey
         ? previousData
         : undefined;
     },

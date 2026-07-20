@@ -1,11 +1,19 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 
-type DraftVisibilityGroupId = string | null | undefined;
+export type DraftMentionSearchScope =
+  | { readonly kind: "disabled" }
+  | { readonly kind: "public" }
+  | { readonly kind: "group"; readonly visibilityGroupId: string };
 
-const MentionSearchScopeContext =
-  createContext<DraftVisibilityGroupId>(undefined);
+export const DISABLED_DRAFT_MENTION_SEARCH_SCOPE: DraftMentionSearchScope = {
+  kind: "disabled",
+};
+
+const MentionSearchScopeContext = createContext<DraftMentionSearchScope>(
+  DISABLED_DRAFT_MENTION_SEARCH_SCOPE
+);
 
 export function MentionSearchScopeProvider({
   children,
@@ -14,13 +22,21 @@ export function MentionSearchScopeProvider({
   readonly children: ReactNode;
   readonly visibilityGroupId: string | null;
 }) {
+  const scope = useMemo<DraftMentionSearchScope>(
+    () =>
+      visibilityGroupId === null
+        ? { kind: "public" }
+        : { kind: "group", visibilityGroupId },
+    [visibilityGroupId]
+  );
+
   return (
-    <MentionSearchScopeContext.Provider value={visibilityGroupId}>
+    <MentionSearchScopeContext.Provider value={scope}>
       {children}
     </MentionSearchScopeContext.Provider>
   );
 }
 
-export function useDraftMentionVisibilityGroupId(): DraftVisibilityGroupId {
+export function useDraftMentionSearchScope(): DraftMentionSearchScope {
   return useContext(MentionSearchScopeContext);
 }

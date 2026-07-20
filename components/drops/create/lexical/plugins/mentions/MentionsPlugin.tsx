@@ -28,7 +28,7 @@ import {
   useIdentitiesSearch,
 } from "@/hooks/useIdentitiesSearch";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
-import { useDraftMentionVisibilityGroupId } from "./MentionSearchScopeContext";
+import { useDraftMentionSearchScope } from "./MentionSearchScopeContext";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -174,11 +174,11 @@ const NewMentionsPlugin = forwardRef<
 >(({ waveId, onSelect, canMentionAll = false, onSelectGroupMention }, ref) => {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
-  const visibilityGroupId = useDraftMentionVisibilityGroupId();
+  const draftScope = useDraftMentionSearchScope();
   const { identities } = useIdentitiesSearch({
+    draftScope,
     handle: queryString ?? "",
     waveId,
-    visibilityGroupId,
   });
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);

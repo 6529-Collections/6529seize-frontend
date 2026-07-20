@@ -105,8 +105,25 @@ describe("MentionsPlugin", () => {
     );
 
     expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: {
+        kind: "group",
+        visibilityGroupId: "visibility-group",
+      },
       handle: "",
-      visibilityGroupId: "visibility-group",
+      waveId: null,
+    });
+  });
+
+  it("uses an explicit disabled draft scope without a provider", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <NewMentionsPlugin waveId={null} onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: { kind: "disabled" },
+      handle: "",
       waveId: null,
     });
   });

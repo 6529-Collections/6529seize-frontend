@@ -3,21 +3,25 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useIdentitiesSearch } from "@/hooks/useIdentitiesSearch";
 import { commonApiFetch } from "@/services/api/common-api";
+import {
+  DISABLED_DRAFT_MENTION_SEARCH_SCOPE,
+  type DraftMentionSearchScope,
+} from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 
 jest.mock("@/services/api/common-api");
 
 function TestComponent({
+  draftScope = DISABLED_DRAFT_MENTION_SEARCH_SCOPE,
   handle,
   waveId,
-  visibilityGroupId,
 }: {
+  draftScope?: DraftMentionSearchScope;
   handle: string;
   waveId: string | null;
-  visibilityGroupId?: string | null | undefined;
 }) {
   const { identities } = useIdentitiesSearch({
+    draftScope,
     handle,
-    visibilityGroupId,
     waveId,
   });
   return <div>{identities.map((i) => i.handle).join(",")}</div>;
@@ -106,9 +110,12 @@ describe("useIdentitiesSearch", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <TestComponent
+          draftScope={{
+            kind: "group",
+            visibilityGroupId: "visibility-group",
+          }}
           handle="ali"
           waveId={null}
-          visibilityGroupId="visibility-group"
         />
       </QueryClientProvider>
     );
@@ -129,7 +136,11 @@ describe("useIdentitiesSearch", () => {
   it("searches the public audience for a public draft wave", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <TestComponent handle="ali" waveId={null} visibilityGroupId={null} />
+        <TestComponent
+          draftScope={{ kind: "public" }}
+          handle="ali"
+          waveId={null}
+        />
       </QueryClientProvider>
     );
 
@@ -150,5 +161,46 @@ describe("useIdentitiesSearch", () => {
     );
 
     await waitFor(() => expect(commonApiFetch).not.toHaveBeenCalled());
+  });
+
+  it("clears placeholder suggestions when the draft group changes", async () => {
+    let resolveSecondSearch:
+      | ((value: Array<{ handle: string }>) => void)
+      | null = null;
+    (commonApiFetch as jest.Mock)
+      .mockResolvedValueOnce([{ handle: "alice" }])
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveSecondSearch = resolve;
+          })
+      );
+
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <TestComponent
+          draftScope={{ kind: "group", visibilityGroupId: "group-a" }}
+          handle="ali"
+          waveId={null}
+        />
+      </QueryClientProvider>
+    );
+    await screen.findByText("alice");
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <TestComponent
+          draftScope={{ kind: "group", visibilityGroupId: "group-b" }}
+          handle="ali"
+          waveId={null}
+        />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalledTimes(2));
+    expect(screen.queryByText("alice")).not.toBeInTheDocument();
+
+    resolveSecondSearch?.([{ handle: "alicia" }]);
+    await screen.findByText("alicia");
   });
 });

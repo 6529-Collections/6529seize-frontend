@@ -9979,8 +9979,6 @@ paths:
           description: Authentication required
         "403":
           description: An acting profile is required
-        "404":
-          description: Visibility group not found or not visible to the caller
   /v2/waves/{waveId}/mention-search:
     get:
       tags:
