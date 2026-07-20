@@ -3,7 +3,20 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { publicEnv } from "@/config/env";
-import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
+import type {
+  ArtistPreview,
+  AssetPreview,
+  CollectionPreview,
+  Preview,
+  SetPreview,
+} from "./types";
+import {
+  absolutizeRelativeUrl,
+  decentralizedMediaToHttp,
+  deepFindAll,
+  normalizeImageUrl,
+  slugifyName,
+} from "./media";
 import {
   assertContentType,
   isHtmlContentType,
@@ -19,94 +32,6 @@ export const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 const JSON_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
 const HTML_ACCEPT_HEADER =
   "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-
-type PepeKind = "asset" | "collection" | "artist" | "set";
-
-type Market = {
-  bestAskSats?: number | undefined;
-  lastSaleSats?: number | undefined;
-  bestAskXcp?: number | undefined;
-  lastSaleXcp?: number | undefined;
-  approxEthPerBtc?: number | undefined;
-  approxEthPerXcp?: number | undefined;
-  updatedISO?: string | undefined;
-};
-
-type BasePreview = {
-  readonly kind: PepeKind;
-  readonly href: string;
-  readonly slug: string;
-};
-
-type AssetPreview = BasePreview & {
-  readonly kind: "asset";
-  readonly asset?: string | undefined;
-  readonly name?: string | undefined;
-  readonly collection?: string | undefined;
-  readonly artist?: string | undefined;
-  readonly series?: number | null | undefined;
-  readonly card?: number | null | undefined;
-  readonly supply?: number | null | undefined;
-  readonly holders?: number | null | undefined;
-  readonly image?: string | null | undefined;
-  readonly links?:
-    | {
-        readonly horizon?: string | undefined;
-        readonly xchain?: string | undefined;
-        readonly wiki?: string | undefined;
-      }
-    | null
-    | undefined;
-  readonly market?: Market | null | undefined;
-};
-
-type CollectionPreview = BasePreview & {
-  readonly kind: "collection";
-  readonly name?: string | undefined;
-  readonly image?: string | null | undefined;
-  readonly stats?:
-    | {
-        readonly items?: number | null | undefined;
-        readonly floorSats?: number | null | undefined;
-      }
-    | null
-    | undefined;
-};
-
-type ArtistPreview = BasePreview & {
-  readonly kind: "artist";
-  readonly name?: string | undefined;
-  readonly image?: string | null | undefined;
-  readonly stats?:
-    | {
-        readonly uniqueCards?: number | null | undefined;
-        readonly collections?: string[] | null | undefined;
-      }
-    | null
-    | undefined;
-};
-
-type SetPreview = BasePreview & {
-  readonly kind: "set";
-  readonly name?: string | undefined;
-  readonly image?: string | null | undefined;
-  readonly stats?:
-    | {
-        readonly items?: number | null | undefined;
-        readonly fullSetFloorSats?: number | null | undefined;
-        readonly lastSaleValuationSats?: number | null | undefined;
-      }
-    | null
-    | undefined;
-  readonly links?:
-    | {
-        readonly wiki?: string | undefined;
-      }
-    | null
-    | undefined;
-};
-
-type Preview = AssetPreview | CollectionPreview | ArtistPreview | SetPreview;
 
 const readNumber = (value: string | undefined, fallback: number): number => {
   if (!value) {
@@ -198,92 +123,6 @@ async function fetchJson<T>(url: string, timeoutMs = 4000): Promise<T | null> {
     }
     return null;
   }
-}
-
-function decentralizedMediaToHttp(url: string): string {
-  return (
-    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
-    url
-  );
-}
-
-function absolutizeRelativeUrl(candidate: string, base: string): string {
-  try {
-    return new URL(candidate, base).toString();
-  } catch {
-    return candidate;
-  }
-}
-
-function normalizeImageUrl(candidate: unknown, base: string): string | null {
-  if (typeof candidate !== "string") {
-    return null;
-  }
-
-  const trimmed = candidate.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  if (/^data:/i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith("ipfs://")) {
-    return decentralizedMediaToHttp(trimmed);
-  }
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith("//")) {
-    return `https:${trimmed}`;
-  }
-
-  if (/^[./]/.test(trimmed)) {
-    return absolutizeRelativeUrl(trimmed, base);
-  }
-
-  return null;
-}
-
-function slugifyName(name: string): string {
-  return name
-    .toLowerCase()
-    .replaceAll("&", "and")
-    .replaceAll(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replaceAll(/\s+/g, "-")
-    .replaceAll(/-+/g, "-");
-}
-
-function deepFindAll(
-  value: unknown,
-  keys: string[],
-  results: unknown[] = []
-): unknown[] {
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      deepFindAll(item, keys, results);
-    }
-    return results;
-  }
-
-  if (!value || typeof value !== "object") {
-    return results;
-  }
-
-  for (const [key, val] of Object.entries(value)) {
-    if (keys.includes(key)) {
-      results.push(val);
-    }
-    if (val && typeof val === "object") {
-      deepFindAll(val, keys, results);
-    }
-  }
-
-  return results;
 }
 
 async function scrapeNextData(url: string): Promise<ScrapeNextDataResult> {

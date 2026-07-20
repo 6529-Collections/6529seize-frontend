@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
 import {
@@ -32,6 +30,43 @@ import type {
 } from "@/services/api/link-preview-api";
 import { createPublicClient, fallback, http } from "viem";
 import { mainnet } from "viem/chains";
+import {
+  fetchFirstPageItem,
+  fetchOptionalApiJson,
+  getCacheAuthScope,
+  type ApiContext,
+  type ApiPage,
+} from "./apiClient";
+import {
+  asRecord,
+  buildPreview,
+  compactFacts,
+  compactPeople,
+  createFact,
+  createPerson,
+  firstHandle,
+  firstNonEmptyString,
+  firstPositiveNumber,
+  formatDecimal,
+  formatInteger,
+  formatMintDate,
+  identityProfileDisplay,
+  identityProfileHref,
+  normalizeHttpsImageUrl,
+  parseMetadata,
+  profileHrefForHandle,
+  readAttributeValue,
+  readAttributes,
+  readMetadataString,
+  readNumber,
+  readPositiveNumber,
+  readString,
+  readTheMemesTdhRateValue,
+  resolveIdentityProfile,
+  resolveProfileHref,
+  selectHttpsImageUrl,
+  type AttributeRecord,
+} from "./previewHelpers";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
@@ -50,14 +85,6 @@ const mainnetPublicClient = createPublicClient({
   ]),
 });
 
-type ApiContext = {
-  readonly apiAuth?: string | null | undefined;
-};
-
-type ApiPage<T> = {
-  readonly data?: readonly T[] | null | undefined;
-};
-
 type NftRecord = Partial<BaseNFT> &
   Partial<NFT> &
   Partial<LabNFT> & {
@@ -75,11 +102,6 @@ type MintingClaimRecord = {
   readonly attributes?: readonly AttributeRecord[] | null | undefined;
 };
 
-type AttributeRecord = {
-  readonly trait_type?: string | null | undefined;
-  readonly value?: string | number | null | undefined;
-};
-
 type ResolvedTarget =
   | { readonly kind: "the-memes"; readonly id: string }
   | { readonly kind: "meme-lab"; readonly id: string }
@@ -90,223 +112,6 @@ type ResolvedTarget =
       readonly contract: string;
       readonly id: string;
     };
-
-type PreviewBuildInput = {
-  readonly kind: SeizeCollectionPreviewKind;
-  readonly requestUrl: URL;
-  readonly title: string;
-  readonly kicker?: string | null | undefined;
-  readonly people?: readonly SeizeCollectionPreviewPerson[] | undefined;
-  readonly facts?: readonly SeizeCollectionPreviewFact[] | undefined;
-  readonly traits?: readonly SeizeCollectionPreviewTrait[] | undefined;
-  readonly liveMint?: SeizeCollectionLinkPreview["liveMint"];
-  readonly imageUrl?: string | null | undefined;
-};
-
-type IdentityResponse = {
-  readonly handle?: string | null | undefined;
-  readonly normalised_handle?: string | null | undefined;
-  readonly display?: string | null | undefined;
-  readonly primary_wallet?: string | null | undefined;
-};
-
-function trimTrailingSlashes(value: string): string {
-  let end = value.length;
-  while (end > 0 && value[end - 1] === "/") {
-    end -= 1;
-  }
-
-  return value.slice(0, end);
-}
-
-function trimLeadingSlashes(value: string): string {
-  let start = 0;
-  while (start < value.length && value[start] === "/") {
-    start += 1;
-  }
-
-  return value.slice(start);
-}
-
-function getApiBase(): string {
-  const base = publicEnv.API_ENDPOINT?.trim();
-  if (!base) {
-    throw new Error("API endpoint is not configured.");
-  }
-  return trimTrailingSlashes(base);
-}
-
-function buildApiUrl(
-  base: string,
-  endpoint: string,
-  params?: Record<string, string | number | undefined>
-): string {
-  const url = new URL(`/api/${trimLeadingSlashes(endpoint)}`, `${base}/`);
-
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        url.searchParams.set(key, String(value));
-      }
-    }
-  }
-
-  return url.toString();
-}
-
-function normalizeApiOrigin(base: string): string {
-  try {
-    const url = new URL(`${trimTrailingSlashes(base)}/`);
-    return url.origin.toLowerCase();
-  } catch {
-    return trimTrailingSlashes(base).toLowerCase();
-  }
-}
-
-function getApiBases(): readonly string[] {
-  const primary = getApiBase();
-  if (normalizeApiOrigin(primary) === normalizeApiOrigin(PUBLIC_API_BASE)) {
-    return [primary];
-  }
-
-  return [primary, PUBLIC_API_BASE];
-}
-
-function getCallerApiAuth(context?: ApiContext): string | undefined {
-  const apiAuth = context?.apiAuth?.trim();
-  return apiAuth || undefined;
-}
-
-function getApiAuth(context?: ApiContext): string | undefined {
-  return (
-    getCallerApiAuth(context) ?? publicEnv.STAGING_API_KEY?.trim() ?? undefined
-  );
-}
-
-function hashCacheToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex").slice(0, 24);
-}
-
-function getCacheAuthScope(context?: ApiContext): string {
-  const callerAuth = getCallerApiAuth(context);
-  if (callerAuth) {
-    return `auth:${hashCacheToken(callerAuth)}`;
-  }
-
-  return publicEnv.STAGING_API_KEY?.trim() ? "staging" : "public";
-}
-
-function createApiHeaders(context?: ApiContext): HeadersInit {
-  const headers: Record<string, string> = {
-    accept: "application/json",
-  };
-  const apiAuth = getApiAuth(context);
-
-  if (apiAuth) {
-    headers["x-6529-auth"] = apiAuth;
-  }
-
-  return headers;
-}
-
-const PUBLIC_API_HEADERS: HeadersInit = {
-  accept: "application/json",
-};
-
-function hasApiAuth(context?: ApiContext): boolean {
-  return getApiAuth(context) !== undefined;
-}
-
-function shouldRetryApiStatus(status: number, context?: ApiContext): boolean {
-  if (status >= 500 && status < 600) {
-    return true;
-  }
-
-  return (status === 401 || status === 403) && !hasApiAuth(context);
-}
-
-async function getApiFetch(): Promise<typeof fetch> {
-  if (typeof window !== "undefined") {
-    return fetch;
-  }
-
-  try {
-    const { ssrFetch } = await import("@/lib/fetch/ssrFetch");
-    return ssrFetch;
-  } catch {
-    // Preview enrichment should degrade to public API data if server signing is unavailable.
-    return fetch;
-  }
-}
-
-async function fetchApiJson<T>(
-  endpoint: string,
-  params?: Record<string, string | number | undefined>,
-  context?: ApiContext
-): Promise<T> {
-  const fetchImpl = await getApiFetch();
-  const bases = getApiBases();
-  let lastStatus: number | undefined;
-  let primaryStatus: number | undefined;
-  let lastError: unknown;
-
-  for (const [index, base] of bases.entries()) {
-    try {
-      const response = await fetchImpl(buildApiUrl(base, endpoint, params), {
-        headers: index === 0 ? createApiHeaders(context) : PUBLIC_API_HEADERS,
-      });
-
-      if (response.ok) {
-        return (await response.json()) as T;
-      }
-
-      lastStatus = response.status;
-      if (index === 0) {
-        primaryStatus = response.status;
-      }
-
-      if (!shouldRetryApiStatus(response.status, context)) {
-        break;
-      }
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  const status = primaryStatus ?? lastStatus;
-  if (status !== undefined) {
-    throw new Error(`6529 API request failed with status ${status}.`);
-  }
-
-  throw new Error("6529 API request failed.", {
-    cause: lastError,
-  });
-}
-
-async function fetchOptionalApiJson<T>(
-  endpoint: string,
-  params?: Record<string, string | number | undefined>,
-  context?: ApiContext
-): Promise<T | null> {
-  try {
-    return await fetchApiJson<T>(endpoint, params, context);
-  } catch {
-    return null;
-  }
-}
-
-async function fetchFirstPageItem<T>(
-  endpoint: string,
-  params?: Record<string, string | number | undefined>,
-  context?: ApiContext
-): Promise<T | null> {
-  const page = await fetchOptionalApiJson<ApiPage<T>>(
-    endpoint,
-    params,
-    context
-  );
-  return page?.data?.[0] ?? null;
-}
 
 function isFirstPartyHost(url: URL): boolean {
   const hostname = url.hostname.toLowerCase();
@@ -370,340 +175,6 @@ function resolveTarget(url: URL): ResolvedTarget | null {
   }
 
   return null;
-}
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return typeof value === "object" && value !== null
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function parseMetadata(value: unknown): Record<string, unknown> | null {
-  if (typeof value === "string") {
-    try {
-      return asRecord(JSON.parse(value));
-    } catch {
-      return null;
-    }
-  }
-
-  return asRecord(value);
-}
-
-function readString(value: unknown): string | undefined {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : undefined;
-  }
-
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return String(value);
-  }
-
-  return undefined;
-}
-
-function readNumber(value: unknown): number | undefined {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
-function readPositiveNumber(value: unknown): number | undefined {
-  const parsed = readNumber(value);
-  return parsed !== undefined && parsed > 0 ? parsed : undefined;
-}
-
-function readTheMemesTdhRateValue(
-  hodlRate: unknown,
-  recordedInTdh: boolean | null | undefined
-): string | undefined {
-  if (recordedInTdh === false) {
-    return "Pending";
-  }
-
-  const tdhRate = readPositiveNumber(hodlRate);
-  if (tdhRate === undefined) {
-    return undefined;
-  }
-  return formatDecimal(tdhRate);
-}
-
-function readMetadataString(
-  metadata: Record<string, unknown> | null,
-  key: string
-): string | undefined {
-  return metadata ? readString(metadata[key]) : undefined;
-}
-
-function readAttributes(
-  metadata: Record<string, unknown> | null
-): readonly AttributeRecord[] {
-  const attributes = metadata?.["attributes"];
-  return Array.isArray(attributes) ? (attributes as AttributeRecord[]) : [];
-}
-
-function normalizeTraitType(value: string | null | undefined): string {
-  return (value ?? "").trim().toLowerCase().replaceAll(/\s+/g, " ");
-}
-
-function readAttributeValue(
-  attributes: readonly AttributeRecord[],
-  traitType: string
-): string | undefined {
-  const normalizedTrait = normalizeTraitType(traitType);
-  const match = attributes.find(
-    (attribute) => normalizeTraitType(attribute.trait_type) === normalizedTrait
-  );
-
-  return readString(match?.value);
-}
-
-function firstNonEmptyString(
-  ...values: readonly unknown[]
-): string | undefined {
-  for (const value of values) {
-    const stringValue = readString(value);
-    if (stringValue) {
-      return stringValue;
-    }
-  }
-
-  return undefined;
-}
-
-function firstPositiveNumber(
-  ...values: readonly unknown[]
-): number | undefined {
-  for (const value of values) {
-    const numberValue = readPositiveNumber(value);
-    if (numberValue !== undefined) {
-      return numberValue;
-    }
-  }
-
-  return undefined;
-}
-
-function formatInteger(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function formatDecimal(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function formatMintDate(value: unknown): string | undefined {
-  const raw = readString(value);
-  if (!raw) {
-    return undefined;
-  }
-
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) {
-    return undefined;
-  }
-
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  }).format(date);
-}
-
-function createFact(
-  label: string,
-  value: string | number | undefined
-): SeizeCollectionPreviewFact | null {
-  const stringValue = readString(value);
-  return stringValue ? { label, value: stringValue } : null;
-}
-
-function compactFacts(
-  facts: readonly (SeizeCollectionPreviewFact | null | undefined)[]
-): SeizeCollectionPreviewFact[] {
-  return facts.filter(
-    (fact): fact is SeizeCollectionPreviewFact =>
-      fact !== null && fact !== undefined
-  );
-}
-
-function normalizeHttpsImageUrl(value: unknown): string | undefined {
-  const url = readString(value);
-  if (!url) {
-    return undefined;
-  }
-
-  try {
-    const parsed = new URL(url, "https://6529.io");
-    return parsed.protocol === "https:" ? parsed.toString() : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function selectHttpsImageUrl(
-  ...values: readonly unknown[]
-): string | undefined {
-  for (const value of values) {
-    const url = normalizeHttpsImageUrl(value);
-    if (url) {
-      return url;
-    }
-  }
-
-  return undefined;
-}
-
-function createImageMedia(url: string | undefined): LinkPreviewMedia | null {
-  const normalizedUrl = normalizeHttpsImageUrl(url);
-  return normalizedUrl
-    ? { url: normalizedUrl, secureUrl: normalizedUrl }
-    : null;
-}
-
-function buildPreview(input: PreviewBuildInput): SeizeCollectionLinkPreview {
-  const image = createImageMedia(input.imageUrl ?? undefined);
-  const descriptionParts = [
-    input.kicker,
-    ...(input.people ?? []).map((person) =>
-      person.label ? `${person.label} ${person.name}` : person.name
-    ),
-    ...(input.facts ?? []).map((fact) => `${fact.label} ${fact.value}`),
-  ].filter((part): part is string => Boolean(part));
-
-  return {
-    type: "6529.collection",
-    kind: input.kind,
-    requestUrl: input.requestUrl.toString(),
-    url: input.requestUrl.toString(),
-    title: input.title,
-    description:
-      descriptionParts.length > 0 ? descriptionParts.join(" | ") : null,
-    siteName: "6529",
-    mediaType: null,
-    contentType: null,
-    favicon: null,
-    favicons: [],
-    image,
-    images: image ? [image] : [],
-    kicker: input.kicker ?? null,
-    people: input.people ?? [],
-    facts: input.facts ?? [],
-    traits: input.traits ?? [],
-    liveMint: input.liveMint ?? null,
-  };
-}
-
-function firstHandle(value: string | null | undefined): string | undefined {
-  return value
-    ?.split(",")
-    .map((handle) => handle.trim().replace(/^@/, ""))
-    .find((handle) => handle.length > 0);
-}
-
-function profileHrefForHandle(
-  value: string | null | undefined
-): string | undefined {
-  const handle = firstHandle(value);
-  return handle ? `/${handle}` : undefined;
-}
-
-function createPerson({
-  label,
-  name,
-  href,
-}: {
-  readonly label?: string | null | undefined;
-  readonly name?: string | null | undefined;
-  readonly href?: string | null | undefined;
-}): SeizeCollectionPreviewPerson | null {
-  const displayName = readString(name);
-  if (!displayName) {
-    return null;
-  }
-
-  const normalizedHref = readString(href);
-
-  return {
-    ...(label ? { label } : {}),
-    name: displayName,
-    ...(normalizedHref ? { href: normalizedHref } : {}),
-  };
-}
-
-function compactPeople(
-  people: readonly (SeizeCollectionPreviewPerson | null | undefined)[]
-): SeizeCollectionPreviewPerson[] {
-  return people.filter(
-    (person): person is SeizeCollectionPreviewPerson =>
-      person !== null && person !== undefined
-  );
-}
-
-function profileLookupCandidate(value: unknown): string | null {
-  const normalized = readString(value)?.replace(/^@/, "");
-  if (!normalized || normalized.includes(",") || normalized.includes(" ")) {
-    return null;
-  }
-
-  return normalized;
-}
-
-function identityProfileHandle(
-  profile: IdentityResponse | null | undefined
-): string | undefined {
-  return firstNonEmptyString(profile?.handle, profile?.normalised_handle);
-}
-
-function identityProfileHref(
-  profile: IdentityResponse | null | undefined
-): string | undefined {
-  const handle = identityProfileHandle(profile);
-  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
-}
-
-function identityProfileDisplay(
-  profile: IdentityResponse | null | undefined
-): string | undefined {
-  return firstNonEmptyString(
-    profile?.display,
-    profile?.handle,
-    profile?.normalised_handle
-  );
-}
-
-async function resolveProfileHref(
-  value: unknown,
-  context?: ApiContext
-): Promise<string | undefined> {
-  const candidate = profileLookupCandidate(value);
-  if (!candidate) {
-    return undefined;
-  }
-
-  const profile = await resolveIdentityProfile(candidate, context);
-  return identityProfileHref(profile);
-}
-
-async function resolveIdentityProfile(
-  value: unknown,
-  context?: ApiContext
-): Promise<IdentityResponse | null> {
-  const candidate = profileLookupCandidate(value);
-  if (!candidate) {
-    return null;
-  }
-
-  return await fetchOptionalApiJson<IdentityResponse>(
-    `identities/${encodeURIComponent(candidate.toLowerCase())}`,
-    undefined,
-    context
-  );
 }
 
 function readMemeSeason(
