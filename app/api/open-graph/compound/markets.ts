@@ -10,13 +10,7 @@ import {
   type Hash,
 } from "viem";
 
-import {
-  cTokenAbi,
-  cometAbi,
-  comptrollerAbi,
-  priceFeedAbi,
-  priceOracleAbi,
-} from "./abis";
+import { cTokenAbi, cometAbi, comptrollerAbi, priceOracleAbi } from "./abis";
 import { publicClient } from "./client";
 import {
   compoundRegistry,
@@ -26,6 +20,7 @@ import {
 
 const BLOCKS_PER_YEAR = 2_365_200;
 const SECONDS_PER_YEAR = 31_536_000;
+const COMET_PRICE_DECIMALS = 8;
 
 export const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
@@ -176,7 +171,6 @@ type V3CollateralInfo = {
   readonly decimals: number;
   readonly scale: bigint;
   readonly collateralFactor: string;
-  readonly priceFeed: Address | null;
   readonly usdPrice?: string | undefined;
 };
 
@@ -186,6 +180,17 @@ type V3AssetInfo = {
   readonly scale: bigint;
   readonly borrowCollateralFactor: bigint;
 };
+
+type V3AssetInfoResult = readonly [
+  offset: number,
+  asset: Address,
+  priceFeed: Address,
+  scale: bigint,
+  borrowCollateralFactor: bigint,
+  liquidateCollateralFactor: bigint,
+  liquidationFactor: bigint,
+  supplyCap: bigint,
+];
 
 type V3MarketState = {
   readonly config: CompoundV3MarketConfig;
@@ -208,45 +213,16 @@ type V3MarketState = {
   };
 };
 
-async function fetchV3CollateralPrice(
-  priceFeedAddress: Address,
-  assetAddress: Address
-): Promise<string | undefined> {
-  if (!priceFeedAddress || priceFeedAddress === zeroAddress) {
-    return undefined;
-  }
-
-  try {
-    const [priceValue, priceDecimalsRaw] = await publicClient.multicall({
-      allowFailure: false,
-      contracts: [
-        {
-          address: priceFeedAddress,
-          abi: priceFeedAbi,
-          functionName: "getPrice",
-          args: [assetAddress],
-        },
-        {
-          address: priceFeedAddress,
-          abi: priceFeedAbi,
-          functionName: "decimals",
-        },
-      ],
-    });
-
-    if (!priceValue || priceValue <= BIGINT_ZERO) {
-      return undefined;
-    }
-
-    return formatUnitsWithPrecision(
-      priceValue,
-      Number(priceDecimalsRaw ?? 8),
-      6
-    );
-  } catch {
-    return undefined;
-  }
-}
+type V3TotalsBasic = readonly [
+  baseSupplyIndex: bigint,
+  baseBorrowIndex: bigint,
+  trackingSupplyIndex: bigint,
+  trackingBorrowIndex: bigint,
+  totalSupplyBase: bigint,
+  totalBorrowBase: bigint,
+  lastAccrualTime: bigint,
+  pauseFlags: number,
+];
 
 function buildFallbackCollateral(info: V3AssetInfo): V3CollateralInfo {
   return {
@@ -255,13 +231,38 @@ function buildFallbackCollateral(info: V3AssetInfo): V3CollateralInfo {
     decimals: 18,
     scale: info.scale,
     collateralFactor: formatMantissa(info.borrowCollateralFactor),
-    priceFeed: info.priceFeed,
   };
+}
+
+function parseV3AssetInfo(result: unknown): V3AssetInfo {
+  const [, asset, priceFeed, scale, borrowCollateralFactor] =
+    result as V3AssetInfoResult;
+  return { asset, priceFeed, scale, borrowCollateralFactor };
+}
+
+async function fetchV3AssetPrice(
+  comet: Address,
+  priceFeed: Address
+): Promise<string | undefined> {
+  try {
+    const price = await publicClient.readContract({
+      address: comet,
+      abi: cometAbi,
+      functionName: "getPrice",
+      args: [priceFeed],
+    });
+    if (price <= BIGINT_ZERO) {
+      return undefined;
+    }
+    return formatUnitsWithPrecision(price, COMET_PRICE_DECIMALS, 6);
+  } catch {
+    return undefined;
+  }
 }
 
 async function fetchV3Collateral(
   info: V3AssetInfo,
-  priceFeedAddress: Address
+  comet: Address
 ): Promise<V3CollateralInfo> {
   try {
     const [symbolResult, decimalsResult] = await publicClient.multicall({
@@ -271,15 +272,13 @@ async function fetchV3Collateral(
         { address: info.asset, abi: erc20Abi, functionName: "decimals" },
       ],
     });
-    const usdPrice = await fetchV3CollateralPrice(priceFeedAddress, info.asset);
-
+    const usdPrice = await fetchV3AssetPrice(comet, info.priceFeed);
     return {
       asset: info.asset,
       symbol: String(symbolResult),
       decimals: Number(decimalsResult ?? 18),
       scale: info.scale,
       collateralFactor: formatMantissa(info.borrowCollateralFactor),
-      priceFeed: info.priceFeed,
       usdPrice,
     };
   } catch {
@@ -289,8 +288,7 @@ async function fetchV3Collateral(
 
 async function fetchV3Collaterals(
   comet: Address,
-  numAssets: number,
-  priceFeedAddress: Address
+  numAssets: number
 ): Promise<readonly V3CollateralInfo[]> {
   if (numAssets === 0) {
     return [];
@@ -312,37 +310,27 @@ async function fetchV3Collaterals(
 
   return Promise.all(
     collateralResults.map((result) =>
-      fetchV3Collateral(result as unknown as V3AssetInfo, priceFeedAddress)
+      fetchV3Collateral(parseV3AssetInfo(result), comet)
     )
   );
 }
 
 async function fetchV3BasePrice(
-  priceFeedAddress: Address,
-  baseAddress: Address
+  comet: Address,
+  priceFeedAddress: Address
 ): Promise<readonly [bigint | null, number | null]> {
   if (!priceFeedAddress || priceFeedAddress === zeroAddress) {
     return [null, null];
   }
 
   try {
-    const [basePrice, decimalsRaw] = await publicClient.multicall({
-      allowFailure: false,
-      contracts: [
-        {
-          address: priceFeedAddress,
-          abi: priceFeedAbi,
-          functionName: "getPrice",
-          args: [baseAddress],
-        },
-        {
-          address: priceFeedAddress,
-          abi: priceFeedAbi,
-          functionName: "decimals",
-        },
-      ],
+    const basePrice = await publicClient.readContract({
+      address: comet,
+      abi: cometAbi,
+      functionName: "getPrice",
+      args: [priceFeedAddress],
     });
-    return [basePrice, Number(decimalsRaw ?? 8)];
+    return [basePrice, COMET_PRICE_DECIMALS];
   } catch {
     return [null, null];
   }
@@ -360,7 +348,7 @@ export async function fetchV2MarketState(
       { address: cToken, abi: cTokenAbi, functionName: "totalBorrows" },
       { address: cToken, abi: cTokenAbi, functionName: "totalReserves" },
       { address: cToken, abi: cTokenAbi, functionName: "totalSupply" },
-      { address: cToken, abi: cTokenAbi, functionName: "cash" },
+      { address: cToken, abi: cTokenAbi, functionName: "getCash" },
       {
         address: cToken,
         abi: cTokenAbi,
@@ -481,7 +469,7 @@ export async function fetchV3MarketState(
       { address: comet, abi: cometAbi, functionName: "totalsBasic" },
       { address: comet, abi: cometAbi, functionName: "getUtilization" },
       { address: comet, abi: cometAbi, functionName: "numAssets" },
-      { address: comet, abi: cometAbi, functionName: "priceFeed" },
+      { address: comet, abi: cometAbi, functionName: "baseTokenPriceFeed" },
     ],
   });
 
@@ -512,20 +500,14 @@ export async function fetchV3MarketState(
   });
 
   const decimals = Number(decimalsRaw ?? 0);
-  const { totalSupplyBase, totalBorrowBase } = totalsBasic as {
-    totalSupplyBase: bigint;
-    totalBorrowBase: bigint;
-  };
+  const [, , , , totalSupplyBase, totalBorrowBase] =
+    totalsBasic as V3TotalsBasic;
 
   const numAssets = Number(numAssetsRaw ?? 0);
-  const collaterals = await fetchV3Collaterals(
-    comet,
-    numAssets,
-    priceFeedAddress
-  );
+  const collaterals = await fetchV3Collaterals(comet, numAssets);
   const [basePrice, basePriceDecimals] = await fetchV3BasePrice(
-    priceFeedAddress,
-    market.base.address as Address
+    comet,
+    priceFeedAddress
   );
 
   const supplyApy = calculateApyFromRatePerSecond(supplyRate);
