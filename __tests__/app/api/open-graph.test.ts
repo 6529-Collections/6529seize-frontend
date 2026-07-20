@@ -295,6 +295,10 @@ describe("open-graph route helpers", () => {
       availability: "restricted",
       title: "Untitled Doc",
     });
+    expect(mockUndiciFetch).toHaveBeenCalledWith(
+      "https://docs.google.com/document/d/abc/preview",
+      expect.any(Object)
+    );
   });
 
   it("builds a Google Sheets preview and marks restricted access on failure", async () => {

@@ -157,6 +157,12 @@ describe("createCompoundPlan", () => {
         args: [priceFeedAddress],
       })
     );
+    expect(publicClient.readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        functionName: "getPrice",
+        args: [collateralPriceFeedAddress],
+      })
+    );
   });
 
   it("returns null for hosts that only end with the Compound app domain text", () => {
