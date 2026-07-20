@@ -12,27 +12,28 @@ describe('useWebSocketMessage', () => {
   beforeEach(() => {
     subscribe.mockReset();
     unsubscribe.mockReset();
+    subscribe.mockReturnValue(unsubscribe);
     (useWebSocket as jest.Mock).mockReturnValue({
-      subscribe: jest.fn(() => unsubscribe),
+      subscribe,
       status: WebSocketStatus.CONNECTED,
     });
   });
 
-  it('subscribes and unsubscribes when connected', () => {
+  it('subscribes and unsubscribes while mounted', () => {
     const cb = jest.fn();
     const { unmount } = renderHook(() => useWebSocketMessage('TYPE' as any, cb));
-    expect(useWebSocket().subscribe).toHaveBeenCalledWith('TYPE', cb);
+    expect(subscribe).toHaveBeenCalledWith('TYPE', expect.any(Function));
     unmount();
     expect(unsubscribe).toHaveBeenCalled();
   });
 
-  it('does not subscribe when not connected', () => {
+  it('keeps the listener registered while disconnected', () => {
     (useWebSocket as jest.Mock).mockReturnValue({
       subscribe,
       status: WebSocketStatus.DISCONNECTED,
     });
     renderHook(() => useWebSocketMessage('TYPE' as any, jest.fn()));
-    expect(subscribe).not.toHaveBeenCalled();
+    expect(subscribe).toHaveBeenCalledWith('TYPE', expect.any(Function));
   });
 });
 

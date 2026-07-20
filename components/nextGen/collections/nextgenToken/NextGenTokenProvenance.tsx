@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "../NextGen.module.css";
 import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import Pagination from "@/components/pagination/Pagination";
@@ -17,8 +16,8 @@ interface Props {
 const PAGE_SIZE = 25;
 
 export default function NextGenTokenProvenance(props: Readonly<Props>) {
-  const scrollTarget = useRef<HTMLImageElement>(null);
-  const logsScrollTarget = useRef<HTMLImageElement>(null);
+  const scrollTarget = useRef<HTMLDivElement>(null);
+  const logsScrollTarget = useRef<HTMLDivElement>(null);
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [transactionsLoaded, setTransactionsLoaded] = useState(false);
@@ -30,49 +29,67 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   const [logsTotalResults, setLogsTotalResults] = useState(0);
   const [logsPage, setLogsPage] = useState(1);
 
-  function fetchResults(mypage: number) {
+  useEffect(() => {
+    let isCurrentRequest = true;
     setTransactionsLoaded(false);
+
     commonApiFetch<{
       count: number;
       page: number;
       next: unknown;
       data: Transaction[];
     }>({
-      endpoint: `nextgen/tokens/${props.token_id}/transactions?page_size=${PAGE_SIZE}&page=${mypage}`,
-    }).then((response) => {
-      setTotalResults(response.count);
-      setTransactions(response.data);
-      setTransactionsLoaded(true);
-    });
-  }
+      endpoint: `nextgen/tokens/${props.token_id}/transactions?page_size=${PAGE_SIZE}&page=${page}`,
+    })
+      .then((response) => {
+        if (!isCurrentRequest) return;
+        setTotalResults(response.count);
+        setTransactions(response.data);
+        setTransactionsLoaded(true);
+      })
+      .catch((error) => {
+        if (!isCurrentRequest) return;
+        console.error("Failed to fetch NextGen token transactions", error);
+        setTotalResults(0);
+        setTransactions([]);
+        setTransactionsLoaded(true);
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [page, props.token_id]);
 
   useEffect(() => {
-    fetchResults(page);
-  }, [page]);
-
-  function fetchLogsResults(mypage: number) {
+    let isCurrentRequest = true;
     setLogsLoaded(false);
+
     commonApiFetch<{
       count: number;
       page: number;
       next: unknown;
       data: NextGenLog[];
     }>({
-      endpoint: `nextgen/collections/${props.collection.id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${mypage}`,
-    }).then((response) => {
-      setLogsTotalResults(response.count);
-      setLogs(response.data);
-      setLogsLoaded(true);
-    });
-  }
+      endpoint: `nextgen/collections/${props.collection.id}/logs/${props.token_id}?page_size=${PAGE_SIZE}&page=${logsPage}`,
+    })
+      .then((response) => {
+        if (!isCurrentRequest) return;
+        setLogsTotalResults(response.count);
+        setLogs(response.data);
+        setLogsLoaded(true);
+      })
+      .catch((error) => {
+        if (!isCurrentRequest) return;
+        console.error("Failed to fetch NextGen token logs", error);
+        setLogsTotalResults(0);
+        setLogs([]);
+        setLogsLoaded(true);
+      });
 
-  useEffect(() => {
-    fetchResults(page);
-  }, [page]);
-
-  useEffect(() => {
-    fetchLogsResults(logsPage);
-  }, [logsPage]);
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [logsPage, props.collection.id, props.token_id]);
 
   return (
     <>
@@ -85,13 +102,9 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
             <h3>Token Provenance</h3>
           </div>
         </div>
-        <div
-          className={`-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2 ${styles["logsScrollContainer"]}`}
-        >
+        <div className="tw-overflow-x-auto tw-pt-2">
           <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <table
-              className={`tw-w-full tw-border-collapse ${styles["logsTable"]}`}
-            >
+            <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
               <tbody>
                 {transactions.map((tr) => (
                   <LatestActivityRow

@@ -66,6 +66,7 @@
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
+        "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
         "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
       ],
       "canonical_path": "/waves",
@@ -677,6 +678,7 @@
       "facts": [
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
+        "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],
@@ -2277,7 +2279,7 @@
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
         "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
-        "On The Memes Main Stage, the native app lock explains the current 50,000 MemesNominee REP eligibility requirement; the desktop How to Submit panel also shows live REP progress and a Get nominated action.",
+        "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",
@@ -4450,6 +4452,44 @@
       "source_refs": ["ops/docs/waves/composer/feature-enter-key-behavior.md"]
     },
     {
+      "id": "waves.composer.storms",
+      "kind": "workflow",
+      "title": "Create and manage a storm post",
+      "aliases": [
+        "storm post",
+        "create a storm",
+        "multi-part post",
+        "add storm part",
+        "edit storm part",
+        "reorder storm"
+      ],
+      "keywords": [
+        "waves",
+        "composer",
+        "storm",
+        "parts",
+        "edit",
+        "reorder",
+        "discard",
+        "post"
+      ],
+      "facts": [
+        "Write the first part and select Break into storm to open the private Storm draft workspace.",
+        "The primary action says Add part while writing a new part, Save changes while editing, and Post storm when the current editor is empty.",
+        "Saved parts have visible controls to edit, move earlier or later, and remove; Discard clears the complete draft after confirmation.",
+        "Blank or whitespace-only text is not saved as a storm part, while media-only parts are allowed.",
+        "The storm is published as one drop with multiple ordered parts."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/messages"],
+      "tags": ["waves", "composer", "storm", "workflow"],
+      "source_refs": [
+        "ops/docs/waves/composer/feature-storm-composer.md",
+        "components/waves/CreateDropStormParts.tsx",
+        "components/waves/create-drop-content/CreateDropLayout.tsx"
+      ]
+    },
+    {
       "id": "waves.composer.curation-url",
       "kind": "workflow",
       "title": "Wave curation URL submissions",
@@ -5166,6 +5206,7 @@
         "Upcoming unresolved Meme Card pages show mint timing and subscription awareness; positive card ids also show a Distribution Plan link for that card.",
         "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
         "Card tabs and focus links are documented for deep-linking into card page sections.",
+        "If a Meme Card fails to load, the card page replaces the loading state with a Try again action.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."
       ],
       "canonical_path": "/the-memes/{id}",

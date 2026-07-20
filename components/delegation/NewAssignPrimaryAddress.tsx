@@ -15,16 +15,19 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import type { DelegationCollection } from "./delegation-constants";
 import { PRIMARY_ADDRESS_USE_CASE } from "./delegation-constants";
-import { getGasError } from "./delegation-shared";
+import {
+  getGasError,
+  type DelegationWriteSettledHandler,
+} from "./delegation-shared";
 import type { DelegationToastState } from "./DelegationToast";
 import {
   DelegationAddressDisabledInput,
-  DelegationCloseButton,
   DelegationFormField,
   DelegationFormLabel,
   DelegationFormOptionsFormGroup,
   DelegationFormOriginalDelegatorFormGroup,
   DelegationFormRow,
+  DelegationFormShell,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 
@@ -59,6 +62,9 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
   const [addressOptions, setAddressOptions] = useState<string[]>([]);
 
   const [gasError, setGasError] = useState<string>();
+  const handleWriteSettled: DelegationWriteSettledHandler = (_data, error) => {
+    setGasError(error ? getGasError(error) : undefined);
+  };
 
   const contractWriteDelegationConfigParams = subdelegation
     ? {
@@ -78,14 +84,6 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
           validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
-        onSettled(data: unknown, error: Error | null) {
-          if (data) {
-            setGasError(undefined);
-          }
-          if (error) {
-            setGasError(getGasError(error));
-          }
-        },
       }
     : {
         address: DELEGATION_CONTRACT.contract,
@@ -101,14 +99,6 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
         ],
         functionName:
           validate().length === 0 ? "registerDelegationAddress" : undefined,
-        onSettled(data: unknown, error: Error | null) {
-          if (data) {
-            setGasError(undefined);
-          }
-          if (error) {
-            setGasError(getGasError(error));
-          }
-        },
       };
 
   function validate() {
@@ -170,49 +160,46 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
 
   function printForm() {
     return (
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-w-full tw-px-3">
-          <form>
-            {subdelegation && (
-              <DelegationFormOriginalDelegatorFormGroup
-                subdelegation={subdelegation}
-              />
-            )}
-            <DelegationFormRow>
-              <DelegationFormLabel
-                title={subdelegation ? `Delegation Manager` : `Delegator`}
-                tooltip={`Address ${
-                  subdelegation ? `executing` : `registering`
-                } the Primary Address assignment`}
-              />
-              <DelegationFormField>
-                <DelegationAddressDisabledInput
-                  address={address}
-                  ens={ens}
-                  label={subdelegation ? "Delegation Manager" : "Delegator"}
-                />
-              </DelegationFormField>
-            </DelegationFormRow>
-            <DelegationFormOptionsFormGroup
-              title={"Primary Address"}
-              tooltip="Address to be assigned as Primary"
-              options={addressOptions}
-              selected={selectedToAddress}
-              setSelected={setSelectedToAddress}
+      <form>
+        {subdelegation && (
+          <DelegationFormOriginalDelegatorFormGroup
+            subdelegation={subdelegation}
+          />
+        )}
+        <DelegationFormRow>
+          <DelegationFormLabel
+            title={subdelegation ? `Delegation Manager` : `Delegator`}
+            tooltip={`Address ${
+              subdelegation ? `executing` : `registering`
+            } the Primary Address assignment`}
+          />
+          <DelegationFormField>
+            <DelegationAddressDisabledInput
+              address={address}
+              ens={ens}
+              label={subdelegation ? "Delegation Manager" : "Delegator"}
             />
-            <DelegationSubmitGroups
-              title={"Registering Primary Address"}
-              writeParams={contractWriteDelegationConfigParams}
-              showCancel={true}
-              gasError={gasError}
-              validate={validate}
-              onHide={onHide}
-              onSetToast={onSetToast}
-              submitBtnLabel="Assign Primary Address"
-            />
-          </form>
-        </div>
-      </div>
+          </DelegationFormField>
+        </DelegationFormRow>
+        <DelegationFormOptionsFormGroup
+          title={"Primary Address"}
+          tooltip="Address to be assigned as Primary"
+          options={addressOptions}
+          selected={selectedToAddress}
+          setSelected={setSelectedToAddress}
+        />
+        <DelegationSubmitGroups
+          title={"Registering Primary Address"}
+          writeParams={contractWriteDelegationConfigParams}
+          showCancel={true}
+          gasError={gasError}
+          onWriteSettled={handleWriteSettled}
+          validate={validate}
+          onHide={onHide}
+          onSetToast={onSetToast}
+          submitBtnLabel="Assign Primary Address"
+        />
+      </form>
     );
   }
 
@@ -224,13 +211,15 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
   function printContent() {
     if (!connectedProfile) return null;
     if (isFetchingTdhAddress) {
-      return <DotLoader />;
+      return (
+        <div className="tw-flex tw-min-h-24 tw-items-center tw-justify-center">
+          <DotLoader />
+        </div>
+      );
     } else if (!isValidConsolidation()) {
       return (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-w-full tw-px-3 tw-text-lg tw-font-bold">
-            You must have a consolidation to assign a Primary Address
-          </div>
+        <div className="tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-p-4 tw-text-base tw-font-semibold tw-text-amber-200">
+          You must have a consolidation to assign a Primary Address
         </div>
       );
     } else {
@@ -239,25 +228,20 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-w-full tw-px-3">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pb-3">
-        <div className="tw-w-10/12 tw-px-3 tw-pb-1 tw-pt-3">
-          <h4>
-            Assign Primary Address {subdelegation && `as Delegation Manager`}
-          </h4>
-        </div>
-        <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3 tw-pb-1 tw-pt-3">
-          <DelegationCloseButton onHide={onHide} title="Consolidation" />
-        </div>
-      </div>
+    <DelegationFormShell
+      title={`Assign Primary Address${
+        subdelegation ? " as Delegation Manager" : ""
+      }`}
+      description="Choose the primary wallet used for TDH within an existing consolidation."
+      closeTitle="Primary Address"
+      onHide={onHide}
+    >
       {!connectedProfile && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-px-3 tw-text-lg tw-font-bold">
-            Connect Wallet to continue
-          </div>
+        <div className="tw-rounded-lg tw-bg-iron-950 tw-p-4 tw-text-base tw-font-semibold tw-text-white">
+          Connect Wallet to continue
         </div>
       )}
       {printContent()}
-    </div>
+    </DelegationFormShell>
   );
 }

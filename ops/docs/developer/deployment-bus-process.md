@@ -1,16 +1,71 @@
 # Staging and Production Deployment Bus
 
-Status: implemented behind rollout controls. The normal path becomes authoritative
-only after the release-bus infrastructure, GitHub App, secrets, repository rules,
-and `RELEASE_BUS_ENFORCEMENT` switch are enabled.
+Status: implemented behind rollout controls. The live API mode selects the
+release route; repository enforcement separately controls whether a manual
+route requires audited break glass.
 
 ## What changes for developers
 
+The live rollout mode is authoritative. The canonical agent preflight in both
+repositories is:
+
+```bash
+node ops/scripts/release-bus-status.mjs
+```
+
+The helper requires an installed, authenticated `gh`, obtains its token
+internally, calls the production controls API, validates the mode plus `ALL`,
+`STAGING`, and `PRODUCTION`, and prints only sanitized state:
+
+```json
+{
+  "mode": "OFF",
+  "controls": {
+    "ALL": "RUNNING",
+    "STAGING": "RUNNING",
+    "PRODUCTION": "RUNNING"
+  }
+}
+```
+
+Run it when a release request arrives, immediately before readiness, immediately
+before a manual merge or workflow dispatch, and again before production after a
+significant wait. Do not substitute documentation, conversation state, a
+previous release's mode, workflow configuration, AWS assumptions, repository
+files, or the browser UI. A signed-in browser session alone does not authenticate
+the Release Bus API; the helper deliberately uses the developer's authenticated
+`gh` session.
+
+Status discovery is fail-closed. Missing or unauthenticated `gh`, timeouts,
+network or authentication errors, malformed JSON, unknown modes, and incomplete
+controls all stop the release before mutation. Failure never means `OFF` and
+never means “bus enabled.” Agents must not fall back to AWS CLI, queue a
+candidate, merge, or deploy while status is unknown.
+
+| Live mode    | Staging behavior                                                 | Production behavior                                                         |
+| ------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `OFF`        | Use the legacy manual path; do not queue in the bus              | Use the legacy manual path                                                  |
+| `SHADOW`     | Record the candidate for shadow evaluation, then deploy manually | Record shadow evidence as designed, then deploy manually                    |
+| `STAGING`    | Submit through the Release Bus and wait for validation           | Follow the operator/manual production path; do not queue a production train |
+| `PRODUCTION` | Submit through the Release Bus                                   | Submit the staging-validated SHA through the Release Bus                    |
+
+If `ALL` or the relevant lane is paused, stop and report the paused scope.
+After an active bus lane accepts a candidate, do not start a parallel manual
+deployment.
+
+For a manual route, inspect `RELEASE_BUS_ENFORCEMENT` in every affected
+repository with authenticated `gh`. `OFF` or `SHADOW` combined with enabled
+enforcement is a configuration mismatch and requires an operator. If the
+manual route is enforced, only an organization owner or active
+`release-bus-operators` member may continue, with a non-empty audited
+break-glass reason. Never bypass a blocked workflow.
+
 Developers and agents no longer need to merge feature branches into
 `1a-staging`, dispatch staging deployments, merge source PRs to `main`, or
-dispatch production deployments on the normal path.
+dispatch production deployments on a lane currently owned by the bus.
 
-Instead, use the Release Bus panel at `/deploy/ui/bus`:
+When the table selects a bus route, use the Release Bus panel at
+`/deploy/ui/bus`:
 
 1. Select frontend or backend and enter the developer branch.
 2. Resolve and review its exact 40-character head SHA.
@@ -32,6 +87,11 @@ candidate and the new SHA must be marked ready explicitly.
 
 This process is universal repository behavior. It does not know about or call
 any developer's personal phase skill.
+
+Submitting live readiness creates a pending `Release Bus` commit status. A
+successful validation completes it, and cancelling a candidate with an
+existing live status completes it as `release readiness cancelled` so source
+PRs are not left with a permanent pending status.
 
 ## How a train departs
 
@@ -115,12 +175,16 @@ publishes release notes nor invokes the legacy GelatoBot skill.
 
 ## Failure behavior
 
-- Safe, allowlisted conflicts on temporary train branches may be offered to a
-  constrained Codex job. A separate deterministic job applies and fully tests
-  the patch. Deployment, schema, authentication, authorization, and instruction
-  conflicts are never auto-resolved.
-- Codex is read-only during failure diagnosis. Deterministic checks decide
-  whether a candidate is quarantined.
+- When `RELEASE_BUS_CODEX_ENABLED=true`, safe allowlisted conflicts on temporary
+  train branches may be offered to a constrained Codex job. Deterministic
+  validation checks the result. Deployment, schema, authentication,
+  authorization, and instruction conflicts are never auto-resolved.
+- Codex is optional and read-only during failure diagnosis. Without it, the
+  bus publishes the conflict-free candidate prefix (which can be empty when
+  the first candidate conflicts), verifies candidate ancestry, quarantines the
+  first omitted immutable candidate, and returns the others to the queue.
+  Deterministic isolation still works and its raw log remains the diagnostic
+  source of truth.
 - Isolation uses non-secret placeholder analytics and Sentry values. It helps
   diagnose deterministic candidate failures but does not replace the real
   preflight build or prove behavior that depends on credential value formats.

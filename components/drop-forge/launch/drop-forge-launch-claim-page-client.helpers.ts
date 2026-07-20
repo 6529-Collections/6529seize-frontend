@@ -25,7 +25,6 @@ type LaunchAirdropActionKey = "artist" | "team";
 
 type LaunchActionLookupKind = LaunchPhaseKey | LaunchAirdropActionKey;
 
-type ClaimTxModalStatus = "confirm_wallet" | "submitted" | "success" | "error";
 type LaunchMediaTab = "image" | "animation";
 
 export function parseLocalDateTimeToUnixSeconds(value: string): number | null {
@@ -645,12 +644,6 @@ export function formatDateTimeLocalInput(date: Date): string {
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-export function getClaimTxModalEmoji(status: ClaimTxModalStatus): string {
-  if (status === "success") return "/emojis/sgt_saluting_face.webp";
-  if (status === "error") return "/emojis/sgt_sob.webp";
-  return "/emojis/sgt_flushed.webp";
 }
 
 const FORMAT_TO_MIME: Record<string, string> = {

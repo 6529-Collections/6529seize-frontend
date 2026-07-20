@@ -40,7 +40,14 @@ import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -299,9 +306,6 @@ function GradientDetailsPanel({
         </div>
       </section>
       <section className="tw-pt-6 md:tw-pt-8">
-        <h3 className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-          Market Overview
-        </h3>
         <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 md:tw-grid-cols-3 md:tw-gap-x-10">
           <GradientMarketMetric
             label="Floor Price"
@@ -384,8 +388,6 @@ function GradientActivitySection({
               <LatestActivityRow
                 nft={nft}
                 tr={tr}
-                variant="tailwind"
-                rowStyle="striped"
                 key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
               />
             ))}
@@ -405,6 +407,8 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   useSetTitle(`6529 Gradient #${id}`);
 
   const [allNfts, setAllNfts] = useState<NftWithOwner[]>([]);
+  const activitySectionRef = useRef<HTMLDivElement | null>(null);
+  const [activityNearViewport, setActivityNearViewport] = useState(false);
   const [transactionsState, setTransactionsState] = useState<TransactionsState>(
     {
       nftId: id,
@@ -492,7 +496,34 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   }, [fetchNfts]);
 
   useEffect(() => {
-    if (!id) {
+    setActivityNearViewport(false);
+
+    const element = activitySectionRef.current;
+    if (!nft || !element) {
+      return;
+    }
+
+    if (typeof globalThis.IntersectionObserver === "undefined") {
+      setActivityNearViewport(true);
+      return;
+    }
+
+    const observer = new globalThis.IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setActivityNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px" }
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [id, nft]);
+
+  useEffect(() => {
+    if (!id || !activityNearViewport) {
       return;
     }
 
@@ -523,7 +554,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
     fetchTransactions();
 
     return () => abortController.abort();
-  }, [id]);
+  }, [activityNearViewport, id]);
 
   return (
     <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
@@ -538,7 +569,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
-                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-x-0.5 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                   />
                   6529 Gradient
                 </Link>
@@ -597,7 +628,14 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                 />
               </div>
             </div>
-            <GradientActivitySection nft={nft} transactions={transactions} />
+            <div ref={activitySectionRef} className="tw-min-h-px">
+              {activityNearViewport && (
+                <GradientActivitySection
+                  nft={nft}
+                  transactions={transactions}
+                />
+              )}
+            </div>
           </>
         ) : (
           <MemePageSkeleton />

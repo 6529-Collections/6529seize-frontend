@@ -2,6 +2,10 @@ import LatestActivityRow, {
   printGas,
   printRoyalties,
 } from "@/components/latest-activity/LatestActivityRow";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "@/components/nextGen/nextgen_contracts";
 import { MANIFOLD } from "@/constants/constants";
 import {
   faCartPlus,
@@ -74,6 +78,52 @@ const baseTr = {
 } as any;
 
 describe("LatestActivityRow", () => {
+  it("applies striped Tailwind row styling", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LatestActivityRow tr={baseTr} />
+        </tbody>
+      </table>
+    );
+
+    expect(container.querySelector("tr")).toHaveClass(
+      "odd:tw-bg-transparent",
+      "even:tw-bg-iron-900/45",
+      "hover:tw-bg-iron-900/70"
+    );
+  });
+
+  it("keeps the date column compact when the NFT image is hidden", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LatestActivityRow tr={baseTr} />
+        </tbody>
+      </table>
+    );
+
+    expect(container.querySelector("td")).toHaveClass("tw-w-px");
+  });
+
+  it("describes a NextGen transfer from sender to recipient", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LatestActivityRow
+            tr={{
+              ...baseTr,
+              contract: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
+            }}
+            hideNextgenTokenId
+          />
+        </tbody>
+      </table>
+    );
+
+    expect(container).toHaveTextContent("Transferred from From to To");
+  });
+
   it("uses burn icon when to address is null", () => {
     render(
       <table>
@@ -83,7 +133,10 @@ describe("LatestActivityRow", () => {
       </table>
     );
     expect(iconMock).toHaveBeenCalledWith(
-      expect.objectContaining({ icon: faFire, className: "iconRed" })
+      expect.objectContaining({
+        icon: faFire,
+        className: expect.stringContaining("tw-text-red"),
+      })
     );
   });
 
@@ -98,7 +151,10 @@ describe("LatestActivityRow", () => {
       </table>
     );
     expect(iconMock).toHaveBeenCalledWith(
-      expect.objectContaining({ icon: faCartPlus, className: "iconWhite" })
+      expect.objectContaining({
+        icon: faCartPlus,
+        className: expect.stringContaining("tw-text-iron-100"),
+      })
     );
   });
 
@@ -145,13 +201,13 @@ describe("extra cases", () => {
   });
 });
 
-test("printNft fallback when no nft provided", () => {
+test("prints an NFT identity fallback when requested without metadata", () => {
   const { container } = render(
     <table>
       <tbody>
-        <LatestActivityRow tr={{ ...baseTr, nft: undefined }} />
+        <LatestActivityRow tr={{ ...baseTr, nft: undefined }} showNftIdentity />
       </tbody>
     </table>
   );
-  expect(container.textContent).toContain("Meme #1");
+  expect(container.textContent).toContain("The Memes #1");
 });

@@ -28,6 +28,7 @@ Use this area when you need behavior for:
 
 ### Submission and Content
 
+- [Storm Composer](feature-storm-composer.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Composer Body Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)

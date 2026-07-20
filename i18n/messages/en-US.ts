@@ -222,6 +222,25 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "wave.loadingMore": "Loading...",
 } as const);
 
+// Rep-category validation copy. Kept as its own group with unquoted keys
+// (not merged into the big REP block above) so its lines don't extend that
+// block's quoted-key run — which the duplication detector matches against
+// the parallel key blocks in the locale dictionaries.
+const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
+  "rep.categories.validation",
+  {
+    errorTitle: "That category name won't work",
+    tooShort: "Use at least {min} characters.",
+    tooLong: "It's {length} characters long — the maximum is {max}.",
+    leadingDash: "A category can't start with a dash.",
+    disallowedChars:
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+    aiFilterDetails:
+      "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
+    closeErrorLabel: "Dismiss error",
+  } as const
+);
+
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
   {
@@ -286,6 +305,8 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.join6529": "Join 6529",
   "primary.about": "About",
   "primary.home": "Home",
+  "sidebar.submenuLabel": "{section} sub-navigation",
+  "sidebar.panelLabel": "{section} items",
   "account.notifications": "Notifications",
   "section.main": "Main",
   "section.utility": "Utility",
@@ -902,6 +923,38 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
 } as const);
 
+const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
+  draftTitle: "Storm draft",
+  privateDraftHint: "Only you can see this until you post it.",
+  partsCountOne: "{count} part",
+  partsCountOther: "{count} parts",
+  discard: "Discard",
+  discardConfirmation: "Discard every saved part and the part you are writing?",
+  keepDraft: "Keep draft",
+  discardDraft: "Discard draft",
+  part: "Part {number}",
+  mediaOnlyPart: "Media-only part",
+  edit: "Edit",
+  editPart: "Edit part {number}",
+  finishCurrentPartBeforeEditing:
+    "Add or clear the current part before editing another part",
+  editing: "Editing",
+  movePartEarlier: "Move part {number} earlier",
+  movePartLater: "Move part {number} later",
+  moveEarlier: "Move earlier",
+  moveLater: "Move later",
+  remove: "Remove",
+  removePart: "Remove part {number}",
+  nextPart: "Next: Part {number}",
+  editingPart: "Editing Part {number}",
+  cancelEdit: "Cancel edit",
+  writePart: "Write part {number}",
+  breakIntoStorm: "Break into storm",
+  addPart: "Add part",
+  saveChanges: "Save changes",
+  postStorm: "Post storm",
+} as const);
+
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
   "access.anyone": "Anyone",
   "access.anyoneWhenEnabled": "Anyone when enabled",
@@ -1193,6 +1246,135 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
   "search.emptyTitle": "No collections found for “{query}”",
 } as const);
 
+const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
+  "readError.message": "Unable to load delegation records for {collection}.",
+  "readError.retry": "Try Again",
+  "scope.all":
+    "Records here apply across every supported delegation collection.",
+  "scope.memes": "Records here apply only to The Memes collection.",
+  "scope.memeLab": "Records here apply only to Meme Lab.",
+  "scope.gradient": "Records here apply only to 6529 Gradient.",
+  "scope.selected": "Records here apply to the selected collection scope.",
+  "navigation.back": "Back to Delegation Center",
+  "connect.title": "Connect Wallet to Manage {collection}",
+  "connect.description":
+    "Connect the wallet whose outgoing and incoming records you want to review.",
+  "connect.button": "Connect Wallet",
+  "network.switch": "Switch to {network}",
+  "network.ethereumMainnet": "Ethereum Mainnet",
+  "network.sepolia": "Sepolia Network",
+  "sections.delegations.title": "Delegations",
+  "sections.delegations.description":
+    "Delegations let another wallet use NFT utility for this collection scope without moving the NFT.",
+  "sections.delegations.outgoing": "Outgoing Delegations",
+  "sections.delegations.incoming": "Incoming Delegations",
+  "sections.managers.title": "Delegation Managers",
+  "sections.managers.description":
+    "Manager rights let another wallet maintain delegations or consolidations for this collection scope.",
+  "sections.managers.outgoing": "Outgoing Manager Rights",
+  "sections.managers.incoming": "Incoming Manager Rights",
+  "sections.consolidations.title": "Consolidations",
+  "sections.consolidations.description":
+    "Consolidations link wallets you control so 6529 can treat them together for collection metrics.",
+  "sections.consolidations.outgoing": "Outgoing Consolidations",
+  "sections.consolidations.incoming": "Incoming Consolidations",
+  "scopeLabel.delegations": "delegations",
+  "scopeLabel.managers": "Delegation Managers",
+  "scopeLabel.consolidations": "consolidations",
+  "direction.outgoing": "outgoing",
+  "direction.incoming": "incoming",
+  "records.empty": "No {direction} {scope} found for {collection}",
+  "records.fetching": "Fetching {direction} {scope} for {collection}",
+  "row.allTokens": "all tokens",
+  "row.tokenId": " - token ID: {tokens}",
+  "row.status.active": "consolidation active",
+  "row.status.incomplete": "consolidation incomplete",
+  "row.status.unavailable": "consolidation status unavailable",
+  "row.consolidationMissing": "{label} consolidation missing",
+  "row.label.incoming": "Incoming",
+  "row.label.outgoing": "Outgoing",
+  "outgoing.selectBulk": "Select {wallet} for bulk revoke",
+  "outgoing.editAriaLabel": "Edit delegation for {wallet}",
+  "outgoing.edit": "Edit",
+  "outgoing.revokeAriaLabel": "Revoke delegation for {wallet}",
+  "outgoing.revoke": "Revoke",
+  "outgoing.selected": "Selected: {count}",
+  "outgoing.selectedMax": "{count} (max)",
+  "outgoing.batchRevoke": "Batch Revoke",
+  "incoming.selectOriginal": "Select {wallet} as original delegator",
+  "incoming.actionsDescription":
+    "Select a delegator above, then choose an action to perform on their behalf.",
+  "incoming.registerDelegation": "Register Delegation",
+  "incoming.registerManager": "Register Delegation Manager",
+  "incoming.registerConsolidation": "Register Consolidation",
+  "incoming.assignPrimary": "Assign Primary Address",
+  "incoming.revoke": "Revoke",
+  "transaction.pending": "Transaction pending",
+  "toast.revokingDelegation": "Revoking Delegation",
+  "toast.revokingDelegationFailed": "Revoking Delegation Failed",
+  "toast.revokingDelegationsFailed": "Revoking Delegations Failed",
+  "toast.batchRevoking": "Batch Revoking Delegations",
+  "toast.revokeStartFailed": "Failed to start revoking delegation.",
+  "toast.batchRevokeStartFailed": "Failed to start revoking delegations.",
+  "toast.confirmationFailed":
+    "Transaction failed while waiting for confirmation.",
+  "toast.lockingWallet": "Locking Wallet",
+  "toast.unlockingWallet": "Unlocking Wallet",
+  "toast.lockFailed": "{title} Failed",
+  "toast.walletLockStartFailed": "Failed to start wallet lock update.",
+  "toast.useCaseLockStartFailed": "Failed to start use-case lock update.",
+  "toast.lockingUseCase":
+    "Locking Wallet on Use Case\n#{useCase} {useCaseName}",
+  "toast.unlockingUseCase":
+    "Unlocking Wallet on Use Case\n#{useCase} {useCaseName}",
+  "locks.title": "Locks",
+  "locks.tooltip":
+    "Locks only block incoming delegations for this collection scope. They do not revoke outgoing records.",
+  "locks.description":
+    "Locks block incoming delegations for this collection scope. They do not stop delegations you already made to other wallets.",
+  "locks.wallet.lock": "Lock Wallet",
+  "locks.wallet.unlock": "Unlock Wallet",
+  "locks.useCase.ariaLabel": "Lock or unlock use case",
+  "locks.useCase.placeholder": "Lock/Unlock Use Case",
+  "locks.useCase.lock": "Lock Use Case",
+  "locks.useCase.unlock": "Unlock Use Case",
+  "locks.useCase.unavailable":
+    "This use case is unavailable. Select another use case and try again.",
+  "locks.note.label": "Note:",
+  "locks.useCase.globalNotePrefix": "Unlock use case in",
+  "locks.allCollections": "All Collections",
+  "locks.option.locked": "#{useCase} - {name} - LOCKED{globalMarker}",
+  "locks.option.unlocked": "#{useCase} - {name} - UNLOCKED",
+  "locks.note.local": "Unlock Wallet to lock/unlock specific use cases",
+  "locks.note.globalPrefix": "Unlock Wallet on",
+  "locks.note.globalSuffix":
+    "to lock/unlock specific collections and use cases",
+  "walletChecker.never": "Never",
+  "walletChecker.all": "All",
+  "walletChecker.delegations.title": "Delegations ({count})",
+  "walletChecker.managers.title": "Delegation Managers ({count})",
+  "walletChecker.consolidations.title": "Consolidations ({count})",
+  "walletChecker.columns.from": "From",
+  "walletChecker.columns.to": "To",
+  "walletChecker.columns.collection": "Collection",
+  "walletChecker.columns.useCase": "Use Case",
+  "walletChecker.columns.tokens": "Tokens",
+  "walletChecker.columns.expiry": "Expiry",
+  "walletChecker.delegations.empty": "No delegations found",
+  "walletChecker.managers.empty": "No delegation managers found",
+  "walletChecker.consolidations.empty": "No consolidations found",
+  "walletChecker.activeDelegation": "Active Minting Delegation for The Memes",
+  "walletChecker.activeConsolidation": "Active Consolidation",
+  "walletChecker.labels.to": "To:",
+  "walletChecker.labels.collection": "Collection:",
+  "walletChecker.labels.useCase": "Use Case:",
+  "walletChecker.labels.expiry": "Expiry:",
+  "walletChecker.incompleteConsolidation": "Incomplete Consolidation",
+  "walletChecker.recommendedActions": "Recommended Actions:",
+  "walletChecker.registerConsolidation":
+    "Register Consolidation from {from} to {to}",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.all": "All",
   "category.nfts": "NFTs",
@@ -1250,6 +1432,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
 export const EN_US_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
+  ...COLLECTION_DELEGATION_MESSAGES,
   ...join6529Messages,
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
@@ -1485,6 +1668,9 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
+  "theMemes.detail.loadError.message":
+    "We couldn't load this card. Please try again.",
+  "theMemes.detail.loadError.retry": "Try again",
   "theMemes.detail.mainStageSubmission.title": "Main Stage Submission",
   "theMemes.detail.sections.ariaLabel": "Meme page sections",
   "theMemes.detail.history.ariaLabel": "Meme history sections",
@@ -1929,6 +2115,9 @@ export const EN_US_MESSAGES = {
   "profile.mute.status.muted": "Notifications from this profile are muted.",
   "profile.mute.status.unmuted":
     "Notifications from this profile are not muted.",
+  "profile.subscriptions.mintingToday.label": "Minting Today",
+  "profile.subscriptions.mintingToday.tooltip":
+    "No changes allowed on minting day",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
   "drop.media.processingGeneric": "Processing media",
@@ -1965,6 +2154,7 @@ export const EN_US_MESSAGES = {
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
   ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
@@ -1991,6 +2181,7 @@ export const EN_US_MESSAGES = {
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
+  ...REP_CATEGORY_VALIDATION_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,

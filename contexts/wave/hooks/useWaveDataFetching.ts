@@ -17,7 +17,10 @@ import {
   fetchWaveMessages,
   formatWaveMessages,
 } from "../utils/wave-messages-utils";
-import { useWaveAbortController } from "./useWaveAbortController";
+import {
+  type WaveAbortTrigger,
+  useWaveAbortController,
+} from "./useWaveAbortController";
 import {
   createWaveFeedAbortError,
   createWaveFeedUnavailableError,
@@ -46,6 +49,7 @@ interface RegisterWaveOptions {
 }
 
 interface WaveDataFetchingProps extends WaveDataStoreUpdater {
+  readonly hasServerFeedSeed: (waveId: string) => boolean;
   readonly isCapacitor?: boolean | undefined;
 }
 
@@ -267,7 +271,7 @@ function useNativeInitialBackfill({
   updateData,
   updateEligibility,
 }: {
-  readonly cancelFetch: (waveId: string) => void;
+  readonly cancelFetch: (waveId: string, trigger: WaveAbortTrigger) => void;
   readonly cleanupController: (
     waveId: string,
     controller: AbortController
@@ -327,7 +331,7 @@ function useNativeInitialBackfill({
       }
 
       clearInitialBackfillTimeout(waveId);
-      cancelFetch(`${waveId}-initial-backfill`);
+      cancelFetch(`${waveId}-initial-backfill`, "request_replaced");
 
       initialBackfillTimeoutsRef.current[waveId] = setTimeout(() => {
         delete initialBackfillTimeoutsRef.current[waveId];
@@ -559,12 +563,13 @@ function useSyncExistingWaveNewestMessages({
 export function useWaveDataFetching({
   updateData,
   getData,
+  hasServerFeedSeed,
   isCapacitor = false,
 }: WaveDataFetchingProps) {
   const { getLoadingState, setLoadingState, setPromise, clearLoadingState } =
     useWaveLoadingState();
   const { cancelFetch, createController, cleanupController } =
-    useWaveAbortController();
+    useWaveAbortController("feed");
   const { updateEligibility } = useWaveEligibility();
   const initialWaveDropsLimit = getWaveDropsInitialLimit(isCapacitor);
   const trackedCacheSuccessWaveIdsRef = useRef<Set<string>>(new Set());
@@ -629,6 +634,10 @@ export function useWaveDataFetching({
       syncNewest = false,
       options?: RegisterWaveOptions
     ) => {
+      if (hasServerFeedSeed(waveId)) {
+        return;
+      }
+
       const existingDropsCount = getData(waveId)?.drops.length ?? 0;
       if (existingDropsCount > 0) {
         if (!trackedCacheSuccessWaveIdsRef.current.has(waveId)) {
@@ -741,6 +750,7 @@ export function useWaveDataFetching({
       cleanupController,
       createController,
       getData,
+      hasServerFeedSeed,
       getLoadingState,
       handleFetchError,
       handleFetchSuccess,
@@ -769,9 +779,9 @@ export function useWaveDataFetching({
   const cancelWaveDataFetch = useCallback(
     (waveId: string) => {
       clearInitialBackfillTimeout(waveId);
-      cancelFetch(waveId);
-      cancelFetch(`${waveId}-initial-backfill`);
-      cancelFetch(getNewestSyncAbortKey(waveId));
+      cancelFetch(waveId, "wave_deactivated");
+      cancelFetch(`${waveId}-initial-backfill`, "wave_deactivated");
+      cancelFetch(getNewestSyncAbortKey(waveId), "wave_deactivated");
     },
     [cancelFetch, clearInitialBackfillTimeout]
   );

@@ -9,6 +9,61 @@ import {
   setWaveDropNearViewport,
 } from "@/contexts/wave/drop-visibility";
 
+interface ResizeSubscription {
+  readonly updateHeight: (height: number) => void;
+}
+
+const resizeSubscriptions = new Map<Element, ResizeSubscription>();
+let sharedResizeObserver: ResizeObserver | null = null;
+
+function getSharedResizeObserver(): ResizeObserver | null {
+  if (typeof ResizeObserver === "undefined") {
+    return null;
+  }
+
+  sharedResizeObserver ??= new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const subscription = resizeSubscriptions.get(entry.target);
+      if (!subscription) {
+        continue;
+      }
+
+      const borderBoxSize = (entry as Partial<ResizeObserverEntry>)
+        .borderBoxSize?.[0];
+      subscription.updateHeight(
+        borderBoxSize?.blockSize ?? entry.contentRect.height
+      );
+    }
+  });
+
+  return sharedResizeObserver;
+}
+
+function observeHeight(
+  element: HTMLElement,
+  subscription: ResizeSubscription
+): (() => void) | undefined {
+  const observer = getSharedResizeObserver();
+  if (!observer) {
+    return undefined;
+  }
+
+  resizeSubscriptions.set(element, subscription);
+  observer.observe(element);
+
+  return () => {
+    observer.unobserve(element);
+    resizeSubscriptions.delete(element);
+
+    if (resizeSubscriptions.size === 0) {
+      observer.disconnect();
+      if (observer === sharedResizeObserver) {
+        sharedResizeObserver = null;
+      }
+    }
+  };
+}
+
 /**
  * Props for VirtualScrollWrapper
  */
@@ -26,6 +81,7 @@ interface VirtualScrollWrapperProps {
   readonly waveId: string;
   readonly type: DropSize;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly rootMargin?: string | undefined;
 
   /**
    * The child components to be rendered or virtualized.
@@ -63,6 +119,7 @@ export default function VirtualScrollWrapper({
   waveId,
   type,
   suspendLightDropHydration = false,
+  rootMargin = "5000px 0px 5000px 0px",
 }: VirtualScrollWrapperProps) {
   const { fetchAroundSerialNo } = useMyStream();
 
@@ -77,6 +134,8 @@ export default function VirtualScrollWrapper({
    */
   const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
 
+  const hasMeasuredHeightRef = useRef(false);
+
   /**
    * containerRef: Reference to the top-level container element
    * to measure size, observe media, and attach an IntersectionObserver.
@@ -87,26 +146,58 @@ export default function VirtualScrollWrapper({
    * measureHeight: Uses getBoundingClientRect to measure the
    * rendered height of the container element.
    */
-  const measureHeight = useCallback(() => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setMeasuredHeight(rect.height);
+  const updateMeasuredHeight = useCallback((height: number) => {
+    if (!Number.isFinite(height) || height <= 0) {
+      return;
     }
+
+    hasMeasuredHeightRef.current = true;
+    setMeasuredHeight((currentHeight) =>
+      currentHeight === height ? currentHeight : height
+    );
   }, []);
 
-  /**
-   * Once all media are loaded, optionally wait the provided `delay`
-   * before measuring the height. This allows any final reflows or
-   * async changes to settle.
-   */
+  const measureHeight = useCallback(() => {
+    if (containerRef.current) {
+      updateMeasuredHeight(containerRef.current.getBoundingClientRect().height);
+    }
+  }, [updateMeasuredHeight]);
+
+  /** Keep FULL-drop height tracking active across viewport transitions. */
   useEffect(() => {
     if (type === DropSize.LIGHT) return;
+    const element = containerRef.current;
+    if (!element) return;
+
+    hasMeasuredHeightRef.current = false;
+    const stopObservingHeight = observeHeight(element, {
+      updateHeight: updateMeasuredHeight,
+    });
+
+    return () => {
+      stopObservingHeight?.();
+    };
+  }, [type, updateMeasuredHeight]);
+
+  /**
+   * Fall back to one delayed layout read when ResizeObserver has not supplied
+   * a usable height. Cancel it while the drop is outside the render window.
+   */
+  useEffect(() => {
+    if (type === DropSize.LIGHT || !isInView || hasMeasuredHeightRef.current) {
+      return;
+    }
+
     const timer = setTimeout(() => {
-      measureHeight();
+      if (!hasMeasuredHeightRef.current) {
+        measureHeight();
+      }
     }, delay);
 
-    return () => clearTimeout(timer);
-  }, [delay, measureHeight]);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [delay, isInView, measureHeight, type]);
 
   /**
    * Intersection Observer to track if the element is in the viewport.
@@ -129,42 +220,45 @@ export default function VirtualScrollWrapper({
           });
         }
         if (!inView && containerRef.current && type !== DropSize.LIGHT) {
-          // If leaving viewport, measure height in case content changed
+          // Capture the current border box immediately before replacing the
+          // drop with its placeholder. This preserves the chat's scroll
+          // geometry even if a resize notification is still pending.
           measureHeight();
         }
-        if (inView !== isInView) {
-          setIsInView(inView);
-        }
+        setIsInView((currentValue) =>
+          currentValue === inView ? currentValue : inView
+        );
         if (inView && type === DropSize.LIGHT && !suspendLightDropHydration) {
           fetchAroundSerialNo(waveId, dropSerialNo);
         }
       },
       {
-        // For a reversed layout, we need a large margin at both top and bottom
-        // This ensures elements are detected well before they enter/leave the viewport
-        // Using a large value for both directions ensures smooth operation in both regular and reversed layouts
-        rootMargin: "5000px 0px 5000px 0px",
+        // Keep enough content mounted around the reversed viewport to avoid
+        // visible placeholder swaps during fast scrolling.
+        rootMargin,
         threshold: 0.0,
         root: scrollContainerRef.current,
       }
     );
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const observedElement = containerRef.current;
+    if (observedElement) {
+      observer.observe(observedElement);
     }
 
     // Cleanup observer on unmount
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
+      if (observedElement) {
+        observer.unobserve(observedElement);
       }
+      observer.disconnect();
     };
   }, [
     dropId,
     dropSerialNo,
     fetchAroundSerialNo,
-    isInView,
     measureHeight,
+    rootMargin,
     scrollContainerRef,
     suspendLightDropHydration,
     type,

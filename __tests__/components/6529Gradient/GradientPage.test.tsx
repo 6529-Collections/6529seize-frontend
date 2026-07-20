@@ -44,13 +44,7 @@ jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
 }));
 jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
   __esModule: true,
-  default: (props: any) => (
-    <tr
-      data-testid="activity-row"
-      data-variant={props.variant}
-      data-row-style={props.rowStyle}
-    />
-  ),
+  default: () => <tr data-testid="activity-row" />,
 }));
 jest.mock("@/components/nft-transfer/TransferSingle", () => ({
   __esModule: true,
@@ -174,8 +168,9 @@ describe("GradientPage", () => {
     renderPage();
     const row = await screen.findByTestId("activity-row");
     expect(row).toBeInTheDocument();
-    expect(row).toHaveAttribute("data-variant", "tailwind");
-    expect(row).toHaveAttribute("data-row-style", "striped");
+    expect(
+      screen.getByRole("heading", { name: "Card Activity" })
+    ).toBeInTheDocument();
   });
 
   it("renders navigation and rank", async () => {
@@ -243,7 +238,7 @@ describe("GradientPage", () => {
     expect(screen.getByText("Mint Date")).toBeInTheDocument();
     expect(screen.getByText("Artist")).toBeInTheDocument();
     expect(screen.getByTestId("artist")).toBeInTheDocument();
-    expect(screen.getByText("Market Overview")).toBeInTheDocument();
+    expect(screen.queryByText("Market Overview")).not.toBeInTheDocument();
     expect(screen.getByText("Floor Price")).toBeInTheDocument();
     expect(screen.getByText("Market Cap")).toBeInTheDocument();
     expect(screen.getByText("Highest Offer")).toBeInTheDocument();

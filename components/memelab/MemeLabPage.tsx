@@ -142,8 +142,20 @@ const isAbortError = (error: unknown): boolean => {
   return error instanceof Error && error.name === "AbortError";
 };
 
+function runAfterCriticalWork(callback: () => void): () => void {
+  if (typeof globalThis.requestIdleCallback !== "function") {
+    callback();
+    return () => undefined;
+  }
+
+  const idleCallbackId = globalThis.requestIdleCallback(callback, {
+    timeout: 1500,
+  });
+  return () => globalThis.cancelIdleCallback(idleCallbackId);
+}
+
 const MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME =
-  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 function getMemeLabTabButtonClassName(isActive: boolean) {
   return `${MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME} ${
@@ -281,6 +293,8 @@ export default function MemeLabPageComponent({
   );
   const routeTab = parseMemeLabFocus(focusParam) ?? MEME_FOCUS.LIVE;
   const activitySectionRef = useRef<HTMLElement | null>(null);
+  const loadedActivityKeyRef = useRef<string | null>(null);
+  const loadedHistoryNftIdRef = useRef<string | null>(null);
 
   const [nft, setNft] = useState<LabNFT>();
   const [originalMemes, setOriginalMemes] = useState<NFT[]>([]);
@@ -408,34 +422,6 @@ export default function MemeLabPageComponent({
       return undefined;
     };
 
-    const loadOriginalMemes = async (fetchedNft?: LabNFT) => {
-      if (!fetchedNft?.meme_references?.length) {
-        setOriginalMemesState([]);
-        return;
-      }
-
-      try {
-        const referencesResponse = await fetchUrl<DBResponse<NFT>>(
-          `${
-            publicEnv.API_ENDPOINT
-          }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${fetchedNft.meme_references.join(
-            ","
-          )}`,
-          { signal }
-        );
-        if (cancelled) {
-          return;
-        }
-        setOriginalMemesState(referencesResponse.data);
-      } catch (error) {
-        if (cancelled || isAbortError(error)) {
-          return;
-        }
-        console.error("Failed to fetch referenced memes", error);
-        setOriginalMemesState([]);
-      }
-    };
-
     const loadNft = async () => {
       try {
         const metaResponse = await fetchUrl<DBResponse<LabExtendedData>>(
@@ -479,8 +465,6 @@ export default function MemeLabPageComponent({
 
         setNft(fetchedNft);
         setNftLoading(false);
-
-        await loadOriginalMemes(fetchedNft);
       } catch (error) {
         if (cancelled || isAbortError(error)) {
           return;
@@ -497,6 +481,54 @@ export default function MemeLabPageComponent({
       abortController.abort();
     };
   }, [nftId]);
+
+  useEffect(() => {
+    if (
+      activeTab !== MEME_FOCUS.REFERENCES ||
+      !nft ||
+      originalMemesLoaded
+    ) {
+      return;
+    }
+
+    if (!nft.meme_references?.length) {
+      setOriginalMemes([]);
+      setOriginalMemesLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+    const abortController = new AbortController();
+
+    fetchUrl<DBResponse<NFT>>(
+      `${
+        publicEnv.API_ENDPOINT
+      }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
+        ","
+      )}`,
+      { signal: abortController.signal }
+    )
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        setOriginalMemes(response.data);
+        setOriginalMemesLoaded(true);
+      })
+      .catch((error: unknown) => {
+        if (cancelled || isAbortError(error)) {
+          return;
+        }
+        console.error("Failed to fetch referenced memes", error);
+        setOriginalMemes([]);
+        setOriginalMemesLoaded(true);
+      });
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+  }, [activeTab, nft, originalMemesLoaded]);
 
   useEffect(() => {
     const walletObjects = connectedProfile?.wallets ?? [];
@@ -555,100 +587,152 @@ export default function MemeLabPageComponent({
   }, [nftId, connectedProfile]);
 
   useEffect(() => {
-    setActivity([]);
-    setActivityTotalResults(0);
-
     if (!nftId) {
       return;
     }
 
-    setActivityLoading(true);
-    let url = `${publicEnv.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
-    switch (activityTypeFilter) {
-      case TypeFilter.SALES:
-        url += `&filter=sales`;
-        break;
-      case TypeFilter.TRANSFERS:
-        url += `&filter=transfers`;
-        break;
-      case TypeFilter.AIRDROPS:
-        url += `&filter=airdrops`;
-        break;
-      case TypeFilter.MINTS:
-        url += `&filter=mints`;
-        break;
-      case TypeFilter.BURNS:
-        url += `&filter=burns`;
-        break;
+    const activityKey = `${nftId}:${activityPage}:${activityTypeFilter}`;
+    if (loadedActivityKeyRef.current === activityKey) {
+      return;
     }
 
     let cancelled = false;
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    fetchUrl(url, { signal })
-      .then((response: DBResponse<Transaction>) => {
-        if (cancelled) {
-          return;
-        }
-        setActivityTotalResults(response.count);
-        setActivity(response.data);
-      })
-      .catch((error) => {
-        if (cancelled || isAbortError(error)) {
-          return;
-        }
-        console.error(`Failed to fetch Meme Lab activity for ${nftId}`, error);
-        setActivityTotalResults(0);
-        setActivity([]);
-      })
-      .finally(() => {
-        setActivityLoading(false);
-      });
+    const loadActivity = () => {
+      if (cancelled) {
+        return;
+      }
+
+      setActivity([]);
+      setActivityTotalResults(0);
+      setActivityLoading(true);
+
+      let url = `${publicEnv.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
+      switch (activityTypeFilter) {
+        case TypeFilter.SALES:
+          url += `&filter=sales`;
+          break;
+        case TypeFilter.TRANSFERS:
+          url += `&filter=transfers`;
+          break;
+        case TypeFilter.AIRDROPS:
+          url += `&filter=airdrops`;
+          break;
+        case TypeFilter.MINTS:
+          url += `&filter=mints`;
+          break;
+        case TypeFilter.BURNS:
+          url += `&filter=burns`;
+          break;
+      }
+
+      fetchUrl(url, { signal })
+        .then((response: DBResponse<Transaction>) => {
+          if (cancelled) {
+            return;
+          }
+          setActivityTotalResults(response.count);
+          setActivity(response.data);
+          loadedActivityKeyRef.current = activityKey;
+        })
+        .catch((error) => {
+          if (cancelled || isAbortError(error)) {
+            return;
+          }
+          console.error(
+            `Failed to fetch Meme Lab activity for ${nftId}`,
+            error
+          );
+          setActivityTotalResults(0);
+          setActivity([]);
+          loadedActivityKeyRef.current = activityKey;
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setActivityLoading(false);
+          }
+        });
+    };
+
+    const activityIsVisible =
+      activeTab === MEME_FOCUS.HISTORY &&
+      activeHistoryTab === MEME_LAB_HISTORY_TAB.ACTIVITY;
+    let cancelScheduledLoad: () => void = () => undefined;
+    if (activityIsVisible) {
+      loadActivity();
+    } else {
+      cancelScheduledLoad = runAfterCriticalWork(loadActivity);
+    }
 
     return () => {
       cancelled = true;
+      cancelScheduledLoad();
       abortController.abort();
     };
-  }, [nftId, activityPage, activityTypeFilter]);
+  }, [
+    activeHistoryTab,
+    activeTab,
+    nftId,
+    activityPage,
+    activityTypeFilter,
+  ]);
 
   useEffect(() => {
-    setNftHistory([]);
-
-    let cancelled = false;
-    const abortController = new AbortController();
-    const { signal } = abortController;
-
-    async function fetchHistory(url: string) {
-      try {
-        const response = await fetchAllPages<NFTHistory>(url, { signal });
-        if (!cancelled) {
-          setNftHistory(response);
-        }
-      } catch (error) {
-        if (cancelled || isAbortError(error)) {
-          return;
-        }
-        console.error(
-          `Failed to fetch NFT history for Meme Lab ${nftId}`,
-          error
-        );
-        setNftHistory([]);
-      }
-    }
-
-    if (!nftId) {
+    if (!nftId || loadedHistoryNftIdRef.current === nftId) {
       return;
     }
 
+    let cancelled = false;
+    const abortController = new AbortController();
     const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
-    fetchHistory(initialUrlHistory);
+
+    const loadHistory = () => {
+      if (cancelled) {
+        return;
+      }
+
+      setNftHistory([]);
+      fetchAllPages<NFTHistory>(initialUrlHistory, {
+        signal: abortController.signal,
+      })
+        .then((response) => {
+          if (cancelled) {
+            return;
+          }
+          setNftHistory(response);
+          loadedHistoryNftIdRef.current = nftId;
+        })
+        .catch((error: unknown) => {
+          if (cancelled || isAbortError(error)) {
+            return;
+          }
+          console.error(
+            `Failed to fetch NFT history for Meme Lab ${nftId}`,
+            error
+          );
+          setNftHistory([]);
+          loadedHistoryNftIdRef.current = nftId;
+        });
+    };
+
+    const timelineIsVisible =
+      activeTab === MEME_FOCUS.HISTORY &&
+      activeHistoryTab === MEME_LAB_HISTORY_TAB.TIMELINE;
+    let cancelScheduledLoad: () => void = () => undefined;
+    if (timelineIsVisible) {
+      loadHistory();
+    } else {
+      cancelScheduledLoad = runAfterCriticalWork(loadHistory);
+    }
 
     return () => {
       cancelled = true;
+      cancelScheduledLoad();
       abortController.abort();
     };
-  }, [nftId]);
+  }, [activeHistoryTab, activeTab, nftId]);
 
   const activityContent = useMemo(() => {
     if (activity.length > 0) {
@@ -660,8 +744,6 @@ export default function MemeLabPageComponent({
                 <LatestActivityRow
                   tr={tr}
                   nft={nft}
-                  variant="tailwind"
-                  rowStyle="striped"
                   key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                 />
               ))}
@@ -955,7 +1037,7 @@ export default function MemeLabPageComponent({
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
-                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-x-0.5 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                   />
                   {t(locale, "memeLab.detail.backLink.label")}
                 </Link>

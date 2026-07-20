@@ -205,13 +205,16 @@ export default function CreateDropPoll({
   }));
 
   return (
-    <div className="tw-mt-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-shadow-2xl tw-shadow-black/60 tw-backdrop-blur">
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-3 tw-pt-4">
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-          <h3 className="tw-mb-0 tw-text-[13.5px] tw-font-bold tw-tracking-wide tw-text-iron-50">
+    <div
+      data-testid="create-drop-poll"
+      className="tw-mt-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-shadow-2xl tw-shadow-black/60 tw-backdrop-blur"
+    >
+      <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-3 tw-pt-4 sm:tw-flex sm:tw-justify-between sm:tw-gap-3">
+        <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-items-center sm:tw-gap-3">
+          <h3 className="tw-col-start-1 tw-row-start-1 tw-mb-0 tw-text-[13.5px] tw-font-bold tw-tracking-wide tw-text-iron-50">
             Create Poll
           </h3>
-          <div className="tw-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/60 tw-p-0.5">
+          <div className="tw-col-span-2 tw-col-start-1 tw-row-start-2 tw-flex tw-w-fit tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/60 tw-p-0.5">
             <button
               type="button"
               aria-pressed={!draft.multichoice}
@@ -245,7 +248,7 @@ export default function CreateDropPoll({
           aria-label="Remove poll"
           disabled={disabled}
           onClick={onRemove}
-          className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-0 tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-white"
+          className="tw-col-start-2 tw-row-start-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-0 tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-white"
         >
           <XMarkIcon className="tw-size-4" aria-hidden="true" />
         </button>
@@ -308,7 +311,7 @@ export default function CreateDropPoll({
             );
           })}
 
-          <div className="tw-mt-1 tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3">
+          <div className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-1.5 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-3">
             <button
               type="button"
               disabled={disabled || !canAddOption}
@@ -321,7 +324,7 @@ export default function CreateDropPoll({
               <span className="tw-text-sm tw-font-medium">Add option</span>
             </button>
             {validationError && (
-              <p className="tw-mb-0 tw-min-w-0 tw-truncate tw-text-right tw-text-[11px] tw-font-medium tw-text-amber-200">
+              <p className="tw-mb-0 tw-min-w-0 tw-text-left tw-text-[11px] tw-font-medium tw-text-amber-200 sm:tw-truncate sm:tw-text-right">
                 {validationError}
               </p>
             )}

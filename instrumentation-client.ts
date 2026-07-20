@@ -9,6 +9,10 @@ import {
 } from "@/utils/error-sanitizer";
 import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
 import {
+  enrichCyclicJsonTimerEvent,
+  installCyclicJsonTimerDiagnostics,
+} from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
+import {
   sanitizeSentryBreadcrumb,
   sanitizeSentryEvent,
   sanitizeUrlString,
@@ -18,9 +22,11 @@ import {
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterAnonymousUnsafeEvalCspError,
+  shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
@@ -30,7 +36,6 @@ import {
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
-  shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -159,6 +164,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterPoperBlockerOrphanFetchRejection(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
     return true;
   }
@@ -191,7 +200,12 @@ function shouldFilterEvent(
     return true;
   }
 
-  if (shouldFilterSentryRouteParameterizationError(event)) {
+  // Intentionally do not call shouldFilterSentryRouteParameterizationError.
+  // Keep all cyclic JSON timer failures while origin diagnostics are active.
+  // Generic Sentry/WKWebView frames do not prove third-party ownership, so
+  // retaining only the sampled diagnostic subset would hide genuine app errors.
+
+  if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
     return true;
   }
 
@@ -264,6 +278,10 @@ function filterNoisyThirdPartyTransactionSpans(
 }
 
 function handleIndexedDBError(event: Sentry.Event): void {
+  const mechanism = event.exception?.values?.[0]?.mechanism;
+  if (mechanism) {
+    mechanism.handled = true;
+  }
   event.level = "warning";
   event.tags = {
     ...event.tags,
@@ -453,6 +471,8 @@ Sentry.init({
       return null;
     }
 
+    enrichCyclicJsonTimerEvent(event, hint);
+
     const error = hint?.originalException ?? hint?.syntheticException;
     const value = event.exception?.values?.[0];
     const message =
@@ -502,6 +522,17 @@ Sentry.init({
     );
   },
 });
+
+if (sentryEnabled && isProduction) {
+  try {
+    // Install after Sentry so BrowserApiErrors remains the sole event capture
+    // path. This wrapper only associates sampled scheduling provenance with
+    // the original Error and then rethrows it unchanged.
+    installCyclicJsonTimerDiagnostics();
+  } catch {
+    // Diagnostics must never affect application startup.
+  }
+}
 
 if (globalThis.window !== undefined) {
   globalThis.window.addEventListener("error", (event) => {
