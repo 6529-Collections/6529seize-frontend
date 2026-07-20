@@ -12,11 +12,12 @@ import {
 import type { NextGenToken } from "@/entities/INextgen";
 import { formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatDate, formatNumber } from "@/i18n/format";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import { Tooltip } from "react-tooltip";
 import { TraitScore } from "./NextGenTokenAbout";
 
@@ -39,6 +40,7 @@ export function NextGenTokenImage(
   }>
 ) {
   const isMobileScreen = useIsMobileScreen();
+  const locale = useBrowserLocale();
   function getImageUrl() {
     if (props.show_original) {
       return props.token.image_url;
@@ -52,8 +54,7 @@ export function NextGenTokenImage(
       const handleOrWallet =
         props.token.normalised_handle ?? formatAddress(props.token.owner);
       const profileHref = `/${props.token.normalised_handle ?? props.token.owner}`;
-      const initial =
-        handleOrWallet.trim().charAt(0) || "?";
+      const initial = handleOrWallet.trim().charAt(0) || "?";
       const ownerInfo = (
         <div className="tailwind-scope tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2.5">
           <ProfileAvatar
@@ -84,40 +85,26 @@ export function NextGenTokenImage(
 
       ownerInfoDisplay = (
         <button
-          style={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-            display: "flex",
-          }}
+          type="button"
+          className="tw-flex tw-h-10 tw-w-10 tw-cursor-pointer tw-items-center tw-justify-end tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           aria-label="More info"
+          data-tooltip-id={`owner-info-${props.token.id}`}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
           }}
         >
           <FontAwesomeIcon
-            height={18}
             icon={faInfoCircle}
-            data-tooltip-id={`owner-info-${props.token.id}`}
+            className="tw-h-5 tw-w-5"
+            aria-hidden="true"
           />
           <Tooltip
             id={`owner-info-${props.token.id}`}
             place="right"
             delayShow={250}
-            style={{
-              backgroundColor: "#26272B",
-              color: "#F4F4F5",
-              padding: "10px 12px",
-              maxWidth: "min(280px, calc(100vw - 24px))",
-              fontSize: "12px",
-              lineHeight: "1.35",
-              borderRadius: "8px",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
-              ...({ "--rt-opacity": 1 } as CSSProperties),
-            }}
+            opacity={1}
+            className="!tw-max-w-[min(280px,calc(100vw-24px))] !tw-rounded-lg !tw-border !tw-border-solid !tw-border-white/15 !tw-bg-iron-800 !tw-px-3 !tw-py-2.5 !tw-text-sm !tw-leading-[1.5] !tw-text-iron-50 !tw-shadow-lg"
           >
             <div className="tw-flex tw-flex-col tw-gap-1.5 tw-text-left">
               <div className="tw-border-b tw-border-white/10 tw-pb-1.5">
@@ -186,24 +173,22 @@ export function NextGenTokenImage(
             props.token.opensea_royalty > 0 && (
               <Image
                 unoptimized
-                width={0}
-                height={0}
-                style={{ height: "20px", width: "auto" }}
+                width={20}
+                height={20}
+                className="tw-h-5 tw-w-auto tw-cursor-pointer"
                 src={`/${getRoyaltyImage(props.token.opensea_royalty / 100)}`}
-                alt={"pepe"}
-                className="tw-cursor-pointer"
+                alt="Royalty indicator"
               />
             )}
           {props.token.me_price == props.token.price &&
             props.token.me_price > 0 && (
               <Image
                 unoptimized
-                width={0}
-                height={0}
-                style={{ height: "20px", width: "auto" }}
+                width={20}
+                height={20}
+                className="tw-h-5 tw-w-auto tw-cursor-pointer"
                 src={`/${getRoyaltyImage(props.token.me_royalty / 100)}`}
-                alt={"pepe"}
-                className="tw-cursor-pointer"
+                alt="Royalty indicator"
               />
             )}
         </span>
@@ -223,13 +208,16 @@ export function NextGenTokenImage(
       if (value && date) {
         saleDisplay = (
           <span className="tw-flex tw-items-center">
-            <span className="tw-text-[#9a9a9a] tw-text-sm">{display}</span>&nbsp;
+            <span className="tw-text-sm tw-text-[#9a9a9a]">{display}</span>
+            &nbsp;
             <span className="tw-flex tw-gap-2">
               <span>
-                {Number.parseFloat(value.toFixed(5)).toLocaleString()}{" "}
+                {formatNumber(locale, Number.parseFloat(value.toFixed(5)), {
+                  maximumFractionDigits: 5,
+                })}{" "}
                 {ETHEREUM_ICON_TEXT}
               </span>
-              <span>{new Date(date).toLocaleDateString()}</span>
+              <span>{formatDate(locale, date)}</span>
             </span>
           </span>
         );
@@ -246,38 +234,29 @@ export function NextGenTokenImage(
     );
   }
   function getImage() {
-    let height = "auto";
-    if (props.token_art) {
+    let heightClassName = "tw-h-auto";
+    if (props.is_fullscreen) {
+      heightClassName = "tw-h-[calc(100dvh-2rem)] tw-w-[calc(100vw-2rem)]";
+    } else if (props.token_art) {
       if (isMobileScreen) {
-        height = "55vh";
+        heightClassName = "tw-h-[55vh]";
       } else {
-        height = "85vh";
+        heightClassName = "tw-h-[85vh]";
       }
-    } else if (props.is_fullscreen) {
-      height = "100vh";
     }
 
     return (
       <>
         <span
-          className="tw-flex tw-flex-col tw-items-center tw-justify-center"
-          style={{
-            overflow: "hidden",
-            height: height,
-          }}
+          className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-overflow-hidden ${heightClassName}`}
         >
           <Image
             quality={100}
             priority
             unoptimized
-            width="0"
-            height="0"
-            style={{
-              height: "auto",
-              width: "auto",
-              maxHeight: "100%",
-              maxWidth: "100%",
-            }}
+            width={0}
+            height={0}
+            className="tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full"
             src={getImageUrl()}
             alt={props.token.name}
             onError={(e) => {
@@ -287,7 +266,7 @@ export function NextGenTokenImage(
         </span>
         {!props.hide_info && (
           <span
-            className={`tw-pt-1 tw-flex tw-items-center ${
+            className={`tw-flex tw-w-full tw-items-center tw-pt-1 ${
               props.rarity_type ||
               props.show_listing ||
               props.show_max_sale ||
@@ -312,17 +291,16 @@ export function NextGenTokenImage(
 
   function getContent() {
     if (props.show_animation && props.token.animation_url) {
+      let animationHeightClassName = "tw-h-[85vh]";
+      if (props.is_fullscreen) {
+        animationHeightClassName = "tw-h-screen";
+      } else if (isMobileScreen) {
+        animationHeightClassName = "tw-h-[60vh]";
+      }
+
       return (
         <iframe
-          style={{
-            width: "100%",
-            height: props.is_fullscreen
-              ? "100vh"
-              : isMobileScreen
-                ? "60vh"
-                : "85vh",
-            marginBottom: "-8px",
-          }}
+          className={`-tw-mb-2 tw-w-full ${animationHeightClassName}`}
           src={props.token.animation_url ?? props.token.generator?.html}
           title={props.token.name}
         />
