@@ -79,6 +79,12 @@ function mainButton(page: Page, name: string) {
   return page.locator("main").getByRole("button", { name });
 }
 
+function nextGenSectionLink(page: Page, name: string) {
+  return page
+    .getByRole("navigation", { name: "NextGen sections" })
+    .getByRole("link", { name, exact: true });
+}
+
 function detailButton(page: Page, name: string) {
   return mainButton(page, name).last();
 }
@@ -105,21 +111,17 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     await gotoReady(page, "/nextgen");
 
     await expect(page).toHaveTitle(/NextGen/);
-    await expectAnyVisible(
-      [
-        page.getByAltText("nextgen"),
-        page.getByRole("button", { name: "Collections" }),
-      ],
-      "Expected the NextGen header to render"
-    );
     await expect(
-      page.locator("main").getByRole("heading", { name: "Featured" }).first()
+      page.getByRole("navigation", { name: "NextGen sections" })
+    ).toBeVisible();
+    await expect(
+      page.locator("main").getByRole("heading", { level: 1 }).first()
     ).toBeVisible();
     for (const item of ["Collections", "Artists", "About"]) {
-      await expect(mainButton(page, item).first()).toBeVisible();
+      await expect(nextGenSectionLink(page, item)).toBeVisible();
     }
     await expect(
-      page.getByRole("button", { name: "Explore Collection" })
+      page.getByRole("link", { name: "Explore Collection" })
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Featured Artist" })
@@ -155,9 +157,11 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("heading", { level: 1, name: "Collections" })
     ).toBeVisible();
-    const statusFilter = page.getByRole("combobox", { name: "Status:" });
+    const statusFilter = page.getByRole("button", {
+      name: "Filter collections by status",
+    });
     await expect(statusFilter).toBeVisible();
-    await expect(statusFilter).toHaveValue("ALL");
+    await expect(statusFilter).toHaveText("All statuses");
     await expectCardsOrEmpty(
       page,
       page.locator('main a[href*="/nextgen/collection/"]'),
@@ -170,7 +174,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
 
     await expect(page).toHaveTitle(/Pebbles.*NextGen/);
     await expect(
-      page.getByText("Pebbles", { exact: true }).first()
+      page.getByRole("heading", { level: 1, name: /^Pebbles by/ })
     ).toBeVisible();
     for (const tab of ["Overview", "About", "Provenance", "Trait Sets"]) {
       await expect(detailButton(page, tab)).toBeVisible();
