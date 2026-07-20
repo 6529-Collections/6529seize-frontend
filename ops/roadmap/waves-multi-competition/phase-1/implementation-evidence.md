@@ -15,10 +15,10 @@ D-17 remains deferred until the Phase 6 presentation rollout gate.
 
 ## Source Baselines
 
-- Backend main: `127c9409` (`6529seize-backend`)
-- Frontend main: `ea5434e1a` (`6529seize-frontend`)
+- Backend main: `3a3b1e4c` (`6529seize-backend`)
+- Frontend main: `aa1631e49` (`6529seize-frontend`)
 - Backend and frontend OpenAPI source SHA-256:
-  `962a0090faf49732667e2b56c7af93cb106057502c87a47a2e5a5b2ac8fb5bb6`
+  `8bd139a415fb061df0e6e75fe8a2095d8cb5da1b5e66a55d0f3cc06f1314212f`
 - Frozen Phase 0 baselines: 296 mounted GET route shapes, 183 OpenAPI GET
   operations, and the accepted representative fixture matrix.
 
@@ -65,9 +65,10 @@ All commands ran from clean task-specific worktrees on 2026-07-20.
 
 | Command | Result |
 | --- | --- |
-| `npm run check` | Passed Prettier, ESLint, 267 suites, 2,283 passing tests, one intentional skip, and TypeScript build on the latest merged `main`. |
+| `npm run check` | Passed Prettier, ESLint, 268 suites, 2,288 passing tests, one intentional skip, and TypeScript build on the latest merged `main`. |
 | `npm test -- --runInBand src/competitions/competition-page.test.ts src/competitions/competition.service.test.ts src/competitions/legacy-competition.adapter.integration.test.ts src/competitions/native-competition.reader.integration.test.ts` | Passed 4 suites and 14 focused service/adapter/repository paging tests. |
 | `npm test -- --runInBand src/competitions/competition.repository.integration.test.ts` | Passed 4 mapping/schema/capability tests, including idempotent mapping and per-competition capability identity. |
+| `npm test -- src/competitions/competition.repository.integration.test.ts src/competitions/legacy-competition.adapter.integration.test.ts src/competitions/competition.service.test.ts src/api-serverless/src/competitions/competitions-v3.handlers.test.ts src/api-serverless/src/competitions/competitions-v3.openapi.test.ts src/app-features.test.ts --runInBand` | Passed 6 suites and 27 tests covering transactional batch backfill, bounded legacy-decision pagination, voter masking, malformed IDs, per-operation defaults, and fail-closed shadow sampling. |
 | `(cd src/api-serverless && npm run build)` | Regenerated routes/models and produced the deployable API zip successfully. |
 
 The full suite includes entity/repository/service/API/auth, stable ID,

@@ -776,6 +776,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveV3"
+        "400":
+          description: Invalid wave identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
         "404":
           description: Wave is absent, private, or unified reads are disabled
           content:
@@ -839,7 +845,9 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
         - name: cursor
           in: query
           required: false
@@ -911,6 +919,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetition"
+        "400":
+          description: Invalid wave or competition identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
         "404":
           description: >-
             Parent or child is absent, private, mismatched, or reads are
@@ -1043,7 +1057,9 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
         - name: cursor
           in: query
           required: false
@@ -1121,6 +1137,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionEntry"
+        "400":
+          description: Invalid wave, competition, or entry identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
         "404":
           description: Masked parent or child mismatch
           content:
@@ -1166,7 +1188,9 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
         - name: cursor
           in: query
           required: false
@@ -1243,10 +1267,8 @@ paths:
           in: query
           required: false
           schema:
-            type: string
-            enum:
-              - ASC
-              - DESC
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
             default: DESC
         - name: cursor
           in: query
@@ -1330,10 +1352,8 @@ paths:
           in: query
           required: false
           schema:
-            type: string
-            enum:
-              - ASC
-              - DESC
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
             default: DESC
         - name: cursor
           in: query
@@ -1403,7 +1423,9 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
         - name: cursor
           in: query
           required: false
@@ -1472,7 +1494,9 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
         - name: cursor
           in: query
           required: false
@@ -1541,7 +1565,9 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
         - name: cursor
           in: query
           required: false
@@ -1616,7 +1642,9 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
         - name: cursor
           in: query
           required: false
@@ -1685,7 +1713,9 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
         - name: cursor
           in: query
           required: false
@@ -13562,7 +13592,6 @@ components:
       enum:
         - ASC
         - DESC
-      default: ASC
     ApiCompetitionType:
       type: string
       enum:
