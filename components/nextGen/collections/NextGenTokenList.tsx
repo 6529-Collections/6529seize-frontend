@@ -179,13 +179,12 @@ export default function NextGenTokenList(props: Readonly<Props>) {
             }
           } else {
             return (
-              <div
-                role="status"
+              <output
                 aria-label="Loading tokens"
                 className="tw-col-span-full tw-flex tw-min-h-24 tw-items-start tw-py-4"
               >
                 <DotLoader />
-              </div>
+              </output>
             );
           }
         })()}

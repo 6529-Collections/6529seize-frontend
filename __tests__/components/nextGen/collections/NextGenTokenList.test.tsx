@@ -69,9 +69,7 @@ it("announces the token loading state", () => {
   (commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
   render(<NextGenTokenList collection={collection} />);
 
-  expect(
-    screen.getByRole("status", { name: "Loading tokens" })
-  ).toBeInTheDocument();
+  expect(screen.getByLabelText("Loading tokens").tagName).toBe("OUTPUT");
 });
 
 it("requests next page with pagination", async () => {

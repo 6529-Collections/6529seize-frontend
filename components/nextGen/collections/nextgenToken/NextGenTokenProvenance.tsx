@@ -116,9 +116,12 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
             Token Provenance
           </h3>
           {!transactionsLoaded && (
-            <p role="status" className="tw-mb-0 tw-py-5 tw-text-iron-400">
+            <output
+              aria-label="Loading token provenance"
+              className="tw-block tw-py-5 tw-text-iron-400"
+            >
               Loading token provenance…
-            </p>
+            </output>
           )}
           {transactionsError && (
             <div
@@ -188,9 +191,12 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
             Collection Provenance
           </h3>
           {!logsLoaded && (
-            <p role="status" className="tw-mb-0 tw-py-5 tw-text-iron-400">
+            <output
+              aria-label="Loading collection provenance"
+              className="tw-block tw-py-5 tw-text-iron-400"
+            >
               Loading collection provenance…
-            </p>
+            </output>
           )}
           {logsError && (
             <div

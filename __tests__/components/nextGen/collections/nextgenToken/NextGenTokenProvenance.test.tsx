@@ -96,6 +96,19 @@ describe("NextGenTokenProvenance", () => {
     });
   });
 
+  it("announces token and collection loading states", () => {
+    (commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+    render(<NextGenTokenProvenance collection={collection} token_id={7} />);
+
+    expect(screen.getByLabelText("Loading token provenance").tagName).toBe(
+      "OUTPUT"
+    );
+    expect(screen.getByLabelText("Loading collection provenance").tagName).toBe(
+      "OUTPUT"
+    );
+  });
+
   it("ignores stale transaction and log responses after the token changes", async () => {
     const resolvers: Record<string, (value: any) => void> = {};
     (commonApiFetch as jest.Mock).mockImplementation(
