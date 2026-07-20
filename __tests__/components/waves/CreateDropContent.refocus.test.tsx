@@ -95,6 +95,12 @@ jest.mock("@/components/waves/CreateDropInput", () => {
     }),
   };
 });
+jest.mock(
+  "@/components/waves/create-drop-content/exportComposerMarkdown",
+  () => ({
+    exportComposerMarkdown: jest.fn(() => ""),
+  })
+);
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
   <div data-testid="requirements" />
 ));

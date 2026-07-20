@@ -32,6 +32,7 @@ import CreateDropReplyingWrapper from "../CreateDropReplyingWrapper";
 import CreateDropStormParts from "../CreateDropStormParts";
 import { CreateDropSubmit } from "../CreateDropSubmit";
 import SlowModeChatNotice from "../SlowModeChatNotice";
+import { exportComposerMarkdown } from "./exportComposerMarkdown";
 import InlineIdentityPicker from "./InlineIdentityPicker";
 import type {
   CreateDropMetadataType,
@@ -108,7 +109,7 @@ interface CreateDropLayoutProps {
   readonly handleRequestEditLastDrop: () => boolean;
   readonly initialMarkdown: string | null;
   readonly initialMarkdownKey: string | null;
-  readonly onDrop: (resolvedEditorState?: EditorState) => Promise<void>;
+  readonly onDrop: (resolvedMarkdown?: string) => Promise<void>;
   readonly pollDraft: CreateDropPollDraft | null;
   readonly pollValidationError: string | null;
   readonly updatePollDraft: (value: CreateDropPollDraft) => void;
@@ -248,7 +249,7 @@ export default function CreateDropLayout({
       return;
     }
     if (!expansion.completed) return;
-    await onDrop(expansion.editorState);
+    await onDrop(exportComposerMarkdown(expansion.editorState));
   };
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;

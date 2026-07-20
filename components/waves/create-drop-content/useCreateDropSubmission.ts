@@ -348,7 +348,7 @@ export const useCreateDropSubmission = ({
   ) => CreateDropConfig;
   readonly createGifDrop: (gif: string) => CreateDropConfig;
   readonly finalizeAndAddDropPart: (
-    markdownOverride?: string | null
+    markdownOverride: string | null
   ) => CreateDropConfig;
   readonly refreshState: () => void;
   readonly setSubmitting: Dispatch<SetStateAction<boolean>>;

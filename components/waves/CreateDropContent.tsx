@@ -31,6 +31,7 @@ import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identit
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -450,9 +451,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldCollapseOptionsAfterMarkdownSyncRef,
   });
 
+  const showMentionAliasExpansionError = useCallback(() => {
+    setToast({
+      type: "error",
+      title: t(locale, "waves.composer.mentionShortcuts.loadErrorTitle"),
+      message: t(locale, "waves.composer.mentionShortcuts.loadErrorMessage"),
+    });
+  }, [locale, setToast]);
+
   const {
     breakIntoStorm,
-    finalizeAndAddDropPart,
+    finalizeResolvedDropPart,
     onCancelPartEdit,
     onDiscardStorm,
     onEditPart,
@@ -467,6 +476,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     editingPartIndex,
     finalizeAndAddDropPartDraft,
     keepOptionsVisible: keepDesktopOptionsVisible,
+    onMentionAliasExpansionError: showMentionAliasExpansionError,
     refreshState,
     setDrop,
     setEditingPartIndex,
@@ -551,7 +561,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     disableIdentityPickerAutoOpen,
     getUpdatedDrop,
     createGifDrop,
-    finalizeAndAddDropPart,
+    finalizeAndAddDropPart: finalizeResolvedDropPart,
     refreshState,
     setSubmitting,
     setUploadingFiles,
@@ -563,16 +573,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldRefocusAfterChatSubmitRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,
   });
-
-  const onDropWithResolvedAliases = useCallback(
-    (resolvedEditorState?: EditorState) =>
-      onDrop(
-        resolvedEditorState
-          ? exportComposerMarkdown(resolvedEditorState)
-          : undefined
-      ),
-    [onDrop]
-  );
 
   const onSwitchToDropMode = useCallback(() => {
     if (!normalizedCurationDropUrl) {
@@ -748,7 +748,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       handleRequestEditLastDrop={handleRequestEditLastDrop}
       initialMarkdown={initialMarkdown}
       initialMarkdownKey={initialMarkdownKey}
-      onDrop={onDropWithResolvedAliases}
+      onDrop={onDrop}
       pollDraft={pollDraft}
       pollValidationError={pollValidation.error}
       updatePollDraft={updatePollDraft}
