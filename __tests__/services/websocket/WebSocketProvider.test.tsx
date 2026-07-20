@@ -967,6 +967,44 @@ describe("WebSocketProvider", () => {
   });
 
   describe("Subscription Management", () => {
+    it("retains subscribers across a socket reconnect", () => {
+      jest.useFakeTimers();
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+      const callback = jest.fn();
+
+      act(() => {
+        result.current.subscribe(WsMessageType.DROP_UPDATE, callback);
+        result.current.connect("token");
+      });
+
+      const firstSocket = (
+        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
+      ).mock.results[0]?.value as MockWebSocket;
+
+      act(() => {
+        firstSocket.triggerOpen();
+        firstSocket.triggerClose(1006, "Unexpected close");
+        jest.advanceTimersByTime(2000);
+      });
+
+      const reconnectedSocket = (
+        globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
+      ).mock.results[1]?.value as MockWebSocket;
+
+      act(() => {
+        reconnectedSocket.triggerOpen();
+        reconnectedSocket.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: 1 },
+        });
+      });
+
+      expect(callback).toHaveBeenCalledWith({ id: 1 });
+    });
+
     it("manages multiple subscribers for same message type", () => {
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
