@@ -6,6 +6,7 @@ import {
   getLocalizedGithubFileKindLabel,
 } from "@/lib/link-preview/filePreviewI18n";
 import type {
+  GithubContentPreviewResponse,
   GithubPreviewChecks,
   GithubPreviewLabel,
   GithubPreviewResponse,
@@ -286,13 +287,10 @@ export const getCardTitle = (
   return title && title.length > 0 ? title : getFallbackTitle(link);
 };
 
-type GithubPreviewOf<TType extends GithubPreviewResponse["type"]> =
-  TType extends "github.file" | "github.directory"
-    ? Extract<
-        GithubPreviewResponse,
-        { readonly type: "github.file" | "github.directory" }
-      > & { readonly type: TType }
-    : Extract<GithubPreviewResponse, { readonly type: TType }>;
+type GithubPreviewOf<TType extends GithubPreviewResponse["type"]> = Extract<
+  GithubPreviewResponse,
+  { readonly type: TType }
+>;
 
 const getRepositoryDetail = (
   repoLabel: string,
@@ -313,7 +311,7 @@ const getRepositoryDetail = (
 
 const getFileDetail = (
   repoLabel: string,
-  preview: GithubPreviewOf<"github.file">
+  preview: GithubContentPreviewResponse
 ): string =>
   joinDetailParts([
     repoLabel,
@@ -327,7 +325,7 @@ const getFileDetail = (
 
 const getDirectoryDetail = (
   repoLabel: string,
-  preview: GithubPreviewOf<"github.directory">
+  preview: GithubContentPreviewResponse
 ): string =>
   joinDetailParts([
     repoLabel,
@@ -555,7 +553,7 @@ const getRepositoryFacts = (
   ]);
 
 const getLineAnchor = (
-  preview: GithubPreviewOf<"github.file">
+  preview: GithubContentPreviewResponse
 ): string | null => {
   if (!preview.lineStart) {
     return null;
@@ -567,7 +565,7 @@ const getLineAnchor = (
 };
 
 const getFileFacts = (
-  preview: GithubPreviewOf<"github.file">
+  preview: GithubContentPreviewResponse
 ): readonly GithubFact[] => {
   const showMimeType =
     preview.mimeType &&
@@ -601,7 +599,7 @@ const getFileFacts = (
 };
 
 const getDirectoryFacts = (
-  preview: GithubPreviewOf<"github.directory">
+  preview: GithubContentPreviewResponse
 ): readonly GithubFact[] =>
   compactFacts([
     createFact("Ref", preview.ref),
