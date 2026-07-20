@@ -3,6 +3,7 @@ import { render, act } from "@testing-library/react";
 import NewMentionsPlugin, {
   MentionTypeaheadOption,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 
 jest.mock("@lexical/react/LexicalComposerContext", () => ({
   useLexicalComposerContext: () => [{ update: (fn: any) => fn() }],
@@ -15,7 +16,7 @@ jest.mock("@lexical/react/LexicalTypeaheadMenuPlugin", () => ({
     return <div data-testid="typeahead" />;
   },
   MenuOption: class {},
-  useBasicTypeaheadTriggerMatch: () => jest.fn(),
+  useBasicTypeaheadTriggerMatch: () => jest.fn(() => null),
 }));
 
 jest.mock("@/hooks/useIdentitiesSearch", () => ({
@@ -25,6 +26,12 @@ jest.mock("@/hooks/useIdentitiesSearch", () => ({
 jest.mock("@/hooks/useMentionAliases", () => ({
   useMentionAliases: jest.fn(),
 }));
+jest.mock(
+  "@/components/drops/create/lexical/utils/codeContextDetection",
+  () => ({
+    isInCodeContext: jest.fn(() => false),
+  })
+);
 
 jest.mock("@/components/drops/create/lexical/nodes/MentionNode", () => ({
   $createMentionNode: jest.fn(() => ({
@@ -51,6 +58,7 @@ const {
 
 describe("MentionsPlugin", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     (useMentionAliases as jest.Mock).mockReturnValue({ aliases: [] });
   });
 
@@ -72,6 +80,37 @@ describe("MentionsPlugin", () => {
       capturedProps.onClose();
     });
     expect(ref.current.isMentionsOpen()).toBe(false);
+  });
+
+  it.each([
+    ["@alice", 0, "alice", "@alice"],
+    ["hello @alice", 6, "alice", "@alice"],
+    ["hello (@alice", 7, "alice", "@alice"],
+    ["@alice.smith", 0, "alice.smith", "@alice.smith"],
+    ["@alice smith", 0, "alice smith", "@alice smith"],
+  ])(
+    "matches mention query %s",
+    (text, leadOffset, matchingString, replaceableString) => {
+      (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+      render(
+        <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+      );
+
+      expect(capturedProps.triggerFn(text)).toEqual({
+        leadOffset,
+        matchingString,
+        replaceableString,
+      });
+    }
+  );
+
+  it("does not match an at-sign in the middle of a word", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    expect(capturedProps.triggerFn("email@example")).toBeNull();
   });
 
   it("calls onSelect with mention info", () => {
@@ -96,6 +135,43 @@ describe("MentionsPlugin", () => {
       handle_in_content: option.handle,
     });
     expect(close).toHaveBeenCalled();
+  });
+
+  it("passes the draft visibility group to identity search", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <MentionSearchScopeProvider visibilityGroupId="visibility-group">
+        <NewMentionsPlugin
+          waveId={null}
+          onSelect={jest.fn()}
+          ref={createRef()}
+        />
+      </MentionSearchScopeProvider>
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: {
+        kind: "group",
+        visibilityGroupId: "visibility-group",
+      },
+      handle: "",
+      waveId: null,
+    });
+  });
+
+  it("uses an explicit disabled draft scope without a provider", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <NewMentionsPlugin waveId={null} onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: { kind: "disabled" },
+      handle: "",
+      waveId: null,
+    });
   });
 
   it("renders the menu wrapper on the raised typeahead layer", () => {

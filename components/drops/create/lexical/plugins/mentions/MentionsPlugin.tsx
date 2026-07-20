@@ -51,12 +51,13 @@ import { $isCodeNode } from "@lexical/code";
 import { $isLinkNode } from "@lexical/link";
 import { AuthContext } from "@/components/auth/Auth";
 import { GROUP_MENTION_TEXT } from "@/helpers/waves/drop-group-mentions";
+import { useDraftMentionSearchScope } from "./MentionSearchScopeContext";
 
 const AtSignMentionsRegex =
-  /(^|\s|\()([@]((?:[^@\.,\+\*\?\$\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;\s](?:\.[ |$]| |[\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;]|)){0,75}))$/;
+  /(^|\s|\()(@((?:[^@.,+*?$|#{}()^\-[\]\\/!%'"~=<>_:;\s](?:\.[ |$]| |[.,+*?$@|#{}()^\-[\]\\/!%'"~=<>_:;]|)){0,75}))$/;
 
 const AtSignMentionsRegexAliasRegex =
-  /(^|\s|\()([@]((?:[^@\.,\+\*\?\$\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;\s]){0,50}))$/;
+  /(^|\s|\()(@((?:[^@.,+*?$|#{}()^\-[\]\\/!%'"~=<>_:;\s]){0,50}))$/;
 
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
@@ -331,7 +332,9 @@ const NewMentionsPlugin = forwardRef<
   const [editor] = useLexicalComposerContext();
   const locale = useBrowserLocale();
   const [queryString, setQueryString] = useState<string | null>(null);
+  const draftScope = useDraftMentionSearchScope();
   const { identities } = useIdentitiesSearch({
+    draftScope,
     handle: queryString ?? "",
     waveId,
   });

@@ -1,6 +1,7 @@
 import {
   fetchCollection,
   getCollectionView,
+  getCollectionViewFromPathname,
   getContentViewKeyByValue,
 } from "@/app/nextgen/collection/[collection]/page-utils";
 import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
@@ -38,6 +39,18 @@ describe("collection utils", () => {
     expect(getContentViewKeyByValue(NextgenCollectionView.PROVENANCE)).toBe(
       "PROVENANCE"
     );
+  });
+
+  it("treats a view-named collection slug as the overview", () => {
+    expect(
+      getCollectionViewFromPathname("/nextgen/collection/provenance")
+    ).toBe(NextgenCollectionView.OVERVIEW);
+  });
+
+  it("reads only the segment after a view-named collection slug", () => {
+    expect(
+      getCollectionViewFromPathname("/nextgen/collection/provenance/provenance")
+    ).toBe(NextgenCollectionView.PROVENANCE);
   });
 
   it("useShallowRedirect replaces url", () => {

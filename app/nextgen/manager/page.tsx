@@ -5,7 +5,6 @@ import {
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import type { Metadata } from "next";
-import styles from "@/styles/Home.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata(
@@ -23,8 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function NextGenAdminPage() {
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
-      <div className={`${styles["main"]} tw-w-full tw-px-3`}>
+    <main className="tailwind-scope tw-min-h-screen">
+      <div className="tw-min-h-screen tw-w-full tw-px-3">
         <div className="-tw-mx-3 tw-flex tw-flex-wrap">
           <div className="tw-relative tw-w-full tw-min-w-0 tw-flex-1 tw-px-3">
             <NextGenAdminComponent />

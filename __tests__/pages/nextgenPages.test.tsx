@@ -58,9 +58,6 @@ jest.mock(
     default: ({ collection }: any) => (
       <div data-testid="collection-header">{collection?.name}</div>
     ),
-    NextGenCollectionHead: ({ collection }: any) => (
-      <div data-testid="collection-head">{collection?.name}</div>
-    ),
   })
 );
 
@@ -265,9 +262,7 @@ describe("NextGen Client Components", () => {
 
     it("sets correct title when token exists", () => {
       renderWithAuth(<NextGenTokenPageClient {...mockTokenPageClientProps} />);
-      expect(mockSetTitle).toHaveBeenCalledWith(
-        expect.stringContaining("Test Token")
-      );
+      expect(mockSetTitle).toHaveBeenCalledWith("Test Token");
     });
 
     it("sets collection and token ID title when token is null", () => {
@@ -276,9 +271,7 @@ describe("NextGen Client Components", () => {
         token: null,
       };
       renderWithAuth(<NextGenTokenPageClient {...propsWithoutToken} />);
-      expect(mockSetTitle).toHaveBeenCalledWith(
-        expect.stringContaining("Test Collection - #123")
-      );
+      expect(mockSetTitle).toHaveBeenCalledWith("Test Collection - #123");
     });
 
     it("sets correct collection title with NextGen suffix", async () => {

@@ -3,7 +3,6 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
-import styles from "@/components/nextGen/collections/NextGen.module.css";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_MINTER,
@@ -28,14 +27,18 @@ import {
   isValidEthAddress,
 } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { Tooltip } from "react-tooltip";
 import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
-import { NextGenMintErrors, NextGenMintingFor } from "./NextGenMintShared";
+import {
+  MINT_ACTION_BUTTON_CLASSNAME,
+  MINT_INPUT_CLASSNAME,
+  MINT_SELECT_CLASSNAME,
+  MintInfoTooltip,
+  NextGenMintErrors,
+  NextGenMintingFor,
+} from "./NextGenMintShared";
 
 export function getJsonData(keccak: string, data: unknown) {
   const parsed = JSON.parse(String(data));
@@ -340,38 +343,6 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     }
   }, [props.fetchingMintCounts]);
 
-  function renderAllowlistStatus() {
-    if (proofResponse && alStatus === Status.LIVE) {
-      const maxSpots = proofResponse.reduce(
-        (acc, response) => acc + response.spots,
-        0
-      );
-      if (maxSpots > 0) {
-        const spotsRemaining =
-          maxSpots > props.mint_counts.allowlist
-            ? ` (${maxSpots - props.mint_counts.allowlist} remaining)`
-            : "";
-        return `${props.mint_counts.allowlist} / ${maxSpots}${spotsRemaining}`;
-      } else {
-        return "You don't have any spots in the allowlist";
-      }
-    }
-    return null;
-  }
-
-  function renderPublicStatus() {
-    if (publicStatus == Status.LIVE) {
-      const publicRemaining =
-        props.collection.max_purchases > props.mint_counts.public
-          ? ` (${
-              props.collection.max_purchases - props.mint_counts.public
-            } remaining)`
-          : "";
-      return `${props.mint_counts.public} / ${props.collection.max_purchases}${publicRemaining}`;
-    }
-    return null;
-  }
-
   function renderAllowlistOptions() {
     if (alStatus == Status.LIVE && proofResponse && proofResponse.length > 0) {
       return createArray(
@@ -380,7 +351,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           ? currentProof.proof.spots - props.mint_counts.allowlist
           : 0
       ).map((i) => (
-        <option selected key={`allowlist-mint-count-${i}`} value={i}>
+        <option key={`allowlist-mint-count-${i}`} value={i}>
           {i > 0 ? i : `n/a`}
         </option>
       ));
@@ -415,20 +386,10 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     return "Mint";
   }
 
-  function getWalletMintsLabel() {
-    let label = "";
-    if (alStatus === Status.LIVE) {
-      label = "Allowlist";
-    }
-    if (publicStatus === Status.LIVE) {
-      label = "Public Phase";
-    }
-    return <>Wallet Mints {label}</>;
-  }
-
   return (
     <div>
       <form
+        className="tw-grid tw-gap-4"
         onChange={() => {
           setErrors([]);
           setIsMinting(false);
@@ -440,27 +401,23 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           mintForAddress={mintForAddress}
           setMintForAddress={setMintForAddress}
         />
-        <div className="tw-pb-2">
-          <label className="tw-flex tw-items-center">
-            Mint To
-            <FontAwesomeIcon
-              className={styles["infoIcon"]}
-              icon={faInfoCircle}
-              data-tooltip-id={`mint-to-info-${props.collection.id}`}
-            ></FontAwesomeIcon>
-            <Tooltip
-              id={`mint-to-info-${props.collection.id}`}
-              style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
-              }}
+        <div className="tw-grid tw-gap-2">
+          <div className="tw-flex tw-items-center">
+            <label
+              htmlFor={`mint-to-${props.collection.id}`}
+              className="tw-text-sm tw-font-medium tw-text-iron-300"
             >
-              Address to receive the minted tokens
-            </Tooltip>
-          </label>
+              Mint To
+            </label>
+            <MintInfoTooltip
+              id={`mint-to-info-${props.collection.id}`}
+              label="Mint recipient help"
+              content="Address to receive the minted tokens"
+            />
+          </div>
           <input
-            className={`${styles["formInput"]} ${styles["formInputDisabled"]} tw-form-input tw-block tw-w-full`}
+            id={`mint-to-${props.collection.id}`}
+            className={MINT_INPUT_CLASSNAME}
             type="text"
             placeholder="0x..."
             disabled={!isConnected || disableMint()}
@@ -471,29 +428,23 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
             }}
           />
         </div>
-        <div className="tw-pt-2">
-          <label className="tw-flex tw-items-center">
-            {getWalletMintsLabel()}
-            :&nbsp;
-            {props.fetchingMintCounts ? (
-              <DotLoader />
-            ) : (
-              <b>
-                {renderAllowlistStatus()}
-                {renderPublicStatus()}
-              </b>
-            )}
-          </label>
-        </div>
         {alStatus === Status.LIVE &&
           (fetchingProofs ? (
-            <DotLoader />
+            <output
+              aria-label="Loading allowlist proofs"
+              className="tw-text-sm tw-text-iron-400"
+            >
+              Loading allowlist proofs <DotLoader />
+            </output>
           ) : (
             proofResponse.map((response, index) => (
-              <div key={response.keccak} className="tw-pl-2 tw-pt-2">
-                <label className="tw-flex tw-gap-2 tw-py-1">
+              <div
+                key={response.keccak}
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-black/20 tw-p-3"
+              >
+                <label className="tw-flex tw-gap-3">
                   <input
-                    className="tw-form-checkbox"
+                    className="tw-mt-1 tw-h-4 tw-w-4 tw-flex-none tw-cursor-pointer tw-rounded tw-border-white/20 tw-bg-black/20 tw-text-primary-500 focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
                     type="checkbox"
                     id={`${response.keccak}`}
                     checked={!!(currentProof && currentProof.index >= index)}
@@ -514,59 +465,58 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               </div>
             ))
           ))}
-        <div className="tw-flex tw-items-center tw-py-2">
-          <label className="tw-flex tw-items-center">
-            Mint Count
-            <FontAwesomeIcon
-              className={styles["infoIcon"]}
-              icon={faInfoCircle}
-              data-tooltip-id={`mint-count-info-${props.collection.id}`}
-            ></FontAwesomeIcon>
-            <Tooltip
-              id={`mint-count-info-${props.collection.id}`}
-              style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
-              }}
-            >
-              How many tokens to mint
-            </Tooltip>
-          </label>
-          <div className="tw-w-1/4 tw-px-3">
-            <select
-              className={`${styles["mintSelect"]} tw-form-select tw-block tw-w-full tw-rounded-none`}
-              value={mintCount}
-              disabled={
-                !isConnected ||
-                (publicStatus !== Status.LIVE &&
-                  currentProof?.proof &&
-                  currentProof.proof.spots <= 0) ||
-                disableMint()
-              }
-              onChange={(e) => {
-                setMintCount(parseInt(e.currentTarget.value));
-              }}
-            >
-              {props.mint_counts ? (
-                (renderAllowlistOptions() ?? renderPublicOptions())
-              ) : (
-                <option value={0}>n/a</option>
-              )}
-            </select>
+        <fieldset className="tw-m-0 tw-grid tw-gap-3 tw-border-0 tw-p-0">
+          <legend className="tw-sr-only">Mint options</legend>
+          <div className="tw-grid tw-gap-3 sm:tw-grid-cols-[minmax(8rem,0.35fr)_minmax(0,0.65fr)] sm:tw-items-end">
+            <div className="tw-grid tw-gap-2">
+              <div className="tw-flex tw-items-center">
+                <label
+                  htmlFor={`mint-count-${props.collection.id}`}
+                  className="tw-text-sm tw-font-medium tw-text-iron-300"
+                >
+                  Mint Count
+                </label>
+                <MintInfoTooltip
+                  id={`mint-count-info-${props.collection.id}`}
+                  label="Mint count help"
+                  content="How many tokens to mint"
+                />
+              </div>
+              <select
+                id={`mint-count-${props.collection.id}`}
+                className={MINT_SELECT_CLASSNAME}
+                value={mintCount}
+                disabled={
+                  !isConnected ||
+                  (publicStatus !== Status.LIVE &&
+                    currentProof?.proof &&
+                    currentProof.proof.spots <= 0) ||
+                  disableMint()
+                }
+                onChange={(e) => {
+                  setMintCount(parseInt(e.currentTarget.value));
+                }}
+              >
+                {props.mint_counts ? (
+                  (renderAllowlistOptions() ?? renderPublicOptions())
+                ) : (
+                  <option value={0}>n/a</option>
+                )}
+              </select>
+            </div>
+            <div>
+              <button
+                type="button"
+                className={MINT_ACTION_BUTTON_CLASSNAME}
+                disabled={disableMint()}
+                onClick={handleMintClick}
+              >
+                {renderButtonText()}
+                {isMinting && <Spinner />}
+              </button>
+            </div>
           </div>
-          <div className="tw-w-3/4 tw-px-3">
-            <button
-              type="button"
-              className={styles["mintBtn"]}
-              disabled={disableMint()}
-              onClick={handleMintClick}
-            >
-              {renderButtonText()}
-              {isMinting && <Spinner />}
-            </button>
-          </div>
-        </div>
+        </fieldset>
         {errors.length > 0 && <NextGenMintErrors errors={errors} />}
         <NextGenContractWriteStatus
           isLoading={mintWrite.isPending}
