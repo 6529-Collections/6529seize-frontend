@@ -9,18 +9,20 @@ import Link from "next/link";
 import { useState } from "react";
 import type { DelegationCollection } from "./delegation-constants";
 import { CONSOLIDATION_USE_CASE } from "./delegation-constants";
-import { getGasError } from "./delegation-shared";
+import {
+  getGasError,
+  type DelegationWriteSettledHandler,
+} from "./delegation-shared";
 import type { DelegationToastState } from "./DelegationToast";
-import styles from "./Delegation.module.css";
 import {
   DelegationAddressDisabledInput,
-  DelegationCloseButton,
   DelegationFormField,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
   DelegationFormLabel,
   DelegationFormOriginalDelegatorFormGroup,
   DelegationFormRow,
+  DelegationFormShell,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 
@@ -44,6 +46,9 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
   const [gasError, setGasError] = useState<string>();
+  const handleWriteSettled: DelegationWriteSettledHandler = (_data, error) => {
+    setGasError(error ? getGasError(error) : undefined);
+  };
 
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
@@ -63,14 +68,6 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
           validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
-        onSettled(data: unknown, error: Error | null) {
-          if (data) {
-            setGasError(undefined);
-          }
-          if (error) {
-            setGasError(getGasError(error));
-          }
-        },
       }
     : {
         address: DELEGATION_CONTRACT.contract,
@@ -86,14 +83,6 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
         ],
         functionName:
           validate().length === 0 ? "registerDelegationAddress" : undefined,
-        onSettled(data: unknown, error: Error | null) {
-          if (data) {
-            setGasError(undefined);
-          }
-          if (error) {
-            setGasError(getGasError(error));
-          }
-        },
       };
 
   function validate() {
@@ -105,7 +94,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
       newErrors.push("Missing or invalid Address");
     } else if (
       (props.subdelegation &&
-        newDelegationToAddress.toUpperCase() ==
+        newDelegationToAddress.toUpperCase() ===
           props.subdelegation.originalDelegator.toUpperCase()) ||
       (!props.subdelegation &&
         newDelegationToAddress.toUpperCase() === props.address.toUpperCase())
@@ -117,87 +106,74 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-w-full tw-px-3">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-w-10/12 tw-px-3 tw-pb-1 tw-pt-3">
-          <h4>
-            Register Consolidation{" "}
-            {props.subdelegation && `as Delegation Manager`}
-          </h4>
-          <p className={styles["actionIntro"]}>
-            Register an ownership link between wallets you control. NFTs stay
-            where they are.
-          </p>
-        </div>
-        <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3 tw-pb-1 tw-pt-3">
-          <DelegationCloseButton onHide={props.onHide} title="Consolidation" />
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-w-full tw-px-3">
-          <form>
-            {props.subdelegation && (
-              <DelegationFormOriginalDelegatorFormGroup
-                subdelegation={props.subdelegation}
-              />
-            )}
-            <DelegationFormRow>
-              <DelegationFormLabel
-                title={props.subdelegation ? `Delegation Manager` : `Delegator`}
-                tooltip={`Address ${
-                  props.subdelegation ? `executing` : `registering`
-                } the consolidation`}
-              />
-              <DelegationFormField>
-                <DelegationAddressDisabledInput
-                  address={props.address}
-                  ens={props.ens}
-                  label={
-                    props.subdelegation ? "Delegation Manager" : "Delegator"
-                  }
-                />
-              </DelegationFormField>
-            </DelegationFormRow>
-            <DelegationFormCollectionFormGroup
-              collection={newDelegationCollection}
-              setCollection={setNewDelegationCollection}
-              subdelegation={props.subdelegation}
-              consolidation
+    <DelegationFormShell
+      title={`Register Consolidation${
+        props.subdelegation ? " as Delegation Manager" : ""
+      }`}
+      description="Register an ownership link between wallets you control. NFTs stay where they are."
+      closeTitle="Consolidation"
+      onHide={props.onHide}
+    >
+      <form>
+        {props.subdelegation && (
+          <DelegationFormOriginalDelegatorFormGroup
+            subdelegation={props.subdelegation}
+          />
+        )}
+        <DelegationFormRow>
+          <DelegationFormLabel
+            title={props.subdelegation ? `Delegation Manager` : `Delegator`}
+            tooltip={`Address ${
+              props.subdelegation ? `executing` : `registering`
+            } the consolidation`}
+          />
+          <DelegationFormField>
+            <DelegationAddressDisabledInput
+              address={props.address}
+              ens={props.ens}
+              label={props.subdelegation ? "Delegation Manager" : "Delegator"}
             />
-            <DelegationFormDelegateAddressFormGroup
-              setAddress={setNewDelegationToAddress}
-              title="Consolidating With"
-              tooltip="Consolidate with Address e.g. your hot wallet"
-            />
-            <DelegationFormRow>
-              <div className="tw-flex tw-items-center sm:tw-col-span-12">
-                Note: For TDH Consolidation use either &apos;Any
-                Collection&apos; or &apos;The Memes&apos;
-                <Link
-                  href={`/delegation/delegation-faq/register-consolidation`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <FontAwesomeIcon
-                    className={styles["infoIconLink"]}
-                    icon={faInfoCircle}
-                  ></FontAwesomeIcon>
-                </Link>
-              </div>
-            </DelegationFormRow>
-            <DelegationSubmitGroups
-              title={"Registering Consolidation"}
-              writeParams={contractWriteDelegationConfigParams}
-              showCancel={true}
-              gasError={gasError}
-              validate={validate}
-              onHide={props.onHide}
-              onSetToast={props.onSetToast}
-              submitBtnLabel="Register Consolidation"
-            />
-          </form>
-        </div>
-      </div>
-    </div>
+          </DelegationFormField>
+        </DelegationFormRow>
+        <DelegationFormCollectionFormGroup
+          collection={newDelegationCollection}
+          setCollection={setNewDelegationCollection}
+          subdelegation={props.subdelegation}
+          consolidation
+        />
+        <DelegationFormDelegateAddressFormGroup
+          setAddress={setNewDelegationToAddress}
+          title="Consolidating With"
+          tooltip="Consolidate with Address e.g. your hot wallet"
+        />
+        <DelegationFormRow>
+          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-col-span-12">
+            Note: For TDH Consolidation use either &apos;Any Collection&apos; or
+            &apos;The Memes&apos;
+            <Link
+              href={`/delegation/delegation-faq/register-consolidation`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon
+                className="hover:tw-text-primary-200 tw-ml-2 tw-h-4 tw-w-4 tw-text-primary-300 tw-transition-colors"
+                icon={faInfoCircle}
+              ></FontAwesomeIcon>
+            </Link>
+          </div>
+        </DelegationFormRow>
+        <DelegationSubmitGroups
+          title={"Registering Consolidation"}
+          writeParams={contractWriteDelegationConfigParams}
+          showCancel={true}
+          gasError={gasError}
+          onWriteSettled={handleWriteSettled}
+          validate={validate}
+          onHide={props.onHide}
+          onSetToast={props.onSetToast}
+          submitBtnLabel="Register Consolidation"
+        />
+      </form>
+    </DelegationFormShell>
   );
 }

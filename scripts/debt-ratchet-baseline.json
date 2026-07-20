@@ -4,7 +4,7 @@
   "counts": {
     "any_casts": 0,
     "todo_comments": 0,
-    "oversized_files": 38,
+    "oversized_files": 36,
     "legacy_wordpress_runtime": 0,
     "bootstrap_imports": 0,
     "redux_imports": 0,
@@ -23,8 +23,6 @@
     "components/about/AboutTermsOfService.tsx",
     "components/auth/SeizeConnectProvider.tsx",
     "components/brain/left-sidebar/waves/memes-quick-vote/useMemesQuickVotePreviewSwipe.ts",
-    "components/delegation/CollectionDelegation.tsx",
-    "components/delegation/walletChecker/WalletChecker.tsx",
     "components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal.tsx",
     "components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooter.tsx",
     "components/drops/view/item/content/attachments/DropAttachmentDisplay.tsx",

@@ -9,24 +9,24 @@ jest.mock('@/services/websocket/useWebSocket', () => ({
 const { useWebSocket } = require('@/services/websocket/useWebSocket');
 
 describe('useWebSocketMessage', () => {
-  it('subscribes when connected and cleans up on unmount', () => {
+  it('subscribes while mounted and cleans up on unmount', () => {
     const unsubscribe = jest.fn();
     const subscribe = jest.fn().mockReturnValue(unsubscribe);
     useWebSocket.mockReturnValue({ subscribe, status: WebSocketStatus.CONNECTED });
     const callback = jest.fn();
     const { unmount, result } = renderHook(() => useWebSocketMessage('TYPE' as any, callback));
     expect(result.current.isConnected).toBe(true);
-    expect(subscribe).toHaveBeenCalledWith('TYPE', callback);
+    expect(subscribe).toHaveBeenCalledWith('TYPE', expect.any(Function));
     unmount();
     expect(unsubscribe).toHaveBeenCalled();
   });
 
-  it('does nothing when disconnected', () => {
+  it('keeps the listener registered while disconnected', () => {
     const subscribe = jest.fn();
     useWebSocket.mockReturnValue({ subscribe, status: WebSocketStatus.DISCONNECTED });
     const { result } = renderHook(() => useWebSocketMessage('T' as any, jest.fn()));
     expect(result.current.isConnected).toBe(false);
-    expect(subscribe).not.toHaveBeenCalled();
+    expect(subscribe).toHaveBeenCalledWith('T', expect.any(Function));
   });
 });
 

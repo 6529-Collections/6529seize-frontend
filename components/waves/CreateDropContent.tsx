@@ -3,6 +3,7 @@
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { EditorState } from "lexical";
 import React, {
@@ -113,6 +114,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
+  const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
   const { actionsContainerRef, isWideContainer, setActionsContainerRef } =
     useCreateDropContainerWidth();
@@ -149,10 +151,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
   }
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
+  const keepDesktopOptionsVisible = !isMobile && isWideContainer;
+  // Keep the scoped collapse state live so resizing back to a narrow layout
+  // restores the chevron immediately.
   const showOptions =
-    showOptionsState?.scopeKey === wave.id
-      ? showOptionsState.value
-      : isWideContainer;
+    keepDesktopOptionsVisible ||
+    (showOptionsState?.scopeKey === wave.id && showOptionsState.value);
 
   useLayoutEffect(() => {
     if (prevIsDropModeRef.current && !isDropMode) {
@@ -483,7 +487,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     drop,
     editingPartIndex,
     finalizeAndAddDropPartDraft,
-    isWideContainer,
+    keepOptionsVisible: keepDesktopOptionsVisible,
     refreshState,
     setDrop,
     setEditingPartIndex,
@@ -591,7 +595,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { handleFileChange, removeFile } = useCreateDropFileHandlers({
     drop,
     files,
-    isWideContainer,
+    keepOptionsVisible: keepDesktopOptionsVisible,
     waveId: wave.id,
     externalAttachmentDrop,
     onExternalAttachmentDropConsumed,
@@ -607,13 +611,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     (next: boolean) => {
       shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: next });
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         closeOnNextInputRef.current = false;
         return;
       }
       closeOnNextInputRef.current = next;
     },
-    [isWideContainer, wave.id]
+    [keepDesktopOptionsVisible, wave.id]
   );
 
   const handleEditorStateChange = useCallback(
@@ -621,7 +625,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setEditorState(newEditorState);
       shouldCollapseOptionsAfterMarkdownSyncRef.current = true;
 
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         return;
       }
 
@@ -629,12 +633,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         collapseOptions();
       }
     },
-    [collapseOptions, isWideContainer]
+    [collapseOptions, keepDesktopOptionsVisible]
   );
 
   const handleEditorBlur = useCallback(
     (event: React.FocusEvent<HTMLDivElement>) => {
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         return;
       }
       const nextTarget = event.relatedTarget as Node | null;
@@ -645,7 +649,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     },
-    [isWideContainer, wave.id]
+    [keepDesktopOptionsVisible, wave.id]
   );
 
   useEffect(() => {

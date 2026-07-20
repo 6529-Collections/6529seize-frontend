@@ -65,6 +65,166 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
+  const poperBlockerNetworkErrorMessage =
+    "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
+  const poperBlockerInjectedFetchFrames = [
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: "window.fetch",
+      lineno: 1,
+      colno: 4520,
+      in_app: true,
+    },
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: "VihJ",
+      lineno: 1,
+      colno: 3159,
+      in_app: true,
+    },
+  ];
+  const poperBlockerProcessedFrames = [
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+      function: "e.prototype.handle",
+      in_app: false,
+    },
+    ...poperBlockerInjectedFetchFrames,
+  ];
+  const poperBlockerLatestRawFrames = [
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "a",
+      lineno: 11,
+      colno: 9819,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "Object.next",
+      lineno: 11,
+      colno: 10983,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.<anonymous>",
+      lineno: 11,
+      colno: 11456,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.handle",
+      lineno: 11,
+      colno: 6396,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0_6tmws~mg4aj.js",
+      abs_path: "app:///_next/static/chunks/0_6tmws~mg4aj.js",
+      lineno: 10,
+      colno: 1824,
+      in_app: true,
+    },
+    ...poperBlockerInjectedFetchFrames,
+  ];
+  const poperBlockerRecommendedRawFrames = [
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "a",
+      lineno: 11,
+      colno: 1231,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "Object.next",
+      lineno: 11,
+      colno: 2395,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "ts.<anonymous>",
+      lineno: 11,
+      colno: 2889,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.handle",
+      lineno: 11,
+      colno: 11269,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "tW",
+      lineno: 11,
+      colno: 9763,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "new Promise",
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      lineno: 11,
+      colno: 10014,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "Object.next",
+      lineno: 11,
+      colno: 10983,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.<anonymous>",
+      lineno: 11,
+      colno: 11456,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.handle",
+      lineno: 11,
+      colno: 6396,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0l0_44jw8k0xa.js",
+      abs_path: "app:///_next/static/chunks/0l0_44jw8k0xa.js",
+      lineno: 10,
+      colno: 1824,
+      in_app: true,
+    },
+    ...poperBlockerInjectedFetchFrames,
+  ];
+  const webkitExtensionMessagingTabNotFoundMessage =
+    "Invalid call to runtime.sendMessage(). Tab not found.";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
@@ -145,6 +305,50 @@ describe("instrumentation-client", () => {
       ],
     },
   });
+
+  const createPoperBlockerOrphanFetchRejectionEvent = (
+    value = poperBlockerNetworkErrorMessage,
+    frames: Array<Record<string, unknown>> = poperBlockerProcessedFrames
+  ) => ({
+    level: "warning",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+  });
+
+  const createWebKitExtensionMessagingTabNotFoundEvent = (
+    valueOverrides: Record<string, unknown> = {},
+    eventOverrides: Record<string, unknown> = {}
+  ) => {
+    const event = createUnhandledRejectionEvent(
+      webkitExtensionMessagingTabNotFoundMessage
+    );
+
+    return {
+      ...event,
+      ...eventOverrides,
+      exception: {
+        values: [
+          {
+            ...event.exception.values[0],
+            ...valueOverrides,
+          },
+        ],
+      },
+    };
+  };
 
   const createAppleWebKitSortedTrackListEvent = (
     frames: Array<Record<string, unknown>> = [
@@ -1355,6 +1559,129 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops the exact frame-less WebKit extension tab-not-found rejection", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createWebKitExtensionMessagingTabNotFoundEvent()
+    );
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps mixed WebKit and app-owned exceptions", () => {
+    const beforeSend = loadBeforeSend();
+    const baseEvent = createWebKitExtensionMessagingTabNotFoundEvent();
+    const event = {
+      ...baseEvent,
+      exception: {
+        values: [
+          ...baseEvent.exception.values,
+          {
+            type: "TypeError",
+            value: "App-owned failure",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+                  function: "sendMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each([
+    [
+      "an altered message",
+      { value: "Invalid call to runtime.sendMessage(). No tab found." },
+      {},
+    ],
+    ["a different exception type", { type: "TypeError" }, {}],
+    [
+      "a different mechanism",
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onerror",
+          handled: false,
+        },
+      },
+      {},
+    ],
+    [
+      "a handled mechanism",
+      {
+        mechanism: {
+          type: browserUnhandledRejectionMechanismType,
+          handled: true,
+        },
+      },
+      {},
+    ],
+    [
+      "an app-owned frame",
+      {
+        stacktrace: {
+          frames: [
+            {
+              filename:
+                "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+              function: "sendMessage",
+              in_app: true,
+            },
+          ],
+        },
+      },
+      {},
+    ],
+    [
+      "an app-owned serialized stack",
+      {},
+      {
+        extra: {
+          __serialized__: {
+            message: webkitExtensionMessagingTabNotFoundMessage,
+            stack:
+              "Error: Invalid call to runtime.sendMessage(). Tab not found.\n    at sendMessage (app:///services/messaging/sendMessage.ts:10:1)",
+          },
+        },
+      },
+    ],
+  ])("keeps the WebKit tab-not-found near miss with %s", (_, value, event) => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createWebKitExtensionMessagingTabNotFoundEvent(value, event)
+    );
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps WebKit tab-not-found rejections with app-owned original stacks", () => {
+    const beforeSend = loadBeforeSend();
+    const error = new Error(webkitExtensionMessagingTabNotFoundMessage);
+    error.stack = [
+      `Error: ${webkitExtensionMessagingTabNotFoundMessage}`,
+      "    at sendMessage (webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts:10:1)",
+    ].join("\n");
+
+    const result = beforeSend(
+      createWebKitExtensionMessagingTabNotFoundEvent(),
+      { originalException: error }
+    );
+
+    expect(result).not.toBeNull();
+  });
+
   it("drops the raw DK Coinbase request-relay websocket event", () => {
     const beforeSend = loadBeforeSend();
 
@@ -1370,6 +1697,103 @@ describe("instrumentation-client", () => {
 
     expect(result).not.toBeNull();
     expect(result?.tags?.["network_noise_sampled"]).toBe("true");
+  });
+
+  it("drops the normalized Poper Blocker orphan fetch rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the latest raw Poper Blocker orphan fetch rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent(
+      poperBlockerNetworkErrorMessage,
+      poperBlockerLatestRawFrames
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the recommended raw Poper Blocker orphan fetch rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent(
+      "Failed to fetch",
+      poperBlockerRecommendedRawFrames
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps mixed-exception events with a Poper Blocker rejection first", () => {
+    const beforeSend = loadBeforeSend();
+    const poperBlockerEvent = createPoperBlockerOrphanFetchRejectionEvent();
+    const event = {
+      ...poperBlockerEvent,
+      exception: {
+        values: [
+          ...poperBlockerEvent.exception.values,
+          {
+            type: "Error",
+            value: "Application request validation failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+                  function: "executeApiRequest",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps first-party unread-DM network failures without the extension signature", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      level: "warning",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: poperBlockerNetworkErrorMessage,
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+                  function: "executeApiRequest",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps app-owned Twitter currentInset errors", () => {

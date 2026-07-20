@@ -161,6 +161,7 @@ function buildAppKitConfig(
     },
     themeVariables: {
       "--w3m-font-family": "'Montserrat', sans-serif",
+      "--w3m-z-index": 10000,
     },
     enableWalletGuide: false,
     enableCoinbase: !isCapacitor,
