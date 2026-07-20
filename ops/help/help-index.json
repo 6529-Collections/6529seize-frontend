@@ -1751,6 +1751,7 @@
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
+        "In Description, individual @ mention suggestions follow the draft wave's Who can view group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
       ],
       "canonical_path": "/waves?create=wave",
@@ -1760,7 +1761,8 @@
         "ops/docs/waves/create/README.md",
         "ops/docs/waves/create/feature-overview-step.md",
         "ops/docs/waves/create/feature-groups-step.md",
-        "ops/docs/waves/create/feature-rules-step.md"
+        "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/create/feature-description-step.md"
       ]
     },
     {
