@@ -115,7 +115,9 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
       page.getByRole("navigation", { name: "NextGen sections" })
     ).toBeVisible();
     await expect(
-      page.locator("main").getByRole("heading", { level: 1 }).first()
+      page
+        .locator("main")
+        .getByRole("heading", { level: 1, name: "Pebbles", exact: true })
     ).toBeVisible();
     for (const item of ["Collections", "Artists", "About"]) {
       await expect(nextGenSectionLink(page, item)).toBeVisible();
