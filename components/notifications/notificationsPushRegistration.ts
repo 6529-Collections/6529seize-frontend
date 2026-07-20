@@ -55,6 +55,7 @@ const PUSH_REGISTRATION_TOTAL_ATTEMPTS = 3;
 const PUSH_REGISTRATION_BASE_DELAY_MS = 500;
 const PUSH_REGISTRATION_MAX_DELAY_MS = 4000;
 const PUSH_REGISTRATION_JITTER_FACTOR = 0.2;
+const UINT32_RANGE = 0x1_0000_0000;
 const PUSH_REGISTRATION_MAX_RETRY_AFTER_MS = 10000;
 // Capacitor omits the native domain/code, so keep this limited to the exact
 // production signature instead of suppressing similar helper failures.
@@ -326,8 +327,12 @@ const computePushRegistrationRetryDelayMs = (
     PUSH_REGISTRATION_BASE_DELAY_MS * Math.pow(2, attempt),
     PUSH_REGISTRATION_MAX_DELAY_MS
   );
+  const [randomValue = 0] = globalThis.crypto.getRandomValues(
+    new Uint32Array(1)
+  );
   const jitterMultiplier =
-    1 + (Math.random() * 2 - 1) * PUSH_REGISTRATION_JITTER_FACTOR;
+    1 +
+    ((randomValue / UINT32_RANGE) * 2 - 1) * PUSH_REGISTRATION_JITTER_FACTOR;
   return Math.max(0, Math.round(baseDelay * jitterMultiplier));
 };
 
