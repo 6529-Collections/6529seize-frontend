@@ -82,7 +82,7 @@ const isWikimediaCommonsFilePage = (url: URL): boolean => {
   const hostname = url.hostname.replace(/^www\./i, "").toLowerCase();
   return (
     hostname === "commons.wikimedia.org" &&
-    url.pathname.toLowerCase().startsWith("/wiki/file:")
+    /^\/wiki\/file(?::|%3a)/i.test(url.pathname)
   );
 };
 

@@ -80,5 +80,8 @@ describe("isDirectImageUrl", () => {
     expect(
       isDirectImageUrl("https://commons.wikimedia.org/wiki/File:Example.jpg")
     ).toBe(false);
+    expect(
+      isDirectImageUrl("https://commons.wikimedia.org/wiki/File%3AExample.jpg")
+    ).toBe(false);
   });
 });
