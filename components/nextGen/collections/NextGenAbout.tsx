@@ -1,3 +1,7 @@
+"use client";
+
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -21,11 +25,13 @@ function AboutSection({
 }
 
 export default function NextGenAbout() {
+  const locale = useBrowserLocale();
+
   return (
     <article className="tw-w-full tw-py-6 sm:tw-py-8">
       <header className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-5 tw-py-6 tw-shadow-lg sm:tw-px-7 sm:tw-py-8">
         <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
-          About NextGen
+          {t(locale, "nextgen.about.title")}
         </h1>
         <div className="tw-mt-5 [&_p:last-child]:tw-mb-0 [&_p]:tw-mb-4 [&_p]:tw-text-sm [&_p]:tw-leading-6 [&_p]:tw-text-iron-300 sm:[&_p]:tw-text-base sm:[&_p]:tw-leading-7">
           <p>
@@ -62,7 +68,9 @@ export default function NextGenAbout() {
       </header>
 
       <div className="tw-mt-6 tw-w-full">
-        <AboutSection title="Overall Approach">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.overallApproach")}
+        >
           <p>
             The fundamental structure of the NextGen contract follows the
             overall approach pioneered by Art Blocks in 2020-2021.
@@ -86,7 +94,9 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="Native Allowlists">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.nativeAllowlists")}
+        >
           <p>
             We believe that allowlists are the best approach for most in-demand
             mints. They support fairness and transparency in minting
@@ -99,7 +109,9 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="Native Delegation">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.nativeDelegation")}
+        >
           <p>
             We have been a leading voice for wallet safety for a long time and
             design all our systems to encourage 6529 collectors and community
@@ -118,7 +130,9 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="Personalization, Customization and Collector Provenance">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.personalization")}
+        >
           <p>
             The classic approach to a generative mint is that the algorithm is
             fully randomly (or pseudo-randomly, to be precise) determined at the
@@ -148,7 +162,9 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="Extra On-Chain™">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.extraOnChain")}
+        >
           <p>
             Most generative collections, even the on-chain ones, serve an
             off-chain URI with metadata and potentially rendered images, to
@@ -173,7 +189,9 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="Artist Provenance">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.artistProvenance")}
+        >
           <p>
             NextGen allows the artist to cryptographically sign a NextGen
             collection from an ethereum address or ENS of their choice.
@@ -185,7 +203,9 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="Multiple Randomization Methods">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.randomization")}
+        >
           <p>
             NextGen supports three different randomization methods with the
             capacity to integrate more approaches in the future.
@@ -198,7 +218,7 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="Phases / Periodicity">
+        <AboutSection title={t(locale, "nextgen.about.sections.phases")}>
           <p>
             NextGen supports a wide range of phased and periodic minting
             approaches, from simple mints to periodic mints that can stretch for
@@ -206,7 +226,9 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="Minting Sales Models">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.mintingSales")}
+        >
           <p>
             NextGen supports all widely used (and some not-widely used) minting
             sales models
@@ -228,14 +250,16 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="On-Chain Libraries">
+        <AboutSection title={t(locale, "nextgen.about.sections.libraries")}>
           <p>
             NextGen supports the ability for collections to reference on-chain
             libraries to have no off-chain dependencies in rendering.
           </p>
         </AboutSection>
 
-        <AboutSection title="More Information">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.moreInformation")}
+        >
           <p>
             Additional technical information can be found here:{" "}
             <Link
@@ -249,7 +273,9 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection title="NextGen Collections Model">
+        <AboutSection
+          title={t(locale, "nextgen.about.sections.collectionsModel")}
+        >
           <p>
             We do not have a fixed plan in place post the genesis Pebbles
             collection and will develop and refine our approach over time.

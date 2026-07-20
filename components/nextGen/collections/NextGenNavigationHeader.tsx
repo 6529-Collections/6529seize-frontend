@@ -2,29 +2,35 @@
 
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
 import Link from "next/link";
 
 const NEXTGEN_VIEWS: ReadonlyArray<{
   readonly href: string;
-  readonly label: string;
+  readonly labelKey: MessageKey;
   readonly view: NextgenView | undefined;
 }> = [
-  { href: "/nextgen", label: "Featured", view: undefined },
+  {
+    href: "/nextgen",
+    labelKey: "nextgen.navigation.featured",
+    view: undefined,
+  },
   {
     href: "/nextgen/collections",
-    label: NextgenView.COLLECTIONS,
+    labelKey: "nextgen.navigation.collections",
     view: NextgenView.COLLECTIONS,
   },
   {
     href: "/nextgen/artists",
-    label: NextgenView.ARTISTS,
+    labelKey: "nextgen.navigation.artists",
     view: NextgenView.ARTISTS,
   },
   {
     href: "/nextgen/about",
-    label: NextgenView.ABOUT,
+    labelKey: "nextgen.navigation.about",
     view: NextgenView.ABOUT,
   },
 ];
@@ -35,6 +41,7 @@ export default function NextGenNavigationHeader(
     setView?: ((view: NextgenView | undefined) => void) | undefined;
   }>
 ) {
+  const locale = useBrowserLocale();
   const handleNavigation = (
     event: { preventDefault(): void },
     view: NextgenView | undefined
@@ -66,7 +73,7 @@ export default function NextGenNavigationHeader(
                   height={91}
                   className="tw-h-auto tw-w-[140px] tw-max-w-[38vw] sm:tw-w-[250px] sm:tw-max-w-[85vw]"
                   src="/nextgen-logo.png"
-                  alt="NextGen"
+                  alt={t(locale, "nextgen.brand")}
                 />
               }
             />
@@ -75,7 +82,7 @@ export default function NextGenNavigationHeader(
             href="/nextgen"
             scroll={false}
             onNavigate={(event) => handleNavigation(event, undefined)}
-            aria-label="NextGen featured"
+            aria-label={t(locale, "nextgen.navigation.featuredAriaLabel")}
             className="tw-hidden tw-rounded-md focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 min-[1200px]:tw-block"
           >
             <Image
@@ -85,7 +92,7 @@ export default function NextGenNavigationHeader(
               height={91}
               className="tw-h-auto tw-w-[250px]"
               src="/nextgen-logo.png"
-              alt="NextGen"
+              alt={t(locale, "nextgen.brand")}
             />
           </Link>
           <div className="tw-shrink-0">
@@ -94,7 +101,7 @@ export default function NextGenNavigationHeader(
         </div>
 
         <nav
-          aria-label="NextGen sections"
+          aria-label={t(locale, "nextgen.navigation.sectionsAriaLabel")}
           className="tw-w-full tw-overflow-x-auto min-[1200px]:tw-w-auto"
         >
           <ul className="tw-m-0 tw-flex tw-min-w-max tw-list-none tw-gap-1 tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-white/10">
@@ -115,7 +122,7 @@ export default function NextGenNavigationHeader(
                         : "tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-white"
                     }`}
                   >
-                    {item.label}
+                    {t(locale, item.labelKey)}
                   </Link>
                 </li>
               );
