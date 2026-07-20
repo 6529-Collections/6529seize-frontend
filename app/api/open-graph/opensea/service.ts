@@ -15,6 +15,13 @@ import {
   truncateForLog,
 } from "./shared";
 import { fetchAlchemyMetadataCandidate } from "./alchemy";
+import {
+  TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN,
+  buildTokenIdCandidates,
+  getTokenIdParts,
+  hasTokenIdPlaceholder,
+  replaceTokenIdPlaceholders,
+} from "./tokenUri";
 import type {
   AlchemyNftMetadata,
   CreateOpenSeaPlanDeps,
@@ -33,7 +40,6 @@ const OPENSEA_ITEM_PATH_PATTERN =
   /^\/item\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
 const OPENSEA_ASSET_PATH_PATTERN =
   /^\/assets\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
-const TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN = /0x(?:\{id\}|%7Bid%7D)/i;
 const TOKEN_URI_FETCH_TIMEOUT_MS = 4000;
 
 const ALCHEMY_NETWORK_BY_OPENSEA_CHAIN: Record<string, string> = {
@@ -46,70 +52,6 @@ const ALCHEMY_NETWORK_BY_OPENSEA_CHAIN: Record<string, string> = {
   polygon: "polygon-mainnet",
   zora: "zora-mainnet",
 };
-
-const normalizeTokenIdCandidate = (tokenId: string): string => {
-  const trimmed = tokenId.trim();
-  if (trimmed.startsWith("0x") || trimmed.startsWith("0X")) {
-    try {
-      return `0x${BigInt(trimmed).toString(16)}`;
-    } catch {
-      return trimmed;
-    }
-  }
-
-  return trimmed;
-};
-
-const toHexTokenId = (tokenId: string): string | null => {
-  const trimmed = tokenId.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    return `0x${BigInt(trimmed).toString(16)}`;
-  } catch {
-    return null;
-  }
-};
-
-const buildTokenIdCandidates = (tokenId: string): string[] => {
-  const normalizedPrimary = normalizeTokenIdCandidate(tokenId);
-  const candidates = [normalizedPrimary];
-  const hexCandidate = toHexTokenId(tokenId);
-
-  if (hexCandidate && !candidates.includes(hexCandidate)) {
-    candidates.push(hexCandidate);
-  }
-
-  return candidates;
-};
-
-const getTokenIdParts = (
-  tokenId: string
-): {
-  readonly decimal: string;
-  readonly hexNoPrefix: string;
-  readonly hex64NoPrefix: string;
-} | null => {
-  try {
-    const parsed = BigInt(tokenId.trim());
-    const hexNoPrefix = parsed.toString(16);
-    return {
-      decimal: parsed.toString(10),
-      hexNoPrefix,
-      hex64NoPrefix: hexNoPrefix.padStart(64, "0"),
-    };
-  } catch {
-    return null;
-  }
-};
-
-const hasTokenIdPlaceholder = (tokenUri: string): boolean =>
-  /\{id\}/i.test(tokenUri) || /%7Bid%7D/i.test(tokenUri);
-
-const replaceTokenIdPlaceholders = (tokenUri: string, value: string): string =>
-  tokenUri.replaceAll(/\{id\}/gi, value).replaceAll(/%7Bid%7D/gi, value);
 
 const logFallback = (
   requestId: string,

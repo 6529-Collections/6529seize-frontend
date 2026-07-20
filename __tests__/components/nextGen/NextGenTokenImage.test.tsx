@@ -148,7 +148,7 @@ test("renders listing info when show_listing is true and price > 0", () => {
 
   const link = screen.getByRole("link");
   const listingText = screen.getByText(/Listed for/);
-  const royaltyImage = screen.getByAltText("pepe");
+  const royaltyImage = screen.getByAltText("Royalty indicator");
 
   expect(link).toBeInTheDocument();
   expect(listingText).toBeInTheDocument();
@@ -247,7 +247,7 @@ test("renders Magic Eden royalty image when me_price matches token price", () =>
   };
   render(<NextGenTokenImage token={tokenWithMEPrice} show_listing />);
 
-  const royaltyImages = screen.getAllByAltText("pepe");
+  const royaltyImages = screen.getAllByAltText("Royalty indicator");
   expect(royaltyImages.length).toBeGreaterThan(0);
 });
 

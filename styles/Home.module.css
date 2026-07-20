@@ -101,13 +101,6 @@
   color: rgb(179, 179, 179);
 }
 
-.nextGenQuestion {
-  height: calc(100vh - 100px - 20px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .viewAllLink {
   text-decoration: none;
 }

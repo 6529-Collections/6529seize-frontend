@@ -34,7 +34,7 @@ export default async function NextGenMintPage({
     notFound();
   }
   return (
-    <CollectionPageShell collection={resolvedCollection} withNav={false}>
+    <CollectionPageShell collection={resolvedCollection}>
       <NextGenCollectionMint collection={resolvedCollection} />
     </CollectionPageShell>
   );
