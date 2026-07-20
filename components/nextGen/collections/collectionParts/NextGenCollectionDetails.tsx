@@ -36,12 +36,12 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
   }
 
   return (
-    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-5 tw-shadow-lg sm:tw-p-6">
-      <div className="tw-grid tw-gap-5 lg:tw-grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:tw-gap-6">
+    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 tw-shadow-lg sm:tw-p-5">
+      <div className="tw-grid tw-gap-5 lg:tw-grid-cols-[minmax(0,390px)_minmax(0,1fr)] lg:tw-gap-7">
         <aside>
           {props.collection.artist_signature && (
             <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-3">
-              <h2 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+              <h2 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
                 Artist Signature
               </h2>
               <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-line tw-break-words tw-text-base tw-font-semibold tw-leading-6 tw-text-white">
@@ -62,7 +62,7 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
             </div>
             <div className="tw-grid tw-grid-cols-2 tw-gap-4">
               <div>
-                <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
                   License
                 </dt>
                 <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-100">
@@ -70,7 +70,7 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                 </dd>
               </div>
               <div>
-                <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
                   Library
                 </dt>
                 <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-100">
@@ -79,7 +79,7 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
               </div>
             </div>
             <div>
-              <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+              <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
                 Contract
               </dt>
               <dd className="tw-m-0 tw-mt-1">
@@ -105,11 +105,11 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
           </dl>
         </aside>
 
-        <article className="tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-pl-6 lg:tw-pt-0">
-          <h2 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
+        <article className="tw-relative tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-pl-7 lg:tw-pt-0 lg:before:tw-absolute lg:before:tw-bottom-2 lg:before:tw-left-0 lg:before:tw-top-2 lg:before:tw-w-px lg:before:tw-bg-white/10 lg:before:tw-content-['']">
+          <h2 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
             Collection Overview
           </h2>
-          <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-line tw-text-base tw-leading-7 tw-text-iron-100">
+          <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-line tw-text-sm tw-leading-6 tw-text-iron-200">
             {props.collection.description}
           </p>
         </article>

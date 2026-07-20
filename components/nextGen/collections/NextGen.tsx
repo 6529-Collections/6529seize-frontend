@@ -167,7 +167,7 @@ export function DistributionLink(
           )}/distribution-plan`}
           className={
             props.emphasized
-              ? "tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-white tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-950 tw-no-underline tw-shadow-sm tw-transition-colors tw-duration-200 hover:tw-bg-iron-300 hover:tw-text-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 active:tw-bg-iron-400"
+              ? "tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-white/25 hover:tw-bg-white/10 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 active:tw-bg-white/15"
               : "tw-inline-flex tw-min-h-10 tw-items-center tw-rounded-md tw-px-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-bg-white/5 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           }
         >
@@ -175,7 +175,7 @@ export function DistributionLink(
           {props.emphasized && (
             <ArrowUpRightIcon
               aria-hidden="true"
-              className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-600 tw-transition-colors group-hover:tw-text-iron-800"
+              className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
             />
           )}
         </Link>
