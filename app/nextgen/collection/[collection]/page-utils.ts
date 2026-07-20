@@ -10,6 +10,8 @@ import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { getNextgenTitle } from "../../title-utils";
 
+const COLLECTION_VIEW_PATH_SEGMENT_INDEX = 3;
+
 export async function fetchCollection(
   id: string,
   headers: Record<string, string>
@@ -37,6 +39,14 @@ export function getCollectionView(view: string): NextgenCollectionView {
     return NextgenCollectionView.TOP_TRAIT_SETS;
   }
   return NextgenCollectionView.OVERVIEW;
+}
+
+export function getCollectionViewFromPathname(
+  pathname: string
+): NextgenCollectionView {
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const viewSegment = pathSegments[COLLECTION_VIEW_PATH_SEGMENT_INDEX] ?? "";
+  return getCollectionView(viewSegment);
 }
 
 export function getContentViewKeyByValue(value: string): string {

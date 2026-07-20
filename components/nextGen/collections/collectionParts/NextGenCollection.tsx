@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  getCollectionView,
+  getCollectionViewFromPathname,
   getContentViewKeyByValue,
   getNextgenCollectionDocumentTitle,
 } from "@/app/nextgen/collection/[collection]/page-utils";
@@ -17,8 +17,6 @@ import NextGenCollectionArtist from "./NextGenCollectionArtist";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
-
-const COLLECTION_VIEW_PATH_SEGMENT_INDEX = 3;
 
 export function printViewButton(
   currentView: NextgenCollectionView,
@@ -41,14 +39,6 @@ export function printViewButton(
       {v}
     </button>
   );
-}
-
-function getCollectionViewFromPathname(
-  pathname: string
-): NextgenCollectionView {
-  const pathSegments = pathname.split("/").filter(Boolean);
-  const viewSegment = pathSegments[COLLECTION_VIEW_PATH_SEGMENT_INDEX] ?? "";
-  return getCollectionView(viewSegment);
 }
 
 export default function NextGenCollectionComponent({

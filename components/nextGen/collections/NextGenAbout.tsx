@@ -162,9 +162,7 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection
-          title={t(locale, "nextgen.about.sections.extraOnChain")}
-        >
+        <AboutSection title={t(locale, "nextgen.about.sections.extraOnChain")}>
           <p>
             Most generative collections, even the on-chain ones, serve an
             off-chain URI with metadata and potentially rendered images, to
@@ -203,9 +201,7 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection
-          title={t(locale, "nextgen.about.sections.randomization")}
-        >
+        <AboutSection title={t(locale, "nextgen.about.sections.randomization")}>
           <p>
             NextGen supports three different randomization methods with the
             capacity to integrate more approaches in the future.
@@ -226,9 +222,7 @@ export default function NextGenAbout() {
           </p>
         </AboutSection>
 
-        <AboutSection
-          title={t(locale, "nextgen.about.sections.mintingSales")}
-        >
+        <AboutSection title={t(locale, "nextgen.about.sections.mintingSales")}>
           <p>
             NextGen supports all widely used (and some not-widely used) minting
             sales models
