@@ -68,11 +68,9 @@ export default function CreateWaveModal({
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div
-              className="tw-min-h-0 tw-flex-1 tw-overflow-y-scroll tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
-              style={{ scrollbarGutter: "stable" }}
-            >
+            {/* Modal Content — the shared CreateWaveFlow owns the scroll
+                region, so this just bounds the height and lets the flow fill. */}
+            <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
               <CreateWave
                 profile={profile}
                 onBack={onClose}

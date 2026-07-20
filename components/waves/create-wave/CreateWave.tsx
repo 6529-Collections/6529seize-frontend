@@ -118,7 +118,7 @@ export default function CreateWave({
     // padding the last row (Previous/Next) renders half-hidden behind it.
     <div
       ref={containerRef}
-      className="create-wave-flow tw-pb-[env(safe-area-inset-bottom,0px)]"
+      className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-[env(safe-area-inset-bottom,0px)]"
     >
       <CreateWaveFlow
         title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
