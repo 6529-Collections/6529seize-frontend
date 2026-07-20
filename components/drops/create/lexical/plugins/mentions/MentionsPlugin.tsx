@@ -53,10 +53,10 @@ import { AuthContext } from "@/components/auth/Auth";
 import { GROUP_MENTION_TEXT } from "@/helpers/waves/drop-group-mentions";
 
 const AtSignMentionsRegex =
-  /(^|\s|\()([@]((?:[^@\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;\s](?:\.[ |$]| |[\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;]|)){0,75}))$/;
+  /(^|\s|\()([@]((?:[^@\.,\+\*\?\$\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;\s](?:\.[ |$]| |[\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;]|)){0,75}))$/;
 
 const AtSignMentionsRegexAliasRegex =
-  /(^|\s|\()([@]((?:[^@\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;\s]){0,50}))$/;
+  /(^|\s|\()([@]((?:[^@\.,\+\*\?\$\|#{}\(\)\^\-\[\]\\/!%'"~=<>_:;\s]){0,50}))$/;
 
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
