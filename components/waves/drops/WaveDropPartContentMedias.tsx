@@ -13,6 +13,11 @@ import CircleLoader, {
 import { t, type MessageKey } from "@/i18n/messages";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { useOptionalDropContext } from "./DropContext";
+import {
+  INTERACTIVE_HTML_MEDIA_CONTAINER_CLASS_NAME,
+  INTERACTIVE_HTML_MEDIA_VIEWPORT_CLASS_NAME,
+  isInteractiveHtmlMedia,
+} from "@/components/drops/view/item/content/media/interactiveHtmlMediaLayout";
 
 function isRenderableMedia(mimeType: string, url: string): boolean {
   return (
@@ -125,15 +130,21 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     useNaturalHeightMedia,
     useCompactLink,
     alignStart,
+    useInteractiveHtmlLayout,
   }: {
     readonly groupedImage: boolean;
     readonly reserveMediaHeight: boolean;
     readonly useNaturalHeightMedia: boolean;
     readonly useCompactLink: boolean;
     readonly alignStart: boolean;
+    readonly useInteractiveHtmlLayout: boolean;
   }) => {
     if (useCompactLink) {
       return "tw-w-full";
+    }
+
+    if (useInteractiveHtmlLayout) {
+      return `${INTERACTIVE_HTML_MEDIA_CONTAINER_CLASS_NAME} tw-flex tw-items-center tw-justify-center`;
     }
 
     if (reserveMediaHeight) {
@@ -184,6 +195,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
     const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
+    const useInteractiveHtmlLayout = isInteractiveHtmlMedia(media.mime_type);
     const isImageMedia = media.mime_type.includes("image");
     const isProcessingMedia = isMediaProcessing(media);
     const isFailedMedia = isMediaFailed(media);
@@ -193,6 +205,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       useNaturalHeightMedia: useNaturalHeightImage || useNaturalHeightVideo,
       useCompactLink,
       alignStart: useNaturalHeightVideo,
+      useInteractiveHtmlLayout,
     });
     let mediaContent;
 
@@ -210,6 +223,11 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           media_url={media.url}
           disableMediaInteraction={disableMediaInteraction}
           imageScale={imageScale}
+          htmlIframeViewportClassName={
+            useInteractiveHtmlLayout
+              ? INTERACTIVE_HTML_MEDIA_VIEWPORT_CLASS_NAME
+              : undefined
+          }
         />
       );
     } else if (useNaturalHeightImage || useImageReservedHeight) {
@@ -233,6 +251,11 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           imageScale={imageScale}
           galleryItemId={galleryItemId}
           fillVideoContainer={useVideoReservedHeight}
+          htmlIframeViewportClassName={
+            useInteractiveHtmlLayout
+              ? INTERACTIVE_HTML_MEDIA_VIEWPORT_CLASS_NAME
+              : undefined
+          }
         />
       );
     }

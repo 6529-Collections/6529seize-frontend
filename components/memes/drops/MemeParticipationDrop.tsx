@@ -1,6 +1,11 @@
 "use client";
 
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import {
+  INTERACTIVE_HTML_MEDIA_CONTAINER_CLASS_NAME,
+  INTERACTIVE_HTML_MEDIA_VIEWPORT_CLASS_NAME,
+  isInteractiveHtmlMedia,
+} from "@/components/drops/view/item/content/media/interactiveHtmlMediaLayout";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
@@ -111,6 +116,9 @@ export default function MemeParticipationDrop({
 
   // Get artwork media URL if available
   const artworkMedia = firstPart?.media.at(0);
+  const isInteractiveHtml = artworkMedia
+    ? isInteractiveHtmlMedia(artworkMedia.mime_type)
+    : false;
 
   const borderClasses = getBorderClasses(drop, isActiveDrop);
 
@@ -169,17 +177,30 @@ export default function MemeParticipationDrop({
       </div>
       {artworkMedia && (
         <div
-          className={`tw-flex tw-h-96 tw-justify-center ${
+          className={`tw-flex tw-justify-center ${
             location === DropLocation.WAVE
               ? "tw-bg-iron-800/30"
               : "tw-bg-iron-900/40"
           }`}
         >
-          <DropListItemContentMedia
-            media_mime_type={artworkMedia.mime_type}
-            media_url={artworkMedia.url}
-            isCompetitionDrop={true}
-          />
+          <div
+            className={
+              isInteractiveHtml
+                ? INTERACTIVE_HTML_MEDIA_CONTAINER_CLASS_NAME
+                : "tw-h-96 tw-w-full"
+            }
+          >
+            <DropListItemContentMedia
+              media_mime_type={artworkMedia.mime_type}
+              media_url={artworkMedia.url}
+              isCompetitionDrop={true}
+              htmlIframeViewportClassName={
+                isInteractiveHtml
+                  ? INTERACTIVE_HTML_MEDIA_VIEWPORT_CLASS_NAME
+                  : undefined
+              }
+            />
+          </div>
         </div>
       )}
 
