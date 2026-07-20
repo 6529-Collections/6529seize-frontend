@@ -65,7 +65,7 @@ All commands ran from clean task-specific worktrees on 2026-07-20.
 
 | Command | Result |
 | --- | --- |
-| `npm run check` | Passed Prettier, ESLint, 267 suites, 2,282 passing tests, one intentional skip, and TypeScript build. |
+| `npm run check` | Passed Prettier, ESLint, 267 suites, 2,283 passing tests, one intentional skip, and TypeScript build on the latest merged `main`. |
 | `npm test -- --runInBand src/competitions/competition-page.test.ts src/competitions/competition.service.test.ts src/competitions/legacy-competition.adapter.integration.test.ts src/competitions/native-competition.reader.integration.test.ts` | Passed 4 suites and 14 focused service/adapter/repository paging tests. |
 | `npm test -- --runInBand src/competitions/competition.repository.integration.test.ts` | Passed 4 mapping/schema/capability tests, including idempotent mapping and per-competition capability identity. |
 | `(cd src/api-serverless && npm run build)` | Regenerated routes/models and produced the deployable API zip successfully. |
