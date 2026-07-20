@@ -41,6 +41,13 @@ export function printViewButton(
   );
 }
 
+function getCollectionViewFromPathname(
+  pathname: string
+): NextgenCollectionView {
+  const pathSegments = pathname.split("/").filter(Boolean);
+  return getCollectionView(pathSegments[3] ?? "");
+}
+
 export default function NextGenCollectionComponent({
   collection,
   initialView,
@@ -71,10 +78,7 @@ export default function NextGenCollectionComponent({
 
   useEffect(() => {
     const onPopState = () => {
-      const pathSegments = globalThis.location.pathname
-        .split("/")
-        .filter(Boolean);
-      setView(getCollectionView(pathSegments[3] ?? ""));
+      setView(getCollectionViewFromPathname(globalThis.location.pathname));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);

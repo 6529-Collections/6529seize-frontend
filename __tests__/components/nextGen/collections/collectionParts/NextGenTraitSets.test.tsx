@@ -94,5 +94,7 @@ describe("NextGenTraitSets", () => {
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "nextgen/collections/999/traits",
     });
+    expect(screen.queryByText(/Unique values for/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Collectors Count/)).not.toBeInTheDocument();
   });
 });
