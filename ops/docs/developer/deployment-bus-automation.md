@@ -128,6 +128,33 @@ the live version.
 
 ## Modes
 
+Agents discover live mode only through the repository helper:
+
+```bash
+node ops/scripts/release-bus-status.mjs
+```
+
+It uses the authenticated `gh` token internally to call
+`GET https://api.6529.io/deploy/release-bus/controls`, validates all required
+states, and suppresses tokens, raw API payloads, and authentication-command
+output. `RELEASE_BUS_API_URL` may override the API base only with a loopback
+test server; arbitrary hosts are rejected before the helper obtains a token.
+Missing or unauthenticated `gh`, network and timeout failures, HTTP errors,
+malformed JSON, unknown modes, or missing controls are terminal preflight
+failures. Agents do not fall back to AWS CLI or infer a route from the browser,
+docs, workflows, or earlier state.
+
+Run the helper on receipt of a release request, immediately before readiness or
+manual mutation, and again before production after a significant wait. Stop if
+`ALL` or the relevant lane is paused.
+
+| Live mode    | Staging route                        | Production route                           |
+| ------------ | ------------------------------------ | ------------------------------------------ |
+| `OFF`        | Legacy manual; no bus candidate      | Legacy manual                              |
+| `SHADOW`     | Record shadow candidate, then manual | Record shadow evidence, then manual        |
+| `STAGING`    | Release Bus                          | Operator/manual; no production train       |
+| `PRODUCTION` | Release Bus                          | Release Bus with the staging-validated SHA |
+
 `RELEASE_BUS_MODE` has four values:
 
 - `OFF`: no trains are collected.
@@ -152,9 +179,13 @@ The readiness API enforces those boundaries:
   a rollout mode was reduced after the original submission. Shadow-only
   candidates do not gain a status when cancelled.
 
-`RELEASE_BUS_ENFORCEMENT=true` in each GitHub repository turns legacy manual
-deployments into operator-only audited break glass. Enable it only after the
-corresponding bus mode is healthy.
+AWS `RELEASE_BUS_MODE` controls runtime ownership and API readiness acceptance.
+GitHub `RELEASE_BUS_ENFORCEMENT` is separate: exact `true` in a repository turns
+legacy manual deployments into operator-only audited break glass. Agents inspect
+the live Actions variable in every repository selected for a manual route.
+`OFF` or `SHADOW` with enforcement enabled is a rollout mismatch and blocks the
+release until an operator reconciles configuration. Enable enforcement only
+after the corresponding bus mode is healthy.
 
 ## Required external setup
 

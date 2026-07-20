@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { AwsRumExpectedAbortPlugin } from "@/utils/monitoring/awsRumExpectedAbort";
 import { createAwsRumPrivacyPlugin } from "@/utils/monitoring/awsRumPrivacy";
 import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 import type { AwsRum as AwsRumInstance, AwsRumConfig } from "aws-rum-web";
@@ -95,8 +96,8 @@ export default function AwsRumProvider({
             new ResourcePlugin(),
             new WebVitalsPlugin(),
             new JsErrorPlugin(),
-            new XhrPlugin(httpPluginConfig),
-            new FetchPlugin(httpPluginConfig),
+            new AwsRumExpectedAbortPlugin(new XhrPlugin(httpPluginConfig)),
+            new AwsRumExpectedAbortPlugin(new FetchPlugin(httpPluginConfig)),
           ],
           allowCookies: true,
           enableXRay: false,
