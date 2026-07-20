@@ -69,11 +69,15 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
 
       const controller = new AbortController();
       let active = true;
-      const timeoutId = globalThis.setTimeout(() => {
+      const abortMetadataFetch = () => {
         if (active) {
           controller.abort();
         }
-      }, TOKEN_METADATA_FETCH_TIMEOUT_MS);
+      };
+      const timeoutId = globalThis.setTimeout(
+        abortMetadataFetch,
+        TOKEN_METADATA_FETCH_TIMEOUT_MS
+      );
       const fetchMetadata = async () => {
         try {
           const response = await fetch(tokenUri, { signal: controller.signal });

@@ -547,7 +547,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                       <span className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-1.5">
                         <span>{tr.trait}</span>
                         <span className="tw-text-iron-400">
-                          x{tr.values.length}
+                          x{formatInteger(locale, tr.values.length)}
                         </span>
                       </span>
                     </summary>
@@ -581,7 +581,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                             <span>
                               {v.key}{" "}
                               <span className="tw-text-iron-400">
-                                x{v.count}
+                                x{formatInteger(locale, v.count)}
                               </span>
                             </span>
                           </label>

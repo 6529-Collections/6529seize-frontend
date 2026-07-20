@@ -73,9 +73,8 @@ export default function NextGenCollectionComponent({
     const onPopState = () => {
       // A collection slug can itself be a view name, so only parse the
       // segment after the slug instead of reading the last path segment.
-      const restoredView = getCollectionViewFromPathname(
-        globalThis.location.pathname
-      );
+      const pathname = window.location.pathname;
+      const restoredView = getCollectionViewFromPathname(pathname);
       setView(restoredView);
     };
     window.addEventListener("popstate", onPopState);
