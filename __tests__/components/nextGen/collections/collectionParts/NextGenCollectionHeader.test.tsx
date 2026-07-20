@@ -65,7 +65,18 @@ describe("NextGenCollectionHeader", () => {
   it("renders back link text depending on path", () => {
     window.history.pushState({}, "", "/x/art");
     render(<NextGenBackToCollectionPageLink collection={collection} />);
-    expect(screen.getByText("Back to collection page")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Back to collection page" })
+    ).toHaveAttribute("href", "/nextgen/collection/my-collection");
+  });
+
+  it("links collection overview pages back to their art view", () => {
+    window.history.pushState({}, "", "/nextgen/collection/my-collection/about");
+    render(<NextGenBackToCollectionPageLink collection={collection} />);
+
+    expect(
+      screen.getByRole("link", { name: "Back to collection art" })
+    ).toHaveAttribute("href", "/nextgen/collection/my-collection/art");
   });
 
   it("shows countdown when mint window approaching", () => {
