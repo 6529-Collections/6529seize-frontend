@@ -92,6 +92,7 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
     <svg
       data-testid={props.icon.iconName}
       style={props.style}
+      className={props.className}
       onClick={props.onClick}
       data-tooltip-id={props["data-tooltip-id"]}
     />
@@ -192,10 +193,8 @@ describe("NextGenTokenPage", () => {
   describe("navigation", () => {
     it("disables previous button on first token", () => {
       renderComponent({ token: { ...baseProps.token, normalised_id: 0 } });
-      const prev = screen.getByTestId("circle-chevron-left");
-      expect(prev.getAttribute("style")).toContain("color: rgb(154, 154, 154)");
-      expect(prev.getAttribute("style")).toContain("cursor: default");
-      // When disabled, no tooltip should be present
+      const prev = screen.getByRole("button", { name: "Previous token" });
+      expect(prev).toBeDisabled();
       expect(prev.getAttribute("data-tooltip-id")).toBeFalsy();
     });
 
@@ -203,12 +202,9 @@ describe("NextGenTokenPage", () => {
       renderComponent({
         token: { ...baseProps.token, normalised_id: 1, id: 2 },
       });
-      const prev = screen.getByTestId("circle-chevron-left");
-      expect(prev.getAttribute("style")).toContain("color: rgb(255, 255, 255)");
-      expect(prev.getAttribute("style")).toContain("cursor: pointer");
-      // When enabled, the icon should have a tooltip id
+      const prev = screen.getByRole("button", { name: "Previous token" });
+      expect(prev).toBeEnabled();
       expect(prev.getAttribute("data-tooltip-id")).toBeTruthy();
-      // And the tooltip should be present in the document
       expect(screen.getByTestId("tooltip-prev-token-2")).toBeInTheDocument();
     });
 
@@ -217,9 +213,8 @@ describe("NextGenTokenPage", () => {
         token: { ...baseProps.token, normalised_id: 1 },
         tokenCount: 2,
       });
-      const next = screen.getByTestId("circle-chevron-right");
-      expect(next.getAttribute("style")).toContain("color: rgb(154, 154, 154)");
-      expect(next.getAttribute("style")).toContain("cursor: default");
+      const next = screen.getByRole("button", { name: "Next token" });
+      expect(next).toBeDisabled();
       expect(next.getAttribute("data-tooltip-id")).toBeFalsy();
     });
 
@@ -228,9 +223,8 @@ describe("NextGenTokenPage", () => {
         token: { ...baseProps.token, normalised_id: 0, id: 1 },
         tokenCount: 3,
       });
-      const next = screen.getByTestId("circle-chevron-right");
-      expect(next.getAttribute("style")).toContain("color: rgb(255, 255, 255)");
-      expect(next.getAttribute("style")).toContain("cursor: pointer");
+      const next = screen.getByRole("button", { name: "Next token" });
+      expect(next).toBeEnabled();
       expect(next.getAttribute("data-tooltip-id")).toBeTruthy();
       expect(screen.getByTestId("tooltip-next-token-1")).toBeInTheDocument();
     });
@@ -241,9 +235,7 @@ describe("NextGenTokenPage", () => {
       renderComponent({ token: { ...baseProps.token, burnt: true } });
       const fireIcon = screen.getByTestId("fire");
       expect(fireIcon).toBeInTheDocument();
-      expect(fireIcon.getAttribute("style")).toContain(
-        "color: rgb(197, 29, 52)"
-      );
+      expect(fireIcon).toHaveClass("tw-text-error");
       expect(screen.getByTestId("tooltip-burnt-token-1")).toBeInTheDocument();
     });
 

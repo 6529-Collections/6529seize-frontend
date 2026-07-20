@@ -26,11 +26,7 @@ export default function Lightbulb(
           content="Blackbox"
           place="bottom"
           delayShow={100}
-          style={{
-            backgroundColor: "#1F2937",
-            color: "white",
-            padding: "4px 8px",
-          }}
+          className="!tw-bg-iron-900 !tw-px-2 !tw-py-1 !tw-text-white"
         />
       </>
     );
@@ -53,11 +49,7 @@ export default function Lightbulb(
         content="Lightbox"
         place="bottom"
         delayShow={100}
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
+        className="!tw-bg-iron-900 !tw-px-2 !tw-py-1 !tw-text-white"
       />
     </>
   );

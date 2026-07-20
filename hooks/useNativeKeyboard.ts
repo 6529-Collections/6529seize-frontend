@@ -324,13 +324,9 @@ function markKeyboardHiddenFromFallback(): void {
 }
 
 function syncKeyboardVisibilityFromViewport(): void {
-  // Native iOS will-events provide the final geometry before animation starts.
-  // Intermediate viewport frames must not replace that animation target.
-  if (
-    currentState.isIos &&
-    nativeKeyboardLifecycleActive &&
-    (currentState.phase === "showing" || currentState.phase === "hiding")
-  ) {
+  // Native iOS events provide the final keyboard frame. Viewport updates can
+  // arrive late and report device-specific intermediate geometry.
+  if (currentState.isIos && nativeKeyboardLifecycleActive) {
     return;
   }
 
