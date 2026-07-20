@@ -1,6 +1,7 @@
 import type { Event, EventHint } from "@sentry/nextjs";
+import { PRODUCTION_ASSET_HOSTNAME } from "@/config/assetPrefix";
 
-const CYCLIC_JSON_TIMER_DIAGNOSTICS_VERSION = "v1";
+const CYCLIC_JSON_TIMER_DIAGNOSTICS_VERSION = "v2";
 export const CYCLIC_JSON_TIMER_DIAGNOSTICS_TAG =
   "cyclic_json_timer_diagnostics";
 
@@ -13,6 +14,7 @@ const DEFAULT_TIMER_SAMPLE_RATE = 1 / 16;
 const MAX_SCHEDULING_FRAMES = 8;
 const INTERNAL_TIMER_FUNCTION = "cyclicJsonTimerDiagnosticSetTimeout";
 const INTERNAL_STACK_FUNCTIONS = new Set([INTERNAL_TIMER_FUNCTION]);
+const PRODUCTION_ASSET_PATH_PATTERN = /^\/web_build\/[^/]+\/_next\/static\//;
 const SAFE_NAME_PATTERN = /[^\w$<>. -]/g;
 // Privacy wins over callback-name fidelity: long minified names can be
 // redacted because they are indistinguishable from identifier-shaped secrets.
@@ -135,6 +137,15 @@ function getStaticAssetPath(pathname: string): string | null {
   return pathname.slice(staticIndex).slice(0, 512);
 }
 
+function isProductionNextAssetUrl(url: URL): boolean {
+  return (
+    url.protocol === "https:" &&
+    url.hostname === PRODUCTION_ASSET_HOSTNAME &&
+    url.port === "" &&
+    PRODUCTION_ASSET_PATH_PATTERN.test(url.pathname)
+  );
+}
+
 function getSanitizedFile(
   rawLocation: string,
   firstPartyHostname: string
@@ -159,7 +170,8 @@ function getSanitizedFile(
       isHttp &&
       (parsed.hostname === firstPartyHostname ||
         parsed.hostname === "6529.io" ||
-        parsed.hostname.endsWith(".6529.io"));
+        parsed.hostname.endsWith(".6529.io") ||
+        isProductionNextAssetUrl(parsed));
 
     if (isFirstParty) {
       return {
@@ -344,73 +356,75 @@ export function installCyclicJsonTimerDiagnostics(
   const stackFactory = options.stackFactory;
   const firstPartyHostname = target.location?.hostname ?? "6529.io";
 
-  const diagnosticSetTimeout: TimerSetTimeout = function cyclicJsonTimerDiagnosticSetTimeout(
-    this: TimerTarget,
-    handler,
-    timeout,
-    ...args
-  ) {
-    if (typeof handler !== "function") {
-      return originalSetTimeout.apply(target, [handler, timeout, ...args]);
-    }
-
-    let shouldSample = false;
-    try {
-      shouldSample = random() < sampleRate;
-    } catch {
-      // A diagnostics failure must preserve the original timer path.
-    }
-    if (!shouldSample) {
-      return originalSetTimeout.apply(target, [handler, timeout, ...args]);
-    }
-
-    let diagnostics: CyclicJsonTimerDiagnostics;
-    try {
-      const schedulingStack = stackFactory
-        ? stackFactory()
-        : new Error("cyclic-json-timer-schedule").stack;
-      diagnostics = createDiagnostics(
-        handler,
-        userAgent,
-        firstPartyHostname,
-        sampleRate,
-        schedulingStack
-      );
-    } catch {
-      return originalSetTimeout.apply(target, [handler, timeout, ...args]);
-    }
-
-    const diagnosticCallback: TimerCallback = function (
-      this: unknown,
-      ...callbackArgs
-    ) {
-      try {
-        return handler.apply(this, callbackArgs);
-      } catch (error) {
-        // This intentionally covers synchronous callback throws only. Promise
-        // rejections use a different Sentry mechanism and cannot be associated
-        // with the timer Error object here.
-        if (isExactCyclicJsonTypeError(error)) {
-          diagnosticsByError.set(error, diagnostics);
-        }
-        throw error;
+  // JavaScriptCore stack traces use the source-level function name. A static
+  // method keeps its public property key through production minification, so
+  // internal-frame cleanup can use an exact name instead of frame position.
+  class DiagnosticTimer {
+    static cyclicJsonTimerDiagnosticSetTimeout(
+      this: void,
+      handler: TimerHandler,
+      timeout?: number,
+      ...args: unknown[]
+    ): number {
+      if (typeof handler !== "function") {
+        return originalSetTimeout.apply(target, [handler, timeout, ...args]);
       }
-    };
 
-    return originalSetTimeout.apply(target, [
-      diagnosticCallback,
-      timeout,
-      ...args,
-    ]);
-  };
+      let shouldSample = false;
+      try {
+        shouldSample = random() < sampleRate;
+      } catch {
+        // A diagnostics failure must preserve the original timer path.
+      }
+      if (!shouldSample) {
+        return originalSetTimeout.apply(target, [handler, timeout, ...args]);
+      }
+
+      let diagnostics: CyclicJsonTimerDiagnostics;
+      try {
+        const schedulingStack = stackFactory
+          ? stackFactory()
+          : new Error("cyclic-json-timer-schedule").stack;
+        diagnostics = createDiagnostics(
+          handler,
+          userAgent,
+          firstPartyHostname,
+          sampleRate,
+          schedulingStack
+        );
+      } catch {
+        return originalSetTimeout.apply(target, [handler, timeout, ...args]);
+      }
+
+      const diagnosticCallback: TimerCallback = function (
+        this: unknown,
+        ...callbackArgs
+      ) {
+        try {
+          return handler.apply(this, callbackArgs);
+        } catch (error) {
+          // This intentionally covers synchronous callback throws only. Promise
+          // rejections use a different Sentry mechanism and cannot be associated
+          // with the timer Error object here.
+          if (isExactCyclicJsonTypeError(error)) {
+            diagnosticsByError.set(error, diagnostics);
+          }
+          throw error;
+        }
+      };
+
+      return originalSetTimeout.apply(target, [
+        diagnosticCallback,
+        timeout,
+        ...args,
+      ]);
+    }
+  }
+
+  const diagnosticSetTimeout: TimerSetTimeout =
+    DiagnosticTimer.cyclicJsonTimerDiagnosticSetTimeout;
 
   try {
-    // Preserve the diagnostic frame name through production minification so
-    // stack cleanup does not rely on a fixed frame position.
-    Object.defineProperty(diagnosticSetTimeout, "name", {
-      configurable: true,
-      value: INTERNAL_TIMER_FUNCTION,
-    });
     target.setTimeout = diagnosticSetTimeout;
     installedTargets.add(target);
     return true;

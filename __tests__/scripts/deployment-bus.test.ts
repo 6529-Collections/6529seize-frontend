@@ -28,6 +28,24 @@ const ARTIFACT_SHA256 =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const REQUIRED_WEB_SURFACES = ["web:desktop-chromium", "web:mobile-chromium"];
 
+describe("release bus optional Codex workflow", () => {
+  const composeWorkflow = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/release-bus-compose.yml"),
+    "utf8"
+  );
+
+  it("guards and integrity-checks a Codex-disabled deferred composition", () => {
+    expect(composeWorkflow).toContain(
+      "git rev-parse -q --verify MERGE_HEAD >/dev/null"
+    );
+    expect(composeWorkflow).toContain("Release-Bus-Defer: true");
+    expect(composeWorkflow).toContain(
+      "Incomplete composition does not contain a strict candidate prefix."
+    );
+    expect(composeWorkflow).toContain('test "$missing_seen" = true');
+  });
+});
+
 function releaseArtifact(uri, metadata) {
   return {
     uri,

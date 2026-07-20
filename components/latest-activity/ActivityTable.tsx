@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "./LatestActivity.module.css";
 import LatestActivityRow from "./LatestActivityRow";
 import { areEqualAddresses, isNextgenContract } from "@/helpers/Helpers";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
@@ -24,8 +23,8 @@ export default function ActivityTable({
   }
 
   return (
-    <div className={`tw-pt-3 ${styles["scrollContainer"] ?? ""}`}>
-      <table className={styles["activityTable"]}>
+    <div className="tw-overflow-x-auto tw-pt-3">
+      <table className="tw-w-full tw-min-w-[900px] tw-border-collapse">
         <tbody>
           {activity.map((tr) => {
             let nft = undefined;
@@ -48,6 +47,7 @@ export default function ActivityTable({
                 nft={nft}
                 nextgen_collection={nextgenCollection}
                 tr={tr}
+                showNftIdentity
                 key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
               />
             );

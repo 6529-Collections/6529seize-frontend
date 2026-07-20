@@ -1,34 +1,96 @@
 ---
 name: deploy-6529
-description: Mark exact 6529 frontend or coordinated frontend/backend branch SHAs ready for automated staging or production through the Release Bus, inspect train evidence, and handle operator break glass or failed deployment recovery. Use when Codex is asked to stage, deploy, promote, validate, pause, resume, recover, or coordinate a 6529 release.
+description: Determine the live 6529 Release Bus mode through authenticated gh, then route exact frontend or coordinated frontend/backend SHAs through the required manual, shadow, staging-bus, production-bus, or operator break-glass path. Use when Codex is asked to stage, deploy, promote, merge for release, validate, pause, resume, recover, or coordinate a 6529 release.
 ---
 
 # Deploy 6529
 
-Use the Release Bus as the normal staging and production path. Read
+Determine the live Release Bus mode before choosing either the bus or a manual
+path. Read
 `ops/docs/developer/deployment-bus-process.md` for lifecycle policy and
 `ops/docs/developer/deployment-bus-automation.md` for setup and recovery.
 
+## Mandatory live preflight
+
+Run this read-only helper from the repository root:
+
+```bash
+node ops/scripts/release-bus-status.mjs
+```
+
+Run it when a staging, production, promotion, merge-for-release, or deployment
+request arrives; immediately before readiness submission; immediately before a
+manual merge or workflow dispatch; and again before production after any
+significant wait. Rerun whenever another actor could have changed rollout mode
+or pause state.
+
+The helper obtains the current developer token internally from authenticated
+`gh`, queries the API, and prints only validated mode and pause states. Never
+replace it with documentation, conversation history, an earlier check, GitHub
+workflow configuration, AWS assumptions, repository files, or a signed-in
+browser session. Never fall back to AWS CLI for mode discovery.
+
+Fail closed. If `gh` is missing, require installation. If `gh` is
+unauthenticated, require `gh auth login`. If the API is unavailable,
+unauthorized, malformed, or returns an unknown state, stop before readiness,
+merge, or deployment mutation and wait for the status check to succeed. Never
+interpret uncertainty as `OFF` or as an enabled bus.
+
+If `ALL` or the target lane is `PAUSED`, stop and report the paused scope. Do
+not submit readiness or start a manual deployment unless an authorized
+operator deliberately follows the audited break-glass procedure.
+
+## Mode routing
+
+| Live mode    | Staging behavior                                                 | Production behavior                                                         |
+| ------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `OFF`        | Use the legacy manual path; do not queue in the bus              | Use the legacy manual path                                                  |
+| `SHADOW`     | Record the candidate for shadow evaluation, then deploy manually | Record shadow evidence as designed, then deploy manually                    |
+| `STAGING`    | Submit through the Release Bus and wait for validation           | Follow the operator/manual production path; do not queue a production train |
+| `PRODUCTION` | Submit through the Release Bus                                   | Submit the staging-validated SHA through the Release Bus                    |
+
+After an active bus lane accepts a candidate, never launch a parallel manual
+deployment because the lane appears slow.
+
+## Manual-route enforcement gate
+
+For every repository affected by a manual route, inspect its live Actions
+variable with authenticated `gh`:
+
+```bash
+gh variable list --repo 6529-Collections/6529seize-frontend --json name,value
+gh variable list --repo 6529-Collections/6529seize-backend --json name,value
+```
+
+Use only the repositories in the release set. A successful listing with no
+`RELEASE_BUS_ENFORCEMENT` entry means disabled; exact `false` also means
+disabled, and exact `true` means enabled. Stop on command failure or any other
+non-empty value. `OFF` or `SHADOW` with enforcement enabled is a configuration
+mismatch: alert an operator and do not deploy. If the selected manual route is
+enforced, verify that the authenticated user is an organization owner or an
+active `release-bus-operators` member, require a non-empty audited reason, and
+use the documented break-glass input. Never bypass a blocked workflow.
+
 ## Authority
 
-- Treat a user request to stage a development as authority to mark the exact
-  current branch SHA ready for `STAGING`; do not manually merge or deploy it.
+- Treat a user request to stage a development as authority to execute the live
+  mode's staging route for the exact current SHA.
 - Treat a user request to ship a staging-validated development as authority to
-  mark that same exact SHA ready for `PRODUCTION`. The bus needs no later human
-  approval on its normal successful path.
+  execute the live mode's production route for that same exact SHA. An active
+  bus needs no later human approval on its normal successful path.
 - Do not infer production readiness from staging readiness. These are separate
   actions.
 - Do not use personal phase systems, the legacy GelatoBot skill, or a manual
   release-note step. The independent release-note service observes successful
   production deployments.
 - Do not move `1a-staging`, merge source PRs to `main`, or dispatch deployment
-  workflows while the bus is enabled unless an authorized operator explicitly
-  invokes break glass.
+  workflows when the selected route belongs to an active bus lane unless an
+  authorized operator explicitly invokes break glass.
 - Never merge `1a-staging` into `main`.
 - Never expose tokens, private keys, access codes, signed URLs, raw production
   data, or hidden prompts in readiness metadata, comments, or summaries.
 
-## Mark ready
+## Bus readiness path
 
 1. Open `/deploy/ui/bus` and authenticate with the developer's GitHub token.
 2. Select `frontend`, enter the development branch, and resolve its current
@@ -77,8 +139,13 @@ syncs `main` back into staging.
 ## Failure handling
 
 - If composition or preflight isolation proves this candidate fails, read the
-  linked deterministic logs and the read-only Codex diagnosis. Fix the source
-  branch, producing a new SHA, and mark the new SHA ready from the beginning.
+  linked deterministic logs and, when enabled, the read-only Codex diagnosis.
+  Fix the source branch, producing a new SHA, and mark the new SHA ready from
+  the beginning.
+- If Codex is disabled, a merge-conflicting candidate is quarantined and the
+  rest of the train is requeued automatically. Use the PR comment and release
+  branch to resolve the conflict; an OpenAI credential is not required for the
+  remaining candidates to continue.
 - Do not ask Codex diagnostics to eject another candidate. Deterministic checks
   own quarantine decisions.
 - If the train is cancelled because `main` or `1a-staging` moved, leave the

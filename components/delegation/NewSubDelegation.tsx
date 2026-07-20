@@ -7,18 +7,20 @@ import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUB_DELEGATION_USE_CASE } from "./delegation-constants";
-import { getGasError } from "./delegation-shared";
+import {
+  getGasError,
+  type DelegationWriteSettledHandler,
+} from "./delegation-shared";
 import type { DelegationToastState } from "./DelegationToast";
-import styles from "./Delegation.module.css";
 import {
   DelegationAddressDisabledInput,
-  DelegationCloseButton,
   DelegationFormField,
   DelegationFormCollectionFormGroup,
   DelegationFormDelegateAddressFormGroup,
   DelegationFormLabel,
   DelegationFormOriginalDelegatorFormGroup,
   DelegationFormRow,
+  DelegationFormShell,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
 
@@ -42,6 +44,9 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
   const [newDelegationToAddress, setNewDelegationToAddress] = useState("");
 
   const [gasError, setGasError] = useState<string>();
+  const handleWriteSettled: DelegationWriteSettledHandler = (_data, error) => {
+    setGasError(error ? getGasError(error) : undefined);
+  };
 
   const contractWriteDelegationConfigParams = props.subdelegation
     ? {
@@ -61,14 +66,6 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
           validate().length === 0
             ? "registerDelegationAddressUsingSubDelegation"
             : undefined,
-        onSettled(data: unknown, error: Error | null) {
-          if (data) {
-            setGasError(undefined);
-          }
-          if (error) {
-            setGasError(getGasError(error));
-          }
-        },
       }
     : {
         address: DELEGATION_CONTRACT.contract,
@@ -84,14 +81,6 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
         ],
         functionName:
           validate().length === 0 ? "registerDelegationAddress" : undefined,
-        onSettled(data: unknown, error: Error | null) {
-          if (data) {
-            setGasError(undefined);
-          }
-          if (error) {
-            setGasError(getGasError(error));
-          }
-        },
       };
 
   function validate() {
@@ -103,7 +92,7 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
       newErrors.push("Missing or invalid Address");
     } else if (
       (props.subdelegation &&
-        newDelegationToAddress.toUpperCase() ==
+        newDelegationToAddress.toUpperCase() ===
           props.subdelegation.originalDelegator.toUpperCase()) ||
       (!props.subdelegation &&
         newDelegationToAddress.toUpperCase() === props.address.toUpperCase())
@@ -115,72 +104,55 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-w-full tw-px-3">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-w-10/12 tw-px-3 tw-pb-1 tw-pt-3">
-          <h4>Register Delegation Manager (Sub-Delegation)</h4>
-          <p className={styles["actionIntro"]}>
-            Grant a manager wallet permission to maintain delegations and
-            consolidations for the managed wallet.
-          </p>
-        </div>
-        <div className="tw-flex tw-w-2/12 tw-items-center tw-justify-end tw-px-3 tw-pb-1 tw-pt-3">
-          <DelegationCloseButton
-            onHide={props.onHide}
-            title="Delegation Manager"
+    <DelegationFormShell
+      title="Register Delegation Manager (Sub-Delegation)"
+      description="Grant a manager wallet permission to maintain delegations and consolidations for the managed wallet."
+      closeTitle="Delegation Manager"
+      onHide={props.onHide}
+    >
+      <form>
+        {props.subdelegation && (
+          <DelegationFormOriginalDelegatorFormGroup
+            subdelegation={props.subdelegation}
           />
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-w-full tw-px-3">
-          <form>
-            {props.subdelegation && (
-              <DelegationFormOriginalDelegatorFormGroup
-                subdelegation={props.subdelegation}
-              />
-            )}
-            <DelegationFormRow>
-              <DelegationFormLabel
-                title={
-                  props.subdelegation ? "Manager Wallet" : "Managed Wallet"
-                }
-                tooltip={`Address ${
-                  props.subdelegation ? `executing` : `registering`
-                } the sub-delegation`}
-              />
-              <DelegationFormField>
-                <DelegationAddressDisabledInput
-                  address={props.address}
-                  ens={props.ens}
-                  label={
-                    props.subdelegation ? "Delegation Manager" : "Delegator"
-                  }
-                />
-              </DelegationFormField>
-            </DelegationFormRow>
-            <DelegationFormCollectionFormGroup
-              collection={newDelegationCollection}
-              setCollection={setNewDelegationCollection}
-              subdelegation={props.subdelegation}
+        )}
+        <DelegationFormRow>
+          <DelegationFormLabel
+            title={props.subdelegation ? "Manager Wallet" : "Managed Wallet"}
+            tooltip={`Address ${
+              props.subdelegation ? `executing` : `registering`
+            } the sub-delegation`}
+          />
+          <DelegationFormField>
+            <DelegationAddressDisabledInput
+              address={props.address}
+              ens={props.ens}
+              label={props.subdelegation ? "Delegation Manager" : "Delegator"}
             />
-            <DelegationFormDelegateAddressFormGroup
-              setAddress={setNewDelegationToAddress}
-              title="Manager Address"
-              tooltip="Wallet that can manage delegations and consolidations for the selected collection"
-            />
-            <DelegationSubmitGroups
-              title={"Registering Delegation Manager"}
-              writeParams={contractWriteDelegationConfigParams}
-              showCancel={true}
-              gasError={gasError}
-              validate={validate}
-              onHide={props.onHide}
-              onSetToast={props.onSetToast}
-              submitBtnLabel="Register Delegation Manager"
-            />
-          </form>
-        </div>
-      </div>
-    </div>
+          </DelegationFormField>
+        </DelegationFormRow>
+        <DelegationFormCollectionFormGroup
+          collection={newDelegationCollection}
+          setCollection={setNewDelegationCollection}
+          subdelegation={props.subdelegation}
+        />
+        <DelegationFormDelegateAddressFormGroup
+          setAddress={setNewDelegationToAddress}
+          title="Manager Address"
+          tooltip="Wallet that can manage delegations and consolidations for the selected collection"
+        />
+        <DelegationSubmitGroups
+          title={"Registering Delegation Manager"}
+          writeParams={contractWriteDelegationConfigParams}
+          showCancel={true}
+          gasError={gasError}
+          onWriteSettled={handleWriteSettled}
+          validate={validate}
+          onHide={props.onHide}
+          onSetToast={props.onSetToast}
+          submitBtnLabel="Register Delegation Manager"
+        />
+      </form>
+    </DelegationFormShell>
   );
 }

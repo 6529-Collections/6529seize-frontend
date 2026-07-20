@@ -1,7 +1,7 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Link from "next/link";
 
-type PrimaryButtonSize = "default" | "sm";
+type PrimaryButtonSize = "default" | "sm" | "lg";
 
 interface PrimaryButtonProps {
   readonly loading: boolean;
@@ -20,11 +20,13 @@ interface PrimaryButtonProps {
 const TEXT_SIZE_CLASS_BY_SIZE: Record<PrimaryButtonSize, string> = {
   default: "tw-text-sm",
   sm: "tw-text-xs",
+  lg: "tw-text-base",
 };
 
 const PADDING_CLASS_BY_SIZE: Record<PrimaryButtonSize, string> = {
   default: "tw-px-3.5 tw-py-2.5",
   sm: "tw-px-2.5 tw-py-2",
+  lg: "tw-px-5 tw-py-3",
 };
 
 export default function PrimaryButton({
@@ -71,7 +73,7 @@ export default function PrimaryButton({
       className={classes}
     >
       {loading && (
-        <span className={showChildren ? "-tw-ml-1.5" : ""}>
+        <span className="tw-flex tw-items-center tw-justify-center">
           <CircleLoader />
         </span>
       )}

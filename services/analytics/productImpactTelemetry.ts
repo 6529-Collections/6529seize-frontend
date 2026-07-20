@@ -28,6 +28,15 @@ type ProductImpactStatusBucket =
   | "unknown";
 
 type ProductImpactSeverity = "info" | "warning";
+type ProductImpactSentryDelivery =
+  | "always"
+  | "never"
+  | "sample_initial_success";
+
+type ProductImpactLogOptions = {
+  readonly sentryDelivery?: ProductImpactSentryDelivery;
+  readonly sentryOnlyProperties?: ProductImpactProperties;
+};
 
 export const PRODUCT_IMPACT_EVENT_NAMES = [
   "Auth Session Refresh Product Impact",
@@ -90,6 +99,14 @@ interface AuthRefreshImpactTelemetry extends AuthRefreshTelemetryBase {
 }
 
 const TELEMETRY_VERSION = 1;
+const WAVE_FEED_INITIAL_SUCCESS_SENTRY_SAMPLE_RATE = 0.05;
+const UINT32_SAMPLE_SPACE = 2 ** 32;
+
+function getTelemetrySampleValue(): number {
+  const sample = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(sample);
+  return (sample[0] ?? 0) / UINT32_SAMPLE_SPACE;
+}
 const DEFAULT_AUTH_REFRESH_IMPACT_DEDUPE_SCOPE = "default";
 const authRefreshImpactDedupeKeysByScope = new Map<string, Set<string>>();
 
@@ -367,7 +384,7 @@ function logProductImpactEvent(
   eventName: ProductImpactEventName,
   properties: ProductImpactProperties,
   severity: ProductImpactSeverity,
-  sentryOnlyProperties: ProductImpactProperties = {}
+  options: ProductImpactLogOptions = {}
 ): void {
   const payload = buildBaseProperties(properties);
 
@@ -378,9 +395,20 @@ function logProductImpactEvent(
   }
 
   try {
+    const sentryDelivery = options.sentryDelivery ?? "always";
+    if (sentryDelivery === "never") {
+      return;
+    }
+    if (
+      sentryDelivery === "sample_initial_success" &&
+      getTelemetrySampleValue() >= WAVE_FEED_INITIAL_SUCCESS_SENTRY_SAMPLE_RATE
+    ) {
+      return;
+    }
+
     const sentryPayload = {
       ...payload,
-      ...sentryOnlyProperties,
+      ...options.sentryOnlyProperties,
     };
     const sentryLogName = eventName.toLowerCase().replaceAll(" ", "_");
     if (severity === "warning") {
@@ -447,6 +475,10 @@ function getWaveBaseProperties(
   };
 }
 
+function isInitialWaveFeedLoadSource(loadSource: WaveFeedLoadSource): boolean {
+  return loadSource === "initial_visible" || loadSource === "server_initial";
+}
+
 export function trackWaveFeedLoadStarted(
   telemetry: WaveFeedTelemetryBase
 ): void {
@@ -456,7 +488,8 @@ export function trackWaveFeedLoadStarted(
       ...getWaveBaseProperties(telemetry),
       product_failure: false,
     },
-    "info"
+    "info",
+    { sentryDelivery: "never" }
   );
 }
 
@@ -474,7 +507,13 @@ export function trackWaveFeedLoadSucceeded(
     },
     "info",
     {
-      duration_ms: getRawDurationMs(telemetry.durationMs),
+      sentryDelivery: isInitialWaveFeedLoadSource(telemetry.loadSource)
+        ? "sample_initial_success"
+        : "never",
+      sentryOnlyProperties: {
+        duration_ms: getRawDurationMs(telemetry.durationMs),
+        sentry_sample_rate: WAVE_FEED_INITIAL_SUCCESS_SENTRY_SAMPLE_RATE,
+      },
     }
   );
 }
@@ -490,7 +529,8 @@ export function trackWaveFeedLoadCancelled(
       product_failure: false,
       status_bucket: "aborted",
     },
-    "info"
+    "info",
+    { sentryDelivery: "never" }
   );
 }
 

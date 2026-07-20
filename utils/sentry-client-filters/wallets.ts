@@ -522,9 +522,19 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     return false;
   }
 
+  const hasCoinbaseRequestRelaySignature =
+    hasCoinbaseWalletRequestRelayFrame(value?.stacktrace?.frames);
+  if (hasCoinbaseRequestRelaySignature) {
+    return (
+      event.exception?.values?.length === 1 &&
+      hasBrowserUnhandledRejectionMechanism(value) &&
+      typeof value?.value === "string" &&
+      isCoinbaseWalletLinkWebSocket1006Message(value.value)
+    );
+  }
+
   const hasExplicitCoinbaseWalletLinkStack =
     hasCoinbaseWalletLinkWebSocketFrame(value?.stacktrace?.frames) ||
-    hasCoinbaseWalletRequestRelayFrame(value?.stacktrace?.frames) ||
     hasCoinbaseWalletLinkWebSocketStack(hint) ||
     hasCoinbaseWalletLinkWebSocketSerializedStack(event);
 

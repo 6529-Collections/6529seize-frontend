@@ -7,6 +7,7 @@ import {
   injectedScriptSendMessageError,
   sentryBrowserHelperPathToken,
   sentryBrowserPackagePathTokens,
+  webkitExtensionMessagingTabNotFoundMessage,
 } from "./constants";
 import type {
   SentryClientEvent,
@@ -113,9 +114,13 @@ export function shouldFilterBrowserExtensionSendMessageError(
   hint?: SentryEventHint
 ): boolean {
   const value = event.exception?.values?.[0];
+  const normalizedMessage = normalizeErrorPrefix(value?.value ?? "");
+  const isWebKitExtensionTabNotFoundError =
+    normalizedMessage === webkitExtensionMessagingTabNotFoundMessage;
   if (
     value?.type !== "Error" ||
-    normalizeErrorPrefix(value.value ?? "") !== injectedScriptSendMessageError
+    (normalizedMessage !== injectedScriptSendMessageError &&
+      !isWebKitExtensionTabNotFoundError)
   ) {
     return false;
   }
@@ -126,6 +131,10 @@ export function shouldFilterBrowserExtensionSendMessageError(
     hasAppOwnedSourceEvidence(event, value, hint)
   ) {
     return false;
+  }
+
+  if (isWebKitExtensionTabNotFoundError) {
+    return event.exception?.values?.length === 1;
   }
 
   return hasOnlyInjectedSendMessageFrames(value.stacktrace?.frames);

@@ -10,6 +10,7 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 
 import { NextConfig } from "next";
+import { getProductionAssetPrefix } from "@/config/assetPrefix";
 import { computeVersionFromEnvOrGit, logOnceConfig } from "@/config/version";
 import {
   loadAssetsFlagAtRuntime,
@@ -33,7 +34,7 @@ function getAssetPrefix(assetsFromS3: boolean, version: string): string {
   if (!assetsFromS3) {
     return "";
   }
-  return `https://dnclu2fna0b2b.cloudfront.net/web_build/${version}`;
+  return getProductionAssetPrefix(version);
 }
 
 const standaloneOutput = { output: "standalone" as const };

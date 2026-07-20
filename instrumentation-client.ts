@@ -26,6 +26,7 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
@@ -160,6 +161,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterBrowserExtensionSendMessageError(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterPoperBlockerOrphanFetchRejection(event, hint)) {
     return true;
   }
 

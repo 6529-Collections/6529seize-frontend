@@ -3,7 +3,11 @@ import {
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import { publicEnv } from "@/config/env";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
+import {
+  GRADIENT_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Transaction } from "@/entities/ITransaction";
 import { fetchUrl } from "@/services/6529api";
@@ -21,6 +25,7 @@ export enum TypeFilter {
 enum ContractFilter {
   ALL = "All Collections",
   MEMES = "The Memes",
+  MEMELAB = "MemeLab",
   NEXTGEN = "NextGen",
   GRADIENTS = "Gradients",
 }
@@ -48,8 +53,9 @@ export function useActivityData(
     totalResults: number;
   }
 ): UseActivityDataReturn {
+  const initialActivity = initialData?.activity;
   const [activity, setActivity] = useState<Transaction[]>(
-    initialData?.activity || []
+    initialActivity || []
   );
   const [page, setPage] = useState(initialPage);
   const [totalResults, setTotalResults] = useState(
@@ -59,7 +65,7 @@ export function useActivityData(
 
   useEffect(() => {
     // Skip initial fetch if we have initial data and filters are at defaults
-    const hasInitialData = initialData && initialData.activity.length > 0;
+    const hasInitialData = initialActivity && initialActivity.length > 0;
     const isDefaultFilters =
       typeFilter === TypeFilter.ALL && selectedContract === ContractFilter.ALL;
     const isInitialPage = page === initialPage;
@@ -68,6 +74,7 @@ export function useActivityData(
       return; // Use initial data, no fetch needed
     }
 
+    let isCurrentRequest = true;
     setFetching(true);
     let url = `${publicEnv.API_ENDPOINT}/api/transactions?page_size=${pageSize}&page=${page}`;
 
@@ -96,6 +103,9 @@ export function useActivityData(
       case ContractFilter.NEXTGEN:
         url += `&contract=${NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}`;
         break;
+      case ContractFilter.MEMELAB:
+        url += `&contract=${MEMELAB_CONTRACT}`;
+        break;
       case ContractFilter.GRADIENTS:
         url += `&contract=${GRADIENT_CONTRACT}`;
         break;
@@ -103,18 +113,33 @@ export function useActivityData(
 
     fetchUrl(url)
       .then((response: DBResponse) => {
+        if (!isCurrentRequest) return;
         setTotalResults(response.count);
         setActivity(response.data);
       })
       .catch((error) => {
+        if (!isCurrentRequest) return;
         console.error("Failed to fetch activity data", error);
         setTotalResults(0);
         setActivity([]);
       })
       .finally(() => {
-        setFetching(false);
+        if (isCurrentRequest) {
+          setFetching(false);
+        }
       });
-  }, [page, typeFilter, selectedContract, pageSize, initialData, initialPage]);
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [
+    page,
+    typeFilter,
+    selectedContract,
+    pageSize,
+    initialActivity,
+    initialPage,
+  ]);
 
   return {
     activity,

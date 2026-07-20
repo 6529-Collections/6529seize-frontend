@@ -16,6 +16,7 @@
       "bin/**/*.mjs",                // repo-local Node CLIs launched from shell helpers
       "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
       "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
+      "ops/scripts/release-bus-status.mjs", // deployment CLI invoked by deploy-6529 instructions
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",

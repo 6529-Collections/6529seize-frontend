@@ -10,7 +10,7 @@ import type { MutableCurrentRef, ScopedValueState } from "./types";
 export const useCreateDropFileHandlers = ({
   drop,
   files,
-  isWideContainer,
+  keepOptionsVisible,
   waveId,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
@@ -23,7 +23,7 @@ export const useCreateDropFileHandlers = ({
 }: {
   readonly drop: CreateDropConfig | null;
   readonly files: File[];
-  readonly isWideContainer: boolean;
+  readonly keepOptionsVisible: boolean;
   readonly waveId: string;
   readonly externalAttachmentDrop:
     | {
@@ -49,7 +49,7 @@ export const useCreateDropFileHandlers = ({
       newFiles,
       drop,
       files,
-      isWideContainer,
+      keepOptionsVisible,
       waveId,
       setToast,
       setFiles,

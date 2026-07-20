@@ -523,6 +523,13 @@ function currentLocalDrop() {
     : localDrop;
 }
 
+function currentDirectMessageDrop() {
+  return {
+    ...currentLocalDrop(),
+    content: "Synthetic local-only direct message body for Playwright.",
+  };
+}
+
 const createdWaveMin = {
   ...localWaveMin,
   id: SANDBOX_CREATED_WAVE_ID,
@@ -642,7 +649,7 @@ const dmWaveOverview = {
     id: "local-dm-description-drop",
     content: "Synthetic local-only direct message for Playwright.",
   },
-  total_drops_count: 0,
+  total_drops_count: 1,
   is_private: true,
   is_dm_wave: true,
 };
@@ -685,6 +692,10 @@ const dmWave = {
   chat: {
     ...localWave.chat,
     scope: { group: { is_direct_message: true } },
+  },
+  metrics: {
+    ...localWave.metrics,
+    drops_count: dmWaveOverview.total_drops_count,
   },
 };
 
@@ -1715,9 +1726,7 @@ function loggedRequestBody(pathname, body) {
         : null,
       part_count: Array.isArray(body.parts) ? body.parts.length : 0,
       part_contents: Array.isArray(body.parts)
-        ? body.parts.map((part) =>
-            isPlainObject(part) ? part.content : null
-          )
+        ? body.parts.map((part) => (isPlainObject(part) ? part.content : null))
         : [],
       part_keys: isPlainObject(firstPart) ? sortedKeys(firstPart) : [],
       media_count: Array.isArray(firstPart?.media) ? firstPart.media.length : 0,
@@ -1835,7 +1844,7 @@ const mockApiExactReadRoutes = new Map([
   [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
-    () => ({ wave: dmWaveOverview, drops: [] }),
+    () => ({ wave: dmWaveOverview, drops: [currentDirectMessageDrop()] }),
   ],
   [`/api/waves/${SANDBOX_NOTIFICATION_WAVE_ID}`, () => notificationWave],
   [
