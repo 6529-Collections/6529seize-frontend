@@ -95,5 +95,16 @@ describe("NextGenCollectionComponent navigation", () => {
     expect(screen.getByTestId("collection-view")).toHaveTextContent(
       NextgenCollectionView.OVERVIEW
     );
+
+    window.history.replaceState(
+      {},
+      "",
+      "/nextgen/collection/provenance/provenance"
+    );
+    fireEvent.popState(window);
+
+    expect(screen.getByTestId("collection-view")).toHaveTextContent(
+      NextgenCollectionView.PROVENANCE
+    );
   });
 });
