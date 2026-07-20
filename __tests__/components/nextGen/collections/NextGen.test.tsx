@@ -64,6 +64,19 @@ describe("DistributionLink", () => {
     expect(screen.getByText("Distribution Plan")).toBeInTheDocument();
   });
 
+  it("uses the secondary treatment when emphasized", () => {
+    getStatusFromDates
+      .mockReturnValueOnce("UPCOMING")
+      .mockReturnValueOnce("COMPLETE");
+    render(<DistributionLink collection={collection} emphasized />);
+
+    expect(screen.getByRole("link", { name: "Distribution Plan" })).toHaveClass(
+      "tw-border-white/15",
+      "tw-bg-white/5",
+      "tw-text-white"
+    );
+  });
+
   it("renders nothing when complete", () => {
     getStatusFromDates.mockReturnValue("COMPLETE");
     const { container } = render(<DistributionLink collection={collection} />);

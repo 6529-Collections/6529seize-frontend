@@ -38,6 +38,9 @@ enum Mode {
   HIGH_RES = "High Res",
 }
 
+const BODY_SCROLL_LOCK_CLASS = "tw-overflow-hidden";
+const ROOT_OVERSCROLL_LOCK_CLASS = "tw-overscroll-none";
+
 function NextGenTokenArtImage(
   props: Readonly<{
     token: NextGenToken;
@@ -130,19 +133,31 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
       return;
     }
 
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousRootOverflow = document.documentElement.style.overflow;
-    const previousOverscrollBehavior =
-      document.documentElement.style.overscrollBehavior;
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    document.documentElement.style.overscrollBehavior = "none";
+    const bodyWasLocked = document.body.classList.contains(
+      BODY_SCROLL_LOCK_CLASS
+    );
+    const rootWasLocked = document.documentElement.classList.contains(
+      BODY_SCROLL_LOCK_CLASS
+    );
+    const rootOverscrollWasLocked = document.documentElement.classList.contains(
+      ROOT_OVERSCROLL_LOCK_CLASS
+    );
+    document.body.classList.add(BODY_SCROLL_LOCK_CLASS);
+    document.documentElement.classList.add(
+      BODY_SCROLL_LOCK_CLASS,
+      ROOT_OVERSCROLL_LOCK_CLASS
+    );
 
     return () => {
-      document.body.style.overflow = previousBodyOverflow;
-      document.documentElement.style.overflow = previousRootOverflow;
-      document.documentElement.style.overscrollBehavior =
-        previousOverscrollBehavior;
+      if (!bodyWasLocked) {
+        document.body.classList.remove(BODY_SCROLL_LOCK_CLASS);
+      }
+      if (!rootWasLocked) {
+        document.documentElement.classList.remove(BODY_SCROLL_LOCK_CLASS);
+      }
+      if (!rootOverscrollWasLocked) {
+        document.documentElement.classList.remove(ROOT_OVERSCROLL_LOCK_CLASS);
+      }
     };
   }, [showLightbox, showBlackbox]);
 
@@ -177,6 +192,11 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
     setZoomScale(Math.min(zoomScale + 1, MAX_ZOOM_SCALE));
   };
 
+  const selectMode = (nextMode: Mode) => {
+    setMode(nextMode);
+    setShowZoomControls(false);
+  };
+
   function printModeIcons() {
     return (
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
@@ -185,7 +205,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             type="button"
             aria-pressed={mode === Mode.IMAGE}
             className={resolutionButtonClassName(mode === Mode.IMAGE)}
-            onClick={() => setMode(Mode.IMAGE)}
+            onClick={() => selectMode(Mode.IMAGE)}
           >
             2K
           </button>
@@ -193,7 +213,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             type="button"
             aria-pressed={mode === Mode.HIGH_RES}
             className={resolutionButtonClassName(mode === Mode.HIGH_RES)}
-            onClick={() => setMode(Mode.HIGH_RES)}
+            onClick={() => selectMode(Mode.HIGH_RES)}
           >
             {isMobileDevice ? "8K" : "16K"}
           </button>
@@ -204,7 +224,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             className={`${iconButtonClassName} ${
               mode === Mode.LIVE ? "tw-bg-white tw-text-iron-950" : ""
             }`}
-            onClick={() => setMode(Mode.LIVE)}
+            onClick={() => selectMode(Mode.LIVE)}
             data-tooltip-id={`live-tooltip-${props.token.id}`}
           >
             <FontAwesomeIcon
@@ -393,10 +413,6 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
       }
     }
   };
-
-  useEffect(() => {
-    setShowZoomControls(false);
-  }, [mode]);
 
   const isBoxOpen = showLightbox || showBlackbox;
   const viewerName = showLightbox ? "lightbox" : "blackbox";

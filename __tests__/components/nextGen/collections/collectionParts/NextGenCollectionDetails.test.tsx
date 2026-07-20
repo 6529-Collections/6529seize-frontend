@@ -37,7 +37,16 @@ describe("NextGenCollectionDetails", () => {
         view={NextgenCollectionView.OVERVIEW}
       />
     );
-    expect(screen.getByText("Collection Overview")).toBeInTheDocument();
+    const overviewHeading = screen.getByText("Collection Overview");
+    expect(overviewHeading).toBeInTheDocument();
+    expect(overviewHeading.closest("section")).toHaveClass(
+      "tw-bg-iron-900/80",
+      "tw-p-4"
+    );
+    expect(screen.getByText("Desc")).toHaveClass(
+      "tw-text-sm",
+      "tw-leading-6"
+    );
   });
 
   it("renders artist signature markup as text", () => {

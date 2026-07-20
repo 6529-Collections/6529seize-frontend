@@ -19,7 +19,10 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronRight,
+  faExternalLinkSquare,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,8 +37,44 @@ interface Props {
 }
 
 const PAGE_SIZE = 20;
+const MAX_FALLBACK_SUMMARY_LENGTH = 160;
+const SCRIPT_UPDATE_PATTERN = /^Script at index\s+(\d+)\s+updated/i;
 const CELL_CLASSES =
   "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5";
+
+function normalizeLogText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getCollectionLogSummary(log: NextGenLog): string {
+  const heading = normalizeLogText(log.heading);
+  if (heading) {
+    return heading;
+  }
+
+  const logText = normalizeLogText(log.log);
+  const scriptUpdateMatch = SCRIPT_UPDATE_PATTERN.exec(logText);
+  if (scriptUpdateMatch?.[1]) {
+    return `Script at index ${scriptUpdateMatch[1]} Updated`;
+  }
+
+  if (logText.length <= MAX_FALLBACK_SUMMARY_LENGTH) {
+    return logText || "Collection updated";
+  }
+
+  return `${logText.slice(0, MAX_FALLBACK_SUMMARY_LENGTH - 1).trimEnd()}…`;
+}
+
+function getCollectionLogDetails(
+  log: NextGenLog,
+  summary: string
+): string | undefined {
+  const logText = normalizeLogText(log.log);
+  if (!logText || logText === summary) {
+    return undefined;
+  }
+  return logText;
+}
 
 function getActivityTransaction(log: NextGenLog): Transaction | undefined {
   if (typeof log.token_id !== "number") {
@@ -278,7 +317,7 @@ export function NextGenCollectionProvenanceRow(
   };
 
   const transactionTools = (
-    <span className="tw-flex tw-items-center tw-gap-3 tw-pl-4">
+    <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3 tw-pl-4">
       {isTransaction &&
         printRoyalties(log.value, log.royalties, log.from_address, "22px")}
       {isTransaction &&
@@ -293,55 +332,67 @@ export function NextGenCollectionProvenanceRow(
         target="_blank"
         rel="noopener noreferrer"
         aria-label="View transaction on Etherscan"
-        className="tw-flex tw-rounded-sm tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-400 hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         onClick={(event) => event.stopPropagation()}
       >
         <FontAwesomeIcon
-          className="tw-h-5 tw-w-5"
+          className="tw-h-4 tw-w-4"
           icon={faExternalLinkSquare}
         />
       </Link>
     </span>
   );
 
-  const body = log.log.startsWith("Script at index") ? (
-    <span className="tw-flex tw-flex-col tw-gap-2">
-      <span className="tw-text-xs tw-text-iron-400">
-        The script is split into chunks because of Ethereum transaction-size
-        limits.
-      </span>
-      <span>{log.log}</span>
-    </span>
-  ) : (
-    log.log
-  );
+  const summary = getCollectionLogSummary(log);
+  const details = getCollectionLogDetails(log, summary);
+  const isScriptUpdate = SCRIPT_UPDATE_PATTERN.test(summary);
+
+  const printCollectionEvent = () => {
+    if (isTransaction) {
+      return printParsedLog();
+    }
+
+    if (!details) {
+      return (
+        <span className="tw-min-w-0 tw-flex-1 tw-break-words">{summary}</span>
+      );
+    }
+
+    return (
+      <details className="tw-group tw-min-w-0 tw-flex-1">
+        <summary className="tw-flex tw-min-h-8 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-rounded-md tw-py-1 tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 [&::-webkit-details-marker]:tw-hidden">
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className="tw-h-3 tw-w-3 tw-flex-none tw-text-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-90 motion-reduce:tw-transition-none"
+            icon={faChevronRight}
+          />
+          <span className="tw-min-w-0 tw-break-words">{summary}</span>
+        </summary>
+        <div className="tw-ml-5 tw-mt-2 tw-rounded-lg tw-bg-black/20 tw-p-3 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-300">
+          {isScriptUpdate && (
+            <p className="tw-mb-2 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+              The script is split into chunks because of Ethereum
+              transaction-size limits.
+            </p>
+          )}
+          <p className="tw-m-0 tw-max-h-48 tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-pr-2 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700">
+            {details}
+          </p>
+        </div>
+      </details>
+    );
+  };
 
   return (
     <tr className="tw-h-16 odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70">
       <td
-        className={`${CELL_CLASSES} tw-w-px tw-whitespace-nowrap tw-text-iron-400`}
+        className={`${CELL_CLASSES} tw-w-px tw-whitespace-nowrap tw-text-iron-300`}
       >
         {getDateDisplay(new Date(log.block_timestamp * 1000))}
       </td>
-      <td className={`${CELL_CLASSES} tw-w-14 tw-text-center tw-text-iron-400`}>
-        <span aria-hidden="true">•</span>
-      </td>
-      <td className={`${CELL_CLASSES} tw-text-white`}>
+      <td colSpan={3} className={`${CELL_CLASSES} tw-text-white`}>
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          {isTransaction ? (
-            printParsedLog()
-          ) : (
-            <details className="tw-group tw-min-w-0 tw-flex-1">
-              <summary className="tw-cursor-pointer tw-list-none tw-rounded-sm tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
-                <span className="tw-flex tw-items-center tw-gap-2 before:tw-text-lg before:tw-text-iron-400 before:tw-transition-transform before:tw-content-['›'] group-open:before:tw-rotate-90">
-                  {log.heading}
-                </span>
-              </summary>
-              <div className="tw-pb-1 tw-pl-5 tw-pt-2 tw-text-sm tw-font-normal tw-text-iron-300">
-                {body}
-              </div>
-            </details>
-          )}
+          {printCollectionEvent()}
           {transactionTools}
         </div>
       </td>
