@@ -11,11 +11,11 @@ export function MetricTile({
   readonly value: number;
 }) {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-px-4 tw-py-3">
-      <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+    <div className="rep-category-metric tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-px-4 tw-py-3">
+      <p className="rep-category-metric-label tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
         {label}
       </p>
-      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-primary-300">
+      <p className="rep-category-metric-value tw-mb-0 tw-text-xl tw-font-semibold tw-text-primary-300">
         {formatNumberWithCommas(value)}
       </p>
     </div>
@@ -32,7 +32,7 @@ export function StateBlock({
   readonly onRetry?: (() => void) | undefined;
 }) {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-p-5">
+    <div className="rep-category-state tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-p-5">
       <p className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-100">
         {title}
       </p>
