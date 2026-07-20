@@ -327,13 +327,24 @@ const computePushRegistrationRetryDelayMs = (
     PUSH_REGISTRATION_BASE_DELAY_MS * Math.pow(2, attempt),
     PUSH_REGISTRATION_MAX_DELAY_MS
   );
-  const [randomValue = 0] = globalThis.crypto.getRandomValues(
-    new Uint32Array(1)
+  const minimumDelay = Math.max(
+    0,
+    Math.round(baseDelay * (1 - PUSH_REGISTRATION_JITTER_FACTOR))
   );
-  const jitterMultiplier =
-    1 +
-    ((randomValue / UINT32_RANGE) * 2 - 1) * PUSH_REGISTRATION_JITTER_FACTOR;
-  return Math.max(0, Math.round(baseDelay * jitterMultiplier));
+  const maximumDelay = Math.round(
+    baseDelay * (1 + PUSH_REGISTRATION_JITTER_FACTOR)
+  );
+  const delayRange = maximumDelay - minimumDelay + 1;
+  const unbiasedLimit = UINT32_RANGE - (UINT32_RANGE % delayRange);
+  const randomValues = new Uint32Array(1);
+  let randomValue: number;
+
+  do {
+    globalThis.crypto.getRandomValues(randomValues);
+    randomValue = randomValues[0] ?? 0;
+  } while (randomValue >= unbiasedLimit);
+
+  return minimumDelay + (randomValue % delayRange);
 };
 
 const extractErrorCode = (error: unknown): string | number | undefined => {
