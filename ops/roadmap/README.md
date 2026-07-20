@@ -7,6 +7,12 @@ repository operations but should not appear in user-facing product docs.
 Keep roadmap pages current-state oriented. Archive or replace stale plans
 instead of leaving conflicting guidance in place.
 
+## Product Architecture Roadmaps
+
+- [Waves as Multi-Competition Hubs](./waves-multi-competition/README.md):
+  staged separation of durable wave hubs from sequential and parallel
+  competitions, including compatibility, migration, rollout, and retirement.
+
 ## Agent Release Railway Roadmap
 
 Last reviewed: 2026-06-18 against `origin/main` at `97bb30914`.
