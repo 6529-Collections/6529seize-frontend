@@ -205,8 +205,9 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
     const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
-    const htmlIframeViewportClassName =
-      getInteractiveHtmlViewportClassName(media.mime_type);
+    const htmlIframeViewportClassName = getInteractiveHtmlViewportClassName(
+      media.mime_type
+    );
     const useInteractiveHtmlLayout = Boolean(htmlIframeViewportClassName);
     const isImageMedia = media.mime_type.includes("image");
     const isProcessingMedia = isMediaProcessing(media);
