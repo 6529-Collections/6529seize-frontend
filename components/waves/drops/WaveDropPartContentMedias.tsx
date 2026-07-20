@@ -33,9 +33,13 @@ function isRenderableMedia(mimeType: string, url: string): boolean {
 }
 
 function getInteractiveHtmlViewportClassName(
-  mimeType: string
+  media: ApiDropPart["media"][number]
 ): string | undefined {
-  if (!isInteractiveHtmlMedia(mimeType)) {
+  if (
+    isMediaProcessing(media) ||
+    isMediaFailed(media) ||
+    !isInteractiveHtmlMedia(media.mime_type)
+  ) {
     return undefined;
   }
 
@@ -205,9 +209,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
     const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
-    const htmlIframeViewportClassName = getInteractiveHtmlViewportClassName(
-      media.mime_type
-    );
+    const htmlIframeViewportClassName =
+      getInteractiveHtmlViewportClassName(media);
     const useInteractiveHtmlLayout = Boolean(htmlIframeViewportClassName);
     const isImageMedia = media.mime_type.includes("image");
     const isProcessingMedia = isMediaProcessing(media);
