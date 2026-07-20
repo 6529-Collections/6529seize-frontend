@@ -1196,8 +1196,9 @@ describe("CreateWave", () => {
 
     renderCreateWave();
 
-    // Look for the flex-1 div that gets the iOS styling
-    const flexDiv = document.querySelector(".tw-flex-1");
+    // Target the CreateWaveLayout main column specifically (it also carries
+    // tw-bg-iron-950); other .tw-flex-1 wrappers now exist above it in the DOM.
+    const flexDiv = document.querySelector(".tw-flex-1.tw-bg-iron-950");
     expect(flexDiv).toHaveClass("tw-mb-10");
   });
 
@@ -1208,7 +1209,7 @@ describe("CreateWave", () => {
 
     renderCreateWave();
 
-    const flexDiv = document.querySelector(".tw-flex-1");
+    const flexDiv = document.querySelector(".tw-flex-1.tw-bg-iron-950");
     expect(flexDiv).not.toHaveClass("tw-mb-10");
   });
 });
