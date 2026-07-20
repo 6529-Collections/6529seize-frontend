@@ -7,7 +7,7 @@ export type DraftMentionSearchScope =
   | { readonly kind: "public" }
   | { readonly kind: "group"; readonly visibilityGroupId: string };
 
-export const DISABLED_DRAFT_MENTION_SEARCH_SCOPE: DraftMentionSearchScope = {
+const DISABLED_DRAFT_MENTION_SEARCH_SCOPE: DraftMentionSearchScope = {
   kind: "disabled",
 };
 

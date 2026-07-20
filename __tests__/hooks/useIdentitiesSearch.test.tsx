@@ -3,10 +3,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useIdentitiesSearch } from "@/hooks/useIdentitiesSearch";
 import { commonApiFetch } from "@/services/api/common-api";
-import {
-  DISABLED_DRAFT_MENTION_SEARCH_SCOPE,
-  type DraftMentionSearchScope,
-} from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
+import type { DraftMentionSearchScope } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
+
+const DISABLED_DRAFT_MENTION_SEARCH_SCOPE: DraftMentionSearchScope = {
+  kind: "disabled",
+};
 
 jest.mock("@/services/api/common-api");
 
