@@ -77,6 +77,9 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
       const fetchMetadata = async () => {
         try {
           const response = await fetch(tokenUri, { signal: controller.signal });
+          if (!response.ok) {
+            throw new Error(`Metadata request failed: ${response.status}`);
+          }
           const metadata = (await response.json()) as { image?: unknown };
           if (!active) {
             return;

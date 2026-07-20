@@ -43,10 +43,7 @@ describe("NextGenCollectionDetails", () => {
       "tw-bg-iron-900/80",
       "tw-p-4"
     );
-    expect(screen.getByText("Desc")).toHaveClass(
-      "tw-text-sm",
-      "tw-leading-6"
-    );
+    expect(screen.getByText("Desc")).toHaveClass("tw-text-sm", "tw-leading-6");
   });
 
   it("renders artist signature markup as text", () => {

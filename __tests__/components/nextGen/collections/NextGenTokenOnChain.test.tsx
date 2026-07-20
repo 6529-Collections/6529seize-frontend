@@ -110,6 +110,7 @@ describe("NextGenTokenOnChain", () => {
     mockUseReadContract.mockReturnValue({ data: null });
     mockUseEnsName.mockReturnValue({ data: null });
     (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ image: "https://example.com/image.png" }),
     });
   });
@@ -261,6 +262,7 @@ describe("NextGenTokenOnChain", () => {
     });
 
     (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ image: imageUrl }),
     });
 
@@ -290,12 +292,33 @@ describe("NextGenTokenOnChain", () => {
       return { data: null };
     });
     (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ image: "   " }),
     });
 
     render(<NextGenTokenOnChain {...baseProps} />);
 
     expect(await screen.findByText("Token not found")).toBeInTheDocument();
+  });
+
+  it("rejects non-successful metadata responses without parsing the body", async () => {
+    mockUseReadContract.mockImplementation(({ functionName }) => {
+      if (functionName === "tokenURI") {
+        return { data: "https://example.com/missing.json" };
+      }
+      return { data: null };
+    });
+    const json = jest.fn();
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 404,
+      json,
+    });
+
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    expect(await screen.findByText("Token not found")).toBeInTheDocument();
+    expect(json).not.toHaveBeenCalled();
   });
 
   it("stops loading when the metadata request times out", async () => {
