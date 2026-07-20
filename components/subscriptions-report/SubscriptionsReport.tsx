@@ -130,7 +130,7 @@ function getDisplayedRedeemedTotal(
   return Math.max(totalRedeemed - 1, 0);
 }
 
-async function fetchReportActiveMintNumber() {
+async function fetchReportActiveMintNumber(now: Date) {
   const response = await fetch("/api/meme-calendar/current");
 
   if (!response.ok) {
@@ -140,7 +140,7 @@ async function fetchReportActiveMintNumber() {
   }
 
   const currentMint = (await response.json()) as MemeCalendarCurrentResponse;
-  return getReportActiveMintNumber(currentMint);
+  return getReportActiveMintNumber(currentMint, now);
 }
 
 export default function SubscriptionsReportComponent() {
@@ -240,12 +240,12 @@ export default function SubscriptionsReportComponent() {
       let activeRedeemedDrop: RedeemedSubscriptionCounts | null = null;
       let activeTokenId: number | null = null;
       let reportActiveMintNumber: number | null = null;
-      const reportActiveMintNumberPromise = fetchReportActiveMintNumber().catch(
-        (error: unknown) => {
-          console.error("Failed to fetch current meme calendar mint:", error);
-          return null;
-        }
-      );
+      const reportActiveMintNumberPromise = fetchReportActiveMintNumber(
+        now
+      ).catch((error: unknown) => {
+        console.error("Failed to fetch current meme calendar mint:", error);
+        return null;
+      });
 
       try {
         const [redeemed, activeMintNumber] = await Promise.all([
