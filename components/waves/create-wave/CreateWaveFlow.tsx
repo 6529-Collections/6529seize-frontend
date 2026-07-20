@@ -34,7 +34,11 @@ export default function CreateWaveFlow({
 
       const target = event.target as HTMLElement | null;
       const tagName = target?.tagName.toLowerCase();
-      if (tagName === "input" || tagName === "textarea" || tagName === "select") {
+      if (
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select"
+      ) {
         return;
       }
 
@@ -51,9 +55,17 @@ export default function CreateWaveFlow({
 
   return (
     <div
-      className="tailwind-scope tw-bg-iron-950"
-      data-flow-title={title}>
-      <div className="tw-h-full tw-w-full">{children}</div>
+      className="tailwind-scope tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-iron-950"
+      data-flow-title={title}
+    >
+      {/* Single scroll owner for the create-wave flow. The route (native app)
+          renders this inside the app shell, which locks document scroll, so
+          without an internal scroll region a tall form leaves the footer
+          (Next/Complete) unreachable. The modal reuses this same container
+          instead of scrolling on its own. */}
+      <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15">
+        {children}
+      </div>
     </div>
   );
 }
