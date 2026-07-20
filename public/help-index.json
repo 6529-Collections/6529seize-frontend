@@ -5519,7 +5519,8 @@
       "facts": [
         "NextGen mint and distribution-plan behavior is documented under NextGen docs.",
         "Mint routes live under /nextgen/collection/{collection}/mint.",
-        "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan."
+        "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan.",
+        "The distribution-plan allowlist shows a loading state while entries are fetched and a no-match state when active filters return no entries."
       ],
       "canonical_path": "/nextgen/collection/{collection}/mint",
       "related_paths": [
@@ -5542,7 +5543,11 @@
       "facts": [
         "NextGen token pages live at /nextgen/token/{token}.",
         "Token media rendering behavior is documented under NextGen docs.",
-        "Use collection pages for collection-level art browsing and token pages for token-specific media."
+        "Use collection pages for collection-level art browsing and token pages for token-specific media.",
+        "Token download options show Loading while availability is checked, a file size when available, and Coming Soon only when an output is missing.",
+        "Token lightbox and blackbox viewers fill the viewport, center the artwork, and lock page scrolling until closed.",
+        "Token and collection provenance sections show explicit loading and no-entry states.",
+        "When indexed token data is unavailable, the on-chain fallback keeps the standard token-page frame and shows fetching, not-found, or indexing-in-progress status."
       ],
       "canonical_path": "/nextgen/token/{token}",
       "related_paths": ["/nextgen/collection/{collection}"],

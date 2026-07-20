@@ -65,8 +65,9 @@ it("shows coming soon and disables when image missing", async () => {
   );
 
   const button = await screen.findByRole("button");
+  expect(button).toHaveTextContent("1K Loading…");
   expect(button).toBeDisabled();
-  expect(button).toHaveTextContent("1K Coming Soon");
+  await waitFor(() => expect(button).toHaveTextContent("1K Coming Soon"));
   await userEvent.click(button);
   expect(mockDownload).not.toHaveBeenCalled();
 });

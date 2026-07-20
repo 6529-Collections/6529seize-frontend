@@ -7,7 +7,6 @@ import {
   MINTING_USE_CASE,
 } from "@/components/delegation/delegation-constants";
 import DotLoader from "@/components/dotLoader/DotLoader";
-import styles from "@/components/nextGen/collections/NextGen.module.css";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -15,8 +14,8 @@ import {
 import type { CollectionWithMerkle } from "@/components/nextGen/nextgen_entities";
 import { AllowlistType, Status } from "@/components/nextGen/nextgen_entities";
 import {
-  formatNameForUrl,
   getStatusFromDates,
+  useCollectionMintCount,
   useCollectionCostsHook,
   useMintSharedState,
   useSharedState,
@@ -30,15 +29,9 @@ import type { NextGenCollection } from "@/entities/INextgen";
 import { fromGWEI } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Abi } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
-import {
-  NextGenCountdown,
-  NextGenMintCounts,
-  NextGenPhases,
-} from "../NextGenCollectionHeader";
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import NextGenMintWidget from "./NextGenMintWidget";
 
@@ -50,11 +43,10 @@ interface Props {
 
 export function Spinner() {
   return (
-    <div className="tw-inline">
-      <output
-        className={`${styles["loader"]} tw-inline-block tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-current tw-border-r-transparent tw-align-[-0.125em]`}
-      ></output>
-    </div>
+    <output
+      aria-label="Processing"
+      className="tw-ml-2 tw-inline-block tw-h-4 tw-w-4 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-current tw-border-r-transparent tw-align-[-0.125em] motion-reduce:tw-animate-none"
+    />
   );
 }
 
@@ -72,7 +64,7 @@ export default function NextGenMint(props: Readonly<Props>) {
     props.collection.public_end
   );
 
-  const [shouldRefetchMintCounts, setShouldRefetchMintCounts] = useState(false);
+  const [enableMintCountRefresh, setEnableMintCountRefresh] = useState(true);
 
   const {
     available,
@@ -86,6 +78,21 @@ export default function NextGenMint(props: Readonly<Props>) {
     fetchingMintCounts,
     setFetchingMintCounts,
   } = useMintSharedState();
+
+  const collectionMintCountRead = useCollectionMintCount(
+    props.collection.id,
+    enableMintCountRefresh
+  );
+
+  useEffect(() => {
+    const currentMintCount = Number(collectionMintCountRead.data);
+    const nextAvailable = props.collection.total_supply - currentMintCount;
+    if (!Number.isFinite(nextAvailable)) {
+      return;
+    }
+    setAvailable(Math.max(nextAvailable, 0));
+    setEnableMintCountRefresh(nextAvailable > 0);
+  }, [collectionMintCountRead.data, props.collection.total_supply]);
 
   function getDelegationAddress() {
     if (collection && mintingDetails) {
@@ -287,6 +294,13 @@ export default function NextGenMint(props: Readonly<Props>) {
     addressMintCountMintedPublicRead.isFetching,
   ]);
 
+  function refreshMintCounts() {
+    void collectionMintCountRead.refetch();
+    void addressMintCountAirdropRead.refetch();
+    void addressMintCountMintedALRead.refetch();
+    void addressMintCountMintedPublicRead.refetch();
+  }
+
   function printMintWidget(type: AllowlistType) {
     if (type === AllowlistType.ALLOWLIST) {
       return (
@@ -298,9 +312,7 @@ export default function NextGenMint(props: Readonly<Props>) {
           delegators={delegators}
           mintForAddress={setMintForAddress}
           fetchingMintCounts={fetchingMintCounts}
-          refreshMintCounts={() => {
-            setShouldRefetchMintCounts(true);
-          }}
+          refreshMintCounts={refreshMintCounts}
         />
       );
     } else if (collection && type == AllowlistType.EXTERNAL_BURN) {
@@ -314,9 +326,7 @@ export default function NextGenMint(props: Readonly<Props>) {
           delegators={delegators}
           mintForAddress={setMintForAddress}
           fetchingMintCounts={fetchingMintCounts}
-          refreshMintCounts={() => {
-            setShouldRefetchMintCounts(true);
-          }}
+          refreshMintCounts={refreshMintCounts}
         />
       );
     }
@@ -332,71 +342,44 @@ export default function NextGenMint(props: Readonly<Props>) {
         return printMintWidget(collection.al_type);
       }
       return (
-        <span className="tw-flex tw-items-center tw-gap-1">
+        <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
           <Image
             unoptimized
             loading="eager"
-            width="0"
-            height="0"
-            style={{ height: "50px", width: "auto" }}
+            width={50}
+            height={50}
+            className="tw-h-12 tw-w-auto"
             src="/SummerGlasses.svg"
-            alt="SummerGlasses"
+            alt=""
           />
-          <b>Allowlist Not Found</b>
+          <b className="tw-font-semibold tw-text-white">Allowlist not found</b>
         </span>
       );
     }
-    return <DotLoader />;
+    return (
+      <output
+        aria-label="Loading mint options"
+        className="tw-text-sm tw-text-iron-400"
+      >
+        Loading mint options <DotLoader />
+      </output>
+    );
   }
 
   return (
-    <div>
-      <div className="tw-grid tw-grid-cols-1 tw-pt-2 md:tw-grid-cols-2">
-        <div className="tw-flex tw-flex-col tw-px-3">
-          <NextGenPhases collection={props.collection} available={available} />
-          <Link
-            href={`/nextgen/collection/${formatNameForUrl(
-              props.collection.name
-            )}`}
-            className="tw-no-underline hover:tw-underline"
-          >
-            <h1 className="tw-mb-0 tw-text-white">{props.collection.name}</h1>
-          </Link>
-          <span className="tw-text-lg">
-            by{" "}
-            <b>
-              <Link href={`/${props.collection.artist_address}`}>
-                {props.collection.artist}
-              </Link>
-            </b>
-          </span>
-          <span className="tw-inline-flex tw-items-center tw-pt-2 tw-text-lg">
-            <NextGenMintCounts
-              collection={props.collection}
-              setAvailable={setAvailable}
-              shouldRefetchMintCounts={shouldRefetchMintCounts}
-              setShouldRefetchMintCounts={setShouldRefetchMintCounts}
-            />
-          </span>
-        </div>
-        <div className="tw-flex tw-items-center tw-px-3 tw-py-1">
-          <NextGenCountdown collection={props.collection} />
-        </div>
-      </div>
-      <div className="tw-grid tw-grid-cols-1 tw-py-4 tw-pt-4 md:tw-grid-cols-2">
-        <div className="tw-flex tw-items-start tw-justify-start tw-gap-3 tw-px-0">
+    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5">
+      <div className="tw-grid tw-gap-5 lg:tw-grid-cols-[minmax(0,0.95fr)_minmax(22rem,1.05fr)]">
+        <div
+          aria-label={`${props.collection.name} artwork`}
+          className="tw-flex tw-min-h-[18rem] tw-items-center tw-justify-center"
+        >
           <Image
             unoptimized
+            priority
             loading="eager"
-            width="0"
-            height="0"
-            style={{
-              height: "auto",
-              width: "auto",
-              maxHeight: "100%",
-              maxWidth: "100%",
-              padding: "10px",
-            }}
+            width={1200}
+            height={1200}
+            className="tw-h-auto tw-max-h-[70vh] tw-w-auto tw-max-w-full tw-object-contain"
             src={props.collection.image}
             alt={props.collection.name}
             onError={(e) => {
@@ -404,31 +387,33 @@ export default function NextGenMint(props: Readonly<Props>) {
             }}
           />
         </div>
-        <div className="tw-px-3">
+
+        <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-pl-5 lg:tw-pt-0">
           <div>
-            <div className="tw-pt-2">
-              <div className="tw-flex tw-gap-2">
-                <span
-                  className={`tw-mb-0 tw-flex tw-min-w-fit tw-items-center tw-gap-2 tw-whitespace-nowrap ${styles["nextgenTag"]}`}
-                >
-                  <span>Mint Cost:</span>
-                  <span className="tw-font-bold">
-                    {props.mint_price > 0 ? fromGWEI(props.mint_price) : `Free`}{" "}
-                    {props.mint_price > 0 ? `ETH` : ``}
-                  </span>
-                </span>
-                <span
-                  className={`tw-mb-0 tw-flex tw-min-w-fit tw-items-center tw-gap-2 tw-whitespace-nowrap ${styles["nextgenTag"]}`}
-                >
-                  <span>Sales Model:</span>
-                  <span className="tw-font-bold">{getSalesModel()}</span>
-                </span>
+            <dl className="tw-m-0 tw-grid tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-4 sm:tw-grid-cols-2">
+              <div className="tw-grid tw-gap-1">
+                <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+                  Mint Cost
+                </dt>
+                <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-white">
+                  {props.mint_price > 0
+                    ? `${fromGWEI(props.mint_price)} ETH`
+                    : "Free"}
+                </dd>
               </div>
-            </div>
-            <div className="tw-pt-3">{printMintWidgetContent()}</div>
+              <div className="tw-grid tw-gap-1">
+                <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+                  Sales Model
+                </dt>
+                <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-white">
+                  {getSalesModel()}
+                </dd>
+              </div>
+            </dl>
+            <div className="tw-pt-4">{printMintWidgetContent()}</div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
