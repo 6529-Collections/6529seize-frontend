@@ -88,6 +88,7 @@ const AveragingIntervalInput = memo(
           <input
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             autoComplete="off"
             id={inputId}
             value={value}

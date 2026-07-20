@@ -116,9 +116,12 @@ export default function CreateWave({
     // The bottom safe-area region is inside the viewport (viewport-fit=cover)
     // and iOS Safari's floating bottom chrome overlays it; without this
     // padding the last row (Previous/Next) renders half-hidden behind it.
+    // The native-keyboard inset extends the scrollable area by the software
+    // keyboard's height so the page can scroll the footer (and a focused
+    // field) up above the keyboard instead of trapping it underneath.
     <div
       ref={containerRef}
-      className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-[env(safe-area-inset-bottom,0px)]"
+      className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-[calc(env(safe-area-inset-bottom,0px)+var(--native-keyboard-inset-bottom,0px))]"
     >
       <CreateWaveFlow
         title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${

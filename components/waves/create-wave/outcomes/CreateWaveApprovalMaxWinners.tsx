@@ -23,6 +23,7 @@ export default function CreateWaveApprovalMaxWinners({
         <input
           type="text"
           inputMode="numeric"
+          pattern="[0-9]*"
           value={hasMaxWinners ? maxWinners.toString() : ""}
           onChange={onMaxWinnersChange}
           id="approval-max-winners"

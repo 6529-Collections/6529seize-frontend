@@ -54,6 +54,7 @@ export default function CreateWaveOutcomesWinnersRow({
           <input
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             value={winner.value}
             onChange={onValueChange}
             autoComplete="off"
