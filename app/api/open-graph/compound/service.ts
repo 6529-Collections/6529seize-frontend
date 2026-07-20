@@ -1,24 +1,8 @@
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
-import {
-  decodeEventLog,
-  erc20Abi,
-  formatUnits,
-  getAddress,
-  isAddress,
-  isHex,
-  zeroAddress,
-  type Address,
-  type Hash,
-} from "viem";
+import { decodeEventLog, getAddress, type Address, type Hash } from "viem";
 
-import {
-  cTokenAbi,
-  cometAbi,
-  comptrollerAbi,
-  priceFeedAbi,
-  priceOracleAbi,
-} from "./abis";
+import { cTokenAbi, cometAbi, comptrollerAbi } from "./abis";
 import { publicClient } from "./client";
 import {
   compoundRegistry,
@@ -26,8 +10,6 @@ import {
   v2MarketsByPath,
   v3MarketsByAddress,
   v3MarketsByPath,
-  type CompoundV2MarketConfig,
-  type CompoundV3MarketConfig,
 } from "./registry";
 import {
   BIGINT_ZERO,

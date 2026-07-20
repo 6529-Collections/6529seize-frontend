@@ -289,146 +289,153 @@ export const getCardTitle = (
   return title && title.length > 0 ? title : getFallbackTitle(link);
 };
 
+type GithubPreviewOf<TType extends GithubPreviewResponse["type"]> = Extract<
+  GithubPreviewResponse,
+  { readonly type: TType }
+>;
+
+const getRepositoryDetail = (
+  repoLabel: string,
+  preview: GithubPreviewOf<"github.repository">
+): string =>
+  joinDetailParts([
+    repoLabel,
+    preview.description,
+    preview.language,
+    preview.archived ? "archived" : null,
+    preview.stars !== null
+      ? `${formatCompactNumber(preview.stars)} stars`
+      : null,
+    preview.forks !== null
+      ? `${formatCompactNumber(preview.forks)} forks`
+      : null,
+  ]);
+
+const getFileDetail = (
+  repoLabel: string,
+  preview: GithubPreviewOf<"github.file">
+): string =>
+  joinDetailParts([
+    repoLabel,
+    preview.path,
+    preview.fileKind
+      ? getLocalizedFileKindLabel(GITHUB_PREVIEW_LOCALE, preview.fileKind)
+      : null,
+    preview.ref,
+    formatFileSizeLabel(preview.size, GITHUB_PREVIEW_LOCALE),
+  ]);
+
+const getDirectoryDetail = (
+  repoLabel: string,
+  preview: GithubPreviewOf<"github.directory">
+): string =>
+  joinDetailParts([
+    repoLabel,
+    preview.path,
+    preview.ref,
+    preview.itemCount !== null
+      ? `${formatInteger(preview.itemCount)} items`
+      : null,
+  ]);
+
+const getFallbackDetail = (
+  link: ParsedGithubLink,
+  repoLabel: string
+): string => {
+  if (link.kind === "pull" && link.number) {
+    return `${repoLabel} - PR #${link.number}`;
+  }
+  if (link.kind === "issue" && link.number) {
+    return `${repoLabel} - issue #${link.number}`;
+  }
+  return link.pathLabel ? `${repoLabel} - ${link.pathLabel}` : repoLabel;
+};
+
 export const getDetailText = (
   link: ParsedGithubLink,
   preview: GithubPreviewResponse | null
 ): string => {
   const repoLabel = `${link.owner}/${link.repo}`;
 
-  if (preview?.type === "github.pull_request") {
-    return `${repoLabel} - PR #${preview.number}`;
+  switch (preview?.type) {
+    case "github.pull_request":
+      return `${repoLabel} - PR #${preview.number}`;
+    case "github.issue":
+      return `${repoLabel} - issue #${preview.number}`;
+    case "github.repository":
+      return getRepositoryDetail(repoLabel, preview);
+    case "github.file":
+      return getFileDetail(repoLabel, preview);
+    case "github.directory":
+      return getDirectoryDetail(repoLabel, preview);
+    case "github.commit":
+      return joinDetailParts([
+        repoLabel,
+        preview.shortSha,
+        preview.author ? `@${preview.author}` : null,
+        formatDate(preview.committedAt),
+      ]);
+    case "github.release":
+      return joinDetailParts([
+        repoLabel,
+        preview.tagName,
+        preview.state,
+        formatDate(preview.publishedAt),
+      ]);
+    case "github.actions":
+      return joinDetailParts([
+        repoLabel,
+        preview.runNumber ? `run #${formatInteger(preview.runNumber)}` : null,
+        normalizeStatusText(preview.conclusion ?? preview.status),
+        preview.event,
+      ]);
+    case "github.discussion":
+      return joinDetailParts([
+        repoLabel,
+        preview.number ? `discussion #${preview.number}` : null,
+        preview.category,
+        normalizeStatusText(preview.state),
+        preview.comments !== null
+          ? `${formatInteger(preview.comments)} comments`
+          : null,
+      ]);
+    case undefined:
+      return getFallbackDetail(link, repoLabel);
   }
-
-  if (preview?.type === "github.issue") {
-    return `${repoLabel} - issue #${preview.number}`;
-  }
-
-  if (preview?.type === "github.repository") {
-    return joinDetailParts([
-      repoLabel,
-      preview.description,
-      preview.language,
-      preview.archived ? "archived" : null,
-      preview.stars !== null
-        ? `${formatCompactNumber(preview.stars)} stars`
-        : null,
-      preview.forks !== null
-        ? `${formatCompactNumber(preview.forks)} forks`
-        : null,
-    ]);
-  }
-
-  if (preview?.type === "github.file" || preview?.type === "github.directory") {
-    return joinDetailParts([
-      repoLabel,
-      preview.path,
-      preview.type === "github.file" && preview.fileKind
-        ? getLocalizedFileKindLabel(GITHUB_PREVIEW_LOCALE, preview.fileKind)
-        : null,
-      preview.ref,
-      preview.type === "github.file"
-        ? formatFileSizeLabel(preview.size, GITHUB_PREVIEW_LOCALE)
-        : null,
-      preview.type === "github.directory" && preview.itemCount !== null
-        ? `${formatInteger(preview.itemCount)} items`
-        : null,
-    ]);
-  }
-
-  if (preview?.type === "github.commit") {
-    return joinDetailParts([
-      repoLabel,
-      preview.shortSha,
-      preview.author ? `@${preview.author}` : null,
-      formatDate(preview.committedAt),
-    ]);
-  }
-
-  if (preview?.type === "github.release") {
-    return joinDetailParts([
-      repoLabel,
-      preview.tagName,
-      preview.state,
-      formatDate(preview.publishedAt),
-    ]);
-  }
-
-  if (preview?.type === "github.actions") {
-    return joinDetailParts([
-      repoLabel,
-      preview.runNumber ? `run #${formatInteger(preview.runNumber)}` : null,
-      normalizeStatusText(preview.conclusion ?? preview.status),
-      preview.event,
-    ]);
-  }
-
-  if (preview?.type === "github.discussion") {
-    return joinDetailParts([
-      repoLabel,
-      preview.number ? `discussion #${preview.number}` : null,
-      preview.category,
-      normalizeStatusText(preview.state),
-      preview.comments !== null
-        ? `${formatInteger(preview.comments)} comments`
-        : null,
-    ]);
-  }
-
-  if (link.kind === "pull" && link.number) {
-    return `${repoLabel} - PR #${link.number}`;
-  }
-
-  if (link.kind === "issue" && link.number) {
-    return `${repoLabel} - issue #${link.number}`;
-  }
-
-  if (link.pathLabel) {
-    return `${repoLabel} - ${link.pathLabel}`;
-  }
-
-  return repoLabel;
 };
 
 export const getMetaText = (
   preview: GithubPreviewResponse | null
 ): string | null => {
-  if (!preview) {
-    return null;
+  switch (preview?.type) {
+    case "github.pull_request":
+      return joinMetaParts([
+        preview.author ? `by @${preview.author}` : null,
+        preview.updatedAt ? `updated ${formatDate(preview.updatedAt)}` : null,
+        preview.headRef && preview.baseRef
+          ? `${preview.headRef} -> ${preview.baseRef}`
+          : null,
+      ]);
+    case "github.issue":
+      return joinMetaParts([
+        preview.author ? `by @${preview.author}` : null,
+        preview.updatedAt ? `updated ${formatDate(preview.updatedAt)}` : null,
+      ]);
+    case "github.repository":
+      return joinMetaParts([
+        preview.visibility,
+        preview.defaultBranch ? `default ${preview.defaultBranch}` : null,
+        preview.pushedAt ? `pushed ${formatDate(preview.pushedAt)}` : null,
+      ]);
+    case "github.file":
+    case "github.directory":
+      return joinMetaParts([
+        preview.path,
+        preview.ref ? `ref ${preview.ref}` : null,
+      ]);
+    default:
+      return null;
   }
-
-  if (preview.type === "github.pull_request") {
-    return joinMetaParts([
-      preview.author ? `by @${preview.author}` : null,
-      preview.updatedAt ? `updated ${formatDate(preview.updatedAt)}` : null,
-      preview.headRef && preview.baseRef
-        ? `${preview.headRef} -> ${preview.baseRef}`
-        : null,
-    ]);
-  }
-
-  if (preview.type === "github.issue") {
-    return joinMetaParts([
-      preview.author ? `by @${preview.author}` : null,
-      preview.updatedAt ? `updated ${formatDate(preview.updatedAt)}` : null,
-    ]);
-  }
-
-  if (preview.type === "github.repository") {
-    return joinMetaParts([
-      preview.visibility,
-      preview.defaultBranch ? `default ${preview.defaultBranch}` : null,
-      preview.pushedAt ? `pushed ${formatDate(preview.pushedAt)}` : null,
-    ]);
-  }
-
-  if (preview.type === "github.file" || preview.type === "github.directory") {
-    return joinMetaParts([
-      preview.path,
-      preview.ref ? `ref ${preview.ref}` : null,
-    ]);
-  }
-
-  return null;
 };
 
 export const getAssigneeLabel = (
@@ -470,6 +477,181 @@ export const getPreviewLabels = (
   return [];
 };
 
+const createFact = (
+  label: string,
+  value: string | null,
+  tone?: GithubFact["tone"]
+): GithubFact | null => (value ? { label, value, tone } : null);
+
+const getReviewFact = (
+  reviewState: GithubPreviewOf<"github.pull_request">["reviewState"]
+): GithubFact | null => {
+  if (reviewState === "none") {
+    return null;
+  }
+  const changesRequested = reviewState === "changes_requested";
+  return {
+    label: "Review",
+    value: changesRequested ? "Changes requested" : "Approved",
+    tone: changesRequested ? "danger" : "success",
+  };
+};
+
+const getPullRequestFacts = (
+  preview: GithubPreviewOf<"github.pull_request">
+): readonly GithubFact[] => {
+  const checksLabel = getChecksLabel(preview.checks);
+  return compactFacts([
+    checksLabel
+      ? {
+          label: "Checks",
+          value: checksLabel,
+          tone: getChecksTone(preview.checks),
+        }
+      : null,
+    getReviewFact(preview.reviewState),
+    createFact("Diff", formatDiff(preview.additions, preview.deletions)),
+    createFact("Files", formatCount(preview.changedFiles, "file")),
+    createFact("Commits", formatCount(preview.commits, "commit")),
+    createFact("Comments", formatCount(preview.comments, "comment")),
+  ]);
+};
+
+const getIssueFacts = (
+  preview: GithubPreviewOf<"github.issue">
+): readonly GithubFact[] =>
+  compactFacts([
+    createFact("Assignees", getAssigneeLabel(preview.assignees)),
+    createFact("Comments", formatCount(preview.comments, "comment")),
+    createFact("Closed", formatDate(preview.closedAt)),
+  ]);
+
+const getRepositoryFacts = (
+  preview: GithubPreviewOf<"github.repository">
+): readonly GithubFact[] =>
+  compactFacts([
+    createFact("Language", preview.language),
+    createFact("Stars", formatCompactNumber(preview.stars)),
+    createFact("Forks", formatCompactNumber(preview.forks)),
+    createFact("Open", formatCount(preview.openIssues, "issue")),
+    createFact("License", preview.license),
+  ]);
+
+const getLineAnchor = (
+  preview: GithubPreviewOf<"github.file">
+): string | null => {
+  if (!preview.lineStart) {
+    return null;
+  }
+  if (preview.lineEnd && preview.lineEnd !== preview.lineStart) {
+    return `L${preview.lineStart}-L${preview.lineEnd}`;
+  }
+  return `L${preview.lineStart}`;
+};
+
+const getFileFacts = (
+  preview: GithubPreviewOf<"github.file">
+): readonly GithubFact[] => {
+  const showMimeType =
+    preview.mimeType &&
+    preview.fileKind !== "code" &&
+    preview.fileKind !== "text";
+  return compactFacts([
+    preview.fileKind
+      ? {
+          label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.github.fact.type"),
+          value: getLocalizedFileKindLabel(
+            GITHUB_PREVIEW_LOCALE,
+            preview.fileKind
+          ),
+        }
+      : null,
+    createFact("Language", preview.language),
+    showMimeType
+      ? {
+          label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.github.fact.mime"),
+          value: preview.mimeType,
+        }
+      : null,
+    createFact("Ref", preview.ref),
+    createFact(
+      t(GITHUB_PREVIEW_LOCALE, "linkPreview.file.fact.size"),
+      formatFileSizeLabel(preview.size, GITHUB_PREVIEW_LOCALE)
+    ),
+    createFact("Lines", formatCount(preview.lineCount, "line")),
+    createFact("Anchor", getLineAnchor(preview)),
+  ]);
+};
+
+const getDirectoryFacts = (
+  preview: GithubPreviewOf<"github.directory">
+): readonly GithubFact[] =>
+  compactFacts([
+    createFact("Ref", preview.ref),
+    createFact("Items", formatCount(preview.itemCount, "item")),
+    createFact("Files", formatCount(preview.fileCount, "file")),
+    createFact("Folders", formatCount(preview.directoryCount, "folder")),
+  ]);
+
+const getCommitFacts = (
+  preview: GithubPreviewOf<"github.commit">
+): readonly GithubFact[] =>
+  compactFacts([
+    { label: "SHA", value: preview.shortSha },
+    createFact("Author", preview.author ? `@${preview.author}` : null),
+    createFact("Date", formatDate(preview.committedAt)),
+    createFact("Diff", formatDiff(preview.additions, preview.deletions)),
+    createFact("Files", formatCount(preview.changedFiles, "file")),
+  ]);
+
+const getReleaseFacts = (
+  preview: GithubPreviewOf<"github.release">
+): readonly GithubFact[] =>
+  compactFacts([
+    createFact("Tag", preview.tagName),
+    { label: "State", value: titleCase(preview.state) ?? preview.state },
+    createFact("Published", formatDate(preview.publishedAt)),
+  ]);
+
+const getActionsTone = (
+  conclusion: GithubPreviewOf<"github.actions">["conclusion"]
+): GithubFact["tone"] => {
+  if (conclusion === "success") {
+    return "success";
+  }
+  return conclusion ? "danger" : "default";
+};
+
+const getActionsFacts = (
+  preview: GithubPreviewOf<"github.actions">
+): readonly GithubFact[] => {
+  const status = titleCase(preview.conclusion ?? preview.status);
+  return compactFacts([
+    createFact(
+      "Run",
+      preview.runNumber ? `#${formatInteger(preview.runNumber)}` : null
+    ),
+    status
+      ? {
+          label: "Status",
+          value: status,
+          tone: getActionsTone(preview.conclusion),
+        }
+      : null,
+    createFact("Event", preview.event),
+  ]);
+};
+
+const getDiscussionFacts = (
+  preview: GithubPreviewOf<"github.discussion">
+): readonly GithubFact[] =>
+  compactFacts([
+    createFact("Discussion", preview.number ? `#${preview.number}` : null),
+    createFact("Category", preview.category),
+    createFact("State", titleCase(preview.state)),
+    createFact("Comments", formatCount(preview.comments, "comment")),
+  ]);
+
 export const getPreviewFacts = (
   preview: GithubPreviewResponse | null
 ): readonly GithubFact[] => {
@@ -478,208 +660,24 @@ export const getPreviewFacts = (
   }
 
   switch (preview.type) {
-    case "github.pull_request": {
-      const checksLabel = getChecksLabel(preview.checks);
-      return compactFacts([
-        checksLabel
-          ? {
-              label: "Checks",
-              value: checksLabel,
-              tone: getChecksTone(preview.checks),
-            }
-          : null,
-        preview.reviewState !== "none"
-          ? {
-              label: "Review",
-              value:
-                preview.reviewState === "changes_requested"
-                  ? "Changes requested"
-                  : "Approved",
-              tone:
-                preview.reviewState === "changes_requested"
-                  ? "danger"
-                  : "success",
-            }
-          : null,
-        formatDiff(preview.additions, preview.deletions)
-          ? {
-              label: "Diff",
-              value: formatDiff(preview.additions, preview.deletions)!,
-            }
-          : null,
-        formatCount(preview.changedFiles, "file")
-          ? {
-              label: "Files",
-              value: formatCount(preview.changedFiles, "file")!,
-            }
-          : null,
-        formatCount(preview.commits, "commit")
-          ? { label: "Commits", value: formatCount(preview.commits, "commit")! }
-          : null,
-        formatCount(preview.comments, "comment")
-          ? {
-              label: "Comments",
-              value: formatCount(preview.comments, "comment")!,
-            }
-          : null,
-      ]);
-    }
+    case "github.pull_request":
+      return getPullRequestFacts(preview);
     case "github.issue":
-      return compactFacts([
-        getAssigneeLabel(preview.assignees)
-          ? { label: "Assignees", value: getAssigneeLabel(preview.assignees)! }
-          : null,
-        formatCount(preview.comments, "comment")
-          ? {
-              label: "Comments",
-              value: formatCount(preview.comments, "comment")!,
-            }
-          : null,
-        preview.closedAt
-          ? { label: "Closed", value: formatDate(preview.closedAt) ?? "" }
-          : null,
-      ]);
+      return getIssueFacts(preview);
     case "github.repository":
-      return compactFacts([
-        preview.language
-          ? { label: "Language", value: preview.language }
-          : null,
-        formatCompactNumber(preview.stars)
-          ? { label: "Stars", value: formatCompactNumber(preview.stars)! }
-          : null,
-        formatCompactNumber(preview.forks)
-          ? { label: "Forks", value: formatCompactNumber(preview.forks)! }
-          : null,
-        formatCount(preview.openIssues, "issue")
-          ? { label: "Open", value: formatCount(preview.openIssues, "issue")! }
-          : null,
-        preview.license ? { label: "License", value: preview.license } : null,
-      ]);
+      return getRepositoryFacts(preview);
     case "github.file":
-      return compactFacts([
-        preview.fileKind
-          ? {
-              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.github.fact.type"),
-              value: getLocalizedFileKindLabel(
-                GITHUB_PREVIEW_LOCALE,
-                preview.fileKind
-              ),
-            }
-          : null,
-        preview.language
-          ? { label: "Language", value: preview.language }
-          : null,
-        preview.mimeType &&
-        preview.fileKind !== "code" &&
-        preview.fileKind !== "text"
-          ? {
-              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.github.fact.mime"),
-              value: preview.mimeType,
-            }
-          : null,
-        preview.ref ? { label: "Ref", value: preview.ref } : null,
-        formatFileSizeLabel(preview.size, GITHUB_PREVIEW_LOCALE)
-          ? {
-              label: t(GITHUB_PREVIEW_LOCALE, "linkPreview.file.fact.size"),
-              value: formatFileSizeLabel(preview.size, GITHUB_PREVIEW_LOCALE)!,
-            }
-          : null,
-        formatCount(preview.lineCount, "line")
-          ? { label: "Lines", value: formatCount(preview.lineCount, "line")! }
-          : null,
-        preview.lineStart
-          ? {
-              label: "Anchor",
-              value:
-                preview.lineEnd && preview.lineEnd !== preview.lineStart
-                  ? `L${preview.lineStart}-L${preview.lineEnd}`
-                  : `L${preview.lineStart}`,
-            }
-          : null,
-      ]);
+      return getFileFacts(preview);
     case "github.directory":
-      return compactFacts([
-        preview.ref ? { label: "Ref", value: preview.ref } : null,
-        formatCount(preview.itemCount, "item")
-          ? { label: "Items", value: formatCount(preview.itemCount, "item")! }
-          : null,
-        formatCount(preview.fileCount, "file")
-          ? { label: "Files", value: formatCount(preview.fileCount, "file")! }
-          : null,
-        formatCount(preview.directoryCount, "folder")
-          ? {
-              label: "Folders",
-              value: formatCount(preview.directoryCount, "folder")!,
-            }
-          : null,
-      ]);
+      return getDirectoryFacts(preview);
     case "github.commit":
-      return compactFacts([
-        { label: "SHA", value: preview.shortSha },
-        preview.author
-          ? { label: "Author", value: `@${preview.author}` }
-          : null,
-        formatDate(preview.committedAt)
-          ? { label: "Date", value: formatDate(preview.committedAt)! }
-          : null,
-        formatDiff(preview.additions, preview.deletions)
-          ? {
-              label: "Diff",
-              value: formatDiff(preview.additions, preview.deletions)!,
-            }
-          : null,
-        formatCount(preview.changedFiles, "file")
-          ? {
-              label: "Files",
-              value: formatCount(preview.changedFiles, "file")!,
-            }
-          : null,
-      ]);
+      return getCommitFacts(preview);
     case "github.release":
-      return compactFacts([
-        preview.tagName ? { label: "Tag", value: preview.tagName } : null,
-        { label: "State", value: titleCase(preview.state) ?? preview.state },
-        formatDate(preview.publishedAt)
-          ? { label: "Published", value: formatDate(preview.publishedAt)! }
-          : null,
-      ]);
+      return getReleaseFacts(preview);
     case "github.actions":
-      return compactFacts([
-        preview.runNumber
-          ? { label: "Run", value: `#${formatInteger(preview.runNumber)}` }
-          : null,
-        titleCase(preview.conclusion ?? preview.status)
-          ? {
-              label: "Status",
-              value: titleCase(preview.conclusion ?? preview.status)!,
-              tone:
-                preview.conclusion === "success"
-                  ? "success"
-                  : preview.conclusion
-                    ? "danger"
-                    : "default",
-            }
-          : null,
-        preview.event ? { label: "Event", value: preview.event } : null,
-      ]);
+      return getActionsFacts(preview);
     case "github.discussion":
-      return compactFacts([
-        preview.number
-          ? { label: "Discussion", value: `#${preview.number}` }
-          : null,
-        preview.category
-          ? { label: "Category", value: preview.category }
-          : null,
-        titleCase(preview.state)
-          ? { label: "State", value: titleCase(preview.state)! }
-          : null,
-        formatCount(preview.comments, "comment")
-          ? {
-              label: "Comments",
-              value: formatCount(preview.comments, "comment")!,
-            }
-          : null,
-      ]);
+      return getDiscussionFacts(preview);
   }
 };
 

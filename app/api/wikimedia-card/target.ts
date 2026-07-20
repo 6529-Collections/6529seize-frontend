@@ -414,6 +414,107 @@ const extractCommonsFileName = (url: URL): string | null => {
   return decodeURIComponent(segments.at(-1)!);
 };
 
+type DecodedFragment = ReturnType<typeof decodeFragment>;
+
+const normalizeWikimediaHostname = (url: URL): string => {
+  const hostname = url.hostname.toLowerCase();
+  return hostname.startsWith("www.") ? hostname.slice(4) : hostname;
+};
+
+const normalizeWikipediaTarget = async (
+  currentUrl: URL,
+  hostname: string,
+  fragment: DecodedFragment
+): Promise<SummaryTarget> => {
+  let langHost = hostname;
+  if (langHost.endsWith(".m.wikipedia.org")) {
+    langHost = langHost.replace(".m.wikipedia.org", ".wikipedia.org");
+  }
+  if (langHost.startsWith("m.")) {
+    langHost = langHost.slice(2);
+  }
+
+  const lang = langHost.replace(".wikipedia.org", "");
+  const canonicalHost = `${lang}.wikipedia.org`;
+  let title: string | null = null;
+
+  if (currentUrl.pathname.startsWith("/wiki/")) {
+    title = decodeURIComponent(currentUrl.pathname.slice(6));
+  } else if (currentUrl.pathname.startsWith("/w/")) {
+    title = await resolveWikipediaTitle(lang, currentUrl.searchParams);
+  }
+
+  if (!title) {
+    throw new Error("Unable to resolve Wikipedia title");
+  }
+
+  const stripped = stripNamespace(title);
+  if (isDisallowedNamespace(stripped)) {
+    throw new Error("Namespace is not supported");
+  }
+
+  const normalizedTitle = normalizeTitle(stripped);
+  return {
+    type: "summary",
+    host: canonicalHost,
+    title: normalizedTitle,
+    source: "wikipedia",
+    fragment,
+    canonicalFallback: `https://${canonicalHost}/wiki/${encodeURIComponent(
+      normalizedTitle
+    )}`,
+  };
+};
+
+const normalizeCommonsTarget = (
+  currentUrl: URL,
+  fragment: DecodedFragment
+): NormalizedTarget => {
+  if (currentUrl.pathname.startsWith("/wiki/File:")) {
+    return {
+      type: "commons-file",
+      fileName: currentUrl.pathname.slice("/wiki/File:".length),
+      fragment,
+    };
+  }
+
+  const titleSegment = currentUrl.pathname.startsWith("/wiki/")
+    ? currentUrl.pathname.slice(6)
+    : currentUrl.pathname.replace(/^\//, "");
+  const normalizedTitle = normalizeTitle(decodeURIComponent(titleSegment));
+  return {
+    type: "summary",
+    host: "commons.wikimedia.org",
+    title: normalizedTitle,
+    source: "wikimedia-commons",
+    fragment,
+    canonicalFallback: `https://commons.wikimedia.org/wiki/${encodeURIComponent(
+      normalizedTitle
+    )}`,
+  };
+};
+
+const normalizeUploadTarget = (
+  currentUrl: URL,
+  fragment: DecodedFragment
+): CommonsFileTarget => {
+  const fileName = extractCommonsFileName(currentUrl);
+  if (!fileName) {
+    throw new Error("Unable to determine file name");
+  }
+  return { type: "commons-file", fileName, fragment };
+};
+
+const normalizeWikidataTarget = (
+  currentUrl: URL,
+  fragment: DecodedFragment
+): WikidataTarget => {
+  const path = currentUrl.pathname.startsWith("/wiki/")
+    ? currentUrl.pathname.slice(6)
+    : currentUrl.pathname.replace(/^\//, "");
+  return { type: "wikidata", id: path.toUpperCase(), fragment };
+};
+
 export const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
   ensureWikimediaUrl(url);
 
@@ -423,11 +524,7 @@ export const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
     ensureWikimediaUrl(currentUrl);
   }
 
-  let hostname = currentUrl.hostname.toLowerCase();
-  if (hostname.startsWith("www.")) {
-    hostname = hostname.slice(4);
-  }
-
+  const hostname = normalizeWikimediaHostname(currentUrl);
   const fragment = decodeFragment(
     currentUrl.hash ? currentUrl.hash.slice(1) : ""
   );
@@ -436,88 +533,19 @@ export const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
     hostname.endsWith(".wikipedia.org") ||
     hostname.endsWith(".m.wikipedia.org")
   ) {
-    let langHost = hostname;
-    if (langHost.endsWith(".m.wikipedia.org")) {
-      langHost = langHost.replace(".m.wikipedia.org", ".wikipedia.org");
-    }
-    if (langHost.startsWith("m.")) {
-      langHost = langHost.slice(2);
-    }
-    const lang = langHost.replace(".wikipedia.org", "");
-    const canonicalHost = `${lang}.wikipedia.org`;
-
-    let title: string | null = null;
-
-    if (currentUrl.pathname.startsWith("/wiki/")) {
-      const raw = currentUrl.pathname.slice(6);
-      title = decodeURIComponent(raw);
-    } else if (currentUrl.pathname.startsWith("/w/")) {
-      const params = currentUrl.searchParams;
-      title = await resolveWikipediaTitle(lang, params);
-    }
-
-    if (!title) {
-      throw new Error("Unable to resolve Wikipedia title");
-    }
-
-    const stripped = stripNamespace(title);
-    if (isDisallowedNamespace(stripped)) {
-      throw new Error("Namespace is not supported");
-    }
-
-    const normalizedTitle = normalizeTitle(stripped);
-    const canonicalFallback = `https://${canonicalHost}/wiki/${encodeURIComponent(
-      normalizedTitle
-    )}`;
-
-    return {
-      type: "summary",
-      host: canonicalHost,
-      title: normalizedTitle,
-      source: "wikipedia",
-      fragment,
-      canonicalFallback,
-    };
+    return normalizeWikipediaTarget(currentUrl, hostname, fragment);
   }
 
   if (hostname === "commons.wikimedia.org") {
-    if (currentUrl.pathname.startsWith("/wiki/File:")) {
-      const fileName = currentUrl.pathname.slice("/wiki/File:".length);
-      return { type: "commons-file", fileName, fragment };
-    }
-
-    const titleSegment = currentUrl.pathname.startsWith("/wiki/")
-      ? currentUrl.pathname.slice(6)
-      : currentUrl.pathname.replace(/^\//, "");
-    const title = decodeURIComponent(titleSegment);
-    const normalizedTitle = normalizeTitle(title);
-    const canonicalFallback = `https://commons.wikimedia.org/wiki/${encodeURIComponent(
-      normalizedTitle
-    )}`;
-    return {
-      type: "summary",
-      host: "commons.wikimedia.org",
-      title: normalizedTitle,
-      source: "wikimedia-commons",
-      fragment,
-      canonicalFallback,
-    };
+    return normalizeCommonsTarget(currentUrl, fragment);
   }
 
   if (hostname === "upload.wikimedia.org") {
-    const fileName = extractCommonsFileName(currentUrl);
-    if (!fileName) {
-      throw new Error("Unable to determine file name");
-    }
-    return { type: "commons-file", fileName, fragment };
+    return normalizeUploadTarget(currentUrl, fragment);
   }
 
   if (hostname === "wikidata.org" || hostname === "www.wikidata.org") {
-    const path = currentUrl.pathname.startsWith("/wiki/")
-      ? currentUrl.pathname.slice(6)
-      : currentUrl.pathname.replace(/^\//, "");
-    const id = path.toUpperCase();
-    return { type: "wikidata", id, fragment };
+    return normalizeWikidataTarget(currentUrl, fragment);
   }
 
   throw new Error("Unsupported Wikimedia host");

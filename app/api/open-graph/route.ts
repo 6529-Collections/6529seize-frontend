@@ -29,12 +29,7 @@ import type {
   ExternalFileLinkPreviewResponse,
   LinkPreviewResponse,
 } from "@/services/api/link-preview-api";
-import {
-  HTML_ACCEPT_HEADER,
-  LINK_PREVIEW_USER_AGENT,
-  buildGoogleWorkspaceResponse,
-  buildResponse,
-} from "./utils";
+import { buildGoogleWorkspaceResponse, buildResponse } from "./utils";
 import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 import { createFoundationPlan } from "./foundation/service";
 import { createManifoldPlan } from "./manifold/service";

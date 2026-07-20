@@ -20,14 +20,7 @@ import type {
 } from "@/entities/INextgen";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
-import type {
-  LinkPreviewMedia,
-  SeizeCollectionLinkPreview,
-  SeizeCollectionPreviewFact,
-  SeizeCollectionPreviewKind,
-  SeizeCollectionPreviewPerson,
-  SeizeCollectionPreviewTrait,
-} from "@/services/api/link-preview-api";
+import type { SeizeCollectionLinkPreview } from "@/services/api/link-preview-api";
 import { createPublicClient, fallback, http } from "viem";
 import { mainnet } from "viem/chains";
 import {
@@ -52,7 +45,6 @@ import {
   formatMintDate,
   identityProfileDisplay,
   identityProfileHref,
-  normalizeHttpsImageUrl,
   parseMetadata,
   profileHrefForHandle,
   readAttributeValue,

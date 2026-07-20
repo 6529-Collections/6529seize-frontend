@@ -12,6 +12,8 @@ export type ApiPage<T> = {
   readonly data?: readonly T[] | null | undefined;
 };
 
+type ApiQueryParams = Record<string, string | number | undefined>;
+
 function trimTrailingSlashes(value: string): string {
   let end = value.length;
   while (end > 0 && value[end - 1] === "/") {
@@ -41,7 +43,7 @@ function getApiBase(): string {
 function buildApiUrl(
   base: string,
   endpoint: string,
-  params?: Record<string, string | number | undefined>
+  params?: ApiQueryParams
 ): string {
   const url = new URL(`/api/${trimLeadingSlashes(endpoint)}`, `${base}/`);
 
@@ -143,7 +145,7 @@ async function getApiFetch(): Promise<typeof fetch> {
 
 async function fetchApiJson<T>(
   endpoint: string,
-  params?: Record<string, string | number | undefined>,
+  params?: ApiQueryParams,
   context?: ApiContext
 ): Promise<T> {
   const fetchImpl = await getApiFetch();
@@ -187,7 +189,7 @@ async function fetchApiJson<T>(
 
 export async function fetchOptionalApiJson<T>(
   endpoint: string,
-  params?: Record<string, string | number | undefined>,
+  params?: ApiQueryParams,
   context?: ApiContext
 ): Promise<T | null> {
   try {
@@ -199,7 +201,7 @@ export async function fetchOptionalApiJson<T>(
 
 export async function fetchFirstPageItem<T>(
   endpoint: string,
-  params?: Record<string, string | number | undefined>,
+  params?: ApiQueryParams,
   context?: ApiContext
 ): Promise<T | null> {
   const page = await fetchOptionalApiJson<ApiPage<T>>(

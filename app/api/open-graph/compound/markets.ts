@@ -180,6 +180,13 @@ type V3CollateralInfo = {
   readonly usdPrice?: string | undefined;
 };
 
+type V3AssetInfo = {
+  readonly asset: Address;
+  readonly priceFeed: Address;
+  readonly scale: bigint;
+  readonly borrowCollateralFactor: bigint;
+};
+
 type V3MarketState = {
   readonly config: CompoundV3MarketConfig;
   readonly decimals: number;
@@ -200,6 +207,146 @@ type V3MarketState = {
     readonly tvlUsd?: string | undefined;
   };
 };
+
+async function fetchV3CollateralPrice(
+  priceFeedAddress: Address,
+  assetAddress: Address
+): Promise<string | undefined> {
+  if (!priceFeedAddress || priceFeedAddress === zeroAddress) {
+    return undefined;
+  }
+
+  try {
+    const [priceValue, priceDecimalsRaw] = await publicClient.multicall({
+      allowFailure: false,
+      contracts: [
+        {
+          address: priceFeedAddress,
+          abi: priceFeedAbi,
+          functionName: "getPrice",
+          args: [assetAddress],
+        },
+        {
+          address: priceFeedAddress,
+          abi: priceFeedAbi,
+          functionName: "decimals",
+        },
+      ],
+    });
+
+    if (!priceValue || priceValue <= BIGINT_ZERO) {
+      return undefined;
+    }
+
+    return formatUnitsWithPrecision(
+      priceValue,
+      Number(priceDecimalsRaw ?? 8),
+      6
+    );
+  } catch {
+    return undefined;
+  }
+}
+
+function buildFallbackCollateral(info: V3AssetInfo): V3CollateralInfo {
+  return {
+    asset: info.asset,
+    symbol: info.asset,
+    decimals: 18,
+    scale: info.scale,
+    collateralFactor: formatMantissa(info.borrowCollateralFactor),
+    priceFeed: info.priceFeed,
+  };
+}
+
+async function fetchV3Collateral(
+  info: V3AssetInfo,
+  priceFeedAddress: Address
+): Promise<V3CollateralInfo> {
+  try {
+    const [symbolResult, decimalsResult] = await publicClient.multicall({
+      allowFailure: false,
+      contracts: [
+        { address: info.asset, abi: erc20Abi, functionName: "symbol" },
+        { address: info.asset, abi: erc20Abi, functionName: "decimals" },
+      ],
+    });
+    const usdPrice = await fetchV3CollateralPrice(priceFeedAddress, info.asset);
+
+    return {
+      asset: info.asset,
+      symbol: String(symbolResult),
+      decimals: Number(decimalsResult ?? 18),
+      scale: info.scale,
+      collateralFactor: formatMantissa(info.borrowCollateralFactor),
+      priceFeed: info.priceFeed,
+      usdPrice,
+    };
+  } catch {
+    return buildFallbackCollateral(info);
+  }
+}
+
+async function fetchV3Collaterals(
+  comet: Address,
+  numAssets: number,
+  priceFeedAddress: Address
+): Promise<readonly V3CollateralInfo[]> {
+  if (numAssets === 0) {
+    return [];
+  }
+
+  const collateralResults = await publicClient.multicall({
+    allowFailure: false,
+    contracts: Array.from(
+      { length: numAssets },
+      (_, index) =>
+        ({
+          address: comet,
+          abi: cometAbi,
+          functionName: "getAssetInfo",
+          args: [BigInt(index)],
+        }) as const
+    ),
+  });
+
+  return Promise.all(
+    collateralResults.map((result) =>
+      fetchV3Collateral(result as unknown as V3AssetInfo, priceFeedAddress)
+    )
+  );
+}
+
+async function fetchV3BasePrice(
+  priceFeedAddress: Address,
+  baseAddress: Address
+): Promise<readonly [bigint | null, number | null]> {
+  if (!priceFeedAddress || priceFeedAddress === zeroAddress) {
+    return [null, null];
+  }
+
+  try {
+    const [basePrice, decimalsRaw] = await publicClient.multicall({
+      allowFailure: false,
+      contracts: [
+        {
+          address: priceFeedAddress,
+          abi: priceFeedAbi,
+          functionName: "getPrice",
+          args: [baseAddress],
+        },
+        {
+          address: priceFeedAddress,
+          abi: priceFeedAbi,
+          functionName: "decimals",
+        },
+      ],
+    });
+    return [basePrice, Number(decimalsRaw ?? 8)];
+  } catch {
+    return [null, null];
+  }
+}
 
 export async function fetchV2MarketState(
   market: CompoundV2MarketConfig
@@ -371,127 +518,15 @@ export async function fetchV3MarketState(
   };
 
   const numAssets = Number(numAssetsRaw ?? 0);
-  const collaterals: V3CollateralInfo[] = [];
-  const collateralCalls = Array.from(
-    { length: numAssets },
-    (_, index) =>
-      ({
-        address: comet,
-        abi: cometAbi,
-        functionName: "getAssetInfo",
-        args: [BigInt(index)],
-      }) as const
+  const collaterals = await fetchV3Collaterals(
+    comet,
+    numAssets,
+    priceFeedAddress
   );
-
-  if (collateralCalls.length > 0) {
-    const collateralResults = await publicClient.multicall({
-      allowFailure: false,
-      contracts: collateralCalls,
-    });
-
-    for (const result of collateralResults) {
-      const info = result as unknown as {
-        offset: bigint;
-        asset: Address;
-        priceFeed: Address;
-        scale: bigint;
-        borrowCollateralFactor: bigint;
-      };
-
-      const assetAddress = info.asset;
-      try {
-        const symbolAndDecimals = await publicClient.multicall({
-          allowFailure: false,
-          contracts: [
-            { address: assetAddress, abi: erc20Abi, functionName: "symbol" },
-            { address: assetAddress, abi: erc20Abi, functionName: "decimals" },
-          ],
-        });
-
-        const symbolResult = symbolAndDecimals[0];
-        const decimalsResult = symbolAndDecimals[1];
-
-        let usdPrice: string | undefined;
-
-        if (priceFeedAddress && priceFeedAddress !== zeroAddress) {
-          try {
-            const priceResults = await publicClient.multicall({
-              allowFailure: false,
-              contracts: [
-                {
-                  address: priceFeedAddress as Address,
-                  abi: priceFeedAbi,
-                  functionName: "getPrice",
-                  args: [assetAddress],
-                },
-                {
-                  address: priceFeedAddress as Address,
-                  abi: priceFeedAbi,
-                  functionName: "decimals",
-                },
-              ],
-            });
-
-            const priceValue = priceResults[0];
-            const priceDecimals = Number(priceResults[1] ?? 8);
-            if (priceValue && priceValue > BIGINT_ZERO) {
-              usdPrice = formatUnitsWithPrecision(priceValue, priceDecimals, 6);
-            }
-          } catch {
-            usdPrice = undefined;
-          }
-        }
-
-        collaterals.push({
-          asset: assetAddress,
-          symbol: String(symbolResult),
-          decimals: Number(decimalsResult ?? 18),
-          scale: info.scale,
-          collateralFactor: formatMantissa(info.borrowCollateralFactor),
-          priceFeed: info.priceFeed,
-          usdPrice,
-        });
-      } catch {
-        collaterals.push({
-          asset: assetAddress,
-          symbol: assetAddress,
-          decimals: 18,
-          scale: info.scale,
-          collateralFactor: formatMantissa(info.borrowCollateralFactor),
-          priceFeed: info.priceFeed,
-        });
-      }
-    }
-  }
-
-  let basePrice: bigint | null = null;
-  let basePriceDecimals: number | null = null;
-
-  if (priceFeedAddress && priceFeedAddress !== zeroAddress) {
-    try {
-      const basePriceResults = await publicClient.multicall({
-        allowFailure: false,
-        contracts: [
-          {
-            address: priceFeedAddress as Address,
-            abi: priceFeedAbi,
-            functionName: "getPrice",
-            args: [market.base.address as Address],
-          },
-          {
-            address: priceFeedAddress as Address,
-            abi: priceFeedAbi,
-            functionName: "decimals",
-          },
-        ],
-      });
-      basePrice = basePriceResults[0];
-      basePriceDecimals = Number(basePriceResults[1] ?? 8);
-    } catch {
-      basePrice = null;
-      basePriceDecimals = null;
-    }
-  }
+  const [basePrice, basePriceDecimals] = await fetchV3BasePrice(
+    priceFeedAddress,
+    market.base.address as Address
+  );
 
   const supplyApy = calculateApyFromRatePerSecond(supplyRate);
   const borrowApy = calculateApyFromRatePerSecond(borrowRate);

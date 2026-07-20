@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 import type {
   WikimediaCardResponse,
-  WikimediaSource,
   WikimediaImage,
 } from "@/services/api/wikimedia-card";
 
