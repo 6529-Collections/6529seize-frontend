@@ -26,9 +26,17 @@ const { lookup } = require("node:dns/promises") as {
 const originalFetch = global.fetch;
 const mockFetch = jest.fn();
 
-const createMockFetchResponse = (status: number, body: string, url: string) => {
+const createMockFetchResponse = (
+  status: number,
+  body: string,
+  url: string,
+  contentLength?: number
+) => {
   const headerMap = new Map<string, string>();
   headerMap.set("content-type", "text/html");
+  if (contentLength !== undefined) {
+    headerMap.set("content-length", String(contentLength));
+  }
   return {
     status,
     ok: status >= 200 && status < 300,
@@ -258,6 +266,30 @@ describe("open-graph route helpers", () => {
 
     expect(mockFetch).not.toHaveBeenCalled();
     expect(mockUndiciFetch).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      type: "google.docs",
+      availability: "restricted",
+      title: "Untitled Doc",
+    });
+  });
+
+  it("rejects oversized bodyless Google previews before buffering", async () => {
+    mockUndiciFetch.mockResolvedValueOnce(
+      createMockFetchResponse(
+        200,
+        "<html><head><title>Oversized</title></head></html>",
+        "https://docs.google.com/document/d/abc/preview",
+        64 * 1024 + 1
+      )
+    );
+
+    const resolvedUrl = new URL("https://docs.google.com/document/d/abc/edit");
+    const result = await buildGoogleWorkspaceResponse(
+      resolvedUrl,
+      "<html><head><title>Fallback</title></head></html>",
+      resolvedUrl
+    );
+
     expect(result).toMatchObject({
       type: "google.docs",
       availability: "restricted",

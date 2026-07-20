@@ -34,14 +34,16 @@ const formatCompactNumber = (
   value: number | null | undefined
 ): string | null =>
   typeof value === "number"
-    ? new Intl.NumberFormat(undefined, {
+    ? new Intl.NumberFormat(GITHUB_PREVIEW_LOCALE, {
         notation: "compact",
         maximumFractionDigits: 1,
       }).format(value)
     : null;
 
 const formatInteger = (value: number | null | undefined): string | null =>
-  typeof value === "number" ? new Intl.NumberFormat().format(value) : null;
+  typeof value === "number"
+    ? new Intl.NumberFormat(GITHUB_PREVIEW_LOCALE).format(value)
+    : null;
 
 const formatDate = (value: string | null | undefined): string | null => {
   if (!value) {
@@ -53,7 +55,7 @@ const formatDate = (value: string | null | undefined): string | null => {
     return null;
   }
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(GITHUB_PREVIEW_LOCALE, {
     year: "numeric",
     month: "short",
     day: "numeric",

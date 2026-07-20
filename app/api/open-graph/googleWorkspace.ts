@@ -284,6 +284,11 @@ async function readTextResponse(
   response: Response,
   byteLimit: number
 ): Promise<string> {
+  const contentLength = Number(response.headers.get("content-length"));
+  if (Number.isFinite(contentLength) && contentLength > byteLimit) {
+    throw new Error("Google preview response exceeds the byte limit.");
+  }
+
   const text = await response.text();
   return truncateToLimit(text, byteLimit);
 }
@@ -421,6 +426,38 @@ function pickGoogleTitle(
   return clampGoogleTitle(selected, fallback);
 }
 
+type GoogleDocumentKind = Exclude<GoogleWorkspaceKind, "sheets">;
+
+async function buildGoogleDocumentPreviewContext(
+  kind: GoogleDocumentKind,
+  normalization: GoogleWorkspaceNormalization,
+  html: string
+): Promise<{
+  readonly openUrl: string;
+  readonly previewUrl: string;
+  readonly availability: GoogleWorkspaceAvailability;
+  readonly resolvedTitle: string;
+}> {
+  const info = GOOGLE_TYPE_INFO[kind];
+  const openUrl = `${normalization.canonicalBase}/edit`;
+  const previewUrl = `${normalization.canonicalBase}/preview`;
+  const preview = await fetchGooglePreviewHtml(previewUrl);
+  const availability = deriveGoogleAvailability(preview, html);
+  const extractedTitle = pickGoogleTitle(
+    preview.html,
+    html,
+    info.fallbackTitle
+  );
+
+  return {
+    openUrl,
+    previewUrl,
+    availability,
+    resolvedTitle:
+      availability === "restricted" ? info.fallbackTitle : extractedTitle,
+  };
+}
+
 export async function buildGoogleWorkspaceResponse(
   resolvedUrl: URL,
   html: string,
@@ -435,17 +472,8 @@ export async function buildGoogleWorkspaceResponse(
   const thumbnail = buildGoogleThumbnailUrl(normalization.fileId);
 
   if (normalization.kind === "docs") {
-    const openUrl = `${normalization.canonicalBase}/edit`;
-    const previewUrl = `${normalization.canonicalBase}/preview`;
-    const preview = await fetchGooglePreviewHtml(previewUrl);
-    const availability = deriveGoogleAvailability(preview, html);
-    const extractedTitle = pickGoogleTitle(
-      preview.html,
-      html,
-      info.fallbackTitle
-    );
-    const resolvedTitle =
-      availability === "restricted" ? info.fallbackTitle : extractedTitle;
+    const { openUrl, previewUrl, availability, resolvedTitle } =
+      await buildGoogleDocumentPreviewContext("docs", normalization, html);
 
     const response: GoogleDocsLinkPreview = {
       type: "google.docs",
@@ -474,17 +502,8 @@ export async function buildGoogleWorkspaceResponse(
   }
 
   if (normalization.kind === "slides") {
-    const openUrl = `${normalization.canonicalBase}/edit`;
-    const previewUrl = `${normalization.canonicalBase}/preview`;
-    const preview = await fetchGooglePreviewHtml(previewUrl);
-    const availability = deriveGoogleAvailability(preview, html);
-    const extractedTitle = pickGoogleTitle(
-      preview.html,
-      html,
-      info.fallbackTitle
-    );
-    const resolvedTitle =
-      availability === "restricted" ? info.fallbackTitle : extractedTitle;
+    const { openUrl, previewUrl, availability, resolvedTitle } =
+      await buildGoogleDocumentPreviewContext("slides", normalization, html);
 
     const response: GoogleSlidesLinkPreview = {
       type: "google.slides",
