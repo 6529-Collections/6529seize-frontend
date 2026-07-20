@@ -98,6 +98,7 @@ describe("NextGen page component", () => {
     mockedFetch.mockReset().mockResolvedValue(createFeaturedCollection());
     useRouterMock.mockReturnValue({ push });
     useParamsMock.mockReturnValue({ view: undefined }); // landing (no view)
+    window.history.replaceState({}, "", "/nextgen");
     pushStateSpy = jest
       .spyOn(window.history, "pushState")
       .mockImplementation(() => {});
@@ -150,6 +151,22 @@ describe("NextGen page component", () => {
     });
 
     expect(nav).toHaveTextContent(NextgenView.COLLECTIONS);
+  });
+
+  it("restores a lowercased view from the pathname without history state", async () => {
+    const jsx = await NextGenPage({
+      params: Promise.resolve({ view: undefined }),
+    } as any);
+
+    render(jsx);
+
+    const nav = await screen.findByTestId("nav");
+    expect(nav).toBeEmptyDOMElement();
+
+    window.history.replaceState({}, "", "/nextgen/artists");
+    fireEvent.popState(window, { state: null });
+
+    expect(nav).toHaveTextContent(NextgenView.ARTISTS);
   });
 
   it("shows placeholder when collection missing", async () => {
