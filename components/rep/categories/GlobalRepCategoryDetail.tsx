@@ -474,7 +474,7 @@ function PaginatedTable({
 
   return (
     <div className="rep-category-table-content tw-flex tw-flex-col tw-gap-4">
-      <div className="tw-flex tw-flex-wrap tw-justify-end tw-gap-3">
+      <div className="rep-category-sort-row tw-flex tw-flex-wrap tw-justify-end tw-gap-3">
         <div
           className="rep-category-sort tw-inline-flex tw-flex-wrap tw-gap-2"
           aria-label="Sort category rows"

@@ -33,10 +33,10 @@ export function StateBlock({
 }) {
   return (
     <div className="rep-category-state tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-p-5">
-      <p className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-100">
+      <p className="tw-mb-1 tw-mt-0 tw-text-sm tw-font-semibold tw-text-iron-100">
         {title}
       </p>
-      <p className="tw-mb-0 tw-text-sm tw-text-iron-400">{message}</p>
+      <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-text-iron-400">{message}</p>
       {onRetry && (
         <button
           type="button"
