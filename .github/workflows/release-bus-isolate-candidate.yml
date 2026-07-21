@@ -106,21 +106,19 @@ jobs:
             corepack enable pnpm
             corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
             ./bin/6529 install:frozen
-            ./bin/6529 run lint
-            ./bin/6529 run typecheck:ci
-            ./bin/6529 run test:no-coverage -- --runInBand
-            NODE_ENV=production \
-              API_ENDPOINT='https://api.staging.6529.io' \
-              WS_ENDPOINT='wss://ws.staging.6529.io' \
-              ALLOWLIST_API_ENDPOINT='https://allowlist-api.staging.6529.io' \
-              BASE_ENDPOINT='https://staging.6529.io' \
-              MOBILE_APP_SCHEME='mobile6529' \
-              CORE_SCHEME='core6529' \
-              IPFS_API_ENDPOINT='https://api-ipfs.6529.io' \
-              IPFS_GATEWAY_ENDPOINT='https://ipfs.6529.io' \
-              VERSION="$EXPECTED_SHA" \
-              VERSION_BUILD_TIMESTAMP="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-              ./bin/6529 run build
+            export NODE_ENV=production
+            export API_ENDPOINT='https://api.staging.6529.io'
+            export WS_ENDPOINT='wss://ws.staging.6529.io'
+            export ALLOWLIST_API_ENDPOINT='https://allowlist-api.staging.6529.io'
+            export BASE_ENDPOINT='https://staging.6529.io'
+            export MOBILE_APP_SCHEME='mobile6529'
+            export CORE_SCHEME='core6529'
+            export IPFS_API_ENDPOINT='https://api-ipfs.6529.io'
+            export IPFS_GATEWAY_ENDPOINT='https://ipfs.6529.io'
+            export VERSION="$EXPECTED_SHA"
+            export VERSION_BUILD_TIMESTAMP="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            ./scripts/release-bus-frontend-gate.sh full
+            git diff --exit-code
           } > >(tee isolation.log) 2>&1
       - name: Upload isolation log
         if: always()

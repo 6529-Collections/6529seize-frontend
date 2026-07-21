@@ -197,4 +197,50 @@ describe("NextGenCollectionProvenance", () => {
     expect(container.querySelector("details")).toBeInTheDocument();
     expect(container).toHaveTextContent("Metadata updated");
   });
+
+  it("renders an event without a placeholder separator or empty disclosure", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <NextGenCollectionProvenanceRow
+            collection={collection}
+            log={{ ...log, heading: "Approve", log: "" }}
+          />
+        </tbody>
+      </table>
+    );
+
+    expect(screen.getByText("Approve")).toBeInTheDocument();
+    expect(screen.queryByText("•")).not.toBeInTheDocument();
+    expect(container.querySelector("details")).not.toBeInTheDocument();
+    expect(screen.getByText("Approve").closest("td")).toHaveAttribute(
+      "colspan",
+      "3"
+    );
+  });
+
+  it("derives a visible script summary and keeps the payload supplemental", () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <NextGenCollectionProvenanceRow
+            collection={collection}
+            log={{
+              ...log,
+              heading: "",
+              log: "Script at index 1 updated to: const art = true;",
+            }}
+          />
+        </tbody>
+      </table>
+    );
+
+    const summary = screen.getByText("Script at index 1 Updated");
+    expect(summary.closest("summary")).toBeInTheDocument();
+    expect(container.querySelector("details")).toBeInTheDocument();
+    expect(
+      screen.getByText("Script at index 1 updated to: const art = true;")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("•")).not.toBeInTheDocument();
+  });
 });

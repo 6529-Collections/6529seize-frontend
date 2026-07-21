@@ -18,7 +18,6 @@ import {
   parsePublicUrl,
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
-import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import {
   detectExternalFileKind,
@@ -30,12 +29,7 @@ import type {
   ExternalFileLinkPreviewResponse,
   LinkPreviewResponse,
 } from "@/services/api/link-preview-api";
-import {
-  HTML_ACCEPT_HEADER,
-  LINK_PREVIEW_USER_AGENT,
-  buildGoogleWorkspaceResponse,
-  buildResponse,
-} from "./utils";
+import { buildGoogleWorkspaceResponse, buildResponse } from "./utils";
 import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 import { createFoundationPlan } from "./foundation/service";
 import { createManifoldPlan } from "./manifold/service";
@@ -45,20 +39,16 @@ import { createTransientPlan } from "./transient/service";
 import { createYoutubePlan } from "./youtube/service";
 import { buildFarcasterEmbedResponse } from "./farcaster/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
+import { HTML_FETCH_HEADERS, createFetchConfig } from "./fetchConfig";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_MAX_ITEMS = 500;
 const FETCH_TIMEOUT_MS = 8000;
-const USER_AGENT = LINK_PREVIEW_USER_AGENT;
 const MAX_REDIRECTS = 5;
 const BATCH_CONCURRENCY = 5;
 const MAX_BATCH_URLS = BATCH_CONCURRENCY;
 const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 const BATCH_REQUEST_MAX_BYTES = 64 * 1024;
-
-const HTML_FETCH_HEADERS = {
-  accept: HTML_ACCEPT_HEADER,
-} as const;
 
 const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
   blockedHosts: ["localhost", "127.0.0.1", "::1"],
@@ -77,96 +67,9 @@ const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
   policy: PUBLIC_URL_POLICY,
 };
 
-type HeaderOverrides = {
-  readonly set?: Record<string, string | undefined> | undefined;
-  readonly remove?: readonly string[] | undefined;
-};
-
-type HostOverrides = {
-  readonly domain: string;
-  readonly headers?: HeaderOverrides | undefined;
-  readonly userAgent?: string | undefined;
-};
-
 type PreviewContext = {
   readonly apiAuth?: string | null | undefined;
 };
-
-const HOST_OVERRIDES: readonly HostOverrides[] = [
-  {
-    domain: "facebook.com",
-    userAgent:
-      "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
-    headers: {
-      set: {
-        accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        referer: "https://www.facebook.com/",
-      },
-    },
-  },
-];
-
-function findHostOverrides(hostname: string): HostOverrides | undefined {
-  return HOST_OVERRIDES.find(({ domain }) =>
-    matchesDomainOrSubdomain(hostname, domain)
-  );
-}
-
-function applyHeaderRemovals(
-  headers: Record<string, string>,
-  toRemove?: readonly string[]
-): void {
-  if (!toRemove) {
-    return;
-  }
-
-  for (const header of toRemove) {
-    delete headers[header.toLowerCase()];
-  }
-}
-
-function applyHeaderAssignments(
-  headers: Record<string, string>,
-  entries?: Record<string, string | undefined>
-): void {
-  if (!entries) {
-    return;
-  }
-
-  for (const [key, value] of Object.entries(entries)) {
-    const normalizedKey = key.toLowerCase();
-    if (typeof value === "string" && value.length > 0) {
-      headers[normalizedKey] = value;
-    } else {
-      delete headers[normalizedKey];
-    }
-  }
-}
-
-function createFetchConfig(url: URL): {
-  headers: Record<string, string>;
-  userAgent: string;
-} {
-  const overrides = findHostOverrides(url.hostname);
-  const headers: Record<string, string> = { ...HTML_FETCH_HEADERS };
-  const userAgent = overrides?.userAgent ?? USER_AGENT;
-
-  if (!overrides?.headers) {
-    return {
-      headers,
-      userAgent,
-    };
-  }
-
-  applyHeaderRemovals(headers, overrides.headers.remove);
-  applyHeaderAssignments(headers, overrides.headers.set);
-
-  return {
-    headers,
-    userAgent,
-  };
-}
 
 const cache = new LruTtlCache<string, LinkPreviewResponse>({
   max: CACHE_MAX_ITEMS,

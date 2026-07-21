@@ -1,7 +1,5 @@
 "use client";
 
-import styles from "../NextGen.module.css";
-
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
@@ -32,6 +30,7 @@ import { faFire } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { displayScore } from "./NextGenTokenProperties";
@@ -39,6 +38,31 @@ import { displayScore } from "./NextGenTokenProperties";
 interface Props {
   collection: NextGenCollection;
   token: NextGenToken;
+}
+
+function DetailRow(
+  props: Readonly<{
+    label: string;
+    children: ReactNode;
+    stacked?: boolean | undefined;
+  }>
+) {
+  return (
+    <div
+      className={`tw-grid tw-gap-1 tw-py-3 ${
+        props.stacked
+          ? ""
+          : "sm:tw-grid-cols-[minmax(9rem,0.38fr)_minmax(0,0.62fr)] sm:tw-gap-4"
+      }`}
+    >
+      <dt className="tw-text-sm tw-font-medium tw-text-iron-400">
+        {props.label}:
+      </dt>
+      <dd className="tw-m-0 tw-min-w-0 tw-text-base tw-text-white">
+        {props.children}
+      </dd>
+    </div>
+  );
 }
 
 export default function NextgenTokenAbout(props: Readonly<Props>) {
@@ -67,66 +91,46 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
     );
   }, [props.token.owner, connectedProfile?.wallets]);
 
+  const marketplaceLinkClassName =
+    "tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-white tw-no-underline tw-transition hover:tw-bg-white/5 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+
   return (
-    <div className="tw-mx-auto tw-w-full !tw-p-0 tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-4">
-          <h3 className="tw-mb-0">About</h3>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Collection Token ID:</span>
-          <span>{props.token.normalised_id}</span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Contract Token ID:</span>
-          <span>{props.token.id}</span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Minted:</span>
-          <span>{printMintDate(props.token.mint_date)}</span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Mint Price:</span>
-          <span>
-            {props.token.mint_price ? (
-              <span className="tw-flex tw-items-center">
-                {props.token.mint_price}
-                <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
-                  <EthereumIcon />
-                </div>
+    <section>
+      <h3 className="tw-mb-3 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white">
+        Details
+      </h3>
+      <dl className="tw-m-0 tw-divide-y tw-divide-white/10">
+        <DetailRow label="Collection Token ID">
+          {props.token.normalised_id}
+        </DetailRow>
+        <DetailRow label="Contract Token ID">{props.token.id}</DetailRow>
+        <DetailRow label="Minted">
+          {printMintDate(props.token.mint_date)}
+        </DetailRow>
+        <DetailRow label="Mint Price">
+          {props.token.mint_price ? (
+            <span className="tw-flex tw-items-center">
+              {props.token.mint_price}
+              <span className="tw-flex tw-h-5 tw-w-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-50">
+                <EthereumIcon />
               </span>
-            ) : (
-              "Free"
-            )}
-          </span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Collector:</span>
-          <span className="tw-flex tw-items-center tw-gap-1">
+            </span>
+          ) : (
+            "Free"
+          )}
+        </DetailRow>
+        <DetailRow label="Collector">
+          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
             {(props.token.burnt || isNullAddress(props.token.owner)) && (
               <>
                 <FontAwesomeIcon
                   icon={faFire}
-                  style={{ height: "22px", color: "#c51d34" }}
+                  className="tw-h-[22px] tw-w-[22px] tw-text-error"
                   data-tooltip-id={`burnt-${props.token.id}`}
                 />
                 <Tooltip
                   id={`burnt-${props.token.id}`}
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
+                  className="!tw-bg-iron-900 !tw-px-2 !tw-py-1 !tw-text-white"
                 >
                   Burnt
                 </Tooltip>
@@ -134,278 +138,211 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             )}
             {profile?.level ? (
               <Link
-                href={`/${profile?.handle ?? props.token.owner}`}
-                className="tw-flex tw-items-center tw-gap-2 tw-no-underline hover:tw-underline"
+                href={`/${profile.handle ?? props.token.owner}`}
+                className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline hover:tw-underline"
               >
                 <UserCICAndLevel level={profile.level} />
-                <span className="tw-underline">
-                  {profile?.handle ??
-                    profile?.display ??
+                <span className="tw-break-all">
+                  {profile.handle ??
+                    profile.display ??
                     formatAddress(props.token.owner)}
                 </span>
               </Link>
             ) : (
-              <Link href={`/${profile?.handle ?? props.token.owner}`}>
-                <span>
-                  {profile?.handle ??
-                    profile?.display ??
-                    formatAddress(props.token.owner)}
-                </span>
+              <Link
+                href={`/${profile?.handle ?? props.token.owner}`}
+                className="tw-break-all"
+              >
+                {profile?.handle ??
+                  profile?.display ??
+                  formatAddress(props.token.owner)}
               </Link>
             )}
             {isOwner && <YouOwnNftBadge />}
           </span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-2 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Collector TDH:</span>
-          <span className="tw-flex tw-items-center tw-gap-1">
-            {numberWithCommas(Math.round((profile?.tdh ?? 0) * 100) / 100)}
-          </span>
-        </div>
-      </div>
-      {(!capacitor.isIos || country === "US") && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-flex-col tw-px-3 tw-pb-4">
-            <span className="tw-text-[#9a9a9a]">Listed:</span>
-            <span className="tw-flex tw-flex-col tw-items-start tw-gap-2 tw-pt-1">
-              <span>
-                <Link
-                  href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="tw-flex tw-items-center tw-gap-2 tw-no-underline"
-                  data-tooltip-id={`opensea-${props.token.id}`}
-                >
-                  <Image
-                    unoptimized
-                    className={styles["marketplace"]}
-                    src="/opensea.png"
-                    alt="opensea"
-                    width={24}
-                    height={24}
-                  />
-                  {props.token.opensea_price > 0 ? (
-                    <span className="tw-flex tw-items-center tw-gap-2">
-                      <span className="tw-flex tw-items-center">
-                        <span>{props.token.opensea_price}</span>
-                        <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
-                          <EthereumIcon />
-                        </div>
+        </DetailRow>
+        <DetailRow label="Collector TDH">
+          {numberWithCommas(Math.round((profile?.tdh ?? 0) * 100) / 100)}
+        </DetailRow>
+
+        {(!capacitor.isIos || country === "US") && (
+          <DetailRow label="Listed" stacked>
+            <div className="tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-3">
+              <Link
+                href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={marketplaceLinkClassName}
+                data-tooltip-id={`opensea-${props.token.id}`}
+              >
+                <Image
+                  unoptimized
+                  className="tw-rounded-md"
+                  src="/opensea.png"
+                  alt="OpenSea"
+                  width={24}
+                  height={24}
+                />
+                {props.token.opensea_price > 0 ? (
+                  <span className="tw-flex tw-items-center tw-gap-2">
+                    <span className="tw-flex tw-items-center">
+                      {props.token.opensea_price}
+                      <span className="tw-flex tw-h-5 tw-w-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-50">
+                        <EthereumIcon />
                       </span>
-                      {props.token.opensea_royalty > 0 && (
-                        <Image
-                          unoptimized
-                          width={0}
-                          height={0}
-                          style={{ height: "25px", width: "auto" }}
-                          src={`/${getRoyaltyImage(
-                            props.token.opensea_royalty / 100
-                          )}`}
-                          alt={"pepe"}
-                          className="tw-cursor-pointer"
-                        />
-                      )}
                     </span>
-                  ) : (
-                    "No"
-                  )}
-                </Link>
-                <Tooltip
-                  id={`opensea-${props.token.id}`}
-                  place="right"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                        Opensea:{" "}
-                        {props.token.opensea_price > 0
-                          ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
-                          : "Not Listed"}
-                      </div>
-                    </div>
-                    {props.token.opensea_price > 0 && (
-                      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                          Royalties: {props.token.opensea_royalty}%
-                        </div>
-                      </div>
+                    {props.token.opensea_royalty > 0 && (
+                      <Image
+                        unoptimized
+                        width={30}
+                        height={25}
+                        src={`/${getRoyaltyImage(
+                          props.token.opensea_royalty / 100
+                        )}`}
+                        alt={`${props.token.opensea_royalty}% royalty`}
+                        className="tw-h-6 tw-w-auto"
+                      />
                     )}
-                  </div>
-                </Tooltip>
-              </span>
-              <span>
-                <Link
-                  href={getBlurLink(props.token.id)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="tw-flex tw-items-center tw-gap-2 tw-no-underline"
-                  data-tooltip-id={`blur-${props.token.id}`}
-                >
-                  <Image
-                    unoptimized
-                    className={styles["marketplace"]}
-                    src="/blur.png"
-                    alt="blur"
-                    width={24}
-                    height={24}
-                  />
-                  {props.token.blur_price > 0 ? (
-                    <span className="tw-flex tw-items-center tw-gap-2">
-                      <span className="tw-flex tw-items-center">
-                        <span>{props.token.blur_price}</span>
-                        <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
-                          <EthereumIcon />
-                        </div>
+                  </span>
+                ) : (
+                  "Not listed"
+                )}
+              </Link>
+              <Tooltip
+                id={`opensea-${props.token.id}`}
+                place="right"
+                className="!tw-bg-iron-900 !tw-px-2 !tw-py-1 !tw-text-white"
+              >
+                OpenSea:{" "}
+                {props.token.opensea_price > 0
+                  ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                  : "Not Listed"}
+                {props.token.opensea_price > 0 && (
+                  <div>Royalties: {props.token.opensea_royalty}%</div>
+                )}
+              </Tooltip>
+
+              <Link
+                href={getBlurLink(props.token.id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={marketplaceLinkClassName}
+                data-tooltip-id={`blur-${props.token.id}`}
+              >
+                <Image
+                  unoptimized
+                  className="tw-rounded-md"
+                  src="/blur.png"
+                  alt="Blur"
+                  width={24}
+                  height={24}
+                />
+                {props.token.blur_price > 0 ? (
+                  <span className="tw-flex tw-items-center">
+                    {props.token.blur_price}
+                    <span className="tw-flex tw-h-5 tw-w-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-50">
+                      <EthereumIcon />
+                    </span>
+                  </span>
+                ) : (
+                  "Not listed"
+                )}
+              </Link>
+              <Tooltip
+                id={`blur-${props.token.id}`}
+                place="right"
+                className="!tw-bg-iron-900 !tw-px-2 !tw-py-1 !tw-text-white"
+              >
+                Blur:{" "}
+                {props.token.blur_price > 0
+                  ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                  : "Not Listed"}
+              </Tooltip>
+
+              <Link
+                href={getMagicEdenLink(props.token.id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={marketplaceLinkClassName}
+                data-tooltip-id={`magic-eden-${props.token.id}`}
+              >
+                <Image
+                  unoptimized
+                  className="tw-rounded-md"
+                  src="/magiceden.png"
+                  alt="Magic Eden"
+                  width={24}
+                  height={24}
+                />
+                {props.token.me_price > 0 ? (
+                  <span className="tw-flex tw-items-center tw-gap-2">
+                    <span className="tw-flex tw-items-center">
+                      {props.token.me_price}
+                      <span className="tw-flex tw-h-5 tw-w-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-50">
+                        <EthereumIcon />
                       </span>
                     </span>
-                  ) : (
-                    "No"
-                  )}
-                </Link>
-                <Tooltip
-                  id={`blur-${props.token.id}`}
-                  place="right"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                        Blur:{" "}
-                        {props.token.blur_price > 0
-                          ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
-                          : "Not Listed"}
-                      </div>
-                    </div>
-                  </div>
-                </Tooltip>
-              </span>
-              <span>
-                <Link
-                  href={getMagicEdenLink(props.token.id)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="tw-flex tw-items-center tw-gap-2 tw-no-underline"
-                  data-tooltip-id={`magic-eden-${props.token.id}`}
-                >
-                  <Image
-                    unoptimized
-                    className={styles["marketplace"]}
-                    src="/magiceden.png"
-                    alt="magiceden"
-                    width={24}
-                    height={24}
-                  />
-                  {props.token.me_price > 0 ? (
-                    <span className="tw-flex tw-items-center tw-gap-2">
-                      <span className="tw-flex tw-items-center">
-                        <span>{props.token.me_price}</span>
-                        <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
-                          <EthereumIcon />
-                        </div>
-                      </span>
-                      {props.token.me_royalty > 0 && (
-                        <Image
-                          unoptimized
-                          width={0}
-                          height={0}
-                          style={{ height: "25px", width: "auto" }}
-                          src={`/${getRoyaltyImage(
-                            props.token.me_royalty / 100
-                          )}`}
-                          alt={"pepe"}
-                          className="tw-cursor-pointer"
-                        />
-                      )}
-                    </span>
-                  ) : (
-                    "No"
-                  )}
-                </Link>
-                <Tooltip
-                  id={`magic-eden-${props.token.id}`}
-                  place="right"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                        Magic Eden:{" "}
-                        {props.token.me_price > 0
-                          ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
-                          : "Not Listed"}
-                      </div>
-                    </div>
-                    {props.token.me_price > 0 && (
-                      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                        <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                          Royalties: {props.token.me_royalty}%
-                        </div>
-                      </div>
+                    {props.token.me_royalty > 0 && (
+                      <Image
+                        unoptimized
+                        width={30}
+                        height={25}
+                        src={`/${getRoyaltyImage(props.token.me_royalty / 100)}`}
+                        alt={`${props.token.me_royalty}% royalty`}
+                        className="tw-h-6 tw-w-auto"
+                      />
                     )}
-                  </div>
-                </Tooltip>
-              </span>
+                  </span>
+                ) : (
+                  "Not listed"
+                )}
+              </Link>
+              <Tooltip
+                id={`magic-eden-${props.token.id}`}
+                place="right"
+                className="!tw-bg-iron-900 !tw-px-2 !tw-py-1 !tw-text-white"
+              >
+                Magic Eden:{" "}
+                {props.token.me_price > 0
+                  ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
+                  : "Not Listed"}
+                {props.token.me_price > 0 && (
+                  <div>Royalties: {props.token.me_royalty}%</div>
+                )}
+              </Tooltip>
+            </div>
+          </DetailRow>
+        )}
+
+        <DetailRow label="Collection">
+          <Link
+            href={`/nextgen/collection/${formatNameForUrl(
+              props.collection.name
+            )}`}
+          >
+            {props.collection.name}
+          </Link>
+        </DetailRow>
+        <DetailRow label="Artist">
+          <Link href={`/${props.collection.artist_address}`}>
+            {props.collection.artist}
+          </Link>
+        </DetailRow>
+        <DetailRow label="TDH">
+          <span className="tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-1">
+            <span>
+              <span className="tw-text-iron-400">Rate:</span>{" "}
+              {numberWithCommas(Math.round(props.token.hodl_rate * 100) / 100)}
             </span>
-          </div>
-        </div>
-      )}
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Collection:</span>
-          <span>
-            <Link
-              href={`/nextgen/collection/${formatNameForUrl(
-                props.collection.name
-              )}`}
-            >
-              {props.collection.name}
-            </Link>
+            <span>
+              <span className="tw-text-iron-400">Total:</span>{" "}
+              {numberWithCommas(Math.round(tdh * 100) / 100)}
+            </span>
           </span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Artist:</span>
-          <span>
-            <Link href={`/${props.collection.artist_address}`}>
-              {props.collection.artist}
-            </Link>
-          </span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">TDH Rate:</span>
-          <span>
-            {numberWithCommas(Math.round(props.token.hodl_rate * 100) / 100)}
-          </span>
-          &nbsp;&nbsp;|&nbsp;&nbsp;
-          <span className="tw-text-[#9a9a9a]">TDH:</span>
-          <span>{numberWithCommas(Math.round(tdh * 100) / 100)}</span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-gap-1 tw-px-3 tw-pb-4">
-          <span className="tw-text-[#9a9a9a]">Image Licence:</span>
-          <span>{props.collection.licence}</span>
-        </div>
-      </div>
-    </div>
+        </DetailRow>
+        <DetailRow label="Image Licence">{props.collection.licence}</DetailRow>
+      </dl>
+    </section>
   );
 }
 
@@ -420,12 +357,12 @@ export function TraitScore(
     <span className="tw-flex tw-flex-col">
       <span className="tw-flex tw-gap-2">
         <span className="tw-flex tw-min-w-fit tw-items-center tw-whitespace-nowrap">
-          <span className="tw-text-sm tw-text-[#9a9a9a]">Score</span>&nbsp;
+          <span className="tw-text-sm tw-text-iron-400">Score</span>&nbsp;
           {displayScore(props.score)}
         </span>
-        <span className="tw-text-[#9a9a9a]">|</span>
+        <span className="tw-text-iron-400">|</span>
         <span className="tw-flex tw-min-w-fit tw-items-center tw-whitespace-nowrap">
-          <span className="tw-text-sm tw-text-[#9a9a9a]">Rank</span>&nbsp;#
+          <span className="tw-text-sm tw-text-iron-400">Rank</span>&nbsp;#
           {props.rank.toLocaleString()}
         </span>
       </span>
