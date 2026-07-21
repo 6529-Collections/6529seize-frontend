@@ -57,6 +57,8 @@ describe("Release Bus gate evidence", () => {
     const baseline = frontendGateContract(input);
     expect(frontendGateContract(input)).toEqual(baseline);
     expect(baseline).toMatchObject({
+      behavior_digest:
+        "56bdbaf1d0a50a6f6bd34149014bc9a0da9d69d38019e9013cdb888b08da6107",
       gate_fingerprint:
         "78870a761c2c085d2ca6a9386a3c6e77ccda5348667526972718a5832c530b49",
       workflow_digest:
@@ -68,6 +70,48 @@ describe("Release Bus gate evidence", () => {
         baseFileContents: { ...baseFileContents, "jest.config.js": "changed" },
       }).gate_fingerprint
     ).not.toBe(baseline.gate_fingerprint);
+    expect(
+      frontendGateContract({
+        ...input,
+        baseSha: "c".repeat(40),
+        workflowSha: "d".repeat(40),
+      }).behavior_digest
+    ).toBe(baseline.behavior_digest);
+    for (const file of Object.keys(baseFileContents)) {
+      const changedContents =
+        file === "package.json"
+          ? JSON.stringify({ packageManager: "pnpm@10.15.0" })
+          : `${baseFileContents[file]} changed`;
+      expect(
+        frontendGateContract({
+          ...input,
+          baseFileContents: {
+            ...baseFileContents,
+            [file]: changedContents,
+          },
+        }).behavior_digest
+      ).not.toBe(baseline.behavior_digest);
+    }
+    for (const file of Object.keys(workflowFileContents)) {
+      expect(
+        frontendGateContract({
+          ...input,
+          workflowFileContents: {
+            ...workflowFileContents,
+            [file]: `${workflowFileContents[file]} changed`,
+          },
+        }).behavior_digest
+      ).not.toBe(baseline.behavior_digest);
+    }
+    expect(
+      frontendGateContract({ ...input, shardCount: 2 }).behavior_digest
+    ).not.toBe(baseline.behavior_digest);
+    expect(
+      frontendGateContract({ ...input, gateMode: "shadow" }).behavior_digest
+    ).not.toBe(baseline.behavior_digest);
+    expect(
+      frontendGateContract({ ...input, nodeVersion: "24" }).behavior_digest
+    ).not.toBe(baseline.behavior_digest);
     expect(
       frontendGateContract({
         ...input,
@@ -537,6 +581,7 @@ describe("Release Bus gate evidence", () => {
         "base-sha": evidenceIdentity.base_sha,
         environment: evidenceIdentity.environment,
         "gate-fingerprint": evidenceIdentity.gate_fingerprint,
+        "behavior-digest": "e".repeat(64),
         "workflow-sha": evidenceIdentity.workflow_sha,
         "workflow-digest": evidenceIdentity.workflow_digest,
         "node-version": evidenceIdentity.node_version,
@@ -581,6 +626,7 @@ describe("Release Bus gate evidence", () => {
         "base-sha": evidenceIdentity.base_sha,
         environment: evidenceIdentity.environment,
         "gate-fingerprint": evidenceIdentity.gate_fingerprint,
+        "behavior-digest": "e".repeat(64),
         "workflow-sha": evidenceIdentity.workflow_sha,
         "workflow-digest": evidenceIdentity.workflow_digest,
         "node-version": evidenceIdentity.node_version,

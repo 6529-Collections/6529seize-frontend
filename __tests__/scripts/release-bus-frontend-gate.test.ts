@@ -143,6 +143,8 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain('git show "$WORKFLOW_SHA:$file"');
     expect(canary).toContain("Derive and verify immutable gate fingerprint");
     expect(canary).toContain("RELEASE_BUS_GATE_FINGERPRINT=$GATE_FINGERPRINT");
+    expect(canary).toContain("behavior_digest");
+    expect(canary).toContain('--behavior-digest "$behavior_digest"');
     expect(canary).not.toContain("gate_fingerprint=unversioned");
     expect(canary).toContain('RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE"');
     expect(canary).not.toContain("ref: ${{ inputs.base_sha }}");

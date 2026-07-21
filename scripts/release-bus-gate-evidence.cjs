@@ -75,6 +75,12 @@ function integer(value, name, minimum = 0) {
   return parsed;
 }
 
+function digest(args, name) {
+  const value = required(args, name);
+  if (!/^[a-f0-9]{64}$/.test(value)) throw new Error(`Invalid --${name}`);
+  return value;
+}
+
 function safeText(value, maximum = MAX_TEXT_LENGTH) {
   return String(value ?? "")
     .replace(/[\u0000-\u001f\u007f]/g, " ")
@@ -111,6 +117,7 @@ function frontendGateContract({
   workflowFileContents,
   gateMode,
   shardCount,
+  nodeVersion = "22",
 }) {
   if (!/^[a-f0-9]{40}$/.test(baseSha)) throw new Error("Invalid base SHA");
   if (!/^[a-f0-9]{40}$/.test(workflowSha))
@@ -119,6 +126,8 @@ function frontendGateContract({
     throw new Error("Invalid gate mode");
   if (!ALLOWED_SHARD_COUNTS.has(shardCount))
     throw new Error("Unsupported shard count");
+  if (!/^[1-9][0-9]{0,2}$/.test(nodeVersion))
+    throw new Error("Invalid Node version");
   const workflowFiles = [
     FRONTEND_GATE_WORKFLOW,
     ...FRONTEND_GATE_TOOLING_FILES,
@@ -147,6 +156,18 @@ function frontendGateContract({
     ...workflowFiles.map((file) => [file, sha256(workflowFileContents[file])]),
   ]);
   const workflowDigest = componentDigests[FRONTEND_GATE_WORKFLOW];
+  const behaviorDigest = sha256(
+    JSON.stringify({
+      schema_version: 1,
+      repository: "frontend",
+      environment: "orchestration",
+      node_version: nodeVersion,
+      package_manager: packageManager,
+      gate_mode: gateMode,
+      shard_count: shardCount,
+      component_digests: componentDigests,
+    })
+  );
   const fingerprint = sha256(
     JSON.stringify({
       schema_version: 1,
@@ -155,7 +176,7 @@ function frontendGateContract({
       base_sha: baseSha,
       workflow_sha: workflowSha,
       workflow_digest: workflowDigest,
-      node_version: "22",
+      node_version: nodeVersion,
       package_manager: packageManager,
       gate_mode: gateMode,
       shard_count: shardCount,
@@ -167,10 +188,11 @@ function frontendGateContract({
     repository: "frontend",
     environment: "orchestration",
     base_sha: baseSha,
+    behavior_digest: behaviorDigest,
     gate_fingerprint: fingerprint,
     workflow_sha: workflowSha,
     workflow_digest: workflowDigest,
-    node_version: "22",
+    node_version: nodeVersion,
     package_manager: packageManager,
     gate_mode: gateMode,
     shard_count: shardCount,
@@ -709,6 +731,7 @@ function finalSummary({ args, records, jobResults }) {
     gate_mode: mode,
     fresh_or_reused: "fresh",
     ...identity,
+    behavior_digest: digest(args, "behavior-digest"),
     shard_count: mode === "sharded" ? shardCount : 1,
     phases: authoritative?.phases ?? [],
     phase_durations_ms: Object.fromEntries(

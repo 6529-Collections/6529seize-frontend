@@ -40,6 +40,7 @@ jobs:
       shard_count: ${{ steps.inputs.outputs.shard_count }}
       shard_matrix: ${{ steps.inputs.outputs.shard_matrix }}
       gate_fingerprint: ${{ steps.fingerprint.outputs.gate_fingerprint }}
+      behavior_digest: ${{ steps.fingerprint.outputs.behavior_digest }}
       workflow_sha: ${{ steps.fingerprint.outputs.workflow_sha }}
       workflow_digest: ${{ steps.fingerprint.outputs.workflow_digest }}
       evidence_environment: ${{ steps.fingerprint.outputs.evidence_environment }}
@@ -146,6 +147,7 @@ jobs:
             --shard-count "$SHARD_COUNT" \
             --output "$contract"
           gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
+          behavior_digest="$(jq -r '.behavior_digest' "$contract")"
           workflow_digest="$(jq -r '.workflow_digest' "$contract")"
           package_manager="$(jq -r '.package_manager' "$contract")"
           if [ -n "$GATE_CONTRACT_INPUT" ]; then
@@ -155,6 +157,7 @@ jobs:
           fi
           {
             echo "gate_fingerprint=$gate_fingerprint"
+            echo "behavior_digest=$behavior_digest"
             echo "workflow_sha=$WORKFLOW_SHA"
             echo "workflow_digest=$workflow_digest"
             echo "evidence_environment=orchestration"
@@ -523,6 +526,7 @@ jobs:
           LEGACY_RESULT: ${{ needs.legacy.result }}
           LINT_RESULT: ${{ needs.lint.result }}
           PASSED_GATE_FINGERPRINT: ${{ needs.authorize.outputs.gate_fingerprint }}
+          PASSED_BEHAVIOR_DIGEST: ${{ needs.authorize.outputs.behavior_digest }}
           PASSED_PACKAGE_MANAGER: ${{ needs.authorize.outputs.package_manager }}
           PASSED_WORKFLOW_DIGEST: ${{ needs.authorize.outputs.workflow_digest }}
           TYPECHECK_RESULT: ${{ needs.typecheck.result }}
@@ -538,9 +542,11 @@ jobs:
             --shard-count "${{ needs.authorize.outputs.shard_count }}" \
             --output "$contract"
           gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
+          behavior_digest="$(jq -r '.behavior_digest' "$contract")"
           workflow_digest="$(jq -r '.workflow_digest' "$contract")"
           package_manager="$(jq -r '.package_manager' "$contract")"
           test "$PASSED_GATE_FINGERPRINT" = "$gate_fingerprint"
+          test "$PASSED_BEHAVIOR_DIGEST" = "$behavior_digest"
           test "$PASSED_WORKFLOW_DIGEST" = "$workflow_digest"
           test "$PASSED_PACKAGE_MANAGER" = "$package_manager"
           jq -n \
@@ -560,6 +566,7 @@ jobs:
             --base-sha "$BASE_SHA" \
             --environment "${{ needs.authorize.outputs.evidence_environment }}" \
             --gate-fingerprint "$gate_fingerprint" \
+            --behavior-digest "$behavior_digest" \
             --workflow-sha "${{ needs.authorize.outputs.workflow_sha }}" \
             --workflow-digest "$workflow_digest" \
             --node-version "22" \

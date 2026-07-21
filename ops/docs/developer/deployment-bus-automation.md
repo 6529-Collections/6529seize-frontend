@@ -145,6 +145,16 @@ the workflow and this tooling at the workflow SHA, plus the Jest configuration,
 package manager, lockfile, and approved runner at the base SHA. Changing any
 covered policy invalidates older evidence.
 
+The exact-SHA `gate_fingerprint` remains the authoritative reuse key and
+includes the base and workflow commit SHAs. The aggregate artifact also records
+a separate `behavior_digest`, derived from the complete covered file digests,
+Node/package-manager contract, gate mode, and shard count but not Git ancestry.
+That content address is the equivalence-continuity key: a merge commit may keep
+prior behavior evidence only when the digest is byte-identical. Workflow and
+base SHAs remain mandatory provenance, and any covered byte, action pin,
+runtime, package-manager, mode, or shard-count change invalidates continuity
+fail-closed.
+
 Every shard uploads bounded JSON counts, timing, its planned manifest, its
 executed-file manifest, exact shard coordinates, and failing suite/test
 identities. Every phase, manifest, and shard record also repeats the exact base
