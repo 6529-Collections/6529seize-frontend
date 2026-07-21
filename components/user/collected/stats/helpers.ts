@@ -15,11 +15,9 @@ import type {
   DisplaySeason,
 } from "./types";
 
-/** Checks whether a caught value represents an aborted request. */
 export const isAbortError = (error: unknown): boolean =>
   error instanceof Error && error.name === "AbortError";
 
-/** Returns the stats API path, or null when the profile input is invalid. */
 export const getSafeStatsPath = (
   profile: ApiIdentity,
   activeAddress: string | null
@@ -31,7 +29,6 @@ export const getSafeStatsPath = (
   }
 };
 
-/** Returns the stats cache identity, or null when the input is invalid. */
 export const getSafeCollectedStatsIdentityKey = (
   profile: ApiIdentity,
   activeAddress: string | null
@@ -47,7 +44,6 @@ const METRIC_NUMBER_FORMAT_OPTIONS = {
   maximumFractionDigits: 2,
 } satisfies Intl.NumberFormatOptions;
 
-/** Formats one collected metric value with the requested locale. */
 const formatMetricValue = (
   value: number | undefined,
   locale: SupportedLocale
@@ -56,7 +52,6 @@ const formatMetricValue = (
     value: formatInteger(locale, value ?? 0),
   });
 
-/** Parses supported season labels into their positive numeric identifier. */
 const parseSeasonNumber = (season: string) => {
   const trimmed = season.trim();
   if (/^szn\d+$/i.test(trimmed)) {
@@ -73,13 +68,6 @@ const parseSeasonNumber = (season: string) => {
   return null;
 };
 
-/** Normalizes API count values for safe display and progress calculations. */
-const toNonNegativeInteger = (value: number | null | undefined): number =>
-  typeof value === "number" && Number.isFinite(value) && value > 0
-    ? Math.trunc(value)
-    : 0;
-
-/** Builds the compact collection metrics shown above the details panel. */
 const buildMainMetrics = (
   collectedStats: ApiCollectedStats | undefined,
   locale: SupportedLocale
@@ -92,12 +80,9 @@ const buildMainMetrics = (
   const validSeasonSets = collectedStats.seasons
     .filter((season) => {
       const seasonNumber = parseSeasonNumber(season.season);
-      return (
-        seasonNumber !== null &&
-        toNonNegativeInteger(season.total_cards_in_season) > 0
-      );
+      return seasonNumber !== null && season.total_cards_in_season > 0;
     })
-    .map((season) => toNonNegativeInteger(season.sets_held));
+    .map((season) => season.sets_held);
   const memeSets =
     validSeasonSets.length > 0 ? Math.min(...validSeasonSets) : 0;
 
@@ -162,22 +147,19 @@ const buildMainMetrics = (
   return metrics;
 };
 
-/** Converts one API season into the normalized table-row view model. */
 const buildDisplaySeason = (
   season: ApiCollectedStatsSeason,
   locale: SupportedLocale
 ): DisplaySeason | null => {
   const seasonNumber = parseSeasonNumber(season.season);
-  const totalCards = toNonNegativeInteger(season.total_cards_in_season);
+  const totalCards = season.total_cards_in_season;
   if (seasonNumber === null || totalCards <= 0) {
     return null;
   }
 
-  const setsHeld = toNonNegativeInteger(season.sets_held);
-  const nextSetCards = toNonNegativeInteger(
-    season.partial_set_unique_cards_held
-  );
-  const totalCardsHeld = toNonNegativeInteger(season.total_cards_held);
+  const setsHeld = season.sets_held;
+  const nextSetCards = season.partial_set_unique_cards_held;
+  const totalCardsHeld = season.total_cards_held;
   const isStarted = totalCardsHeld > 0;
   const isRestingComplete = setsHeld > 0 && nextSetCards === 0;
   const rawProgressPct =
@@ -189,7 +171,7 @@ const buildDisplaySeason = (
     if (nextSetCards > 0) {
       detailText = translate(
         locale,
-        "user.collected.stats.seasonRow.toNextSet",
+        "user.collected.stats.seasonTile.toNextSet",
         {
           held: formatInteger(locale, nextSetCards),
           total: formatInteger(locale, totalCards),
@@ -199,7 +181,7 @@ const buildDisplaySeason = (
     } else if (setsHeld > 0) {
       detailText = translate(
         locale,
-        "user.collected.stats.seasonRow.setComplete",
+        "user.collected.stats.seasonTile.setComplete",
         { count: formatInteger(locale, setsHeld) }
       );
     }
@@ -207,7 +189,7 @@ const buildDisplaySeason = (
 
   return {
     id: season.season,
-    label: translate(locale, "user.collected.stats.seasonRow.label", {
+    label: translate(locale, "user.collected.stats.seasonTile.label", {
       seasonNumber,
     }),
     seasonNumber,
@@ -222,7 +204,6 @@ const buildDisplaySeason = (
   };
 };
 
-/** Builds the complete display model for the Collected summary. */
 export const buildCollectedStatsViewModel = (
   collectedStats: ApiCollectedStats | undefined,
   locale: SupportedLocale = DEFAULT_LOCALE

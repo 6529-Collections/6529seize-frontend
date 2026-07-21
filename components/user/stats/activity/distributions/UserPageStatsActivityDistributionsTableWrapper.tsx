@@ -3,6 +3,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
+import { UserPageStatsTableScroll } from "@/components/user/stats/UserPageStatsTableShared";
 import { getDistributionsMessage } from "./distributions.messages";
 import UserPageStatsActivityDistributionsTable from "./UserPageStatsActivityDistributionsTable";
 
@@ -34,15 +35,23 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
   }
 
   return (
-    <div className="tw-mt-2 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 lg:tw-mt-4">
+    <div className="tw-mt-2 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02] lg:tw-mt-4">
       {data.length ? (
         <div className="tw-flow-root">
-          <UserPageStatsActivityDistributionsTable
-            items={data}
-            profile={profile}
-            loading={loading}
-            locale={locale}
-          />
+          <UserPageStatsTableScroll
+            label={getDistributionsMessage(
+              "user.collected.stats.distributions.tableCaption",
+              undefined,
+              locale
+            )}
+          >
+            <UserPageStatsActivityDistributionsTable
+              items={data}
+              profile={profile}
+              loading={loading}
+              locale={locale}
+            />
+          </UserPageStatsTableScroll>
           {totalPages > 1 && (
             <CommonTablePagination
               currentPage={page}

@@ -99,7 +99,7 @@ export default function UserPageStatsActivityDistributionsTable({
   );
 
   return (
-    <table className="tw-min-w-full tw-divide-y tw-divide-iron-700">
+    <table className="tw-min-w-full tw-divide-y tw-divide-white/[0.08]">
       <caption className="tw-sr-only">
         {getDistributionsMessage(
           "user.collected.stats.distributions.tableCaption",
@@ -107,7 +107,7 @@ export default function UserPageStatsActivityDistributionsTable({
           locale
         )}
       </caption>
-      <thead className="tw-bg-iron-900">
+      <thead className="tw-bg-white/[0.04]">
         <tr>
           <th
             scope="col"
@@ -198,7 +198,7 @@ export default function UserPageStatsActivityDistributionsTable({
           </th>
         </tr>
       </thead>
-      <tbody className="tw-divide-y tw-divide-iron-800">
+      <tbody className="tw-divide-y tw-divide-white/[0.06]">
         {results.map((item) => (
           <UserPageStatsActivityDistributionsTableItem
             key={`${item.collection}-${item.tokenId}-${item.wallet}`}

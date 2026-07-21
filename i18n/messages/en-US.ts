@@ -32,7 +32,6 @@ type NamespacedMessages<
   readonly [Entry in Entries[number] as `${Prefix}.${Entry[0]}`]: Entry[1];
 };
 
-/** Prefixes tuple message keys while preserving their literal key types. */
 function namespaceMessages<
   Prefix extends string,
   Entries extends readonly MessageEntry[],
@@ -50,7 +49,6 @@ type ObjectMessages<Prefix extends string, Entries extends MessageMap> = {
   readonly [Entry in keyof Entries as `${Prefix}.${Entry & string}`]: Entries[Entry];
 };
 
-/** Prefixes object message keys while preserving their literal key types. */
 function objectMessages<Prefix extends string, Entries extends MessageMap>(
   prefix: Prefix,
   entries: Entries
@@ -110,14 +108,12 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["seasons.showMore", "+{count} more"],
     ["seasons.showMoreAriaLabel", "Show {count} more started seasons"],
     ["seasons.unseized", "Unseized"],
-    ["seasons.tableCaption", "Meme season collection progress"],
-    ["seasons.column.season", "Season"],
-    ["seasons.column.sets", "Sets"],
-    ["seasons.column.progress", "Set progress"],
-    ["seasonRow.label", "SZN{seasonNumber}"],
-    ["seasonRow.toNextSet", "{held}/{total} to set {setNumber}"],
-    ["seasonRow.setComplete", "Set {count} complete"],
-    ["seasonRow.progressAriaLabel", "{season} set progress"],
+    ["seasonTile.sets.zero", "0 sets"],
+    ["seasonTile.sets.one", "{count} set"],
+    ["seasonTile.sets.many", "{count} sets"],
+    ["seasonTile.label", "SZN{seasonNumber}"],
+    ["seasonTile.toNextSet", "{held}/{total} to set {setNumber}"],
+    ["seasonTile.setComplete", "Set {count} complete"],
   ] as const
 );
 
@@ -132,12 +128,14 @@ const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
     "tables.column.nextGen": "NextGen",
     "tables.column.gradient": "Gradient",
     "tables.column.memeLab": "Meme Lab",
+    "tables.column.season": "Season",
     "rows.cards": "Cards",
     "rows.rank": "Rank",
     "rows.tdh": "TDH",
     "rows.noTdh": "* No TDH",
     memesBySeason: "Memes Breakdown By Season",
     "tables.memesBySeasonCaption": "Collected Memes breakdown by season",
+    "tables.memesBySeasonEmpty": "No Meme holdings by season yet.",
     "tables.column.unique": "Unique",
     "tables.column.sets": "Sets",
     seasonLabel: "Season {seasonNumber}",

@@ -50,7 +50,7 @@ export default function UserPageStatsActivityTDHHistory({
     );
   } else {
     content = (
-      <div className="tw-mt-2 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 lg:tw-mt-4">
+      <div className="tw-mt-2 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02] lg:tw-mt-4">
         <output className="tw-block tw-p-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6">
           {getTdhHistoryMessage(
             "user.collected.stats.tdhHistory.empty",
