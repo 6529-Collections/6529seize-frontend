@@ -80,7 +80,6 @@ function SeasonProgressRow({
         <progress
           className="tw-sr-only"
           aria-label={progressLabel}
-          aria-valuetext={progressValue}
           max={100}
           value={progressPercent}
         >
