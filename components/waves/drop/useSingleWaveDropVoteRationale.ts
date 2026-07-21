@@ -22,6 +22,7 @@ interface UseSingleWaveDropVoteRationaleParams {
 
 interface UseSingleWaveDropVoteRationaleResult {
   readonly rationaleText: string;
+  readonly isUsingGeneratedRationale: boolean;
   readonly shouldPostRationale: boolean;
   readonly handlePostRationaleChange: (postRationale: boolean) => void;
   readonly handleRationaleTextChange: (nextText: string) => void;
@@ -211,6 +212,7 @@ export const useSingleWaveDropVoteRationale = (
 
   return {
     rationaleText,
+    isUsingGeneratedRationale: rationaleText === generatedRationaleText,
     shouldPostRationale: postRationale,
     handlePostRationaleChange,
     handleRationaleTextChange,

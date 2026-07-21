@@ -80,6 +80,9 @@ Transfer mode is part of the Native collected view (not a separate route).
        labels are message-backed from the source locale
      - collected details tables include screen-reader captions and row headers
        for assistive technologies
+     - wide tables stay inside their bordered sections on narrow screens; the
+       first label column remains visible while the numeric columns scroll
+       horizontally by touch or the browser's horizontal scroll controls
    - `Activity Overview`
    - Activity Overview heading, table headings, row labels, and per-season
      labels are message-backed from the source locale

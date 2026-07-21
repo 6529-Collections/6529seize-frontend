@@ -11,6 +11,8 @@ import {
 } from "../waves/drop/SingleWaveDropVote.types";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 import { VoteModeControl } from "./VoteModeControl";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface VotingModalProps {
   readonly drop: ExtendedDrop;
@@ -23,6 +25,7 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const [voteInputMode, setVoteInputMode] =
     useState<SingleWaveDropVoteMode>("slider");
   const handleClose = useCallback(() => {
@@ -68,7 +71,7 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-iron-600/60 tw-outline-none"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-bg-gray-700/75 tw-outline-none"
       onClick={(e) => e.stopPropagation()}
     >
       <div
@@ -82,11 +85,11 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <ModalLayout
-          title="Vote for this artwork"
+          title={t(locale, "waves.vote.modalTitle")}
           onCancel={handleClose}
           titleId={titleId}
           showAmbientBackground={false}
-          surfaceClassName="tw-w-full tw-bg-[#131316] tw-rounded-xl tw-relative tw-border tw-border-solid tw-border-[#26272B] tw-overflow-hidden tw-shadow-2xl"
+          surfaceClassName="tw-relative tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl"
           headerClassName="tw-relative tw-z-10 tw-px-6 tw-pt-5 tw-pb-5 tw-flex tw-justify-between tw-items-start"
           titleClassName="tw-text-lg tw-font-semibold tw-text-white tw-mb-0"
           closeButtonClassName="-tw-mr-2 -tw-mt-1 tw-size-9 tw-rounded-lg tw-p-0 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-600 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-300"
