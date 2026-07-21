@@ -87,7 +87,7 @@ function ProfileCell({
           compact ? "tw-gap-2" : "tw-gap-3"
         }`}
       >
-        <span className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+        <span className="rep-category-profile-avatar tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
           {profile.pfp ? (
             <Image
               unoptimized
