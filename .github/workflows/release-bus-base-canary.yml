@@ -516,6 +516,7 @@ jobs:
         if: always()
         continue-on-error: true
         env:
+          BASE_SHA: ${{ inputs.base_sha }}
           BUILD_RESULT: ${{ needs.production-build.result }}
           INVENTORY_RESULT: ${{ needs.jest-inventory.result }}
           JEST_RESULT: ${{ needs.jest.result }}
@@ -527,10 +528,11 @@ jobs:
           TYPECHECK_RESULT: ${{ needs.typecheck.result }}
         run: |
           set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
           contract="$RUNNER_TEMP/release-bus-gate-contract.json"
           node "$RELEASE_BUS_EVIDENCE_TOOL" fingerprint \
             --repo-root "$GITHUB_WORKSPACE" \
-            --base-sha "${{ inputs.base_sha }}" \
+            --base-sha "$BASE_SHA" \
             --workflow-sha "${{ needs.authorize.outputs.workflow_sha }}" \
             --mode "${{ needs.authorize.outputs.gate_mode }}" \
             --shard-count "${{ needs.authorize.outputs.shard_count }}" \
@@ -555,7 +557,7 @@ jobs:
             --shard-count "${{ needs.authorize.outputs.shard_count }}" \
             --evidence-root "$RUNNER_TEMP/release-bus-evidence" \
             --job-results "$RUNNER_TEMP/release-bus-job-results.json" \
-            --base-sha "${{ inputs.base_sha }}" \
+            --base-sha "$BASE_SHA" \
             --environment "${{ needs.authorize.outputs.evidence_environment }}" \
             --gate-fingerprint "$gate_fingerprint" \
             --workflow-sha "${{ needs.authorize.outputs.workflow_sha }}" \

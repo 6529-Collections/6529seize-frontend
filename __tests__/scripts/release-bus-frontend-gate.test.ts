@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { parse as parseYaml } from "yaml";
 
 const read = (relativePath: string) =>
   fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -12,6 +13,16 @@ describe("Release Bus frontend gate contract", () => {
   const isolation = read(".github/workflows/release-bus-isolate-candidate.yml");
   const canary = read(".github/workflows/release-bus-base-canary.yml");
   const appPrCi = read(".github/workflows/app-pr-ci.yml");
+
+  type WorkflowStep = {
+    env?: Record<string, string>;
+    name?: string;
+    run?: string;
+  };
+
+  const canaryWorkflow = parseYaml(canary) as {
+    jobs?: Record<string, { steps?: WorkflowStep[] }>;
+  };
 
   it("owns the only Release Bus Jest invocation", () => {
     expect(gate).toContain(
@@ -135,6 +146,45 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).not.toContain("gate_fingerprint=unversioned");
     expect(canary).toContain('RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE"');
     expect(canary).not.toContain("ref: ${{ inputs.base_sha }}");
+  });
+
+  it("passes untrusted workflow inputs through the environment before shell use", () => {
+    const steps = Object.values(canaryWorkflow.jobs ?? {}).flatMap(
+      (job) => job.steps ?? []
+    );
+    for (const step of steps) {
+      expect(step.run ?? "").not.toMatch(/\$\{\{\s*inputs\./);
+    }
+
+    const aggregate = steps.find(
+      (step) => step.name === "Aggregate fail-closed evidence"
+    );
+    expect(aggregate?.env?.BASE_SHA).toBe("${{ inputs.base_sha }}");
+    expect(aggregate?.run).toContain('[[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]');
+    expect(aggregate?.run?.match(/--base-sha "\$BASE_SHA"/g)).toHaveLength(2);
+
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-input-")
+    );
+    const marker = path.join(tempDir, "shell-interpolation-ran");
+    const validator = path.join(tempDir, "validate-base-sha");
+    const maliciousBaseSha = `$(touch ${marker})`;
+    try {
+      fs.writeFileSync(
+        validator,
+        '#!/usr/bin/env bash\nset -euo pipefail\n[[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]\n'
+      );
+      fs.chmodSync(validator, 0o755);
+      expect(() =>
+        execFileSync(validator, [], {
+          env: { ...process.env, BASE_SHA: maliciousBaseSha },
+          stdio: "ignore",
+        })
+      ).toThrow();
+      expect(fs.existsSync(marker)).toBe(false);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it("keeps all required phases and deterministic shard controls", () => {
