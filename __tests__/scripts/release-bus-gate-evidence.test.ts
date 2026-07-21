@@ -253,6 +253,67 @@ describe("Release Bus gate evidence", () => {
     expect(summary.duplicate_files).toContain("a.test.ts");
   });
 
+  it("fails closed when Jest reports a skipped or todo test", () => {
+    const records = [
+      {
+        kind: "manifest",
+        source: "parallel",
+        scope: "all",
+        files: ["a.test.ts"],
+      },
+      {
+        kind: "manifest",
+        source: "parallel",
+        scope: "shard",
+        shard_index: 1,
+        shard_count: 1,
+        files: ["a.test.ts"],
+      },
+      {
+        kind: "jest_shard",
+        source: "parallel",
+        shard_index: 1,
+        shard_count: 1,
+        status: "SUCCEEDED",
+        duration_ms: 1,
+        counts: {
+          test_files: 1,
+          test_suites: 1,
+          passed_test_suites: 1,
+          failed_test_suites: 0,
+          pending_test_suites: 0,
+          tests: 2,
+          passed_tests: 1,
+          failed_tests: 0,
+          pending_tests: 1,
+          todo_tests: 0,
+        },
+        executed_test_files: ["a.test.ts"],
+      },
+      ...["lint", "typecheck", "build"].map((name) =>
+        phaseRecord({
+          name,
+          status: "SUCCEEDED",
+          durationMs: 1,
+          exitCode: 0,
+          source: "parallel",
+        })
+      ),
+    ];
+
+    expect(
+      buildGateSummary({
+        records,
+        source: "parallel",
+        shardCount: 1,
+        jobResults: { jest: "success" },
+      })
+    ).toMatchObject({
+      status: "FAILED",
+      errors: expect.arrayContaining(["Jest reported skipped or todo tests"]),
+    });
+  });
+
   it("fails when an individual shard does not execute its exact plan", () => {
     const records = [
       {

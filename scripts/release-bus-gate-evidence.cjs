@@ -588,6 +588,13 @@ function buildGateSummary({
     errors.push("one or more required phases failed");
   }
   const counts = sumCounts(shards);
+  if (
+    counts.pending_test_suites > 0 ||
+    counts.pending_tests > 0 ||
+    counts.todo_tests > 0
+  ) {
+    errors.push("Jest reported skipped or todo tests");
+  }
   const shardDurations = shards
     .map((shard) => Number(shard.duration_ms ?? 0))
     .filter((duration) => duration >= 0);
