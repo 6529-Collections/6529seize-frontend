@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { amIUser } from "@/helpers/Helpers";
@@ -13,7 +14,6 @@ import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQueries } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
@@ -166,20 +166,22 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
         ))}
       </ul>
       <div className="tw-space-x-3 tw-pt-5 xl:tw-pt-4">
-        <Link
+        <ButtonLink
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
-          className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.08] hover:tw-text-iron-200 focus:tw-z-10 focus:tw-outline-none"
+          variant="secondary"
+          size="sm"
         >
           Wallet Checker
-        </Link>
+        </ButtonLink>
         <AnimatePresence mode="wait" initial={false}>
           {showDelegationCenter && (
-            <Link
+            <ButtonLink
               href="/delegation/delegation-center"
-              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.08] hover:tw-text-iron-200 focus:tw-z-10 focus:tw-outline-none"
+              variant="secondary"
+              size="sm"
             >
               Delegation Center
-            </Link>
+            </ButtonLink>
           )}
         </AnimatePresence>
       </div>

@@ -1,18 +1,14 @@
 import type { CSSProperties, PointerEvent } from "react";
-import Link from "next/link";
 
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { SupportedLocale } from "@/i18n/locales";
 
 import { HERO_CONTENT, HERO_POINTS } from "./heroContent";
 import { MemeArtifactCard } from "./MemeArtifactCard";
 import { HERO_MEME_CARDS } from "./page.content";
 import type { CurrentPanelAction, JoinPageState } from "./page.types";
-import {
-  cx,
-  m,
-  PRIMARY_ACTION_CLASS,
-  SECONDARY_ACTION_CLASS,
-} from "./page.utils";
+import { cx, m } from "./page.utils";
 import { getMemeCardAriaLabel } from "./JoinVisualArtifacts";
 
 const heroFloatStyle = (
@@ -267,32 +263,33 @@ function HeroAction({
   readonly variant: "primary" | "secondary";
 }) {
   const label = action.busy ? (action.busyLabel ?? action.label) : action.label;
-  const className = cx(
-    variant === "primary" ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS,
-    "tw-w-full sm:tw-w-auto"
-  );
+  const className = "tw-w-full sm:tw-w-auto";
 
   if (action.kind === "link") {
     return (
-      <Link
+      <ButtonLink
+        variant={variant}
+        size="lg"
         className={className}
         href={action.href ?? "#journey"}
         {...(action.onClick ? { onClick: action.onClick } : {})}
         {...(action.onNavigate ? { onNavigate: action.onNavigate } : {})}
       >
         {label}
-      </Link>
+      </ButtonLink>
     );
   }
 
   return (
-    <button
+    <Button
+      variant={variant}
+      size="lg"
       className={className}
       disabled={action.busy}
+      loading={action.busy}
       onClick={action.onClick}
-      type="button"
     >
       {label}
-    </button>
+    </Button>
   );
 }
