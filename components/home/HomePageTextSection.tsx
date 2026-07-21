@@ -5,7 +5,7 @@ export default function HomePageTextSection() {
         className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden"
         aria-hidden="true"
       >
-        <div className="tw-absolute tw-left-1/2 tw-top-1/2 tw-h-[600px] tw-w-[600px] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-[radial-gradient(circle,rgba(130,150,185,0.15)_0%,transparent_70%)] sm:tw-h-[800px] sm:tw-w-[800px]" />
+        <div className="tw-absolute tw-left-1/2 tw-top-1/2 tw-h-[600px] tw-w-[600px] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-[radial-gradient(circle,rgba(130,150,185,0.15)_0%,transparent_70%)] sm:tw-h-[800px] sm:tw-w-[800px] lg:tw-left-2/3" />
       </div>
 
       <div className="tw-relative tw-z-10 tw-py-4 md:tw-py-8">
