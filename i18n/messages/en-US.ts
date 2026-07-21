@@ -464,6 +464,18 @@ const WAVE_VOTE_MODE_MESSAGES = objectMessages("waves.voteMode", {
   groupLabel: "Vote input mode",
   slider: "Slider",
   numeric: "Numeric",
+  switchTitle: "Switch mode",
+  switchToNumeric: "Switch to numeric",
+  switchToSlider: "Switch to slider",
+  switchToNumericAriaLabel: "Switch to numeric input",
+  switchToSliderAriaLabel: "Switch to slider input",
+} as const);
+
+const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
+  controlsLegend: "Vote controls",
+  modalTitle: "Vote for this artwork",
+  decreaseLabel: "Decrease vote",
+  increaseLabel: "Increase vote",
 } as const);
 
 const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
@@ -2168,6 +2180,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,
+  ...WAVE_VOTE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;

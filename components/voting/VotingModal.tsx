@@ -11,6 +11,8 @@ import {
 } from "../waves/drop/SingleWaveDropVote.types";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 import { VoteModeControl } from "./VoteModeControl";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface VotingModalProps {
   readonly drop: ExtendedDrop;
@@ -23,6 +25,7 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const [voteInputMode, setVoteInputMode] =
     useState<SingleWaveDropVoteMode>("slider");
   const handleClose = useCallback(() => {
@@ -82,7 +85,7 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <ModalLayout
-          title="Vote for this artwork"
+          title={t(locale, "waves.vote.modalTitle")}
           onCancel={handleClose}
           titleId={titleId}
           showAmbientBackground={false}

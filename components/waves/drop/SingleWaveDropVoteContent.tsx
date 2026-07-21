@@ -101,22 +101,6 @@ const getNextVoteMode = (isSliderMode: boolean): SingleWaveDropVoteMode => {
   return "slider";
 };
 
-const getSwitchModeTitle = (isSliderMode: boolean): string => {
-  if (isSliderMode) {
-    return "Switch to numeric";
-  }
-
-  return "Switch to slider";
-};
-
-const getSwitchModeAriaLabel = (isSliderMode: boolean): string => {
-  if (isSliderMode) {
-    return "Switch to numeric input";
-  }
-
-  return "Switch to slider input";
-};
-
 const getExchangeIconFlip = (
   isSliderMode: boolean
 ): "horizontal" | "vertical" => {
@@ -199,6 +183,18 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   const currentVoteMode = voteModeControl.value;
   const setCurrentVoteMode = voteModeControl.setValue;
   const isSliderMode = currentVoteMode === "slider";
+  const switchModeTitle = t(
+    locale,
+    isSliderMode
+      ? "waves.voteMode.switchToNumeric"
+      : "waves.voteMode.switchToSlider"
+  );
+  const switchModeAriaLabel = t(
+    locale,
+    isSliderMode
+      ? "waves.voteMode.switchToNumericAriaLabel"
+      : "waves.voteMode.switchToSliderAriaLabel"
+  );
 
   const voteLabel =
     WAVE_VOTING_LABELS[displayDrop.wave.voting_credit_type] || "votes";
@@ -254,14 +250,16 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
       <fieldset className="tw-m-0 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#1A1A1F] tw-px-2 tw-py-1.5">
-        <legend className="tw-sr-only">Vote controls</legend>
+        <legend className="tw-sr-only">
+          {t(locale, "waves.vote.controlsLegend")}
+        </legend>
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
             type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
             className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.06] tw-font-medium tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-white/25 desktop-hover:hover:tw-bg-white/[0.1] desktop-hover:hover:tw-text-white"
-            title={getSwitchModeTitle(isSliderMode)}
-            aria-label={getSwitchModeAriaLabel(isSliderMode)}
+            title={switchModeTitle}
+            aria-label={switchModeAriaLabel}
           >
             <FontAwesomeIcon
               icon={faExchange}
@@ -315,7 +313,9 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
 
   return (
     <fieldset className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0">
-      <legend className="tw-sr-only">Vote controls</legend>
+      <legend className="tw-sr-only">
+        {t(locale, "waves.vote.controlsLegend")}
+      </legend>
       <div className={isSliderMode ? undefined : "tw-min-h-[92px]"}>
         <VoteModeField
           isSliderMode={isSliderMode}
@@ -348,10 +348,10 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
             className="tw-flex-shrink-0 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
-            title="Switch mode"
-            aria-label={getSwitchModeAriaLabel(isSliderMode)}
+            title={t(locale, "waves.voteMode.switchTitle")}
+            aria-label={switchModeAriaLabel}
           >
-            {getSwitchModeTitle(isSliderMode)}
+            {switchModeTitle}
           </button>
         )}
       </div>

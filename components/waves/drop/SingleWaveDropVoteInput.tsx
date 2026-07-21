@@ -3,6 +3,8 @@
 import React, { useEffect, useRef } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface SingleWaveDropVoteInputProps {
   readonly voteValue: number | string;
@@ -93,6 +95,7 @@ export const SingleWaveDropVoteInput: React.FC<
   onSubmit,
   size = SingleWaveDropVoteSize.NORMAL,
 }) => {
+  const locale = useBrowserLocale();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pressStartTime = useRef<number | null>(null);
@@ -316,7 +319,7 @@ export const SingleWaveDropVoteInput: React.FC<
           onMouseLeave={stopPress}
           onTouchStart={() => startPress(false)}
           onTouchEnd={stopPress}
-          aria-label="Decrease vote"
+          aria-label={t(locale, "waves.vote.decreaseLabel")}
           className="tw-flex tw-h-full tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-rose-400/70 active:tw-bg-rose-500/15 active:tw-text-rose-300 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-300"
         >
           <ArrowDownIcon className="tw-size-[15px] tw-flex-shrink-0" />
@@ -345,7 +348,7 @@ export const SingleWaveDropVoteInput: React.FC<
           onMouseLeave={stopPress}
           onTouchStart={() => startPress(true)}
           onTouchEnd={stopPress}
-          aria-label="Increase vote"
+          aria-label={t(locale, "waves.vote.increaseLabel")}
           className="tw-flex tw-h-full tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-emerald-400/70 active:tw-bg-emerald-500/15 active:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/10 desktop-hover:hover:tw-text-emerald-300"
         >
           <ArrowUpIcon className="tw-size-[15px] tw-flex-shrink-0" />
