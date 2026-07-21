@@ -82,16 +82,13 @@ jobs:
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
-      - name: Typecheck
+      - name: Run exact train validation gate
+        if: matrix.environment == 'staging'
+        run: ./scripts/release-bus-frontend-gate.sh validate
+      - name: Typecheck production artifact source
+        if: matrix.environment == 'production'
         run: ./bin/6529 run typecheck:ci
-      - name: Lint exact train
-        if: matrix.environment == 'staging'
-        run: ./bin/6529 run lint
-      - name: Run frontend unit tests
-        if: matrix.environment == 'staging'
-        run: ./bin/6529 run test:no-coverage -- --runInBand
       - name: Verify validation did not mutate source
-        if: matrix.environment == 'staging'
         run: git diff --exit-code
       - name: Capture build timestamp
         run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
