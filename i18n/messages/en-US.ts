@@ -32,6 +32,7 @@ type NamespacedMessages<
   readonly [Entry in Entries[number] as `${Prefix}.${Entry[0]}`]: Entry[1];
 };
 
+/** Prefixes tuple message keys while preserving their literal key types. */
 function namespaceMessages<
   Prefix extends string,
   Entries extends readonly MessageEntry[],
@@ -49,6 +50,7 @@ type ObjectMessages<Prefix extends string, Entries extends MessageMap> = {
   readonly [Entry in keyof Entries as `${Prefix}.${Entry & string}`]: Entries[Entry];
 };
 
+/** Prefixes object message keys while preserving their literal key types. */
 function objectMessages<Prefix extends string, Entries extends MessageMap>(
   prefix: Prefix,
   entries: Entries

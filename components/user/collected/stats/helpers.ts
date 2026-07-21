@@ -15,9 +15,11 @@ import type {
   DisplaySeason,
 } from "./types";
 
+/** Checks whether a caught value represents an aborted request. */
 export const isAbortError = (error: unknown): boolean =>
   error instanceof Error && error.name === "AbortError";
 
+/** Returns the stats API path, or null when the profile input is invalid. */
 export const getSafeStatsPath = (
   profile: ApiIdentity,
   activeAddress: string | null
@@ -29,6 +31,7 @@ export const getSafeStatsPath = (
   }
 };
 
+/** Returns the stats cache identity, or null when the input is invalid. */
 export const getSafeCollectedStatsIdentityKey = (
   profile: ApiIdentity,
   activeAddress: string | null
@@ -44,6 +47,7 @@ const METRIC_NUMBER_FORMAT_OPTIONS = {
   maximumFractionDigits: 2,
 } satisfies Intl.NumberFormatOptions;
 
+/** Formats one collected metric value with the requested locale. */
 const formatMetricValue = (
   value: number | undefined,
   locale: SupportedLocale
@@ -52,6 +56,7 @@ const formatMetricValue = (
     value: formatInteger(locale, value ?? 0),
   });
 
+/** Parses supported season labels into their positive numeric identifier. */
 const parseSeasonNumber = (season: string) => {
   const trimmed = season.trim();
   if (/^szn\d+$/i.test(trimmed)) {
@@ -217,6 +222,7 @@ const buildDisplaySeason = (
   };
 };
 
+/** Builds the complete display model for the Collected summary. */
 export const buildCollectedStatsViewModel = (
   collectedStats: ApiCollectedStats | undefined,
   locale: SupportedLocale = DEFAULT_LOCALE
