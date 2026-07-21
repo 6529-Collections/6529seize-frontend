@@ -9,6 +9,8 @@ import {
 } from "../waves/drop/SingleWaveDropVote.types";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import { VoteModeControl } from "./VoteModeControl";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface MobileVotingModalProps {
   readonly drop: ExtendedDrop;
@@ -21,6 +23,7 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const locale = useBrowserLocale();
   const [voteInputMode, setVoteInputMode] =
     useState<SingleWaveDropVoteMode>("slider");
 
@@ -41,7 +44,7 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
     <MobileWrapperDialog
       isOpen
       onClose={handleClose}
-      title="Vote for this artwork"
+      title={t(locale, "waves.vote.modalTitle")}
       headerActions={
         <VoteModeControl value={voteInputMode} onChange={setVoteInputMode} />
       }

@@ -123,17 +123,20 @@ const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
     "collected.title": "Collected",
     overview: "Overview",
     "tables.overviewCaption": "Collected holdings summary by collection",
+    "tables.column.metric": "Metric",
     "tables.column.total": "Total",
     "tables.column.memes": "Memes",
     "tables.column.nextGen": "NextGen",
     "tables.column.gradient": "Gradient",
     "tables.column.memeLab": "Meme Lab",
+    "tables.column.season": "Season",
     "rows.cards": "Cards",
     "rows.rank": "Rank",
     "rows.tdh": "TDH",
     "rows.noTdh": "* No TDH",
     memesBySeason: "Memes Breakdown By Season",
     "tables.memesBySeasonCaption": "Collected Memes breakdown by season",
+    "tables.memesBySeasonEmpty": "No Meme holdings by season yet.",
     "tables.column.unique": "Unique",
     "tables.column.sets": "Sets",
     seasonLabel: "Season {seasonNumber}",
@@ -473,6 +476,24 @@ const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
     "Vote rationale ({voteTotal} total, {voteChange} change at time of posting):\n\n",
 } as const);
 
+const WAVE_VOTE_MODE_MESSAGES = objectMessages("waves.voteMode", {
+  groupLabel: "Vote input mode",
+  slider: "Slider",
+  numeric: "Numeric",
+  switchTitle: "Switch mode",
+  switchToNumeric: "Switch to numeric",
+  switchToSlider: "Switch to slider",
+  switchToNumericAriaLabel: "Switch to numeric input",
+  switchToSliderAriaLabel: "Switch to slider input",
+} as const);
+
+const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
+  controlsLegend: "Vote controls",
+  modalTitle: "Vote for this artwork",
+  decreaseLabel: "Decrease vote",
+  increaseLabel: "Increase vote",
+} as const);
+
 const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
   "actions.viewResults": "View results",
   "actions.vote": "Vote",
@@ -509,6 +530,13 @@ const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
     filterOptionsLabel: "Wallet activity filter options",
     optionAriaLabel: "Show {filter} wallet activity",
     tableCaption: "Wallet activity transactions",
+    etherscanLinkLabel: "Go to Etherscan",
+    gasLabel: "Gas",
+    gasGweiLabel: "GWEI",
+    gasInformationLabel: "Gas Information",
+    gasPriceLabel: "Gas Price",
+    royaltiesInformationLabel: "Royalties information",
+    royaltiesValue: "Royalties: {amount}ETH ({percentage}%)",
     "filters.all": "All",
     "filters.airdrops": "Airdrops",
     "filters.mints": "Mints",
@@ -2192,6 +2220,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
+  ...WAVE_VOTE_MODE_MESSAGES,
+  ...WAVE_VOTE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;
