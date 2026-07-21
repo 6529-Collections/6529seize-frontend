@@ -4039,6 +4039,7 @@
         "The Collected tab lives at /{user}/collected.",
         "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
+        "Wide tables in Details scroll horizontally on narrow screens while their first label column stays visible.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
@@ -4048,7 +4049,8 @@
       "source_refs": [
         "app/[user]/collected/page.tsx",
         "ops/docs/profiles/tabs/feature-collected-tab.md",
-        "components/user/collected/stats/useCollectedStatsData.ts"
+        "components/user/collected/stats/useCollectedStatsData.ts",
+        "components/user/stats/UserPageStatsTableShared.tsx"
       ]
     },
     {

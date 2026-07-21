@@ -75,16 +75,19 @@ describe("UserPageStatsActivityWalletTable", () => {
       />
     );
 
-    expect(
-      screen.getByRole("table", {
-        name: getWalletActivityMessage(
-          "user.collected.stats.walletActivity.tableCaption",
-          undefined,
-          locale
-        ),
-      })
-    ).toBeInTheDocument();
+    const table = screen.getByRole("table", {
+      name: getWalletActivityMessage(
+        "user.collected.stats.walletActivity.tableCaption",
+        undefined,
+        locale
+      ),
+    });
+    expect(table).toBeInTheDocument();
+    expect(table.querySelector("tbody")).toHaveClass("tw-bg-white/[0.02]");
     expect(RowMock).toHaveBeenCalledTimes(2);
+    expect(RowMock.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({ locale })
+    );
     expect(screen.getAllByTestId("row")).toHaveLength(2);
   });
 });
