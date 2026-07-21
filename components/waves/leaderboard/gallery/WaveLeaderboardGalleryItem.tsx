@@ -206,6 +206,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               media_mime_type={primaryMedia?.mime_type ?? "image/jpeg"}
               media_url={primaryMedia?.url ?? ""}
               disableMediaInteraction={true}
+              fillVideoContainer={true}
               imageScale={mediaImageScale}
               previewImageUrl={previewImageUrl}
             />
