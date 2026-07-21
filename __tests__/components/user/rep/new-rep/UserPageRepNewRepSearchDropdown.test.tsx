@@ -1,49 +1,125 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import React from "react";
 import UserPageRepNewRepSearchDropdown from "@/components/user/rep/new-rep/UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "@/components/user/rep/new-rep/rep-search-types";
 
-describe("UserPageRepNewRepSearchDropdown", () => {
-  it("renders categories and handles selection", async () => {
-    const onSelect = jest.fn();
-    render(
-      <UserPageRepNewRepSearchDropdown
-        categories={["Art", "NFT"]}
-        onRepSelect={onSelect}
-        state={RepSearchState.HAVE_RESULTS}
-        minSearchLength={3}
-        maxSearchLength={100}
-      />
-    );
+const defaultProps = {
+  listId: "rep-category-options",
+  minSearchLength: 3,
+  maxSearchLength: 100,
+  onRepSelect: jest.fn(),
+};
 
-    const buttons = screen.getAllByRole("button");
-    expect(buttons).toHaveLength(2);
-    await userEvent.click(buttons[1]);
-    expect(onSelect).toHaveBeenCalledWith("NFT");
+describe("UserPageRepNewRepSearchDropdown", () => {
+  beforeEach(() => {
+    defaultProps.onRepSelect.mockClear();
   });
 
-  it("shows error messages for min and max length", () => {
-    const { rerender } = render(
+  it("groups similar spellings under the selected existing category", async () => {
+    const option = {
+      kind: "existing" as const,
+      category: "top artist",
+      aliases: ["Top Artist"],
+      selectionReason: "most-active" as const,
+    };
+    render(
       <UserPageRepNewRepSearchDropdown
-        categories={[]}
-        onRepSelect={() => {}}
-        state={RepSearchState.MIN_LENGTH_ERROR}
-        minSearchLength={3}
-        maxSearchLength={10}
+        {...defaultProps}
+        options={[option]}
+        state={RepSearchState.HAVE_RESULTS}
       />
     );
-    expect(screen.getByText("Type at least 3 characters")).toBeInTheDocument();
+
+    expect(screen.getByText("Existing category")).toBeInTheDocument();
+    expect(
+      screen.getByText("Most active spelling among similar categories.")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Top Artist")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("option"));
+    expect(defaultProps.onRepSelect).toHaveBeenCalledWith(option);
+  });
+
+  it("identifies the category used by Memes submission eligibility", () => {
+    render(
+      <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
+        options={[
+          {
+            kind: "existing",
+            category: "MemesNominee",
+            aliases: ["Memes Nominee"],
+            selectionReason: "submission",
+          },
+        ]}
+        state={RepSearchState.HAVE_RESULTS}
+      />
+    );
+
+    expect(
+      screen.getByText("Counts toward Memes submission eligibility.")
+    ).toBeInTheDocument();
+  });
+
+  it("presents new category creation as a separate deliberate action", () => {
+    render(
+      <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
+        options={[{ kind: "new", category: "Fresh Category" }]}
+        state={RepSearchState.HAVE_RESULTS}
+      />
+    );
+
+    expect(screen.getByText("Create new category")).toBeInTheDocument();
+    expect(screen.getByText("Fresh Category")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "No equivalent category exists. This exact spelling creates a separate category."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("shows minimum, maximum, loading, and error states", () => {
+    const { rerender } = render(
+      <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
+        options={[]}
+        state={RepSearchState.MIN_LENGTH_ERROR}
+      />
+    );
+    expect(screen.getByText("Type at least 3 characters.")).toBeInTheDocument();
 
     rerender(
       <UserPageRepNewRepSearchDropdown
-        categories={[]}
-        onRepSelect={() => {}}
+        {...defaultProps}
+        options={[]}
         state={RepSearchState.MAX_LENGTH_ERROR}
-        minSearchLength={3}
-        maxSearchLength={10}
       />
     );
-    expect(screen.getByText("Type at most 10 characters")).toBeInTheDocument();
+    expect(
+      screen.getByText("Type at most 100 characters.")
+    ).toBeInTheDocument();
+
+    rerender(
+      <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
+        options={[]}
+        state={RepSearchState.LOADING}
+      />
+    );
+    expect(
+      screen.getByText("Finding existing categories...")
+    ).toBeInTheDocument();
+
+    rerender(
+      <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
+        options={[]}
+        state={RepSearchState.ERROR}
+      />
+    );
+    expect(
+      screen.getByText("Could not search REP categories. Please try again.")
+    ).toBeInTheDocument();
   });
 });

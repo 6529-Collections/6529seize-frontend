@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
@@ -31,6 +31,12 @@ import {
 import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import {
+  cleanRepCategoryName,
+  getRepCategoryMatchKey,
+  type GrantRepCategoryOption,
+  searchGrantRepCategoryOptions,
+} from "./grantRepCategorySearch";
 
 const SEARCH_LENGTH = {
   MIN: 3,
@@ -75,7 +81,9 @@ export default function UserPageRepNewRepSearch({
   );
 
   const [repSearch, setRepSearch] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] =
+    useState<GrantRepCategoryOption | null>(null);
+  const selectedCategory = selectedOption?.category ?? null;
   const [amountStr, setAmountStr] = useState<string>("0");
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -93,18 +101,23 @@ export default function UserPageRepNewRepSearch({
     [repSearch]
   );
 
+  const debouncedSearchLength = Array.from(
+    cleanRepCategoryName(debouncedValue)
+  ).length;
   const matchingSearchLength =
-    debouncedValue.length >= SEARCH_LENGTH.MIN &&
-    debouncedValue.length <= SEARCH_LENGTH.MAX;
+    debouncedSearchLength >= SEARCH_LENGTH.MIN &&
+    debouncedSearchLength <= SEARCH_LENGTH.MAX;
 
-  const { isFetching, data: categories } = useQuery<string[]>({
-    queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedValue],
-    queryFn: async () =>
-      await commonApiFetch<string[]>({
-        endpoint: "/rep/categories",
-        params: {
-          param: debouncedValue,
-        },
+  const {
+    isError: isCategorySearchError,
+    isFetching,
+    data: categoryOptions,
+  } = useQuery<GrantRepCategoryOption[]>({
+    queryKey: [QueryKey.GRANT_REP_CATEGORY_SEARCH, debouncedValue],
+    queryFn: async ({ signal }) =>
+      await searchGrantRepCategoryOptions({
+        search: debouncedValue,
+        signal,
       }),
     enabled: matchingSearchLength,
   });
@@ -131,10 +144,15 @@ export default function UserPageRepNewRepSearch({
   // --- End derived rep state ---
 
   const [isOpen, setIsOpen] = useState(false);
+  const listId = useId();
 
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   useClickAway(listRef, () => setIsOpen(false));
-  useKeyPressEvent("Escape", () => setIsOpen(false));
+  useKeyPressEvent("Escape", () => {
+    setIsOpen(false);
+    inputRef.current?.focus();
+  });
 
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
@@ -143,7 +161,8 @@ export default function UserPageRepNewRepSearch({
     setShowErrorDetails(false);
   };
 
-  const onRepSelect = async (rep: string) => {
+  const onRepSelect = async (option: GrantRepCategoryOption) => {
+    const rep = option.category;
     if (isHelpBotCreditRepCategory(rep)) {
       showHelpBotCreditRepCategoryError();
       return;
@@ -179,10 +198,11 @@ export default function UserPageRepNewRepSearch({
           param: rep,
         },
       });
-      setSelectedCategory(rep);
+      setSelectedOption(option);
       setRepSearch(rep);
       setErrorMsg(null);
       setShowErrorDetails(true);
+      inputRef.current?.focus();
       setIsOpen(false);
     } catch (error: unknown) {
       setErrorMsg(getErrorMessage(error));
@@ -211,7 +231,7 @@ export default function UserPageRepNewRepSearch({
         connectedProfile,
         profileProxy: activeProfileProxy ?? null,
       });
-      setSelectedCategory(null);
+      setSelectedOption(null);
       setRepSearch("");
       setAmountStr("0");
       setIsOpen(false);
@@ -252,34 +272,30 @@ export default function UserPageRepNewRepSearch({
   const onSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!repSearch) return;
-    void onRepSelect(repSearch);
+    const searchKey = getRepCategoryMatchKey(repSearch);
+    const equivalentExistingOption = categoryOptions?.find(
+      (option) =>
+        option.kind === "existing" &&
+        getRepCategoryMatchKey(option.category) === searchKey
+    );
+    if (equivalentExistingOption) {
+      void onRepSelect(equivalentExistingOption);
+      return;
+    }
+    setIsOpen(true);
   };
 
-  const categoriesToDisplay = useMemo(() => {
-    const items: string[] = [];
-    if (matchingSearchLength) {
-      if (!isHelpBotCreditRepCategory(debouncedValue)) {
-        items.push(debouncedValue);
-      }
-    }
-    if ((categories?.length ?? 0) > 0) {
-      items.push(
-        ...categories!.filter(
-          (c) => c !== debouncedValue && !isHelpBotCreditRepCategory(c)
-        )
-      );
-    }
-    return items;
-  }, [debouncedValue, categories, matchingSearchLength]);
-
   const repSearchState = useMemo(() => {
-    if (debouncedValue.length < SEARCH_LENGTH.MIN)
+    const searchLength = Array.from(cleanRepCategoryName(repSearch)).length;
+    if (searchLength < SEARCH_LENGTH.MIN)
       return RepSearchState.MIN_LENGTH_ERROR;
-    if (debouncedValue.length > SEARCH_LENGTH.MAX)
+    if (searchLength > SEARCH_LENGTH.MAX)
       return RepSearchState.MAX_LENGTH_ERROR;
-    if (isFetching) return RepSearchState.LOADING;
+    if (repSearch !== debouncedValue || isFetching)
+      return RepSearchState.LOADING;
+    if (isCategorySearchError) return RepSearchState.ERROR;
     return RepSearchState.HAVE_RESULTS;
-  }, [debouncedValue, isFetching]);
+  }, [debouncedValue, isCategorySearchError, isFetching, repSearch]);
 
   const handleRepSearchChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -287,9 +303,19 @@ export default function UserPageRepNewRepSearch({
     const newValue = event.target.value;
     setRepSearch(newValue);
     if (selectedCategory && newValue !== selectedCategory) {
-      setSelectedCategory(null);
+      setSelectedOption(null);
       setAmountStr("");
     }
+  };
+
+  const handleSearchKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key !== "ArrowDown" || !isOpen) return;
+    const firstOption = document.getElementById(`${listId}-option-0`);
+    if (!(firstOption instanceof HTMLButtonElement)) return;
+    event.preventDefault();
+    firstOption.focus();
   };
 
   const isGrantDisabled =
@@ -332,6 +358,9 @@ export default function UserPageRepNewRepSearch({
                   onSubmit={onSearchSubmit}
                   className="tw-relative tw-w-full"
                 >
+                  <label htmlFor="search-rep" className="tw-sr-only">
+                    {t(locale, "rep.categories.grant.searchPlaceholder")}
+                  </label>
                   <div className="tw-relative tw-w-full">
                     <svg
                       className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-4 tw-w-4 tw-text-iron-500"
@@ -346,16 +375,39 @@ export default function UserPageRepNewRepSearch({
                       />
                     </svg>
                     <input
+                      ref={inputRef}
                       id="search-rep"
                       name="search-rep"
                       type="text"
                       required
                       autoComplete="off"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
                       value={repSearch}
                       onChange={handleRepSearchChange}
                       onFocus={() => setIsOpen(true)}
+                      onKeyDown={handleSearchKeyDown}
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-haspopup="listbox"
+                      aria-expanded={isOpen && !selectedCategory}
+                      aria-controls={
+                        isOpen &&
+                        !selectedCategory &&
+                        repSearchState === RepSearchState.HAVE_RESULTS &&
+                        (categoryOptions?.length ?? 0) > 0
+                          ? listId
+                          : undefined
+                      }
+                      aria-describedby={
+                        selectedOption ? `${listId}-selection` : undefined
+                      }
                       className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-py-3 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-400 tw-transition tw-duration-300 tw-ease-out placeholder:tw-font-normal placeholder:tw-text-iron-500 focus:tw-border-blue-500/50 focus:tw-outline-none lg:tw-font-semibold lg:placeholder:tw-text-iron-400"
-                      placeholder="Category to grant rep for"
+                      placeholder={t(
+                        locale,
+                        "rep.categories.grant.searchPlaceholder"
+                      )}
                     />
                     {checkingAvailability && (
                       <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
@@ -363,6 +415,32 @@ export default function UserPageRepNewRepSearch({
                       </div>
                     )}
                   </div>
+                  {selectedOption && (
+                    <p
+                      id={`${listId}-selection`}
+                      role="status"
+                      className="tw-mb-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-300"
+                    >
+                      <span>
+                        {t(
+                          locale,
+                          selectedOption.kind === "existing"
+                            ? "rep.categories.grant.selectedExisting"
+                            : "rep.categories.grant.selectedNew",
+                          { category: selectedOption.category }
+                        )}
+                      </span>
+                      {selectedOption.kind === "existing" &&
+                        selectedOption.selectionReason === "submission" && (
+                          <span className="tw-text-success">
+                            {t(
+                              locale,
+                              "rep.categories.grant.submissionCategory"
+                            )}
+                          </span>
+                        )}
+                    </p>
+                  )}
                   <AnimatePresence initial={false}>
                     {isOpen && !selectedCategory && (
                       <motion.div
@@ -374,10 +452,11 @@ export default function UserPageRepNewRepSearch({
                       >
                         <div className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/10">
                           <UserPageRepNewRepSearchDropdown
-                            categories={categoriesToDisplay}
+                            options={categoryOptions ?? []}
                             state={repSearchState}
                             minSearchLength={SEARCH_LENGTH.MIN}
                             maxSearchLength={SEARCH_LENGTH.MAX}
+                            listId={listId}
                             onRepSelect={onRepSelect}
                           />
                         </div>

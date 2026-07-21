@@ -3867,6 +3867,9 @@
         "network identity check",
         "rate nic",
         "rep dialog",
+        "grant rep",
+        "rep category spelling",
+        "memesnominee rep",
         "activity log"
       ],
       "keywords": [
@@ -3886,6 +3889,8 @@
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
         "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
+        "Grant Rep prioritizes existing categories, groups names that differ only by spacing, capitalization, or punctuation, and clearly separates deliberate new-category creation.",
+        "The exact MemesNominee category is marked as counting toward Memes submission eligibility so near-duplicate spellings do not receive the intended nomination REP.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",
