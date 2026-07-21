@@ -460,6 +460,12 @@ const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
     "Vote rationale ({voteTotal} total, {voteChange} change at time of posting):\n\n",
 } as const);
 
+const WAVE_VOTE_MODE_MESSAGES = objectMessages("waves.voteMode", {
+  groupLabel: "Vote input mode",
+  slider: "Slider",
+  numeric: "Numeric",
+} as const);
+
 const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
   "actions.viewResults": "View results",
   "actions.vote": "Vote",
@@ -2161,6 +2167,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
+  ...WAVE_VOTE_MODE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;

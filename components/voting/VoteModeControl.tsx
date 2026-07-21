@@ -1,5 +1,7 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { SingleWaveDropVoteMode } from "../waves/drop/SingleWaveDropVote.types";
 
 interface VoteModeControlProps {
@@ -7,19 +9,18 @@ interface VoteModeControlProps {
   readonly onChange: (mode: SingleWaveDropVoteMode) => void;
 }
 
-const voteModeOptions: ReadonlyArray<{
-  readonly label: string;
-  readonly value: SingleWaveDropVoteMode;
-}> = [
-  { label: "Slider", value: "slider" },
-  { label: "Numeric", value: "numeric" },
-];
+const voteModeOptions = [
+  { labelKey: "waves.voteMode.slider", value: "slider" },
+  { labelKey: "waves.voteMode.numeric", value: "numeric" },
+] as const;
 
 export function VoteModeControl({ value, onChange }: VoteModeControlProps) {
+  const locale = useBrowserLocale();
+
   return (
     <div
       role="group"
-      aria-label="Vote input mode"
+      aria-label={t(locale, "waves.voteMode.groupLabel")}
       className="tw-flex tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950"
     >
       {voteModeOptions.map((mode) => {
@@ -37,7 +38,7 @@ export function VoteModeControl({ value, onChange }: VoteModeControlProps) {
                 : "tw-bg-transparent tw-font-normal tw-text-iron-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-200"
             }`}
           >
-            {mode.label}
+            {t(locale, mode.labelKey)}
           </button>
         );
       })}
