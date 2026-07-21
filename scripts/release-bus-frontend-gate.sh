@@ -94,11 +94,15 @@ run_recorded_jest() {
   local shard_count="$3"
   local output_dir="$4"
   local manifest="$output_dir/manifest-shard-$shard_index-of-$shard_count.json"
-  local results="$output_dir/jest-results-$shard_index-of-$shard_count.json"
+  local raw_dir
+  local results
   local summary="$output_dir/jest-shard-$shard_index-of-$shard_count.json"
   local started_at
   local completed_at
   local exit_code
+  local summary_exit_code
+  raw_dir="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/release-bus-jest-raw.XXXXXX")"
+  results="$raw_dir/jest-results.json"
   capture_manifest "$source" shard "$shard_index" "$shard_count" "$output_dir"
   started_at="$(now_ms)"
   set +e
@@ -109,6 +113,7 @@ run_recorded_jest() {
   exit_code=$?
   set -e
   completed_at="$(now_ms)"
+  set +e
   node "$EVIDENCE_TOOL" jest \
     --source "$source" \
     --repo-root "$REPO_ROOT" \
@@ -119,6 +124,11 @@ run_recorded_jest() {
     --duration-ms "$((completed_at - started_at))" \
     --exit-code "$exit_code" \
     --output "$summary"
+  summary_exit_code=$?
+  set -e
+  rm -f -- "$results"
+  rmdir -- "$raw_dir"
+  if [ "$summary_exit_code" -ne 0 ]; then return "$summary_exit_code"; fi
   return "$exit_code"
 }
 
