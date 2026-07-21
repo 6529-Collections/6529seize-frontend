@@ -83,9 +83,11 @@ jobs:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
       - name: Run exact train validation gate
+        id: validation
         if: matrix.environment == 'staging'
         run: ./scripts/release-bus-frontend-gate.sh validate
       - name: Typecheck production artifact source
+        id: typecheck_production
         if: matrix.environment == 'production'
         run: ./bin/6529 run typecheck:ci
       - name: Verify validation did not mutate source
@@ -93,6 +95,7 @@ jobs:
       - name: Capture build timestamp
         run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
       - name: Build immutable application
+        id: build
         env:
           BUILD_ENVIRONMENT: ${{ matrix.environment }}
           NODE_ENV: production
@@ -123,6 +126,19 @@ jobs:
             unset ANNOUNCED_VERSION_ENDPOINT
           fi
           ./bin/6529 run build
+      - name: Report structured preflight result
+        if: always()
+        continue-on-error: true
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          RELEASE_BUS_TRAIN_ID: ${{ inputs.release_train_id }}
+          RELEASE_BUS_OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_REPORT_PHASE: build
+          RELEASE_BUS_JOB_STATUS: ${{ job.status }}
+          RELEASE_BUS_GATE_TYPECHECK_OUTCOME: ${{ steps.typecheck_production.outcome }}
+          RELEASE_BUS_GATE_BUILD_OUTCOME: ${{ steps.build.outcome }}
+        run: node scripts/release-bus-report-progress.mjs
       - name: Package immutable bundle
         env:
           BUILD_ENVIRONMENT: ${{ matrix.environment }}
