@@ -151,5 +151,6 @@ jobs:
         with:
           name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-${{ matrix.environment }}
           path: release-bus-artifact
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90

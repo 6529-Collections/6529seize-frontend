@@ -46,6 +46,20 @@ describe("release bus optional Codex workflow", () => {
   });
 });
 
+describe("release bus immutable frontend artifact", () => {
+  const preflightWorkflow = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/release-bus-preflight.yml"),
+    "utf8"
+  );
+
+  it("uploads hidden bundle files covered by the checksum manifest", () => {
+    expect(preflightWorkflow).toContain("find . -type f ! -name SHA256SUMS");
+    expect(preflightWorkflow).toMatch(
+      /name: Upload immutable frontend artifact[\s\S]*?include-hidden-files: true/
+    );
+  });
+});
+
 function releaseArtifact(uri, metadata) {
   return {
     uri,
