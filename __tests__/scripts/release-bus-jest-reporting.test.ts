@@ -1,7 +1,33 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const YAML = require("yaml") as { parse: (text: string) => unknown };
+
+type WorkflowStep = {
+  name?: string;
+  if?: string;
+  env?: Record<string, string>;
+  run?: string;
+};
+
+type Workflow = {
+  jobs?: Record<string, { steps?: WorkflowStep[] }>;
+};
+
+function readWorkflow(filename: string): Workflow {
+  return YAML.parse(
+    fs.readFileSync(path.join(process.cwd(), filename), "utf8")
+  ) as Workflow;
+}
+
+function findStep(workflow: Workflow, name: string): WorkflowStep | undefined {
+  return Object.values(workflow.jobs ?? {})
+    .flatMap((job) => job.steps ?? [])
+    .find((step) => step.name === name);
+}
 
 describe("Release Bus structured Jest reporting", () => {
   it("surfaces exact suites and tests without failure messages or raw logs", () => {
@@ -105,32 +131,130 @@ describe("Release Bus structured Jest reporting", () => {
     expect(JSON.stringify(payload)).not.toContain("OPENAI");
   });
 
-  it("reports preflight and isolation independently of optional Codex", () => {
-    const preflight = fs.readFileSync(
-      path.join(process.cwd(), ".github/workflows/release-bus-preflight.yml"),
-      "utf8"
+  it("omits malformed or unsafe Jest details deterministically", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-report-")
     );
-    const isolation = fs.readFileSync(
-      path.join(
-        process.cwd(),
-        ".github/workflows/release-bus-isolate-candidate.yml"
-      ),
-      "utf8"
-    );
-    const appPrCi = fs.readFileSync(
-      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
-      "utf8"
+    const summaryPath = path.join(tempDir, "summary.json");
+    try {
+      fs.writeFileSync(summaryPath, "{not-json");
+      const malformed = execFileSync(
+        process.execPath,
+        ["scripts/release-bus-report-progress.mjs", "--payload-only"],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            RELEASE_BUS_JEST_SUMMARY: summaryPath,
+          },
+        }
+      );
+      expect(JSON.parse(malformed.toString("utf8")).jest).toBeNull();
+
+      fs.writeFileSync(
+        summaryPath,
+        JSON.stringify({
+          num_failed_test_suites: 1,
+          num_failed_tests: 1,
+          failing_suites: ["suite.test.ts\u0000"],
+          failing_tests: [
+            {
+              suite: "suite.test.ts",
+              test: "fails\u0007 cleanly",
+              stack: "raw",
+            },
+            { suite: null, test: "discarded" },
+          ],
+          raw_log: "must not leave the runner",
+        })
+      );
+      const safe = execFileSync(
+        process.execPath,
+        ["scripts/release-bus-report-progress.mjs", "--payload-only"],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            RELEASE_BUS_JEST_SUMMARY: summaryPath,
+          },
+        }
+      );
+      const payload = JSON.parse(safe.toString("utf8"));
+      expect(payload.jest).toEqual({
+        num_failed_test_suites: 1,
+        num_failed_tests: 1,
+        failing_suites: ["suite.test.ts"],
+        failing_tests: [{ suite: "suite.test.ts", test: "fails  cleanly" }],
+      });
+      expect(JSON.stringify(payload)).not.toContain("raw_log");
+      expect(JSON.stringify(payload)).not.toContain("stack");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("exits successfully when progress reporting is not configured", () => {
+    const result = spawnSync(
+      process.execPath,
+      ["scripts/release-bus-report-progress.mjs"],
+      {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          RELEASE_BUS_API_URL: "",
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "",
+        },
+      }
     );
 
-    expect(preflight).toContain("Report structured preflight result");
-    expect(preflight).toContain("release-bus-report-progress.mjs");
-    expect(isolation).toContain("Report structured isolation result");
-    expect(isolation).toContain("release-bus-report-progress.mjs");
-    expect(isolation).not.toMatch(
-      /Report structured isolation result[\s\S]{0,350}RELEASE_BUS_CODEX_ENABLED/
+    expect(result.status).toBe(0);
+    expect(result.stderr).toContain("not configured; skipping");
+  });
+
+  it("reports preflight and isolation independently of optional Codex", () => {
+    const preflight = readWorkflow(
+      ".github/workflows/release-bus-preflight.yml"
     );
-    expect(appPrCi).toContain("scripts/release-bus-summarize-jest.mjs");
-    expect(appPrCi).toContain(
+    const isolation = readWorkflow(
+      ".github/workflows/release-bus-isolate-candidate.yml"
+    );
+    const appPrCi = readWorkflow(".github/workflows/app-pr-ci.yml");
+    const preflightReport = findStep(
+      preflight,
+      "Report structured preflight result"
+    );
+    const isolationReport = findStep(
+      isolation,
+      "Report structured isolation result"
+    );
+
+    expect(preflightReport).toEqual(
+      expect.objectContaining({
+        if: "always()",
+        run: "node scripts/release-bus-report-progress.mjs",
+      })
+    );
+    expect(isolationReport).toEqual(
+      expect.objectContaining({
+        if: "always()",
+        run: "node scripts/release-bus-report-progress.mjs",
+        env: expect.objectContaining({
+          RELEASE_BUS_REPORT_INCLUDE_STAGES: "false",
+        }),
+      })
+    );
+    expect(isolationReport?.env).not.toHaveProperty(
+      "RELEASE_BUS_CODEX_ENABLED"
+    );
+    const gateContract = findStep(
+      appPrCi,
+      "Verify Release Bus gate command contract"
+    );
+    expect(gateContract?.run).toContain(
+      "scripts/release-bus-summarize-jest.mjs"
+    );
+    expect(gateContract?.run).toContain(
       "__tests__/scripts/release-bus-jest-reporting.test.ts"
     );
   });

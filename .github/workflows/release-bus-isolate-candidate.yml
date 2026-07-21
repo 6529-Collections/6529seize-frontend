@@ -137,6 +137,7 @@ jobs:
           RELEASE_BUS_TRAIN_ID: ${{ inputs.release_train_id }}
           RELEASE_BUS_OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_JOB_STATUS: ${{ steps.reproduce.outcome }}
+          RELEASE_BUS_REPORT_INCLUDE_STAGES: "false"
         run: node scripts/release-bus-report-progress.mjs
       - name: Return deterministic result
         if: always()
