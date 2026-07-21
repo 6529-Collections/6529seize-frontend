@@ -115,7 +115,9 @@ describe("UserPageStatsActivityWalletTableWrapper", () => {
         locale="de-DE"
       />
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
+    const emptyState = screen.getByRole("status");
+    expect(emptyState).toHaveClass("tw-block", "tw-py-5");
+    expect(emptyState).toHaveTextContent(
       getWalletActivityEmptyMessage(
         UserPageStatsActivityWalletFilterType.MINTS,
         "de-DE"
