@@ -125,6 +125,9 @@ order.
 
 It then:
 
+- runs the shared frontend validation/build gate against the exact fresh
+  `1a-staging` base before composing any frontend candidate, so a broken base or
+  control-plane command cannot be blamed on candidate code;
 - runs immutable preflight builds;
 - deploys backend units in service-DAG order;
 - deploys frontend after backend succeeds;
@@ -194,6 +197,12 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   failure or combined-only interaction pauses the lane instead of guessing.
   Independent candidates return to the queue and a proved offender's PR
   receives a diagnostic link.
+- Frontend lint, typecheck, Jest, and build commands are owned by one shared
+  Release Bus gate. Pull-request CI executes the gate's regression contract
+  whenever that gate or a Release Bus workflow changes. Before candidate
+  composition, the bus also runs the full gate against the exact recorded
+  frontend base SHA. A base-canary failure requeues every candidate and pauses
+  the lane without quarantining a developer branch.
 - Ambiguous external calls are reconciled by exact operation key before any
   retry. A timeout is not treated as proof that an operation did not happen.
 - Before production mutation, an unexpected target-branch move safely cancels
@@ -208,6 +217,10 @@ publishes release notes nor invokes the legacy GelatoBot skill.
 The operator controls are on `/deploy/ui/bus`. Members of the configured
 `release-bus-operators` GitHub team, plus organization owners, may pause or
 resume `ALL`, `STAGING`, or `PRODUCTION`, with an audited reason.
+
+Each control shows its current reason and actor. When an automatic pause came
+from a trusted 6529 GitHub Actions run, the control also links directly to that
+failure evidence.
 
 A pause prevents the next irreversible operation; it does not interrupt an AWS
 deployment already mutating an environment.
