@@ -27,7 +27,7 @@ export default function GlobalRepCategoryDialog({
       surfaceClassName="tw-bg-iron-950"
       headerClassName="!tw-absolute tw-right-6 tw-top-7 tw-z-30 !tw-p-0 sm:tw-right-10"
       titleClassName="tw-sr-only"
-      headerCloseButtonClassName="!tw-mr-0 !tw-h-8 !tw-w-8 !tw-rounded-md !tw-bg-transparent !tw-p-0 !tw-text-iron-500 !tw-ring-0 hover:!tw-bg-iron-900 hover:!tw-text-white focus:!tw-ring-0 focus-visible:!tw-ring-2 focus-visible:!tw-ring-primary-400/60 [&_svg]:!tw-h-5 [&_svg]:!tw-w-5"
+      headerCloseButtonClassName="!tw-mr-0 !tw-h-8 !tw-w-8 !tw-rounded-md !tw-bg-iron-950 !tw-p-0 !tw-text-iron-500 !tw-ring-0 hover:!tw-bg-iron-900 hover:!tw-text-white focus:!tw-ring-0 focus-visible:!tw-ring-2 focus-visible:!tw-ring-primary-400/60 [&_svg]:!tw-h-5 [&_svg]:!tw-w-5"
     >
       <div
         className={`
