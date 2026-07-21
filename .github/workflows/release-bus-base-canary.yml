@@ -53,6 +53,7 @@ jobs:
           BASE_SHA: ${{ inputs.base_sha }}
         run: |
           set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
           git init .
           git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
           git fetch --no-tags origin "$BASE_SHA"

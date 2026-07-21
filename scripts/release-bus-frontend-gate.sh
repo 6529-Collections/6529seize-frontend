@@ -4,16 +4,17 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SEIZE_BIN="${RELEASE_BUS_6529_BIN:-./bin/6529}"
 
 cd "$REPO_ROOT"
 
 run_unit_tests() {
-  ./bin/6529 run test:no-coverage --runInBand "$@"
+  "$SEIZE_BIN" run test:no-coverage --runInBand "$@"
 }
 
 run_validation() {
-  ./bin/6529 run lint
-  ./bin/6529 run typecheck:ci
+  "$SEIZE_BIN" run lint
+  "$SEIZE_BIN" run typecheck:ci
   run_unit_tests
 }
 
@@ -26,7 +27,7 @@ case "${1:-full}" in
     ;;
   full)
     run_validation
-    ./bin/6529 run build
+    "$SEIZE_BIN" run build
     ;;
   *)
     echo "Usage: scripts/release-bus-frontend-gate.sh [contract|validate|full]" >&2
