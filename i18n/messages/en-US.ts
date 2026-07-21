@@ -108,12 +108,13 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["seasons.showMore", "+{count} more"],
     ["seasons.showMoreAriaLabel", "Show {count} more started seasons"],
     ["seasons.unseized", "Unseized"],
-    ["seasonTile.sets.zero", "0 sets"],
-    ["seasonTile.sets.one", "{count} set"],
-    ["seasonTile.sets.many", "{count} sets"],
-    ["seasonTile.label", "SZN{seasonNumber}"],
-    ["seasonTile.toNextSet", "{held}/{total} to set {setNumber}"],
-    ["seasonTile.setComplete", "Set {count} complete"],
+    ["seasons.tableCaption", "Meme season collection progress"],
+    ["seasons.column.season", "Season"],
+    ["seasons.column.sets", "Sets"],
+    ["seasons.column.progress", "Set progress"],
+    ["seasonRow.label", "SZN{seasonNumber}"],
+    ["seasonRow.toNextSet", "{held}/{total} to set {setNumber}"],
+    ["seasonRow.setComplete", "Set {count} complete"],
   ] as const
 );
 

@@ -7,7 +7,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
-import { useDesktopSeasonRowCapacity } from "@/components/user/collected/stats/useDesktopSeasonRowCapacity";
 
 jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
   __esModule: true,
@@ -37,17 +36,8 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
 
-jest.mock(
-  "@/components/user/collected/stats/useDesktopSeasonRowCapacity",
-  () => ({
-    useDesktopSeasonRowCapacity: jest.fn(),
-  })
-);
-
 const apiMock = commonApiFetch as jest.Mock;
 const useSearchParamsMock = useSearchParams as jest.Mock;
-const useDesktopSeasonRowCapacityMock =
-  useDesktopSeasonRowCapacity as jest.Mock;
 
 const profile = {
   handle: "punk6529",
@@ -85,6 +75,51 @@ const collectedStats = {
     },
   ],
 } as const;
+
+const sixStartedSeasons = [
+  {
+    season: "Season 1",
+    total_cards_in_season: 47,
+    sets_held: 1,
+    partial_set_unique_cards_held: 0,
+    total_cards_held: 748,
+  },
+  {
+    season: "Season 2",
+    total_cards_in_season: 39,
+    sets_held: 1,
+    partial_set_unique_cards_held: 26,
+    total_cards_held: 1413,
+  },
+  {
+    season: "Season 3",
+    total_cards_in_season: 32,
+    sets_held: 1,
+    partial_set_unique_cards_held: 0,
+    total_cards_held: 320,
+  },
+  {
+    season: "Season 4",
+    total_cards_in_season: 33,
+    sets_held: 1,
+    partial_set_unique_cards_held: 5,
+    total_cards_held: 333,
+  },
+  {
+    season: "Season 5",
+    total_cards_in_season: 34,
+    sets_held: 1,
+    partial_set_unique_cards_held: 9,
+    total_cards_held: 340,
+  },
+  {
+    season: "Season 6",
+    total_cards_in_season: 35,
+    sets_held: 1,
+    partial_set_unique_cards_held: 12,
+    total_cards_held: 350,
+  },
+] as const;
 
 const buildInitialStatsData = (
   overrides: Partial<UserPageStatsInitialData> = {}
@@ -131,16 +166,9 @@ describe("UserPageCollectedStats", () => {
     useSearchParamsMock.mockReturnValue({
       get: () => null,
     });
-    useDesktopSeasonRowCapacityMock.mockReturnValue({
-      containerRef: { current: null },
-      visibleSeasonCount: null,
-      isDesktopLayout: false,
-    });
   });
 
-  it("renders the new collected header metrics and season states", async () => {
-    const user = userEvent.setup();
-
+  it("renders the new collected header metrics and season table", () => {
     renderWithQueryClient(
       <UserPageCollectedStats
         profile={profile}
@@ -162,9 +190,14 @@ describe("UserPageCollectedStats", () => {
     expect(screen.getByText("Unseized")).toBeInTheDocument();
     expect(screen.getByText("SZN3")).toBeInTheDocument();
     expect(screen.getByText("Set 1 complete")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: /szn2/i }));
     expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+    expect(
+      screen.getByRole("table", { name: "Meme season collection progress" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Sets" })).toBeVisible();
+    expect(
+      screen.getByRole("columnheader", { name: "Set progress" })
+    ).toBeVisible();
   });
 
   it("formats collected summary metrics and season details with the active locale", () => {
@@ -238,7 +271,7 @@ describe("UserPageCollectedStats", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("only applies the season shortcut on click while hover still previews details", async () => {
+  it("keeps season progress visible and applies the season shortcut on click", async () => {
     const user = userEvent.setup();
     const onSeasonShortcut = jest.fn();
 
@@ -257,8 +290,6 @@ describe("UserPageCollectedStats", () => {
     expect(seasonButton).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
 
-    await user.hover(seasonButton);
-
     expect(onSeasonShortcut).not.toHaveBeenCalled();
     expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
 
@@ -267,8 +298,8 @@ describe("UserPageCollectedStats", () => {
     expect(onSeasonShortcut).toHaveBeenCalledWith(2);
   });
 
-  it("drops stale preview state when the active season filter changes", async () => {
-    const user = userEvent.setup();
+  it("updates the selected season when the active season filter changes", () => {
+    const onSeasonShortcut = jest.fn();
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -282,11 +313,10 @@ describe("UserPageCollectedStats", () => {
           profile={profile}
           activeAddress={null}
           initialStatsData={buildInitialStatsData()}
+          onSeasonShortcut={onSeasonShortcut}
         />
       </QueryClientProvider>
     );
-
-    await user.hover(screen.getByRole("button", { name: /szn1/i }));
 
     expect(screen.getByText("Set 1 complete")).toBeInTheDocument();
 
@@ -297,39 +327,44 @@ describe("UserPageCollectedStats", () => {
           activeAddress={null}
           initialStatsData={buildInitialStatsData()}
           activeSeasonNumber={2}
+          onSeasonShortcut={onSeasonShortcut}
         />
       </QueryClientProvider>
     );
 
     expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
-    expect(screen.queryByText("Set 1 complete")).not.toBeInTheDocument();
+    expect(screen.getByText("Set 1 complete")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /szn2/i })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
+    expect(screen.getByRole("button", { name: /szn1/i })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
   });
 
-  it("keeps the filtered season visible in the collapsed desktop row", () => {
-    useDesktopSeasonRowCapacityMock.mockReturnValue({
-      containerRef: { current: null },
-      visibleSeasonCount: 1,
-      isDesktopLayout: true,
-    });
-
+  it("keeps the filtered season visible in the collapsed table", () => {
     renderWithQueryClient(
       <UserPageCollectedStats
         profile={profile}
         activeAddress={null}
-        initialStatsData={buildInitialStatsData()}
-        activeSeasonNumber={2}
+        initialStatsData={buildInitialStatsData({
+          initialCollectedStats: {
+            ...collectedStats,
+            seasons: sixStartedSeasons,
+          } as any,
+        })}
+        activeSeasonNumber={6}
+        onSeasonShortcut={jest.fn()}
       />
     );
 
-    expect(screen.getByRole("button", { name: /szn2/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /szn6/i })).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /szn1/i })
+      screen.queryByRole("button", { name: /szn5/i })
     ).not.toBeInTheDocument();
-    expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+    expect(screen.getByText("12/35 to set 2")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Show 1 more started seasons" })
     ).toBeInTheDocument();
@@ -402,163 +437,45 @@ describe("UserPageCollectedStats", () => {
     expect(screen.getByText("2/3 started")).toBeInTheDocument();
   });
 
-  it("collapses overflowing started seasons behind a see more control on desktop", async () => {
+  it("collapses overflowing started seasons behind a show more control", async () => {
     const user = userEvent.setup();
-    useDesktopSeasonRowCapacityMock.mockReturnValue({
-      containerRef: { current: null },
-      visibleSeasonCount: 4,
-      isDesktopLayout: true,
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData({
+          initialCollectedStats: {
+            ...collectedStats,
+            seasons: sixStartedSeasons,
+          } as any,
+        })}
+        onSeasonShortcut={jest.fn()}
+      />
+    );
+
+    const showMoreButton = screen.getByRole("button", {
+      name: "Show 1 more started seasons",
     });
-    const originalInnerWidth = globalThis.innerWidth;
-    const originalGetComputedStyle = globalThis.getComputedStyle;
-    const clientWidthSpy = jest
-      .spyOn(HTMLElement.prototype, "clientWidth", "get")
-      .mockImplementation(function (this: HTMLElement) {
-        const isSeasonTile = Object.hasOwn(this.dataset, "seasonTile");
-        return isSeasonTile ? 72 : 372;
-      });
-    const getBoundingClientRectSpy = jest
-      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-      .mockImplementation(function (this: HTMLElement) {
-        const isSeasonTile = Object.hasOwn(this.dataset, "seasonTile");
-        const width = isSeasonTile ? 72 : 372;
-        return {
-          width,
-          height: 0,
-          top: 0,
-          left: 0,
-          right: width,
-          bottom: 0,
-          x: 0,
-          y: 0,
-          toJSON: () => ({}),
-        } as DOMRect;
-      });
-    const getComputedStyleSpy = jest
-      .spyOn(globalThis, "getComputedStyle")
-      .mockImplementation((element) => {
-        const styles = originalGetComputedStyle(element);
-        return {
-          ...styles,
-          columnGap: "12px",
-          gap: "12px",
-          getPropertyValue: (property: string) => {
-            if (property === "column-gap" || property === "gap") {
-              return "12px";
-            }
-            return styles.getPropertyValue(property);
-          },
-        } as CSSStyleDeclaration;
-      });
+    expect(showMoreButton).toHaveTextContent("+1 more");
+    expect(showMoreButton).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("button", {
+        name: /szn6/i,
+      })
+    ).not.toBeInTheDocument();
 
-    Object.defineProperty(globalThis, "innerWidth", {
-      configurable: true,
-      writable: true,
-      value: 1280,
-    });
+    await user.click(showMoreButton);
 
-    try {
-      renderWithQueryClient(
-        <UserPageCollectedStats
-          profile={profile}
-          activeAddress={null}
-          initialStatsData={buildInitialStatsData({
-            initialCollectedStats: {
-              ...collectedStats,
-              seasons: [
-                {
-                  season: "Season 1",
-                  total_cards_in_season: 47,
-                  sets_held: 1,
-                  partial_set_unique_cards_held: 0,
-                  total_cards_held: 748,
-                },
-                {
-                  season: "Season 2",
-                  total_cards_in_season: 39,
-                  sets_held: 1,
-                  partial_set_unique_cards_held: 26,
-                  total_cards_held: 1413,
-                },
-                {
-                  season: "Season 3",
-                  total_cards_in_season: 32,
-                  sets_held: 1,
-                  partial_set_unique_cards_held: 0,
-                  total_cards_held: 320,
-                },
-                {
-                  season: "Season 4",
-                  total_cards_in_season: 33,
-                  sets_held: 1,
-                  partial_set_unique_cards_held: 5,
-                  total_cards_held: 333,
-                },
-                {
-                  season: "Season 5",
-                  total_cards_in_season: 34,
-                  sets_held: 1,
-                  partial_set_unique_cards_held: 9,
-                  total_cards_held: 340,
-                },
-                {
-                  season: "Season 6",
-                  total_cards_in_season: 35,
-                  sets_held: 1,
-                  partial_set_unique_cards_held: 12,
-                  total_cards_held: 350,
-                },
-              ],
-            } as any,
-          })}
-        />
-      );
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", {
-            name: "Show 2 more started seasons",
-          })
-        ).toBeInTheDocument();
-      });
-
-      const showMoreButton = screen.getByRole("button", {
-        name: "Show 2 more started seasons",
-      });
-      expect(showMoreButton).toHaveTextContent("+2 more");
-      expect(showMoreButton).not.toHaveClass("tw-absolute", "tw-right-0");
-      expect(showMoreButton.parentElement).toHaveClass(
-        "tw-flex",
-        "tw-justify-center"
-      );
-      expect(
-        screen.queryByRole("button", {
-          name: /szn6/i,
-        })
-      ).not.toBeInTheDocument();
-
-      await user.click(showMoreButton);
-
-      expect(
-        screen.getByRole("button", {
-          name: /szn6/i,
-        })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", {
-          name: "Show less",
-        })
-      ).toBeInTheDocument();
-    } finally {
-      clientWidthSpy.mockRestore();
-      getBoundingClientRectSpy.mockRestore();
-      getComputedStyleSpy.mockRestore();
-      Object.defineProperty(globalThis, "innerWidth", {
-        configurable: true,
-        writable: true,
-        value: originalInnerWidth,
-      });
-    }
+    expect(
+      screen.getByRole("button", {
+        name: /szn6/i,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Show less",
+      })
+    ).toHaveAttribute("aria-expanded", "true");
   });
 
   it("fetches only collected-stats when the collected address changes while details are closed", async () => {

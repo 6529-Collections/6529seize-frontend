@@ -64,14 +64,14 @@ Transfer mode is part of the Native collected view (not a separate route).
    - `Boost` is informational only and does not change filters
    - `Meme Sets` appears only when every valid Meme season has at least one
      full set; it shows the lowest full-set count across those seasons
-   - `Seasons` tiles show started Meme seasons, complete-set counts, and
-     progress toward the next set
-   - `Seasons` heading/count text, show more/less controls, unseized labels,
-     and tile set-count text are message-backed from the source locale
-   - season tile labels and progress detail copy are message-backed from the
-     source locale
-   - hover/focus previews a season tile's progress text; click applies or
-     clears the Memes season filter
+   - the `Seasons` table shows started Meme seasons, complete-set counts,
+     progress toward the next set, and completion percentages in aligned rows
+   - `Seasons` heading/count text, table headings, show more/less controls, and
+     unseized labels are message-backed from the source locale
+   - season row labels and progress detail copy are message-backed from the
+     source locale; numeric values use locale-aware formatting
+   - progress text stays visible at desktop and mobile widths; clicking a season
+     label applies or clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
 3. Click `Details` to expand the integrated stats panel.
 4. In `Details`, review:
@@ -141,7 +141,7 @@ Transfer mode is part of the Native collected view (not a separate route).
   `Distributions` or `TDH History` with `Details` already open.
 - Check how many full Meme sets exist and how far the active season is from the
   next set.
-- Preview season progress from the stats strip, then click a season tile to
+- Review season progress in the stats table, then click a season label to
   switch into `The Memes` with that season selected.
 - Filter Memes by season and clear back to `All Seasons`.
 - Switch to `Network` to inspect per-token `xTDH` and `xTDH/day`.
@@ -158,9 +158,9 @@ Transfer mode is part of the Native collected view (not a separate route).
 - `Details` can open even when summary metrics are sparse; if the profile cannot
   produce a stats scope, the panel shows `Stats are unavailable for this profile.`.
 - The `Seasons` strip is hidden when there are no started Meme seasons.
-- On desktop, the started-season row can collapse behind `+N more`; on
-  touch/mobile, seasons stay horizontally scrollable. When a season filter is
-  active, the collapsed desktop row keeps that season visible.
+- Long started-season tables collapse behind `+N more` at desktop and mobile
+  widths. When a season filter is active, the collapsed table keeps that season
+  visible.
 - `page` is reserved for the main collected list. Details tables use their own
   page params so they do not reset collected pagination state.
 - Clicking another profile tab keeps only `address` and drops collected-specific
@@ -168,9 +168,9 @@ Transfer mode is part of the Native collected view (not a separate route).
   `wallet-activity-page`, and `distribution-page`.
 - Clicking an active collection metric clears that collection filter back to the
   combined Native view.
-- Clicking a season tile switches to `The Memes`, applies the selected season,
+- Clicking a season label switches to `The Memes`, applies the selected season,
   and resets incompatible state such as `page`, `subcollection`, and default
-  sorts. Clicking the active season tile again clears the season filter.
+  sorts. Clicking the active season label again clears the season filter.
 - Transfer controls are hidden when:
   - screen is mobile,
   - connected wallet is not one of the profile wallets,
@@ -211,7 +211,7 @@ Transfer mode is part of the Native collected view (not a separate route).
 - There is no standalone `/{user}/stats` route. Use `/{user}/collected` and
   `Details` for profile stats behavior.
 - `Seized` and `Season` controls appear only when `Collection` is `The Memes`.
-- Season-tile shortcuts use the same route filters as the main controls; they do
+- Season-table shortcuts use the same route filters as the main controls; they do
   not create a separate stats-only state.
 - Network cards are informational in this tab and do not open token detail routes.
 - Transfer mode uses the connected wallet's transferable balance, not consolidated

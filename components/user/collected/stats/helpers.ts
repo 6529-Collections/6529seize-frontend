@@ -68,6 +68,11 @@ const parseSeasonNumber = (season: string) => {
   return null;
 };
 
+const toNonNegativeInteger = (value: number | null | undefined): number =>
+  typeof value === "number" && Number.isFinite(value) && value > 0
+    ? Math.trunc(value)
+    : 0;
+
 const buildMainMetrics = (
   collectedStats: ApiCollectedStats | undefined,
   locale: SupportedLocale
@@ -80,9 +85,12 @@ const buildMainMetrics = (
   const validSeasonSets = collectedStats.seasons
     .filter((season) => {
       const seasonNumber = parseSeasonNumber(season.season);
-      return seasonNumber !== null && season.total_cards_in_season > 0;
+      return (
+        seasonNumber !== null &&
+        toNonNegativeInteger(season.total_cards_in_season) > 0
+      );
     })
-    .map((season) => season.sets_held);
+    .map((season) => toNonNegativeInteger(season.sets_held));
   const memeSets =
     validSeasonSets.length > 0 ? Math.min(...validSeasonSets) : 0;
 
@@ -152,15 +160,17 @@ const buildDisplaySeason = (
   locale: SupportedLocale
 ): DisplaySeason | null => {
   const seasonNumber = parseSeasonNumber(season.season);
-  const totalCards = season.total_cards_in_season;
+  const totalCards = toNonNegativeInteger(season.total_cards_in_season);
   if (seasonNumber === null || totalCards <= 0) {
     return null;
   }
 
-  const setsHeld = season.sets_held;
-  const nextSetCards = season.partial_set_unique_cards_held;
-  const totalCardsHeld = season.total_cards_held;
-  const isStarted = totalCardsHeld > 0;
+  const setsHeld = toNonNegativeInteger(season.sets_held);
+  const nextSetCards = toNonNegativeInteger(
+    season.partial_set_unique_cards_held
+  );
+  const totalCardsHeld = toNonNegativeInteger(season.total_cards_held);
+  const isStarted = totalCardsHeld > 0 || setsHeld > 0 || nextSetCards > 0;
   const isRestingComplete = setsHeld > 0 && nextSetCards === 0;
   const rawProgressPct =
     totalCards > 0 ? Math.min(nextSetCards / totalCards, 1) : 0;
@@ -171,7 +181,7 @@ const buildDisplaySeason = (
     if (nextSetCards > 0) {
       detailText = translate(
         locale,
-        "user.collected.stats.seasonTile.toNextSet",
+        "user.collected.stats.seasonRow.toNextSet",
         {
           held: formatInteger(locale, nextSetCards),
           total: formatInteger(locale, totalCards),
@@ -181,7 +191,7 @@ const buildDisplaySeason = (
     } else if (setsHeld > 0) {
       detailText = translate(
         locale,
-        "user.collected.stats.seasonTile.setComplete",
+        "user.collected.stats.seasonRow.setComplete",
         { count: formatInteger(locale, setsHeld) }
       );
     }
@@ -189,7 +199,7 @@ const buildDisplaySeason = (
 
   return {
     id: season.season,
-    label: translate(locale, "user.collected.stats.seasonTile.label", {
+    label: translate(locale, "user.collected.stats.seasonRow.label", {
       seasonNumber,
     }),
     seasonNumber,

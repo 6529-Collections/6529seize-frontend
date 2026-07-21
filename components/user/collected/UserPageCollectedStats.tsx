@@ -4,17 +4,16 @@ import type { UserPageStatsInitialData } from "@/components/user/stats/userPageS
 import { SEARCH_PARAM_ACTIVITY } from "@/components/user/stats/activity/activity.helpers";
 import type { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useSearchParams } from "next/navigation";
 import { useId, useMemo, useState } from "react";
+import { COLLAPSED_SEASON_COUNT } from "./stats/constants";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
 import { CollectedStatsDetailsPanel } from "./stats/subcomponents/CollectedStatsDetailsPanel";
 import { CollectedStatsHeader } from "./stats/subcomponents/CollectedStatsHeader";
 import { CollectedStatsSeasons } from "./stats/subcomponents/CollectedStatsSeasons";
 import type { DisplaySeason } from "./stats/types";
 import { useCollectedStatsData } from "./stats/useCollectedStatsData";
-import { useDesktopSeasonRowCapacity } from "./stats/useDesktopSeasonRowCapacity";
 
 const getCollapsedStartedSeasons = ({
   startedSeasons,
@@ -63,11 +62,6 @@ interface UserPageCollectedStatsProps {
   readonly onSeasonShortcut?: ((seasonNumber: number) => void) | undefined;
 }
 
-interface PreferredSeasonPreview {
-  readonly seasonId: string;
-  readonly activeSeasonFilterId: string | null;
-}
-
 export default function UserPageCollectedStats({
   profile,
   activeAddress,
@@ -78,16 +72,12 @@ export default function UserPageCollectedStats({
   onCollectionShortcut,
   onSeasonShortcut,
 }: Readonly<UserPageCollectedStatsProps>) {
-  const { hasTouchScreen } = useDeviceInfo();
   const searchParams = useSearchParams();
   const shouldAutoOpenDetails = Boolean(
     searchParams.get(SEARCH_PARAM_ACTIVITY)
   );
   const [isDetailsOpen, setIsDetailsOpen] = useState(shouldAutoOpenDetails);
-  const [preferredSeasonPreview, setPreferredSeasonPreview] =
-    useState<PreferredSeasonPreview | null>(null);
-  const [isDesktopSeasonListExpanded, setIsDesktopSeasonListExpanded] =
-    useState(false);
+  const [isSeasonListExpanded, setIsSeasonListExpanded] = useState(false);
   const detailsId = useId();
 
   const {
@@ -109,51 +99,20 @@ export default function UserPageCollectedStats({
       () => buildCollectedStatsViewModel(collectedStats, locale),
       [collectedStats, locale]
     );
-  const {
-    containerRef: desktopSeasonsRef,
-    visibleSeasonCount: desktopVisibleSeasonCount,
-    isDesktopLayout: isDesktopSeasonsLayout,
-  } = useDesktopSeasonRowCapacity(startedSeasons.length);
-
   const hiddenStartedSeasonCount = Math.max(
-    startedSeasons.length -
-      (desktopVisibleSeasonCount ?? startedSeasons.length),
+    startedSeasons.length - COLLAPSED_SEASON_COUNT,
     0
   );
   const activeSeasonFilterId =
     startedSeasons.find((season) => season.seasonNumber === activeSeasonNumber)
       ?.id ?? null;
-  const shouldShowAllStartedSeasons =
-    !isDesktopSeasonsLayout ||
-    isDesktopSeasonListExpanded ||
-    hiddenStartedSeasonCount === 0;
-  const visibleStartedSeasons = shouldShowAllStartedSeasons
+  const visibleStartedSeasons = isSeasonListExpanded
     ? startedSeasons
     : getCollapsedStartedSeasons({
         startedSeasons,
-        visibleSeasonCount: desktopVisibleSeasonCount,
+        visibleSeasonCount: COLLAPSED_SEASON_COUNT,
         activeSeasonFilterId,
       });
-  const defaultActiveSeasonId =
-    activeSeasonFilterId ?? startedSeasons[0]?.id ?? null;
-  const selectedActiveSeasonId =
-    preferredSeasonPreview !== null &&
-    preferredSeasonPreview.activeSeasonFilterId === activeSeasonFilterId &&
-    startedSeasons.some(
-      (season) => season.id === preferredSeasonPreview.seasonId
-    )
-      ? preferredSeasonPreview.seasonId
-      : defaultActiveSeasonId;
-  const fallbackVisibleActiveSeasonId =
-    visibleStartedSeasons.find((season) => season.id === activeSeasonFilterId)
-      ?.id ??
-    visibleStartedSeasons[0]?.id ??
-    selectedActiveSeasonId;
-  const activeSeasonId =
-    shouldShowAllStartedSeasons ||
-    visibleStartedSeasons.some((season) => season.id === selectedActiveSeasonId)
-      ? selectedActiveSeasonId
-      : fallbackVisibleActiveSeasonId;
 
   return (
     <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black">
@@ -175,22 +134,12 @@ export default function UserPageCollectedStats({
             visibleStartedSeasons={visibleStartedSeasons}
             hiddenStartedSeasonCount={hiddenStartedSeasonCount}
             notStartedSeasons={notStartedSeasons}
-            activeSeasonId={activeSeasonId}
             activeSeasonNumber={activeSeasonNumber}
             locale={locale}
-            hasTouchScreen={hasTouchScreen}
-            isDesktopLayout={isDesktopSeasonsLayout}
-            isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
-            desktopSeasonsRef={desktopSeasonsRef}
-            onActivateSeason={(seasonId) =>
-              setPreferredSeasonPreview({
-                seasonId,
-                activeSeasonFilterId,
-              })
-            }
+            isSeasonListExpanded={isSeasonListExpanded}
             onSeasonShortcut={onSeasonShortcut}
             onToggleExpanded={() =>
-              setIsDesktopSeasonListExpanded((current) => !current)
+              setIsSeasonListExpanded((current) => !current)
             }
           />
         </div>
