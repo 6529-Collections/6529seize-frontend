@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -14,7 +14,13 @@
 import { HttpFile } from '../http/http';
 
 export class ApiIdentityWaveParticipation {
+    /**
+    * Whether the identity currently has at least one active PARTICIPATORY drop in the wave.
+    */
     'is_participant': boolean;
+    /**
+    * Whether the identity has at least one WINNER drop in the wave.
+    */
     'is_winner': boolean;
 
     static readonly discriminator: string | undefined = undefined;
