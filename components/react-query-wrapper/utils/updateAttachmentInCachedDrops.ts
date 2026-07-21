@@ -84,6 +84,8 @@ export function reconcileFinalizedDropAttachments(
 
   const existingParts = existingDrop["parts"] as unknown[];
   const existingUpdatedAt = existingDrop["updated_at"];
+  // Intentional drop edits receive a newer numeric updated_at from the backend.
+  // Equal or null values can be attachment-lifecycle snapshots of the same drop.
   if (
     typeof drop.updated_at === "number" &&
     typeof existingUpdatedAt === "number" &&
@@ -126,6 +128,7 @@ export function reconcileFinalizedDropAttachments(
     );
     const attachments = part.attachments.map((attachment) => {
       const existingFinalized = finalizedById.get(attachment.attachment_id);
+      // A terminal incoming record is authoritative (for example ready -> bad).
       if (!existingFinalized || isFinalizedAttachment(attachment)) {
         return attachment;
       }

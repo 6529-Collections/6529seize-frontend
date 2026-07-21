@@ -242,7 +242,7 @@ describe("cached drop websocket updates", () => {
     expect(result.parts[0]?.attachments).toEqual([readyAttachment]);
   });
 
-  it("preserves finalized attachments omitted by a stale full-drop payload", () => {
+  it("preserves omitted finalized attachments when updated_at is null", () => {
     const readyAttachment = {
       attachment_id: "attachment-1",
       file_name: "sample.csv",
@@ -253,7 +253,7 @@ describe("cached drop websocket updates", () => {
     };
     const existingDrop = {
       id: "drop-1",
-      updated_at: 100,
+      updated_at: null,
       parts: [
         {
           part_id: 1,
@@ -265,7 +265,7 @@ describe("cached drop websocket updates", () => {
     };
     const staleDrop = {
       id: "drop-1",
-      updated_at: 100,
+      updated_at: null,
       parts: [{ part_id: 1, content: "", media: [], attachments: [] }],
     };
 
