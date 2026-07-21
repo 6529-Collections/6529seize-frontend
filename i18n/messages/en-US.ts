@@ -187,6 +187,8 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
   "suggested.description": "Categories with the most profile REP activity.",
+  "activity.direction": "gave REP to",
+  "activity.value": "{value} REP",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
