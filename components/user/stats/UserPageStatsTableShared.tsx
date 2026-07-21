@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import type { KeyboardEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -65,38 +65,19 @@ export function UserPageStatsTableScroll({
   label: string;
   children: ReactNode;
 }>) {
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (
-      event.target !== event.currentTarget ||
-      (event.key !== "ArrowLeft" && event.key !== "ArrowRight")
-    ) {
-      return;
-    }
-
-    const direction = event.key === "ArrowLeft" ? -1 : 1;
-    const scrollDistance = Math.max(
-      event.currentTarget.clientWidth * 0.75,
-      160
-    );
-    event.preventDefault();
-    event.currentTarget.scrollLeft += direction * scrollDistance;
-  };
-
   return (
-    <div
+    <section
       aria-label={label}
-      className="tw-overflow-x-auto tw-overscroll-x-contain tw-pb-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-500"
-      onKeyDown={handleKeyDown}
-      role="region"
-      tabIndex={0}
+      className="tw-overflow-x-auto tw-overscroll-x-contain tw-pb-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500"
     >
       {children}
-    </div>
+    </section>
   );
 }
 
 function getTableColumnLabels(locale: SupportedLocale) {
   return {
+    metric: t(locale, "user.collected.stats.details.tables.column.metric"),
     total: t(locale, "user.collected.stats.details.tables.column.total"),
     memes: t(locale, "user.collected.stats.details.tables.column.memes"),
     nextGen: t(locale, "user.collected.stats.details.tables.column.nextGen"),
@@ -127,9 +108,11 @@ export function UserPageStatsTableHead({
       <thead className={STATS_TABLE_HEAD_CLASS}>
         <tr>
           <th
-            aria-hidden="true"
-            className="tw-sticky tw-left-0 tw-z-[2] tw-bg-iron-900 tw-px-4 tw-py-3"
-          ></th>
+            scope="col"
+            className={`${STATS_TABLE_HEADER_CELL_CLASS} tw-sticky tw-left-0 tw-z-[2] tw-bg-iron-900 tw-text-left`}
+          >
+            {labels.metric}
+          </th>
           {columns.map((label) => (
             <th
               key={label}

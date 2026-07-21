@@ -94,7 +94,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
             )}
           </div>
         ) : (
-          <output className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
+          <output className="tw-block tw-px-4 tw-py-5 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
             {getWalletActivityEmptyMessage(filter, locale)}
           </output>
         )}

@@ -64,7 +64,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
           )}
         </div>
       ) : (
-        <output className="tw-p-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6">
+        <output className="tw-block tw-px-4 tw-py-5 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6">
           {getDistributionsMessage(
             "user.collected.stats.distributions.empty",
             undefined,

@@ -123,6 +123,7 @@ const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
     "collected.title": "Collected",
     overview: "Overview",
     "tables.overviewCaption": "Collected holdings summary by collection",
+    "tables.column.metric": "Metric",
     "tables.column.total": "Total",
     "tables.column.memes": "Memes",
     "tables.column.nextGen": "NextGen",

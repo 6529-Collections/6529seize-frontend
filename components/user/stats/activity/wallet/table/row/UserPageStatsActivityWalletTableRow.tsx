@@ -389,27 +389,25 @@ export default function UserPageStatsActivityWalletTableRow({
             gasGwei={transaction.gas_gwei}
             gasPriceGwei={transaction.gas_price_gwei}
           />
-          <>
-            <a
-              href={`https://etherscan.io/tx/${transaction.transaction}`}
-              target="_blank"
-              aria-label="Go to Etherscan"
-              aria-describedby={etherscanTooltipId}
-              data-tooltip-content="Go to Etherscan"
-              data-tooltip-id={etherscanTooltipId}
-              rel="noopener noreferrer"
-              className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-text-iron-500 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
-            >
-              <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
-                <EtherscanIcon />
-              </span>
-            </a>
-            <Tooltip
-              id={etherscanTooltipId}
-              place="left"
-              style={TOOLTIP_STYLES}
-            />
-          </>
+          <a
+            href={`https://etherscan.io/tx/${transaction.transaction}`}
+            target="_blank"
+            aria-label="Go to Etherscan"
+            aria-describedby={etherscanTooltipId}
+            data-tooltip-content="Go to Etherscan"
+            data-tooltip-id={etherscanTooltipId}
+            rel="noopener noreferrer"
+            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-text-iron-500 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+          >
+            <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
+              <EtherscanIcon />
+            </span>
+          </a>
+          <Tooltip
+            id={etherscanTooltipId}
+            place="left"
+            style={TOOLTIP_STYLES}
+          />
         </span>
       </td>
       <td className="tw-w-24 tw-py-2.5 tw-text-right sm:tw-w-32">
