@@ -1,8 +1,10 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
+  reconcileFinalizedDropAttachments,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryClient } from "@tanstack/react-query";
 
 const createQueryClient = () =>
@@ -189,5 +191,65 @@ describe("cached drop websocket updates", () => {
       status: "BAD",
       error_reason: "Blocked",
     });
+  });
+
+  it("preserves finalized attachments when a stale drop update downgrades them", () => {
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.pdf",
+      mime_type: "application/pdf",
+      kind: "pdf",
+      status: "ready",
+      url: "https://example.com/sample.pdf",
+    };
+    const existingDrop = {
+      id: "drop-1",
+      parts: [{ content: "", media: [], attachments: [readyAttachment] }],
+    };
+    const staleDrop = {
+      id: "drop-1",
+      parts: [
+        {
+          content: "",
+          media: [],
+          attachments: [
+            { ...readyAttachment, status: "processing", url: null },
+          ],
+        },
+      ],
+    };
+
+    const result = reconcileFinalizedDropAttachments(
+      staleDrop as ApiDrop,
+      existingDrop
+    );
+
+    expect(result.parts[0]?.attachments).toEqual([readyAttachment]);
+  });
+
+  it("preserves finalized attachments omitted by a stale full-drop payload", () => {
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.csv",
+      mime_type: "text/csv",
+      kind: "csv",
+      status: "ready",
+      url: "https://example.com/sample.csv",
+    };
+    const existingDrop = {
+      id: "drop-1",
+      parts: [{ content: "", media: [], attachments: [readyAttachment] }],
+    };
+    const staleDrop = {
+      id: "drop-1",
+      parts: [{ content: "", media: [], attachments: [] }],
+    };
+
+    const result = reconcileFinalizedDropAttachments(
+      staleDrop as ApiDrop,
+      existingDrop
+    );
+
+    expect(result.parts[0]?.attachments).toEqual([readyAttachment]);
   });
 });

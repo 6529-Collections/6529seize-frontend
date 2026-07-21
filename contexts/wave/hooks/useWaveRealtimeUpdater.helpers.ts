@@ -13,7 +13,10 @@ import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 import { type QueryClient } from "@tanstack/react-query";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
-import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import {
+  reconcileFinalizedDropAttachments,
+  updateDropInCachedDrops,
+} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
 
 const HELP_BOT_HANDLE = "help6529";
@@ -268,14 +271,24 @@ const buildOptimisticDrop = ({
   readonly options: ProcessIncomingDropOptions;
 }): ExtendedDrop => {
   const preferExistingPollVote = options.preferExistingPollVote;
-  let reconciledDrop = drop;
+  let reconciledDrop =
+    existingDrop === null
+      ? drop
+      : reconcileFinalizedDropAttachments(drop, existingDrop);
   if (existingDrop !== null && preferExistingPollVote === undefined) {
-    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop);
+    reconciledDrop = reconcileDropAuthenticatedPollVote(
+      reconciledDrop,
+      existingDrop
+    );
   }
   if (existingDrop !== null && preferExistingPollVote !== undefined) {
-    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop, {
-      preferExistingVote: preferExistingPollVote,
-    });
+    reconciledDrop = reconcileDropAuthenticatedPollVote(
+      reconciledDrop,
+      existingDrop,
+      {
+        preferExistingVote: preferExistingPollVote,
+      }
+    );
   }
 
   return {

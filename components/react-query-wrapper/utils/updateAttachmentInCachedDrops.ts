@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { QueryKey } from "../ReactQueryWrapper";
 
@@ -56,6 +57,70 @@ function isMatchingDrop(
   return value["id"] === dropId;
 }
 
+const FINALIZED_ATTACHMENT_STATUSES = new Set<ApiAttachmentStatus>([
+  ApiAttachmentStatus.Ready,
+  ApiAttachmentStatus.Bad,
+]);
+
+function isFinalizedAttachment(value: unknown): value is ApiAttachment {
+  return (
+    isRecord(value) &&
+    typeof value["attachment_id"] === "string" &&
+    FINALIZED_ATTACHMENT_STATUSES.has(value["status"] as ApiAttachmentStatus)
+  );
+}
+
+export function reconcileFinalizedDropAttachments(
+  drop: ApiDrop,
+  existingDrop: unknown
+): ApiDrop {
+  if (!isRecord(existingDrop) || !Array.isArray(existingDrop["parts"])) {
+    return drop;
+  }
+
+  const existingParts = existingDrop["parts"] as unknown[];
+  const parts = drop.parts.map((part, index) => {
+    const existingPart = existingParts[index];
+    if (
+      !isRecord(existingPart) ||
+      !Array.isArray(existingPart["attachments"])
+    ) {
+      return part;
+    }
+
+    const finalizedAttachments = existingPart["attachments"].filter(
+      isFinalizedAttachment
+    );
+    if (finalizedAttachments.length === 0) {
+      return part;
+    }
+
+    const finalizedById = new Map(
+      finalizedAttachments.map((attachment) => [
+        attachment.attachment_id,
+        attachment,
+      ])
+    );
+    const incomingIds = new Set(
+      part.attachments.map((attachment) => attachment.attachment_id)
+    );
+    const attachments = part.attachments.map(
+      (attachment) => finalizedById.get(attachment.attachment_id) ?? attachment
+    );
+
+    for (const attachment of finalizedAttachments) {
+      if (!incomingIds.has(attachment.attachment_id)) {
+        attachments.push(attachment);
+      }
+    }
+
+    return { ...part, attachments };
+  });
+  const changed = parts.some((part, index) => part !== drop.parts[index]);
+
+  return changed ? { ...drop, parts } : drop;
+}
+
 interface DropReplacementOptions {
   readonly mergeWithExisting?: boolean;
   readonly preferExistingPollVote?: boolean;
@@ -66,9 +131,13 @@ function replaceMatchingDrop(
   drop: ApiDrop,
   options: DropReplacementOptions
 ): ApiDrop {
+  const dropWithFinalizedAttachments = reconcileFinalizedDropAttachments(
+    drop,
+    value
+  );
   const dropForReconciliation = options.mergeWithExisting
-    ? ({ ...value, ...drop } as ApiDrop)
-    : drop;
+    ? ({ ...value, ...dropWithFinalizedAttachments } as ApiDrop)
+    : dropWithFinalizedAttachments;
   const preferExistingPollVote = options.preferExistingPollVote;
   const reconciledDrop =
     preferExistingPollVote === undefined
