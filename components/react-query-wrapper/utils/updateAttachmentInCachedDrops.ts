@@ -74,13 +74,33 @@ export function reconcileFinalizedDropAttachments(
   drop: ApiDrop,
   existingDrop: unknown
 ): ApiDrop {
-  if (!isRecord(existingDrop) || !Array.isArray(existingDrop["parts"])) {
+  if (
+    !Array.isArray(drop.parts) ||
+    !isRecord(existingDrop) ||
+    !Array.isArray(existingDrop["parts"])
+  ) {
     return drop;
   }
 
   const existingParts = existingDrop["parts"] as unknown[];
-  const parts = drop.parts.map((part, index) => {
-    const existingPart = existingParts[index];
+  const existingUpdatedAt = existingDrop["updated_at"];
+  if (
+    typeof drop.updated_at === "number" &&
+    typeof existingUpdatedAt === "number" &&
+    drop.updated_at > existingUpdatedAt
+  ) {
+    return drop;
+  }
+
+  const existingPartsById = new Map(
+    existingParts.flatMap((part) =>
+      isRecord(part) && typeof part["part_id"] === "number"
+        ? [[part["part_id"], part] as const]
+        : []
+    )
+  );
+  const parts = drop.parts.map((part) => {
+    const existingPart = existingPartsById.get(part.part_id);
     if (
       !isRecord(existingPart) ||
       !Array.isArray(existingPart["attachments"])
@@ -104,9 +124,13 @@ export function reconcileFinalizedDropAttachments(
     const incomingIds = new Set(
       part.attachments.map((attachment) => attachment.attachment_id)
     );
-    const attachments = part.attachments.map(
-      (attachment) => finalizedById.get(attachment.attachment_id) ?? attachment
-    );
+    const attachments = part.attachments.map((attachment) => {
+      const existingFinalized = finalizedById.get(attachment.attachment_id);
+      if (!existingFinalized || isFinalizedAttachment(attachment)) {
+        return attachment;
+      }
+      return existingFinalized;
+    });
 
     for (const attachment of finalizedAttachments) {
       if (!incomingIds.has(attachment.attachment_id)) {
