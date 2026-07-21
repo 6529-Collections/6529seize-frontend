@@ -23,6 +23,7 @@ concurrency:
 env:
   AWS_REGION: ${{ vars.STAGING_AWS_REGION || 'eu-west-1' }}
   ARTIFACT_BUCKET: ${{ vars.RELEASE_BUS_ARTIFACT_BUCKET || 'seize-web' }}
+  ARTIFACT_BUCKET_REGION: ${{ vars.RELEASE_BUS_ARTIFACT_BUCKET_REGION || 'us-east-1' }}
   STAGING_REPO_DIR: ${{ vars.STAGING_REPO_DIR || '/home/ubuntu/6529seize-frontend' }}
   STAGING_RUN_AS: ${{ vars.STAGING_RUN_AS || 'ubuntu' }}
 
@@ -121,10 +122,14 @@ jobs:
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$PACKAGE_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$ARTIFACT_BUCKET_REGION" =~ ^[a-z]{2}(-gov)?-[a-z]+-[1-9][0-9]*$ ]]
           object_key="release-bus/${TRAIN_ID}/r${TRAIN_REVISION}/staging/frontend/${EXPECTED_SHA}.zip"
           aws s3 cp release-bus-artifact/target/package.zip "s3://${ARTIFACT_BUCKET}/${object_key}" \
+            --region "$ARTIFACT_BUCKET_REGION" \
             --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
-          url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" --expires-in 7200)"
+          url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" \
+            --region "$ARTIFACT_BUCKET_REGION" \
+            --expires-in 7200)"
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Deploy immutable bundle through SSM
         id: send-command
@@ -151,7 +156,11 @@ jobs:
           current_link="$release_root/current"
           previous_target="$(readlink "$current_link" 2>/dev/null || true)"
           install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"
-          curl --fail --silent --show-error --location "$ARTIFACT_URL" -o "$release_dir/package.zip"
+          http_status="$(curl --silent --show-error --proto '=https' \
+            --output "$release_dir/package.zip" \
+            --write-out '%{http_code}' \
+            "$ARTIFACT_URL")"
+          test "$http_status" = 200
           echo "$EXPECTED_DIGEST  $release_dir/package.zip" | sha256sum -c -
           rm -rf "$release_dir/app"
           install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir/app"
