@@ -81,11 +81,18 @@ describe("UserPageStatsBoostBreakdown", () => {
         ),
       })
     ).toBeInTheDocument();
-    expect(
-      within(table).getByRole("rowheader", {
-        name: boostText("user.collected.stats.boostBreakdown.rows.total"),
-      })
-    ).toBeInTheDocument();
+    const totalRowHeader = within(table).getByRole("rowheader", {
+      name: boostText("user.collected.stats.boostBreakdown.rows.total"),
+    });
+    expect(totalRowHeader).toBeInTheDocument();
+    const totalRow = totalRowHeader.closest("tr");
+    expect(totalRow).not.toBeNull();
+    if (!totalRow) {
+      throw new Error("Expected total boost row");
+    }
+    within(totalRow)
+      .getAllByRole("cell")
+      .forEach((cell) => expect(cell).toHaveClass("tw-font-semibold"));
     expect(
       screen.getAllByRole("button", {
         name: boostText("user.collected.stats.boostBreakdown.info.ariaLabel"),

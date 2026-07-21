@@ -23,8 +23,10 @@ import {
   isMemesContract,
   isNextgenContract,
 } from "@/helpers/Helpers";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
 import UserPageStatsActivityWalletTableRowIcon from "./UserPageStatsActivityWalletTableRowIcon";
 import UserPageStatsActivityWalletTableRowMainAddress from "./UserPageStatsActivityWalletTableRowMainAddress";
@@ -201,6 +203,10 @@ export default function UserPageStatsActivityWalletTableRow({
   };
 
   const type = getType();
+  const etherscanTooltipId = buildTooltipId(
+    "wallet-activity-etherscan",
+    transaction.transaction
+  );
 
   let nftLite: NFTLite | undefined | null = null;
   if (isMemesContract(transaction.contract)) {
@@ -305,28 +311,28 @@ export default function UserPageStatsActivityWalletTableRow({
             type={type}
             profile={profile}
           />
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-text-base">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-500 sm:tw-text-base">
             {TYPE_TP_ACTION[type]}
           </span>
           {transaction.token_count > 1 && (
-            <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-300">
+            <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-400">
               x{transaction.token_count}
             </span>
           )}
           <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium sm:tw-text-base">
             <Link
-              className="tw-text-iron-100 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400"
+              className="tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-text-iron-100"
               href={getPath()}
             >
               {getLinkContent()}
             </Link>
           </span>
           <img
-            className="tw-mx-0.5 tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/30"
+            className="tw-ml-1 tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/10"
             src={getImageSrc()}
             alt={nftLite?.name ?? ""}
           />
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100 sm:tw-text-base">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-text-base">
             {showAnotherSide && (
               <UserPageStatsActivityWalletTableRowSecondAddress
                 type={type}
@@ -339,7 +345,7 @@ export default function UserPageStatsActivityWalletTableRow({
               for{" "}
               <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
                 <svg
-                  className="tw-h-5 tw-w-5"
+                  className="tw-h-4 tw-w-4"
                   aria-hidden="true"
                   aria-label="ethereum"
                   enableBackground="new 0 0 1920 1920"
@@ -362,7 +368,7 @@ export default function UserPageStatsActivityWalletTableRow({
                   <path d="m420.1 1078.7 539.7 760.6v-441.7z" fill="#8a92b2" />
                   <path d="m959.8 1397.6v441.7l540.1-760.6z" fill="#62688f" />
                 </svg>
-                <span className="tw-whitespace-nowrap tw-text-iron-100">
+                <span className="tw-whitespace-nowrap tw-text-iron-300">
                   {value}
                 </span>
               </span>
@@ -386,15 +392,22 @@ export default function UserPageStatsActivityWalletTableRow({
           <a
             href={`https://etherscan.io/tx/${transaction.transaction}`}
             target="_blank"
-            title="Go to etherscan"
-            aria-label="Go to etherscan"
+            aria-label="Go to Etherscan"
+            aria-describedby={etherscanTooltipId}
+            data-tooltip-content="Go to Etherscan"
+            data-tooltip-id={etherscanTooltipId}
             rel="noopener noreferrer"
-            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-text-iron-500 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
           >
-            <span className="tw-h-6 tw-w-6 tw-flex-shrink-0 sm:tw-h-5 sm:tw-w-5">
+            <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
               <EtherscanIcon />
             </span>
           </a>
+          <Tooltip
+            id={etherscanTooltipId}
+            place="left"
+            style={TOOLTIP_STYLES}
+          />
         </span>
       </td>
       <td className="tw-w-24 tw-py-2.5 tw-text-right sm:tw-w-32">

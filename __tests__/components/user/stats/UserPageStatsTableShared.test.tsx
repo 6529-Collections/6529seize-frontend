@@ -1,6 +1,7 @@
 import {
+  UserPageStatsDisclosure,
   UserPageStatsTableHead,
-  UserPageStatsTableHr,
+  UserPageStatsTableScroll,
 } from "@/components/user/stats/UserPageStatsTableShared";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -22,29 +23,31 @@ describe("UserPageStatsTableShared", () => {
 
     expect(screen.getByRole("table", { name: caption })).toBeInTheDocument();
     const headers = screen.getAllByRole("columnheader");
-    expect(headers).toHaveLength(5);
+    expect(headers).toHaveLength(6);
     expect(headers[0]).toHaveTextContent(
-      t(DEFAULT_LOCALE, "user.collected.stats.details.tables.column.total")
+      t(DEFAULT_LOCALE, "user.collected.stats.details.tables.column.metric")
     );
     expect(headers[0]).toHaveAttribute("scope", "col");
-    expect(headers[4]).toHaveTextContent(
+    expect(headers[1]).toHaveTextContent(
+      t(DEFAULT_LOCALE, "user.collected.stats.details.tables.column.total")
+    );
+    expect(headers[5]).toHaveTextContent(
       t(DEFAULT_LOCALE, "user.collected.stats.details.tables.column.memeLab")
     );
   });
 
-  it("renders hr row spanning specified columns", () => {
+  it("renders an open disclosure and labelled scroll region", () => {
+    const label = "Season activity";
     const { container } = render(
-      <table>
-        <tbody>
-          <UserPageStatsTableHr span={4} />
-        </tbody>
-      </table>
+      <UserPageStatsDisclosure title="Overview">
+        <UserPageStatsTableScroll label={label}>
+          <table />
+        </UserPageStatsTableScroll>
+      </UserPageStatsDisclosure>
     );
-    const separatorRow = container.querySelector('tr[aria-hidden="true"]');
-    const cell = separatorRow?.querySelector("td") ?? null;
 
-    expect(separatorRow).toBeInTheDocument();
-    expect(cell).not.toBeNull();
-    expect(cell!).toHaveAttribute("colspan", "4");
+    expect(screen.getByText("Overview")).toBeInTheDocument();
+    expect(container.querySelector("details")).toHaveAttribute("open");
+    expect(screen.getByRole("region", { name: label })).toBeInTheDocument();
   });
 });
