@@ -5,6 +5,7 @@ import path from "node:path";
 const {
   buildGateSummary,
   finalSummary,
+  frontendGateContract,
   jestRecord,
   manifestFromRaw,
   phaseRecord,
@@ -12,6 +13,7 @@ const {
 }: {
   buildGateSummary: (input: Record<string, unknown>) => Record<string, any>;
   finalSummary: (input: Record<string, unknown>) => Record<string, any>;
+  frontendGateContract: (input: Record<string, unknown>) => Record<string, any>;
   jestRecord: (input: Record<string, unknown>) => Record<string, any>;
   manifestFromRaw: (raw: string, root: string) => string[];
   phaseRecord: (input: Record<string, unknown>) => Record<string, any>;
@@ -19,6 +21,54 @@ const {
 } = require("../../scripts/release-bus-gate-evidence.cjs");
 
 describe("Release Bus gate evidence", () => {
+  it("fingerprints base policy and pinned workflow tooling deterministically", () => {
+    const baseFileContents = {
+      "bin/6529": "runner",
+      "jest.config.js": "config",
+      "jest.setup.js": "setup",
+      "package.json": JSON.stringify({ packageManager: "pnpm@10.14.0" }),
+      "pnpm-lock.yaml": "lockfile",
+    };
+    const workflowFileContents = {
+      ".github/workflows/release-bus-base-canary.yml": "workflow",
+      "scripts/release-bus-frontend-gate.sh": "gate",
+      "scripts/release-bus-gate-evidence.cjs": "evidence",
+      "scripts/release-bus-report-progress.mjs": "reporter",
+    };
+    const input = {
+      baseSha: "a".repeat(40),
+      workflowSha: "b".repeat(40),
+      baseFileContents,
+      workflowFileContents,
+      gateMode: "sharded",
+      shardCount: 4,
+    };
+
+    const baseline = frontendGateContract(input);
+    expect(frontendGateContract(input)).toEqual(baseline);
+    expect(baseline).toMatchObject({
+      gate_fingerprint:
+        "78870a761c2c085d2ca6a9386a3c6e77ccda5348667526972718a5832c530b49",
+      workflow_digest:
+        "da7f739f627198465eeab537a6f7a435dc4a0c332f9e4a8462293eb3f4ab7ee0",
+    });
+    expect(
+      frontendGateContract({
+        ...input,
+        baseFileContents: { ...baseFileContents, "jest.config.js": "changed" },
+      }).gate_fingerprint
+    ).not.toBe(baseline.gate_fingerprint);
+    expect(
+      frontendGateContract({
+        ...input,
+        workflowFileContents: {
+          ...workflowFileContents,
+          "scripts/release-bus-gate-evidence.cjs": "changed",
+        },
+      }).gate_fingerprint
+    ).not.toBe(baseline.gate_fingerprint);
+  });
+
   it("normalizes an exact repository-local test inventory", () => {
     const root = path.join(os.tmpdir(), "release-bus-evidence-root");
     const raw = [

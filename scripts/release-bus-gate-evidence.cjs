@@ -2,6 +2,8 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { createHash } = require("node:crypto");
+const { execFileSync } = require("node:child_process");
 
 const ALLOWED_SHARD_COUNTS = new Set([1, 2, 4]);
 const PHASES = ["lint", "typecheck", "unit_tests", "build"];
@@ -14,6 +16,19 @@ const STATUSES = new Set([
 ]);
 const MAX_FAILURES = 100;
 const MAX_TEXT_LENGTH = 500;
+const FRONTEND_GATE_WORKFLOW = ".github/workflows/release-bus-base-canary.yml";
+const FRONTEND_GATE_BASE_FILES = [
+  "bin/6529",
+  "jest.config.js",
+  "jest.setup.js",
+  "package.json",
+  "pnpm-lock.yaml",
+];
+const FRONTEND_GATE_TOOLING_FILES = [
+  "scripts/release-bus-frontend-gate.sh",
+  "scripts/release-bus-gate-evidence.cjs",
+  "scripts/release-bus-report-progress.mjs",
+];
 
 function parseArgs(values) {
   const result = {};
@@ -73,6 +88,119 @@ function readJson(file) {
 function writeJson(file, value) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function frontendGateContract({
+  baseSha,
+  workflowSha,
+  baseFileContents,
+  workflowFileContents,
+  gateMode,
+  shardCount,
+}) {
+  if (!/^[a-f0-9]{40}$/.test(baseSha)) throw new Error("Invalid base SHA");
+  if (!/^[a-f0-9]{40}$/.test(workflowSha))
+    throw new Error("Invalid workflow SHA");
+  if (!new Set(["legacy", "shadow", "sharded"]).has(gateMode))
+    throw new Error("Invalid gate mode");
+  if (!ALLOWED_SHARD_COUNTS.has(shardCount))
+    throw new Error("Unsupported shard count");
+  const workflowFiles = [
+    FRONTEND_GATE_WORKFLOW,
+    ...FRONTEND_GATE_TOOLING_FILES,
+  ];
+  for (const file of FRONTEND_GATE_BASE_FILES) {
+    if (typeof baseFileContents[file] !== "string")
+      throw new Error(`Missing base contract file ${file}`);
+  }
+  for (const file of workflowFiles) {
+    if (typeof workflowFileContents[file] !== "string")
+      throw new Error(`Missing workflow contract file ${file}`);
+  }
+  const packageJson = JSON.parse(baseFileContents["package.json"]);
+  const packageManager = packageJson?.packageManager;
+  if (
+    typeof packageManager !== "string" ||
+    packageManager.length < 1 ||
+    packageManager.length > 128
+  ) {
+    throw new Error("Invalid package-manager contract");
+  }
+  const componentDigests = Object.fromEntries([
+    ...FRONTEND_GATE_BASE_FILES.map((file) => [
+      file,
+      sha256(baseFileContents[file]),
+    ]),
+    ...workflowFiles.map((file) => [file, sha256(workflowFileContents[file])]),
+  ]);
+  const workflowDigest = componentDigests[FRONTEND_GATE_WORKFLOW];
+  const fingerprint = sha256(
+    JSON.stringify({
+      schema_version: 1,
+      repository: "frontend",
+      environment: "orchestration",
+      base_sha: baseSha,
+      workflow_sha: workflowSha,
+      workflow_digest: workflowDigest,
+      node_version: "22",
+      package_manager: packageManager,
+      gate_mode: gateMode,
+      shard_count: shardCount,
+      component_digests: componentDigests,
+    })
+  );
+  return {
+    schema_version: 1,
+    repository: "frontend",
+    environment: "orchestration",
+    base_sha: baseSha,
+    gate_fingerprint: fingerprint,
+    workflow_sha: workflowSha,
+    workflow_digest: workflowDigest,
+    node_version: "22",
+    package_manager: packageManager,
+    gate_mode: gateMode,
+    shard_count: shardCount,
+    component_digests: componentDigests,
+  };
+}
+
+function contractFromRepository(args) {
+  const repoRoot = path.resolve(required(args, "repo-root"));
+  const baseSha = required(args, "base-sha");
+  const workflowSha = required(args, "workflow-sha");
+  const head = execFileSync("git", ["-C", repoRoot, "rev-parse", "HEAD"], {
+    encoding: "utf8",
+  }).trim();
+  if (head !== baseSha)
+    throw new Error("Base checkout does not match base SHA");
+  const baseFileContents = Object.fromEntries(
+    FRONTEND_GATE_BASE_FILES.map((file) => [
+      file,
+      fs.readFileSync(path.join(repoRoot, file), "utf8"),
+    ])
+  );
+  const workflowFileContents = Object.fromEntries(
+    [FRONTEND_GATE_WORKFLOW, ...FRONTEND_GATE_TOOLING_FILES].map((file) => [
+      file,
+      execFileSync("git", ["-C", repoRoot, "show", `${workflowSha}:${file}`], {
+        encoding: "utf8",
+        maxBuffer: 2 * 1024 * 1024,
+      }),
+    ])
+  );
+  return frontendGateContract({
+    baseSha,
+    workflowSha,
+    baseFileContents,
+    workflowFileContents,
+    gateMode: required(args, "mode"),
+    shardCount: integer(required(args, "shard-count"), "shard-count", 1),
+  });
 }
 
 function relativeTestPath(testPath, repoRoot) {
@@ -531,6 +659,10 @@ function finalSummary({ args, records, jobResults }) {
 }
 
 function run(command, args) {
+  if (command === "fingerprint") {
+    writeJson(required(args, "output"), contractFromRepository(args));
+    return;
+  }
   if (command === "matrix") {
     const count = integer(required(args, "shard-count"), "shard-count", 1);
     if (!ALLOWED_SHARD_COUNTS.has(count))
@@ -620,6 +752,7 @@ function run(command, args) {
 module.exports = {
   buildGateSummary,
   finalSummary,
+  frontendGateContract,
   jestRecord,
   manifestFromRaw,
   phaseRecord,
