@@ -465,13 +465,27 @@ jobs:
           JEST_RESULT: ${{ needs.jest.result }}
           LEGACY_RESULT: ${{ needs.legacy.result }}
           LINT_RESULT: ${{ needs.lint.result }}
-          PACKAGE_MANAGER_INPUT: ${{ needs.authorize.outputs.package_manager }}
+          PASSED_GATE_FINGERPRINT: ${{ needs.authorize.outputs.gate_fingerprint }}
+          PASSED_PACKAGE_MANAGER: ${{ needs.authorize.outputs.package_manager }}
+          PASSED_WORKFLOW_DIGEST: ${{ needs.authorize.outputs.workflow_digest }}
           TYPECHECK_RESULT: ${{ needs.typecheck.result }}
         run: |
           set -euo pipefail
-          package_manager="$PACKAGE_MANAGER_INPUT"
-          if [ -z "$package_manager" ]; then
-            package_manager="$(node -p 'require("./package.json").packageManager')"
+          contract="$RUNNER_TEMP/release-bus-gate-contract.json"
+          node "$RELEASE_BUS_EVIDENCE_TOOL" fingerprint \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --base-sha "${{ inputs.base_sha }}" \
+            --workflow-sha "${{ needs.authorize.outputs.workflow_sha }}" \
+            --mode "${{ needs.authorize.outputs.gate_mode }}" \
+            --shard-count "${{ needs.authorize.outputs.shard_count }}" \
+            --output "$contract"
+          gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
+          workflow_digest="$(jq -r '.workflow_digest' "$contract")"
+          package_manager="$(jq -r '.package_manager' "$contract")"
+          if [ "$PASSED_GATE_FINGERPRINT" != unversioned ]; then
+            test "$PASSED_GATE_FINGERPRINT" = "$gate_fingerprint"
+            test "$PASSED_WORKFLOW_DIGEST" = "$workflow_digest"
+            test "$PASSED_PACKAGE_MANAGER" = "$package_manager"
           fi
           jq -n \
             --arg legacy "$LEGACY_RESULT" \
@@ -489,9 +503,9 @@ jobs:
             --job-results "$RUNNER_TEMP/release-bus-job-results.json" \
             --base-sha "${{ inputs.base_sha }}" \
             --environment "${{ needs.authorize.outputs.evidence_environment }}" \
-            --gate-fingerprint "${{ needs.authorize.outputs.gate_fingerprint }}" \
+            --gate-fingerprint "$gate_fingerprint" \
             --workflow-sha "${{ needs.authorize.outputs.workflow_sha }}" \
-            --workflow-digest "${{ needs.authorize.outputs.workflow_digest }}" \
+            --workflow-digest "$workflow_digest" \
             --node-version "22" \
             --package-manager "$package_manager" \
             --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
