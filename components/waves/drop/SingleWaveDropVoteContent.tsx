@@ -356,7 +356,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
         )}
       </div>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-6">
         {canPostRationale && (
           <div>
             <label
@@ -383,9 +383,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
                 <span
                   aria-hidden="true"
                   className={`tw-absolute tw-inset-0 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 ${
-                    shouldPostRationale
-                      ? "tw-bg-primary-500"
-                      : "tw-bg-iron-650"
+                    shouldPostRationale ? "tw-bg-primary-500" : "tw-bg-iron-650"
                   }`}
                 />
                 <span
