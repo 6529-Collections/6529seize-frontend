@@ -183,7 +183,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
 
               {artworkMedia && (
                 <div
-                  className={`tw-flex tw-h-96 tw-justify-center ${
+                  className={`tw-flex tw-h-96 tw-justify-center tw-overflow-hidden ${
                     location === DropLocation.WAVE
                       ? "tw-bg-iron-950"
                       : "tw-bg-iron-900/40"
@@ -193,6 +193,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
                     isCompetitionDrop={true}
+                    fillVideoContainer={true}
                     imageScale={mediaImageScale}
                   />
                 </div>
