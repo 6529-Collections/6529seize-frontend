@@ -32,19 +32,13 @@ export default function HomePageTextSection() {
             className="tw-relative tw-z-10 tw-mt-6 tw-flex tw-items-center md:tw-mt-8 lg:tw-col-span-5 lg:tw-col-start-8 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-mt-0"
             aria-label="Mission statement"
           >
-            <div className="tw-group tw-relative tw-w-full">
-              <div
-                className="tw-pointer-events-none tw-absolute -tw-inset-0.5 tw-rounded-xl tw-bg-gradient-to-r tw-from-iron-400/20 tw-to-iron-200/10 tw-opacity-30 tw-blur tw-transition-opacity tw-duration-500 group-hover:tw-opacity-50"
-                aria-hidden="true"
-              />
-              <blockquote className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/70 tw-bg-iron-950/80 tw-px-4 tw-py-5 tw-shadow-lg tw-backdrop-blur-xl">
-                <p className="tw-mb-0 tw-mt-0 tw-font-mono tw-text-sm tw-leading-relaxed tw-text-iron-400 md:tw-text-center lg:tw-text-left">
-                  We're extending what Bitcoin and Ethereum proved for money and
-                  code to human coordination itself, so any activity can be
-                  organized permissionlessly.
-                </p>
-              </blockquote>
-            </div>
+            <blockquote className="tw-relative tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/70 tw-bg-iron-950/80 tw-px-4 tw-py-5 tw-shadow-[0_18px_50px_-24px_rgba(0,0,0,0.72)] tw-backdrop-blur-xl">
+              <p className="tw-mb-0 tw-mt-0 tw-font-mono tw-text-sm tw-leading-relaxed tw-text-iron-400 md:tw-text-center lg:tw-text-left">
+                We're extending what Bitcoin and Ethereum proved for money and
+                code to human coordination itself, so any activity can be
+                organized permissionlessly.
+              </p>
+            </blockquote>
           </aside>
         </div>
       </div>
