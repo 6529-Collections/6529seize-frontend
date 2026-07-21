@@ -72,7 +72,7 @@ export default function UserPageStatsActivityTDHHistoryChart({
   return (
     <div
       aria-labelledby={headingId}
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+      className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02]"
       role="listitem"
     >
       <div className="tw-flex tw-px-4 tw-pt-6 sm:tw-px-6">
