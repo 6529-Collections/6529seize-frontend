@@ -314,7 +314,7 @@ function BoostValueCell({
   return (
     <td
       className={`${BOOST_VALUE_CELL_CLASS}${
-        emphasized ? "tw-font-semibold" : ""
+        emphasized ? " tw-font-semibold" : ""
       }`}
     >
       {hasBoostValue(value) ? (
