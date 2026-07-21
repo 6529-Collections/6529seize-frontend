@@ -592,35 +592,37 @@ export default function GlobalRepCategoryDetail({
               {category}
             </h1>
           </div>
-          <div className="rep-category-header-actions tw-flex tw-flex-wrap tw-gap-2">
-            {showSearchLink && (
+          {showSearchLink && (
+            <div className="rep-category-header-actions tw-flex tw-flex-wrap tw-gap-2">
               <Link
                 href="/rep/categories"
                 className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] hover:tw-text-white"
               >
                 Back to category search
               </Link>
-            )}
-            {showFullPageLink && (
-              <Link
-                href={getRepCategoryPath(category)}
-                className="rep-category-full-page tw-text-primary-200 hover:tw-text-primary-100 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15"
-              >
-                Open full page
-              </Link>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        <div className="rep-category-scope tw-max-w-full">
-          <CommonTabs<RepCategoryScope>
-            items={SCOPES}
-            activeItem={activeScope}
-            filterLabel="REP category scope"
-            setSelected={setActiveScope}
-            size="sm"
-            fill={false}
-          />
+        <div className="rep-category-scope-row tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <div className="rep-category-scope tw-min-w-0 tw-max-w-full">
+            <CommonTabs<RepCategoryScope>
+              items={SCOPES}
+              activeItem={activeScope}
+              filterLabel="REP category scope"
+              setSelected={setActiveScope}
+              size="sm"
+              fill={false}
+            />
+          </div>
+          {showFullPageLink && (
+            <Link
+              href={getRepCategoryPath(category)}
+              className="rep-category-full-page tw-text-primary-200 hover:tw-text-primary-100 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15"
+            >
+              Open full page
+            </Link>
+          )}
         </div>
 
         {activeScope === "profile" ? (
