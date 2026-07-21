@@ -1,4 +1,5 @@
 import type { ComponentProps, ReactNode } from "react";
+import clsx from "clsx";
 import Link from "next/link";
 
 import {
@@ -32,9 +33,10 @@ export default function ButtonLink({
         variant,
         size,
         fullWidth,
-        className:
-          "tw-no-underline hover:tw-no-underline focus:tw-no-underline " +
-          (className ?? ""),
+        className: clsx(
+          "tw-no-underline hover:tw-no-underline focus:tw-no-underline",
+          className
+        ),
       })}
     >
       {children}

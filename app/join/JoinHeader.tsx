@@ -262,7 +262,10 @@ function HeroAction({
   readonly action: CurrentPanelAction;
   readonly variant: "primary" | "secondary";
 }) {
-  const label = action.busy ? (action.busyLabel ?? action.label) : action.label;
+  const label =
+    action.kind === "button" && action.busy
+      ? (action.busyLabel ?? action.label)
+      : action.label;
   const className = "tw-w-full sm:tw-w-auto";
 
   if (action.kind === "link") {
@@ -271,7 +274,7 @@ function HeroAction({
         variant={variant}
         size="lg"
         className={className}
-        href={action.href ?? "#journey"}
+        href={action.href}
         {...(action.onClick ? { onClick: action.onClick } : {})}
         {...(action.onNavigate ? { onNavigate: action.onNavigate } : {})}
       >

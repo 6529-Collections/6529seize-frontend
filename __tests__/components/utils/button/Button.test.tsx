@@ -82,5 +82,6 @@ describe("ButtonLink", () => {
     );
     expect(link).not.toHaveClass("tw-ring-1");
     expect(link).not.toHaveClass("tw-ring-inset");
+    expect(link.className).not.toMatch(/\s$/);
   });
 });
