@@ -68,11 +68,13 @@ const parseSeasonNumber = (season: string) => {
   return null;
 };
 
+/** Normalizes API count values for safe display and progress calculations. */
 const toNonNegativeInteger = (value: number | null | undefined): number =>
   typeof value === "number" && Number.isFinite(value) && value > 0
     ? Math.trunc(value)
     : 0;
 
+/** Builds the compact collection metrics shown above the details panel. */
 const buildMainMetrics = (
   collectedStats: ApiCollectedStats | undefined,
   locale: SupportedLocale
@@ -155,6 +157,7 @@ const buildMainMetrics = (
   return metrics;
 };
 
+/** Converts one API season into the normalized table-row view model. */
 const buildDisplaySeason = (
   season: ApiCollectedStatsSeason,
   locale: SupportedLocale

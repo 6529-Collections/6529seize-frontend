@@ -15,6 +15,7 @@ import { CollectedStatsSeasons } from "./stats/subcomponents/CollectedStatsSeaso
 import type { DisplaySeason } from "./stats/types";
 import { useCollectedStatsData } from "./stats/useCollectedStatsData";
 
+/** Keeps the active season visible when a started-season list is collapsed. */
 const getCollapsedStartedSeasons = ({
   startedSeasons,
   visibleSeasonCount,
@@ -62,6 +63,7 @@ interface UserPageCollectedStatsProps {
   readonly onSeasonShortcut?: ((seasonNumber: number) => void) | undefined;
 }
 
+/** Renders the Collected summary and coordinates its disclosure and filters. */
 export default function UserPageCollectedStats({
   profile,
   activeAddress,

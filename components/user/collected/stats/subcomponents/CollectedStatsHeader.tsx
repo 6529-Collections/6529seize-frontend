@@ -16,7 +16,7 @@ interface CollectedStatsHeaderProps {
     | undefined;
 }
 
-// Keep these 2 / 3 / 5 spans aligned with the responsive grid columns below.
+/** Keeps the final metric aligned with the responsive 2 / 3 / 5-column grid. */
 function getLastMetricSpanClass(index: number, metricCount: number): string {
   if (index !== metricCount - 1) {
     return "tw-col-span-1";
@@ -34,6 +34,7 @@ function getLastMetricSpanClass(index: number, metricCount: number): string {
   return `${mobileSpanClass} ${tabletSpanClass} xl:tw-col-span-1`;
 }
 
+/** Renders collection summary metrics and the details disclosure control. */
 export function CollectedStatsHeader({
   metrics,
   activeCollection,

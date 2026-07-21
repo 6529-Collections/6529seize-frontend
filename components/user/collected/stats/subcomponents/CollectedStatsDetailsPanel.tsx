@@ -20,6 +20,7 @@ interface CollectedStatsDetailsPanelProps {
   readonly locale: SupportedLocale;
 }
 
+/** Reveals the existing detailed statistics content beneath the summary. */
 export function CollectedStatsDetailsPanel({
   isOpen,
   detailsId,

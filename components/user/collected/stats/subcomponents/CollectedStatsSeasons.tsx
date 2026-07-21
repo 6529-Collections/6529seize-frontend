@@ -17,6 +17,7 @@ interface CollectedStatsSeasonsProps {
   readonly onToggleExpanded: () => void;
 }
 
+/** Renders one season with its set count and progress toward the next set. */
 function SeasonProgressRow({
   season,
   activeSeasonNumber,
@@ -99,6 +100,7 @@ function SeasonProgressRow({
   );
 }
 
+/** Renders the collapsible started-season table and unseized season list. */
 export function CollectedStatsSeasons({
   allSeasonCount,
   startedSeasons,
