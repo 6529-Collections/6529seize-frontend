@@ -16,6 +16,7 @@ interface CollectedStatsHeaderProps {
     | undefined;
 }
 
+// Keep these 2 / 3 / 5 spans aligned with the responsive grid columns below.
 function getLastMetricSpanClass(index: number, metricCount: number): string {
   if (index !== metricCount - 1) {
     return "tw-col-span-1";
