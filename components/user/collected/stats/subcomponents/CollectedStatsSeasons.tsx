@@ -76,17 +76,20 @@ function SeasonProgressRow({
             {progressValue}
           </span>
         </div>
-        <div
-          role="progressbar"
+        <progress
+          className="tw-sr-only"
           aria-label={progressLabel}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={progressPercent}
           aria-valuetext={progressValue}
+          max={100}
+          value={progressPercent}
+        >
+          {progressValue}
+        </progress>
+        <div
+          aria-hidden="true"
           className="tw-ml-auto tw-mt-1.5 tw-h-1 tw-w-full tw-max-w-56 tw-overflow-hidden tw-rounded-full tw-bg-iron-800"
         >
           <div
-            aria-hidden="true"
             className="tw-h-full tw-rounded-full tw-bg-iron-400"
             style={{ width: progressWidth }}
           />
