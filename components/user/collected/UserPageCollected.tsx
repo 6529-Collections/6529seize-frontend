@@ -15,6 +15,7 @@ import {
   CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
+import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";

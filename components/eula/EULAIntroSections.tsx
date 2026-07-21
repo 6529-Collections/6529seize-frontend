@@ -100,7 +100,7 @@ export default function EULAIntroSections() {
           We strive for a positive community, and that means no abusive behavior
           or posting objectionable user-generated content. Please report any
           concerns to us at <a href="mailto:support@6529.io">support@6529.io</a>
-          . Our policy is to respond to these reports within 24 hours, which
+          {"."} Our policy is to respond to these reports within 24 hours, which
           includes removing content or blocking users as warranted.
         </p>
         <p>

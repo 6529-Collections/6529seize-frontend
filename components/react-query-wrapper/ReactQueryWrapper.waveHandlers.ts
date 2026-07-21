@@ -110,7 +110,6 @@ export const createWaveQueryHandlers = (queryClient: QueryClient) => {
   };
 
   return {
-    invalidateAllWaves,
     invalidateDrops,
     invalidateWavesV2,
     onIdentityFollowChange,

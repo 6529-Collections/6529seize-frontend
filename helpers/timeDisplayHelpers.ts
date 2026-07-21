@@ -1,6 +1,7 @@
 export const getTimeAgo = (milliseconds: number): string => {
-  const timeDifference = new Date().getTime() - milliseconds;
-  const minutes = Math.floor(Math.floor(timeDifference / 1000) / 60);
+  const timeDifference = Date.now() - milliseconds;
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
   const months = Math.floor(days / 30);
@@ -18,9 +19,9 @@ export const getTimeAgoShort = (
   referenceTime: number = Date.now(),
   alwaysRelative: boolean = false
 ): string => {
-  const minutes = Math.floor(
-    Math.floor((referenceTime - milliseconds) / 1000) / 60
-  );
+  const timeDifference = referenceTime - milliseconds;
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
   if (alwaysRelative) {
@@ -41,20 +42,36 @@ export const getTimeAgoShort = (
 };
 
 export const getTimeUntil = (milliseconds: number): string => {
-  let timeDifference = milliseconds - new Date().getTime();
+  let timeDifference = milliseconds - Date.now();
   const isFuture = timeDifference >= 0;
   timeDifference = Math.abs(timeDifference);
-  const minutes = Math.floor(Math.floor(timeDifference / 1000) / 60);
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
   const months = Math.floor(days / 30);
   const years = Math.floor(months / 12);
-  const format = (value: number, unit: string) =>
-    `${isFuture ? "in" : ""} ${value} ${unit}${value > 1 ? "s" : ""} ${isFuture ? "" : "ago"}`;
-  if (years > 0) return format(years, "year");
-  if (months > 0) return format(months, "month");
-  if (days > 0) return format(days, "day");
-  if (hours > 0) return format(hours, "hour");
-  if (minutes > 0) return format(minutes, "minute");
-  return "Just now";
+  if (years > 0) {
+    return `${isFuture ? "in" : ""} ${years} year${years > 1 ? "s" : ""} ${
+      isFuture ? "" : "ago"
+    }`;
+  } else if (months > 0) {
+    return `${isFuture ? "in" : ""} ${months} month${months > 1 ? "s" : ""} ${
+      isFuture ? "" : "ago"
+    }`;
+  } else if (days > 0) {
+    return `${isFuture ? "in" : ""} ${days} day${days > 1 ? "s" : ""} ${
+      isFuture ? "" : "ago"
+    }`;
+  } else if (hours > 0) {
+    return `${isFuture ? "in" : ""} ${hours} hour${hours > 1 ? "s" : ""} ${
+      isFuture ? "" : "ago"
+    }`;
+  } else if (minutes > 0) {
+    return `${isFuture ? "in" : ""} ${minutes} minute${
+      minutes > 1 ? "s" : ""
+    } ${isFuture ? "" : "ago"}`;
+  } else {
+    return "Just now";
+  }
 };

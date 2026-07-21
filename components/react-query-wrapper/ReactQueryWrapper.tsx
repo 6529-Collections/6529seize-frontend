@@ -728,7 +728,6 @@ const createReactQueryContextValue = (
   };
 
   const {
-    invalidateAllWaves,
     invalidateDrops,
     invalidateWavesV2,
     onIdentityFollowChange,

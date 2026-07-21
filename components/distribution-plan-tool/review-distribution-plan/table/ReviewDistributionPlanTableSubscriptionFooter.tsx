@@ -1,8 +1,6 @@
 "use client";
 
-import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -12,17 +10,12 @@ import { ApiDistributionAirdropsUploadResponse } from "@/generated/models/ApiDis
 import { DistributionOverview } from "@/generated/models/DistributionOverview";
 import { DistributionPhoto } from "@/generated/models/DistributionPhoto";
 import { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
-import { formatAddress } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
-import { faDownload, faUpload } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
 import {
-  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -31,18 +24,14 @@ import {
   useState,
 } from "react";
 import useDownloader from "@/hooks/useDownloader";
-import {
-  DistributionAirdropsPhase,
-  DistributionPhaseAirdropsModal,
-} from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdrops";
+import { DistributionAirdropsPhase } from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
-import { DistributionPhaseAirdropsViewerModal } from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdropsViewer";
+import type { GithubUploadResult } from "./ReviewDistributionPlanTableSubscriptionFooterGithubUploadModal";
 import {
-  GithubUploadModal,
-  type GithubUploadResult,
-} from "./ReviewDistributionPlanTableSubscriptionFooterGithubUploadModal";
-import { DistributionPhotosViewerModal } from "./ReviewDistributionPlanTableSubscriptionFooterPhotosViewer";
-import { UploadDistributionPhotosModal } from "./ReviewDistributionPlanTableSubscriptionFooterUploadPhotos";
+  canPublishToGithub,
+  getGithubUploadTooltip,
+  SubscriptionFooterMain,
+} from "./ReviewDistributionPlanTableSubscriptionFooterMain";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
 function getErrorMessage(error: unknown): string {
@@ -55,11 +44,6 @@ function getErrorMessage(error: unknown): string {
   return "Couldn't complete this request. Please try again.";
 }
 
-import {
-  canPublishToGithub,
-  getGithubUploadTooltip,
-  SubscriptionFooterMain,
-} from "./ReviewDistributionPlanTableSubscriptionFooterMain";
 export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan, confirmedTokenId, setConfirmedTokenId } =
     useContext(DistributionPlanToolContext);
