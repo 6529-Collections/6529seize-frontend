@@ -241,6 +241,11 @@ jobs:
         run: |
           set -euo pipefail
           if git diff --quiet "origin/${BASE_REF}...HEAD" -- \
+            bin/6529 \
+            jest.config.js \
+            jest.setup.js \
+            package.json \
+            pnpm-lock.yaml \
             .github/workflows/release-bus-*.yml \
             scripts/release-bus-frontend-gate.sh \
             scripts/release-bus-gate-evidence.cjs \

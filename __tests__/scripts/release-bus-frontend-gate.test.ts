@@ -71,6 +71,18 @@ describe("Release Bus frontend gate contract", () => {
     }
   });
 
+  it("runs the contract when any fingerprinted base file changes", () => {
+    for (const baseFile of [
+      "bin/6529",
+      "jest.config.js",
+      "jest.setup.js",
+      "package.json",
+      "pnpm-lock.yaml",
+    ]) {
+      expect(appPrCi).toContain(`${baseFile} \\`);
+    }
+  });
+
   it("forwards the contract arguments to the 6529 runner exactly", () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "release-bus-gate-"));
     const runner = path.join(tempDir, "fake-6529");
