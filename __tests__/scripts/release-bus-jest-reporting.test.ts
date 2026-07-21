@@ -386,6 +386,28 @@ describe("Release Bus structured Jest reporting", () => {
           "workflow_sha",
         ].sort()
       );
+
+      const shadowAggregate = {
+        ...JSON.parse(fs.readFileSync(aggregatePath, "utf8")),
+        gate_mode: "shadow",
+      };
+      fs.writeFileSync(aggregatePath, JSON.stringify(shadowAggregate));
+      const shadowOutput = execFileSync(
+        process.execPath,
+        ["scripts/release-bus-report-progress.mjs", "--payload-only"],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            GITHUB_RUN_ID: "123",
+            RELEASE_BUS_AGGREGATE_SUMMARY: aggregatePath,
+            RELEASE_BUS_SUMMARY_ARTIFACT_DIGEST: "e".repeat(64),
+          },
+        }
+      );
+      const shadowPayload = JSON.parse(shadowOutput.toString("utf8"));
+      expect(payload.summary.phase_durations_ms.total).toBe(40);
+      expect(shadowPayload.summary.phase_durations_ms.total).toBe(100);
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }

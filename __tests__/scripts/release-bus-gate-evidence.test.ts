@@ -107,7 +107,7 @@ describe("Release Bus gate evidence", () => {
     expect(safeText("x".repeat(50), 10)).toHaveLength(10);
   });
 
-  it("proves every expected Jest file executed exactly once", () => {
+  it("proves every expected Jest file executed exactly once and required jobs cannot skip", () => {
     const root = path.join(os.tmpdir(), "release-bus-evidence-root");
     const files = ["__tests__/a.test.ts", "__tests__/b.test.ts"];
     const records = [
@@ -187,6 +187,29 @@ describe("Release Bus gate evidence", () => {
       missing_files: [],
       duplicate_files: [],
     });
+
+    for (const requiredJob of ["lint", "typecheck", "jest"] as const) {
+      const evidenceWithoutSkippedJob = records.filter((record) =>
+        requiredJob === "jest"
+          ? record.kind !== "jest_shard"
+          : !(record.kind === "phase" && record.name === requiredJob)
+      );
+      expect(
+        buildGateSummary({
+          records: evidenceWithoutSkippedJob,
+          source: "parallel",
+          shardCount: 2,
+          jobResults: {
+            lint: requiredJob === "lint" ? "skipped" : "success",
+            typecheck: requiredJob === "typecheck" ? "skipped" : "success",
+            build: "success",
+            inventory: "success",
+            jest: requiredJob === "jest" ? "skipped" : "success",
+          },
+          identity: evidenceIdentity,
+        })
+      ).toMatchObject({ status: "FAILED" });
+    }
 
     const mismatched = records.map((record) =>
       record.kind === "jest_shard"
@@ -548,5 +571,33 @@ describe("Release Bus gate evidence", () => {
         ],
       },
     });
+
+    const skippedLegacy = finalSummary({
+      args: {
+        mode: "shadow",
+        "shard-count": "1",
+        "run-url":
+          "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
+        "base-sha": evidenceIdentity.base_sha,
+        environment: evidenceIdentity.environment,
+        "gate-fingerprint": evidenceIdentity.gate_fingerprint,
+        "workflow-sha": evidenceIdentity.workflow_sha,
+        "workflow-digest": evidenceIdentity.workflow_digest,
+        "node-version": evidenceIdentity.node_version,
+        "package-manager": evidenceIdentity.package_manager,
+        "artifact-name": "release-bus-base-canary-summary-123",
+        "jobs-file": jobsFile,
+      },
+      records: records.filter((record) => record.source !== "legacy"),
+      jobResults: {
+        legacy: "skipped",
+        lint: "success",
+        typecheck: "success",
+        build: "success",
+        inventory: "success",
+        jest: "success",
+      },
+    });
+    expect(skippedLegacy.status).toBe("FAILED");
   });
 });
