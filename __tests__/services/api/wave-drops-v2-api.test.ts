@@ -9,6 +9,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   fetchBoostedDropsV2,
   fetchDropPollOptionVotersV2,
+  fetchDropReactionDetailsV2,
   fetchDropMetadataByIdV2,
   fetchDropRepliesV2,
   fetchDropsV2ByIds,
@@ -32,6 +33,59 @@ const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
 const commonApiPostMock = commonApiPost as jest.MockedFunction<
   typeof commonApiPost
 >;
+
+describe("fetchDropReactionDetailsV2", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("records non-abort failures before returning the empty fallback", async () => {
+    const error = new Error("reaction request failed");
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    commonApiFetchMock.mockRejectedValueOnce(error);
+
+    await expect(fetchDropReactionDetailsV2("drop-1")).resolves.toEqual([]);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Failed to fetch Wave drop reaction details.",
+      error
+    );
+  });
+
+  it("rethrows abort failures without recording them", async () => {
+    const abortError = Object.assign(new Error("aborted"), {
+      name: "AbortError",
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    commonApiFetchMock.mockRejectedValueOnce(abortError);
+
+    await expect(fetchDropReactionDetailsV2("drop-1")).rejects.toBe(abortError);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("rethrows ERR_CANCELED failures without recording them", async () => {
+    const canceledError = Object.assign(new Error("canceled"), {
+      code: "ERR_CANCELED",
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    commonApiFetchMock.mockRejectedValueOnce(canceledError);
+
+    await expect(fetchDropReactionDetailsV2("drop-1")).rejects.toBe(
+      canceledError
+    );
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+});
 
 const identity = {
   id: "author-id",

@@ -66,7 +66,9 @@ describe("UserPageStatsActivityTDHHistory", () => {
     render(
       <UserPageStatsActivityTDHHistory profile={profile} locale="de-DE" />
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
+    const emptyState = screen.getByRole("status");
+    expect(emptyState).toHaveClass("tw-block", "tw-py-5");
+    expect(emptyState).toHaveTextContent(
       getTdhHistoryMessage(
         "user.collected.stats.tdhHistory.empty",
         undefined,

@@ -21,6 +21,7 @@ const childProcess = require("node:child_process");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const YAML = require("yaml");
 
 const STAGING_SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const MAIN_SHA = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
@@ -43,6 +44,37 @@ describe("release bus optional Codex workflow", () => {
       "Incomplete composition does not contain a strict candidate prefix."
     );
     expect(composeWorkflow).toContain('test "$missing_seen" = true');
+  });
+});
+
+describe("release bus immutable frontend artifact", () => {
+  const preflightWorkflow = YAML.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/release-bus-preflight.yml"),
+      "utf8"
+    )
+  );
+
+  it("uploads hidden bundle files covered by the checksum manifest", () => {
+    const packageStep = preflightWorkflow.jobs.build.steps.find(
+      (step: { name?: string }) => step.name === "Package immutable bundle"
+    );
+    const uploadStep = preflightWorkflow.jobs.build.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Upload immutable frontend artifact"
+    );
+
+    expect(packageStep.run).toContain("find . -type f ! -path ./SHA256SUMS");
+    expect(packageStep.run).toContain("sha256sum > SHA256SUMS");
+    expect(uploadStep).toMatchObject({
+      uses: expect.stringContaining("actions/upload-artifact@"),
+      with: {
+        path: "release-bus-artifact",
+        "include-hidden-files": true,
+        "if-no-files-found": "error",
+        "retention-days": 90,
+      },
+    });
   });
 });
 

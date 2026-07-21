@@ -82,16 +82,13 @@ jobs:
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
-      - name: Typecheck
+      - name: Run exact train validation gate
+        if: matrix.environment == 'staging'
+        run: ./scripts/release-bus-frontend-gate.sh validate
+      - name: Typecheck production artifact source
+        if: matrix.environment == 'production'
         run: ./bin/6529 run typecheck:ci
-      - name: Lint exact train
-        if: matrix.environment == 'staging'
-        run: ./bin/6529 run lint
-      - name: Run frontend unit tests
-        if: matrix.environment == 'staging'
-        run: ./bin/6529 run test:no-coverage -- --runInBand
       - name: Verify validation did not mutate source
-        if: matrix.environment == 'staging'
         run: git diff --exit-code
       - name: Capture build timestamp
         run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
@@ -148,11 +145,12 @@ jobs:
           done
           (cd release-bus-artifact/bundle && zip -yr ../target/package.zip .)
           jq -n --arg train_id "$TRAIN_ID" --arg source_sha "$EXPECTED_SHA" --arg environment "$BUILD_ENVIRONMENT" '{train_id:$train_id,source_sha:$source_sha,environment:$environment}' > release-bus-artifact/manifest.json
-          (cd release-bus-artifact && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+          (cd release-bus-artifact && find . -type f ! -path ./SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
       - name: Upload immutable frontend artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-${{ matrix.environment }}
           path: release-bus-artifact
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
