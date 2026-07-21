@@ -35,7 +35,7 @@ function safeCount(value) {
     : 0;
 }
 
-export function summarizeJestPayload(payload, rootDirectory = process.cwd()) {
+function summarizeJestPayload(payload, rootDirectory = process.cwd()) {
   const results = Array.isArray(payload?.testResults)
     ? payload.testResults
     : [];
