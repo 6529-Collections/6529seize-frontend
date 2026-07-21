@@ -147,9 +147,13 @@ covered policy invalidates older evidence.
 
 Every shard uploads bounded JSON counts, timing, its planned manifest, its
 executed-file manifest, exact shard coordinates, and failing suite/test
-identities. The fail-closed aggregate requires every selected job to succeed,
-requires every expected Jest file in exactly one shard, compares each shard's
-plan to execution, and rejects missing, duplicate, unexpected, malformed,
+identities. Every phase, manifest, and shard record also repeats the exact base
+SHA, `orchestration` environment, gate fingerprint, workflow SHA/digest, Node
+version, and package-manager contract. The authorize job derives that identity
+from the immutable base and workflow commits before calling the Release Bus
+API. The fail-closed aggregate requires every selected job to succeed, requires
+every expected Jest file in exactly one shard, compares each shard's plan to
+execution, and rejects missing, duplicate, unexpected, malformed, mismatched,
 cancelled, or failed evidence. Artifacts are retained for 14 days and never
 contain raw logs or failure messages. Dependency-store caching is intentionally
 deferred: the measured frozen install is small compared with Jest, and neither

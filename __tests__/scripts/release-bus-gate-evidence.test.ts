@@ -21,6 +21,16 @@ const {
 } = require("../../scripts/release-bus-gate-evidence.cjs");
 
 describe("Release Bus gate evidence", () => {
+  const evidenceIdentity = {
+    base_sha: "a".repeat(40),
+    environment: "orchestration",
+    gate_fingerprint: "b".repeat(64),
+    workflow_sha: "c".repeat(40),
+    workflow_digest: "d".repeat(64),
+    node_version: "22",
+    package_manager: "pnpm@10.14.0",
+  };
+
   it("fingerprints base policy and pinned workflow tooling deterministically", () => {
     const baseFileContents = {
       "bin/6529": "runner",
@@ -67,6 +77,15 @@ describe("Release Bus gate evidence", () => {
         },
       }).gate_fingerprint
     ).not.toBe(baseline.gate_fingerprint);
+    expect(() =>
+      frontendGateContract({
+        ...input,
+        baseFileContents: {
+          ...baseFileContents,
+          "package.json": JSON.stringify({ packageManager: "pnpm@10\nunsafe" }),
+        },
+      })
+    ).toThrow("Invalid package-manager contract");
   });
 
   it("normalizes an exact repository-local test inventory", () => {
@@ -94,12 +113,14 @@ describe("Release Bus gate evidence", () => {
     const records = [
       {
         kind: "manifest",
+        ...evidenceIdentity,
         source: "parallel",
         scope: "all",
         files,
       },
       ...files.map((file, index) => ({
         kind: "manifest",
+        ...evidenceIdentity,
         source: "parallel",
         scope: "shard",
         shard_index: index + 1,
@@ -131,6 +152,7 @@ describe("Release Bus gate evidence", () => {
           durationMs: 10 + index,
           exitCode: 0,
           source: "parallel",
+          identity: evidenceIdentity,
         })
       ),
       ...["lint", "typecheck", "build"].map((name) =>
@@ -140,6 +162,7 @@ describe("Release Bus gate evidence", () => {
           durationMs: 10,
           exitCode: 0,
           source: "parallel",
+          identity: evidenceIdentity,
         })
       ),
     ];
@@ -155,6 +178,7 @@ describe("Release Bus gate evidence", () => {
         inventory: "success",
         jest: "success",
       },
+      identity: evidenceIdentity,
     });
 
     expect(summary).toMatchObject({
@@ -162,6 +186,32 @@ describe("Release Bus gate evidence", () => {
       counts: { test_files: 2, test_suites: 2, tests: 4 },
       missing_files: [],
       duplicate_files: [],
+    });
+
+    const mismatched = records.map((record) =>
+      record.kind === "jest_shard"
+        ? { ...record, gate_fingerprint: "e".repeat(64) }
+        : record
+    );
+    expect(
+      buildGateSummary({
+        records: mismatched,
+        source: "parallel",
+        shardCount: 2,
+        jobResults: {
+          lint: "success",
+          typecheck: "success",
+          build: "success",
+          inventory: "success",
+          jest: "success",
+        },
+        identity: evidenceIdentity,
+      })
+    ).toMatchObject({
+      status: "FAILED",
+      errors: expect.arrayContaining([
+        "evidence identity is missing or mismatched",
+      ]),
     });
   });
 
@@ -344,12 +394,14 @@ describe("Release Bus gate evidence", () => {
     for (const source of ["legacy", "parallel"] as const) {
       records.push({
         kind: "manifest",
+        ...evidenceIdentity,
         source,
         scope: "all",
         files: ["a.test.ts"],
       });
       records.push({
         kind: "manifest",
+        ...evidenceIdentity,
         source,
         scope: "shard",
         shard_index: 1,
@@ -358,6 +410,7 @@ describe("Release Bus gate evidence", () => {
       });
       records.push({
         kind: "jest_shard",
+        ...evidenceIdentity,
         source,
         shard_index: 1,
         shard_count: 1,
@@ -385,6 +438,7 @@ describe("Release Bus gate evidence", () => {
             durationMs: 1,
             exitCode: 0,
             source,
+            identity: evidenceIdentity,
           })
         );
       }
@@ -396,13 +450,13 @@ describe("Release Bus gate evidence", () => {
         "shard-count": "1",
         "run-url":
           "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
-        "base-sha": "a".repeat(40),
-        environment: "STAGING",
-        "gate-fingerprint": "b".repeat(64),
-        "workflow-sha": "c".repeat(40),
-        "workflow-digest": "d".repeat(64),
-        "node-version": "22",
-        "package-manager": "pnpm@10.14.0",
+        "base-sha": evidenceIdentity.base_sha,
+        environment: evidenceIdentity.environment,
+        "gate-fingerprint": evidenceIdentity.gate_fingerprint,
+        "workflow-sha": evidenceIdentity.workflow_sha,
+        "workflow-digest": evidenceIdentity.workflow_digest,
+        "node-version": evidenceIdentity.node_version,
+        "package-manager": evidenceIdentity.package_manager,
         "artifact-name": "release-bus-base-canary-summary-123",
         "jobs-file": jobsFile,
       },
@@ -420,7 +474,18 @@ describe("Release Bus gate evidence", () => {
     expect(summary).toMatchObject({
       status: "SUCCEEDED",
       gate_mode: "shadow",
-      equivalence: { equivalent: true },
+      equivalence: {
+        equivalent: true,
+        sharded_phase_durations_ms: {
+          lint: 1,
+          typecheck: 1,
+          unit_tests: 1,
+          build: 1,
+        },
+        sharded_shards: [
+          expect.objectContaining({ index: 1, count: 1, duration_ms: 1 }),
+        ],
+      },
     });
   });
 });

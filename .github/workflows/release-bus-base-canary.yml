@@ -36,24 +36,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      gate_mode: ${{ steps.contract.outputs.gate_mode }}
-      shard_count: ${{ steps.contract.outputs.shard_count }}
-      shard_matrix: ${{ steps.contract.outputs.shard_matrix }}
-      gate_fingerprint: ${{ steps.contract.outputs.gate_fingerprint }}
-      workflow_sha: ${{ steps.contract.outputs.workflow_sha }}
-      workflow_digest: ${{ steps.contract.outputs.workflow_digest }}
-      evidence_environment: ${{ steps.contract.outputs.evidence_environment }}
-      package_manager: ${{ steps.contract.outputs.package_manager }}
+      gate_mode: ${{ steps.inputs.outputs.gate_mode }}
+      shard_count: ${{ steps.inputs.outputs.shard_count }}
+      shard_matrix: ${{ steps.inputs.outputs.shard_matrix }}
+      gate_fingerprint: ${{ steps.fingerprint.outputs.gate_fingerprint }}
+      workflow_sha: ${{ steps.fingerprint.outputs.workflow_sha }}
+      workflow_digest: ${{ steps.fingerprint.outputs.workflow_digest }}
+      evidence_environment: ${{ steps.fingerprint.outputs.evidence_environment }}
+      package_manager: ${{ steps.fingerprint.outputs.package_manager }}
     steps:
-      - name: Validate and authorize immutable inputs
-        id: contract
+      - name: Validate immutable inputs
+        id: inputs
         env:
           BASE_SHA: ${{ inputs.base_sha }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           GATE_CONTRACT_INPUT: ${{ inputs.gate_contract }}
           OPERATION_KEY: ${{ inputs.operation_key }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           TRAIN_ID: ${{ inputs.release_train_id }}
           TRAIN_REVISION: ${{ inputs.release_train_revision }}
           VALIDATION_GATE_MODE: ${{ inputs.validation_gate_mode }}
@@ -71,11 +69,6 @@ jobs:
           if [ "$VALIDATION_INJECT_FAILURE" = true ]; then
             test "$VALIDATION_ONLY" = true
           fi
-          workflow_sha="$GITHUB_SHA"
-          workflow_digest=unversioned
-          gate_fingerprint=unversioned
-          evidence_environment=orchestration
-          package_manager=""
           if [ "$VALIDATION_ONLY" = true ]; then
             test -z "$GATE_CONTRACT_INPUT"
             GATE_MODE="$VALIDATION_GATE_MODE"
@@ -97,20 +90,12 @@ jobs:
               <<< "$GATE_CONTRACT_INPUT" >/dev/null
             GATE_MODE="$(jq -r '.gate_mode' <<< "$GATE_CONTRACT_INPUT")"
             FRONTEND_GATE_SHARD_COUNT="$(jq -r '.shard_count' <<< "$GATE_CONTRACT_INPUT")"
-            workflow_digest="$(jq -r '.workflow_digest' <<< "$GATE_CONTRACT_INPUT")"
-            gate_fingerprint="$(jq -r '.gate_fingerprint' <<< "$GATE_CONTRACT_INPUT")"
-            package_manager="$(jq -r '.package_manager' <<< "$GATE_CONTRACT_INPUT")"
           else
             GATE_MODE="${{ vars.RELEASE_BUS_FRONTEND_GATE_MODE || 'legacy' }}"
             FRONTEND_GATE_SHARD_COUNT="${{ vars.FRONTEND_GATE_SHARD_COUNT || '1' }}"
           fi
           [[ "$GATE_MODE" =~ ^(legacy|shadow|sharded)$ ]]
           [[ "$FRONTEND_GATE_SHARD_COUNT" =~ ^(1|2|4)$ ]]
-          [[ "$workflow_sha" =~ ^[a-f0-9]{40}$ ]]
-          test "$workflow_sha" = "$GITHUB_SHA"
-          [[ "$workflow_digest" = unversioned || "$workflow_digest" =~ ^[a-f0-9]{64}$ ]]
-          [[ "$gate_fingerprint" = unversioned || "$gate_fingerprint" =~ ^[a-f0-9]{64}$ ]]
-          test "${#package_manager}" -le 100
           case "$FRONTEND_GATE_SHARD_COUNT" in
             1) shard_matrix='{"include":[{"index":1,"total":1}]}' ;;
             2) shard_matrix='{"include":[{"index":1,"total":2},{"index":2,"total":2}]}' ;;
@@ -120,29 +105,7 @@ jobs:
             echo "gate_mode=$GATE_MODE"
             echo "shard_count=$FRONTEND_GATE_SHARD_COUNT"
             echo "shard_matrix=$shard_matrix"
-            echo "gate_fingerprint=$gate_fingerprint"
-            echo "workflow_sha=$workflow_sha"
-            echo "workflow_digest=$workflow_digest"
-            echo "evidence_environment=$evidence_environment"
-            echo "package_manager=$package_manager"
           } >> "$GITHUB_OUTPUT"
-          if [ "$VALIDATION_ONLY" != true ]; then
-            payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
-            curl --fail-with-body --silent --show-error \
-              -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-              -H 'Content-Type: application/json' \
-              --data "$payload" \
-              "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
-          fi
-
-  legacy:
-    if: needs.authorize.outputs.gate_mode != 'sharded'
-    needs: authorize
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    permissions:
-      contents: read
-    steps:
       - &checkout
         name: Check out exact frontend base
         env:
@@ -155,13 +118,93 @@ jobs:
           git fetch --no-tags origin "$BASE_SHA"
           git checkout --detach "$BASE_SHA"
           test "$(git rev-parse HEAD)" = "$BASE_SHA"
-      - &stage-tooling
-        name: Stage immutable gate tooling
+      - &setup-node
+        name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with: { node-version: "22" }
+      - name: Derive and verify immutable gate fingerprint
+        id: fingerprint
         env:
-          WORKFLOW_SHA: ${{ needs.authorize.outputs.workflow_sha }}
+          BASE_SHA: ${{ inputs.base_sha }}
+          GATE_CONTRACT_INPUT: ${{ inputs.gate_contract }}
+          GATE_MODE: ${{ steps.inputs.outputs.gate_mode }}
+          SHARD_COUNT: ${{ steps.inputs.outputs.shard_count }}
+          WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
+            git fetch --no-tags origin "$WORKFLOW_SHA"
+          evidence_tool="$RUNNER_TEMP/release-bus-gate-evidence.cjs"
+          contract="$RUNNER_TEMP/release-bus-gate-contract.json"
+          git show "$WORKFLOW_SHA:scripts/release-bus-gate-evidence.cjs" > "$evidence_tool"
+          node "$evidence_tool" fingerprint \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --base-sha "$BASE_SHA" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --mode "$GATE_MODE" \
+            --shard-count "$SHARD_COUNT" \
+            --output "$contract"
+          gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
+          workflow_digest="$(jq -r '.workflow_digest' "$contract")"
+          package_manager="$(jq -r '.package_manager' "$contract")"
+          if [ -n "$GATE_CONTRACT_INPUT" ]; then
+            test "$(jq -r '.gate_fingerprint' <<< "$GATE_CONTRACT_INPUT")" = "$gate_fingerprint"
+            test "$(jq -r '.workflow_digest' <<< "$GATE_CONTRACT_INPUT")" = "$workflow_digest"
+            test "$(jq -r '.package_manager' <<< "$GATE_CONTRACT_INPUT")" = "$package_manager"
+          fi
+          {
+            echo "gate_fingerprint=$gate_fingerprint"
+            echo "workflow_sha=$WORKFLOW_SHA"
+            echo "workflow_digest=$workflow_digest"
+            echo "evidence_environment=orchestration"
+            echo "package_manager=$package_manager"
+          } >> "$GITHUB_OUTPUT"
+      - name: Authorize Release Bus operation
+        if: inputs.validation_only != true
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+      - name: Verify authorization did not mutate source
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+
+  legacy:
+    if: needs.authorize.outputs.gate_mode != 'sharded'
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - *checkout
+      - &stage-tooling
+        name: Stage immutable gate tooling
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          EVIDENCE_ENVIRONMENT: ${{ needs.authorize.outputs.evidence_environment }}
+          GATE_FINGERPRINT: ${{ needs.authorize.outputs.gate_fingerprint }}
+          PACKAGE_MANAGER: ${{ needs.authorize.outputs.package_manager }}
+          WORKFLOW_SHA: ${{ needs.authorize.outputs.workflow_sha }}
+          WORKFLOW_DIGEST: ${{ needs.authorize.outputs.workflow_digest }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$EVIDENCE_ENVIRONMENT" = orchestration
+          [[ "$GATE_FINGERPRINT" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$PACKAGE_MANAGER" =~ ^pnpm@[A-Za-z0-9.+-]{1,122}$ ]]
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$WORKFLOW_DIGEST" =~ ^[a-f0-9]{64}$ ]]
           git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
             git fetch --no-tags origin "$WORKFLOW_SHA"
           tooling="$RUNNER_TEMP/release-bus-tooling/scripts"
@@ -178,11 +221,15 @@ jobs:
             echo "RELEASE_BUS_GATE_TOOL=$tooling/release-bus-frontend-gate.sh"
             echo "RELEASE_BUS_EVIDENCE_TOOL=$tooling/release-bus-gate-evidence.cjs"
             echo "RELEASE_BUS_REPORT_TOOL=$tooling/release-bus-report-progress.mjs"
+            echo "RELEASE_BUS_BASE_SHA=$BASE_SHA"
+            echo "RELEASE_BUS_EVIDENCE_ENVIRONMENT=$EVIDENCE_ENVIRONMENT"
+            echo "RELEASE_BUS_GATE_FINGERPRINT=$GATE_FINGERPRINT"
+            echo "RELEASE_BUS_WORKFLOW_SHA=$WORKFLOW_SHA"
+            echo "RELEASE_BUS_WORKFLOW_DIGEST=$WORKFLOW_DIGEST"
+            echo "RELEASE_BUS_NODE_VERSION=22"
+            echo "RELEASE_BUS_PACKAGE_MANAGER=$PACKAGE_MANAGER"
           } >> "$GITHUB_ENV"
-      - &setup-node
-        name: Install Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with: { node-version: "22" }
+      - *setup-node
       - &activate-pnpm
         name: Activate pinned pnpm
         run: |
@@ -491,11 +538,9 @@ jobs:
           gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
           workflow_digest="$(jq -r '.workflow_digest' "$contract")"
           package_manager="$(jq -r '.package_manager' "$contract")"
-          if [ "$PASSED_GATE_FINGERPRINT" != unversioned ]; then
-            test "$PASSED_GATE_FINGERPRINT" = "$gate_fingerprint"
-            test "$PASSED_WORKFLOW_DIGEST" = "$workflow_digest"
-            test "$PASSED_PACKAGE_MANAGER" = "$package_manager"
-          fi
+          test "$PASSED_GATE_FINGERPRINT" = "$gate_fingerprint"
+          test "$PASSED_WORKFLOW_DIGEST" = "$workflow_digest"
+          test "$PASSED_PACKAGE_MANAGER" = "$package_manager"
           jq -n \
             --arg legacy "$LEGACY_RESULT" \
             --arg lint "$LINT_RESULT" \

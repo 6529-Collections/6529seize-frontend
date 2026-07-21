@@ -7,8 +7,28 @@ REPO_ROOT="${RELEASE_BUS_REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 REPO_ROOT="$(cd "$REPO_ROOT" && pwd)"
 SEIZE_BIN="${RELEASE_BUS_6529_BIN:-./bin/6529}"
 EVIDENCE_TOOL="$SCRIPT_DIR/release-bus-gate-evidence.cjs"
+EVIDENCE_IDENTITY_ARGS=()
 
 cd "$REPO_ROOT"
+
+set_evidence_identity_args() {
+  : "${RELEASE_BUS_BASE_SHA:?RELEASE_BUS_BASE_SHA is required}"
+  : "${RELEASE_BUS_EVIDENCE_ENVIRONMENT:?RELEASE_BUS_EVIDENCE_ENVIRONMENT is required}"
+  : "${RELEASE_BUS_GATE_FINGERPRINT:?RELEASE_BUS_GATE_FINGERPRINT is required}"
+  : "${RELEASE_BUS_WORKFLOW_SHA:?RELEASE_BUS_WORKFLOW_SHA is required}"
+  : "${RELEASE_BUS_WORKFLOW_DIGEST:?RELEASE_BUS_WORKFLOW_DIGEST is required}"
+  : "${RELEASE_BUS_NODE_VERSION:?RELEASE_BUS_NODE_VERSION is required}"
+  : "${RELEASE_BUS_PACKAGE_MANAGER:?RELEASE_BUS_PACKAGE_MANAGER is required}"
+  EVIDENCE_IDENTITY_ARGS=(
+    --base-sha "$RELEASE_BUS_BASE_SHA"
+    --environment "$RELEASE_BUS_EVIDENCE_ENVIRONMENT"
+    --gate-fingerprint "$RELEASE_BUS_GATE_FINGERPRINT"
+    --workflow-sha "$RELEASE_BUS_WORKFLOW_SHA"
+    --workflow-digest "$RELEASE_BUS_WORKFLOW_DIGEST"
+    --node-version "$RELEASE_BUS_NODE_VERSION"
+    --package-manager "$RELEASE_BUS_PACKAGE_MANAGER"
+  )
+}
 
 run_unit_tests() {
   "$SEIZE_BIN" run test:no-coverage --runInBand --bail=0 "$@"
@@ -37,6 +57,7 @@ record_phase_result() {
     --status "$status" \
     --duration-ms "$duration_ms" \
     --exit-code "$exit_code" \
+    "${EVIDENCE_IDENTITY_ARGS[@]}" \
     --output "$output_dir/phase-$phase.json"
 }
 
@@ -78,12 +99,14 @@ capture_manifest() {
     run_unit_tests --listTests > "$raw_file"
     node "$EVIDENCE_TOOL" manifest \
       --source "$source" --scope all --repo-root "$REPO_ROOT" \
+      "${EVIDENCE_IDENTITY_ARGS[@]}" \
       --raw "$raw_file" --output "$json_file"
   else
     run_unit_tests --listTests --shard="$shard_index/$shard_count" > "$raw_file"
     node "$EVIDENCE_TOOL" manifest \
       --source "$source" --scope shard --repo-root "$REPO_ROOT" \
       --shard-index "$shard_index" --shard-count "$shard_count" \
+      "${EVIDENCE_IDENTITY_ARGS[@]}" \
       --raw "$raw_file" --output "$json_file"
   fi
 }
@@ -123,6 +146,7 @@ run_recorded_jest() {
     --shard-count "$shard_count" \
     --duration-ms "$((completed_at - started_at))" \
     --exit-code "$exit_code" \
+    "${EVIDENCE_IDENTITY_ARGS[@]}" \
     --output "$summary"
   summary_exit_code=$?
   set -e
@@ -172,6 +196,7 @@ case "${1:-full}" in
       echo "Usage: scripts/release-bus-frontend-gate.sh phase [lint|typecheck|build] OUTPUT_DIR" >&2
       exit 2
     fi
+    set_evidence_identity_args
     mkdir -p "$3"
     case "$2" in
       lint) run_recorded_phase parallel lint "$3" "$SEIZE_BIN" run lint ;;
@@ -184,6 +209,7 @@ case "${1:-full}" in
       echo "Usage: scripts/release-bus-frontend-gate.sh inventory OUTPUT_DIR" >&2
       exit 2
     fi
+    set_evidence_identity_args
     mkdir -p "$2"
     capture_manifest parallel all 1 1 "$2"
     ;;
@@ -192,6 +218,7 @@ case "${1:-full}" in
       echo "Usage: scripts/release-bus-frontend-gate.sh jest SHARD_INDEX SHARD_COUNT OUTPUT_DIR" >&2
       exit 2
     fi
+    set_evidence_identity_args
     mkdir -p "$4"
     run_recorded_jest parallel "$2" "$3" "$4"
     ;;
@@ -200,6 +227,7 @@ case "${1:-full}" in
       echo "Usage: scripts/release-bus-frontend-gate.sh serial OUTPUT_DIR" >&2
       exit 2
     fi
+    set_evidence_identity_args
     run_serial_evidence_gate "$2"
     ;;
   *)
