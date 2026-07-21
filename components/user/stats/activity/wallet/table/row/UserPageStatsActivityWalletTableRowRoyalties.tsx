@@ -1,8 +1,10 @@
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useId } from "react";
 import { Tooltip } from "react-tooltip";
+import { getWalletActivityMessage } from "../../wallet-activity.messages";
 
 enum RoyaltiesType {
   NONE = "NONE",
@@ -15,11 +17,18 @@ const ROYALTIES_THRESHOLD = 0.069;
 export default function UserPageStatsActivityWalletTableRowRoyalties({
   royalties,
   transactionValue,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly royalties: number;
   readonly transactionValue: number;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const tooltipId = buildTooltipId(useId(), "royalties-information");
+  const royaltiesInformationLabel = getWalletActivityMessage(
+    "user.collected.stats.walletActivity.royaltiesInformationLabel",
+    undefined,
+    locale
+  );
 
   const getRoyaltiesPercentage = () => {
     if (!royalties) {
@@ -53,9 +62,14 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
   const royaltiesType = getRoyaltiesType();
 
   const getContent = (): string =>
-    `Royalties: ${formatNumberWithCommas(
-      +royalties.toFixed(7)
-    )}ETH (${formatNumberWithCommas(+(percentage * 100).toFixed(3))}%)`;
+    getWalletActivityMessage(
+      "user.collected.stats.walletActivity.royaltiesValue",
+      {
+        amount: formatNumberWithCommas(+royalties.toFixed(7)),
+        percentage: formatNumberWithCommas(+(percentage * 100).toFixed(3)),
+      },
+      locale
+    );
 
   switch (royaltiesType) {
     case RoyaltiesType.NONE:
@@ -66,7 +80,7 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
           <button
             type="button"
             className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
-            aria-label="Royalties information"
+            aria-label={royaltiesInformationLabel}
             aria-describedby={tooltipId}
             data-tooltip-id={tooltipId}
           >
@@ -87,7 +101,7 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
           <button
             type="button"
             className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
-            aria-label="Royalties information"
+            aria-label={royaltiesInformationLabel}
             aria-describedby={tooltipId}
             data-tooltip-id={tooltipId}
           >

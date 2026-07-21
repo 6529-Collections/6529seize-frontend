@@ -40,6 +40,7 @@ export default function UserPageStatsActivityWalletTable({
               memes={memes}
               memeLab={memeLab}
               nextgenCollections={nextgenCollections}
+              locale={locale}
             />
           ))}
         </tbody>

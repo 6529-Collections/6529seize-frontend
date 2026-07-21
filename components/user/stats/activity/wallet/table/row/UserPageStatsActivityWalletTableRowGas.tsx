@@ -1,29 +1,53 @@
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useId } from "react";
 import { Tooltip } from "react-tooltip";
+import { getWalletActivityMessage } from "../../wallet-activity.messages";
 
 export default function UserPageStatsActivityWalletTableRowGas({
   gas,
   gasGwei,
   gasPriceGwei,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly gas: number;
   readonly gasGwei: number;
   readonly gasPriceGwei: number;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const tooltipId = buildTooltipId(useId(), "gas-information");
+  const gasLabel = getWalletActivityMessage(
+    "user.collected.stats.walletActivity.gasLabel",
+    undefined,
+    locale
+  );
+  const gasGweiLabel = getWalletActivityMessage(
+    "user.collected.stats.walletActivity.gasGweiLabel",
+    undefined,
+    locale
+  );
+  const gasInformationLabel = getWalletActivityMessage(
+    "user.collected.stats.walletActivity.gasInformationLabel",
+    undefined,
+    locale
+  );
+  const gasPriceLabel = getWalletActivityMessage(
+    "user.collected.stats.walletActivity.gasPriceLabel",
+    undefined,
+    locale
+  );
   const tooltipContent = (
     <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_auto] tw-gap-x-3 tw-gap-y-1 tw-text-sm">
-      <dt className="tw-text-iron-400">Gas</dt>
+      <dt className="tw-text-iron-400">{gasLabel}</dt>
       <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-200">
         {formatNumberWithCommasOrDash(+gas.toFixed(5))}
       </dd>
-      <dt className="tw-text-iron-400">GWEI</dt>
+      <dt className="tw-text-iron-400">{gasGweiLabel}</dt>
       <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-200">
         {formatNumberWithCommasOrDash(gasGwei)}
       </dd>
-      <dt className="tw-text-iron-400">Gas Price</dt>
+      <dt className="tw-text-iron-400">{gasPriceLabel}</dt>
       <dd className="tw-m-0 tw-text-right tw-tabular-nums tw-text-iron-200">
         {formatNumberWithCommasOrDash(+gasPriceGwei.toFixed(2))}
       </dd>
@@ -34,7 +58,7 @@ export default function UserPageStatsActivityWalletTableRowGas({
     <>
       <button
         type="button"
-        aria-label="Gas Information"
+        aria-label={gasInformationLabel}
         aria-describedby={tooltipId}
         data-tooltip-id={tooltipId}
         className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"

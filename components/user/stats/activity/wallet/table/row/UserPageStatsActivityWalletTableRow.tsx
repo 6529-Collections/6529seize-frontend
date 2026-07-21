@@ -16,6 +16,7 @@ import {
 import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
   areEqualAddresses,
   isGradientsContract,
@@ -32,6 +33,7 @@ import UserPageStatsActivityWalletTableRowIcon from "./UserPageStatsActivityWall
 import UserPageStatsActivityWalletTableRowMainAddress from "./UserPageStatsActivityWalletTableRowMainAddress";
 import UserPageStatsActivityWalletTableRowRoyalties from "./UserPageStatsActivityWalletTableRowRoyalties";
 import UserPageStatsActivityWalletTableRowSecondAddress from "./UserPageStatsActivityWalletTableRowSecondAddress";
+import { getWalletActivityMessage } from "../../wallet-activity.messages";
 
 export enum TransactionType {
   AIRDROPPED = "AIRDROPPED",
@@ -70,12 +72,14 @@ export default function UserPageStatsActivityWalletTableRow({
   memes,
   memeLab,
   nextgenCollections,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly transaction: Transaction;
   readonly profile: ApiIdentity;
   readonly memes: NFTLite[];
   readonly memeLab: NFTLite[];
   readonly nextgenCollections: NextGenCollection[];
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const getShowRoyalties = (): boolean => {
     if (!transaction.value) {
@@ -209,6 +213,11 @@ export default function UserPageStatsActivityWalletTableRow({
     transaction.token_id,
     transaction.from_address,
     transaction.to_address
+  );
+  const etherscanLabel = getWalletActivityMessage(
+    "user.collected.stats.walletActivity.etherscanLinkLabel",
+    undefined,
+    locale
   );
 
   let nftLite: NFTLite | undefined | null = null;
@@ -385,19 +394,21 @@ export default function UserPageStatsActivityWalletTableRow({
             <UserPageStatsActivityWalletTableRowRoyalties
               transactionValue={transaction.value}
               royalties={transaction.royalties}
+              locale={locale}
             />
           )}
           <UserPageStatsActivityWalletTableRowGas
             gas={transaction.gas}
             gasGwei={transaction.gas_gwei}
             gasPriceGwei={transaction.gas_price_gwei}
+            locale={locale}
           />
           <a
             href={`https://etherscan.io/tx/${transaction.transaction}`}
             target="_blank"
-            aria-label="Go to Etherscan"
+            aria-label={etherscanLabel}
             aria-describedby={etherscanTooltipId}
-            data-tooltip-content="Go to Etherscan"
+            data-tooltip-content={etherscanLabel}
             data-tooltip-id={etherscanTooltipId}
             rel="noopener noreferrer"
             className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-text-iron-500 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
