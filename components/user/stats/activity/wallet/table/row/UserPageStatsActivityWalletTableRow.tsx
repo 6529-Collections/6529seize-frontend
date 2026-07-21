@@ -205,7 +205,10 @@ export default function UserPageStatsActivityWalletTableRow({
   const type = getType();
   const etherscanTooltipId = buildTooltipId(
     "wallet-activity-etherscan",
-    transaction.transaction
+    transaction.transaction,
+    transaction.token_id,
+    transaction.from_address,
+    transaction.to_address
   );
 
   let nftLite: NFTLite | undefined | null = null;

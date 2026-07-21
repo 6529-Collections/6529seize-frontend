@@ -62,8 +62,16 @@ describe("UserPageStatsActivityWalletTableRow", () => {
       screen.getByRole("link", { name: "meme (The Memes #1)" })
     ).toHaveAttribute("href", "/the-memes/1");
     expect(screen.getByText("2")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Go to Etherscan" })
-    ).toHaveAttribute("data-tooltip-content", "Go to Etherscan");
+    const etherscanLink = screen.getByRole("link", {
+      name: "Go to Etherscan",
+    });
+    expect(etherscanLink).toHaveAttribute(
+      "data-tooltip-content",
+      "Go to Etherscan"
+    );
+    expect(etherscanLink).toHaveAttribute(
+      "data-tooltip-id",
+      expect.stringContaining(baseTx.token_id)
+    );
   });
 });

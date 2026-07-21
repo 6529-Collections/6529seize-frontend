@@ -70,7 +70,8 @@ export function UserPageStatsTableScroll({
   return (
     <section
       aria-label={label}
-      className="tw-overflow-x-auto tw-overscroll-x-contain tw-pb-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500"
+      className="tw-overflow-x-auto tw-overscroll-x-contain tw-pb-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
+      tabIndex={0}
     >
       {children}
     </section>

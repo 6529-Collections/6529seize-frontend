@@ -48,6 +48,9 @@ describe("UserPageStatsTableShared", () => {
 
     expect(screen.getByText("Overview")).toBeInTheDocument();
     expect(container.querySelector("details")).toHaveAttribute("open");
-    expect(screen.getByRole("region", { name: label })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: label })).toHaveAttribute(
+      "tabindex",
+      "0"
+    );
   });
 });
