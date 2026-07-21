@@ -145,7 +145,7 @@ jobs:
           done
           (cd release-bus-artifact/bundle && zip -yr ../target/package.zip .)
           jq -n --arg train_id "$TRAIN_ID" --arg source_sha "$EXPECTED_SHA" --arg environment "$BUILD_ENVIRONMENT" '{train_id:$train_id,source_sha:$source_sha,environment:$environment}' > release-bus-artifact/manifest.json
-          (cd release-bus-artifact && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+          (cd release-bus-artifact && find . -type f ! -path ./SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
       - name: Upload immutable frontend artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
