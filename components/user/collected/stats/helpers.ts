@@ -170,7 +170,7 @@ const buildDisplaySeason = (
     season.partial_set_unique_cards_held
   );
   const totalCardsHeld = toNonNegativeInteger(season.total_cards_held);
-  const isStarted = totalCardsHeld > 0 || setsHeld > 0 || nextSetCards > 0;
+  const isStarted = totalCardsHeld > 0;
   const isRestingComplete = setsHeld > 0 && nextSetCards === 0;
   const rawProgressPct =
     totalCards > 0 ? Math.min(nextSetCards / totalCards, 1) : 0;

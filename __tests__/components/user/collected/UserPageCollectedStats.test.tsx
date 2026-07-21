@@ -198,6 +198,12 @@ describe("UserPageCollectedStats", () => {
     expect(
       screen.getByRole("columnheader", { name: "Set progress" })
     ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: /szn1/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("progressbar", { name: "SZN1 set progress" })
+    ).toHaveAttribute("aria-valuenow", "100");
   });
 
   it("formats collected summary metrics and season details with the active locale", () => {

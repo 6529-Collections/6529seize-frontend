@@ -29,8 +29,14 @@ function SeasonProgressRow({
   onSeasonShortcut?: ((seasonNumber: number) => void) | undefined;
 }>) {
   const isSelected = season.seasonNumber === activeSeasonNumber;
-  const progressWidth = `${Math.round(season.progressPct * 100)}%`;
-  const progressValue = formatPercent(locale, season.progressPct, 0);
+  const progressPercent = Math.round(season.progressPct * 100);
+  const progressWidth = `${progressPercent}%`;
+  const progressValue = formatPercent(locale, progressPercent / 100, 0);
+  const progressLabel = translate(
+    locale,
+    "user.collected.stats.seasonRow.progressAriaLabel",
+    { season: season.label }
+  );
 
   return (
     <tr
@@ -66,11 +72,19 @@ function SeasonProgressRow({
           <span className="tw-min-w-0 tw-break-words tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-300 sm:tw-flex-1">
             {season.detailText}
           </span>
-          <span className="tw-shrink-0 tw-text-[10px] tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-500">
+          <span className="tw-shrink-0 tw-text-[10px] tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-400">
             {progressValue}
           </span>
         </div>
-        <div className="tw-ml-auto tw-mt-1.5 tw-h-1 tw-w-full tw-max-w-56 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
+        <div
+          role="progressbar"
+          aria-label={progressLabel}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progressPercent}
+          aria-valuetext={progressValue}
+          className="tw-ml-auto tw-mt-1.5 tw-h-1 tw-w-full tw-max-w-56 tw-overflow-hidden tw-rounded-full tw-bg-iron-800"
+        >
           <div
             aria-hidden="true"
             className="tw-h-full tw-rounded-full tw-bg-iron-400"
@@ -204,7 +218,7 @@ export function CollectedStatsSeasons({
 
       {notStartedSeasons.length > 0 && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-3 tw-py-3 sm:tw-px-4">
-          <span className="tw-mr-0.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+          <span className="tw-mr-0.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
             {unseizedLabel}
           </span>
           {notStartedSeasons.map((season) => (

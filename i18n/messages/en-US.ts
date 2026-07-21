@@ -115,6 +115,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["seasonRow.label", "SZN{seasonNumber}"],
     ["seasonRow.toNextSet", "{held}/{total} to set {setNumber}"],
     ["seasonRow.setComplete", "Set {count} complete"],
+    ["seasonRow.progressAriaLabel", "{season} set progress"],
   ] as const
 );
 
