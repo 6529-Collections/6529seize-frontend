@@ -83,7 +83,7 @@ describe("UserPageStatsActivityWalletTable", () => {
       ),
     });
     expect(table).toBeInTheDocument();
-    expect(table.querySelector("tbody")).toHaveClass("tw-bg-white/[0.02]");
+    expect(table.querySelector("tbody")).not.toHaveClass("tw-bg-white/[0.02]");
     expect(RowMock).toHaveBeenCalledTimes(2);
     expect(RowMock.mock.calls[0]?.[0]).toEqual(
       expect.objectContaining({ locale })

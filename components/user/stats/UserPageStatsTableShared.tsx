@@ -12,7 +12,7 @@ export const STATS_TABLE_CLASS =
   "tw-w-full tw-border-collapse tw-text-left tw-text-sm";
 
 export const STATS_TABLE_HEAD_CLASS =
-  "tw-bg-white/[0.04] tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500";
+  "tw-bg-white/[0.04] tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
 
 export const STATS_TABLE_HEADER_CELL_CLASS =
   "tw-whitespace-nowrap tw-px-4 tw-py-3 tw-font-semibold";
