@@ -85,6 +85,7 @@ describe("UserPageStatsBoostBreakdown", () => {
       name: boostText("user.collected.stats.boostBreakdown.rows.total"),
     });
     expect(totalRowHeader).toBeInTheDocument();
+    expect(totalRowHeader).toHaveClass("tw-font-semibold");
     const totalRow = totalRowHeader.closest("tr");
     expect(totalRow).not.toBeNull();
     if (!totalRow) {
