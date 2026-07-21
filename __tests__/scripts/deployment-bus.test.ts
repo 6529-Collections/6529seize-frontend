@@ -138,11 +138,21 @@ describe("release bus staging artifact transfer", () => {
     );
     expect(script).toContain("process_kind='legacy'");
     expect(script).toContain("restore_legacy_process");
-    expect(script).toContain("wait_for_exact_local_version");
-    expect(script).toContain("http://127.0.0.1:3001/api/version");
-    expect(script.indexOf("wait_for_exact_local_version")).toBeLessThan(
-      script.lastIndexOf("pm2 save")
+    expect(script).toContain("delete_6529_process || return 1");
+    expect(script).toContain("restore_previous_link || return 1");
+    expect(script).toContain("--update-env || return 1");
+    expect(script).toContain("pm2 save || return 1");
+    expect(script).toContain(
+      'wait_for_local_version "$previous_local_version" || return 1'
     );
+    expect(script).toContain('wait_for_local_version "$EXPECTED_SHA"');
+    expect(script).toContain(
+      "Refusing to deploy without an exact healthy pre-mutation local version."
+    );
+    expect(script).toContain("http://127.0.0.1:3001/api/version");
+    expect(
+      script.lastIndexOf('wait_for_local_version "$EXPECTED_SHA"')
+    ).toBeLessThan(script.lastIndexOf("pm2 save"));
   });
 });
 

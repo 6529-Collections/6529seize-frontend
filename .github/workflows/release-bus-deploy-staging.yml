@@ -197,56 +197,69 @@ jobs:
 
           restore_previous_link() {
             if [ -n "$previous_target" ]; then
-              ln -sfn "$previous_target" "$current_link"
+              ln -sfn "$previous_target" "$current_link" || return 1
             else
-              rm -f "$current_link"
+              rm -f "$current_link" || return 1
             fi
           }
 
-          wait_for_exact_local_version() {
+          read_local_version() {
+            response="$(curl --fail --silent --show-error --max-time 10 \
+              http://127.0.0.1:3001/api/version 2>/dev/null || true)"
+            jq -r '
+              select(.stale == false) |
+              .version | select(type == "string" and test("^[a-f0-9]{40}$"))
+            ' <<<"$response" 2>/dev/null || true
+          }
+
+          wait_for_local_version() {
+            target_version="$1"
             for attempt in {1..24}; do
-              response="$(curl --fail --silent --show-error --max-time 10 \
-                http://127.0.0.1:3001/api/version 2>/dev/null || true)"
-              actual_version="$(jq -r '
-                select(.stale == false) |
-                .version | select(type == "string" and test("^[a-f0-9]{40}$"))
-              ' <<<"$response" 2>/dev/null || true)"
-              if [ "$actual_version" = "$EXPECTED_SHA" ]; then
+              actual_version="$(read_local_version)"
+              if [ "$actual_version" = "$target_version" ]; then
                 return 0
               fi
-              sleep 5
+              sleep 5 || return 1
             done
             return 1
           }
 
-          restore_legacy_process() {
+          delete_6529_process() {
             sudo -H -u "$RUN_AS" pm2 delete 6529seize >/dev/null 2>&1 || true
-            restore_previous_link
+            remaining_count="$(sudo -H -u "$RUN_AS" pm2 jlist | \
+              jq '[.[] | select(.name == "6529seize")] | length')" || return 1
+            [ "$remaining_count" -eq 0 ] || return 1
+          }
+
+          previous_local_version=''
+          if [ "$process_kind" != absent ]; then
+            previous_local_version="$(read_local_version)"
+            [[ "$previous_local_version" =~ ^[a-f0-9]{40}$ ]] || {
+              echo 'Refusing to deploy without an exact healthy pre-mutation local version.' >&2
+              exit 1
+            }
+          fi
+
+          restore_legacy_process() {
+            delete_6529_process || return 1
+            restore_previous_link || return 1
             sudo -H -u "$RUN_AS" pm2 start bash --name=6529seize -- \
-              -lc "cd \"$REPO_DIR\" && ./bin/6529 run start:standalone"
-            for attempt in {1..24}; do
-              if curl --fail --silent --show-error --max-time 10 \
-                http://127.0.0.1:3001/api/version | jq -e '
-                  .stale == false and
-                  (.version | type == "string" and test("^[a-f0-9]{40}$"))
-                ' >/dev/null 2>&1; then
-                sudo -H -u "$RUN_AS" pm2 save
-                return 0
-              fi
-              sleep 5
-            done
-            return 1
+              -lc "cd \"$REPO_DIR\" && ./bin/6529 run start:standalone" || return 1
+            wait_for_local_version "$previous_local_version" || return 1
+            sudo -H -u "$RUN_AS" pm2 save || return 1
           }
 
           rollback_managed_process() {
-            restore_previous_link
+            restore_previous_link || return 1
             if [ -n "$previous_target" ]; then
               sudo -H -u "$RUN_AS" pm2 startOrReload \
-                "$release_root/ecosystem.config.cjs" --only 6529seize --update-env
+                "$release_root/ecosystem.config.cjs" \
+                --only 6529seize --update-env || return 1
+              wait_for_local_version "$previous_local_version" || return 1
             else
-              sudo -H -u "$RUN_AS" pm2 delete 6529seize >/dev/null 2>&1 || true
+              delete_6529_process || return 1
             fi
-            sudo -H -u "$RUN_AS" pm2 save
+            sudo -H -u "$RUN_AS" pm2 save || return 1
           }
 
           install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"
@@ -279,7 +292,10 @@ jobs:
           if [ "$process_kind" = legacy ]; then
             # Future managed releases stay on startOrReload. This bounded replacement
             # is reserved for migrating the exact legacy fork detected above.
-            sudo -H -u "$RUN_AS" pm2 delete 6529seize
+            if ! delete_6529_process; then
+              echo 'Refusing to migrate because the legacy process could not be removed.' >&2
+              exit 1
+            fi
             if ! sudo -H -u "$RUN_AS" pm2 start \
               "$release_root/ecosystem.config.cjs" --only 6529seize; then
               if ! restore_legacy_process; then
@@ -301,7 +317,7 @@ jobs:
             fi
           fi
 
-          if ! wait_for_exact_local_version; then
+          if ! wait_for_local_version "$EXPECTED_SHA"; then
             if [ "$process_kind" = legacy ]; then
               if ! restore_legacy_process; then
                 echo 'CRITICAL: exact-version check and legacy rollback both failed.' >&2
