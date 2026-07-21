@@ -60,6 +60,11 @@ import {
 import { isExpectedWaveReactionDisabledError } from "@/utils/monitoring/dropReactionErrorClassification";
 import styles from "./WaveDropReactions.module.css";
 import { fetchDropReactionDetailsV2 } from "@/services/api/wave-drops-v2-api";
+import {
+  getDropReactionAuthStateFingerprint,
+  isDropReactionAuthRecoveryPending,
+  useDropReactionAuthRecovery,
+} from "@/hooks/drops/useDropReactionAuthRecovery";
 
 const WaveDropReactionsDetailDialog = dynamic(
   () => import("./WaveDropReactionsDetailDialog"),
@@ -380,6 +385,8 @@ function WaveDropReaction({
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
   const locale = useBrowserLocale();
+  const { isRecoveryPending, recoverFromUnauthorized } =
+    useDropReactionAuthRecovery();
   const rollbackRef = useRef<OwnedOptimisticRollback>(null);
   const waveEligibility = getEligibility(drop.wave.id);
   const isEligibleToChat =
@@ -390,6 +397,7 @@ function WaveDropReaction({
     waveEligibility?.authenticated_user_chat_restriction ===
       ChatRestriction.SLOW_MODE;
   const canReact =
+    !isRecoveryPending &&
     Boolean(connectedProfile?.handle) &&
     !activeProfileProxy &&
     (isEligibleToChat !== false || isSlowModeOnlyBlock);
@@ -693,10 +701,15 @@ function WaveDropReaction({
   ]);
 
   const handleClick = useCallback(async () => {
-    if (!canReact || longPressTriggered) {
+    if (
+      !canReact ||
+      longPressTriggered ||
+      isDropReactionAuthRecoveryPending()
+    ) {
       return;
     }
 
+    const authStateFingerprint = getDropReactionAuthStateFingerprint();
     const intendedReaction = selected ? null : reaction.reaction;
     const endpoint = `drops/${drop.id}/reaction`;
     const method = selected ? "DELETE" : "POST";
@@ -761,6 +774,8 @@ function WaveDropReaction({
         return;
       }
 
+      const authRecovery = recoverFromUnauthorized(error, authStateFingerprint);
+
       updateEligibilityAfterExpectedDisabledReaction(error, method);
 
       const msg = getReactionErrorMessage(
@@ -776,6 +791,7 @@ function WaveDropReaction({
         recordReactionRollbackApplied(mutation);
       }
       await refreshCanonicalDropAfterLatestFailure();
+      await authRecovery;
     }
   }, [
     applyOptimisticReactionChange,
@@ -786,6 +802,7 @@ function WaveDropReaction({
     longPressTriggered,
     locale,
     reaction.reaction,
+    recoverFromUnauthorized,
     refreshCanonicalDropAfterLatestFailure,
     selected,
     setToast,

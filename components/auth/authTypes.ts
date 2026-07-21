@@ -12,7 +12,9 @@ export type AuthContextType = {
   readonly activeProfileProxy: ApiProfileProxy | null;
   readonly showWaves: boolean;
   readonly sessionUpgradeRequired: boolean;
-  readonly requestAuth: () => Promise<{ success: boolean }>;
+  readonly requestAuth: (
+    options?: RequestAuthOptions
+  ) => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade?: () => Promise<{ success: boolean }>;
   readonly ensureActiveSessionV2WebSession?: (params?: {
     readonly address?: string | undefined;
@@ -23,6 +25,13 @@ export type AuthContextType = {
     profileProxy: ApiProfileProxy | null
   ) => Promise<void>;
 };
+
+export interface RequestAuthOptions {
+  /** Revalidate with the server even when the local JWT has not expired. */
+  readonly serverRejected?: boolean;
+  /** Cancel recovery if the account or token changes before it can finish. */
+  readonly expectedAuthStateFingerprint?: string;
+}
 
 export type AuthLoadingState = "idle" | "validating" | "signing";
 export type SignModalReason = "auth" | "session-upgrade";

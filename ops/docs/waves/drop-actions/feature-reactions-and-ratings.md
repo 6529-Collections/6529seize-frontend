@@ -71,6 +71,10 @@ rolls back if the request fails.
 
 - If add/remove reaction fails, optimistic reaction state rolls back and the app
   refreshes the canonical drop state.
+- If the API rejects the current session, the app starts one authentication
+  recovery attempt for that session and temporarily disables reaction actions.
+  The failed reaction is not automatically replayed; retry after authentication
+  succeeds.
 - If a reaction request times out, wait for that refresh and check the current
   reaction before trying again; the app does not automatically retry the write.
 - If rating submit fails, optimistic rating state rolls back and users can retry.

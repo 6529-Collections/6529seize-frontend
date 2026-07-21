@@ -32,6 +32,8 @@ interface ValidateJwtParams {
   operationId: string;
   abortSignal: AbortSignal;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
+  serverRejected?: boolean | undefined;
+  shouldPersistRefreshedSession?: (() => boolean) | undefined;
 }
 
 export type SessionRefreshValidationOutcome =
@@ -124,6 +126,19 @@ const doJWTValidation = ({
   );
 };
 
+const canUseLocallyValidatedSession = ({
+  hasValidLocalJwt,
+  serverRejected,
+  wallet,
+}: {
+  readonly hasValidLocalJwt: boolean;
+  readonly serverRejected: boolean;
+  readonly wallet: string;
+}): boolean =>
+  !serverRejected &&
+  hasValidLocalJwt &&
+  hasActiveSessionV2Auth({ address: wallet });
+
 const validateJwtInputs = (wallet: string, operationId: string): void => {
   if (!wallet || typeof wallet !== "string") {
     throw new Error("Invalid wallet address: must be non-empty string");
@@ -177,6 +192,9 @@ const isAbortError = (error: unknown): boolean =>
   error !== null &&
   "name" in error &&
   error.name === "AbortError";
+
+const isAbortSignalAborted = (abortSignal: AbortSignal): boolean =>
+  abortSignal.aborted;
 
 const assertRefreshedSessionMatchesWallet = (
   refreshedSession: RefreshedSession,
@@ -232,12 +250,14 @@ const handleTokenRefresh = async ({
   abortSignal,
   activeProfileProxy,
   trackRecovery,
+  shouldPersistRefreshedSession,
 }: {
   wallet: string;
   role: string | null;
   abortSignal: AbortSignal;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
   trackRecovery: boolean;
+  shouldPersistRefreshedSession: () => boolean;
 }): Promise<ValidateJwtResult> => {
   // Check for cancellation before proceeding
   if (abortSignal.aborted) {
@@ -258,7 +278,10 @@ const handleTokenRefresh = async ({
       return createInvalidJwtResult("empty");
     }
 
-    if (abortSignal.aborted) {
+    if (
+      isAbortSignalAborted(abortSignal) ||
+      !shouldPersistRefreshedSession()
+    ) {
       return CANCELLED_JWT_RESULT;
     }
 
@@ -299,6 +322,8 @@ export const validateJwt = async ({
   operationId,
   abortSignal,
   activeProfileProxy,
+  serverRejected = false,
+  shouldPersistRefreshedSession = () => true,
 }: ValidateJwtParams): Promise<ValidateJwtResult> => {
   // Input validation - fail fast on invalid parameters
   validateJwtInputs(wallet, operationId);
@@ -310,7 +335,13 @@ export const validateJwt = async ({
 
   const hasValidLocalJwt = doJWTValidation({ jwt, wallet, role });
 
-  if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
+  if (
+    canUseLocallyValidatedSession({
+      hasValidLocalJwt,
+      serverRejected,
+      wallet,
+    })
+  ) {
     return VALID_JWT_RESULT;
   }
 
@@ -322,8 +353,12 @@ export const validateJwt = async ({
       abortSignal,
       activeProfileProxy,
       trackRecovery: !hasValidLocalJwt,
+      shouldPersistRefreshedSession,
     });
   } catch (error: unknown) {
+    if (serverRejected) {
+      throw error;
+    }
     if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
       return createValidJwtResult("local_valid_after_failure");
     }
@@ -338,6 +373,10 @@ export const validateJwt = async ({
   }
 
   const refreshOutcome = refreshedResult.refreshOutcome ?? "not_attempted";
+
+  if (serverRejected) {
+    return createInvalidJwtResult(refreshOutcome);
+  }
 
   if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
     return createValidJwtResult("local_valid_after_failure");
