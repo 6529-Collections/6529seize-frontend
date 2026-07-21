@@ -493,6 +493,13 @@ const GroupedDropTimestamp = ({
   // "hover": desktop affordance — swiping would hijack text selection, so the
   // timestamp reveals on row hover instead.
   const isHoverVariant = variant === "hover";
+  let timestampStyle: CSSProperties | undefined;
+
+  if (isHoverVariant) {
+    timestampStyle = forceVisible ? { opacity: 1 } : undefined;
+  } else {
+    timestampStyle = getGroupedTimestampOpacityStyle(swipeOffset);
+  }
 
   return (
     <div
@@ -506,13 +513,7 @@ const GroupedDropTimestamp = ({
           ? "grouped-drop-hover-timestamp"
           : "grouped-drop-swipe-timestamp"
       }
-      style={
-        isHoverVariant
-          ? forceVisible
-            ? { opacity: 1 }
-            : undefined
-          : getGroupedTimestampOpacityStyle(swipeOffset)
-      }
+      style={timestampStyle}
     >
       <WaveDropTime timestamp={timestamp} size="xs" variant="compactReveal" />
     </div>

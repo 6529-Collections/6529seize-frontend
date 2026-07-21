@@ -55,7 +55,7 @@ const PUSH_REGISTRATION_TOTAL_ATTEMPTS = 3;
 const PUSH_REGISTRATION_BASE_DELAY_MS = 500;
 const PUSH_REGISTRATION_MAX_DELAY_MS = 4000;
 const PUSH_REGISTRATION_JITTER_FACTOR = 0.2;
-const UINT32_RANGE = 0x1_0000_0000;
+const UINT32_RANGE = 2 ** 32;
 const PUSH_REGISTRATION_MAX_RETRY_AFTER_MS = 10000;
 // Capacitor omits the native domain/code, so keep this limited to the exact
 // production signature instead of suppressing similar helper failures.

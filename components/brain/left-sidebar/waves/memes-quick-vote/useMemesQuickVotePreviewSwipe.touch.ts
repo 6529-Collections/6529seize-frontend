@@ -6,7 +6,7 @@ import { flushSync } from "react-dom";
 
 export const SWIPE_TRIGGER_THRESHOLD = 32;
 const MAX_SWIPE_OFFSET = 132;
-const SWIPE_EXIT_DURATION_MS = 220;
+export const SWIPE_EXIT_DURATION_MS = 220;
 const SWIPE_EXIT_OFFSET = 420;
 const SWIPE_EXIT_ROTATION_DEGREES = 3;
 const TOUCH_GESTURE_AXIS_LOCK_THRESHOLD = 8;

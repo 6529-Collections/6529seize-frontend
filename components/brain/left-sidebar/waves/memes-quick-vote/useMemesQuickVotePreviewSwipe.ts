@@ -11,6 +11,7 @@ import {
 } from "./useMemesQuickVotePreviewSwipe.helpers";
 import {
   SWIPE_TRIGGER_THRESHOLD,
+  SWIPE_EXIT_DURATION_MS,
   clampSwipeOffset,
   commitSwipeAction,
   getCardTransform,
@@ -21,7 +22,6 @@ import {
   type TouchLikeEvent,
 } from "./useMemesQuickVotePreviewSwipe.touch";
 
-const SWIPE_EXIT_DURATION_MS = 220;
 type TimeoutHandle = ReturnType<typeof globalThis.setTimeout>;
 
 interface UseMemesQuickVotePreviewSwipeArgs {
