@@ -103,12 +103,56 @@ describe("release bus staging artifact transfer", () => {
     expect(
       stageStep.run.match(/--region "\$ARTIFACT_BUCKET_REGION"/g)
     ).toHaveLength(2);
-    expect(deployStep.run).not.toContain("curl --fail");
+    const artifactTransfer = deployStep.run.slice(
+      deployStep.run.indexOf('http_status="$(curl'),
+      deployStep.run.indexOf('test "$http_status" = 200')
+    );
+    expect(artifactTransfer).not.toContain("curl --fail");
     expect(deployStep.run).toContain("--write-out '%{http_code}'");
     expect(deployStep.run).toContain('test "$http_status" = 200');
     expect(deployStep.run.indexOf('test "$http_status" = 200')).toBeLessThan(
       deployStep.run.indexOf("sha256sum -c -")
     );
+  });
+
+  it("migrates only the exact legacy PM2 process and verifies locally", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+    const script = deployStep.run;
+
+    expect(script).toContain(
+      'process_count="$(jq \'[.[] | select(.name == "6529seize")] | length\''
+    );
+    expect(script).toContain('.pm_exec_path == "/usr/bin/bash"');
+    expect(script).toContain(".pm_cwd == $repo_dir");
+    expect(script).toContain(
+      '.args == ["-lc", ("cd \\\"" + $repo_dir + "\\\" && ./bin/6529 run start:standalone")]'
+    );
+    expect(script).toContain(
+      "Refusing to replace an unrecognized 6529seize PM2 process."
+    );
+    expect(script).toContain(
+      "Refusing to deploy with duplicate 6529seize PM2 processes."
+    );
+    expect(script).toContain("process_kind='legacy'");
+    expect(script).toContain("restore_legacy_process");
+    expect(script).toContain("delete_6529_process || return 1");
+    expect(script).toContain("restore_previous_link || return 1");
+    expect(script).toContain("--update-env || return 1");
+    expect(script).toContain("pm2 save || return 1");
+    expect(script).toContain(
+      'wait_for_local_version "$previous_local_version" || return 1'
+    );
+    expect(script).toContain('wait_for_local_version "$EXPECTED_SHA"');
+    expect(script).toContain(
+      "Refusing to deploy without an exact healthy pre-mutation local version."
+    );
+    expect(script).toContain("http://127.0.0.1:3001/api/version");
+    expect(
+      script.lastIndexOf('wait_for_local_version "$EXPECTED_SHA"')
+    ).toBeLessThan(script.lastIndexOf("pm2 save"));
   });
 });
 
