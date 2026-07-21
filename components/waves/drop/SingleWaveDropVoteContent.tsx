@@ -21,6 +21,7 @@ import { useSingleWaveDropVoteState } from "./useSingleWaveDropVoteState";
 import { useSingleWaveDropVoteRationale } from "./useSingleWaveDropVoteRationale";
 import styles from "./VoteButton.module.css";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 interface SingleWaveDropVoteContentProps {
@@ -111,6 +112,24 @@ const getExchangeIconFlip = (
   return "vertical";
 };
 
+const getVoteModeLabels = (
+  locale: SupportedLocale,
+  isSliderMode: boolean
+): { readonly title: string; readonly ariaLabel: string } => ({
+  title: t(
+    locale,
+    isSliderMode
+      ? "waves.voteMode.switchToNumeric"
+      : "waves.voteMode.switchToSlider"
+  ),
+  ariaLabel: t(
+    locale,
+    isSliderMode
+      ? "waves.voteMode.switchToNumericAriaLabel"
+      : "waves.voteMode.switchToSliderAriaLabel"
+  ),
+});
+
 const VoteModeField: FC<VoteModeFieldProps> = ({
   isSliderMode,
   voteValue,
@@ -183,18 +202,8 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   const currentVoteMode = voteModeControl.value;
   const setCurrentVoteMode = voteModeControl.setValue;
   const isSliderMode = currentVoteMode === "slider";
-  const switchModeTitle = t(
-    locale,
-    isSliderMode
-      ? "waves.voteMode.switchToNumeric"
-      : "waves.voteMode.switchToSlider"
-  );
-  const switchModeAriaLabel = t(
-    locale,
-    isSliderMode
-      ? "waves.voteMode.switchToNumericAriaLabel"
-      : "waves.voteMode.switchToSliderAriaLabel"
-  );
+  const { title: switchModeTitle, ariaLabel: switchModeAriaLabel } =
+    getVoteModeLabels(locale, isSliderMode);
 
   const voteLabel =
     WAVE_VOTING_LABELS[displayDrop.wave.voting_credit_type] || "votes";
@@ -378,7 +387,6 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
                   aria-labelledby={rationaleSwitchLabelId}
                   aria-describedby={rationaleDescriptionIds}
                   aria-controls={rationalePanelId}
-                  aria-expanded={shouldPostRationale}
                 />
                 <span
                   aria-hidden="true"

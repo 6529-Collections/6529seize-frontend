@@ -181,17 +181,17 @@
   color: #60606c;
 }
 .voteSubmitFull .voteButtonPositive {
-  background: #059669;
-  border-color: #10b981;
-  color: #fff;
+  background: #10b981;
+  border-color: #34d399;
+  color: #022c22;
   font-weight: 700;
   box-shadow: none;
 }
 .voteSubmitFull .voteButtonPositive:not(:disabled):hover {
-  background: #10b981;
-  border-color: #34d399;
+  background: #34d399;
+  border-color: #6ee7b7;
   box-shadow: none;
-  color: #fff;
+  color: #022c22;
 }
 .voteSubmitFull .voteButtonNegative {
   background: #e11d48;
@@ -201,8 +201,8 @@
   box-shadow: none;
 }
 .voteSubmitFull .voteButtonNegative:not(:disabled):hover {
-  background: #f43f5e;
-  border-color: #fb7185;
+  background: #be123c;
+  border-color: #e11d48;
   box-shadow: none;
   color: #fff;
 }

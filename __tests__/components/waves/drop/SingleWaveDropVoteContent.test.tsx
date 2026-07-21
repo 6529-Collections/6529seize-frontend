@@ -189,7 +189,8 @@ describe("SingleWaveDropVoteContent", () => {
     expect(rationaleSwitch).toHaveAccessibleName("Vote with reply");
     expect(rationaleSwitch).not.toBeChecked();
     expect(rationaleSwitch).not.toBeDisabled();
-    expect(rationaleSwitch).toHaveAttribute("aria-expanded", "false");
+    expect(rationaleSwitch).not.toHaveAttribute("aria-expanded");
+    expect(rationaleSwitch).toHaveAttribute("aria-controls");
     expect(rationaleSwitch).toHaveAccessibleDescription(
       /Editing this text turns on Vote with reply/i
     );
@@ -200,7 +201,7 @@ describe("SingleWaveDropVoteContent", () => {
     fireEvent.click(rationaleSwitch);
 
     expect(rationaleSwitch).toBeChecked();
-    expect(rationaleSwitch).toHaveAttribute("aria-expanded", "true");
+    expect(rationaleSwitch).not.toHaveAttribute("aria-expanded");
     expect(
       screen.getByRole("textbox", { name: /optional rationale reply/i })
     ).toBeInTheDocument();
