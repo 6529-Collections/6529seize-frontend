@@ -315,7 +315,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   return (
     <fieldset className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0">
       <legend className="tw-sr-only">Vote controls</legend>
-      <div className={isSliderMode ? undefined : "tw-min-h-[92px]"}>
+      <div className="tw-min-h-[92px] tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-px-3 tw-py-2 tw-shadow-inner tw-transition focus-within:tw-border-primary-400/70 focus-within:tw-ring-1 focus-within:tw-ring-primary-400/30">
         <VoteModeField
           isSliderMode={isSliderMode}
           voteValue={voteValue}
@@ -328,11 +328,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
         />
       </div>
 
-      <div
-        className={`tw-flex tw-items-center tw-justify-between tw-gap-4 ${
-          isSliderMode ? "tw-pt-5" : ""
-        }`}
-      >
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
         <SingleWaveDropVoteStats
           currentRating={currentVoteValue}
           maxRating={maxRating}
@@ -370,7 +366,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               voteRationale.handleRationaleTextChange(event.target.value)
             }
             rows={4}
-            className="tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-iron-100 tw-outline-none tw-transition-colors placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-ring-1 focus:tw-ring-primary-400"
+            className="tw-form-textarea tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-iron-100 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-transition placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-600"
             aria-describedby={rationaleDescriptionIds}
           />
           <p id={rationaleDescriptionId} className="tw-sr-only">
@@ -405,8 +401,8 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               />
               <span
                 aria-hidden="true"
-                className={`tw-absolute tw-inset-0 tw-rounded-full tw-transition-colors ${
-                  shouldPostRationale ? "tw-bg-primary-500" : "tw-bg-iron-700"
+                className={`tw-absolute tw-inset-0 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 ${
+                  shouldPostRationale ? "tw-bg-primary-500" : "tw-bg-iron-650"
                 }`}
               />
               <span
