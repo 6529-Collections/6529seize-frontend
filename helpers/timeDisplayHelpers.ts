@@ -41,6 +41,21 @@ export const getTimeAgoShort = (
   return "Just now";
 };
 
+interface TimeUntilPart {
+  readonly value: number;
+  readonly unit: "year" | "month" | "day" | "hour" | "minute";
+}
+
+const formatTimeUntilPart = (
+  { value, unit }: TimeUntilPart,
+  isFuture: boolean
+): string => {
+  const prefix = isFuture ? "in" : "";
+  const pluralSuffix = value > 1 ? "s" : "";
+  const suffix = isFuture ? "" : "ago";
+  return `${prefix} ${value} ${unit}${pluralSuffix} ${suffix}`;
+};
+
 export const getTimeUntil = (milliseconds: number): string => {
   let timeDifference = milliseconds - Date.now();
   const isFuture = timeDifference >= 0;
@@ -51,27 +66,13 @@ export const getTimeUntil = (milliseconds: number): string => {
   const days = Math.floor(hours / 24);
   const months = Math.floor(days / 30);
   const years = Math.floor(months / 12);
-  if (years > 0) {
-    return `${isFuture ? "in" : ""} ${years} year${years > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
-  } else if (months > 0) {
-    return `${isFuture ? "in" : ""} ${months} month${months > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
-  } else if (days > 0) {
-    return `${isFuture ? "in" : ""} ${days} day${days > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
-  } else if (hours > 0) {
-    return `${isFuture ? "in" : ""} ${hours} hour${hours > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
-  } else if (minutes > 0) {
-    return `${isFuture ? "in" : ""} ${minutes} minute${
-      minutes > 1 ? "s" : ""
-    } ${isFuture ? "" : "ago"}`;
-  } else {
-    return "Just now";
-  }
+  const timeParts: readonly TimeUntilPart[] = [
+    { value: years, unit: "year" },
+    { value: months, unit: "month" },
+    { value: days, unit: "day" },
+    { value: hours, unit: "hour" },
+    { value: minutes, unit: "minute" },
+  ];
+  const timePart = timeParts.find(({ value }) => value > 0);
+  return timePart ? formatTimeUntilPart(timePart, isFuture) : "Just now";
 };

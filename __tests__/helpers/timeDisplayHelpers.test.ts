@@ -27,8 +27,23 @@ describe("timeDisplayHelpers", () => {
     );
   });
 
-  it("preserves getTimeUntil leading and trailing spaces", () => {
-    expect(getTimeUntil(now + 60 * 60 * 1000)).toBe("in 1 hour ");
-    expect(getTimeUntil(now - 60 * 60 * 1000)).toBe(" 1 hour ago");
+  it.each([
+    ["minute", 60 * 1000, "in 1 minute ", " 1 minute ago"],
+    ["minutes", 2 * 60 * 1000, "in 2 minutes ", " 2 minutes ago"],
+    ["hour", 60 * 60 * 1000, "in 1 hour ", " 1 hour ago"],
+    ["day", 24 * 60 * 60 * 1000, "in 1 day ", " 1 day ago"],
+    ["month", 30 * 24 * 60 * 60 * 1000, "in 1 month ", " 1 month ago"],
+    ["year", 360 * 24 * 60 * 60 * 1000, "in 1 year ", " 1 year ago"],
+  ])(
+    "preserves getTimeUntil output for %s values",
+    (_unit, duration, futureOutput, pastOutput) => {
+      expect(getTimeUntil(now + duration)).toBe(futureOutput);
+      expect(getTimeUntil(now - duration)).toBe(pastOutput);
+    }
+  );
+
+  it("returns Just now for sub-minute values", () => {
+    expect(getTimeUntil(now + 30 * 1000)).toBe("Just now");
+    expect(getTimeUntil(now - 30 * 1000)).toBe("Just now");
   });
 });
