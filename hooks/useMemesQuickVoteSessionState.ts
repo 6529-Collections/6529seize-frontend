@@ -261,6 +261,10 @@ const useMemesQuickVoteWindowSync = ({
 
         setCurrentSessionState(getQuickVoteSyncFailureState);
       } finally {
+        if (syncRequestIdRef.current !== requestId) {
+          return;
+        }
+
         if (syncAbortControllerRef.current === abortController) {
           syncAbortControllerRef.current = null;
         }

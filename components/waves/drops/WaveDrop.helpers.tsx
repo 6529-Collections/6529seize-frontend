@@ -145,7 +145,8 @@ const getColorClasses = ({
     return `${bgClass} ${ringClasses} ${hoverClass}`.trim();
   }
 
-  const rankClass = RANK_STYLES[rank as keyof typeof RANK_STYLES];
+  const rankClass =
+    RANK_STYLES[rank as keyof typeof RANK_STYLES] ?? RANK_STYLES.default;
   return `${rankClass} tw-transition-shadow tw-duration-300`.trim();
 };
 
