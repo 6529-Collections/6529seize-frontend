@@ -197,8 +197,14 @@ describe("Release Bus frontend gate contract", () => {
       (step) => step.name === "Aggregate fail-closed evidence"
     );
     expect(aggregate?.env?.BASE_SHA).toBe("${{ inputs.base_sha }}");
+    expect(aggregate?.env?.MUTATION_RESULT).toBe(
+      "${{ steps.source-mutation.outcome }}"
+    );
     expect(aggregate?.run).toContain('[[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]');
     expect(aggregate?.run?.match(/--base-sha "\$BASE_SHA"/g)).toHaveLength(2);
+    expect(aggregate?.run).toContain(
+      '--arg source_mutation "$MUTATION_RESULT"'
+    );
 
     const report = steps.find(
       (step) => step.name === "Report sanitized terminal evidence"
@@ -213,6 +219,20 @@ describe("Release Bus frontend gate contract", () => {
       "${{ inputs.release_train_id }}"
     );
     expect(report?.run).toContain('node "$RELEASE_BUS_REPORT_TOOL"');
+
+    const aggregateSteps = canaryWorkflow.jobs?.aggregate?.steps ?? [];
+    const sourceMutationIndex = aggregateSteps.findIndex(
+      (step) => step.name === "Verify gate did not mutate source"
+    );
+    const aggregateIndex = aggregateSteps.findIndex(
+      (step) => step.name === "Aggregate fail-closed evidence"
+    );
+    const reportIndex = aggregateSteps.findIndex(
+      (step) => step.name === "Report sanitized terminal evidence"
+    );
+    expect(sourceMutationIndex).toBeGreaterThanOrEqual(0);
+    expect(sourceMutationIndex).toBeLessThan(aggregateIndex);
+    expect(aggregateIndex).toBeLessThan(reportIndex);
 
     const tempDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "release-bus-input-")

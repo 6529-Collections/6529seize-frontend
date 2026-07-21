@@ -701,7 +701,10 @@ function finalSummary({ args, records, jobResults }) {
           records,
           source: "legacy",
           shardCount: 1,
-          jobResults: { legacy: jobResults.legacy },
+          jobResults: {
+            legacy: jobResults.legacy,
+            source_mutation: jobResults.source_mutation,
+          },
           identity,
         });
   const sharded =
@@ -717,6 +720,7 @@ function finalSummary({ args, records, jobResults }) {
             build: jobResults.build,
             inventory: jobResults.inventory,
             jest: jobResults.jest,
+            source_mutation: jobResults.source_mutation,
           },
           identity,
         });

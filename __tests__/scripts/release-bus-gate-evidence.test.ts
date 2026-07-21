@@ -221,6 +221,7 @@ describe("Release Bus gate evidence", () => {
         build: "success",
         inventory: "success",
         jest: "success",
+        source_mutation: "success",
       },
       identity: evidenceIdentity,
     });
@@ -677,6 +678,7 @@ describe("Release Bus gate evidence", () => {
         build: "success",
         inventory: "success",
         jest: "success",
+        source_mutation: "success",
       },
     });
 
@@ -722,8 +724,42 @@ describe("Release Bus gate evidence", () => {
         build: "success",
         inventory: "success",
         jest: "success",
+        source_mutation: "success",
       },
     });
     expect(skippedLegacy.status).toBe("FAILED");
+
+    const mutated = finalSummary({
+      args: {
+        mode: "sharded",
+        "shard-count": "1",
+        "run-url":
+          "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
+        "base-sha": evidenceIdentity.base_sha,
+        environment: evidenceIdentity.environment,
+        "gate-fingerprint": evidenceIdentity.gate_fingerprint,
+        "behavior-digest": "e".repeat(64),
+        "workflow-sha": evidenceIdentity.workflow_sha,
+        "workflow-digest": evidenceIdentity.workflow_digest,
+        "node-version": evidenceIdentity.node_version,
+        "package-manager": evidenceIdentity.package_manager,
+        "artifact-name": "release-bus-base-canary-summary-123",
+        "jobs-file": jobsFile,
+      },
+      records: records.filter((record) => record.source === "parallel"),
+      jobResults: {
+        legacy: "skipped",
+        lint: "success",
+        typecheck: "success",
+        build: "success",
+        inventory: "success",
+        jest: "success",
+        source_mutation: "failure",
+      },
+    });
+    expect(mutated.status).toBe("FAILED");
+    expect(mutated.errors).toContain(
+      "source_mutation job did not succeed"
+    );
   });
 });
