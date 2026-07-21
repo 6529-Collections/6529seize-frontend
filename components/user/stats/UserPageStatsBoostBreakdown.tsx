@@ -301,6 +301,7 @@ export default function UserPageStatsBoostBreakdown({
   );
 }
 
+/** Renders a boost value with optional breakdown detail and row emphasis. */
 function BoostValueCell({
   value,
   info,

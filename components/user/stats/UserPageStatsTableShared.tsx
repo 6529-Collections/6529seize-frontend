@@ -32,6 +32,7 @@ export const STATS_TABLE_VALUE_CELL_CLASS =
 export const STATS_TABLE_MUTED_VALUE_CELL_CLASS =
   "tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-tabular-nums tw-text-iron-500";
 
+/** Renders a consistently styled, initially expanded Details subsection. */
 export function UserPageStatsDisclosure({
   title,
   children,
@@ -58,6 +59,7 @@ export function UserPageStatsDisclosure({
   );
 }
 
+/** Provides a labelled horizontal scroll area for wide Details tables. */
 export function UserPageStatsTableScroll({
   label,
   children,
