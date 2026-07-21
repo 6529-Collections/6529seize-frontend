@@ -71,9 +71,7 @@ export function UserPageStatsTableScroll({
     <section
       aria-label={label}
       className="tw-overflow-x-auto tw-overscroll-x-contain tw-pb-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-500"
-      tabIndex={
-        0 /* NOSONAR -- Wide data tables need a keyboard-scrollable region. */
-      }
+      tabIndex={0 /* NOSONAR: keyboard-scrollable region */}
     >
       {children}
     </section>
