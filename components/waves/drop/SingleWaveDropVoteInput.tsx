@@ -327,7 +327,7 @@ export const SingleWaveDropVoteInput: React.FC<
             type="text"
             pattern={inputPattern}
             inputMode="numeric"
-            className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-py-0 tw-pl-14 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses} ${inputCaretClasses}`}
+            className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses} ${inputCaretClasses}`}
             value={voteValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -358,7 +358,7 @@ export const SingleWaveDropVoteInput: React.FC<
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-min-h-8 tw-min-w-0 tw-flex-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-bg-iron-700 ${quickPercentageButtonClasses}`}
+              className={`tw-min-w-0 tw-flex-1 tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-bg-iron-700 ${quickPercentageButtonClasses}`}
             >
               {percentage > 0 ? "+" : ""}
               {percentage}%
@@ -371,7 +371,7 @@ export const SingleWaveDropVoteInput: React.FC<
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-min-h-8 tw-min-w-0 tw-flex-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-bg-iron-700 ${quickPercentageButtonClasses}`}
+              className={`tw-min-w-0 tw-flex-1 tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-bg-iron-700 ${quickPercentageButtonClasses}`}
             >
               {percentage > 0 ? "+" : ""}
               {percentage}%

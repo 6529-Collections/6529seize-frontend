@@ -189,17 +189,28 @@ describe("SingleWaveDropVoteContent", () => {
     expect(rationaleSwitch).toHaveAccessibleName("Vote with reply");
     expect(rationaleSwitch).not.toBeChecked();
     expect(rationaleSwitch).not.toBeDisabled();
+    expect(rationaleSwitch).toHaveAttribute("aria-expanded", "false");
+    expect(rationaleSwitch).toHaveAccessibleDescription(
+      /Editing this text turns on Vote with reply/i
+    );
+    expect(
+      screen.queryByRole("textbox", { name: /optional rationale reply/i })
+    ).not.toBeInTheDocument();
 
     fireEvent.click(rationaleSwitch);
 
     expect(rationaleSwitch).toBeChecked();
+    expect(rationaleSwitch).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("textbox", { name: /optional rationale reply/i })
+    ).toBeInTheDocument();
     expect(screen.getByTestId("vote-submit")).toHaveAttribute(
       "data-submit-label",
       "Vote + reply"
     );
   });
 
-  it("auto-enables on the first edit and then respects a manual off choice", () => {
+  it("preserves a rationale draft when the field is hidden and shown again", () => {
     render(
       <SingleWaveDropVoteContent
         drop={createMockDrop()}
@@ -211,6 +222,8 @@ describe("SingleWaveDropVoteContent", () => {
     const rationaleSwitch = screen.getByRole("switch", {
       name: /vote with reply/i,
     });
+    fireEvent.click(rationaleSwitch);
+
     const rationaleTextarea = screen.getByRole("textbox", {
       name: /optional rationale reply/i,
     });
@@ -224,11 +237,18 @@ describe("SingleWaveDropVoteContent", () => {
 
     fireEvent.click(rationaleSwitch);
     expect(rationaleSwitch).not.toBeChecked();
+    expect(
+      screen.queryByRole("textbox", { name: /optional rationale reply/i })
+    ).not.toBeInTheDocument();
 
-    fireEvent.change(rationaleTextarea, {
-      target: { value: "A different reason" },
-    });
-    expect(rationaleSwitch).not.toBeChecked();
+    fireEvent.click(rationaleSwitch);
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: /optional rationale reply/i,
+        }) as HTMLTextAreaElement
+      ).value
+    ).toContain("Reason");
   });
 
   it("blocks an enabled reply after all prefilled text is deleted", () => {
@@ -240,14 +260,16 @@ describe("SingleWaveDropVoteContent", () => {
       />
     );
 
+    const rationaleSwitch = screen.getByRole("switch", {
+      name: "Vote with reply",
+    });
+    fireEvent.click(rationaleSwitch);
+
     const rationaleTextarea = screen.getByRole("textbox", {
       name: /optional rationale reply/i,
     });
     fireEvent.change(rationaleTextarea, { target: { value: "" } });
 
-    const rationaleSwitch = screen.getByRole("switch", {
-      name: "Vote with reply",
-    });
     expect(rationaleSwitch).toBeChecked();
     expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
       "Add rationale text or turn Vote with reply off."

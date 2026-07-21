@@ -242,7 +242,7 @@ const getTooltipClasses = ({
 }): string => {
   const sizeClasses = isMini
     ? "tw-min-h-[22px] tw-min-w-[48px] tw-max-w-[88px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums"
-    : "tw-min-h-[22px] tw-min-w-[64px] tw-max-w-[136px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums";
+    : "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums";
 
   if (isPositiveVote) {
     return `${sizeClasses} tw-border-solid tw-border-emerald-500/60 tw-bg-iron-950 tw-text-emerald-400 tw-shadow-sm`;

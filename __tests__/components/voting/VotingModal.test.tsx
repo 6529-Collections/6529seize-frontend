@@ -56,6 +56,10 @@ describe('VotingModal', () => {
   it('passes background submission mode to vote content', () => {
     render(<VotingModal drop={drop} isOpen={true} onClose={jest.fn()} />);
 
+    expect(screen.getByRole('dialog')).toHaveClass(
+      'tw-z-1000',
+      'tw-bg-gray-700/75'
+    );
     expect(screen.getByTestId('vote')).toHaveAttribute(
       'data-submission-mode',
       SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
