@@ -18,11 +18,10 @@ export function VoteModeControl({ value, onChange }: VoteModeControlProps) {
   const locale = useBrowserLocale();
 
   return (
-    <div
-      role="group"
-      aria-label={t(locale, "waves.voteMode.groupLabel")}
-      className="tw-flex tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950"
-    >
+    <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-0">
+      <legend className="tw-sr-only">
+        {t(locale, "waves.voteMode.groupLabel")}
+      </legend>
       {voteModeOptions.map((mode) => {
         const isActive = value === mode.value;
 
@@ -42,6 +41,6 @@ export function VoteModeControl({ value, onChange }: VoteModeControlProps) {
           </button>
         );
       })}
-    </div>
+    </fieldset>
   );
 }
