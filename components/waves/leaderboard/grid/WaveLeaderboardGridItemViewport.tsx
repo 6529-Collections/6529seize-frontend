@@ -192,6 +192,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
               media_mime_type={mediaMimeType}
               media_url={mediaUrl}
               disableMediaInteraction={true}
+              fillVideoContainer={true}
               imageScale={ImageScale.AUTOx450}
               previewImageUrl={mediaPreviewImageUrl}
             />
