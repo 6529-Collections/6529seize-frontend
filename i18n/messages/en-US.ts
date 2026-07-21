@@ -187,6 +187,8 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
   "suggested.description": "Categories with the most profile REP activity.",
+  "activity.direction": "gave REP to",
+  "activity.value": "{value} REP",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -458,6 +460,24 @@ const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
   prefixTotal: "Vote rationale ({voteTotal} at time of posting):\n\n",
   prefixTotalAndChange:
     "Vote rationale ({voteTotal} total, {voteChange} change at time of posting):\n\n",
+} as const);
+
+const WAVE_VOTE_MODE_MESSAGES = objectMessages("waves.voteMode", {
+  groupLabel: "Vote input mode",
+  slider: "Slider",
+  numeric: "Numeric",
+  switchTitle: "Switch mode",
+  switchToNumeric: "Switch to numeric",
+  switchToSlider: "Switch to slider",
+  switchToNumericAriaLabel: "Switch to numeric input",
+  switchToSliderAriaLabel: "Switch to slider input",
+} as const);
+
+const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
+  controlsLegend: "Vote controls",
+  modalTitle: "Vote for this artwork",
+  decreaseLabel: "Decrease vote",
+  increaseLabel: "Increase vote",
 } as const);
 
 const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
@@ -2161,6 +2181,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
+  ...WAVE_VOTE_MODE_MESSAGES,
+  ...WAVE_VOTE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
 } as const;
