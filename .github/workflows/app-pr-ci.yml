@@ -243,10 +243,13 @@ jobs:
           if git diff --quiet "origin/${BASE_REF}...HEAD" -- \
             .github/workflows/release-bus-*.yml \
             scripts/release-bus-frontend-gate.sh \
+            scripts/release-bus-gate-evidence.cjs \
             scripts/release-bus-summarize-jest.mjs \
             scripts/release-bus-report-progress.mjs \
             __tests__/scripts/release-bus-frontend-gate.test.ts \
-            __tests__/scripts/release-bus-jest-reporting.test.ts; then
+            __tests__/scripts/release-bus-gate-evidence.test.ts \
+            __tests__/scripts/release-bus-jest-reporting.test.ts \
+            __tests__/scripts/release-bus-shard-injection.test.ts; then
             echo "Release Bus gate files are unchanged."
             exit 0
           fi

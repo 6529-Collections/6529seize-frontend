@@ -71,7 +71,8 @@ When the table selects a bus route, use the Release Bus panel at
 2. Resolve and review its exact 40-character head SHA.
 3. Declare cross-repository candidate dependencies. Backend candidates also
    declare allowlisted deploy units and ordering edges.
-4. Mark that exact SHA ready for staging.
+4. If this frontend candidate must not reuse an exact-base success, select
+   **Fresh base canary required**, then mark the exact SHA ready for staging.
 5. Wait for the bus to compose, deploy, and validate the staging train.
 6. After the same candidate shows `STAGING_VALIDATED`, separately mark it ready
    for production.
@@ -178,6 +179,12 @@ It then:
   backend-only train by using the currently deployed staging frontend;
 - records workflow, SHA, artifact, service, and E2E evidence;
 - fast-forwards `1a-staging` only after all required validation passes.
+
+A reused base-canary result is visible as reused evidence, with a link to the
+original train and Actions run. It proves only the unchanged pre-existing base
+under the same gate fingerprint. Candidate composition, preflight, deployment,
+and E2E still run fresh. The operator force-fresh choice is immutable after
+readiness; cancel and resubmit the candidate to change it.
 
 Backend units declared `production-only` in the deploy registry are built and
 tested during preflight but are not runtime-deployed to staging. Their staging

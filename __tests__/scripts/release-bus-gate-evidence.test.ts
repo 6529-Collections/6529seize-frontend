@@ -207,8 +207,81 @@ describe("Release Bus gate evidence", () => {
     });
 
     expect(summary.status).toBe("FAILED");
-    expect(summary.errors).toContain("Jest shard 1/2 did not execute its exact plan");
-    expect(summary.errors).toContain("Jest shard 2/2 did not execute its exact plan");
+    expect(summary.errors).toContain(
+      "Jest shard 1/2 did not execute its exact plan"
+    );
+    expect(summary.errors).toContain(
+      "Jest shard 2/2 did not execute its exact plan"
+    );
+  });
+
+  it("attributes a deliberate first-run failure to its exact shard", () => {
+    const files = Array.from({ length: 4 }, (_, index) => `${index}.test.ts`);
+    const records = [
+      {
+        kind: "manifest",
+        source: "parallel",
+        scope: "all",
+        files,
+      },
+      ...files.map((file, index) => ({
+        kind: "manifest",
+        source: "parallel",
+        scope: "shard",
+        shard_index: index + 1,
+        shard_count: 4,
+        files: [file],
+      })),
+      ...files.map((file, index) => ({
+        kind: "jest_shard",
+        source: "parallel",
+        shard_index: index + 1,
+        shard_count: 4,
+        status: index === 2 ? "FAILED" : "SUCCEEDED",
+        duration_ms: 10,
+        counts: {
+          test_files: 1,
+          test_suites: 1,
+          passed_test_suites: index === 2 ? 0 : 1,
+          failed_test_suites: index === 2 ? 1 : 0,
+          pending_test_suites: 0,
+          tests: 1,
+          passed_tests: index === 2 ? 0 : 1,
+          failed_tests: index === 2 ? 1 : 0,
+          pending_tests: 0,
+          todo_tests: 0,
+        },
+        executed_test_files: [file],
+        failing_suites: index === 2 ? [file] : [],
+        failing_tests:
+          index === 2 ? [{ suite: file, test: "deliberate failure" }] : [],
+      })),
+      ...["lint", "typecheck", "build"].map((name) =>
+        phaseRecord({
+          name,
+          status: "SUCCEEDED",
+          durationMs: 1,
+          exitCode: 0,
+          source: "parallel",
+        })
+      ),
+    ];
+
+    const summary = buildGateSummary({
+      records,
+      source: "parallel",
+      shardCount: 4,
+      jobResults: { jest: "failure" },
+    });
+
+    expect(summary).toMatchObject({
+      status: "FAILED",
+      shards: expect.arrayContaining([
+        expect.objectContaining({ index: 3, status: "FAILED" }),
+      ]),
+      failing_suites: ["2.test.ts"],
+      failing_tests: [{ suite: "2.test.ts", test: "deliberate failure" }],
+    });
   });
 
   it("keeps serial authoritative in shadow mode and records equivalence", () => {
@@ -219,7 +292,12 @@ describe("Release Bus gate evidence", () => {
     fs.writeFileSync(jobsFile, JSON.stringify({ jobs: [] }));
     const records: Array<Record<string, unknown>> = [];
     for (const source of ["legacy", "parallel"] as const) {
-      records.push({ kind: "manifest", source, scope: "all", files: ["a.test.ts"] });
+      records.push({
+        kind: "manifest",
+        source,
+        scope: "all",
+        files: ["a.test.ts"],
+      });
       records.push({
         kind: "manifest",
         source,
