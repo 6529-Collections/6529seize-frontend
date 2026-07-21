@@ -78,6 +78,40 @@ describe("release bus immutable frontend artifact", () => {
   });
 });
 
+describe("release bus staging artifact transfer", () => {
+  const deployWorkflow = YAML.parse(
+    fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-deploy-staging.yml"
+      ),
+      "utf8"
+    )
+  );
+
+  it("uses the bucket region and rejects redirect bodies before activation", () => {
+    const stageStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Stage artifact for the managed instance"
+    );
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+
+    expect(deployWorkflow.env.ARTIFACT_BUCKET_REGION).toContain("us-east-1");
+    expect(
+      stageStep.run.match(/--region "\$ARTIFACT_BUCKET_REGION"/g)
+    ).toHaveLength(2);
+    expect(deployStep.run).not.toContain("curl --fail");
+    expect(deployStep.run).toContain("--write-out '%{http_code}'");
+    expect(deployStep.run).toContain('test "$http_status" = 200');
+    expect(deployStep.run.indexOf('test "$http_status" = 200')).toBeLessThan(
+      deployStep.run.indexOf("sha256sum -c -")
+    );
+  });
+});
+
 function releaseArtifact(uri, metadata) {
   return {
     uri,
