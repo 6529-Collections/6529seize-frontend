@@ -25,7 +25,12 @@ const EVIDENCE_IDENTITY_FIELDS = [
   "node_version",
   "package_manager",
 ];
-const EVIDENCE_RECORD_KINDS = new Set(["manifest", "phase", "jest_shard"]);
+const EVIDENCE_RECORD_KINDS = new Set([
+  "manifest",
+  "manifest_error",
+  "phase",
+  "jest_shard",
+]);
 const FRONTEND_GATE_WORKFLOW = ".github/workflows/release-bus-base-canary.yml";
 const FRONTEND_GATE_BASE_FILES = [
   "bin/6529",
@@ -353,6 +358,7 @@ function jestRecord({
   exitCode,
   source,
   identity,
+  injectedFailure = false,
 }) {
   if (!ALLOWED_SHARD_COUNTS.has(shardCount)) {
     throw new Error("Unsupported shard count");
@@ -378,6 +384,7 @@ function jestRecord({
     shard_index: shardIndex,
     shard_count: shardCount,
     status: exitCode === 0 && result.success ? "SUCCEEDED" : "FAILED",
+    injected_failure: injectedFailure,
     duration_ms: durationMs,
     exit_code: exitCode,
     planned_test_files: manifest.files,
@@ -601,6 +608,8 @@ function buildGateSummary({
   }
   if (records.some((record) => record.kind === "malformed"))
     errors.push("malformed evidence");
+  if (sourceEvidence.some((record) => record.kind === "manifest_error"))
+    errors.push("Jest manifest capture failed");
   for (const [job, result] of Object.entries(jobResults)) {
     if (result !== "success" && result !== "skipped") {
       errors.push(`${safeText(job, 80)} job did not succeed`);
@@ -637,6 +646,7 @@ function buildGateSummary({
             index: shard.shard_index,
             count: shard.shard_count,
             status: shard.status,
+            injected_failure: shard.injected_failure === true,
             duration_ms: shard.duration_ms,
             counts: shard.counts,
           })}`
@@ -819,6 +829,29 @@ function run(command, args) {
     writeJson(required(args, "output"), value);
     return;
   }
+  if (command === "manifest-error") {
+    const scope = required(args, "scope");
+    if (!new Set(["all", "shard"]).has(scope))
+      throw new Error("Invalid manifest-error scope");
+    writeJson(required(args, "output"), {
+      schema_version: 1,
+      kind: "manifest_error",
+      ...evidenceIdentityFromArgs(args),
+      source: required(args, "source"),
+      scope,
+      shard_index:
+        scope === "shard"
+          ? integer(required(args, "shard-index"), "shard-index", 1)
+          : null,
+      shard_count:
+        scope === "shard"
+          ? integer(required(args, "shard-count"), "shard-count", 1)
+          : null,
+      exit_code: integer(required(args, "exit-code"), "exit-code", 1),
+      error: "Jest manifest command failed",
+    });
+    return;
+  }
   if (command === "phase") {
     writeJson(
       required(args, "output"),
@@ -836,6 +869,11 @@ function run(command, args) {
   if (command === "jest") {
     const repoRoot = path.resolve(required(args, "repo-root"));
     const resultsFile = required(args, "results");
+    const injectedFailure = integer(
+      required(args, "injected-failure"),
+      "injected-failure"
+    );
+    if (injectedFailure > 1) throw new Error("Invalid --injected-failure");
     writeJson(
       required(args, "output"),
       jestRecord({
@@ -850,6 +888,7 @@ function run(command, args) {
         exitCode: integer(required(args, "exit-code"), "exit-code"),
         source: required(args, "source"),
         identity: evidenceIdentityFromArgs(args),
+        injectedFailure: injectedFailure === 1,
       })
     );
     return;

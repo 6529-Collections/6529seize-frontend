@@ -13,6 +13,7 @@ describe("Release Bus frontend gate contract", () => {
   const isolation = read(".github/workflows/release-bus-isolate-candidate.yml");
   const canary = read(".github/workflows/release-bus-base-canary.yml");
   const appPrCi = read(".github/workflows/app-pr-ci.yml");
+  const reporter = read("scripts/release-bus-report-progress.mjs");
 
   type WorkflowStep = {
     env?: Record<string, string>;
@@ -21,13 +22,48 @@ describe("Release Bus frontend gate contract", () => {
   };
 
   const canaryWorkflow = parseYaml(canary) as {
+    on?: {
+      workflow_dispatch?: {
+        inputs?: Record<string, { required?: boolean }>;
+      };
+    };
     jobs?: Record<string, { steps?: WorkflowStep[] }>;
   };
 
+  it("keeps deployed worker dispatch and authorization backward compatible", () => {
+    const inputs = canaryWorkflow.on?.workflow_dispatch?.inputs ?? {};
+    expect(
+      Object.entries(inputs)
+        .filter(([, contract]) => contract.required === true)
+        .map(([name]) => name)
+        .sort()
+    ).toEqual(
+      [
+        "base_sha",
+        "expected_sha",
+        "operation_key",
+        "release_train_id",
+        "release_train_revision",
+      ].sort()
+    );
+    expect(inputs.gate_contract?.required).toBe(false);
+    expect(inputs.validation_only?.required).toBe(false);
+    expect(canary).toContain(
+      '\'{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}\''
+    );
+    expect(canary).toContain(
+      "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+    );
+    expect(canary).toContain("release-bus-report-progress.mjs");
+    expect(canary).toContain("Report sanitized terminal evidence");
+    expect(reporter).toContain("/deploy/release-bus/report-progress");
+  });
+
   it("owns the only Release Bus Jest invocation", () => {
     expect(gate).toContain(
-      '"$SEIZE_BIN" run test:no-coverage --runInBand --bail=0 "$@"'
+      '"$SEIZE_BIN" run test:no-coverage --maxWorkers=2 --bail=0 "$@"'
     );
+    expect(gate).not.toContain("--runInBand");
     expect(gate).not.toContain("test:no-coverage -- --runInBand");
 
     for (const workflow of [preflight, isolation, canary]) {
@@ -62,13 +98,12 @@ describe("Release Bus frontend gate contract", () => {
       expect(fs.readFileSync(argumentLog, "utf8").trim().split("\n")).toEqual([
         "run",
         "test:no-coverage",
-        "--runInBand",
+        "--maxWorkers=2",
         "--bail=0",
         "--runTestsByPath",
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
         "__tests__/scripts/release-bus-gate-evidence.test.ts",
         "__tests__/scripts/release-bus-jest-reporting.test.ts",
-        "__tests__/scripts/release-bus-shard-injection.test.ts",
       ]);
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -165,6 +200,20 @@ describe("Release Bus frontend gate contract", () => {
     expect(aggregate?.run).toContain('[[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]');
     expect(aggregate?.run?.match(/--base-sha "\$BASE_SHA"/g)).toHaveLength(2);
 
+    const report = steps.find(
+      (step) => step.name === "Report sanitized terminal evidence"
+    );
+    expect(report?.env?.RELEASE_BUS_AGGREGATE_SUMMARY).toBe(
+      "${{ runner.temp }}/release-bus-base-canary-summary.json"
+    );
+    expect(report?.env?.RELEASE_BUS_OPERATION_KEY).toBe(
+      "${{ inputs.operation_key }}"
+    );
+    expect(report?.env?.RELEASE_BUS_TRAIN_ID).toBe(
+      "${{ inputs.release_train_id }}"
+    );
+    expect(report?.run).toContain('node "$RELEASE_BUS_REPORT_TOOL"');
+
     const tempDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "release-bus-input-")
     );
@@ -217,6 +266,11 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain("validation_inject_failure");
     expect(canary).toContain('test "$VALIDATION_ONLY" = true');
     expect(canary).toContain("RELEASE_BUS_INJECT_SHARD_FAILURE");
+    expect(gate).toContain("manifest-error");
+    expect(gate).toContain("injected_failure=1");
+    expect(gate).toContain('[ "$shard_index" -eq "$shard_count" ]');
+    expect(gate).toContain('--injected-failure "$injected_failure"');
+    expect(gate).not.toContain("release-bus-shard-injection.test.ts");
   });
 
   it("executes its argument-forwarding contract in ordinary PR CI", () => {
