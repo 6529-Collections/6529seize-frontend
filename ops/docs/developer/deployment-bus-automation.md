@@ -121,6 +121,79 @@ build. Failure requeues the train's candidates, pauses the lane, and records the
 exact Actions run as operator evidence; it never attributes the base failure to
 a candidate. Backend-only trains skip this frontend canary.
 
+The frontend base canary has three independently selectable execution modes:
+
+| GitHub Actions variable          | Allowed values                | Safe default |
+| -------------------------------- | ----------------------------- | ------------ |
+| `RELEASE_BUS_FRONTEND_GATE_MODE` | `legacy`, `shadow`, `sharded` | `legacy`     |
+| `FRONTEND_GATE_SHARD_COUNT`      | `1`, `2`, `4`                 | `1`          |
+
+`legacy` keeps the original serial gate authoritative. `shadow` runs that
+serial gate and the parallel lint, typecheck, production-build, inventory, and
+Jest shard jobs against the same SHA, but only the serial outcome controls the
+train. `sharded` makes the parallel aggregate authoritative. Jest continues to
+use `--runInBand --bail=0` inside every deterministic Jest `--shard=N/M`; the
+matrix has `fail-fast: false` and no automatic retry. Returning to
+`legacy`/one shard is the no-code rollback.
+
+Each validation job detaches the exact base SHA, installs frozen dependencies
+through `./bin/6529`, and proves that source files were not mutated. Gate and
+reporting tooling is copied to runner temporary storage from the exact workflow
+commit, so a workflow dispatched from pinned `main` can validate an older base
+without substituting that base's control-plane policy. The fingerprint covers
+the workflow and this tooling at the workflow SHA, plus the Jest configuration,
+package manager, lockfile, and approved runner at the base SHA. Changing any
+covered policy invalidates older evidence.
+
+Every shard uploads bounded JSON counts, timing, its planned manifest, its
+executed-file manifest, exact shard coordinates, and failing suite/test
+identities. The fail-closed aggregate requires every selected job to succeed,
+requires every expected Jest file in exactly one shard, compares each shard's
+plan to execution, and rejects missing, duplicate, unexpected, malformed,
+cancelled, or failed evidence. Artifacts are retained for 14 days and never
+contain raw logs or failure messages. Dependency-store caching is intentionally
+deferred: the measured frozen install is small compared with Jest, and neither
+`node_modules` nor validation output may be cached as gate evidence.
+
+The pre-acceleration reference run was
+[frontend Actions run 29816499825](https://github.com/6529-Collections/6529seize-frontend/actions/runs/29816499825):
+
+| Phase                    | Reference result                        |
+| ------------------------ | --------------------------------------- |
+| frozen install           | about 28 seconds                        |
+| lint                     | about 181 seconds                       |
+| typecheck                | about 57 seconds                        |
+| Jest                     | 2,033 suites / 12,025 tests / 1,511 sec |
+| production build         | about 452 seconds                       |
+| complete serial workflow | about 38.3 minutes                      |
+
+Exact-SHA evidence reuse is separately controlled on the backend worker:
+
+| Worker setting                            | Safe default |
+| ----------------------------------------- | ------------ |
+| `RELEASE_BUS_BASE_EVIDENCE_REUSE_SHADOW`  | `false`      |
+| `RELEASE_BUS_BASE_EVIDENCE_REUSE`         | `false`      |
+| `RELEASE_BUS_BASE_EVIDENCE_MAX_AGE_HOURS` | `24`         |
+
+An operator may also select **Fresh base canary required** on a frontend
+candidate. A reusable success must match repository, exact base SHA,
+`orchestration` environment, complete fingerprint and workflow provenance,
+Node/package-manager contract, structured artifact digest, successful shard
+coordinates/counts, and effective expiry. The newest result for that exact
+contract wins, so a newer failure blocks an older success. Reuse never covers
+candidate composition, preflight, deployment, or E2E. A hit writes durable
+`BASE_CANARY_EVIDENCE_REUSED` evidence with the source train, run, artifact,
+creation, and expiry, then advances within that worker cycle. Shadow lookup
+writes `BASE_CANARY_EVIDENCE_WOULD_REUSE` but still dispatches a fresh gate.
+
+Rollout is ordered and reversible: deploy the additive candidate column first;
+deploy the API/worker with both reuse flags false; merge the frontend workflow
+with `legacy`/one shard; collect serial-versus-sharded equivalence in `shadow`;
+promote `sharded` only after exact outcomes and all counts agree; enable reuse
+shadow and inspect real decisions; then enable reuse with the 24-hour TTL.
+Disable reuse independently or return the frontend to `legacy`/one shard before
+considering a code rollback.
+
 Frontend workflows report lint, typecheck, unit-test, and build outcomes as
 separate structured stages. Jest JSON is reduced to bounded repository-relative
 suite names and exact failing test names; failure messages and raw output are

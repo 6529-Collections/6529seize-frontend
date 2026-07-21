@@ -55,6 +55,9 @@ describe("Release Bus frontend gate contract", () => {
         "--bail=0",
         "--runTestsByPath",
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
+        "__tests__/scripts/release-bus-gate-evidence.test.ts",
+        "__tests__/scripts/release-bus-jest-reporting.test.ts",
+        "__tests__/scripts/release-bus-shard-injection.test.ts",
       ]);
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -66,12 +69,14 @@ describe("Release Bus frontend gate contract", () => {
       "./scripts/release-bus-frontend-gate.sh validate"
     );
     expect(isolation).toContain("./scripts/release-bus-frontend-gate.sh full");
-    expect(canary).toContain("./scripts/release-bus-frontend-gate.sh serial");
-    expect(canary).toContain("./scripts/release-bus-frontend-gate.sh phase lint");
-    expect(canary).toContain("./scripts/release-bus-frontend-gate.sh phase typecheck");
-    expect(canary).toContain("./scripts/release-bus-frontend-gate.sh phase build");
-    expect(canary).toContain("./scripts/release-bus-frontend-gate.sh jest");
+    expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" serial');
+    expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase lint');
+    expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase typecheck');
+    expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase build');
+    expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" jest');
     expect(canary).toContain('git fetch --no-tags origin "$BASE_SHA"');
+    expect(canary).toContain('git show "$WORKFLOW_SHA:$file"');
+    expect(canary).toContain('RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE"');
     expect(canary).not.toContain("ref: ${{ inputs.base_sha }}");
   });
 
@@ -84,6 +89,8 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain("fail-fast: false");
     expect(canary).toContain("FRONTEND_GATE_SHARD_COUNT");
     expect(canary).toContain("RELEASE_BUS_FRONTEND_GATE_MODE");
+    expect(canary).toContain("validation_only");
+    expect(canary).toContain("inputs.validation_only != true");
   });
 
   it("executes its argument-forwarding contract in ordinary PR CI", () => {

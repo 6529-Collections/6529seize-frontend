@@ -5,7 +5,13 @@ const path = require("node:path");
 
 const ALLOWED_SHARD_COUNTS = new Set([1, 2, 4]);
 const PHASES = ["lint", "typecheck", "unit_tests", "build"];
-const STATUSES = new Set(["PENDING", "RUNNING", "SUCCEEDED", "FAILED", "SKIPPED"]);
+const STATUSES = new Set([
+  "PENDING",
+  "RUNNING",
+  "SUCCEEDED",
+  "FAILED",
+  "SKIPPED",
+]);
 const MAX_FAILURES = 100;
 const MAX_TEXT_LENGTH = 500;
 
@@ -13,7 +19,8 @@ function parseArgs(values) {
   const result = {};
   for (let index = 0; index < values.length; index += 1) {
     const value = values[index];
-    if (!value.startsWith("--")) throw new Error(`Unexpected argument: ${value}`);
+    if (!value.startsWith("--"))
+      throw new Error(`Unexpected argument: ${value}`);
     const name = value.slice(2);
     const next = values[index + 1];
     if (next === undefined || next.startsWith("--")) {
@@ -100,7 +107,7 @@ function phaseRecord({ name, status, durationMs, exitCode, source }) {
     name,
     status,
     duration_ms: durationMs,
-    exit_code: exitCode
+    exit_code: exitCode,
   };
 }
 
@@ -117,7 +124,7 @@ function failingTests(result, repoRoot) {
             .map((item) => safeText(item, 200))
             .filter(Boolean)
             .join(" > ")
-        )
+        ),
       });
     }
   }
@@ -132,7 +139,7 @@ function jestRecord({
   shardCount,
   durationMs,
   exitCode,
-  source
+  source,
 }) {
   if (!ALLOWED_SHARD_COUNTS.has(shardCount)) {
     throw new Error("Unsupported shard count");
@@ -141,7 +148,9 @@ function jestRecord({
     throw new Error("Invalid shard index");
   }
   const executedFiles = stableSort(
-    (result.testResults ?? []).map((suite) => relativeTestPath(suite.name, repoRoot))
+    (result.testResults ?? []).map((suite) =>
+      relativeTestPath(suite.name, repoRoot)
+    )
   );
   const failingSuitePaths = stableSort(
     (result.testResults ?? [])
@@ -169,10 +178,10 @@ function jestRecord({
       passed_tests: Number(result.numPassedTests ?? 0),
       failed_tests: Number(result.numFailedTests ?? 0),
       pending_tests: Number(result.numPendingTests ?? 0),
-      todo_tests: Number(result.numTodoTests ?? 0)
+      todo_tests: Number(result.numTodoTests ?? 0),
     },
     failing_suites: failingSuitePaths,
-    failing_tests: failingTests(result, repoRoot)
+    failing_tests: failingTests(result, repoRoot),
   };
 }
 
@@ -183,7 +192,8 @@ function recursiveJsonFiles(root) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       const absolute = path.join(directory, entry.name);
       if (entry.isDirectory()) visit(absolute);
-      else if (entry.isFile() && entry.name.endsWith(".json")) result.push(absolute);
+      else if (entry.isFile() && entry.name.endsWith(".json"))
+        result.push(absolute);
     }
   };
   visit(root);
@@ -195,7 +205,11 @@ function loadEvidence(root) {
   for (const file of recursiveJsonFiles(root)) {
     try {
       const value = readJson(file);
-      if (value && typeof value === "object" && typeof value.kind === "string") {
+      if (
+        value &&
+        typeof value === "object" &&
+        typeof value.kind === "string"
+      ) {
         records.push(value);
       }
     } catch {
@@ -216,12 +230,15 @@ function sumCounts(shards) {
     "passed_tests",
     "failed_tests",
     "pending_tests",
-    "todo_tests"
+    "todo_tests",
   ];
   return Object.fromEntries(
     fields.map((field) => [
       field,
-      shards.reduce((total, shard) => total + Number(shard.counts?.[field] ?? 0), 0)
+      shards.reduce(
+        (total, shard) => total + Number(shard.counts?.[field] ?? 0),
+        0
+      ),
     ])
   );
 }
@@ -230,7 +247,9 @@ function duplicateValues(values) {
   const counts = new Map();
   for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
   return stableSort(
-    [...counts.entries()].filter(([, count]) => count > 1).map(([value]) => value)
+    [...counts.entries()]
+      .filter(([, count]) => count > 1)
+      .map(([value]) => value)
   );
 }
 
@@ -238,8 +257,14 @@ function sameValues(left, right) {
   return JSON.stringify(stableSort(left)) === JSON.stringify(stableSort(right));
 }
 
+function sameCounts(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 function uniqueByName(records, kind, source) {
-  return records.filter((record) => record.kind === kind && record.source === source);
+  return records.filter(
+    (record) => record.kind === kind && record.source === source
+  );
 }
 
 function buildGateSummary({ records, source, shardCount, jobResults }) {
@@ -261,17 +286,18 @@ function buildGateSummary({ records, source, shardCount, jobResults }) {
       return {
         name,
         status:
-          shards.length === shardCount && shards.every((shard) => shard.status === "SUCCEEDED")
+          shards.length === shardCount &&
+          shards.every((shard) => shard.status === "SUCCEEDED")
             ? "SUCCEEDED"
             : "FAILED",
-        duration_ms: duration
+        duration_ms: duration,
       };
     }
     if (matches.length !== 1) return { name, status: "FAILED", duration_ms: 0 };
     return {
       name,
       status: matches[0].status,
-      duration_ms: Number(matches[0].duration_ms ?? 0)
+      duration_ms: Number(matches[0].duration_ms ?? 0),
     };
   });
   const expected = globalManifests.length === 1 ? globalManifests[0].files : [];
@@ -280,11 +306,19 @@ function buildGateSummary({ records, source, shardCount, jobResults }) {
   const plannedSet = new Set(planned);
   const executedSet = new Set(executed);
   const expectedSet = new Set(expected);
-  const missingFiles = stableSort(expected.filter((file) => !executedSet.has(file)));
-  const unexpectedFiles = stableSort(executed.filter((file) => !expectedSet.has(file)));
+  const missingFiles = stableSort(
+    expected.filter((file) => !executedSet.has(file))
+  );
+  const unexpectedFiles = stableSort(
+    executed.filter((file) => !expectedSet.has(file))
+  );
   const duplicateFiles = duplicateValues(executed);
-  const plannedMissing = stableSort(expected.filter((file) => !plannedSet.has(file)));
-  const plannedUnexpected = stableSort(planned.filter((file) => !expectedSet.has(file)));
+  const plannedMissing = stableSort(
+    expected.filter((file) => !plannedSet.has(file))
+  );
+  const plannedUnexpected = stableSort(
+    planned.filter((file) => !expectedSet.has(file))
+  );
   const plannedDuplicates = duplicateValues(planned);
   const shardCoordinates = stableSort(
     shards.map((shard) => `${shard.shard_index}/${shard.shard_count}`)
@@ -294,15 +328,22 @@ function buildGateSummary({ records, source, shardCount, jobResults }) {
     (_, index) => `${index + 1}/${shardCount}`
   );
   const errors = [];
-  if (globalManifests.length !== 1) errors.push("expected exactly one global Jest manifest");
-  if (shardManifests.length !== shardCount) errors.push("missing shard plan manifest");
+  if (globalManifests.length !== 1)
+    errors.push("expected exactly one global Jest manifest");
+  if (shardManifests.length !== shardCount)
+    errors.push("missing shard plan manifest");
   if (shards.length !== shardCount) errors.push("missing shard result");
-  if (JSON.stringify(shardCoordinates) !== JSON.stringify(expectedCoordinates)) {
+  if (
+    JSON.stringify(shardCoordinates) !== JSON.stringify(expectedCoordinates)
+  ) {
     errors.push("invalid shard coordinates");
   }
-  if (missingFiles.length > 0) errors.push("expected Jest files were not executed");
-  if (unexpectedFiles.length > 0) errors.push("unexpected Jest files were executed");
-  if (duplicateFiles.length > 0) errors.push("Jest files executed more than once");
+  if (missingFiles.length > 0)
+    errors.push("expected Jest files were not executed");
+  if (unexpectedFiles.length > 0)
+    errors.push("unexpected Jest files were executed");
+  if (duplicateFiles.length > 0)
+    errors.push("Jest files executed more than once");
   if (plannedMissing.length > 0 || plannedDuplicates.length > 0) {
     errors.push("Jest shard plans are incomplete or overlapping");
   }
@@ -327,7 +368,8 @@ function buildGateSummary({ records, source, shardCount, jobResults }) {
       );
     }
   }
-  if (records.some((record) => record.kind === "malformed")) errors.push("malformed evidence");
+  if (records.some((record) => record.kind === "malformed"))
+    errors.push("malformed evidence");
   for (const [job, result] of Object.entries(jobResults)) {
     if (result !== "success" && result !== "skipped") {
       errors.push(`${safeText(job, 80)} job did not succeed`);
@@ -340,31 +382,39 @@ function buildGateSummary({ records, source, shardCount, jobResults }) {
   const shardDurations = shards
     .map((shard) => Number(shard.duration_ms ?? 0))
     .filter((duration) => duration >= 0);
-  const maximumShardDuration = shardDurations.length ? Math.max(...shardDurations) : 0;
-  const minimumShardDuration = shardDurations.length ? Math.min(...shardDurations) : 0;
+  const maximumShardDuration = shardDurations.length
+    ? Math.max(...shardDurations)
+    : 0;
+  const minimumShardDuration = shardDurations.length
+    ? Math.min(...shardDurations)
+    : 0;
   return {
     status: errors.length === 0 ? "SUCCEEDED" : "FAILED",
     phases,
     counts,
     shards: stableSort(
-      shards.map((shard) => `${String(shard.shard_index).padStart(2, "0")}:${JSON.stringify({
-        index: shard.shard_index,
-        count: shard.shard_count,
-        status: shard.status,
-        duration_ms: shard.duration_ms,
-        counts: shard.counts
-      })}`)
+      shards.map(
+        (shard) =>
+          `${String(shard.shard_index).padStart(2, "0")}:${JSON.stringify({
+            index: shard.shard_index,
+            count: shard.shard_count,
+            status: shard.status,
+            duration_ms: shard.duration_ms,
+            counts: shard.counts,
+          })}`
+      )
     ).map((value) => JSON.parse(value.slice(value.indexOf(":") + 1))),
     shard_imbalance_ms: maximumShardDuration - minimumShardDuration,
     missing_files: missingFiles.slice(0, MAX_FAILURES),
     duplicate_files: duplicateFiles.slice(0, MAX_FAILURES),
     unexpected_files: unexpectedFiles.slice(0, MAX_FAILURES),
-    failing_suites: stableSort(shards.flatMap((shard) => shard.failing_suites ?? [])).slice(
-      0,
-      MAX_FAILURES
-    ),
-    failing_tests: shards.flatMap((shard) => shard.failing_tests ?? []).slice(0, MAX_FAILURES),
-    errors: errors.map((error) => safeText(error, 200)).slice(0, 50)
+    failing_suites: stableSort(
+      shards.flatMap((shard) => shard.failing_suites ?? [])
+    ).slice(0, MAX_FAILURES),
+    failing_tests: shards
+      .flatMap((shard) => shard.failing_tests ?? [])
+      .slice(0, MAX_FAILURES),
+    errors: errors.map((error) => safeText(error, 200)).slice(0, 50),
   };
 }
 
@@ -393,35 +443,44 @@ function finalSummary({ args, records, jobResults }) {
     throw new Error("Invalid gate mode");
   }
   const shardCount = integer(required(args, "shard-count"), "shard-count", 1);
-  if (!ALLOWED_SHARD_COUNTS.has(shardCount)) throw new Error("Unsupported shard count");
-  const legacy = mode === "sharded" ? null : buildGateSummary({
-    records,
-    source: "legacy",
-    shardCount: 1,
-    jobResults: { legacy: jobResults.legacy }
-  });
-  const sharded = mode === "legacy" ? null : buildGateSummary({
-    records,
-    source: "parallel",
-    shardCount,
-    jobResults: {
-      lint: jobResults.lint,
-      typecheck: jobResults.typecheck,
-      build: jobResults.build,
-      inventory: jobResults.inventory,
-      jest: jobResults.jest
-    }
-  });
+  if (!ALLOWED_SHARD_COUNTS.has(shardCount))
+    throw new Error("Unsupported shard count");
+  const legacy =
+    mode === "sharded"
+      ? null
+      : buildGateSummary({
+          records,
+          source: "legacy",
+          shardCount: 1,
+          jobResults: { legacy: jobResults.legacy },
+        });
+  const sharded =
+    mode === "legacy"
+      ? null
+      : buildGateSummary({
+          records,
+          source: "parallel",
+          shardCount,
+          jobResults: {
+            lint: jobResults.lint,
+            typecheck: jobResults.typecheck,
+            build: jobResults.build,
+            inventory: jobResults.inventory,
+            jest: jobResults.jest,
+          },
+        });
   const authoritative = mode === "sharded" ? sharded : legacy;
   const equivalent =
     mode === "shadow"
       ? legacy.status === sharded.status &&
-        legacy.counts.tests === sharded.counts.tests &&
-        legacy.counts.test_suites === sharded.counts.test_suites &&
-        legacy.counts.test_files === sharded.counts.test_files
+        sameCounts(legacy.counts, sharded.counts)
       : null;
   const runUrl = required(args, "run-url");
-  if (!/^https:\/\/github\.com\/6529-Collections\/6529seize-frontend\/actions\/runs\/\d+$/.test(runUrl)) {
+  if (
+    !/^https:\/\/github\.com\/6529-Collections\/6529seize-frontend\/actions\/runs\/\d+$/.test(
+      runUrl
+    )
+  ) {
     throw new Error("Invalid run URL");
   }
   return {
@@ -440,7 +499,10 @@ function finalSummary({ args, records, jobResults }) {
     shard_count: mode === "sharded" ? shardCount : 1,
     phases: authoritative?.phases ?? [],
     phase_durations_ms: Object.fromEntries(
-      (authoritative?.phases ?? []).map((phase) => [phase.name, phase.duration_ms])
+      (authoritative?.phases ?? []).map((phase) => [
+        phase.name,
+        phase.duration_ms,
+      ])
     ),
     totals: authoritative?.counts ?? sumCounts([]),
     shards: authoritative?.shards ?? [],
@@ -457,31 +519,38 @@ function finalSummary({ args, records, jobResults }) {
             equivalent,
             serial_status: legacy.status,
             sharded_status: sharded.status,
+            all_counts_equal: sameCounts(legacy.counts, sharded.counts),
             serial_totals: legacy.counts,
-            sharded_totals: sharded.counts
+            sharded_totals: sharded.counts,
           }
         : null,
     run_url: runUrl,
     job_links: jobLinks(args["jobs-file"]),
-    summary_artifact_name: safeText(required(args, "artifact-name"), 200)
+    summary_artifact_name: safeText(required(args, "artifact-name"), 200),
   };
 }
 
 function run(command, args) {
   if (command === "matrix") {
     const count = integer(required(args, "shard-count"), "shard-count", 1);
-    if (!ALLOWED_SHARD_COUNTS.has(count)) throw new Error("Unsupported shard count");
+    if (!ALLOWED_SHARD_COUNTS.has(count))
+      throw new Error("Unsupported shard count");
     process.stdout.write(
-      `${JSON.stringify({ include: Array.from({ length: count }, (_, index) => ({
-        index: index + 1,
-        total: count
-      })) })}\n`
+      `${JSON.stringify({
+        include: Array.from({ length: count }, (_, index) => ({
+          index: index + 1,
+          total: count,
+        })),
+      })}\n`
     );
     return;
   }
   if (command === "manifest") {
     const repoRoot = path.resolve(required(args, "repo-root"));
-    const files = manifestFromRaw(fs.readFileSync(required(args, "raw"), "utf8"), repoRoot);
+    const files = manifestFromRaw(
+      fs.readFileSync(required(args, "raw"), "utf8"),
+      repoRoot
+    );
     const scope = required(args, "scope");
     const source = required(args, "source");
     const value = {
@@ -489,11 +558,18 @@ function run(command, args) {
       kind: "manifest",
       source,
       scope,
-      shard_index: scope === "shard" ? integer(required(args, "shard-index"), "shard-index", 1) : null,
-      shard_count: scope === "shard" ? integer(required(args, "shard-count"), "shard-count", 1) : null,
-      files
+      shard_index:
+        scope === "shard"
+          ? integer(required(args, "shard-index"), "shard-index", 1)
+          : null,
+      shard_count:
+        scope === "shard"
+          ? integer(required(args, "shard-count"), "shard-count", 1)
+          : null,
+      files,
     };
-    if (files.length === 0) throw new Error("Jest test-file inventory is empty");
+    if (files.length === 0)
+      throw new Error("Jest test-file inventory is empty");
     writeJson(required(args, "output"), value);
     return;
   }
@@ -505,7 +581,7 @@ function run(command, args) {
         status: required(args, "status"),
         durationMs: integer(required(args, "duration-ms"), "duration-ms"),
         exitCode: integer(required(args, "exit-code"), "exit-code"),
-        source: required(args, "source")
+        source: required(args, "source"),
       })
     );
     return;
@@ -525,7 +601,7 @@ function run(command, args) {
         shardCount: integer(required(args, "shard-count"), "shard-count", 1),
         durationMs: integer(required(args, "duration-ms"), "duration-ms"),
         exitCode: integer(required(args, "exit-code"), "exit-code"),
-        source: required(args, "source")
+        source: required(args, "source"),
       })
     );
     return;
@@ -547,7 +623,7 @@ module.exports = {
   jestRecord,
   manifestFromRaw,
   phaseRecord,
-  safeText
+  safeText,
 };
 
 if (require.main === module) {
@@ -556,7 +632,9 @@ if (require.main === module) {
     if (!command) throw new Error("A command is required");
     run(command, parseArgs(values));
   } catch (error) {
-    process.stderr.write(`${safeText(error instanceof Error ? error.message : error, 300)}\n`);
+    process.stderr.write(
+      `${safeText(error instanceof Error ? error.message : error, 300)}\n`
+    );
     process.exitCode = 2;
   }
 }

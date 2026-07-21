@@ -3,7 +3,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="${RELEASE_BUS_REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+REPO_ROOT="$(cd "$REPO_ROOT" && pwd)"
 SEIZE_BIN="${RELEASE_BUS_6529_BIN:-./bin/6529}"
 EVIDENCE_TOOL="$SCRIPT_DIR/release-bus-gate-evidence.cjs"
 
@@ -143,7 +144,11 @@ run_serial_evidence_gate() {
 
 case "${1:-full}" in
   contract)
-    run_unit_tests --runTestsByPath __tests__/scripts/release-bus-frontend-gate.test.ts
+    run_unit_tests --runTestsByPath \
+      __tests__/scripts/release-bus-frontend-gate.test.ts \
+      __tests__/scripts/release-bus-gate-evidence.test.ts \
+      __tests__/scripts/release-bus-jest-reporting.test.ts \
+      __tests__/scripts/release-bus-shard-injection.test.ts
     ;;
   validate)
     run_validation
