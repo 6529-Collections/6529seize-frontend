@@ -24,6 +24,8 @@ on:
           default: "4",
           options: ["1", "2", "4"],
         }
+      validation_inject_failure:
+        { type: boolean, required: false, default: false }
 
 permissions: {}
 
@@ -55,6 +57,7 @@ jobs:
           TRAIN_ID: ${{ inputs.release_train_id }}
           TRAIN_REVISION: ${{ inputs.release_train_revision }}
           VALIDATION_GATE_MODE: ${{ inputs.validation_gate_mode }}
+          VALIDATION_INJECT_FAILURE: ${{ inputs.validation_inject_failure }}
           VALIDATION_ONLY: ${{ inputs.validation_only }}
           VALIDATION_SHARD_COUNT: ${{ inputs.validation_shard_count }}
         run: |
@@ -64,6 +67,10 @@ jobs:
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          [[ "$VALIDATION_INJECT_FAILURE" =~ ^(true|false)$ ]]
+          if [ "$VALIDATION_INJECT_FAILURE" = true ]; then
+            test "$VALIDATION_ONLY" = true
+          fi
           workflow_sha="$GITHUB_SHA"
           workflow_digest=unversioned
           gate_fingerprint=unversioned
@@ -395,6 +402,8 @@ jobs:
       - name: Run complete deterministic Jest shard
         id: gate
         continue-on-error: true
+        env:
+          RELEASE_BUS_INJECT_SHARD_FAILURE: ${{ inputs.validation_inject_failure && '1' || '0' }}
         run: RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" jest "${{ matrix.index }}" "${{ matrix.total }}" "$RUNNER_TEMP/release-bus-evidence"
       - *source-mutation
       - name: Upload sanitized shard evidence

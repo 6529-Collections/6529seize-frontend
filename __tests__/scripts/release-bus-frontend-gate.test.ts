@@ -91,6 +91,9 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain("RELEASE_BUS_FRONTEND_GATE_MODE");
     expect(canary).toContain("validation_only");
     expect(canary).toContain("inputs.validation_only != true");
+    expect(canary).toContain("validation_inject_failure");
+    expect(canary).toContain('test "$VALIDATION_ONLY" = true');
+    expect(canary).toContain("RELEASE_BUS_INJECT_SHARD_FAILURE");
   });
 
   it("executes its argument-forwarding contract in ordinary PR CI", () => {

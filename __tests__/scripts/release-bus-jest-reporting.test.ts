@@ -56,7 +56,7 @@ describe("Release Bus structured Jest reporting", () => {
 
     expect(
       Object.keys(workflow.on?.workflow_dispatch?.inputs ?? {})
-    ).toHaveLength(9);
+    ).toHaveLength(10);
 
     for (const name of requiredJobs) {
       const steps = workflow.jobs?.[name]?.steps ?? [];
