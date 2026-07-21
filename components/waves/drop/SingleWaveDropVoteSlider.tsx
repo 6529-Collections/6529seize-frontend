@@ -207,10 +207,10 @@ const getSliderRangeState = ({
 
 const getTrackClasses = (isMini: boolean): string => {
   if (isMini) {
-    return "tw-bg-[#26272B] tw-shadow-inner group-hover:tw-bg-[#37373E]";
+    return "tw-bg-iron-800 tw-shadow-inner group-hover:tw-bg-iron-700";
   }
 
-  return "tw-bg-[#26272B]";
+  return "tw-bg-iron-600 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors group-hover:tw-bg-iron-500";
 };
 
 const getProgressClasses = ({
@@ -241,18 +241,18 @@ const getTooltipClasses = ({
   readonly isNegativeVote: boolean;
 }): string => {
   const sizeClasses = isMini
-    ? "tw-min-h-[22px] tw-min-w-[48px] tw-max-w-[88px] tw-rounded tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px]"
-    : "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px]";
+    ? "tw-min-h-[22px] tw-min-w-[48px] tw-max-w-[88px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums"
+    : "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums";
 
   if (isPositiveVote) {
-    return `${sizeClasses} tw-border-dashed tw-border-emerald-500/40 tw-bg-[#0d0d10] tw-text-emerald-500`;
+    return `${sizeClasses} tw-border-solid tw-border-emerald-500/60 tw-bg-iron-950 tw-text-emerald-400 tw-shadow-sm`;
   }
 
   if (isNegativeVote) {
-    return `${sizeClasses} tw-border-dashed tw-border-rose-500/40 tw-bg-[#0d0d10] tw-text-rose-500`;
+    return `${sizeClasses} tw-border-solid tw-border-rose-500/60 tw-bg-iron-950 tw-text-rose-400 tw-shadow-sm`;
   }
 
-  return `${sizeClasses} tw-border-dashed tw-border-[#37373E] tw-bg-[#0d0d10] tw-text-[#848490]`;
+  return `${sizeClasses} tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-text-iron-300 tw-shadow-sm`;
 };
 
 const getTooltipArrowClasses = ({
@@ -263,14 +263,14 @@ const getTooltipArrowClasses = ({
   readonly isNegativeVote: boolean;
 }): string => {
   if (isPositiveVote) {
-    return "tw-border-emerald-500/40 tw-bg-[#0d0d10]";
+    return "tw-border-emerald-500/60 tw-bg-iron-950";
   }
 
   if (isNegativeVote) {
-    return "tw-border-rose-500/40 tw-bg-[#0d0d10]";
+    return "tw-border-rose-500/60 tw-bg-iron-950";
   }
 
-  return "tw-border-[#26272B] tw-bg-[#0d0d10]";
+  return "tw-border-iron-600 tw-bg-iron-950";
 };
 
 const getThumbClasses = ({
@@ -296,14 +296,14 @@ const getThumbOuterClasses = (
   isNegativeVote: boolean
 ): string => {
   if (isPositiveVote) {
-    return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-emerald-500 tw-bg-[#131316] tw-transition-shadow";
+    return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-emerald-500 tw-bg-iron-950 tw-transition-shadow";
   }
 
   if (isNegativeVote) {
-    return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-rose-500 tw-bg-[#131316] tw-transition-shadow";
+    return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-rose-500 tw-bg-iron-950 tw-transition-shadow";
   }
 
-  return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-[#4C4C55] tw-bg-[#131316] tw-transition-shadow";
+  return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-650 tw-bg-iron-950 tw-transition-shadow";
 };
 
 const getThumbIdleShadow = ({
@@ -344,10 +344,10 @@ const getThumbDraggingShadow = ({
 
 const getZeroMarkerClasses = (isNeutralVote: boolean): string => {
   if (isNeutralVote) {
-    return "tw-bg-blue-500";
+    return "tw-bg-primary-500";
   }
 
-  return "tw-bg-[#37373E]";
+  return "tw-bg-iron-400";
 };
 
 const getThumbVisualBoxClasses = (isMini: boolean): string => {
