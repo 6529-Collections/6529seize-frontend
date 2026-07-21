@@ -67,8 +67,21 @@ describe("fetchDropReactionDetailsV2", () => {
       .mockImplementation(() => undefined);
     commonApiFetchMock.mockRejectedValueOnce(abortError);
 
+    await expect(fetchDropReactionDetailsV2("drop-1")).rejects.toBe(abortError);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("rethrows ERR_CANCELED failures without recording them", async () => {
+    const canceledError = Object.assign(new Error("canceled"), {
+      code: "ERR_CANCELED",
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    commonApiFetchMock.mockRejectedValueOnce(canceledError);
+
     await expect(fetchDropReactionDetailsV2("drop-1")).rejects.toBe(
-      abortError
+      canceledError
     );
     expect(consoleErrorSpy).not.toHaveBeenCalled();
   });

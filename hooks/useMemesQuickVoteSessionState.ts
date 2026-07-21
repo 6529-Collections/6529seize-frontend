@@ -261,24 +261,22 @@ const useMemesQuickVoteWindowSync = ({
 
         setCurrentSessionState(getQuickVoteSyncFailureState);
       } finally {
-        if (syncRequestIdRef.current !== requestId) {
-          return;
-        }
+        if (syncRequestIdRef.current === requestId) {
+          if (syncAbortControllerRef.current === abortController) {
+            syncAbortControllerRef.current = null;
+          }
 
-        if (syncAbortControllerRef.current === abortController) {
-          syncAbortControllerRef.current = null;
-        }
+          syncInFlightRef.current = false;
 
-        syncInFlightRef.current = false;
-
-        if (
-          shouldRerunQuickVoteSync({
-            abortController,
-            rerunRequestedRef: syncRerunRequestedRef,
-          })
-        ) {
-          syncRerunRequestedRef.current = false;
-          runBestEffortSync(syncWindow);
+          if (
+            shouldRerunQuickVoteSync({
+              abortController,
+              rerunRequestedRef: syncRerunRequestedRef,
+            })
+          ) {
+            syncRerunRequestedRef.current = false;
+            runBestEffortSync(syncWindow);
+          }
         }
       }
     },
