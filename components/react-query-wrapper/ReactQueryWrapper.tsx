@@ -4,7 +4,6 @@ import type { UserPageRepPropsRepRates } from "@/app/[user]/page";
 import type {
   ApiProfileRepRatesState,
   ProfileActivityLog,
-  RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
@@ -14,14 +13,14 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { wait } from "@/helpers/Helpers";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import type { CountlessPage, Page } from "@/helpers/Types";
-import { type ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
+import { RateMatter } from "@/types/enums";
 
 import {
   type InfiniteData,
   type QueryClient,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createContext, useMemo } from "react";
+import { useMemo } from "react";
 import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
 import { QueryKey } from "./query-keys";
 import { addDropToDrops } from "./utils/addDropsToDrops";
@@ -30,175 +29,20 @@ import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "./utils/query-utils";
-import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
-import type { SortDirection } from "@/entities/ISort";
 
 export { QueryKey } from "./query-keys";
 
-interface ProfileRatersParams {
-  readonly page: number;
-  readonly pageSize: number;
-  readonly given: boolean;
-  readonly order: SortDirection;
-  readonly orderBy: ProfileRatersParamsOrderBy;
-  readonly handleOrWallet: string;
-  readonly matter: RateMatter;
-}
-
-interface InitProfileRatersParamsAndData {
-  readonly data: Page<RatingWithProfileInfoAndLevel>;
-  readonly params: ProfileRatersParams;
-}
-
-interface InitProfileActivityLogsParams {
-  readonly params: ActivityLogParams;
-  readonly data: CountlessPage<ProfileActivityLog>;
-}
-
-interface InitProfileRepPageParams {
-  readonly profile: ApiIdentity;
-  readonly repRates: UserPageRepPropsRepRates;
-  readonly repLogs: InitProfileActivityLogsParams;
-  readonly repGivenToUsers: InitProfileRatersParamsAndData;
-  readonly repReceivedFromUsers: InitProfileRatersParamsAndData;
-  readonly handleOrWallet: string;
-}
-
-type ReactQueryWrapperContextType = {
-  readonly setProfile: (profile: ApiIdentity) => void;
-  readonly setWave: (wave: ApiWave) => void;
-  readonly setWavesOverviewPage: (wavesOverview: ApiWave[]) => void;
-  readonly setWaveDrops: (params: {
-    readonly waveDrops: ApiWaveDropsFeed;
-    readonly waveId: string;
-  }) => void;
-  readonly setProfileProxy: (profileProxy: ApiProfileProxy) => void;
-  readonly onProfileProxyModify: ({
-    profileProxyId,
-  }: {
-    readonly profileProxyId: string;
-  }) => void;
-  onProfileCICModify: (params: {
-    readonly targetProfile: ApiIdentity;
-    readonly connectedProfile: ApiIdentity | null;
-    readonly rater: string | null;
-    readonly profileProxy: ApiProfileProxy | null;
-  }) => void;
-  onProfileRepModify: ({
-    targetProfile,
-    connectedProfile,
-    profileProxy,
-  }: {
-    readonly targetProfile: ApiIdentity;
-    readonly connectedProfile: ApiIdentity | null;
-    readonly profileProxy: ApiProfileProxy | null;
-  }) => void;
-  onProfileEdit: ({
-    profile,
-    previousProfile,
-  }: {
-    readonly profile: ApiIdentity;
-    readonly previousProfile: ApiIdentity | null;
-  }) => void;
-  onProfileStatementAdd: (params: { profile: ApiIdentity }) => void;
-  onProfileStatementRemove: (params: { profile: ApiIdentity }) => void;
-  onIdentityFollowChange: () => void;
-  initProfileRepPage: (params: InitProfileRepPageParams) => void;
-  initCommunityActivityPage: ({
-    activityLogs,
-  }: {
-    activityLogs: InitProfileActivityLogsParams;
-  }) => void;
-  waitAndInvalidateDrops: () => Promise<void>;
-  addOptimisticDrop: (params: { readonly drop: ApiDrop }) => Promise<void>;
-  readonly invalidateDrops: () => void;
-  onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
-  onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
-  onGroupCreate: () => void;
-  onIdentityBulkRate: () => void;
-  onWaveCreated: () => void;
-  onWaveFollowChange: (param: {
-    readonly waveId: string;
-    following: boolean;
-  }) => void;
-  invalidateAll: () => void;
-  invalidateAuthSensitiveQueries: () => void;
-  invalidateNotifications: () => void;
-  invalidateIdentityTdhStats: (params: { identity: string }) => void;
-};
-
-export const ReactQueryWrapperContext =
-  createContext<ReactQueryWrapperContextType>({
-    setProfile: () => {},
-    setWavesOverviewPage: () => {},
-    setProfileProxy: () => {},
-    setWave: () => {},
-    setWaveDrops: () => {},
-    onProfileProxyModify: () => {},
-    onProfileCICModify: () => {},
-    onProfileRepModify: () => {},
-    onProfileEdit: () => {},
-    onProfileStatementAdd: () => {},
-    onProfileStatementRemove: () => {},
-    onIdentityFollowChange: () => {},
-    initProfileRepPage: () => {},
-    initCommunityActivityPage: () => {},
-    waitAndInvalidateDrops: async () => {},
-    addOptimisticDrop: async () => {},
-    invalidateDrops: () => {},
-    onGroupRemoved: () => {},
-    onGroupChanged: () => {},
-    onGroupCreate: () => {},
-    onIdentityBulkRate: () => {},
-    onWaveCreated: () => {},
-    onWaveFollowChange: () => {},
-    invalidateAll: () => {},
-    invalidateAuthSensitiveQueries: () => {},
-    invalidateNotifications: () => {},
-    invalidateIdentityTdhStats: () => {},
-  });
-
-const AUTH_SENSITIVE_QUERY_KEYS = [
-  QueryKey.PROFILE,
-  QueryKey.PROFILE_PROFILE_PROXIES,
-  QueryKey.PROFILE_PROXY,
-  QueryKey.IDENTITY_AVAILABLE_CREDIT,
-  QueryKey.IDENTITY_MUTE_STATE,
-  QueryKey.IDENTITY_NOTIFICATIONS,
-  QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
-  QueryKey.DM_DROPS_UNREAD,
-  QueryKey.WAVES_OVERVIEW,
-  QueryKey.WAVES_V2,
-  QueryKey.WAVE_SUBWAVES,
-  QueryKey.OFFICIAL_WAVES,
-  QueryKey.WAVES,
-  QueryKey.WAVES_PUBLIC,
-  QueryKey.WAVE,
-  QueryKey.DROPS,
-  QueryKey.DROPS_LEADERBOARD,
-  QueryKey.DROP,
-  QueryKey.FEED_ITEMS,
-] as const;
-
-const AUTH_SENSITIVE_QUERY_KEY_SET = new Set<QueryKey>(
-  AUTH_SENSITIVE_QUERY_KEYS
-);
-
-const getHandlesFromProfile = (profile: ApiIdentity): string[] => {
-  const handles: string[] = [];
-  if (profile.handle) {
-    handles.push(profile.handle.toLowerCase());
-  }
-
-  profile.wallets?.forEach((wallet) => {
-    if (wallet.display) {
-      handles.push(wallet.display.toLowerCase());
-    }
-    handles.push(wallet.wallet.toLowerCase());
-  });
-
-  return handles;
-};
+import {
+  type InitProfileActivityLogsParams,
+  type InitProfileRatersParamsAndData,
+  type InitProfileRepPageParams,
+  type ReactQueryWrapperContextType,
+  ReactQueryWrapperContext,
+} from "./ReactQueryWrapperContext";
+export { ReactQueryWrapperContext } from "./ReactQueryWrapperContext";
+import { createGeneralQueryHandlers } from "./ReactQueryWrapper.generalHandlers";
+import { createWaveQueryHandlers } from "./ReactQueryWrapper.waveHandlers";
+import { getHandlesFromProfile } from "./profileQueryHandles";
 
 const createReactQueryContextValue = (
   queryClient: QueryClient
@@ -883,147 +727,21 @@ const createReactQueryContextValue = (
     });
   };
 
-  const invalidateWavesV2 = () => {
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.WAVES_V2],
-      })
-      .catch(() => undefined);
-  };
+  const {
+    invalidateAllWaves,
+    invalidateDrops,
+    invalidateWavesV2,
+    onIdentityFollowChange,
+    onWaveCreated,
+    onWaveFollowChange,
+  } = createWaveQueryHandlers(queryClient);
 
-  const invalidateAllWaves = () => {
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVES_OVERVIEW],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC],
-    });
-    invalidateWavesV2();
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.WAVE_SUBWAVES],
-      })
-      .catch(() => undefined);
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.OFFICIAL_WAVES],
-      })
-      .catch(() => undefined);
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVES],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVES_PUBLIC],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVE],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVE_OUTCOMES],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVE_OUTCOME_DISTRIBUTION],
-    });
-  };
-
-  const invalidateDrops = () => {
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROPS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROPS_LEADERBOARD],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP],
-    });
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.WAVE_POLLS],
-      })
-      .catch(() => undefined);
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP_VOTERS],
-    });
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.DROP_POLL_VOTERS],
-      })
-      .catch(() => undefined);
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP_VOTE_LOGS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_DROPS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.FEED_ITEMS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP_DISCUSSION],
-    });
-  };
-
-  const onWaveCreated = () => invalidateAllWaves();
-
-  const onWaveFollowChange = ({
-    waveId,
-    following,
-  }: {
-    readonly waveId: string;
-    readonly following: boolean;
-  }) => {
-    toggleWaveFollowing({ waveId, following, queryClient });
-    setTimeout(() => {
-      invalidateAllWaves();
-    }, 1000);
-  };
-  const onIdentityFollowChange = () => {
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.IDENTITY_FOLLOWERS],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-    });
-  };
-
-  const invalidateAll = () => {
-    queryClient.removeQueries({
-      queryKey: [QueryKey.WAVE],
-    });
-    queryClient.invalidateQueries();
-  };
-
-  const invalidateAuthSensitiveQueries = () => {
-    queryClient.invalidateQueries({
-      predicate: (query) => {
-        const [queryKey] = query.queryKey;
-        return (
-          typeof queryKey === "string" &&
-          AUTH_SENSITIVE_QUERY_KEY_SET.has(queryKey as QueryKey)
-        );
-      },
-    });
-  };
-
-  const invalidateNotifications = () => {
-    // Notification read mutations use the active account's JWT. Other connected
-    // accounts keep their cached unread counts and continue their normal polling.
-    queryClient
-      .invalidateQueries({
-        queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-      })
-      .catch(() => undefined);
-    invalidateWavesV2();
-  };
-
-  const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.IDENTITY_TDH_STATS, identity.toLowerCase()],
-    });
-  };
+  const {
+    invalidateAll,
+    invalidateAuthSensitiveQueries,
+    invalidateIdentityTdhStats,
+    invalidateNotifications,
+  } = createGeneralQueryHandlers(queryClient, invalidateWavesV2);
 
   return {
     setProfile,
