@@ -71,10 +71,10 @@ const SORTS: ReadonlyArray<{
 
 function ProfileCell({
   profile,
-  wrapName = false,
+  compact = false,
 }: {
   readonly profile: ApiProfileMin;
-  readonly wrapName?: boolean;
+  readonly compact?: boolean;
 }) {
   const display = getProfileDisplay(profile);
 
@@ -84,7 +84,7 @@ function ProfileCell({
         href={getProfileHref(profile)}
         prefetch={false}
         className={`rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline ${
-          wrapName ? "tw-gap-2" : "tw-gap-3"
+          compact ? "tw-gap-2" : "tw-gap-3"
         }`}
       >
         <span className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
@@ -103,13 +103,7 @@ function ProfileCell({
             </span>
           )}
         </span>
-        <span
-          className={`rep-category-profile-name tw-min-w-0 tw-text-sm tw-font-semibold tw-text-iron-100 ${
-            wrapName
-              ? "tw-break-words tw-whitespace-normal tw-leading-tight"
-              : "tw-truncate"
-          }`}
-        >
+        <span className="rep-category-profile-name tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
           {display}
         </span>
       </Link>
@@ -160,9 +154,9 @@ function RatingMiniRow({
 }) {
   return (
     <div className="rep-category-preview-row rep-category-activity-row tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5">
-      <div className="rep-category-activity-grid tw-grid tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] tw-items-center tw-gap-2 md:tw-gap-4">
+      <div className="rep-category-activity-grid tw-grid tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5.5rem] tw-items-center tw-gap-2 md:tw-gap-4">
         <div className="rep-category-activity-giver tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
-          <ProfileCell profile={item.giver} wrapName />
+          <ProfileCell profile={item.giver} compact />
           <span className="tw-sr-only">
             {t(REP_CATEGORY_LOCALE, "rep.categories.activity.direction")}
           </span>
@@ -172,9 +166,9 @@ function RatingMiniRow({
           />
         </div>
         <div className="rep-category-activity-recipient tw-min-w-0">
-          <ProfileCell profile={item.recipient} wrapName />
+          <ProfileCell profile={item.recipient} compact />
         </div>
-        <span className="rep-category-preview-value tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-text-iron-200 sm:tw-text-sm">
+        <span className="rep-category-preview-value tw-whitespace-nowrap tw-text-right tw-text-sm tw-font-semibold tw-text-iron-200">
           {t(REP_CATEGORY_LOCALE, "rep.categories.activity.value", {
             value: formatNumberWithCommas(item.rep),
           })}
