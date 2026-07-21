@@ -131,9 +131,10 @@ The frontend base canary has three independently selectable execution modes:
 `legacy` keeps the original serial gate authoritative. `shadow` runs that
 serial gate and the parallel lint, typecheck, production-build, inventory, and
 Jest shard jobs against the same SHA, but only the serial outcome controls the
-train. `sharded` makes the parallel aggregate authoritative. Jest continues to
-use `--runInBand --bail=0` inside every deterministic Jest `--shard=N/M`; the
-matrix has `fail-fast: false` and no automatic retry. Returning to
+train. `sharded` makes the parallel aggregate authoritative. Every deterministic
+Jest `--shard=N/M` uses `--maxWorkers=2 --bail=0`, bounding memory and process
+fan-out without forcing serial execution. The matrix has `fail-fast: false` and
+no automatic retry. Returning to
 `legacy`/one shard is the no-code rollback.
 
 Each validation job detaches the exact base SHA, installs frozen dependencies
