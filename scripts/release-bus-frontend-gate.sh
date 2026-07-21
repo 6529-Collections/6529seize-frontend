@@ -31,7 +31,7 @@ set_evidence_identity_args() {
 }
 
 run_unit_tests() {
-  "$SEIZE_BIN" run test:no-coverage --runInBand --bail=0 "$@"
+  "$SEIZE_BIN" run test:no-coverage --maxWorkers=2 --bail=0 "$@"
 }
 
 run_validation() {

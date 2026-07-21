@@ -59,8 +59,9 @@ describe("Release Bus frontend gate contract", () => {
 
   it("owns the only Release Bus Jest invocation", () => {
     expect(gate).toContain(
-      '"$SEIZE_BIN" run test:no-coverage --runInBand --bail=0 "$@"'
+      '"$SEIZE_BIN" run test:no-coverage --maxWorkers=2 --bail=0 "$@"'
     );
+    expect(gate).not.toContain("--runInBand");
     expect(gate).not.toContain("test:no-coverage -- --runInBand");
 
     for (const workflow of [preflight, isolation, canary]) {
@@ -95,7 +96,7 @@ describe("Release Bus frontend gate contract", () => {
       expect(fs.readFileSync(argumentLog, "utf8").trim().split("\n")).toEqual([
         "run",
         "test:no-coverage",
-        "--runInBand",
+        "--maxWorkers=2",
         "--bail=0",
         "--runTestsByPath",
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
