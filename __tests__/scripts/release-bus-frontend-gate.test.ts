@@ -64,6 +64,60 @@ describe("Release Bus frontend gate contract", () => {
     }
   });
 
+  it("binds immutable identity to emitted phase evidence", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-evidence-")
+    );
+    const runner = path.join(tempDir, "fake-6529");
+    const outputDir = path.join(tempDir, "evidence");
+    const identity = {
+      RELEASE_BUS_BASE_SHA: "a".repeat(40),
+      RELEASE_BUS_EVIDENCE_ENVIRONMENT: "orchestration",
+      RELEASE_BUS_GATE_FINGERPRINT: "b".repeat(64),
+      RELEASE_BUS_WORKFLOW_SHA: "c".repeat(40),
+      RELEASE_BUS_WORKFLOW_DIGEST: "d".repeat(64),
+      RELEASE_BUS_NODE_VERSION: "22",
+      RELEASE_BUS_PACKAGE_MANAGER: "pnpm@10.14.0",
+    };
+    try {
+      fs.writeFileSync(runner, "#!/usr/bin/env bash\nexit 0\n");
+      fs.chmodSync(runner, 0o755);
+
+      execFileSync(
+        "bash",
+        ["scripts/release-bus-frontend-gate.sh", "phase", "lint", outputDir],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            ...identity,
+            RELEASE_BUS_6529_BIN: runner,
+          },
+        }
+      );
+
+      expect(
+        JSON.parse(
+          fs.readFileSync(path.join(outputDir, "phase-lint.json"), "utf8")
+        )
+      ).toMatchObject({
+        kind: "phase",
+        source: "parallel",
+        name: "lint",
+        status: "SUCCEEDED",
+        base_sha: identity.RELEASE_BUS_BASE_SHA,
+        environment: identity.RELEASE_BUS_EVIDENCE_ENVIRONMENT,
+        gate_fingerprint: identity.RELEASE_BUS_GATE_FINGERPRINT,
+        workflow_sha: identity.RELEASE_BUS_WORKFLOW_SHA,
+        workflow_digest: identity.RELEASE_BUS_WORKFLOW_DIGEST,
+        node_version: identity.RELEASE_BUS_NODE_VERSION,
+        package_manager: identity.RELEASE_BUS_PACKAGE_MANAGER,
+      });
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("is shared by preflight, isolation, and exact-base canary", () => {
     expect(preflight).toContain(
       "./scripts/release-bus-frontend-gate.sh validate"
@@ -76,6 +130,9 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" jest');
     expect(canary).toContain('git fetch --no-tags origin "$BASE_SHA"');
     expect(canary).toContain('git show "$WORKFLOW_SHA:$file"');
+    expect(canary).toContain("Derive and verify immutable gate fingerprint");
+    expect(canary).toContain("RELEASE_BUS_GATE_FINGERPRINT=$GATE_FINGERPRINT");
+    expect(canary).not.toContain("gate_fingerprint=unversioned");
     expect(canary).toContain('RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE"');
     expect(canary).not.toContain("ref: ${{ inputs.base_sha }}");
   });
@@ -89,6 +146,17 @@ describe("Release Bus frontend gate contract", () => {
     expect(gate).toContain('raw_dir="$(mktemp -d');
     expect(gate).toContain('results="$raw_dir/jest-results.json"');
     expect(gate).not.toContain('results="$output_dir/jest-results');
+    for (const identityFlag of [
+      "--base-sha",
+      "--environment",
+      "--gate-fingerprint",
+      "--workflow-sha",
+      "--workflow-digest",
+      "--node-version",
+      "--package-manager",
+    ]) {
+      expect(gate).toContain(identityFlag);
+    }
     expect(canary).toContain("fail-fast: false");
     expect(canary).toContain("FRONTEND_GATE_SHARD_COUNT");
     expect(canary).toContain("RELEASE_BUS_FRONTEND_GATE_MODE");

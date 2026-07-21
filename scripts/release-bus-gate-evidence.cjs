@@ -16,6 +16,16 @@ const STATUSES = new Set([
 ]);
 const MAX_FAILURES = 100;
 const MAX_TEXT_LENGTH = 500;
+const EVIDENCE_IDENTITY_FIELDS = [
+  "base_sha",
+  "environment",
+  "gate_fingerprint",
+  "workflow_sha",
+  "workflow_digest",
+  "node_version",
+  "package_manager",
+];
+const EVIDENCE_RECORD_KINDS = new Set(["manifest", "phase", "jest_shard"]);
 const FRONTEND_GATE_WORKFLOW = ".github/workflows/release-bus-base-canary.yml";
 const FRONTEND_GATE_BASE_FILES = [
   "bin/6529",
@@ -125,8 +135,7 @@ function frontendGateContract({
   const packageManager = packageJson?.packageManager;
   if (
     typeof packageManager !== "string" ||
-    packageManager.length < 1 ||
-    packageManager.length > 128
+    !/^pnpm@[A-Za-z0-9.+-]{1,122}$/.test(packageManager)
   ) {
     throw new Error("Invalid package-manager contract");
   }
@@ -203,6 +212,58 @@ function contractFromRepository(args) {
   });
 }
 
+function validateEvidenceIdentity(identity) {
+  if (!identity || typeof identity !== "object" || Array.isArray(identity)) {
+    throw new Error("Evidence identity is missing");
+  }
+  if (!/^[a-f0-9]{40}$/.test(String(identity.base_sha ?? ""))) {
+    throw new Error("Evidence identity has an invalid base SHA");
+  }
+  if (identity.environment !== "orchestration") {
+    throw new Error("Evidence identity has an invalid environment");
+  }
+  if (!/^[a-f0-9]{64}$/.test(String(identity.gate_fingerprint ?? ""))) {
+    throw new Error("Evidence identity has an invalid gate fingerprint");
+  }
+  if (!/^[a-f0-9]{40}$/.test(String(identity.workflow_sha ?? ""))) {
+    throw new Error("Evidence identity has an invalid workflow SHA");
+  }
+  if (!/^[a-f0-9]{64}$/.test(String(identity.workflow_digest ?? ""))) {
+    throw new Error("Evidence identity has an invalid workflow digest");
+  }
+  if (identity.node_version !== "22") {
+    throw new Error("Evidence identity has an invalid Node contract");
+  }
+  if (
+    !/^pnpm@[A-Za-z0-9.+-]{1,122}$/.test(String(identity.package_manager ?? ""))
+  ) {
+    throw new Error(
+      "Evidence identity has an invalid package-manager contract"
+    );
+  }
+  return Object.fromEntries(
+    EVIDENCE_IDENTITY_FIELDS.map((field) => [field, identity[field]])
+  );
+}
+
+function evidenceIdentityFromArgs(args) {
+  return validateEvidenceIdentity({
+    base_sha: required(args, "base-sha"),
+    environment: required(args, "environment"),
+    gate_fingerprint: required(args, "gate-fingerprint"),
+    workflow_sha: required(args, "workflow-sha"),
+    workflow_digest: required(args, "workflow-digest"),
+    node_version: required(args, "node-version"),
+    package_manager: required(args, "package-manager"),
+  });
+}
+
+function sameEvidenceIdentity(record, identity) {
+  return EVIDENCE_IDENTITY_FIELDS.every(
+    (field) => record?.[field] === identity[field]
+  );
+}
+
 function relativeTestPath(testPath, repoRoot) {
   const relative = path.relative(repoRoot, testPath).split(path.sep).join("/");
   if (!relative || relative === ".." || relative.startsWith("../")) {
@@ -225,12 +286,13 @@ function manifestFromRaw(raw, repoRoot) {
   return stableSort(unique);
 }
 
-function phaseRecord({ name, status, durationMs, exitCode, source }) {
+function phaseRecord({ name, status, durationMs, exitCode, source, identity }) {
   if (!PHASES.includes(name)) throw new Error("Invalid phase name");
   if (!STATUSES.has(status)) throw new Error("Invalid phase status");
   return {
     schema_version: 1,
     kind: "phase",
+    ...(identity ? validateEvidenceIdentity(identity) : {}),
     source,
     name,
     status,
@@ -268,6 +330,7 @@ function jestRecord({
   durationMs,
   exitCode,
   source,
+  identity,
 }) {
   if (!ALLOWED_SHARD_COUNTS.has(shardCount)) {
     throw new Error("Unsupported shard count");
@@ -288,6 +351,7 @@ function jestRecord({
   return {
     schema_version: 1,
     kind: "jest_shard",
+    ...(identity ? validateEvidenceIdentity(identity) : {}),
     source,
     shard_index: shardIndex,
     shard_count: shardCount,
@@ -395,7 +459,13 @@ function uniqueByName(records, kind, source) {
   );
 }
 
-function buildGateSummary({ records, source, shardCount, jobResults }) {
+function buildGateSummary({
+  records,
+  source,
+  shardCount,
+  jobResults,
+  identity,
+}) {
   const globalManifests = uniqueByName(records, "manifest", source).filter(
     (record) => record.scope === "all"
   );
@@ -456,6 +526,17 @@ function buildGateSummary({ records, source, shardCount, jobResults }) {
     (_, index) => `${index + 1}/${shardCount}`
   );
   const errors = [];
+  const sourceEvidence = records.filter(
+    (record) =>
+      record.source === source && EVIDENCE_RECORD_KINDS.has(record.kind)
+  );
+  if (
+    identity &&
+    (sourceEvidence.length === 0 ||
+      sourceEvidence.some((record) => !sameEvidenceIdentity(record, identity)))
+  ) {
+    errors.push("evidence identity is missing or mismatched");
+  }
   if (globalManifests.length !== 1)
     errors.push("expected exactly one global Jest manifest");
   if (shardManifests.length !== shardCount)
@@ -573,6 +654,7 @@ function finalSummary({ args, records, jobResults }) {
   const shardCount = integer(required(args, "shard-count"), "shard-count", 1);
   if (!ALLOWED_SHARD_COUNTS.has(shardCount))
     throw new Error("Unsupported shard count");
+  const identity = evidenceIdentityFromArgs(args);
   const legacy =
     mode === "sharded"
       ? null
@@ -581,6 +663,7 @@ function finalSummary({ args, records, jobResults }) {
           source: "legacy",
           shardCount: 1,
           jobResults: { legacy: jobResults.legacy },
+          identity,
         });
   const sharded =
     mode === "legacy"
@@ -596,6 +679,7 @@ function finalSummary({ args, records, jobResults }) {
             inventory: jobResults.inventory,
             jest: jobResults.jest,
           },
+          identity,
         });
   const authoritative = mode === "sharded" ? sharded : legacy;
   const equivalent =
@@ -617,13 +701,7 @@ function finalSummary({ args, records, jobResults }) {
     status: authoritative?.status ?? "FAILED",
     gate_mode: mode,
     fresh_or_reused: "fresh",
-    base_sha: required(args, "base-sha"),
-    environment: required(args, "environment"),
-    gate_fingerprint: safeText(required(args, "gate-fingerprint"), 128),
-    workflow_sha: required(args, "workflow-sha"),
-    workflow_digest: safeText(required(args, "workflow-digest"), 128),
-    node_version: safeText(required(args, "node-version"), 50),
-    package_manager: safeText(required(args, "package-manager"), 100),
+    ...identity,
     shard_count: mode === "sharded" ? shardCount : 1,
     phases: authoritative?.phases ?? [],
     phase_durations_ms: Object.fromEntries(
@@ -650,6 +728,11 @@ function finalSummary({ args, records, jobResults }) {
             all_counts_equal: sameCounts(legacy.counts, sharded.counts),
             serial_totals: legacy.counts,
             sharded_totals: sharded.counts,
+            sharded_phase_durations_ms: Object.fromEntries(
+              sharded.phases.map((phase) => [phase.name, phase.duration_ms])
+            ),
+            sharded_shards: sharded.shards,
+            sharded_shard_imbalance_ms: sharded.shard_imbalance_ms,
           }
         : null,
     run_url: runUrl,
@@ -688,6 +771,7 @@ function run(command, args) {
     const value = {
       schema_version: 1,
       kind: "manifest",
+      ...evidenceIdentityFromArgs(args),
       source,
       scope,
       shard_index:
@@ -714,6 +798,7 @@ function run(command, args) {
         durationMs: integer(required(args, "duration-ms"), "duration-ms"),
         exitCode: integer(required(args, "exit-code"), "exit-code"),
         source: required(args, "source"),
+        identity: evidenceIdentityFromArgs(args),
       })
     );
     return;
@@ -734,6 +819,7 @@ function run(command, args) {
         durationMs: integer(required(args, "duration-ms"), "duration-ms"),
         exitCode: integer(required(args, "exit-code"), "exit-code"),
         source: required(args, "source"),
+        identity: evidenceIdentityFromArgs(args),
       })
     );
     return;
