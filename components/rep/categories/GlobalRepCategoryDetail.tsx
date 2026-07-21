@@ -3,6 +3,8 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiGlobalRepCategoryGiver } from "@/generated/models/ApiGlobalRepCategoryGiver";
 import type { ApiGlobalRepCategoryRating } from "@/generated/models/ApiGlobalRepCategoryRating";
@@ -10,6 +12,9 @@ import type { ApiGlobalRepCategoryRecipient } from "@/generated/models/ApiGlobal
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -48,12 +53,11 @@ const TABS: ReadonlyArray<{
 
 type RepCategoryScope = "profile" | "wave";
 
-const SCOPES: ReadonlyArray<{
-  readonly id: RepCategoryScope;
-  readonly label: string;
-}> = [
-  { id: "profile", label: "Profile REP" },
-  { id: "wave", label: "Wave REP" },
+const REP_CATEGORY_LOCALE = DEFAULT_LOCALE;
+
+const SCOPES: ReadonlyArray<CommonSelectItem<RepCategoryScope>> = [
+  { key: "profile", label: "Profile REP", value: "profile" },
+  { key: "wave", label: "Wave REP", value: "wave" },
 ];
 
 const SORTS: ReadonlyArray<{
@@ -141,12 +145,25 @@ function RatingMiniRow({
   readonly item: ApiGlobalRepCategoryRating;
 }) {
   return (
-    <div className="rep-category-preview-row tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5">
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:tw-items-center">
-        <ProfileCell profile={item.giver} />
-        <ProfileCell profile={item.recipient} />
-        <span className="rep-category-preview-value tw-text-sm tw-font-semibold tw-text-iron-200">
-          {formatNumberWithCommas(item.rep)}
+    <div className="rep-category-preview-row rep-category-activity-row tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5">
+      <div className="rep-category-activity-grid tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 md:tw-grid md:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:tw-gap-4">
+        <div className="rep-category-activity-giver tw-flex tw-max-w-full tw-flex-none tw-items-center tw-gap-2">
+          <ProfileCell profile={item.giver} />
+          <span className="tw-sr-only">
+            {t(REP_CATEGORY_LOCALE, "rep.categories.activity.direction")}
+          </span>
+          <ArrowRightIcon
+            aria-hidden="true"
+            className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-500"
+          />
+        </div>
+        <div className="rep-category-activity-recipient tw-max-w-full tw-flex-none">
+          <ProfileCell profile={item.recipient} />
+        </div>
+        <span className="rep-category-preview-value tw-ml-auto tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-200 md:tw-ml-0">
+          {t(REP_CATEGORY_LOCALE, "rep.categories.activity.value", {
+            value: formatNumberWithCommas(item.rep),
+          })}
         </span>
       </div>
     </div>
@@ -567,7 +584,7 @@ export default function GlobalRepCategoryDetail({
               {category}
             </h1>
           </div>
-          <div className="tw-flex tw-flex-wrap tw-gap-2">
+          <div className="rep-category-header-actions tw-flex tw-flex-wrap tw-gap-2">
             {showSearchLink && (
               <Link
                 href="/rep/categories"
@@ -587,27 +604,15 @@ export default function GlobalRepCategoryDetail({
           </div>
         </div>
 
-        <div
-          role="tablist"
-          aria-label="REP category scope"
-          className="rep-category-scope tw-flex tw-flex-wrap tw-gap-2"
-        >
-          {SCOPES.map((scope) => (
-            <button
-              key={scope.id}
-              type="button"
-              role="tab"
-              aria-selected={activeScope === scope.id}
-              onClick={() => setActiveScope(scope.id)}
-              className={`rep-category-scope-tab tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
-                activeScope === scope.id
-                  ? "tw-text-primary-100 tw-border-primary-400/50 tw-bg-primary-500/15"
-                  : "tw-border-white/10 tw-bg-white/[0.03] tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-200"
-              }`}
-            >
-              {scope.label}
-            </button>
-          ))}
+        <div className="rep-category-scope tw-max-w-full">
+          <CommonTabs<RepCategoryScope>
+            items={SCOPES}
+            activeItem={activeScope}
+            filterLabel="REP category scope"
+            setSelected={setActiveScope}
+            size="sm"
+            fill={false}
+          />
         </div>
 
         {activeScope === "profile" ? (
