@@ -49,15 +49,15 @@ jobs:
       contents: read
     steps:
       - name: Check out exact frontend base
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          ref: ${{ inputs.base_sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Verify immutable source
         env:
           BASE_SHA: ${{ inputs.base_sha }}
-        run: test "$(git rev-parse HEAD)" = "$BASE_SHA"
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
+          git fetch --no-tags origin "$BASE_SHA"
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with: { node-version: "22" }
@@ -82,7 +82,7 @@ jobs:
           BASE_ENDPOINT: https://staging.6529.io
           VERSION: ${{ inputs.base_sha }}
           VERSION_BUILD_TIMESTAMP: "1970-01-01T00:00:00Z"
-          ALCHEMY_API_KEY: release-bus-canary
+          ALCHEMY_API_KEY: canary
           NEXTGEN_CHAIN_ID: "11155111"
           MOBILE_APP_SCHEME: mobile6529
           CORE_SCHEME: core6529

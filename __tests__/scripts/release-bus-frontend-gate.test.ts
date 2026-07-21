@@ -26,6 +26,8 @@ describe("Release Bus frontend gate contract", () => {
     );
     expect(isolation).toContain("./scripts/release-bus-frontend-gate.sh full");
     expect(canary).toContain("./scripts/release-bus-frontend-gate.sh full");
+    expect(canary).toContain('git fetch --no-tags origin "$BASE_SHA"');
+    expect(canary).not.toContain("ref: ${{ inputs.base_sha }}");
   });
 
   it("executes its argument-forwarding contract in ordinary PR CI", () => {
