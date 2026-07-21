@@ -89,6 +89,20 @@ Both repositories contain release-bus workflows for:
 - deterministic candidate isolation with optional read-only Codex diagnostics;
 - post-production `main` to `1a-staging` synchronization.
 
+Frontend Release Bus validation is centralized in
+`scripts/release-bus-frontend-gate.sh`. Preflight and candidate isolation call
+that gate instead of maintaining independent Jest command lines. Ordinary
+frontend PR CI runs the gate contract whenever the gate or any Release Bus
+workflow changes, preventing an invalid argument-forwarding change from being
+merged unnoticed.
+
+Before composing a train that contains frontend work, the worker dispatches
+`release-bus-base-canary.yml` against the train's exact recorded frontend base
+SHA. The canary runs lint, typecheck, the complete Jest suite, and a production
+build. Failure requeues the train's candidates, pauses the lane, and records the
+exact Actions run as operator evidence; it never attributes the base failure to
+a candidate. Backend-only trains skip this frontend canary.
+
 Backend deployment continues through the generated per-service workflow, now
 with exact SHA, preflight run, checksum, operation, and authorization gates.
 The deploy registry supplies adapters, environments, regions, verification
@@ -254,10 +268,20 @@ private keys or workflow credentials into chat or committed files.
 Gate enforcement is last. Existing deployment workflows remain usable while
 the bus is `OFF` or in its initial shadow rollout.
 
+When rolling out the frontend base-canary control specifically, merge its
+workflow and shared gate into both frontend `main` and `1a-staging` before
+deploying the worker that dispatches it. This ensures every recorded frontend
+base and temporary train branch contains the canonical gate. Deploy the backend
+`api` next, then `releaseBus`; resume a paused lane only after both deployments
+are verified.
+
 ## Operations and recovery
 
 - Pause/resume at `/deploy/ui/bus`; every change requires a reason and is
   recorded in `release_train_events`.
+- Controls show the current reason and actor. Trusted frontend/backend GitHub
+  Actions run URLs embedded in an automatic pause are rendered as direct
+  failure-evidence links.
 - A paused train heartbeats owned leases but does not start the next
   irreversible operation.
 - A missed workflow response remains `AMBIGUOUS` until exact-run reconciliation
