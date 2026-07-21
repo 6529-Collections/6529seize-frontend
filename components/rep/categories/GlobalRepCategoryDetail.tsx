@@ -60,13 +60,10 @@ const SCOPES: ReadonlyArray<CommonSelectItem<RepCategoryScope>> = [
   { key: "wave", label: "Wave REP", value: "wave" },
 ];
 
-const SORTS: ReadonlyArray<{
-  readonly id: GlobalRepCategorySort;
-  readonly label: string;
-}> = [
-  { id: "rep_desc", label: "REP impact high" },
-  { id: "rep_asc", label: "REP impact low" },
-  { id: "recent", label: "Recent" },
+const SORTS: ReadonlyArray<CommonSelectItem<GlobalRepCategorySort>> = [
+  { key: "rep_desc", label: "REP impact high", value: "rep_desc" },
+  { key: "rep_asc", label: "REP impact low", value: "rep_asc" },
+  { key: "recent", label: "Recent", value: "recent" },
 ];
 
 function ProfileCell({
@@ -155,7 +152,7 @@ function RatingMiniRow({
   return (
     <div className="rep-category-preview-row rep-category-activity-row tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5">
       <div className="rep-category-activity-grid tw-grid tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5.5rem] tw-items-center tw-gap-2 md:tw-gap-4">
-        <div className="rep-category-activity-giver tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
+        <div className="rep-category-activity-giver tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-2">
           <ProfileCell profile={item.giver} compact />
           <span className="tw-sr-only">
             {t(REP_CATEGORY_LOCALE, "rep.categories.activity.direction")}
@@ -442,7 +439,6 @@ function PaginatedTable({
       pageQuery.fetchNextPage().catch(() => undefined);
     }
   };
-
   if (pageQuery.isPending) {
     return (
       <div
@@ -475,30 +471,18 @@ function PaginatedTable({
   return (
     <div className="rep-category-table-content tw-flex tw-flex-col tw-gap-4">
       <div className="rep-category-sort-row tw-flex tw-flex-wrap tw-justify-end tw-gap-3">
-        <div
-          className="rep-category-sort tw-inline-flex tw-flex-wrap tw-gap-2"
-          aria-label="Sort category rows"
-        >
-          {SORTS.map((option) => {
-            const selected = effectiveSort === option.id;
-            const disabled = tab === "recent" && option.id !== "recent";
-            return (
-              <button
-                key={option.id}
-                type="button"
-                disabled={disabled}
-                aria-pressed={selected}
-                onClick={() => onSortChange(option.id)}
-                className={`rep-category-sort-button tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition-colors ${
-                  selected
-                    ? "tw-text-primary-200 tw-border-primary-400/50 tw-bg-primary-500/15"
-                    : "tw-border-white/10 tw-bg-white/[0.03] tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-200"
-                } disabled:tw-cursor-not-allowed disabled:tw-opacity-40`}
-              >
-                {option.label}
-              </button>
-            );
-          })}
+        <div className="rep-category-sort tw-min-w-0 tw-max-w-full">
+          <CommonTabs<GlobalRepCategorySort>
+            items={SORTS}
+            activeItem={effectiveSort}
+            filterLabel="Sort category rows"
+            setSelected={onSortChange}
+            isItemDisabled={(option) =>
+              tab === "recent" && option.value !== "recent"
+            }
+            size="sm"
+            fill={false}
+          />
         </div>
       </div>
 

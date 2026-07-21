@@ -5,6 +5,8 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import type { ApiGlobalRepCategoryWave } from "@/generated/models/ApiGlobalRepCategoryWave";
 import type { ApiGlobalRepCategoryWaveContributor } from "@/generated/models/ApiGlobalRepCategoryWaveContributor";
 import type { ApiGlobalRepCategoryWaveOverview } from "@/generated/models/ApiGlobalRepCategoryWaveOverview";
@@ -68,12 +70,25 @@ const WAVE_REP_TABS: ReadonlyArray<{
 ];
 
 const WAVE_REP_SORTS: ReadonlyArray<{
-  readonly id: GlobalRepCategorySort;
+  readonly key: GlobalRepCategorySort;
   readonly labelKey: MessageKey;
+  readonly value: GlobalRepCategorySort;
 }> = [
-  { id: "rep_desc", labelKey: "rep.categories.wave.sort.repDesc" },
-  { id: "rep_asc", labelKey: "rep.categories.wave.sort.repAsc" },
-  { id: "recent", labelKey: "rep.categories.wave.sort.recent" },
+  {
+    key: "rep_desc",
+    labelKey: "rep.categories.wave.sort.repDesc",
+    value: "rep_desc",
+  },
+  {
+    key: "rep_asc",
+    labelKey: "rep.categories.wave.sort.repAsc",
+    value: "rep_asc",
+  },
+  {
+    key: "recent",
+    labelKey: "rep.categories.wave.sort.recent",
+    value: "recent",
+  },
 ];
 
 function WaveAvatar({ wave }: { readonly wave: ApiGlobalRepCategoryWaveRef }) {
@@ -363,26 +378,26 @@ function SortControls({
   readonly sort: GlobalRepCategorySort;
   readonly onSortChange: (sort: GlobalRepCategorySort) => void;
 }) {
+  const items: ReadonlyArray<CommonSelectItem<GlobalRepCategorySort>> =
+    WAVE_REP_SORTS.map((option) => ({
+      key: option.key,
+      label: t(REP_CATEGORY_LOCALE, option.labelKey),
+      value: option.value,
+    }));
+
   return (
-    <div
-      className="rep-category-sort tw-inline-flex tw-flex-wrap tw-gap-2"
-      aria-label={t(REP_CATEGORY_LOCALE, "rep.categories.wave.sort.label")}
-    >
-      {WAVE_REP_SORTS.map((option) => (
-        <button
-          key={option.id}
-          type="button"
-          aria-pressed={sort === option.id}
-          onClick={() => onSortChange(option.id)}
-          className={`rep-category-sort-button tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-transition-colors ${
-            sort === option.id
-              ? "tw-text-primary-200 tw-border-primary-400/50 tw-bg-primary-500/15"
-              : "tw-border-white/10 tw-bg-white/[0.03] tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-200"
-          }`}
-        >
-          {t(REP_CATEGORY_LOCALE, option.labelKey)}
-        </button>
-      ))}
+    <div className="rep-category-sort tw-min-w-0 tw-max-w-full">
+      <CommonTabs<GlobalRepCategorySort>
+        items={items}
+        activeItem={sort}
+        filterLabel={t(
+          REP_CATEGORY_LOCALE,
+          "rep.categories.wave.sort.label"
+        )}
+        setSelected={onSortChange}
+        size="sm"
+        fill={false}
+      />
     </div>
   );
 }
