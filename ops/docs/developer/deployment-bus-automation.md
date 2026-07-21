@@ -63,6 +63,7 @@ All endpoints are under `/deploy`:
 - `POST /release-bus/pause`
 - `POST /release-bus/resume`
 - `POST /release-bus/authorize`
+- `POST /release-bus/report-progress`
 - `POST /release-bus/authorize-break-glass`
 - `POST /github/webhook`
 
@@ -75,6 +76,23 @@ matches train ID, revision-derived operation key, workflow run ID, repository,
 environment, service, expected SHA, artifact run ID, artifact digest, and live
 lane ownership. The first matching execution and digest are bound atomically;
 a different run or digest cannot claim the same operation.
+
+`report-progress` is bound to the exact authorized train, operation key, and
+workflow run. It accepts only bounded structured gate fields: stage outcomes,
+failing Jest suite/test identities, and the strict base-canary aggregate
+summary used by deterministic exact-SHA evidence. It never accepts or returns
+raw logs, stack traces, workflow credentials, GitHub App credentials, or lease
+tokens. An identical terminal `complete` report is idempotent and creates no
+second write or event; a different terminal report for the same operation and
+run is rejected.
+
+`GET /release-trains` retains the legacy train list and adds `active_train`.
+`GET /release-trains/:id` retains `train` and `items` and adds `overview`.
+The overview contains the explicit phase/state, elapsed time, structured wait,
+current operation, external run ID and allowlisted URL, active/failed job and
+step, last workflow progress, worker heartbeat, safe lease ownership and
+timing, last meaningful event, included candidates, bounded timeline, and
+actionable incident summary. This is the control panel data contract.
 
 Webhook signatures use the raw request body and HMAC-SHA256. The minute
 reconciler independently checks queued branch heads, so webhook loss affects
@@ -102,6 +120,13 @@ SHA. The canary runs lint, typecheck, the complete Jest suite, and a production
 build. Failure requeues the train's candidates, pauses the lane, and records the
 exact Actions run as operator evidence; it never attributes the base failure to
 a candidate. Backend-only trains skip this frontend canary.
+
+Frontend workflows report lint, typecheck, unit-test, and build outcomes as
+separate structured stages. Jest JSON is reduced to bounded repository-relative
+suite names and exact failing test names; failure messages and raw output are
+discarded. The reporting path and every release decision remain deterministic
+when `RELEASE_BUS_CODEX_ENABLED` is absent or false and when no OpenAI
+credential exists.
 
 Backend deployment continues through the generated per-service workflow, now
 with exact SHA, preflight run, checksum, operation, and authorization gates.
@@ -139,6 +164,49 @@ the live version.
 - Existing manual or bus deploy workflow runs are detected before a lane is
   acquired.
 - Branch updates use expected-old-SHA, non-force fast-forward semantics.
+
+## Train and wait semantics
+
+The worker persists explicit train phases rather than overloading `FROZEN`:
+
+| Phase                      | Meaning                                                 |
+| -------------------------- | ------------------------------------------------------- |
+| `BASE_CANARY_RUNNING`      | Exact recorded frontend base gate is active             |
+| `COMPOSING`                | Immutable candidates are composing on train branches    |
+| `PREFLIGHTING`             | Deterministic preflight gates/artifacts are active      |
+| `ISOLATING_FAILURE`        | Bounded base/candidate/combined attribution is active   |
+| `DEPLOYING_BACKEND`        | Ordered backend units are deploying                     |
+| `DEPLOYING_FRONTEND`       | Immutable frontend artifact is deploying                |
+| `E2E_RUNNING`              | Environment E2E/version validation is active            |
+| `MERGING_PRODUCTION`       | Authorized release PR movement is active                |
+| `VALIDATING_STAGING`       | Staging evidence is being committed                     |
+| `VALIDATING_PRODUCTION`    | Production evidence is being committed                  |
+| `SYNCING_STAGING`          | Main is synchronizing back to staging                   |
+| terminal or `PAUSED` state | No generic active-operation interpretation is permitted |
+
+Every `WAIT` result is constructed by one worker boundary and contains a
+structured reason plus the current operation. Reason codes distinguish rollout
+mode, shadow mode, disabled production, paused controls, an actual unavailable
+lease, an external deployment, a running GitHub workflow, a running
+non-workflow operation, a stalled operation, reconciliation, and a bounded
+phase transition. `LEASE_UNAVAILABLE` is emitted only when the corresponding
+lease guard fails, and then includes the safe owner, train ID, heartbeat, and
+expiry. The lease token is never exposed.
+
+Operation health uses the latest GitHub run/job/step timestamp when available:
+
+| Operation family                  | Stale after no progress |
+| --------------------------------- | ----------------------- |
+| base canary, preflight, isolation | 60 minutes              |
+| frontend deployment               | 45 minutes              |
+| backend deployment, E2E           | 30 minutes              |
+| composition, merge, staging sync  | 15 minutes              |
+
+Before the threshold, a long-running active workflow is `RUNNING`, regardless
+of train age. After it, the operation becomes `STALLED` with one explicit
+reason: workflow reconciliation stale, workflow not discovered, or no recent
+workflow progress. A workflow failure records the exact gate/job/step and the
+bounded Jest suite/test report when available.
 
 ## Modes
 
@@ -286,6 +354,15 @@ are verified.
   irreversible operation.
 - A missed workflow response remains `AMBIGUOUS` until exact-run reconciliation
   proves its state.
+- The incident card distinguishes `PRE_EXISTING_BASE`,
+  `DETERMINISTIC_CANDIDATE`, and train/environment failures. A pre-existing
+  base failure returns every candidate, quarantines none, applies
+  `BASE_FAILURE_NO_CANDIDATE_BLAMED`, pauses the lane, and records the exact
+  recovery recommendation. Candidate quarantine is allowed only after
+  deterministic isolation proves the candidate-owned failure.
+- Do not treat a healthy long-running GitHub workflow as a lease incident. Open
+  its direct run link and inspect the reported active job/step. Retry only
+  after a terminal result or deterministic stale classification.
 - Expired leases can be acquired only after the active worker and external-run
   checks no longer show an owner.
 - Production failure pauses production and blocks later trains. Restore a
