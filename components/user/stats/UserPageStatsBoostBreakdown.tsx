@@ -1,4 +1,5 @@
 import type { ConsolidatedTDH, TDH, TDHBoostBreakdown } from "@/entities/ITDH";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { formatNumber, roundTo } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -313,8 +314,8 @@ function BoostValueCell({
 }) {
   return (
     <td
-      className={`${BOOST_VALUE_CELL_CLASS}${
-        emphasized ? " tw-font-semibold" : ""
+      className={`${BOOST_VALUE_CELL_CLASS} ${
+        emphasized ? "tw-font-semibold" : ""
       }`}
     >
       {hasBoostValue(value) ? (
@@ -336,7 +337,7 @@ function BoostBreakdownInfo({
   readonly info: string[];
   readonly locale: SupportedLocale;
 }) {
-  const tooltipId = `boost-info-${useId().replaceAll(":", "")}`;
+  const tooltipId = buildTooltipId("boost-info", useId());
 
   if (info.length === 0) {
     return null;
