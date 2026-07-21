@@ -86,6 +86,9 @@ describe("Release Bus frontend gate contract", () => {
     }
     expect(gate).toContain('--shard="$shard_index/$shard_count"');
     expect(gate).toContain("--bail=0");
+    expect(gate).toContain('raw_dir="$(mktemp -d');
+    expect(gate).toContain('results="$raw_dir/jest-results.json"');
+    expect(gate).not.toContain('results="$output_dir/jest-results');
     expect(canary).toContain("fail-fast: false");
     expect(canary).toContain("FRONTEND_GATE_SHARD_COUNT");
     expect(canary).toContain("RELEASE_BUS_FRONTEND_GATE_MODE");
