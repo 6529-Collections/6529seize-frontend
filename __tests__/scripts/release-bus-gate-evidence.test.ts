@@ -758,8 +758,6 @@ describe("Release Bus gate evidence", () => {
       },
     });
     expect(mutated.status).toBe("FAILED");
-    expect(mutated.errors).toContain(
-      "source_mutation job did not succeed"
-    );
+    expect(mutated.errors).toContain("source_mutation job did not succeed");
   });
 });
