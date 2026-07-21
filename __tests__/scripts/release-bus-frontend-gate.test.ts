@@ -101,7 +101,6 @@ describe("Release Bus frontend gate contract", () => {
         "--runTestsByPath",
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
         "__tests__/scripts/release-bus-gate-evidence.test.ts",
-        "__tests__/scripts/release-bus-shard-injection.test.ts",
       ]);
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -250,6 +249,11 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain("validation_inject_failure");
     expect(canary).toContain('test "$VALIDATION_ONLY" = true');
     expect(canary).toContain("RELEASE_BUS_INJECT_SHARD_FAILURE");
+    expect(gate).toContain("manifest-error");
+    expect(gate).toContain("injected_failure=1");
+    expect(gate).toContain('[ "$shard_index" -eq "$shard_count" ]');
+    expect(gate).toContain('--injected-failure "$injected_failure"');
+    expect(gate).not.toContain("release-bus-shard-injection.test.ts");
   });
 
   it("executes its argument-forwarding contract in ordinary PR CI", () => {

@@ -279,6 +279,86 @@ describe("Release Bus gate evidence", () => {
         "evidence identity is missing or mismatched",
       ]),
     });
+
+    expect(
+      buildGateSummary({
+        records: [
+          ...records,
+          {
+            kind: "manifest_error",
+            ...evidenceIdentity,
+            source: "parallel",
+            scope: "shard",
+            shard_index: 1,
+            shard_count: 2,
+            exit_code: 2,
+            error: "Jest manifest command failed",
+          },
+        ],
+        source: "parallel",
+        shardCount: 2,
+        jobResults: {
+          lint: "success",
+          typecheck: "success",
+          build: "success",
+          inventory: "success",
+          jest: "failure",
+        },
+        identity: evidenceIdentity,
+      })
+    ).toMatchObject({
+      status: "FAILED",
+      errors: expect.arrayContaining(["Jest manifest capture failed"]),
+    });
+  });
+
+  it("records a direct deliberate gate failure without falsifying Jest counts", () => {
+    const root = path.join(os.tmpdir(), "release-bus-injected-failure-root");
+    const record = jestRecord({
+      result: {
+        success: true,
+        numTotalTestSuites: 1,
+        numPassedTestSuites: 1,
+        numFailedTestSuites: 0,
+        numPendingTestSuites: 0,
+        numTotalTests: 3,
+        numPassedTests: 3,
+        numFailedTests: 0,
+        numPendingTests: 0,
+        numTodoTests: 0,
+        testResults: [
+          {
+            name: path.join(root, "__tests__/a.test.ts"),
+            status: "passed",
+            assertionResults: [],
+          },
+        ],
+      },
+      manifest: { files: ["__tests__/a.test.ts"] },
+      repoRoot: root,
+      shardIndex: 2,
+      shardCount: 2,
+      durationMs: 10,
+      exitCode: 86,
+      source: "parallel",
+      identity: evidenceIdentity,
+      injectedFailure: true,
+    });
+
+    expect(record).toMatchObject({
+      status: "FAILED",
+      exit_code: 86,
+      injected_failure: true,
+      counts: {
+        test_files: 1,
+        test_suites: 1,
+        passed_test_suites: 1,
+        failed_test_suites: 0,
+        tests: 3,
+        passed_tests: 3,
+        failed_tests: 0,
+      },
+    });
   });
 
   it("fails closed for a duplicate, omitted, or failed shard", () => {

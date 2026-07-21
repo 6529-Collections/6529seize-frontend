@@ -95,14 +95,35 @@ capture_manifest() {
   local output_dir="$5"
   local raw_file="$output_dir/manifest-$scope-$shard_index-of-$shard_count.raw"
   local json_file="$output_dir/manifest-$scope-$shard_index-of-$shard_count.json"
+  local exit_code
+  set +e
   if [ "$scope" = all ]; then
     run_unit_tests --listTests > "$raw_file"
+    exit_code=$?
+    set -e
+    if [ "$exit_code" -ne 0 ]; then
+      node "$EVIDENCE_TOOL" manifest-error \
+        --source "$source" --scope all --exit-code "$exit_code" \
+        "${EVIDENCE_IDENTITY_ARGS[@]}" \
+        --output "$output_dir/manifest-error-all.json"
+      return "$exit_code"
+    fi
     node "$EVIDENCE_TOOL" manifest \
       --source "$source" --scope all --repo-root "$REPO_ROOT" \
       "${EVIDENCE_IDENTITY_ARGS[@]}" \
       --raw "$raw_file" --output "$json_file"
   else
     run_unit_tests --listTests --shard="$shard_index/$shard_count" > "$raw_file"
+    exit_code=$?
+    set -e
+    if [ "$exit_code" -ne 0 ]; then
+      node "$EVIDENCE_TOOL" manifest-error \
+        --source "$source" --scope shard \
+        --shard-index "$shard_index" --shard-count "$shard_count" \
+        --exit-code "$exit_code" "${EVIDENCE_IDENTITY_ARGS[@]}" \
+        --output "$output_dir/manifest-error-shard-$shard_index-of-$shard_count.json"
+      return "$exit_code"
+    fi
     node "$EVIDENCE_TOOL" manifest \
       --source "$source" --scope shard --repo-root "$REPO_ROOT" \
       --shard-index "$shard_index" --shard-count "$shard_count" \
@@ -123,6 +144,7 @@ run_recorded_jest() {
   local started_at
   local completed_at
   local exit_code
+  local injected_failure=0
   local summary_exit_code
   raw_dir="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/release-bus-jest-raw.XXXXXX")"
   results="$raw_dir/jest-results.json"
@@ -135,6 +157,11 @@ run_recorded_jest() {
     --outputFile="$results"
   exit_code=$?
   set -e
+  if [ "${RELEASE_BUS_INJECT_SHARD_FAILURE:-0}" = 1 ] && \
+    [ "$shard_index" -eq "$shard_count" ]; then
+    injected_failure=1
+    if [ "$exit_code" -eq 0 ]; then exit_code=86; fi
+  fi
   completed_at="$(now_ms)"
   set +e
   node "$EVIDENCE_TOOL" jest \
@@ -146,6 +173,7 @@ run_recorded_jest() {
     --shard-count "$shard_count" \
     --duration-ms "$((completed_at - started_at))" \
     --exit-code "$exit_code" \
+    --injected-failure "$injected_failure" \
     "${EVIDENCE_IDENTITY_ARGS[@]}" \
     --output "$summary"
   summary_exit_code=$?
@@ -180,8 +208,7 @@ case "${1:-full}" in
   contract)
     run_unit_tests --runTestsByPath \
       __tests__/scripts/release-bus-frontend-gate.test.ts \
-      __tests__/scripts/release-bus-gate-evidence.test.ts \
-      __tests__/scripts/release-bus-shard-injection.test.ts
+      __tests__/scripts/release-bus-gate-evidence.test.ts
     ;;
   validate)
     run_validation
