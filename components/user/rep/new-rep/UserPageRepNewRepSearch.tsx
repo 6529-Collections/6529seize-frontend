@@ -34,46 +34,16 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
   isMemesNomineeLookalike,
-  isMemesNomineeSearchPrefix,
   MEMES_NOMINEE_CATEGORY,
   MEMES_NOMINEE_REQUIRED_REP,
 } from "@/helpers/waves/memes-nomination";
+import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
 
 const SEARCH_LENGTH = {
   MIN: 3,
   MAX: 100,
 };
 const SUBMISSION_GUIDANCE_ID = "grant-rep-submission-guidance";
-
-export function getGrantRepCategoriesToDisplay({
-  search,
-  categories,
-  includeTypedCategory,
-}: {
-  readonly search: string;
-  readonly categories: readonly string[];
-  readonly includeTypedCategory: boolean;
-}): string[] {
-  const items: string[] = [];
-  const shouldSurfaceSubmissionCategory =
-    includeTypedCategory && isMemesNomineeSearchPrefix(search);
-  if (shouldSurfaceSubmissionCategory && search !== MEMES_NOMINEE_CATEGORY) {
-    items.push(MEMES_NOMINEE_CATEGORY);
-  }
-  if (includeTypedCategory && !isHelpBotCreditRepCategory(search)) {
-    items.push(search);
-  }
-  items.push(
-    ...categories.filter(
-      (category) =>
-        category !== search &&
-        (!shouldSurfaceSubmissionCategory ||
-          category !== MEMES_NOMINEE_CATEGORY) &&
-        !isHelpBotCreditRepCategory(category)
-    )
-  );
-  return items;
-}
 
 const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
   if (error instanceof Error && error.message.trim()) {
@@ -562,14 +532,16 @@ export default function UserPageRepNewRepSearch({
         </div>
         <AnimatePresence mode="wait" initial={false}>
           {!!errorMsg && (
-            <UserPageRepNewRepError
-              msg={errorMsg}
-              showDetails={showErrorDetails}
-              closeError={() => {
-                setErrorMsg(null);
-                setShowErrorDetails(true);
-              }}
-            />
+            <div className="tw-mt-3 tw-px-4 tw-pb-4 sm:tw-px-6">
+              <UserPageRepNewRepError
+                msg={errorMsg}
+                showDetails={showErrorDetails}
+                closeError={() => {
+                  setErrorMsg(null);
+                  setShowErrorDetails(true);
+                }}
+              />
+            </div>
           )}
         </AnimatePresence>
       </div>

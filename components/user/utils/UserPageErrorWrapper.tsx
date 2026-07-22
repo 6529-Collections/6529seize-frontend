@@ -12,7 +12,7 @@ export default function UserPageErrorWrapper({
   return (
     <div
       role="alert"
-      className="tw-relative tw-w-full md:tw-w-auto tw-inline-flex tw-items-center tw-rounded-lg tw-bg-red/5 tw-border tw-border-solid tw-border-red/30 tw-p-4"
+      className="tw-relative tw-inline-flex tw-w-full tw-items-start tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/5 tw-p-4 md:tw-w-auto"
     >
       <div className="tw-absolute tw-right-2 tw-top-2">
         <button
@@ -38,9 +38,9 @@ export default function UserPageErrorWrapper({
           </svg>
         </button>
       </div>
-      <div className="tw-flex">
+      <div className="tw-flex tw-items-start">
         <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
+          className="tw-mt-0.5 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-red"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

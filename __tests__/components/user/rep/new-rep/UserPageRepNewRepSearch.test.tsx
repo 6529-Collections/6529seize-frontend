@@ -1,8 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageRepNewRepSearch, {
-  getGrantRepCategoriesToDisplay,
-} from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
+import UserPageRepNewRepSearch from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
+import { getGrantRepCategoriesToDisplay } from "@/components/user/rep/new-rep/grantRepCategoryOptions";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
