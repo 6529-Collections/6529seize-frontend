@@ -154,6 +154,9 @@ jobs:
           WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
+            git fetch --no-tags origin "$WORKFLOW_SHA"
           profile_tool="$RUNNER_TEMP/release-bus-build-profile.cjs"
           git show "$WORKFLOW_SHA:scripts/release-bus-build-profile.cjs" > "$profile_tool"
           node "$profile_tool" \

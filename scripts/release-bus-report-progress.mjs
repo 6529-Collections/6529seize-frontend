@@ -25,8 +25,12 @@ function stageStatus(name) {
   return OUTCOME_STATUS[outcome] ?? "PENDING";
 }
 
-function safeText(value) {
+function safeText(value, maximum = MAX_TEXT) {
   if (typeof value !== "string") return null;
+  const limit =
+    Number.isInteger(maximum) && maximum > 0
+      ? Math.min(maximum, MAX_TEXT)
+      : MAX_TEXT;
   const sanitized = Array.from(value)
     .map((character) => {
       const code = character.codePointAt(0) ?? 0;
@@ -34,7 +38,7 @@ function safeText(value) {
     })
     .join("")
     .trim();
-  return sanitized ? sanitized.slice(0, MAX_TEXT) : null;
+  return sanitized ? sanitized.slice(0, limit) : null;
 }
 
 function safeCount(value, maximum) {

@@ -76,6 +76,8 @@ describe("release bus optional Codex workflow", () => {
     expect(publish.run).toContain("403|5[0-9]{2}");
     expect(publish.run).toContain("requested url returned error");
     expect(publish.run).not.toContain("(^|[^0-9])(403|5[0-9]{2})");
+    expect(report.run).toContain("${PUBLISH_FAILURE_CLASS:-UNKNOWN}");
+    expect(report.run).toContain("${PUBLISH_RETRYABLE:-false}");
     expect(report.run).toContain("release_branch_publication");
   });
 });

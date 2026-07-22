@@ -77,6 +77,15 @@ describe("Release Bus frontend gate contract", () => {
     expect(authorization).toContain('"$api_url/deploy/release-bus/authorize"');
     expect(canary).toContain("release-bus-report-progress.mjs");
     expect(canary).toContain("Report sanitized terminal evidence");
+    const buildProfileStep = Object.values(canaryWorkflow.jobs ?? {})
+      .flatMap((job) => job.steps ?? [])
+      .find((step) => step.name === "Derive protected staging build profile");
+    expect(buildProfileStep?.run).toContain(
+      'git cat-file -e "$WORKFLOW_SHA^{commit}"'
+    );
+    expect(buildProfileStep?.run?.indexOf("git cat-file")).toBeLessThan(
+      buildProfileStep?.run?.indexOf("git show") ?? -1
+    );
     expect(reporter).toContain("/deploy/release-bus/report-progress");
   });
 

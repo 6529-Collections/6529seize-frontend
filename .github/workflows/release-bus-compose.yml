@@ -396,9 +396,9 @@ jobs:
             retryable=false
           else
             status=FAILED
-            failure_class="$PUBLISH_FAILURE_CLASS"
+            failure_class="${PUBLISH_FAILURE_CLASS:-UNKNOWN}"
             failure_phase=release_branch_publication
-            retryable="$PUBLISH_RETRYABLE"
+            retryable="${PUBLISH_RETRYABLE:-false}"
           fi
           payload="$(jq -n \
             --arg train_id "$TRAIN_ID" \
