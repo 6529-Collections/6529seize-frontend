@@ -14,7 +14,11 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ArrowUpRightIcon,
+} from "@heroicons/react/24/outline";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -55,6 +59,9 @@ type RepCategoryScope = "profile" | "wave";
 
 const REP_CATEGORY_LOCALE = DEFAULT_LOCALE;
 
+const CATEGORY_ACTION_LINK_CLASSNAME =
+  "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-iron-700 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60";
+
 const SCOPES: ReadonlyArray<CommonSelectItem<RepCategoryScope>> = [
   { key: "profile", label: "Profile REP", value: "profile" },
   { key: "wave", label: "Wave REP", value: "wave" },
@@ -65,6 +72,35 @@ const SORTS: ReadonlyArray<CommonSelectItem<GlobalRepCategorySort>> = [
   { key: "rep_asc", label: "REP impact low", value: "rep_asc" },
   { key: "recent", label: "Recent", value: "recent" },
 ];
+
+const PRESENTATION_CLASSNAME = `
+  [&_.rep-category-eyebrow]:!tw-mb-1 [&_.rep-category-eyebrow]:!tw-mt-0 [&_.rep-category-eyebrow]:!tw-text-xs [&_.rep-category-eyebrow]:!tw-font-semibold [&_.rep-category-eyebrow]:!tw-uppercase [&_.rep-category-eyebrow]:!tw-tracking-wider [&_.rep-category-eyebrow]:!tw-text-iron-500
+  [&_.rep-category-header-actions]:tw-items-center [&_.rep-category-layout]:!tw-gap-5 sm:[&_.rep-category-layout]:!tw-gap-6
+  [&_.rep-category-load-more]:!tw-rounded-lg [&_.rep-category-load-more]:!tw-border-iron-800 [&_.rep-category-load-more]:!tw-bg-iron-950 [&_.rep-category-load-more]:!tw-px-5 hover:[&_.rep-category-load-more]:!tw-bg-iron-900
+  [&_.rep-category-metric-label]:!tw-mb-1 [&_.rep-category-metric-label]:!tw-mt-0 [&_.rep-category-metric-label]:!tw-whitespace-nowrap [&_.rep-category-metric-label]:!tw-text-xs [&_.rep-category-metric-label]:!tw-font-semibold [&_.rep-category-metric-label]:!tw-uppercase [&_.rep-category-metric-label]:!tw-tracking-wider [&_.rep-category-metric-label]:!tw-text-iron-500
+  [&_.rep-category-metric-value]:!tw-mt-0 [&_.rep-category-metric-value]:!tw-whitespace-nowrap [&_.rep-category-metric-value]:!tw-text-sm [&_.rep-category-metric-value]:!tw-font-normal [&_.rep-category-metric-value]:!tw-leading-tight [&_.rep-category-metric-value]:!tw-tracking-tight [&_.rep-category-metric-value]:!tw-text-iron-200 sm:[&_.rep-category-metric-value]:!tw-text-lg lg:[&_.rep-category-metric-value]:!tw-text-2xl
+  [&_.rep-category-metric:first-child_.rep-category-metric-value]:!tw-font-semibold [&_.rep-category-metric:first-child_.rep-category-metric-value]:!tw-text-primary-300
+  [&_.rep-category-metric]:!tw-min-w-0 [&_.rep-category-metric]:!tw-rounded-lg [&_.rep-category-metric]:!tw-border-0 [&_.rep-category-metric]:!tw-bg-transparent [&_.rep-category-metric]:!tw-px-0 [&_.rep-category-metric]:!tw-py-0 sm:[&_.rep-category-metric]:!tw-px-1 lg:[&_.rep-category-metric]:!tw-px-2
+  [&_.rep-category-metrics]:!tw-grid-cols-2 [&_.rep-category-metrics]:!tw-gap-x-2 [&_.rep-category-metrics]:!tw-gap-y-4 sm:[&_.rep-category-metrics]:!tw-grid-cols-4 sm:[&_.rep-category-metrics]:!tw-gap-x-4 lg:[&_.rep-category-metrics]:!tw-gap-x-6 [&_.rep-category-overview]:!tw-gap-6
+  [&_.rep-category-wave-metrics]:!tw-grid-cols-2 sm:[&_.rep-category-wave-metrics]:!tw-grid-cols-3
+  [&_.rep-category-preview-grid]:!tw-grid-cols-1 [&_.rep-category-preview-grid]:!tw-gap-x-4 [&_.rep-category-preview-grid]:!tw-gap-y-8 sm:[&_.rep-category-preview-grid]:!tw-grid-cols-2 sm:[&_.rep-category-preview-grid]:!tw-gap-x-8 [&_.rep-category-preview-grid]:tw-border-b-0 [&_.rep-category-preview-grid]:tw-border-l-0 [&_.rep-category-preview-grid]:tw-border-r-0 [&_.rep-category-preview-grid]:tw-border-t [&_.rep-category-preview-grid]:tw-border-solid [&_.rep-category-preview-grid]:tw-border-iron-900 [&_.rep-category-preview-grid]:tw-pt-6
+  [&_.rep-category-preview-list]:!tw-gap-1.5 [&_.rep-category-preview-row]:!tw-gap-2 [&_.rep-category-preview-row]:!tw-rounded-lg [&_.rep-category-preview-row]:!tw-border [&_.rep-category-preview-row]:!tw-border-solid [&_.rep-category-preview-row]:!tw-border-iron-800/60 [&_.rep-category-preview-row]:!tw-bg-iron-900/40 [&_.rep-category-preview-row]:tw-transition-colors hover:[&_.rep-category-preview-row]:!tw-border-iron-800/80 hover:[&_.rep-category-preview-row]:!tw-bg-iron-900/50
+  [&_.rep-category-activity-row]:!tw-py-3
+  [&_.rep-category-preview-section]:tw-px-0 sm:[&_.rep-category-preview-section]:tw-px-1 lg:[&_.rep-category-preview-section]:tw-px-2 [&_.rep-category-preview-title]:!tw-mb-3 [&_.rep-category-preview-title]:!tw-mt-0 [&_.rep-category-preview-title]:!tw-text-xs [&_.rep-category-preview-title]:!tw-font-semibold [&_.rep-category-preview-title]:!tw-uppercase [&_.rep-category-preview-title]:!tw-tracking-wider [&_.rep-category-preview-title]:!tw-text-iron-500
+  [&_.rep-category-preview-value]:!tw-font-normal [&_.rep-category-preview-value]:!tw-tracking-tight [&_.rep-category-preview-value]:!tw-text-iron-400 [&_.rep-category-profile-avatar]:!tw-h-7 [&_.rep-category-profile-avatar]:!tw-w-7 sm:[&_.rep-category-profile-avatar]:!tw-h-8 sm:[&_.rep-category-profile-avatar]:!tw-w-8 [&_.rep-category-profile-name]:!tw-text-iron-200
+  md:[&_.rep-category-activity-grid]:!tw-gap-4
+  [&_.rep-category-scope]:tw-w-fit [&_.rep-category-scope]:tw-max-w-full
+  [&_.rep-category-section-tab]:!tw-rounded-none [&_.rep-category-section-tab]:!tw-border-x-0 [&_.rep-category-section-tab]:!tw-border-b-2 [&_.rep-category-section-tab]:!tw-border-t-0 [&_.rep-category-section-tab]:!tw-border-solid [&_.rep-category-section-tab]:!tw-border-transparent [&_.rep-category-section-tab]:!tw-bg-transparent [&_.rep-category-section-tab]:!tw-px-3 [&_.rep-category-section-tab]:!tw-py-3 [&_.rep-category-section-tab]:!tw-text-sm [&_.rep-category-section-tab]:!tw-font-medium [&_.rep-category-section-tab]:!tw-text-iron-500
+  [&_.rep-category-section-tab[aria-pressed=true]]:!tw-border-primary-300 [&_.rep-category-section-tab[aria-pressed=true]]:!tw-bg-transparent [&_.rep-category-section-tab[aria-pressed=true]]:!tw-text-white [&_.rep-category-section-tab[aria-pressed=true]]:!tw-shadow-none
+  [&_.rep-category-section-tab[aria-selected=true]]:!tw-border-primary-300 [&_.rep-category-section-tab[aria-selected=true]]:!tw-bg-transparent [&_.rep-category-section-tab[aria-selected=true]]:!tw-text-white [&_.rep-category-section-tab[aria-selected=true]]:!tw-shadow-none hover:[&_.rep-category-section-tab]:!tw-text-iron-200
+  [&_.rep-category-section-tabs]:!tw-gap-x-1 [&_.rep-category-section-tabs]:!tw-border-b [&_.rep-category-section-tabs]:!tw-border-iron-800 [&_.rep-category-section-tabs]:!tw-bg-transparent [&_.rep-category-section-tabs]:!tw-px-0 [&_.rep-category-section-tabs]:!tw-pb-0
+  [&_.rep-category-sort-row]:!tw-justify-start
+  [&_.rep-category-state]:!tw-rounded-xl [&_.rep-category-state]:!tw-border-iron-800/50 [&_.rep-category-state]:!tw-bg-iron-900/20
+  [&_.rep-category-table-frame]:!tw-rounded-xl [&_.rep-category-table-frame]:!tw-border-0 [&_.rep-category-table-frame]:!tw-bg-iron-950 [&_.rep-category-table-frame]:tw-ring-1 [&_.rep-category-table-frame]:tw-ring-inset [&_.rep-category-table-frame]:tw-ring-iron-900
+  [&_.rep-category-table-head]:!tw-bg-iron-900 [&_.rep-category-table-head]:!tw-text-[0.6875rem] [&_.rep-category-table-head]:!tw-font-medium [&_.rep-category-table-head]:!tw-tracking-wide [&_.rep-category-table-row]:tw-transition-colors hover:[&_.rep-category-table-row]:tw-bg-iron-900 [&_.rep-category-table]:!tw-bg-transparent
+  [&_.rep-category-title]:!tw-mt-0 [&_.rep-category-title]:!tw-text-xl [&_.rep-category-title]:!tw-font-medium [&_.rep-category-title]:!tw-leading-tight [&_.rep-category-title]:!tw-tracking-tight [&_.rep-category-title]:!tw-text-iron-50 sm:[&_.rep-category-title]:!tw-text-2xl
+  [&_.rep-category-wave-content]:!tw-gap-6 [&_.rep-category-wave-controls]:!tw-border-0 [&_.rep-category-wave-link]:!tw-text-iron-200
+`;
 
 function ProfileCell({
   profile,
@@ -80,7 +116,7 @@ function ProfileCell({
       <Link
         href={getProfileHref(profile)}
         prefetch={false}
-        className={`rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline ${
+        className={`rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline tw-decoration-iron-400/80 tw-underline-offset-2 hover:tw-underline focus-visible:tw-underline ${
           compact ? "tw-gap-2" : "tw-gap-3"
         }`}
       >
@@ -100,7 +136,7 @@ function ProfileCell({
             </span>
           )}
         </span>
-        <span className="rep-category-profile-name tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span className="rep-category-profile-name tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
           {display}
         </span>
       </Link>
@@ -214,7 +250,7 @@ function OverviewContent({ category }: { readonly category: string }) {
 
   return (
     <div className="rep-category-overview tw-flex tw-flex-col tw-gap-6">
-      <div className="rep-category-metrics tw-grid tw-grid-cols-2 tw-gap-3 lg:tw-grid-cols-4">
+      <div className="rep-category-metrics tw-grid tw-w-full tw-max-w-3xl tw-grid-cols-2 tw-gap-3 lg:tw-grid-cols-4">
         <MetricTile label="Total REP" value={overview.total_rep} />
         <MetricTile label="Givers" value={overview.giver_count} />
         <MetricTile label="Recipients" value={overview.recipient_count} />
@@ -255,20 +291,22 @@ function OverviewContent({ category }: { readonly category: string }) {
         </MiniList>
       </div>
 
-      <MiniList title="Recent activity">
-        {overview.recently_updated.length > 0 ? (
-          overview.recently_updated.map((item) => (
-            <RatingMiniRow
-              key={`${item.giver.id}-${item.recipient.id}-${item.last_modified}`}
-              item={item}
-            />
-          ))
-        ) : (
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-            No recent activity found.
-          </p>
-        )}
-      </MiniList>
+      <div className="tw-pt-6">
+        <MiniList title="Recent activity">
+          {overview.recently_updated.length > 0 ? (
+            overview.recently_updated.map((item) => (
+              <RatingMiniRow
+                key={`${item.giver.id}-${item.recipient.id}-${item.last_modified}`}
+                item={item}
+              />
+            ))
+          ) : (
+            <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+              No recent activity found.
+            </p>
+          )}
+        </MiniList>
+      </div>
     </div>
   );
 }
@@ -546,11 +584,13 @@ export default function GlobalRepCategoryDetail({
   mode = "page",
   showFullPageLink = false,
   showSearchLink = false,
+  className = "",
 }: {
   readonly category: string;
   readonly mode?: "page" | "dialog";
   readonly showFullPageLink?: boolean;
   readonly showSearchLink?: boolean;
+  readonly className?: string;
 }) {
   const [activeTab, setActiveTab] = useState<GlobalRepCategoryTab>("overview");
   const [sort, setSort] = useState<GlobalRepCategorySort>("rep_desc");
@@ -558,9 +598,9 @@ export default function GlobalRepCategoryDetail({
 
   return (
     <div
-      className={`rep-category-dialog-content tailwind-scope tw-text-iron-100 ${
+      className={`rep-category-dialog-content tailwind-scope tw-text-iron-100 ${PRESENTATION_CLASSNAME} ${
         mode === "page" ? "tw-py-8" : ""
-      }`}
+      } ${className}`}
     >
       <div className="rep-category-layout tw-flex tw-flex-col tw-gap-5">
         <div className="rep-category-header tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
@@ -580,8 +620,12 @@ export default function GlobalRepCategoryDetail({
             <div className="rep-category-header-actions tw-flex tw-flex-wrap tw-gap-2">
               <Link
                 href="/rep/categories"
-                className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] hover:tw-text-white"
+                className={CATEGORY_ACTION_LINK_CLASSNAME}
               >
+                <ArrowLeftIcon
+                  aria-hidden="true"
+                  className="tw-size-3.5 tw-flex-shrink-0"
+                />
                 Back to category search
               </Link>
             </div>
@@ -602,9 +646,13 @@ export default function GlobalRepCategoryDetail({
           {showFullPageLink && (
             <Link
               href={getRepCategoryPath(category)}
-              className="rep-category-full-page tw-text-primary-200 hover:tw-text-primary-100 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15"
+              className={CATEGORY_ACTION_LINK_CLASSNAME}
             >
               Open full page
+              <ArrowUpRightIcon
+                aria-hidden="true"
+                className="tw-size-3.5 tw-flex-shrink-0"
+              />
             </Link>
           )}
         </div>
