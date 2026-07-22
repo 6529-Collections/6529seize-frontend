@@ -31,7 +31,12 @@ describe("Release Bus frontend gate contract", () => {
     };
     jobs?: Record<
       string,
-      { steps?: WorkflowStep[]; "timeout-minutes"?: number }
+      {
+        needs?: string[] | string;
+        outputs?: Record<string, string>;
+        steps?: WorkflowStep[];
+        "timeout-minutes"?: number;
+      }
     >;
   };
   const preflightWorkflow = parseYaml(preflight) as {
@@ -85,6 +90,34 @@ describe("Release Bus frontend gate contract", () => {
     );
     expect(buildProfileStep?.run?.indexOf("git cat-file")).toBeLessThan(
       buildProfileStep?.run?.indexOf("git show") ?? -1
+    );
+    const buildProfileJob = canaryWorkflow.jobs?.build_profile;
+    const authorizeJob = canaryWorkflow.jobs?.authorize;
+    expect(buildProfileJob?.outputs).toBeUndefined();
+    expect(authorizeJob?.needs).toBe("build_profile");
+    expect(buildProfileJob?.steps?.map((step) => step.name)).toEqual(
+      expect.arrayContaining([
+        "Derive protected staging build profile",
+        "Upload protected build profile",
+      ])
+    );
+    expect(authorizeJob?.steps?.map((step) => step.name)).toEqual(
+      expect.arrayContaining([
+        "Download protected build profile",
+        "Verify protected staging build profile",
+      ])
+    );
+    expect(
+      authorizeJob?.steps?.some((step) =>
+        Object.keys(step.env ?? {}).includes("ALCHEMY_API_KEY")
+      )
+    ).toBe(false);
+    const canaryFetches = canary
+      .split("\n")
+      .filter((line) => line.includes("git fetch --no-tags"));
+    expect(canaryFetches.length).toBeGreaterThan(0);
+    expect(canaryFetches.every((line) => line.includes("--depth=1"))).toBe(
+      true
     );
     expect(reporter).toContain("/deploy/release-bus/report-progress");
   });
@@ -312,7 +345,9 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase typecheck');
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase build');
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" jest');
-    expect(canary).toContain('git fetch --no-tags origin "$BASE_SHA"');
+    expect(canary).toContain(
+      'git fetch --no-tags --depth=1 origin "$BASE_SHA"'
+    );
     expect(canary).toContain('git show "$WORKFLOW_SHA:$file"');
     expect(canary).toContain("Derive and verify immutable gate fingerprint");
     expect(canary).toContain("RELEASE_BUS_GATE_FINGERPRINT=$GATE_FINGERPRINT");
