@@ -206,7 +206,15 @@ export function getAppMetadata(
     title,
     description: description ? `${description} | ${domain}` : domain,
     icons: {
-      icon: environment.favicon,
+      // Keep SVG last so supporting browsers prefer it over the PNG fallback.
+      icon: [
+        {
+          url: environment.faviconFallback,
+          type: "image/png",
+          sizes: "96x96",
+        },
+        { url: environment.favicon, type: "image/svg+xml", sizes: "any" },
+      ],
     },
     openGraph: {
       type: "website",

@@ -10,7 +10,8 @@ describe("getAppEnvironment", () => {
         isProduction: true,
         title: "6529.io",
         badge: null,
-        favicon: "/favicon.ico",
+        favicon: "/favicon.svg",
+        faviconFallback: "/favicon.png",
       });
     }
   );
@@ -24,7 +25,8 @@ describe("getAppEnvironment", () => {
         isProduction: true,
         title: "6529.io",
         badge: null,
-        favicon: "/favicon.ico",
+        favicon: "/favicon.svg",
+        faviconFallback: "/favicon.png",
       });
     }
   );
@@ -36,7 +38,8 @@ describe("getAppEnvironment", () => {
       isProduction: false,
       title: "6529 Staging",
       badge: "STG",
-      favicon: "/favicon-staging.ico",
+      favicon: "/favicon-staging.svg",
+      faviconFallback: "/favicon-staging.png",
     });
   });
 
@@ -53,7 +56,8 @@ describe("getAppEnvironment", () => {
         isProduction: false,
         title,
         badge,
-        favicon: "/favicon-alt.ico",
+        favicon: "/favicon-alt.svg",
+        faviconFallback: "/favicon-alt.png",
       });
     }
   );
@@ -65,7 +69,8 @@ describe("getAppEnvironment", () => {
       isProduction: false,
       title: "6529 Preview",
       badge: "PREVIEW",
-      favicon: "/favicon-alt.ico",
+      favicon: "/favicon-alt.svg",
+      faviconFallback: "/favicon-alt.png",
     });
   });
 
@@ -78,7 +83,8 @@ describe("getAppEnvironment", () => {
       isProduction: false,
       title: "6529 Localhost",
       badge,
-      favicon: "/favicon-alt.ico",
+      favicon: "/favicon-alt.svg",
+      faviconFallback: "/favicon-alt.png",
     });
   });
 });

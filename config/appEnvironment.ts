@@ -10,6 +10,7 @@ interface AppEnvironment {
   readonly title: string;
   readonly badge: string | null;
   readonly favicon: string;
+  readonly faviconFallback: string;
 }
 
 const PRODUCTION_ENVIRONMENT: AppEnvironment = {
@@ -18,7 +19,8 @@ const PRODUCTION_ENVIRONMENT: AppEnvironment = {
   isProduction: true,
   title: "6529.io",
   badge: null,
-  favicon: "/favicon.ico",
+  favicon: "/favicon.svg",
+  faviconFallback: "/favicon.png",
 };
 
 function getEnvironmentName(firstLabel: string): string {
@@ -54,18 +56,18 @@ function getEnvironmentBadge({
   return normalizedLabel.toUpperCase();
 }
 
-function getFavicon(hostname: string, isProduction: boolean): string {
+function getFaviconBasename(hostname: string, isProduction: boolean): string {
   // The dedicated staging artwork belongs only to the shared staging host.
   // Personal and future non-production hosts intentionally use the alt icon.
   if (hostname === "staging.6529.io") {
-    return "/favicon-staging.ico";
+    return "/favicon-staging";
   }
 
   if (isProduction) {
-    return "/favicon.ico";
+    return "/favicon";
   }
 
-  return "/favicon-alt.ico";
+  return "/favicon-alt";
 }
 
 export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
@@ -84,6 +86,7 @@ export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
   const environmentName = isLocal
     ? "Localhost"
     : getEnvironmentName(firstLabel);
+  const faviconBasename = getFaviconBasename(hostname, isProduction);
 
   return {
     hostname,
@@ -97,6 +100,7 @@ export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
           isLocal,
           port: url.port,
         }),
-    favicon: getFavicon(hostname, isProduction),
+    favicon: `${faviconBasename}.svg`,
+    faviconFallback: `${faviconBasename}.png`,
   };
 }

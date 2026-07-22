@@ -69,7 +69,10 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
     it("includes favicon icon", () => {
       const metadata = getAppMetadata();
       expect(metadata.icons).toEqual({
-        icon: "/favicon.ico",
+        icon: [
+          { url: "/favicon.png", type: "image/png", sizes: "96x96" },
+          { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+        ],
       });
     });
 
@@ -102,19 +105,32 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
     });
 
     it.each([
-      ["https://staging.6529.io", "6529 Staging", "/favicon-staging.ico"],
-      ["https://prxtstaging.6529.io", "6529 PRXTStaging", "/favicon-alt.ico"],
-      ["http://localhost:3001", "6529 Localhost", "/favicon-alt.ico"],
+      ["https://staging.6529.io", "6529 Staging", "favicon-staging"],
+      ["https://prxtstaging.6529.io", "6529 PRXTStaging", "favicon-alt"],
+      ["http://localhost:3001", "6529 Localhost", "favicon-alt"],
     ])(
       "derives metadata from %s",
-      (baseEndpoint, expectedTitle, expectedFavicon) => {
+      (baseEndpoint, expectedTitle, expectedFaviconBasename) => {
         publicEnv.BASE_ENDPOINT = baseEndpoint;
         const metadata = getAppMetadata({ description: "Environment test" });
         const hostname = new URL(baseEndpoint).hostname;
 
         expect(metadata.title).toBe(expectedTitle);
         expect(metadata.description).toBe(`Environment test | ${hostname}`);
-        expect(metadata.icons).toEqual({ icon: expectedFavicon });
+        expect(metadata.icons).toEqual({
+          icon: [
+            {
+              url: `/${expectedFaviconBasename}.png`,
+              type: "image/png",
+              sizes: "96x96",
+            },
+            {
+              url: `/${expectedFaviconBasename}.svg`,
+              type: "image/svg+xml",
+              sizes: "any",
+            },
+          ],
+        });
         expect(metadata.openGraph?.description).toBe(
           `Environment test | ${hostname}`
         );
