@@ -17,6 +17,7 @@ describe("Release Bus preflight evidence", () => {
     "scripts/release-bus-authorize-operation.sh": "authorize",
     "scripts/release-bus-frontend-gate.sh": "gate",
     "scripts/release-bus-gate-evidence.cjs": "gate evidence",
+    "scripts/release-bus-install-dependencies.cjs": "installer",
     "scripts/release-bus-preflight-evidence.cjs": "preflight evidence",
     "scripts/release-bus-report-progress.mjs": "reporter",
   };
