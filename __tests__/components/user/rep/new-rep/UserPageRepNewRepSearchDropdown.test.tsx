@@ -4,7 +4,6 @@ import UserPageRepNewRepSearchDropdown from "@/components/user/rep/new-rep/UserP
 import { RepSearchState } from "@/components/user/rep/new-rep/rep-search-types";
 
 const defaultProps = {
-  listId: "rep-category-options",
   minSearchLength: 3,
   maxSearchLength: 100,
   onRepSelect: jest.fn(),
@@ -15,75 +14,54 @@ describe("UserPageRepNewRepSearchDropdown", () => {
     defaultProps.onRepSelect.mockClear();
   });
 
-  it("groups similar spellings under the selected existing category", async () => {
-    const option = {
-      kind: "existing" as const,
-      category: "top artist",
-      aliases: ["Top Artist"],
-      selectionReason: "most-active" as const,
-    };
+  it("renders compact category pills and handles selection", async () => {
     render(
       <UserPageRepNewRepSearchDropdown
         {...defaultProps}
-        options={[option]}
+        categories={["Art", "NFT"]}
         state={RepSearchState.HAVE_RESULTS}
       />
     );
 
-    expect(screen.getByText("Existing category")).toBeInTheDocument();
-    expect(
-      screen.getByText("Most active spelling among similar categories.")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Top Artist")).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole("option"));
-    expect(defaultProps.onRepSelect).toHaveBeenCalledWith(option);
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(2);
+    await userEvent.click(buttons[1]!);
+    expect(defaultProps.onRepSelect).toHaveBeenCalledWith("NFT");
   });
 
-  it("identifies the category used by Memes submission eligibility", () => {
+  it("marks only the exact Memes submission category", () => {
     render(
       <UserPageRepNewRepSearchDropdown
         {...defaultProps}
-        options={[
-          {
-            kind: "existing",
-            category: "MemesNominee",
-            aliases: ["Memes Nominee"],
-            selectionReason: "submission",
-          },
-        ]}
+        categories={["MemesNominee", "Memes Nominee"]}
         state={RepSearchState.HAVE_RESULTS}
       />
     );
 
+    expect(screen.getByText("Counts for submissions")).toBeInTheDocument();
     expect(
-      screen.getByText("Counts toward Memes submission eligibility.")
-    ).toBeInTheDocument();
-  });
-
-  it("presents new category creation as a separate deliberate action", () => {
-    render(
-      <UserPageRepNewRepSearchDropdown
-        {...defaultProps}
-        options={[{ kind: "new", category: "Fresh Category" }]}
-        state={RepSearchState.HAVE_RESULTS}
-      />
+      screen.getByRole("button", {
+        name: "MemesNominee Counts for submissions",
+      })
+    ).toHaveClass(
+      "tw-border-emerald-500/30",
+      "tw-bg-emerald-500/10",
+      "tw-text-emerald-50"
     );
-
-    expect(screen.getByText("Create new category")).toBeInTheDocument();
-    expect(screen.getByText("Fresh Category")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "No equivalent category exists. This exact spelling creates a separate category."
-      )
-    ).toBeInTheDocument();
+      screen.getByRole("button", { name: "Memes Nominee" })
+    ).not.toHaveClass(
+      "tw-border-emerald-500/30",
+      "tw-bg-emerald-500/10",
+      "tw-text-emerald-50"
+    );
   });
 
-  it("shows minimum, maximum, loading, and error states", () => {
+  it("shows minimum, maximum, and loading states", () => {
     const { rerender } = render(
       <UserPageRepNewRepSearchDropdown
         {...defaultProps}
-        options={[]}
+        categories={[]}
         state={RepSearchState.MIN_LENGTH_ERROR}
       />
     );
@@ -92,7 +70,7 @@ describe("UserPageRepNewRepSearchDropdown", () => {
     rerender(
       <UserPageRepNewRepSearchDropdown
         {...defaultProps}
-        options={[]}
+        categories={[]}
         state={RepSearchState.MAX_LENGTH_ERROR}
       />
     );
@@ -103,23 +81,12 @@ describe("UserPageRepNewRepSearchDropdown", () => {
     rerender(
       <UserPageRepNewRepSearchDropdown
         {...defaultProps}
-        options={[]}
+        categories={[]}
         state={RepSearchState.LOADING}
       />
     );
     expect(
       screen.getByText("Finding existing categories...")
-    ).toBeInTheDocument();
-
-    rerender(
-      <UserPageRepNewRepSearchDropdown
-        {...defaultProps}
-        options={[]}
-        state={RepSearchState.ERROR}
-      />
-    );
-    expect(
-      screen.getByText("Could not search REP categories. Please try again.")
     ).toBeInTheDocument();
   });
 });

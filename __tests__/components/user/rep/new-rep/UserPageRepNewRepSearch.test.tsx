@@ -1,7 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageRepNewRepSearch from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
-import type { GrantRepCategoryOption } from "@/components/user/rep/new-rep/grantRepCategorySearch";
+import UserPageRepNewRepSearch, {
+  getGrantRepCategoriesToDisplay,
+} from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -16,17 +17,18 @@ jest.mock(
   () =>
     (props: {
       readonly state: string;
-      readonly options: readonly GrantRepCategoryOption[];
-      readonly onRepSelect: (option: GrantRepCategoryOption) => void;
+      readonly categories: readonly string[];
+      readonly onRepSelect: (category: string) => void;
     }) => (
       <div data-testid="dropdown">
         <span>{props.state}</span>
-        {props.options.map((option) => (
+        {props.categories.map((category) => (
           <button
-            key={`${option.kind}-${option.category}`}
-            onClick={() => props.onRepSelect(option)}
+            key={category}
+            type="button"
+            onClick={() => props.onRepSelect(category)}
           >
-            {option.category}
+            {category}
           </button>
         ))}
       </div>
@@ -51,20 +53,12 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
-const existingOption = {
-  kind: "existing" as const,
-  category: "MemesNominee",
-  aliases: ["Memes Nominee"],
-  selectionReason: "submission" as const,
-};
-
 describe("UserPageRepNewRepSearch", () => {
   beforeEach(() => {
     (commonApiFetch as jest.Mock).mockResolvedValue(true);
     (useQuery as jest.Mock).mockReturnValue({
-      isError: false,
       isFetching: false,
-      data: [existingOption],
+      data: ["MemesNominee"],
     });
   });
 
@@ -85,7 +79,7 @@ describe("UserPageRepNewRepSearch", () => {
     expect(screen.getByText("LOADING")).toBeInTheDocument();
   });
 
-  it("selects and confirms the exact existing category", async () => {
+  it("keeps the production select, edit, and search-again interaction", async () => {
     const user = userEvent.setup();
     render(
       <UserPageRepNewRepSearch
@@ -93,22 +87,56 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
+    const input = screen.getByPlaceholderText("Category to grant REP for");
 
-    await user.type(
-      screen.getByPlaceholderText("Category to grant REP for"),
-      "Memes Nominee"
+    await user.type(input, "meme");
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "MemesNominee" })).toBeVisible()
     );
-    await waitFor(() => screen.getByRole("button", { name: "MemesNominee" }));
     await user.click(screen.getByRole("button", { name: "MemesNominee" }));
+    await waitFor(() => expect(input).toHaveValue("MemesNominee"));
 
-    await waitFor(() => {
-      expect(
-        screen.getByText("Using existing category: MemesNominee.")
-      ).toBeInTheDocument();
-    });
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, "meme");
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "MemesNominee" })).toBeVisible()
+    );
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "/rep/categories/availability",
       params: { param: "MemesNominee" },
     });
+  });
+
+  it("surfaces only the exact submission category ahead of its presentation variant", () => {
+    expect(
+      getGrantRepCategoriesToDisplay({
+        search: "Memes-Nominee",
+        categories: [],
+        includeTypedCategory: true,
+      })
+    ).toEqual(["MemesNominee", "Memes-Nominee"]);
+
+    expect(
+      getGrantRepCategoriesToDisplay({
+        search: "memes nomin",
+        categories: ["Memes Nominee", "Memes nominee"],
+        includeTypedCategory: true,
+      })
+    ).toEqual([
+      "MemesNominee",
+      "memes nomin",
+      "Memes Nominee",
+      "Memes nominee",
+    ]);
+
+    expect(
+      getGrantRepCategoriesToDisplay({
+        search: "Top Artist",
+        categories: ["top artist"],
+        includeTypedCategory: true,
+      })
+    ).toEqual(["Top Artist", "top artist"]);
   });
 });

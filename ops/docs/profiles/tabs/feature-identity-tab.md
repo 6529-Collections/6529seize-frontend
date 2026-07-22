@@ -84,29 +84,30 @@ Mobile (`< lg`):
 ### Grant Rep Dialog
 
 - Category search accepts 3-100 characters.
-- Results appear after a short debounce and prioritize existing categories.
-- Search checks compact, spaced, case, and punctuation variants so trivial
-  spelling differences resolve to the same existing category group.
-- When equivalent categories already exist, the dialog shows one recommended
-  spelling instead of presenting every look-alike as a separate choice. The
-  exact `MemesNominee` category is identified as counting toward Memes
-  submission eligibility; other duplicate groups use their most active
-  existing spelling. Alternate spellings remain visible as grouped context but
-  are not selectable.
-- `Create new category` appears as a separate final action only when no
-  equivalent existing category is found. It explains that the exact spelling
-  creates a separate category.
-- Selecting an option validates availability, then confirms whether the dialog
-  will use an existing category or create a new one.
-- Pressing Down Arrow from the search field moves focus to the first result.
-  Pressing Enter selects an equivalent existing category; creating a new
-  category requires choosing the explicit creation action.
+- Results appear after a short debounce as compact category pills, including the
+  typed category and matching categories returned by the existing search.
+- Similar categories remain independent and selectable. The exact
+  `MemesNominee` pill is marked as counting toward the 50,000 REP submission
+  requirement. When the typed value differs from it only by capitalization,
+  spacing, or punctuation, the exact pill is surfaced first; the typed value
+  remains available and all other category pills keep their existing behavior.
+- Selecting an option validates availability before enabling the REP amount.
 - If availability fails, inline error is shown.
 - Editing text after category selection clears selected category and amount.
 - Amount accepts integers.
 - In non-proxy mode, amount clamps to allowed min/max on blur.
 - `Grant Rep` stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
+
+### Localization fallback debt
+
+- Surface: the Grant REP dialog under the profile Identity tab.
+- Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
+  source copy in locales without translated entries.
+- User impact: supported non-English locales can see English fallback copy while
+  the complete grant flow remains functional.
+- Owner/follow-up: frontend localization maintainers can add translated entries
+  during the next profile localization pass.
 
 ## NIC and Statements Behavior
 
@@ -156,9 +157,8 @@ Statement ownership in this tab:
 
 - `Received` and `Given` keep separate expanded-category counts while you stay
   on the same profile route.
-- Category matching ignores whitespace, capitalization, and punctuation when
-  deciding whether an equivalent existing category already exists, but keeps
-  the selected category's exact stored spelling when Rep is granted.
+- Category spelling remains exact. Similar spellings stay separate and
+  selectable, matching the existing Grant REP behavior.
 - Mobile keyboards do not auto-capitalize or autocorrect category input.
 - Opening a different profile resets the visible category counts back to that
   profile's initial list state.
@@ -170,8 +170,6 @@ Statement ownership in this tab:
 ## Failure and Recovery
 
 - Rep submit failures show an error toast and keep dialog values.
-- Category search failures show an inline retry message without offering the
-  typed text as a new category. Edit the search or try again.
 - NIC submit failures show an error toast and keep entered value.
 - If loading a later categories page fails, already visible categories stay on
   screen; use `Load more` again or refresh the route to retry.
