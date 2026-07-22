@@ -39,6 +39,9 @@ const FRONTEND_PREFLIGHT_WORKFLOW =
   ".github/workflows/release-bus-preflight.yml";
 const FRONTEND_BASE_IDENTITY_WORKFLOW =
   ".github/workflows/release-bus-base-evidence-identity.yml";
+const FRONTEND_STAGING_DEPLOY_WORKFLOW =
+  ".github/workflows/release-bus-deploy-staging.yml";
+const FRONTEND_STAGING_E2E_WORKFLOW = ".github/workflows/staging-e2e.yml";
 const FRONTEND_GATE_BASE_FILES = [
   "bin/6529",
   "jest.config.js",
@@ -151,6 +154,8 @@ function frontendGateContract({
     FRONTEND_GATE_WORKFLOW,
     FRONTEND_PREFLIGHT_WORKFLOW,
     FRONTEND_BASE_IDENTITY_WORKFLOW,
+    FRONTEND_STAGING_DEPLOY_WORKFLOW,
+    FRONTEND_STAGING_E2E_WORKFLOW,
     ...FRONTEND_GATE_TOOLING_FILES,
   ];
   for (const file of FRONTEND_GATE_BASE_FILES) {
@@ -247,6 +252,8 @@ function contractFromRepository(args) {
       FRONTEND_GATE_WORKFLOW,
       FRONTEND_PREFLIGHT_WORKFLOW,
       FRONTEND_BASE_IDENTITY_WORKFLOW,
+      FRONTEND_STAGING_DEPLOY_WORKFLOW,
+      FRONTEND_STAGING_E2E_WORKFLOW,
       ...FRONTEND_GATE_TOOLING_FILES,
     ].map((file) => [
       file,

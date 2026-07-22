@@ -45,6 +45,8 @@ describe("Release Bus gate evidence", () => {
       ".github/workflows/release-bus-preflight.yml": "preflight workflow",
       ".github/workflows/release-bus-base-evidence-identity.yml":
         "identity workflow",
+      ".github/workflows/release-bus-deploy-staging.yml": "deploy workflow",
+      ".github/workflows/staging-e2e.yml": "e2e workflow",
       "scripts/release-bus-authorize-operation.sh": "authorize",
       "scripts/release-bus-build-profile.cjs": "profile",
       "scripts/release-bus-frontend-gate.sh": "gate",
@@ -67,9 +69,9 @@ describe("Release Bus gate evidence", () => {
     expect(frontendGateContract(input)).toEqual(baseline);
     expect(baseline).toMatchObject({
       behavior_digest:
-        "031c5c57f19de55c03680d1b2b58e7cca77b0e93014793c7232f2ab1e7708bd8",
+        "44b542ea4662499111b042348135517772ac467565f24f0142ffcb2346f9d171",
       gate_fingerprint:
-        "a2d08ac293a002c7f121b6ca5283e6dbdf1412e2ebcc1bfe96a2beca7e0953fd",
+        "cb1daea78be19e5be1302b0015986a2497bea560f99c8884ae971507caea1764",
       workflow_digest:
         "da7f739f627198465eeab537a6f7a435dc4a0c332f9e4a8462293eb3f4ab7ee0",
     });
