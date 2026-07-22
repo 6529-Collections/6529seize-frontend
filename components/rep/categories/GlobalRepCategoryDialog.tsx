@@ -32,7 +32,6 @@ export default function GlobalRepCategoryDialog({
       <div
         className={`
           tw-px-6 sm:tw-px-10
-          [&_.rep-category-full-page]:!tw-h-9 [&_.rep-category-full-page]:!tw-rounded-lg [&_.rep-category-full-page]:!tw-border-iron-800 [&_.rep-category-full-page]:!tw-bg-iron-950 [&_.rep-category-full-page]:!tw-px-3 [&_.rep-category-full-page]:!tw-py-0 [&_.rep-category-full-page]:!tw-text-xs [&_.rep-category-full-page]:!tw-font-medium [&_.rep-category-full-page]:!tw-text-iron-300 sm:[&_.rep-category-full-page]:!tw-h-10 hover:[&_.rep-category-full-page]:!tw-bg-iron-900 hover:[&_.rep-category-full-page]:!tw-text-white
           [&_.rep-category-header]:tw-pr-14 sm:[&_.rep-category-header]:tw-pr-16
         `}
       >

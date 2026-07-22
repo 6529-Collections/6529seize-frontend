@@ -55,6 +55,9 @@ type RepCategoryScope = "profile" | "wave";
 
 const REP_CATEGORY_LOCALE = DEFAULT_LOCALE;
 
+const CATEGORY_ACTION_LINK_CLASSNAME =
+  "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-iron-700 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60";
+
 const SCOPES: ReadonlyArray<CommonSelectItem<RepCategoryScope>> = [
   { key: "profile", label: "Profile REP", value: "profile" },
   { key: "wave", label: "Wave REP", value: "wave" },
@@ -613,7 +616,7 @@ export default function GlobalRepCategoryDetail({
             <div className="rep-category-header-actions tw-flex tw-flex-wrap tw-gap-2">
               <Link
                 href="/rep/categories"
-                className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] hover:tw-text-white"
+                className={CATEGORY_ACTION_LINK_CLASSNAME}
               >
                 Back to category search
               </Link>
@@ -635,7 +638,7 @@ export default function GlobalRepCategoryDetail({
           {showFullPageLink && (
             <Link
               href={getRepCategoryPath(category)}
-              className="rep-category-full-page tw-text-primary-200 hover:tw-text-primary-100 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-bg-primary-500/15"
+              className={CATEGORY_ACTION_LINK_CLASSNAME}
             >
               Open full page
             </Link>
