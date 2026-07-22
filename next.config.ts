@@ -68,10 +68,15 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
     // Compose config
     const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
+    const developmentDistDir =
+      phase === PHASE_DEVELOPMENT_SERVER
+        ? process.env["NEXT_DEV_DIST_DIR"]?.trim()
+        : undefined;
 
     return {
       ...sharedConfig(publicEnv, assetPrefix),
       ...standaloneOutput,
+      ...(developmentDistDir ? { distDir: developmentDistDir } : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
