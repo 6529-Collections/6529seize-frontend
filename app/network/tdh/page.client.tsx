@@ -1,234 +1,328 @@
 "use client";
 
-import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
-import { useSetTitle } from "@/contexts/TitleContext";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { faArrowTrendUp, faChartLine } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import { useEffect, type ReactNode } from "react";
 
-const BUTTON_LINK_CLASSES =
-  "tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline";
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
+import {
+  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
+  NETWORK_REFERENCE_PAGE_CLASSES,
+} from "@/components/network/networkPageLayoutClasses";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import {
+  formatDate,
+  formatInteger,
+  formatNumber,
+  formatTime,
+} from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+
+import TDHCurrentRules from "./TDHCurrentRules";
+
+type TdhMessageKey = Extract<MessageKey, `network.tdh.${string}`>;
+
+interface EditionExample {
+  readonly editionSize: number;
+  readonly nameKey: TdhMessageKey;
+  readonly weight: number;
+}
+
+interface RelatedDestination {
+  readonly actionKey: TdhMessageKey;
+  readonly descriptionKey: TdhMessageKey;
+  readonly href: string;
+  readonly icon: IconDefinition;
+  readonly iconClassName: string;
+  readonly iconWrapperClassName: string;
+  readonly titleKey: TdhMessageKey;
+}
+
+const EFFECTIVE_DATE = Date.UTC(2025, 9, 10);
+const DAILY_SNAPSHOT_TIME = Date.UTC(2025, 0, 1, 0, 0);
+
+const EDITORIAL_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
+const SECTION_HEADING_CLASS =
+  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+const PANEL_CLASS =
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60";
+const INTERACTIVE_PANEL_CLASS = `${PANEL_CLASS} tw-transform tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-iron-900/60 motion-reduce:tw-transition-none`;
+
+const EDITION_EXAMPLES: readonly EditionExample[] = [
+  {
+    editionSize: 1_000,
+    nameKey: "network.tdh.how.edition.seizingJpg",
+    weight: 3.941,
+  },
+  {
+    editionSize: 300,
+    nameKey: "network.tdh.how.edition.nakamotoFreedom",
+    weight: 13.136,
+  },
+  {
+    editionSize: 101,
+    nameKey: "network.tdh.how.edition.gradients",
+    weight: 39.02,
+  },
+] as const;
+
+const RELATED_DESTINATIONS: readonly RelatedDestination[] = [
+  {
+    actionKey: "network.tdh.related.stats.action",
+    descriptionKey: "network.tdh.related.stats.description",
+    href: "/network/health/network-tdh",
+    icon: faChartLine,
+    iconClassName: "tw-text-[#00f0ff]",
+    iconWrapperClassName: "tw-bg-[#00f0ff]/10",
+    titleKey: "network.tdh.related.stats.title",
+  },
+  {
+    actionKey: "network.tdh.related.levels.action",
+    descriptionKey: "network.tdh.related.levels.description",
+    href: "/network/levels",
+    icon: faArrowTrendUp,
+    iconClassName: "tw-text-[#8f5cff]",
+    iconWrapperClassName: "tw-bg-[#7000ff]/20",
+    titleKey: "network.tdh.related.levels.title",
+  },
+] as const;
+
+const m = (
+  locale: SupportedLocale,
+  key: TdhMessageKey,
+  params: Parameters<typeof t>[2] = {}
+) => t(locale, key, params);
+
+const formatSnapshotTime = (locale: SupportedLocale) =>
+  m(locale, "network.tdh.value.utcTime", {
+    time: formatTime(locale, DAILY_SNAPSHOT_TIME, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+      timeZone: "UTC",
+    }),
+  });
 
 export default function TDHMainPage() {
+  const locale = useBrowserLocale();
+  const effectiveDate = formatDate(locale, EFFECTIVE_DATE, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const snapshotTime = formatSnapshotTime(locale);
+
   useSetTitle("TDH | Network");
 
+  useEffect(() => {
+    const scrollToCurrentRule = () => {
+      if (globalThis.location.hash !== "#tdh-1-4") {
+        return;
+      }
+
+      globalThis.requestAnimationFrame(() => {
+        const currentRule = globalThis.document.getElementById("tdh-1-4");
+        currentRule?.scrollIntoView({ block: "start" });
+        globalThis.document
+          .getElementById("tdh-current-heading")
+          ?.focus({ preventScroll: true });
+      });
+    };
+
+    scrollToCurrentRule();
+    globalThis.addEventListener("hashchange", scrollToCurrentRule);
+
+    return () => {
+      globalThis.removeEventListener("hashchange", scrollToCurrentRule);
+    };
+  }, []);
+
   return (
-    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
-      <AboutContentsDropdown currentHref="/network/tdh" />
-      <h1>TDH</h1>
-      <p className="tw-mt-2">
-        TDH (Total Days Held) is our time-weighted holding metric. Each NFT you
-        hold contributes its days-held to your total. We then multiply by
-        edition-size weights and apply collection &quot;boosters&quot; based on
-        what you hold.
-      </p>
+    <main
+      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-text-iron-100`}
+    >
+      <div className="tw-w-full">
+        <AboutContentsDropdown
+          className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+          currentHref="/network/tdh"
+          withDivider
+        />
 
-      <div className="tw-mt-8 tw-space-y-2">
-        <h2>How TDH is computed</h2>
-        <ol className="tw-ml-6 tw-list-decimal tw-space-y-2">
-          <li>
-            <span className="tw-font-medium">Unweighted days:</span> each NFT
-            contributes 1 per day it&apos;s held.
-          </li>
-          <li>
-            <span className="tw-font-medium">Edition weighting:</span> we scale
-            by edition size with FirstGM (3,941) as 1.
-            <br />
-            Examples:
-            <ul className="tw-ml-6 tw-list-disc tw-space-y-1">
-              <li>SeizingJPG (Edition Size 1,000) = 3.941</li>
-              <li>Nakamoto Freedom (Edition Size 300) = 13.136</li>
-              <li>Gradients (Edition Size 101) = 39.020</li>
-            </ul>
-          </li>
-          <li>
-            <span className="tw-font-medium">Boosts:</span> we multiply by the{" "}
-            <span className="tw-font-medium">higher</span> of Category A or B,
-            then add Category C. (Details below.)
-          </li>
-        </ol>
-        <p className="tw-pt-3">* Calculated daily at 00:00 UTC.</p>
-      </div>
-
-      {/* TDH 1.4 */}
-      <div
-        id="tdh-1-4"
-        className="tw-mt-10 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6"
-      >
-        <h3>TDH 1.4 (October 10, 2025 — present)</h3>
-        <p className="tw-mt-4">
-          Higher of <b>Category A</b> and <b>Category B</b> boosters, plus{" "}
-          <b>Category C</b> boosters.
-        </p>
-
-        <div className="tw-mt-6">
-          <h4>Category A</h4>
-          <ul className="tw-ml-6 tw-list-disc tw-space-y-1">
-            <li>
-              A complete set of all Meme Cards:{" "}
-              <span className="tw-font-mono tw-font-medium">1.60x</span>
-            </li>
-          </ul>
-
-          <p className="tw-mt-3">
-            Additional complete sets add to the <b>total TDH</b> (no cap):
-          </p>
-          <p className="tw-mt-1">
-            Additional Set Boost ={" "}
-            <span className="tw-font-mono tw-font-medium">
-              0.05 &times; (0.6529)<sup>(n-1)</sup>
-            </span>
-          </p>
-          <div className="tw-mt-2">
-            <p className="tw-font-medium">Examples:</p>
-            <ul className="tw-ml-6 tw-space-y-1">
-              <li>
-                1st additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">0.05</span>
-              </li>
-              <li>
-                2nd additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">
-                  0.05 &times; 0.6529 = 0.032645
-                </span>
-              </li>
-              <li>
-                3rd additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">
-                  0.05 &times; 0.6529<sup>2</sup> = 0.021314
-                </span>
-              </li>
-              <li>
-                5th additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">
-                  0.05 &times; 0.6529<sup>4</sup> = 0.009086
-                </span>
-              </li>
-              <li>
-                10th additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">
-                  0.05 &times; 0.6529<sup>9</sup> = 0.001078
-                </span>
-              </li>
-            </ul>
-          </div>
-          <p className="tw-mt-3">
-            Maximum theoretical Category A boost (infinite sets):{" "}
-            <span className="tw-font-mono">
-              {"0.60 + 0.05 / (1 - 0.6529) = 0.744051"}
-            </span>
-          </p>
-        </div>
-
-        <div className="tw-mt-8">
-          <h4>Category B</h4>
-          <p className="tw-mt-1">
-            Applied to the <b>total TDH</b>, not just that season&apos;s TDH:
-          </p>
-          <ul className="tw-ml-6 tw-space-y-1">
-            <li>
-              SZN1:
-              <ul className="tw-ml-4 tw-space-y-1">
-                <li>
-                  Complete Set:{" "}
-                  <span className="tw-font-mono tw-font-medium">1.05x</span> or
-                </li>
-                <li>
-                  Genesis Set:{" "}
-                  <span className="tw-font-mono tw-font-medium">1.01x</span> and
-                </li>
-                <li>
-                  Nakamoto Set:{" "}
-                  <span className="tw-font-mono tw-font-medium">1.01x</span>
-                </li>
-              </ul>
-            </li>
-            <li>
-              SZN2: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN3: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN4: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN5: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN6: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN7: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN8: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN9: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN10: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN11: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN12: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="tw-mt-8">
-          <h4>Category C</h4>
-          <ul className="tw-ml-6 tw-space-y-1">
-            <li>
-              Gradient:{" "}
-              <span className="tw-font-mono tw-font-medium">1.02x</span> per
-              Gradient (up to a maximum of{" "}
-              <span className="tw-font-mono tw-font-medium">5</span>)
-            </li>
-          </ul>
-        </div>
-
-        <div className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3">
-          <Link
-            href="/network/tdh/historic-boosts"
-            className={BUTTON_LINK_CLASSES}
-          >
-            View Historic Boosts
-          </Link>
-          <Link href="/network/definitions" className={BUTTON_LINK_CLASSES}>
-            Definitions
-          </Link>
-        </div>
-      </div>
-
-      {/* Cross-links */}
-      <div className="tw-mt-10 tw-grid tw-gap-6 md:tw-grid-cols-2">
-        <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">
-          <h3>Network TDH Stats</h3>
-          <p className="tw-mt-1">
-            Aggregate community activity, holdings, trading, and time-based
-            metrics across the network.
-          </p>
-          <Link
-            href="/network/health/network-tdh"
-            className={BUTTON_LINK_CLASSES}
-          >
-            View Network TDH Stats
-          </Link>
-        </div>
-        <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">
-          <h3>Levels</h3>
-          <p className="tw-mt-1">
-            Our integrated progression that combines <b>TDH</b> with <b>Rep</b>{" "}
-            (peer-given reputation points).
-          </p>
-          <Link href="/network/levels" className={BUTTON_LINK_CLASSES}>
-            View Levels
-          </Link>
-        </div>
+        <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
+          <TDHHeader locale={locale} />
+          <HowTDHWorks locale={locale} snapshotTime={snapshotTime} />
+          <TDHCurrentRules effectiveDate={effectiveDate} locale={locale} />
+          <RelatedDestinations locale={locale} />
+        </article>
       </div>
     </main>
+  );
+}
+
+function TDHHeader({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <section
+      aria-labelledby="tdh-page-heading"
+      className={`${EDITORIAL_GRID_CLASS} tw-pb-8 sm:tw-pb-12`}
+    >
+      <div className="lg:tw-sticky lg:tw-top-28">
+        <h1
+          className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]"
+          id="tdh-page-heading"
+        >
+          {m(locale, "network.tdh.hero.title")}
+        </h1>
+      </div>
+      <p className="tw-m-0 tw-max-w-3xl tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+        {m(locale, "network.tdh.hero.intro")}
+      </p>
+    </section>
+  );
+}
+
+function HowTDHWorks({
+  locale,
+  snapshotTime,
+}: {
+  readonly locale: SupportedLocale;
+  readonly snapshotTime: string;
+}) {
+  return (
+    <section
+      aria-labelledby="tdh-how-heading"
+      className={`${EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12`}
+    >
+      <div className="lg:tw-sticky lg:tw-top-28">
+        <h2 className={SECTION_HEADING_CLASS} id="tdh-how-heading">
+          {m(locale, "network.tdh.how.title")}
+        </h2>
+      </div>
+
+      <div>
+        <ol className="tw-m-0 tw-list-none tw-space-y-6 tw-p-0">
+          <CalculationStep locale={locale} number={1}>
+            <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
+              <span className="tw-font-medium tw-text-iron-100">
+                {m(locale, "network.tdh.how.unweighted.title")}
+              </span>{" "}
+              {m(locale, "network.tdh.how.unweighted.body")}
+            </p>
+          </CalculationStep>
+
+          <CalculationStep locale={locale} number={2}>
+            <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
+              <span className="tw-font-medium tw-text-iron-100">
+                {m(locale, "network.tdh.how.edition.title")}
+              </span>{" "}
+              {m(locale, "network.tdh.how.edition.body", {
+                editionSize: formatInteger(locale, 3_941),
+              })}
+            </p>
+            <EditionExamples locale={locale} />
+          </CalculationStep>
+
+          <CalculationStep locale={locale} number={3}>
+            <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
+              <span className="tw-font-medium tw-text-iron-100">
+                {m(locale, "network.tdh.how.boosters.title")}
+              </span>{" "}
+              {m(locale, "network.tdh.how.boosters.body")}
+            </p>
+          </CalculationStep>
+        </ol>
+
+        <p className="tw-mb-0 tw-mt-6 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-600">
+          {m(locale, "network.tdh.how.snapshot", { time: snapshotTime })}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function CalculationStep({
+  children,
+  locale,
+  number,
+}: {
+  readonly children: ReactNode;
+  readonly locale: SupportedLocale;
+  readonly number: number;
+}) {
+  return (
+    <li className="tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3 sm:tw-gap-4">
+      <span className="tw-pt-0.5 tw-text-sm tw-font-medium tw-text-iron-600">
+        {formatInteger(locale, number)}.
+      </span>
+      <div className="tw-min-w-0">{children}</div>
+    </li>
+  );
+}
+
+function EditionExamples({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <div className={`${PANEL_CLASS} tw-mt-4 tw-p-4`}>
+      <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+        {m(locale, "network.tdh.how.edition.examples")}
+      </p>
+      <ul className="tw-m-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+        {EDITION_EXAMPLES.map((example) => (
+          <li key={example.nameKey}>
+            {m(locale, "network.tdh.how.edition.example", {
+              editionSize: formatInteger(locale, example.editionSize),
+              name: m(locale, example.nameKey),
+              weight: formatNumber(locale, example.weight, {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3,
+              }),
+            })}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function RelatedDestinations({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <nav
+      aria-label={m(locale, "network.tdh.related.destinationsAria")}
+      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12"
+    >
+      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 md:tw-grid-cols-2 md:tw-gap-6">
+        {RELATED_DESTINATIONS.map((destination) => (
+          <li key={destination.href}>
+            <Link
+              className={`${INTERACTIVE_PANEL_CLASS} tw-group tw-flex tw-h-full tw-flex-col tw-p-4 tw-no-underline hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-p-6`}
+              href={destination.href}
+            >
+              <span
+                className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full ${destination.iconWrapperClassName}`}
+              >
+                <FontAwesomeIcon
+                  aria-hidden="true"
+                  className={`tw-text-lg ${destination.iconClassName}`}
+                  icon={destination.icon}
+                />
+              </span>
+              <span className="tw-mt-5 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 sm:tw-text-lg">
+                {m(locale, destination.titleKey)}
+              </span>
+              <span className="tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+                {m(locale, destination.descriptionKey)}
+              </span>
+              <span className="tw-mt-6 tw-w-fit tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-colors group-hover:tw-border-white/[0.12] group-hover:tw-bg-iron-800 group-hover:tw-text-iron-50">
+                {m(locale, destination.actionKey)}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
