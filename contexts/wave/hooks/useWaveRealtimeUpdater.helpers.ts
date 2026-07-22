@@ -14,6 +14,7 @@ import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropRea
 import { type QueryClient } from "@tanstack/react-query";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import {
+  reconcileAttachmentStatusUpdate,
   reconcileFinalizedDropAttachments,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
@@ -59,21 +60,16 @@ function replaceAttachmentInPart(
   part: ApiDropPart,
   attachment: ApiAttachment
 ): ApiDropPart {
-  const attachments = part.attachments;
-  const hasAttachment = attachments.some(
-    (item) => item.attachment_id === attachment.attachment_id
+  const attachments = part.attachments.map((item) =>
+    item.attachment_id === attachment.attachment_id
+      ? reconcileAttachmentStatusUpdate(item, attachment)
+      : item
+  );
+  const changed = attachments.some(
+    (item, index) => item !== part.attachments[index]
   );
 
-  if (!hasAttachment) {
-    return part;
-  }
-
-  return {
-    ...part,
-    attachments: attachments.map((item) =>
-      item.attachment_id === attachment.attachment_id ? attachment : item
-    ),
-  };
+  return changed ? { ...part, attachments } : part;
 }
 
 const getIncomingWaveId = (drop: ApiDrop): string | null => {

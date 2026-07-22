@@ -1,11 +1,14 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
+  reconcileAttachmentStatusUpdate,
   reconcileFinalizedDropAttachments,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
+import { replaceAttachmentInDrops } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import { QueryClient } from "@tanstack/react-query";
 
 const createQueryClient = () =>
@@ -192,6 +195,76 @@ describe("cached drop websocket updates", () => {
       status: "BAD",
       error_reason: "Blocked",
     });
+  });
+
+  it("does not downgrade a ready attachment when a delayed status arrives", () => {
+    const queryClient = createQueryClient();
+    const queryKey = [QueryKey.DROP, { drop_id: "drop-1" }];
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.csv",
+      mime_type: "text/csv",
+      kind: "CSV",
+      status: ApiAttachmentStatus.Ready,
+      url: "https://example.com/sample.csv",
+      error_reason: null,
+    };
+    queryClient.setQueryData(queryKey, {
+      id: "drop-1",
+      parts: [{ attachments: [readyAttachment] }],
+    });
+
+    updateAttachmentInCachedDrops(queryClient, {
+      ...readyAttachment,
+      status: ApiAttachmentStatus.Processing,
+      url: null,
+    } as any);
+
+    expect(
+      queryClient.getQueryData<any>(queryKey).parts[0].attachments[0]
+    ).toEqual(readyAttachment);
+  });
+
+  it("accepts a terminal correction after another terminal status", () => {
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      status: ApiAttachmentStatus.Ready,
+    } as any;
+    const badAttachment = {
+      ...readyAttachment,
+      status: ApiAttachmentStatus.Bad,
+      error_reason: "Blocked",
+    };
+
+    expect(
+      reconcileAttachmentStatusUpdate(readyAttachment, badAttachment)
+    ).toBe(badAttachment);
+  });
+
+  it("does not downgrade a ready attachment in the active wave store", () => {
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.pdf",
+      mime_type: "application/pdf",
+      kind: "PDF",
+      status: ApiAttachmentStatus.Ready,
+      url: "https://example.com/sample.pdf",
+      error_reason: null,
+    };
+    const drop = {
+      id: "drop-1",
+      type: DropSize.FULL,
+      parts: [{ attachments: [readyAttachment] }],
+    } as any;
+
+    const result = replaceAttachmentInDrops([drop], {
+      ...readyAttachment,
+      status: ApiAttachmentStatus.Verifying,
+      url: null,
+    } as any);
+
+    expect(result.changed).toBe(false);
+    expect(result.drops[0]).toBe(drop);
   });
 
   it("preserves finalized attachments when a stale drop update downgrades them", () => {
