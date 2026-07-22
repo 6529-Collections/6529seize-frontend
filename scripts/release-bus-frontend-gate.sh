@@ -208,7 +208,8 @@ case "${1:-full}" in
   contract)
     run_unit_tests --runTestsByPath \
       __tests__/scripts/release-bus-frontend-gate.test.ts \
-      __tests__/scripts/release-bus-gate-evidence.test.ts
+      __tests__/scripts/release-bus-gate-evidence.test.ts \
+      __tests__/scripts/release-bus-jest-reporting.test.ts
     ;;
   validate)
     run_validation

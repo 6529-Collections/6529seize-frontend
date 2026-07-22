@@ -214,7 +214,8 @@ jobs:
           mkdir -p "$tooling"
           for file in \
             scripts/release-bus-frontend-gate.sh \
-            scripts/release-bus-gate-evidence.cjs
+            scripts/release-bus-gate-evidence.cjs \
+            scripts/release-bus-report-progress.mjs
           do
             git show "$WORKFLOW_SHA:$file" > "$RUNNER_TEMP/release-bus-tooling/$file"
           done
@@ -222,6 +223,7 @@ jobs:
           {
             echo "RELEASE_BUS_GATE_TOOL=$tooling/release-bus-frontend-gate.sh"
             echo "RELEASE_BUS_EVIDENCE_TOOL=$tooling/release-bus-gate-evidence.cjs"
+            echo "RELEASE_BUS_REPORT_TOOL=$tooling/release-bus-report-progress.mjs"
             echo "RELEASE_BUS_BASE_SHA=$BASE_SHA"
             echo "RELEASE_BUS_EVIDENCE_ENVIRONMENT=$EVIDENCE_ENVIRONMENT"
             echo "RELEASE_BUS_GATE_FINGERPRINT=$GATE_FINGERPRINT"
@@ -512,6 +514,7 @@ jobs:
             -H 'X-GitHub-Api-Version: 2022-11-28' \
             "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?filter=latest&per_page=100" \
             > "$RUNNER_TEMP/release-bus-jobs.json"
+      - *source-mutation
       - name: Aggregate fail-closed evidence
         id: aggregate
         if: always()
@@ -523,6 +526,7 @@ jobs:
           JEST_RESULT: ${{ needs.jest.result }}
           LEGACY_RESULT: ${{ needs.legacy.result }}
           LINT_RESULT: ${{ needs.lint.result }}
+          MUTATION_RESULT: ${{ steps.source-mutation.outcome }}
           PASSED_GATE_FINGERPRINT: ${{ needs.authorize.outputs.gate_fingerprint }}
           PASSED_BEHAVIOR_DIGEST: ${{ needs.authorize.outputs.behavior_digest }}
           PASSED_PACKAGE_MANAGER: ${{ needs.authorize.outputs.package_manager }}
@@ -554,7 +558,8 @@ jobs:
             --arg build "$BUILD_RESULT" \
             --arg inventory "$INVENTORY_RESULT" \
             --arg jest "$JEST_RESULT" \
-            '{legacy:$legacy,lint:$lint,typecheck:$typecheck,build:$build,inventory:$inventory,jest:$jest}' \
+            --arg source_mutation "$MUTATION_RESULT" \
+            '{legacy:$legacy,lint:$lint,typecheck:$typecheck,build:$build,inventory:$inventory,jest:$jest,source_mutation:$source_mutation}' \
             > "$RUNNER_TEMP/release-bus-job-results.json"
           node "$RELEASE_BUS_EVIDENCE_TOOL" aggregate \
             --mode "${{ needs.authorize.outputs.gate_mode }}" \
@@ -582,7 +587,19 @@ jobs:
           path: ${{ runner.temp }}/release-bus-base-canary-summary.json
           if-no-files-found: error
           retention-days: 14
-      - *source-mutation
+      - name: Report sanitized terminal evidence
+        if: always() && inputs.validation_only != true
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          RELEASE_BUS_AGGREGATE_SUMMARY: ${{ runner.temp }}/release-bus-base-canary-summary.json
+          RELEASE_BUS_OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_SUMMARY_ARTIFACT_DIGEST: ${{ steps.summary-artifact.outputs.artifact-digest }}
+          RELEASE_BUS_TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          test -f "$RUNNER_TEMP/release-bus-base-canary-summary.json"
+          node "$RELEASE_BUS_REPORT_TOOL"
       - name: Return aggregate result
         if: always()
         env:

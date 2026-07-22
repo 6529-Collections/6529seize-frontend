@@ -14,6 +14,7 @@ describe("Release Bus frontend gate contract", () => {
   const canary = read(".github/workflows/release-bus-base-canary.yml");
   const authorization = read("scripts/release-bus-authorize-operation.sh");
   const appPrCi = read(".github/workflows/app-pr-ci.yml");
+  const reporter = read("scripts/release-bus-report-progress.mjs");
 
   type WorkflowStep = {
     env?: Record<string, string>;
@@ -57,8 +58,9 @@ describe("Release Bus frontend gate contract", () => {
     expect(authorization).toContain(
       '"$api_url/deploy/release-bus/authorize"'
     );
-    expect(canary).not.toContain("/deploy/release-bus/report-progress");
-    expect(canary).not.toContain("release-bus-report-progress.mjs");
+    expect(canary).toContain("release-bus-report-progress.mjs");
+    expect(canary).toContain("Report sanitized terminal evidence");
+    expect(reporter).toContain("/deploy/release-bus/report-progress");
   });
 
   it("bounds and retries an ambiguous authorization transport failure", () => {
@@ -151,6 +153,18 @@ describe("Release Bus frontend gate contract", () => {
     }
   });
 
+  it("runs the contract when any fingerprinted base file changes", () => {
+    for (const baseFile of [
+      "bin/6529",
+      "jest.config.js",
+      "jest.setup.js",
+      "package.json",
+      "pnpm-lock.yaml",
+    ]) {
+      expect(appPrCi).toContain(`${baseFile} \\`);
+    }
+  });
+
   it("forwards the contract arguments to the 6529 runner exactly", () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "release-bus-gate-"));
     const runner = path.join(tempDir, "fake-6529");
@@ -183,6 +197,7 @@ describe("Release Bus frontend gate contract", () => {
         "--runTestsByPath",
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
         "__tests__/scripts/release-bus-gate-evidence.test.ts",
+        "__tests__/scripts/release-bus-jest-reporting.test.ts",
       ]);
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -276,8 +291,42 @@ describe("Release Bus frontend gate contract", () => {
       (step) => step.name === "Aggregate fail-closed evidence"
     );
     expect(aggregate?.env?.BASE_SHA).toBe("${{ inputs.base_sha }}");
+    expect(aggregate?.env?.MUTATION_RESULT).toBe(
+      "${{ steps.source-mutation.outcome }}"
+    );
     expect(aggregate?.run).toContain('[[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]');
     expect(aggregate?.run?.match(/--base-sha "\$BASE_SHA"/g)).toHaveLength(2);
+    expect(aggregate?.run).toContain(
+      '--arg source_mutation "$MUTATION_RESULT"'
+    );
+
+    const report = steps.find(
+      (step) => step.name === "Report sanitized terminal evidence"
+    );
+    expect(report?.env?.RELEASE_BUS_AGGREGATE_SUMMARY).toBe(
+      "${{ runner.temp }}/release-bus-base-canary-summary.json"
+    );
+    expect(report?.env?.RELEASE_BUS_OPERATION_KEY).toBe(
+      "${{ inputs.operation_key }}"
+    );
+    expect(report?.env?.RELEASE_BUS_TRAIN_ID).toBe(
+      "${{ inputs.release_train_id }}"
+    );
+    expect(report?.run).toContain('node "$RELEASE_BUS_REPORT_TOOL"');
+
+    const aggregateSteps = canaryWorkflow.jobs?.aggregate?.steps ?? [];
+    const sourceMutationIndex = aggregateSteps.findIndex(
+      (step) => step.name === "Verify gate did not mutate source"
+    );
+    const aggregateIndex = aggregateSteps.findIndex(
+      (step) => step.name === "Aggregate fail-closed evidence"
+    );
+    const reportIndex = aggregateSteps.findIndex(
+      (step) => step.name === "Report sanitized terminal evidence"
+    );
+    expect(sourceMutationIndex).toBeGreaterThanOrEqual(0);
+    expect(sourceMutationIndex).toBeLessThan(aggregateIndex);
+    expect(aggregateIndex).toBeLessThan(reportIndex);
 
     const tempDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "release-bus-input-")

@@ -43,6 +43,7 @@ const FRONTEND_GATE_TOOLING_FILES = [
   "scripts/release-bus-authorize-operation.sh",
   "scripts/release-bus-frontend-gate.sh",
   "scripts/release-bus-gate-evidence.cjs",
+  "scripts/release-bus-report-progress.mjs",
 ];
 
 function parseArgs(values) {
@@ -701,7 +702,10 @@ function finalSummary({ args, records, jobResults }) {
           records,
           source: "legacy",
           shardCount: 1,
-          jobResults: { legacy: jobResults.legacy },
+          jobResults: {
+            legacy: jobResults.legacy,
+            source_mutation: jobResults.source_mutation,
+          },
           identity,
         });
   const sharded =
@@ -717,6 +721,7 @@ function finalSummary({ args, records, jobResults }) {
             build: jobResults.build,
             inventory: jobResults.inventory,
             jest: jobResults.jest,
+            source_mutation: jobResults.source_mutation,
           },
           identity,
         });

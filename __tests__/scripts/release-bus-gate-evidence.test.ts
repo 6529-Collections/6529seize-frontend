@@ -44,6 +44,7 @@ describe("Release Bus gate evidence", () => {
       "scripts/release-bus-authorize-operation.sh": "authorize",
       "scripts/release-bus-frontend-gate.sh": "gate",
       "scripts/release-bus-gate-evidence.cjs": "evidence",
+      "scripts/release-bus-report-progress.mjs": "reporter",
     };
     const input = {
       baseSha: "a".repeat(40),
@@ -58,9 +59,9 @@ describe("Release Bus gate evidence", () => {
     expect(frontendGateContract(input)).toEqual(baseline);
     expect(baseline).toMatchObject({
       behavior_digest:
-        "9602c7d472e4cbb9dbb5f69c196d25f0ef4746739d199ab93449b5fc951ff089",
+        "7fcd636de546cfc19c57db6f876b57c5157c264710c15848cf56bd2409f0ba68",
       gate_fingerprint:
-        "b51976f92bcc5a34a9fabae337a08935a52424a8c29c48e3fbe7d773eac8e805",
+        "04b7cea66d8075f2c1b8e246bb41ee0d86b7ecc284af42bbe4540de489ea7c6c",
       workflow_digest:
         "da7f739f627198465eeab537a6f7a435dc4a0c332f9e4a8462293eb3f4ab7ee0",
     });
@@ -221,6 +222,7 @@ describe("Release Bus gate evidence", () => {
         build: "success",
         inventory: "success",
         jest: "success",
+        source_mutation: "success",
       },
       identity: evidenceIdentity,
     });
@@ -677,6 +679,7 @@ describe("Release Bus gate evidence", () => {
         build: "success",
         inventory: "success",
         jest: "success",
+        source_mutation: "success",
       },
     });
 
@@ -722,8 +725,40 @@ describe("Release Bus gate evidence", () => {
         build: "success",
         inventory: "success",
         jest: "success",
+        source_mutation: "success",
       },
     });
     expect(skippedLegacy.status).toBe("FAILED");
+
+    const mutated = finalSummary({
+      args: {
+        mode: "sharded",
+        "shard-count": "1",
+        "run-url":
+          "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
+        "base-sha": evidenceIdentity.base_sha,
+        environment: evidenceIdentity.environment,
+        "gate-fingerprint": evidenceIdentity.gate_fingerprint,
+        "behavior-digest": "e".repeat(64),
+        "workflow-sha": evidenceIdentity.workflow_sha,
+        "workflow-digest": evidenceIdentity.workflow_digest,
+        "node-version": evidenceIdentity.node_version,
+        "package-manager": evidenceIdentity.package_manager,
+        "artifact-name": "release-bus-base-canary-summary-123",
+        "jobs-file": jobsFile,
+      },
+      records: records.filter((record) => record.source === "parallel"),
+      jobResults: {
+        legacy: "skipped",
+        lint: "success",
+        typecheck: "success",
+        build: "success",
+        inventory: "success",
+        jest: "success",
+        source_mutation: "failure",
+      },
+    });
+    expect(mutated.status).toBe("FAILED");
+    expect(mutated.errors).toContain("source_mutation job did not succeed");
   });
 });
