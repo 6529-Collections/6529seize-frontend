@@ -972,6 +972,7 @@
         "Category A is the complete Meme Card set boost, with diminishing additional-set boosts.",
         "Category B covers season, genesis, and nakamoto set boosts.",
         "Category C is the Gradient boost, up to 5 Gradients.",
+        "The current TDH guide presents the Category A or Category B comparison before Category C, then groups formulas, examples, season boosts, limits, and related destinations for quick reference.",
         "TDH is calculated daily at 00:00 UTC and is used throughout the network: profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
       ],
       "canonical_path": "/network/tdh",
