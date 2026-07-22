@@ -62,6 +62,8 @@ import {
 
 export type { ProfileCollectedFilters } from "./userPageCollectedQueryState";
 
+type CollectedHistoryMode = "push" | "replace";
+
 export default function UserPageCollected({
   profile,
   initialStatsData = EMPTY_USER_PAGE_STATS_INITIAL_DATA,
@@ -150,13 +152,19 @@ export default function UserPageCollected({
   );
 
   const updateFields = useCallback(
-    async (updateItems: QueryUpdateInput[]): Promise<void> => {
+    async (
+      updateItems: QueryUpdateInput[],
+      historyMode: CollectedHistoryMode = "push"
+    ): Promise<void> => {
       const queryString = createQueryString(updateItems);
       const path = queryString ? pathname + "?" + queryString : pathname;
       if (path) {
-        router.replace(path, {
-          scroll: false,
-        });
+        const navigationOptions = { scroll: false };
+        if (historyMode === "replace") {
+          router.replace(path, navigationOptions);
+        } else {
+          router.push(path, navigationOptions);
+        }
       }
     },
     [pathname, router, createQueryString]
@@ -432,7 +440,10 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  const setPage = async (page: number): Promise<void> => {
+  const setPage = async (
+    page: number,
+    historyMode: CollectedHistoryMode = "push"
+  ): Promise<void> => {
     if (page === filters.page) {
       return;
     }
@@ -443,7 +454,7 @@ export default function UserPageCollected({
         value: page.toString(),
       },
     ];
-    await updateFields(items);
+    await updateFields(items, historyMode);
   };
 
   useEffect(() => {
@@ -551,13 +562,13 @@ export default function UserPageCollected({
       return;
     }
     if (!data?.count) {
-      setPage(1);
+      setPage(1, "replace");
       setTotalPages(1);
       return;
     }
     const pagesCount = Math.ceil(data.count / filters.pageSize);
     if (pagesCount < filters.page) {
-      setPage(pagesCount);
+      setPage(pagesCount, "replace");
       return;
     }
     setTotalPages(pagesCount);
