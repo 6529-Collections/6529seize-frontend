@@ -345,17 +345,20 @@ function projectAggregateProgress(value) {
         !Array.isArray(value.immutable_artifact)
           ? {
               artifact_name: safePath(value.immutable_artifact.artifact_name),
-              run_id: String(value.immutable_artifact.run_id ?? ""),
-              source_sha: String(value.immutable_artifact.source_sha ?? ""),
+              run_id: safeText(value.immutable_artifact.run_id, 20),
+              source_sha: safeText(value.immutable_artifact.source_sha, 40),
               environment: safeText(value.immutable_artifact.environment),
-              package_digest: String(
-                value.immutable_artifact.package_digest ?? ""
+              package_digest: safeText(
+                value.immutable_artifact.package_digest,
+                64
               ),
-              upload_digest: String(
-                value.immutable_artifact.upload_digest ?? ""
+              upload_digest: safeText(
+                value.immutable_artifact.upload_digest,
+                64
               ),
-              build_profile_digest: String(
-                value.immutable_artifact.build_profile_digest ?? ""
+              build_profile_digest: safeText(
+                value.immutable_artifact.build_profile_digest,
+                64
               ),
             }
           : null,

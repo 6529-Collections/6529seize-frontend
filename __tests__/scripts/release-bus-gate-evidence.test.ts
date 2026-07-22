@@ -840,5 +840,46 @@ describe("Release Bus gate evidence", () => {
     });
     expect(mutated.status).toBe("FAILED");
     expect(mutated.errors).toContain("source_mutation job did not succeed");
+
+    const missingAuthoritativeRecords = finalSummary({
+      args: {
+        mode: "sharded",
+        "shard-count": "1",
+        "run-url":
+          "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
+        "base-sha": evidenceIdentity.base_sha,
+        environment: evidenceIdentity.environment,
+        "gate-fingerprint": evidenceIdentity.gate_fingerprint,
+        "behavior-digest": "e".repeat(64),
+        "workflow-sha": evidenceIdentity.workflow_sha,
+        "workflow-digest": evidenceIdentity.workflow_digest,
+        "node-version": evidenceIdentity.node_version,
+        "package-manager": evidenceIdentity.package_manager,
+        "build-profile-digest": evidenceIdentity.build_profile_digest,
+        "artifact-name": "release-bus-base-canary-summary-123",
+        "jobs-file": jobsFile,
+      },
+      records: [],
+      jobResults: {
+        legacy: "skipped",
+        lint: "failure",
+        typecheck: "failure",
+        build: "failure",
+        inventory: "failure",
+        jest: "failure",
+        source_mutation: "failure",
+      },
+    });
+    expect(missingAuthoritativeRecords).toMatchObject({
+      status: "FAILED",
+      skipped_test_suites: 0,
+      errors: expect.arrayContaining([
+        "lint job did not succeed",
+        "jest job did not succeed",
+      ]),
+    });
+    expect(missingAuthoritativeRecords.skipped_test_suites).toBeLessThanOrEqual(
+      10_000_000
+    );
   });
 });

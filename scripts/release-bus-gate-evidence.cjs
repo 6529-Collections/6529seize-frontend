@@ -802,6 +802,12 @@ function finalSummary({ args, records, jobResults }) {
       ? legacy.status === sharded.status &&
         sameCounts(legacy.counts, sharded.counts)
       : null;
+  const skippedTestSuites = authoritative?.counts?.pending_test_suites;
+  if (!Number.isSafeInteger(skippedTestSuites) || skippedTestSuites < 0) {
+    throw new Error(
+      "Authoritative gate evidence has an invalid skipped-suite count"
+    );
+  }
   const runUrl = required(args, "run-url");
   if (
     !/^https:\/\/github\.com\/6529-Collections\/6529seize-frontend\/actions\/runs\/\d+$/.test(
@@ -836,8 +842,7 @@ function finalSummary({ args, records, jobResults }) {
       ])
     ),
     totals: authoritative?.counts ?? sumCounts([]),
-    skipped_test_suites:
-      authoritative?.counts?.pending_test_suites ?? Number.MAX_SAFE_INTEGER,
+    skipped_test_suites: skippedTestSuites,
     shards: authoritative?.shards ?? [],
     shard_imbalance_ms: authoritative?.shard_imbalance_ms ?? 0,
     missing_files: authoritative?.missing_files ?? [],
