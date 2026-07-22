@@ -14,6 +14,8 @@ const OUTCOME_STATUS = {
   cancelled: "FAILED",
   skipped: "SKIPPED",
 };
+const REPORT_MAX_ATTEMPTS = 3;
+const REPORT_TIMEOUT_MS = 15_000;
 
 function stageStatus(name) {
   const key = `RELEASE_BUS_GATE_${name.toUpperCase()}_OUTCOME`;
@@ -326,6 +328,62 @@ export function buildProgressPayload() {
   };
 }
 
+export async function postProgress(
+  apiUrl,
+  token,
+  payload,
+  {
+    fetchImpl = fetch,
+    sleep = (milliseconds) =>
+      new Promise((resolve) => setTimeout(resolve, milliseconds)),
+    timeoutMs = REPORT_TIMEOUT_MS,
+  } = {}
+) {
+  let lastStatus = null;
+  for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetchImpl(
+        `${apiUrl.replace(/\/$/, "")}/deploy/release-bus/report-progress`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(timeoutMs),
+        }
+      );
+      if (response.ok) return;
+      lastStatus = response.status;
+      if (response.status < 500 || response.status > 599) {
+        throw new Error(
+          `Release Bus progress report failed (${response.status})`
+        );
+      }
+      if (attempt === REPORT_MAX_ATTEMPTS) {
+        throw new Error("Release Bus progress report retryable server failure");
+      }
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        /^Release Bus progress report failed \([1-4]\d\d\)$/.test(error.message)
+      ) {
+        throw error;
+      }
+      if (attempt === REPORT_MAX_ATTEMPTS) {
+        throw new Error(
+          `Release Bus progress report failed after bounded transport retries${lastStatus ? ` (${lastStatus})` : ""}`
+        );
+      }
+    }
+    process.stderr.write(
+      `Release Bus progress report transport attempt ${attempt} failed; retrying the same operation/run payload.\n`
+    );
+    await sleep(1_000 * attempt);
+  }
+}
+
 async function main() {
   const payload = buildProgressPayload();
   if (process.argv.includes("--payload-only")) {
@@ -343,20 +401,7 @@ async function main() {
   // Only the strict, bounded projection above is sent to the configured Release
   // Bus endpoint. Unknown fields, failure messages, and raw logs are discarded.
   // lgtm[js/file-access-to-http]
-  const response = await fetch(
-    `${apiUrl.replace(/\/$/, "")}/deploy/release-bus/report-progress`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
-  if (!response.ok) {
-    throw new Error(`Release Bus progress report failed (${response.status})`);
-  }
+  await postProgress(apiUrl, token, payload);
 }
 
 if (

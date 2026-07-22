@@ -449,10 +449,10 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Upload build evidence
-        if: always() && matrix.environment == 'staging'
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: release-bus-preflight-evidence-build-${{ github.run_id }}
+          name: release-bus-preflight-evidence-build-${{ matrix.environment }}-${{ github.run_id }}
           path: ${{ runner.temp }}/release-bus-evidence/*.json
           if-no-files-found: error
           retention-days: 14

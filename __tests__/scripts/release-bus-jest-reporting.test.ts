@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const YAML = require("yaml") as { parse: (text: string) => unknown };
@@ -275,6 +276,39 @@ describe("Release Bus structured Jest reporting", () => {
 
     expect(result.status).toBe(0);
     expect(result.stderr).toContain("not configured; skipping");
+  });
+
+  it("retries only transport and server failures with the exact payload", () => {
+    const moduleUrl = pathToFileURL(
+      path.join(process.cwd(), "scripts/release-bus-report-progress.mjs")
+    ).href;
+    const output = execFileSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "--eval",
+        `import { postProgress } from ${JSON.stringify(moduleUrl)};
+         let attempts = 0;
+         const bodies = [];
+         await postProgress("https://api.example.test", "token", {operation:"same"}, {
+           fetchImpl: async (_url, options) => {
+             attempts += 1;
+             bodies.push(options.body);
+             return {ok: attempts === 2, status: attempts === 2 ? 200 : 503};
+           },
+           sleep: async () => {},
+           timeoutMs: 10
+         });
+         process.stdout.write(JSON.stringify({attempts,bodies}));`,
+      ],
+      { cwd: process.cwd() }
+    );
+    const result = JSON.parse(output.toString("utf8"));
+
+    expect(result).toEqual({
+      attempts: 2,
+      bodies: ['{"operation":"same"}', '{"operation":"same"}'],
+    });
   });
 
   it("projects a versioned aggregate into the strict reusable summary", () => {
