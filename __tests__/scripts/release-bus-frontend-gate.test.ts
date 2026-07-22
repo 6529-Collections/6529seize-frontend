@@ -112,6 +112,13 @@ describe("Release Bus frontend gate contract", () => {
         Object.keys(step.env ?? {}).includes("ALCHEMY_API_KEY")
       )
     ).toBe(false);
+    const canaryFetches = canary
+      .split("\n")
+      .filter((line) => line.includes("git fetch --no-tags"));
+    expect(canaryFetches.length).toBeGreaterThan(0);
+    expect(canaryFetches.every((line) => line.includes("--depth=1"))).toBe(
+      true
+    );
     expect(reporter).toContain("/deploy/release-bus/report-progress");
   });
 
@@ -338,7 +345,9 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase typecheck');
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase build');
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" jest');
-    expect(canary).toContain('git fetch --no-tags origin "$BASE_SHA"');
+    expect(canary).toContain(
+      'git fetch --no-tags --depth=1 origin "$BASE_SHA"'
+    );
     expect(canary).toContain('git show "$WORKFLOW_SHA:$file"');
     expect(canary).toContain("Derive and verify immutable gate fingerprint");
     expect(canary).toContain("RELEASE_BUS_GATE_FINGERPRINT=$GATE_FINGERPRINT");

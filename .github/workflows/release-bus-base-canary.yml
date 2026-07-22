@@ -55,7 +55,7 @@ jobs:
           [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
           git init .
           git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
-          git fetch --no-tags origin "$BASE_SHA"
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
           git checkout --detach "$BASE_SHA"
           test "$(git rev-parse HEAD)" = "$BASE_SHA"
       - &setup-node
@@ -92,7 +92,7 @@ jobs:
           set -euo pipefail
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
           git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
-            git fetch --no-tags origin "$WORKFLOW_SHA"
+            git fetch --no-tags --depth=1 origin "$WORKFLOW_SHA"
           profile_tool="$RUNNER_TEMP/release-bus-build-profile.cjs"
           git show "$WORKFLOW_SHA:scripts/release-bus-build-profile.cjs" > "$profile_tool"
           node "$profile_tool" \
@@ -224,7 +224,7 @@ jobs:
           set -euo pipefail
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
           git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
-            git fetch --no-tags origin "$WORKFLOW_SHA"
+            git fetch --no-tags --depth=1 origin "$WORKFLOW_SHA"
           evidence_tool="$RUNNER_TEMP/release-bus-gate-evidence.cjs"
           contract="$RUNNER_TEMP/release-bus-gate-contract.json"
           git show "$WORKFLOW_SHA:scripts/release-bus-gate-evidence.cjs" > "$evidence_tool"
@@ -300,7 +300,7 @@ jobs:
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$WORKFLOW_DIGEST" =~ ^[a-f0-9]{64}$ ]]
           git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
-            git fetch --no-tags origin "$WORKFLOW_SHA"
+            git fetch --no-tags --depth=1 origin "$WORKFLOW_SHA"
           tooling="$RUNNER_TEMP/release-bus-tooling/scripts"
           mkdir -p "$tooling"
           for file in \
