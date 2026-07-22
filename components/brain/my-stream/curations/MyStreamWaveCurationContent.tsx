@@ -10,8 +10,6 @@ import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
@@ -50,13 +48,9 @@ function MyStreamWaveCurationDropItem({
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }) {
-  const { hasTouchScreen, isApp } = useDeviceInfo();
-  const isTouchDevice = useIsTouchDevice();
   const { updateMembership, isPending } = useDropCurationMembershipMutation({
     dropId: drop.id,
   });
-  const shouldUseDetachedRemoveButton =
-    isTouchDevice || (isApp && hasTouchScreen);
 
   const handleRemove = () => {
     updateMembership(curationId, "remove");
@@ -64,13 +58,11 @@ function MyStreamWaveCurationDropItem({
 
   return (
     <div
-      className={`tw-group tw-relative ${
-        canManageActiveCuration && shouldUseDetachedRemoveButton
-          ? "tw-pt-5"
-          : ""
+      className={`tw-relative ${
+        canManageActiveCuration ? "tw-pt-8 sm:tw-pt-0" : ""
       }`}
     >
-      {canManageActiveCuration && shouldUseDetachedRemoveButton && (
+      {canManageActiveCuration && (
         <button
           type="button"
           onClick={(event) => {
@@ -78,13 +70,25 @@ function MyStreamWaveCurationDropItem({
             handleRemove();
           }}
           disabled={isPending}
-          aria-label="Remove drop from this curation"
-          className="tw-absolute tw-right-5 tw-top-0 tw-z-20 tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-text-iron-100 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          aria-busy={isPending}
+          aria-label={
+            isPending
+              ? "Removing drop from this curation"
+              : "Remove drop from this curation"
+          }
+          title="Remove from curation"
+          className="tw-touch-action-manipulation tw-pointer-events-auto tw-absolute tw-right-4 tw-top-5 tw-z-40 tw-inline-flex tw-h-8 tw-min-w-8 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-shadow-[0_10px_30px_rgba(0,0,0,0.32)] tw-backdrop-blur-sm tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 active:tw-bg-rose-500/15 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-right-7 sm:tw-top-4"
         >
           {isPending ? (
-            <Spinner dimension={12} />
+            <>
+              <Spinner dimension={12} />
+              <span>Removing</span>
+            </>
           ) : (
-            <XMarkIcon className="tw-size-4 tw-flex-shrink-0" />
+            <>
+              <XMarkIcon className="tw-size-3.5 tw-flex-shrink-0 -tw-ml-0.5" />
+              <span>Remove</span>
+            </>
           )}
         </button>
       )}
@@ -108,34 +112,6 @@ function MyStreamWaveCurationDropItem({
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
       />
-
-      {canManageActiveCuration && !shouldUseDetachedRemoveButton && (
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            handleRemove();
-          }}
-          disabled={isPending}
-          aria-label="Remove drop from this curation"
-          title="Remove from wave"
-          className="tw-absolute tw-right-7 tw-top-4 tw-z-20 tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-p-0 tw-text-iron-400 tw-shadow-[0_10px_30px_rgba(0,0,0,0.32)] tw-backdrop-blur-sm tw-transition-all tw-duration-200 tw-ease-out hover:tw-border-rose-500/30 hover:tw-bg-rose-500/20 hover:tw-text-rose-300 active:tw-bg-rose-500/15 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:tw-pointer-events-none desktop-hover:tw-w-auto desktop-hover:tw-translate-y-1 desktop-hover:tw-gap-1.5 desktop-hover:tw-px-2.5 desktop-hover:tw-text-xs desktop-hover:tw-font-medium desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-translate-y-0 desktop-hover:group-hover:tw-opacity-100"
-        >
-          {isPending ? (
-            <>
-              <Spinner dimension={12} />
-              <span className="tw-hidden desktop-hover:tw-inline">
-                Removing
-              </span>
-            </>
-          ) : (
-            <>
-              <XMarkIcon className="tw-size-4 tw-flex-shrink-0 desktop-hover:tw-size-3.5" />
-              <span className="tw-hidden desktop-hover:tw-inline">Remove</span>
-            </>
-          )}
-        </button>
-      )}
     </div>
   );
 }
@@ -253,7 +229,7 @@ export default function MyStreamWaveCurationContent({
     <div
       className={
         constrainToViewport
-          ? "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+          ? "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
           : "tw-flex tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-col"
       }
       style={constrainToViewport ? leaderboardViewStyle : undefined}
