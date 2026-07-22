@@ -13,7 +13,8 @@ boosters.
 - Sidebar path (web): `Network -> TDH`
 - Sidebar path (app): `Network -> TDH`
 - Current rule anchor: `#tdh-1-4`
-- Current rule heading: `TDH 1.4 (October 10, 2025 — present)`
+- Current rule heading in `en-US`: `TDH 1.4 (October 10, 2025 — present)`;
+  the displayed date follows the active browser locale.
 
 ## Entry Points
 

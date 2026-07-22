@@ -45,6 +45,8 @@
   "network.tdh.current.categoryC.gradientTail": "per Gradient (up to a maximum of {count})",
   "network.tdh.related.historic.title": "View Historic Boosts",
   "network.tdh.related.definitions.title": "Definitions",
+  "network.tdh.related.ruleActionsAria": "TDH rule references",
+  "network.tdh.related.destinationsAria": "Related TDH destinations",
   "network.tdh.related.stats.title": "Network TDH Stats",
   "network.tdh.related.stats.description": "Aggregate community activity, holdings, trading, and time-based metrics across the network.",
   "network.tdh.related.stats.action": "View Network TDH Stats",

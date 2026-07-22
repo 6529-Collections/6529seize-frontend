@@ -146,7 +146,7 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Total Boosted TDH",
+          label: m(locale, "network.stats.charts.totalBoosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.total_boosted_tdh
           ),
@@ -154,7 +154,7 @@ export default function CommunityStats() {
           backgroundColor: "#00DC21",
         },
         {
-          label: "Total Unboosted TDH",
+          label: m(locale, "network.stats.charts.totalUnboosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.total_tdh
           ),
@@ -162,7 +162,7 @@ export default function CommunityStats() {
           backgroundColor: "#1861FF",
         },
         {
-          label: "Total Unweighted TDH",
+          label: m(locale, "network.stats.charts.totalUnweighted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.total_tdh__raw
           ),
@@ -178,7 +178,7 @@ export default function CommunityStats() {
           data={data}
           options={GRAPH_OPTIONS}
           role="img"
-          aria-label="Bar chart comparing total boosted, unboosted, and unweighted TDH over time."
+          aria-label={m(locale, "network.stats.charts.totalAria")}
         />
         {/* <Line data={data} /> */}
       </>
@@ -190,7 +190,7 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Net Boosted TDH",
+          label: m(locale, "network.stats.charts.netBoosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_boosted_tdh
           ),
@@ -198,7 +198,7 @@ export default function CommunityStats() {
           backgroundColor: "#00DC21",
         },
         {
-          label: "Net Unboosted TDH",
+          label: m(locale, "network.stats.charts.netUnboosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_tdh
           ),
@@ -206,7 +206,7 @@ export default function CommunityStats() {
           backgroundColor: "#1861FF",
         },
         {
-          label: "Net Unweighted TDH",
+          label: m(locale, "network.stats.charts.netUnweighted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_tdh__raw
           ),
@@ -222,7 +222,7 @@ export default function CommunityStats() {
           data={data}
           options={GRAPH_OPTIONS}
           role="img"
-          aria-label="Bar chart comparing daily net boosted, unboosted, and unweighted TDH changes."
+          aria-label={m(locale, "network.stats.charts.netAria")}
         />
         {/* <Line data={data} /> */}
       </>
@@ -234,7 +234,7 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Created Boosted TDH",
+          label: m(locale, "network.stats.charts.createdBoosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_boosted_tdh
           ),
@@ -242,7 +242,7 @@ export default function CommunityStats() {
           backgroundColor: "#00DC21",
         },
         {
-          label: "Created Unboosted TDH",
+          label: m(locale, "network.stats.charts.createdUnboosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_tdh
           ),
@@ -250,7 +250,7 @@ export default function CommunityStats() {
           backgroundColor: "#1861FF",
         },
         {
-          label: "Created Unweighted TDH",
+          label: m(locale, "network.stats.charts.createdUnweighted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_tdh__raw
           ),
@@ -266,7 +266,7 @@ export default function CommunityStats() {
           data={data}
           options={GRAPH_OPTIONS}
           role="img"
-          aria-label="Bar chart comparing daily created boosted, unboosted, and unweighted TDH."
+          aria-label={m(locale, "network.stats.charts.createdAria")}
         />
         {/* <Line data={data} /> */}
       </>
@@ -278,7 +278,7 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Destroyed Boosted TDH",
+          label: m(locale, "network.stats.charts.destroyedBoosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_boosted_tdh
           ),
@@ -286,7 +286,7 @@ export default function CommunityStats() {
           backgroundColor: "#00DC21",
         },
         {
-          label: "Destroyed Unboosted TDH",
+          label: m(locale, "network.stats.charts.destroyedUnboosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh
           ),
@@ -294,7 +294,7 @@ export default function CommunityStats() {
           backgroundColor: "#1861FF",
         },
         {
-          label: "Destroyed Unweighted TDH",
+          label: m(locale, "network.stats.charts.destroyedUnweighted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh__raw
           ),
@@ -310,7 +310,7 @@ export default function CommunityStats() {
           data={data}
           options={GRAPH_OPTIONS}
           role="img"
-          aria-label="Bar chart comparing daily destroyed boosted, unboosted, and unweighted TDH."
+          aria-label={m(locale, "network.stats.charts.destroyedAria")}
         />
         {/* <Line data={data} /> */}
       </>

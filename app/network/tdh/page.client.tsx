@@ -289,7 +289,7 @@ function EditionExamples({ locale }: { readonly locale: SupportedLocale }) {
 function RelatedDestinations({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <nav
-      aria-label={m(locale, "network.tdh.hero.title")}
+      aria-label={m(locale, "network.tdh.related.destinationsAria")}
       className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12"
     >
       <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 md:tw-grid-cols-2 md:tw-gap-6">

@@ -290,7 +290,7 @@ function CategoryC({ locale }: { readonly locale: SupportedLocale }) {
 function RuleActions({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <nav
-      aria-label={m(locale, "network.tdh.hero.title")}
+      aria-label={m(locale, "network.tdh.related.ruleActionsAria")}
       className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-6"
     >
       <Link
