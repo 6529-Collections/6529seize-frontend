@@ -33,6 +33,22 @@ describe("Release Bus frontend gate contract", () => {
       { steps?: WorkflowStep[]; "timeout-minutes"?: number }
     >;
   };
+  const preflightWorkflow = parseYaml(preflight) as {
+    on?: {
+      workflow_dispatch?: {
+        inputs?: Record<string, { required?: boolean }>;
+      };
+    };
+    jobs?: Record<
+      string,
+      {
+        needs?: string[] | string;
+        steps?: WorkflowStep[];
+        strategy?: { "fail-fast"?: boolean };
+        "timeout-minutes"?: number;
+      }
+    >;
+  };
 
   it("keeps deployed worker dispatch and authorization backward compatible", () => {
     const inputs = canaryWorkflow.on?.workflow_dispatch?.inputs ?? {};
@@ -55,9 +71,7 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain(
       '\'{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}\''
     );
-    expect(authorization).toContain(
-      '"$api_url/deploy/release-bus/authorize"'
-    );
+    expect(authorization).toContain('"$api_url/deploy/release-bus/authorize"');
     expect(canary).toContain("release-bus-report-progress.mjs");
     expect(canary).toContain("Report sanitized terminal evidence");
     expect(reporter).toContain("/deploy/release-bus/report-progress");
@@ -198,6 +212,7 @@ describe("Release Bus frontend gate contract", () => {
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
         "__tests__/scripts/release-bus-gate-evidence.test.ts",
         "__tests__/scripts/release-bus-jest-reporting.test.ts",
+        "__tests__/scripts/release-bus-preflight-evidence.test.ts",
       ]);
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -259,9 +274,11 @@ describe("Release Bus frontend gate contract", () => {
   });
 
   it("is shared by preflight, isolation, and exact-base canary", () => {
-    expect(preflight).toContain(
-      "./scripts/release-bus-frontend-gate.sh validate"
-    );
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" phase lint');
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" phase typecheck');
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" phase build');
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" inventory');
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" jest');
     expect(isolation).toContain("./scripts/release-bus-frontend-gate.sh full");
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" serial');
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase lint');
@@ -373,6 +390,13 @@ describe("Release Bus frontend gate contract", () => {
       expect(gate).toContain(identityFlag);
     }
     expect(canary).toContain("fail-fast: false");
+    expect(preflight).toContain("fail-fast: false");
+    expect(preflight).toContain("FRONTEND_PREFLIGHT_SHARD_COUNT");
+    expect(preflight).toContain("validation_shard_count");
+    expect(preflight).toContain("validation_inject_failure");
+    expect(preflight).toContain("RELEASE_BUS_INJECT_SHARD_FAILURE");
+    expect(preflight).toContain("Aggregate fail-closed preflight evidence");
+    expect(preflight).toContain("release-bus-preflight-evidence.cjs");
     expect(canary).toContain("FRONTEND_GATE_SHARD_COUNT");
     expect(canary).toContain("RELEASE_BUS_FRONTEND_GATE_MODE");
     expect(canary).toContain("validation_only");
@@ -393,8 +417,70 @@ describe("Release Bus frontend gate contract", () => {
     );
     expect(appPrCi).toContain("scripts/release-bus-authorize-operation.sh");
     expect(appPrCi).toContain("scripts/release-bus-gate-evidence.cjs");
+    expect(appPrCi).toContain("scripts/release-bus-preflight-evidence.cjs");
     expect(appPrCi).toContain(
       "__tests__/scripts/release-bus-gate-evidence.test.ts"
+    );
+  });
+
+  it("keeps preflight dispatch backward compatible and fail-closed", () => {
+    const inputs = preflightWorkflow.on?.workflow_dispatch?.inputs ?? {};
+    expect(
+      Object.entries(inputs)
+        .filter(([, contract]) => contract.required === true)
+        .map(([name]) => name)
+        .sort()
+    ).toEqual(
+      [
+        "release_train_id",
+        "release_train_revision",
+        "operation_key",
+        "target_lane",
+        "release_branch",
+        "deploy_units",
+        "expected_sha",
+      ].sort()
+    );
+    expect(inputs.validation_only?.required).toBe(false);
+    expect(inputs.validation_shard_count?.required).toBe(false);
+    expect(inputs.validation_inject_failure?.required).toBe(false);
+    expect(preflightWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
+    expect(preflightWorkflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.build?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.aggregate?.needs).toEqual([
+      "authorize",
+      "lint",
+      "typecheck",
+      "jest-inventory",
+      "jest",
+      "build",
+    ]);
+
+    const steps = Object.values(preflightWorkflow.jobs ?? {}).flatMap(
+      (job) => job.steps ?? []
+    );
+    for (const step of steps) {
+      expect(step.run ?? "").not.toMatch(/\$\{\{\s*inputs\./);
+    }
+    const aggregate = steps.find(
+      (step) => step.name === "Aggregate fail-closed preflight evidence"
+    );
+    expect(aggregate?.env).toMatchObject({
+      BUILD_RESULT: "${{ needs.build.result }}",
+      INVENTORY_RESULT: "${{ needs.jest-inventory.result }}",
+      JEST_RESULT: "${{ needs.jest.result }}",
+      LINT_RESULT: "${{ needs.lint.result }}",
+      TYPECHECK_RESULT: "${{ needs.typecheck.result }}",
+    });
+    expect(aggregate?.run).toContain(
+      '--arg source_mutation "$MUTATION_RESULT"'
+    );
+    expect(aggregate?.run).toContain(
+      'test "$PASSED_BEHAVIOR_DIGEST" = "$behavior_digest"'
+    );
+    expect(preflight).toContain('test "$VALIDATION_ONLY" = true');
+    expect(preflight).toContain(
+      'git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh"'
     );
   });
 });

@@ -172,7 +172,9 @@ It then:
 - runs the shared frontend validation/build gate against the exact fresh
   `1a-staging` base before composing any frontend candidate, so a broken base or
   control-plane command cannot be blamed on candidate code;
-- runs immutable preflight builds;
+- runs parallel fail-closed frontend preflight lint, typecheck, complete Jest
+  inventory/shards, and immutable builds, with an independently reversible
+  `1|2|4` shard count and bounded Jest workers;
 - deploys backend units in service-DAG order;
 - deploys frontend after backend succeeds;
 - runs the existing staging E2E packs against the exact train, including for a

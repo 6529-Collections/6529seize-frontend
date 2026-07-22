@@ -11,6 +11,16 @@ on:
       release_branch: { type: string, required: true }
       deploy_units: { type: string, required: true }
       expected_sha: { type: string, required: true }
+      validation_only: { type: boolean, required: false, default: false }
+      validation_shard_count:
+        {
+          type: choice,
+          required: false,
+          default: "2",
+          options: ["1", "2", "4"],
+        }
+      validation_inject_failure:
+        { type: boolean, required: false, default: false }
 
 permissions: {}
 
@@ -19,17 +29,31 @@ run-name: Preflight frontend train ${{ inputs.release_train_id }} [${{ inputs.op
 jobs:
   authorize:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      shard_count: ${{ steps.inputs.outputs.shard_count }}
+      shard_matrix: ${{ steps.inputs.outputs.shard_matrix }}
+      gate_fingerprint: ${{ steps.fingerprint.outputs.gate_fingerprint }}
+      behavior_digest: ${{ steps.fingerprint.outputs.behavior_digest }}
+      workflow_sha: ${{ steps.fingerprint.outputs.workflow_sha }}
+      workflow_digest: ${{ steps.fingerprint.outputs.workflow_digest }}
+      package_manager: ${{ steps.fingerprint.outputs.package_manager }}
+    permissions:
+      contents: read
     steps:
-      - name: Validate and authorize immutable inputs
+      - name: Validate immutable inputs
+        id: inputs
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
+          PREFLIGHT_SHARD_COUNT: ${{ vars.FRONTEND_PREFLIGHT_SHARD_COUNT || '2' }}
           RELEASE_BRANCH: ${{ inputs.release_branch }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           TARGET_LANE: ${{ inputs.target_lane }}
           TRAIN_ID: ${{ inputs.release_train_id }}
           TRAIN_REVISION: ${{ inputs.release_train_revision }}
+          VALIDATION_INJECT_FAILURE: ${{ inputs.validation_inject_failure }}
+          VALIDATION_ONLY: ${{ inputs.validation_only }}
+          VALIDATION_SHARD_COUNT: ${{ inputs.validation_shard_count }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
@@ -38,26 +62,25 @@ jobs:
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           [[ "$TARGET_LANE" =~ ^(STAGING|PRODUCTION)$ ]]
           [[ "$RELEASE_BRANCH" =~ ^release-bus/(staging|production)-train-[A-Za-z0-9._-]+$ ]]
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
-  build:
-    needs: authorize
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: true
-      matrix:
-        environment: ${{ fromJSON(inputs.target_lane == 'PRODUCTION' && '["staging","production"]' || '["staging"]') }}
-    env:
-      SOURCE_SHA: ${{ inputs.expected_sha }}
-    steps:
-      - name: Check out exact train SHA
+          [[ "$VALIDATION_INJECT_FAILURE" =~ ^(true|false)$ ]]
+          if [ "$VALIDATION_INJECT_FAILURE" = true ]; then
+            test "$VALIDATION_ONLY" = true
+          fi
+          if [ "$VALIDATION_ONLY" = true ]; then
+            PREFLIGHT_SHARD_COUNT="$VALIDATION_SHARD_COUNT"
+          fi
+          [[ "$PREFLIGHT_SHARD_COUNT" =~ ^(1|2|4)$ ]]
+          case "$PREFLIGHT_SHARD_COUNT" in
+            1) shard_matrix='{"include":[{"index":1,"total":1}]}' ;;
+            2) shard_matrix='{"include":[{"index":1,"total":2},{"index":2,"total":2}]}' ;;
+            4) shard_matrix='{"include":[{"index":1,"total":4},{"index":2,"total":4},{"index":3,"total":4},{"index":4,"total":4}]}' ;;
+          esac
+          {
+            echo "shard_count=$PREFLIGHT_SHARD_COUNT"
+            echo "shard_matrix=$shard_matrix"
+          } >> "$GITHUB_OUTPUT"
+      - &checkout
+        name: Check out exact train SHA
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.expected_sha }}
@@ -67,35 +90,277 @@ jobs:
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-      - name: Install Node.js
+      - &setup-node
+        name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with: { node-version: "22" }
-      - name: Activate pinned pnpm
+      - name: Derive deterministic preflight fingerprint
+        id: fingerprint
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          SHARD_COUNT: ${{ steps.inputs.outputs.shard_count }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
+            git fetch --no-tags origin "$WORKFLOW_SHA"
+          evidence_dir="$RUNNER_TEMP/release-bus-preflight-fingerprint"
+          evidence_tool="$evidence_dir/release-bus-preflight-evidence.cjs"
+          contract="$RUNNER_TEMP/release-bus-preflight-contract.json"
+          mkdir -p "$evidence_dir"
+          git show "$WORKFLOW_SHA:scripts/release-bus-preflight-evidence.cjs" > "$evidence_tool"
+          git show "$WORKFLOW_SHA:scripts/release-bus-gate-evidence.cjs" > "$evidence_dir/release-bus-gate-evidence.cjs"
+          node "$evidence_tool" fingerprint \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --source-sha "$EXPECTED_SHA" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --shard-count "$SHARD_COUNT" \
+            --output "$contract"
+          {
+            echo "gate_fingerprint=$(jq -r '.gate_fingerprint' "$contract")"
+            echo "behavior_digest=$(jq -r '.behavior_digest' "$contract")"
+            echo "workflow_sha=$WORKFLOW_SHA"
+            echo "workflow_digest=$(jq -r '.workflow_digest' "$contract")"
+            echo "package_manager=$(jq -r '.package_manager' "$contract")"
+          } >> "$GITHUB_OUTPUT"
+      - name: Authorize Release Bus operation
+        if: inputs.validation_only != true
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          authorize_tool="$RUNNER_TEMP/release-bus-authorize-operation.sh"
+          git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh" > "$authorize_tool"
+          chmod 700 "$authorize_tool"
+          "$authorize_tool" "$payload"
+      - name: Verify authorization did not mutate source
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+
+  lint:
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - *checkout
+      - &stage-tooling
+        name: Stage immutable preflight tooling
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          GATE_FINGERPRINT: ${{ needs.authorize.outputs.gate_fingerprint }}
+          PACKAGE_MANAGER: ${{ needs.authorize.outputs.package_manager }}
+          WORKFLOW_SHA: ${{ needs.authorize.outputs.workflow_sha }}
+          WORKFLOW_DIGEST: ${{ needs.authorize.outputs.workflow_digest }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          [[ "$GATE_FINGERPRINT" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$PACKAGE_MANAGER" =~ ^pnpm@[A-Za-z0-9.+-]{1,122}$ ]]
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$WORKFLOW_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
+            git fetch --no-tags origin "$WORKFLOW_SHA"
+          tooling="$RUNNER_TEMP/release-bus-tooling/scripts"
+          mkdir -p "$tooling"
+          for file in \
+            scripts/release-bus-frontend-gate.sh \
+            scripts/release-bus-gate-evidence.cjs \
+            scripts/release-bus-preflight-evidence.cjs \
+            scripts/release-bus-report-progress.mjs
+          do
+            git show "$WORKFLOW_SHA:$file" > "$RUNNER_TEMP/release-bus-tooling/$file"
+          done
+          chmod +x "$tooling/release-bus-frontend-gate.sh"
+          {
+            echo "RELEASE_BUS_GATE_TOOL=$tooling/release-bus-frontend-gate.sh"
+            echo "RELEASE_BUS_EVIDENCE_TOOL=$tooling/release-bus-gate-evidence.cjs"
+            echo "RELEASE_BUS_PREFLIGHT_EVIDENCE_TOOL=$tooling/release-bus-preflight-evidence.cjs"
+            echo "RELEASE_BUS_REPORT_TOOL=$tooling/release-bus-report-progress.mjs"
+            echo "RELEASE_BUS_BASE_SHA=$EXPECTED_SHA"
+            echo "RELEASE_BUS_EVIDENCE_ENVIRONMENT=orchestration"
+            echo "RELEASE_BUS_GATE_FINGERPRINT=$GATE_FINGERPRINT"
+            echo "RELEASE_BUS_WORKFLOW_SHA=$WORKFLOW_SHA"
+            echo "RELEASE_BUS_WORKFLOW_DIGEST=$WORKFLOW_DIGEST"
+            echo "RELEASE_BUS_NODE_VERSION=22"
+            echo "RELEASE_BUS_PACKAGE_MANAGER=$PACKAGE_MANAGER"
+          } >> "$GITHUB_ENV"
+      - *setup-node
+      - &activate-pnpm
+        name: Activate pinned pnpm
         run: |
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
-      - name: Install Socket Firewall
+      - &socket-firewall
+        name: Install Socket Firewall
         id: socket-firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with: { mode: firewall }
-      - name: Install frozen dependencies
+      - &install
+        name: Install frozen dependencies
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
-      - name: Run exact train validation gate
-        id: validation
-        if: matrix.environment == 'staging'
-        run: ./scripts/release-bus-frontend-gate.sh validate
-      - name: Typecheck production artifact source
-        id: typecheck_production
-        if: matrix.environment == 'production'
-        run: ./bin/6529 run typecheck:ci
-      - name: Verify validation did not mutate source
-        run: git diff --exit-code
+      - name: Run lint
+        id: gate
+        continue-on-error: true
+        run: RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" phase lint "$RUNNER_TEMP/release-bus-evidence"
+      - &source-mutation
+        name: Verify gate did not mutate source
+        id: source-mutation
+        if: always()
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+      - name: Upload lint evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-preflight-evidence-lint-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-evidence/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Return lint result
+        if: always()
+        env:
+          GATE_OUTCOME: ${{ steps.gate.outcome }}
+          MUTATION_OUTCOME: ${{ steps.source-mutation.outcome }}
+        run: test "$GATE_OUTCOME" = success -a "$MUTATION_OUTCOME" = success
+
+  typecheck:
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - *checkout
+      - *stage-tooling
+      - *setup-node
+      - *activate-pnpm
+      - *socket-firewall
+      - *install
+      - name: Run typecheck
+        id: gate
+        continue-on-error: true
+        run: RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" phase typecheck "$RUNNER_TEMP/release-bus-evidence"
+      - *source-mutation
+      - name: Upload typecheck evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-preflight-evidence-typecheck-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-evidence/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Return typecheck result
+        if: always()
+        env:
+          GATE_OUTCOME: ${{ steps.gate.outcome }}
+          MUTATION_OUTCOME: ${{ steps.source-mutation.outcome }}
+        run: test "$GATE_OUTCOME" = success -a "$MUTATION_OUTCOME" = success
+
+  jest-inventory:
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - *checkout
+      - *stage-tooling
+      - *setup-node
+      - *activate-pnpm
+      - *socket-firewall
+      - *install
+      - name: Capture complete Jest inventory
+        id: gate
+        continue-on-error: true
+        run: RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" inventory "$RUNNER_TEMP/release-bus-evidence"
+      - *source-mutation
+      - name: Upload complete Jest inventory
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-preflight-evidence-inventory-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-evidence/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Return inventory result
+        if: always()
+        env:
+          GATE_OUTCOME: ${{ steps.gate.outcome }}
+          MUTATION_OUTCOME: ${{ steps.source-mutation.outcome }}
+        run: test "$GATE_OUTCOME" = success -a "$MUTATION_OUTCOME" = success
+
+  jest:
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.authorize.outputs.shard_matrix) }}
+    name: Jest shard ${{ matrix.index }}/${{ matrix.total }}
+    steps:
+      - *checkout
+      - *stage-tooling
+      - *setup-node
+      - *activate-pnpm
+      - *socket-firewall
+      - *install
+      - name: Run complete deterministic Jest shard
+        id: gate
+        continue-on-error: true
+        env:
+          RELEASE_BUS_INJECT_SHARD_FAILURE: ${{ inputs.validation_inject_failure && '1' || '0' }}
+        run: RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" jest "${{ matrix.index }}" "${{ matrix.total }}" "$RUNNER_TEMP/release-bus-evidence"
+      - *source-mutation
+      - name: Upload sanitized shard evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-preflight-evidence-jest-${{ matrix.index }}-of-${{ matrix.total }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-evidence/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Return first-run shard result
+        if: always()
+        env:
+          GATE_OUTCOME: ${{ steps.gate.outcome }}
+          MUTATION_OUTCOME: ${{ steps.source-mutation.outcome }}
+        run: test "$GATE_OUTCOME" = success -a "$MUTATION_OUTCOME" = success
+
+  build:
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(inputs.target_lane == 'PRODUCTION' && '["staging","production"]' || '["staging"]') }}
+    env:
+      SOURCE_SHA: ${{ inputs.expected_sha }}
+    steps:
+      - *checkout
+      - *stage-tooling
+      - *setup-node
+      - *activate-pnpm
+      - *socket-firewall
+      - *install
       - name: Capture build timestamp
         run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
       - name: Build immutable application
-        id: build
+        id: gate
+        continue-on-error: true
         env:
           BUILD_ENVIRONMENT: ${{ matrix.environment }}
           NODE_ENV: production
@@ -120,14 +385,20 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
+          set -euo pipefail
           if [ "$BUILD_ENVIRONMENT" = production ]; then
             export ANNOUNCED_VERSION_ENDPOINT='https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json'
+            ./bin/6529 run build
           else
             unset ANNOUNCED_VERSION_ENDPOINT
+            RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" phase build "$RUNNER_TEMP/release-bus-evidence"
           fi
-          ./bin/6529 run build
-      - name: Report structured preflight result
+      - name: Verify build did not mutate source
+        id: source-mutation
         if: always()
+        run: git diff --exit-code
+      - name: Report structured preflight result
+        if: always() && inputs.validation_only != true
         continue-on-error: true
         env:
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
@@ -136,10 +407,10 @@ jobs:
           RELEASE_BUS_OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_REPORT_PHASE: build
           RELEASE_BUS_JOB_STATUS: ${{ job.status }}
-          RELEASE_BUS_GATE_TYPECHECK_OUTCOME: ${{ steps.typecheck_production.outcome }}
-          RELEASE_BUS_GATE_BUILD_OUTCOME: ${{ steps.build.outcome }}
-        run: node scripts/release-bus-report-progress.mjs
+          RELEASE_BUS_GATE_BUILD_OUTCOME: ${{ steps.gate.outcome }}
+        run: node "$RELEASE_BUS_REPORT_TOOL"
       - name: Package immutable bundle
+        if: steps.gate.outcome == 'success' && steps.source-mutation.outcome == 'success'
         env:
           BUILD_ENVIRONMENT: ${{ matrix.environment }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
@@ -163,6 +434,7 @@ jobs:
           jq -n --arg train_id "$TRAIN_ID" --arg source_sha "$EXPECTED_SHA" --arg environment "$BUILD_ENVIRONMENT" '{train_id:$train_id,source_sha:$source_sha,environment:$environment}' > release-bus-artifact/manifest.json
           (cd release-bus-artifact && find . -type f ! -path ./SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
       - name: Upload immutable frontend artifact
+        if: steps.gate.outcome == 'success' && steps.source-mutation.outcome == 'success'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-${{ matrix.environment }}
@@ -170,3 +442,125 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
+      - name: Upload build evidence
+        if: always() && matrix.environment == 'staging'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-preflight-evidence-build-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-evidence/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Return build result
+        if: always()
+        env:
+          GATE_OUTCOME: ${{ steps.gate.outcome }}
+          MUTATION_OUTCOME: ${{ steps.source-mutation.outcome }}
+        run: test "$GATE_OUTCOME" = success -a "$MUTATION_OUTCOME" = success
+
+  aggregate:
+    if: always() && needs.authorize.result == 'success'
+    needs: [authorize, lint, typecheck, jest-inventory, jest, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - *checkout
+      - *stage-tooling
+      - *setup-node
+      - name: Download all preflight evidence
+        id: evidence-download
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: release-bus-preflight-evidence-*-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-evidence
+      - name: Capture public job links
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?filter=latest&per_page=100" \
+            > "$RUNNER_TEMP/release-bus-jobs.json"
+      - *source-mutation
+      - name: Aggregate fail-closed preflight evidence
+        id: aggregate
+        if: always()
+        continue-on-error: true
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+          INVENTORY_RESULT: ${{ needs.jest-inventory.result }}
+          JEST_RESULT: ${{ needs.jest.result }}
+          LINT_RESULT: ${{ needs.lint.result }}
+          MUTATION_RESULT: ${{ steps.source-mutation.outcome }}
+          PASSED_BEHAVIOR_DIGEST: ${{ needs.authorize.outputs.behavior_digest }}
+          PASSED_GATE_FINGERPRINT: ${{ needs.authorize.outputs.gate_fingerprint }}
+          PASSED_PACKAGE_MANAGER: ${{ needs.authorize.outputs.package_manager }}
+          PASSED_WORKFLOW_DIGEST: ${{ needs.authorize.outputs.workflow_digest }}
+          SOURCE_SHA: ${{ inputs.expected_sha }}
+          TARGET_LANE: ${{ inputs.target_lane }}
+          TYPECHECK_RESULT: ${{ needs.typecheck.result }}
+          WORKFLOW_SHA: ${{ needs.authorize.outputs.workflow_sha }}
+        run: |
+          set -euo pipefail
+          contract="$RUNNER_TEMP/release-bus-preflight-contract.json"
+          node "$RELEASE_BUS_PREFLIGHT_EVIDENCE_TOOL" fingerprint \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --source-sha "$SOURCE_SHA" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --shard-count "${{ needs.authorize.outputs.shard_count }}" \
+            --output "$contract"
+          gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
+          behavior_digest="$(jq -r '.behavior_digest' "$contract")"
+          workflow_digest="$(jq -r '.workflow_digest' "$contract")"
+          package_manager="$(jq -r '.package_manager' "$contract")"
+          test "$PASSED_GATE_FINGERPRINT" = "$gate_fingerprint"
+          test "$PASSED_BEHAVIOR_DIGEST" = "$behavior_digest"
+          test "$PASSED_WORKFLOW_DIGEST" = "$workflow_digest"
+          test "$PASSED_PACKAGE_MANAGER" = "$package_manager"
+          jq -n \
+            --arg lint "$LINT_RESULT" \
+            --arg typecheck "$TYPECHECK_RESULT" \
+            --arg build "$BUILD_RESULT" \
+            --arg inventory "$INVENTORY_RESULT" \
+            --arg jest "$JEST_RESULT" \
+            --arg source_mutation "$MUTATION_RESULT" \
+            '{lint:$lint,typecheck:$typecheck,build:$build,inventory:$inventory,jest:$jest,source_mutation:$source_mutation}' \
+            > "$RUNNER_TEMP/release-bus-job-results.json"
+          node "$RELEASE_BUS_PREFLIGHT_EVIDENCE_TOOL" aggregate \
+            --shard-count "${{ needs.authorize.outputs.shard_count }}" \
+            --evidence-root "$RUNNER_TEMP/release-bus-evidence" \
+            --job-results "$RUNNER_TEMP/release-bus-job-results.json" \
+            --source-sha "$SOURCE_SHA" \
+            --environment orchestration \
+            --gate-fingerprint "$gate_fingerprint" \
+            --behavior-digest "$behavior_digest" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --workflow-digest "$workflow_digest" \
+            --node-version 22 \
+            --package-manager "$package_manager" \
+            --target-lane "$TARGET_LANE" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --jobs-file "$RUNNER_TEMP/release-bus-jobs.json" \
+            --artifact-name "release-bus-preflight-summary-$GITHUB_RUN_ID" \
+            --output "$RUNNER_TEMP/release-bus-preflight-summary.json"
+      - name: Upload deterministic preflight summary
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-preflight-summary-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-preflight-summary.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Return aggregate result
+        if: always()
+        env:
+          AGGREGATE_OUTCOME: ${{ steps.aggregate.outcome }}
+          MUTATION_OUTCOME: ${{ steps.source-mutation.outcome }}
+        run: test "$AGGREGATE_OUTCOME" = success -a "$MUTATION_OUTCOME" = success
