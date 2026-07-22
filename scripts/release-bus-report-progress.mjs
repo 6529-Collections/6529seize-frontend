@@ -17,6 +17,8 @@ const OUTCOME_STATUS = {
 const REPORT_MAX_ATTEMPTS = 3;
 const REPORT_TIMEOUT_MS = 15_000;
 
+class NonRetryableProgressResponseError extends Error {}
+
 function stageStatus(name) {
   const key = `RELEASE_BUS_GATE_${name.toUpperCase()}_OUTCOME`;
   const outcome = String(process.env[key] ?? "skipped").toLowerCase();
@@ -357,7 +359,7 @@ export async function postProgress(
       if (response.ok) return;
       lastStatus = response.status;
       if (response.status < 500 || response.status > 599) {
-        throw new Error(
+        throw new NonRetryableProgressResponseError(
           `Release Bus progress report failed (${response.status})`
         );
       }
@@ -365,12 +367,7 @@ export async function postProgress(
         throw new Error("Release Bus progress report retryable server failure");
       }
     } catch (error) {
-      if (
-        error instanceof Error &&
-        /^Release Bus progress report failed \([1-4]\d\d\)$/.test(error.message)
-      ) {
-        throw error;
-      }
+      if (error instanceof NonRetryableProgressResponseError) throw error;
       if (attempt === REPORT_MAX_ATTEMPTS) {
         throw new Error(
           `Release Bus progress report failed after bounded transport retries${lastStatus ? ` (${lastStatus})` : ""}`
@@ -382,6 +379,7 @@ export async function postProgress(
     );
     await sleep(1_000 * attempt);
   }
+  throw new Error("Release Bus progress report retry loop exited unexpectedly");
 }
 
 async function main() {

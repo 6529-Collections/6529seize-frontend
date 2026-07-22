@@ -122,8 +122,11 @@ pauses the lane, and records the exact Actions run as operator evidence; it
 never attributes the base failure to a candidate. This pause also applies to an
 unclassified failure. A dependency-install failure explicitly classified as
 transient infrastructure keeps the candidates attached, keeps the lane
-running, and retries the same immutable operation. Backend-only trains skip
-this frontend canary.
+running, and retries the same immutable operation. A train gets at most five
+workflow attempts. If all five fail with authenticated transient-infrastructure
+evidence, the train ends, its candidates return to the queue, and the lane
+stays running so a later fresh train becomes the automatic recovery probe.
+Backend-only trains skip this frontend canary.
 
 The frontend base canary has three independently selectable execution modes:
 
@@ -477,9 +480,12 @@ are verified.
 - A failed base-canary or preflight operation carrying authenticated
   `INFRASTRUCTURE_TRANSIENT` dependency evidence is retried with a new exact
   attempt key. The first retries are prompt; continued outages use bounded
-  5/10/15-minute backoff. The train remains visible as
+  5/10-minute backoff. The train remains visible as
   `INFRASTRUCTURE_RETRY_BACKOFF`, candidates stay attached, and the lane is not
-  paused. Source and unknown failures retain fail-closed behavior.
+  paused. After five failed workflow attempts, the train terminates, candidates
+  are automatically requeued, and the lane remains running. This prevents a
+  permanent provider outage from monopolizing the train indefinitely. Source
+  and unknown failures retain fail-closed behavior.
 - The incident card distinguishes `PRE_EXISTING_BASE`,
   `DETERMINISTIC_CANDIDATE`, and train/environment failures. A pre-existing
   deterministic base failure returns every candidate, quarantines none, applies

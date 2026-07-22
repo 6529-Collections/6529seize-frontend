@@ -355,6 +355,7 @@ jobs:
         environment: ${{ fromJSON(inputs.target_lane == 'PRODUCTION' && '["staging","production"]' || '["staging"]') }}
     env:
       SOURCE_SHA: ${{ inputs.expected_sha }}
+      RELEASE_BUS_INSTALL_EVIDENCE: ${{ runner.temp }}/release-bus-evidence/dependency-install-${{ matrix.environment }}.json
     steps:
       - *checkout
       - *stage-tooling

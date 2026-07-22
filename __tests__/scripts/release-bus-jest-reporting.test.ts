@@ -311,6 +311,64 @@ describe("Release Bus structured Jest reporting", () => {
     });
   });
 
+  it("fails after three persistent server responses", () => {
+    const moduleUrl = pathToFileURL(
+      path.join(process.cwd(), "scripts/release-bus-report-progress.mjs")
+    ).href;
+    const source = `import { postProgress } from ${JSON.stringify(moduleUrl)};
+      let attempts = 0;
+      try {
+        await postProgress("https://api.example.test", "token", {operation:"same"}, {
+          fetchImpl: async () => { attempts += 1; return {ok:false,status:503}; },
+          sleep: async () => {},
+          timeoutMs: 10
+        });
+      } catch (error) {
+        process.stdout.write(JSON.stringify({attempts,message:error.message}));
+      }`;
+    const output = execFileSync(
+      process.execPath,
+      ["--input-type=module", "--eval", source],
+      { cwd: process.cwd() }
+    );
+
+    expect(JSON.parse(output.toString("utf8"))).toEqual({
+      attempts: 3,
+      message:
+        "Release Bus progress report failed after bounded transport retries (503)",
+    });
+  });
+
+  it.each([401, 600])(
+    "fails immediately for non-retryable HTTP status %s",
+    (status) => {
+      const moduleUrl = pathToFileURL(
+        path.join(process.cwd(), "scripts/release-bus-report-progress.mjs")
+      ).href;
+      const source = `import { postProgress } from ${JSON.stringify(moduleUrl)};
+        let attempts = 0;
+        try {
+          await postProgress("https://api.example.test", "token", {operation:"same"}, {
+            fetchImpl: async () => { attempts += 1; return {ok:false,status:${status}}; },
+            sleep: async () => {},
+            timeoutMs: 10
+          });
+        } catch (error) {
+          process.stdout.write(JSON.stringify({attempts,message:error.message}));
+        }`;
+      const output = execFileSync(
+        process.execPath,
+        ["--input-type=module", "--eval", source],
+        { cwd: process.cwd() }
+      );
+
+      expect(JSON.parse(output.toString("utf8"))).toEqual({
+        attempts: 1,
+        message: `Release Bus progress report failed (${status})`,
+      });
+    }
+  );
+
   it("projects a versioned aggregate into the strict reusable summary", () => {
     const tempDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "release-bus-aggregate-")

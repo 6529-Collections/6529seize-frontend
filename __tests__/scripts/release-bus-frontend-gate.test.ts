@@ -42,6 +42,7 @@ describe("Release Bus frontend gate contract", () => {
     jobs?: Record<
       string,
       {
+        env?: Record<string, string>;
         needs?: string[] | string;
         outputs?: Record<string, string>;
         steps?: WorkflowStep[];
@@ -450,6 +451,10 @@ describe("Release Bus frontend gate contract", () => {
     expect(preflightWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
     expect(preflightWorkflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
     expect(preflightWorkflow.jobs?.build?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.build?.env).toMatchObject({
+      RELEASE_BUS_INSTALL_EVIDENCE:
+        "${{ runner.temp }}/release-bus-evidence/dependency-install-${{ matrix.environment }}.json",
+    });
     expect(preflightWorkflow.jobs?.authorize?.outputs).toMatchObject({
       inject_failure: "${{ steps.inputs.outputs.inject_failure }}",
     });

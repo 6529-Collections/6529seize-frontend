@@ -211,6 +211,16 @@ describe("Release Bus gate evidence", () => {
           identity: evidenceIdentity,
         })
       ),
+      ...["staging", "production"].map((buildEnvironment) => ({
+        schema_version: 1,
+        kind: "dependency_install",
+        source: "parallel",
+        ...evidenceIdentity,
+        build_environment: buildEnvironment,
+        status: "SUCCEEDED",
+        failure_class: null,
+        failure_code: null,
+      })),
     ];
 
     const summary = buildGateSummary({

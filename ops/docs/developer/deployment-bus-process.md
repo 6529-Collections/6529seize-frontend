@@ -133,7 +133,10 @@ for staging SHA … Candidates have not been tested yet.” A verified transient
 dependency-infrastructure failure instead says that the same immutable
 operation will retry automatically. The candidates remain attached and
 STAGING remains running; initial retries are prompt and a continued outage uses
-bounded 5/10/15-minute backoff. A deterministic source failure still says:
+bounded 5/10-minute backoff. After five failed workflow attempts, the failed
+train becomes terminal and its immutable candidates are automatically returned
+to the still-running lane for a later fresh train. A deterministic source
+failure still says:
 “Existing staging base failed … No candidate was blamed. STAGING was paused.”
 It also lists the failed gate/job/step, exact failing Jest suite/test when
 reported, candidates returned or quarantined, and the recommended recovery.
@@ -260,8 +263,10 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   frontend base SHA. A deterministic or unknown base-canary failure requeues
   every candidate and pauses the lane without quarantining a developer branch.
   Authenticated transient dependency-infrastructure evidence retries the exact
-  operation without pausing or detaching candidates. The same behavior applies
-  to frontend preflight infrastructure failures before candidate isolation.
+  operation without pausing or detaching candidates. Retries are capped at five
+  workflow attempts; exhaustion terminates only that train, requeues its
+  candidates, and leaves the lane running. The same behavior applies to
+  frontend preflight infrastructure failures before candidate isolation.
 - Ambiguous external calls are reconciled by exact operation key before any
   retry. A timeout is not treated as proof that an operation did not happen.
 - Before production mutation, an unexpected target-branch move safely cancels
