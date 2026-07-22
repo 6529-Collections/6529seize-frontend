@@ -42,6 +42,7 @@ describe("Release Bus frontend gate contract", () => {
     jobs?: Record<
       string,
       {
+        env?: Record<string, string>;
         needs?: string[] | string;
         outputs?: Record<string, string>;
         steps?: WorkflowStep[];
@@ -212,6 +213,7 @@ describe("Release Bus frontend gate contract", () => {
         "--runTestsByPath",
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
         "__tests__/scripts/release-bus-gate-evidence.test.ts",
+        "__tests__/scripts/release-bus-install-dependencies.test.ts",
         "__tests__/scripts/release-bus-jest-reporting.test.ts",
         "__tests__/scripts/release-bus-preflight-evidence.test.ts",
       ]);
@@ -418,6 +420,7 @@ describe("Release Bus frontend gate contract", () => {
     );
     expect(appPrCi).toContain("scripts/release-bus-authorize-operation.sh");
     expect(appPrCi).toContain("scripts/release-bus-gate-evidence.cjs");
+    expect(appPrCi).toContain("scripts/release-bus-install-dependencies.cjs");
     expect(appPrCi).toContain("scripts/release-bus-preflight-evidence.cjs");
     expect(appPrCi).toContain(
       "__tests__/scripts/release-bus-gate-evidence.test.ts"
@@ -448,6 +451,10 @@ describe("Release Bus frontend gate contract", () => {
     expect(preflightWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
     expect(preflightWorkflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
     expect(preflightWorkflow.jobs?.build?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.build?.env).toMatchObject({
+      RELEASE_BUS_INSTALL_EVIDENCE:
+        "${{ runner.temp }}/release-bus-evidence/dependency-install-${{ matrix.environment }}.json",
+    });
     expect(preflightWorkflow.jobs?.authorize?.outputs).toMatchObject({
       inject_failure: "${{ steps.inputs.outputs.inject_failure }}",
     });
