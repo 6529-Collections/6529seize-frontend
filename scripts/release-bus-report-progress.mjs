@@ -14,6 +14,10 @@ const OUTCOME_STATUS = {
   cancelled: "FAILED",
   skipped: "SKIPPED",
 };
+const REPORT_MAX_ATTEMPTS = 3;
+const REPORT_TIMEOUT_MS = 15_000;
+
+class NonRetryableProgressResponseError extends Error {}
 
 function stageStatus(name) {
   const key = `RELEASE_BUS_GATE_${name.toUpperCase()}_OUTCOME`;
@@ -139,6 +143,20 @@ function projectAggregateProgress(value) {
     throw new Error("Release Bus aggregate summary is invalid");
   }
   const status = value.status === "SUCCEEDED" ? "SUCCEEDED" : "FAILED";
+  const failureClass =
+    status === "SUCCEEDED"
+      ? null
+      : ["SOURCE", "INFRASTRUCTURE_TRANSIENT", "UNKNOWN"].includes(
+            value.failure_class
+          )
+        ? value.failure_class
+        : "UNKNOWN";
+  const failurePhase =
+    status === "SUCCEEDED"
+      ? null
+      : ["dependency_install", "gate"].includes(value.failure_phase)
+        ? value.failure_phase
+        : "gate";
   const phases = Array.isArray(value.phases) ? value.phases : [];
   const stages = STAGES.map((name) => {
     const phase = phases.find((item) => item?.name === name);
@@ -161,7 +179,16 @@ function projectAggregateProgress(value) {
     failing_tests: value.failing_tests,
   });
   if (!isVersionedAggregate(value)) {
-    return { status, stages, jest, summary: null };
+    return {
+      status,
+      stages,
+      jest,
+      summary: null,
+      failure_class: failureClass,
+      failure_phase: failurePhase,
+      retryable:
+        failureClass === "INFRASTRUCTURE_TRANSIENT" && value.retryable === true,
+    };
   }
   const artifactDigest = String(
     process.env.RELEASE_BUS_SUMMARY_ARTIFACT_DIGEST ?? ""
@@ -217,6 +244,10 @@ function projectAggregateProgress(value) {
     status,
     stages,
     jest,
+    failure_class: failureClass,
+    failure_phase: failurePhase,
+    retryable:
+      failureClass === "INFRASTRUCTURE_TRANSIENT" && value.retryable === true,
     summary: {
       base_sha: value.base_sha,
       environment: value.environment,
@@ -290,10 +321,65 @@ export function buildProgressPayload() {
     workflow_run_id: process.env.GITHUB_RUN_ID,
     phase: process.env.RELEASE_BUS_REPORT_PHASE ?? "complete",
     status: failed ? "FAILED" : "SUCCEEDED",
+    failure_class: failed ? "UNKNOWN" : null,
+    failure_phase: failed ? "gate" : null,
+    retryable: false,
     stages,
     jest: readJestSummary(),
     summary: null,
   };
+}
+
+export async function postProgress(
+  apiUrl,
+  token,
+  payload,
+  {
+    fetchImpl = fetch,
+    sleep = (milliseconds) =>
+      new Promise((resolve) => setTimeout(resolve, milliseconds)),
+    timeoutMs = REPORT_TIMEOUT_MS,
+  } = {}
+) {
+  let lastStatus = null;
+  for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetchImpl(
+        `${apiUrl.replace(/\/$/, "")}/deploy/release-bus/report-progress`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(timeoutMs),
+        }
+      );
+      if (response.ok) return;
+      lastStatus = response.status;
+      if (response.status < 500 || response.status > 599) {
+        throw new NonRetryableProgressResponseError(
+          `Release Bus progress report failed (${response.status})`
+        );
+      }
+      if (attempt === REPORT_MAX_ATTEMPTS) {
+        throw new Error("Release Bus progress report retryable server failure");
+      }
+    } catch (error) {
+      if (error instanceof NonRetryableProgressResponseError) throw error;
+      if (attempt === REPORT_MAX_ATTEMPTS) {
+        throw new Error(
+          `Release Bus progress report failed after bounded transport retries${lastStatus ? ` (${lastStatus})` : ""}`
+        );
+      }
+    }
+    process.stderr.write(
+      `Release Bus progress report transport attempt ${attempt} failed; retrying the same operation/run payload.\n`
+    );
+    await sleep(1_000 * attempt);
+  }
+  throw new Error("Release Bus progress report retry loop exited unexpectedly");
 }
 
 async function main() {
@@ -313,20 +399,7 @@ async function main() {
   // Only the strict, bounded projection above is sent to the configured Release
   // Bus endpoint. Unknown fields, failure messages, and raw logs are discarded.
   // lgtm[js/file-access-to-http]
-  const response = await fetch(
-    `${apiUrl.replace(/\/$/, "")}/deploy/release-bus/report-progress`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
-  if (!response.ok) {
-    throw new Error(`Release Bus progress report failed (${response.status})`);
-  }
+  await postProgress(apiUrl, token, payload);
 }
 
 if (
