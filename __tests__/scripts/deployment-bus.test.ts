@@ -74,6 +74,8 @@ describe("release bus optional Codex workflow", () => {
     expect(publish["continue-on-error"]).toBe(true);
     expect(publish.run).toContain("INFRASTRUCTURE_TRANSIENT");
     expect(publish.run).toContain("403|5[0-9]{2}");
+    expect(publish.run).toContain("requested url returned error");
+    expect(publish.run).not.toContain("(^|[^0-9])(403|5[0-9]{2})");
     expect(report.run).toContain("release_branch_publication");
   });
 });

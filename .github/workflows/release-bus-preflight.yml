@@ -610,6 +610,7 @@ jobs:
         run: |
           set -euo pipefail
           contract="$RUNNER_TEMP/release-bus-preflight-contract.json"
+          build_result="${{ needs.build.result }}"
           if [ "$PROMOTION_ELIGIBLE" = true ]; then
             node "$RELEASE_BUS_GATE_TOOL" fingerprint \
               --repo-root "$GITHUB_WORKSPACE" \
@@ -619,7 +620,6 @@ jobs:
               --shard-count "${{ needs.authorize.outputs.shard_count }}" \
               --build-profile-digest "$BUILD_PROFILE_DIGEST" \
               --output "$contract"
-            build_result="${{ needs.build.result }}"
           else
             node "$RELEASE_BUS_PREFLIGHT_EVIDENCE_TOOL" fingerprint \
               --repo-root "$GITHUB_WORKSPACE" \
@@ -627,7 +627,6 @@ jobs:
               --workflow-sha "$WORKFLOW_SHA" \
               --shard-count "${{ needs.authorize.outputs.shard_count }}" \
               --output "$contract"
-            build_result="${{ needs.build.result }}"
           fi
           gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
           behavior_digest="$(jq -r '.behavior_digest' "$contract")"

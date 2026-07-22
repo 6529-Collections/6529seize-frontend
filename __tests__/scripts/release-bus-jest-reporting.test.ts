@@ -565,6 +565,34 @@ describe("Release Bus structured Jest reporting", () => {
       const shadowPayload = JSON.parse(shadowOutput.toString("utf8"));
       expect(payload.summary.phase_durations_ms.total).toBe(40);
       expect(shadowPayload.summary.phase_durations_ms.total).toBe(100);
+
+      fs.writeFileSync(
+        aggregatePath,
+        JSON.stringify({
+          ...shadowAggregate,
+          status: "FAILED",
+          skipped_test_suites: Number.MAX_SAFE_INTEGER,
+          errors: ["authoritative evidence missing"],
+        })
+      );
+      const invalidAuthoritativeEvidence = spawnSync(
+        process.execPath,
+        ["scripts/release-bus-report-progress.mjs", "--payload-only"],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            GITHUB_RUN_ID: "123",
+            RELEASE_BUS_AGGREGATE_SUMMARY: aggregatePath,
+            RELEASE_BUS_SUMMARY_ARTIFACT_DIGEST: "e".repeat(64),
+          },
+          encoding: "utf8",
+        }
+      );
+      expect(invalidAuthoritativeEvidence.status).not.toBe(0);
+      expect(invalidAuthoritativeEvidence.stderr).toContain(
+        "Release Bus summary contains an invalid count"
+      );
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
