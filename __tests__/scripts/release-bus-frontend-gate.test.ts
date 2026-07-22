@@ -77,6 +77,15 @@ describe("Release Bus frontend gate contract", () => {
     expect(authorization).toContain('"$api_url/deploy/release-bus/authorize"');
     expect(canary).toContain("release-bus-report-progress.mjs");
     expect(canary).toContain("Report sanitized terminal evidence");
+    const buildProfileStep = Object.values(canaryWorkflow.jobs ?? {})
+      .flatMap((job) => job.steps ?? [])
+      .find((step) => step.name === "Derive protected staging build profile");
+    expect(buildProfileStep?.run).toContain(
+      'git cat-file -e "$WORKFLOW_SHA^{commit}"'
+    );
+    expect(buildProfileStep?.run?.indexOf("git cat-file")).toBeLessThan(
+      buildProfileStep?.run?.indexOf("git show") ?? -1
+    );
     expect(reporter).toContain("/deploy/release-bus/report-progress");
   });
 
@@ -247,6 +256,7 @@ describe("Release Bus frontend gate contract", () => {
       RELEASE_BUS_GATE_FINGERPRINT: "b".repeat(64),
       RELEASE_BUS_WORKFLOW_SHA: "c".repeat(40),
       RELEASE_BUS_WORKFLOW_DIGEST: "d".repeat(64),
+      RELEASE_BUS_BUILD_PROFILE_DIGEST: "e".repeat(64),
       RELEASE_BUS_NODE_VERSION: "22",
       RELEASE_BUS_PACKAGE_MANAGER: "pnpm@10.14.0",
     };
@@ -281,6 +291,7 @@ describe("Release Bus frontend gate contract", () => {
         gate_fingerprint: identity.RELEASE_BUS_GATE_FINGERPRINT,
         workflow_sha: identity.RELEASE_BUS_WORKFLOW_SHA,
         workflow_digest: identity.RELEASE_BUS_WORKFLOW_DIGEST,
+        build_profile_digest: identity.RELEASE_BUS_BUILD_PROFILE_DIGEST,
         node_version: identity.RELEASE_BUS_NODE_VERSION,
         package_manager: identity.RELEASE_BUS_PACKAGE_MANAGER,
       });
@@ -463,16 +474,17 @@ describe("Release Bus frontend gate contract", () => {
     expect(inputs.validation_inject_failure?.required).toBe(false);
     expect(preflightWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
     expect(preflightWorkflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
-    expect(preflightWorkflow.jobs?.build?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.build?.strategy).toBeUndefined();
+    expect(preflightWorkflow.jobs?.build?.env).toMatchObject({
+      BUILD_ENVIRONMENT: "${{ needs.authorize.outputs.build_environment }}",
+    });
     expect(preflightWorkflow.jobs?.build?.env).not.toHaveProperty(
       "RELEASE_BUS_INSTALL_EVIDENCE"
     );
     const buildEvidenceStep = preflightWorkflow.jobs?.build?.steps?.find(
       (step) => step.name === "Select build dependency evidence path"
     );
-    expect(buildEvidenceStep?.env).toEqual({
-      BUILD_ENVIRONMENT: "${{ matrix.environment }}",
-    });
+    expect(buildEvidenceStep?.env).toBeUndefined();
     expect(buildEvidenceStep?.run).toBe(
       'echo "RELEASE_BUS_INSTALL_EVIDENCE=$RUNNER_TEMP/release-bus-evidence/dependency-install-$BUILD_ENVIRONMENT.json" >> "$GITHUB_ENV"'
     );
@@ -505,10 +517,10 @@ describe("Release Bus frontend gate contract", () => {
         "${{ needs.authorize.outputs.inject_failure == 'true' && '1' || '0' }}",
     });
     expect(aggregate?.env).toMatchObject({
-      BUILD_RESULT: "${{ needs.build.result }}",
       INVENTORY_RESULT: "${{ needs.jest-inventory.result }}",
       JEST_RESULT: "${{ needs.jest.result }}",
       LINT_RESULT: "${{ needs.lint.result }}",
+      PROMOTION_ELIGIBLE: "${{ needs.authorize.outputs.promotion_eligible }}",
       TYPECHECK_RESULT: "${{ needs.typecheck.result }}",
     });
     expect(aggregate?.run).toContain(
@@ -523,6 +535,16 @@ describe("Release Bus frontend gate contract", () => {
     );
     expect(preflight).toContain(
       'git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh"'
+    );
+    expect(preflight).toContain('if [ "$PROMOTION_ELIGIBLE" = true ]; then');
+    expect(preflight).toContain("Report terminal preflight base evidence");
+    expect(preflight).not.toContain("matrix.environment");
+    expect(preflight).not.toContain("base-canary-build");
+    expect(preflight.match(/name: Build immutable application/g)).toHaveLength(
+      1
+    );
+    expect(preflight).toContain(
+      "Bind the single target compilation to its immutable artifact"
     );
   });
 });

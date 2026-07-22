@@ -45,6 +45,41 @@ describe("release bus optional Codex workflow", () => {
     );
     expect(composeWorkflow).toContain('test "$missing_seen" = true');
   });
+
+  it("retries only idempotent publication from the verified composition artifact", () => {
+    const workflow = YAML.parse(composeWorkflow);
+    const retryInput =
+      workflow.on.workflow_dispatch.inputs.composition_artifact_run_id;
+    const download = workflow.jobs.publish.steps.find(
+      (step: { name?: string }) => step.name === "Download isolated composition"
+    );
+    const publish = workflow.jobs.publish.steps.find(
+      (step: { name?: string }) => step.name === "Publish release branch"
+    );
+    const report = workflow.jobs.publish.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Report structured publication result"
+    );
+
+    expect(retryInput).toMatchObject({ required: false, default: "" });
+    expect(workflow.jobs.compose.if).toBe(
+      "inputs.composition_artifact_run_id == ''"
+    );
+    expect(workflow.jobs.publish.if).toContain(
+      "inputs.composition_artifact_run_id != ''"
+    );
+    expect(download.with["run-id"]).toContain(
+      "inputs.composition_artifact_run_id"
+    );
+    expect(publish["continue-on-error"]).toBe(true);
+    expect(publish.run).toContain("INFRASTRUCTURE_TRANSIENT");
+    expect(publish.run).toContain("403|5[0-9]{2}");
+    expect(publish.run).toContain("requested url returned error");
+    expect(publish.run).not.toContain("(^|[^0-9])(403|5[0-9]{2})");
+    expect(report.run).toContain("${PUBLISH_FAILURE_CLASS:-UNKNOWN}");
+    expect(report.run).toContain("${PUBLISH_RETRYABLE:-false}");
+    expect(report.run).toContain("release_branch_publication");
+  });
 });
 
 describe("release bus immutable frontend artifact", () => {
@@ -88,6 +123,33 @@ describe("release bus staging artifact transfer", () => {
       "utf8"
     )
   );
+
+  it("deploys the one target-profile artifact without rebuilding it", () => {
+    const inputs = deployWorkflow.on.workflow_dispatch.inputs;
+    const downloadStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Download immutable preflight artifact"
+    );
+    const verifyStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Verify and bind immutable artifact"
+    );
+
+    expect(inputs.artifact_environment).toMatchObject({
+      required: false,
+      default: "staging",
+      options: ["staging", "production"],
+    });
+    expect(downloadStep.with.name).toContain(
+      "${{ inputs.artifact_environment }}"
+    );
+    expect(verifyStep.run).toContain(".environment == $artifact_environment");
+    expect(
+      deployWorkflow.jobs.deploy.steps.filter((step: { name?: string }) =>
+        /build/i.test(step.name ?? "")
+      )
+    ).toEqual([]);
+  });
 
   it("uses the bucket region and rejects redirect bodies before activation", () => {
     const stageStep = deployWorkflow.jobs.deploy.steps.find(

@@ -19,6 +19,7 @@ set_evidence_identity_args() {
   : "${RELEASE_BUS_WORKFLOW_DIGEST:?RELEASE_BUS_WORKFLOW_DIGEST is required}"
   : "${RELEASE_BUS_NODE_VERSION:?RELEASE_BUS_NODE_VERSION is required}"
   : "${RELEASE_BUS_PACKAGE_MANAGER:?RELEASE_BUS_PACKAGE_MANAGER is required}"
+  : "${RELEASE_BUS_BUILD_PROFILE_DIGEST:?RELEASE_BUS_BUILD_PROFILE_DIGEST is required}"
   EVIDENCE_IDENTITY_ARGS=(
     --base-sha "$RELEASE_BUS_BASE_SHA"
     --environment "$RELEASE_BUS_EVIDENCE_ENVIRONMENT"
@@ -27,6 +28,7 @@ set_evidence_identity_args() {
     --workflow-digest "$RELEASE_BUS_WORKFLOW_DIGEST"
     --node-version "$RELEASE_BUS_NODE_VERSION"
     --package-manager "$RELEASE_BUS_PACKAGE_MANAGER"
+    --build-profile-digest "$RELEASE_BUS_BUILD_PROFILE_DIGEST"
   )
 }
 
