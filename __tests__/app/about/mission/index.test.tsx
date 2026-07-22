@@ -1,6 +1,9 @@
 import MissionPage, { generateMetadata } from "@/app/about/mission/page";
 import { aboutMissionMigratedWordPressPage } from "@/app/about/mission/content";
+import { publicEnv } from "@/config/env";
 import { render, screen } from "@testing-library/react";
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 describe("MissionPage (migrated WordPress static page)", () => {
   it("renders the mission title and statement from the content module", () => {
@@ -30,7 +33,7 @@ describe("MissionPage (migrated WordPress static page)", () => {
 
     expect(metadata.title).toBe("6529 MISSION - 6529.io");
     expect(metadata.description).toBe(
-      "THE 6529 MISSION IS TO ACCELERATE THE DEVELOPMENT OF AN OPEN METAVERSE | 6529.io"
+      `THE 6529 MISSION IS TO ACCELERATE THE DEVELOPMENT OF AN OPEN METAVERSE | ${domain}`
     );
     expect(metadata.openGraph).toMatchObject({
       siteName: "6529.io",
