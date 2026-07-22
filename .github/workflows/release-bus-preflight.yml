@@ -175,6 +175,7 @@ jobs:
           for file in \
             scripts/release-bus-frontend-gate.sh \
             scripts/release-bus-gate-evidence.cjs \
+            scripts/release-bus-install-dependencies.cjs \
             scripts/release-bus-preflight-evidence.cjs \
             scripts/release-bus-report-progress.mjs
           do
@@ -184,6 +185,7 @@ jobs:
           {
             echo "RELEASE_BUS_GATE_TOOL=$tooling/release-bus-frontend-gate.sh"
             echo "RELEASE_BUS_EVIDENCE_TOOL=$tooling/release-bus-gate-evidence.cjs"
+            echo "RELEASE_BUS_INSTALL_TOOL=$tooling/release-bus-install-dependencies.cjs"
             echo "RELEASE_BUS_PREFLIGHT_EVIDENCE_TOOL=$tooling/release-bus-preflight-evidence.cjs"
             echo "RELEASE_BUS_REPORT_TOOL=$tooling/release-bus-report-progress.mjs"
             echo "RELEASE_BUS_BASE_SHA=$EXPECTED_SHA"
@@ -203,13 +205,15 @@ jobs:
       - &socket-firewall
         name: Install Socket Firewall
         id: socket-firewall
+        continue-on-error: true
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with: { mode: firewall }
       - &install
-        name: Install frozen dependencies
+        name: Install and verify frozen dependencies
         env:
+          RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket-firewall.outcome }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: node "$RELEASE_BUS_INSTALL_TOOL"
       - name: Run lint
         id: gate
         continue-on-error: true
@@ -357,6 +361,10 @@ jobs:
       - *setup-node
       - *activate-pnpm
       - *socket-firewall
+      - name: Select build dependency evidence path
+        env:
+          BUILD_ENVIRONMENT: ${{ matrix.environment }}
+        run: echo "RELEASE_BUS_INSTALL_EVIDENCE=$RUNNER_TEMP/release-bus-evidence/dependency-install-$BUILD_ENVIRONMENT.json" >> "$GITHUB_ENV"
       - *install
       - name: Capture build timestamp
         run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
@@ -445,10 +453,10 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Upload build evidence
-        if: always() && matrix.environment == 'staging'
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: release-bus-preflight-evidence-build-${{ github.run_id }}
+          name: release-bus-preflight-evidence-build-${{ matrix.environment }}-${{ github.run_id }}
           path: ${{ runner.temp }}/release-bus-evidence/*.json
           if-no-files-found: error
           retention-days: 14
