@@ -39,6 +39,7 @@ function createIcsDataUrl(
   const dtStart = ymdHmsUtc(startInstantUtc);
   const dtEnd = ymdHmsUtc(endInstantUtc);
   const uid = `meme-${dtStart}@6529.io`;
+  const escapedDescription = description.replaceAll("\n", String.raw`\n`);
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -49,7 +50,7 @@ function createIcsDataUrl(
     `DTSTART:${dtStart}`,
     `DTEND:${dtEnd}`,
     `SUMMARY:${title} Minting`,
-    `DESCRIPTION:${description.replaceAll("\n", String.raw`\n`)}`,
+    `DESCRIPTION:${escapedDescription}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");

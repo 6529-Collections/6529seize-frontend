@@ -363,57 +363,55 @@ export function SeizeVideoElement({
   const VideoWithOptionalCaptions = "video";
 
   return (
-    <>
-      <VideoWithOptionalCaptions
-        id={id}
-        ref={setVideoRef}
-        src={src}
-        autoPlay={videoAutoPlay}
-        muted={isMuted}
-        loop={loop}
-        playsInline
-        preload={preload}
-        poster={poster}
-        controls={videoControls}
-        tabIndex={videoTabIndex}
-        aria-label={ariaLabel}
-        {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
-        onLoadedMetadata={onLoadedMetadata}
-        onDurationChange={onDurationChange}
-        onTimeUpdate={onTimeUpdate}
-        onPlay={onPlay}
-        onPause={onPause}
-        onEnded={onEnded}
-        onError={onError}
-        onFocus={onFocus}
-        onSeeked={onSeeked}
-        onSeeking={onSeeking}
-        onClick={onClick}
-        onPointerEnter={onPointerEnter}
-        onPointerMove={onPointerMove}
-        onPointerLeave={onPointerLeave}
-        onTouchStart={onTouchStart}
-        className={clsx(
-          "tw-block tw-h-full tw-w-full tw-rounded-xl tw-object-contain",
-          isWrapperFullscreen && "tw-rounded-none",
-          videoClassName
-        )}
-        data-testid={dataTestId}
-        data-mime={dataMime}
-        data-url={dataUrl}
-        data-disable={dataDisable}
-      >
-        {captionsSrc && (
-          <track
-            kind="captions"
-            src={captionsSrc}
-            srcLang={captionsLang}
-            label={captionsLabel}
-            default={captionsDefault}
-          />
-        )}
-        {labels.unsupported}
-      </VideoWithOptionalCaptions>
-    </>
+    <VideoWithOptionalCaptions
+      id={id}
+      ref={setVideoRef}
+      src={src}
+      autoPlay={videoAutoPlay}
+      muted={isMuted}
+      loop={loop}
+      playsInline
+      preload={preload}
+      poster={poster}
+      controls={videoControls}
+      tabIndex={videoTabIndex}
+      aria-label={ariaLabel}
+      {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
+      onLoadedMetadata={onLoadedMetadata}
+      onDurationChange={onDurationChange}
+      onTimeUpdate={onTimeUpdate}
+      onPlay={onPlay}
+      onPause={onPause}
+      onEnded={onEnded}
+      onError={onError}
+      onFocus={onFocus}
+      onSeeked={onSeeked}
+      onSeeking={onSeeking}
+      onClick={onClick}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onTouchStart={onTouchStart}
+      className={clsx(
+        "tw-block tw-h-full tw-w-full tw-rounded-xl tw-object-contain",
+        isWrapperFullscreen && "tw-rounded-none",
+        videoClassName
+      )}
+      data-testid={dataTestId}
+      data-mime={dataMime}
+      data-url={dataUrl}
+      data-disable={dataDisable}
+    >
+      {captionsSrc && (
+        <track
+          kind="captions"
+          src={captionsSrc}
+          srcLang={captionsLang}
+          label={captionsLabel}
+          default={captionsDefault}
+        />
+      )}
+      {labels.unsupported}
+    </VideoWithOptionalCaptions>
   );
 }
