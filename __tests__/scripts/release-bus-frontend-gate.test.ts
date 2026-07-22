@@ -614,6 +614,8 @@ describe("Release Bus frontend gate contract", () => {
     expect(aggregate?.run).toContain(
       'test "$PASSED_BEHAVIOR_DIGEST" = "$behavior_digest"'
     );
+    expect(aggregate?.run).toContain('"$RELEASE_BUS_GATE_TOOL" fingerprint');
+    expect(aggregate?.run).not.toContain('node "$RELEASE_BUS_GATE_TOOL"');
     expect(preflight).toContain('test "$VALIDATION_ONLY" = true');
     expect(preflight).toContain(
       'echo "inject_failure=$VALIDATION_INJECT_FAILURE"'
