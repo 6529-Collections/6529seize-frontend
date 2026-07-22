@@ -253,7 +253,7 @@ export default function RepCategoryExplorer() {
       <section className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-900 tw-pb-6">
         <label
           htmlFor="global-rep-category-search"
-          className="tw-mb-3 tw-block tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50"
+          className="tw-mb-3 tw-block tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
         >
           {t(REP_CATEGORY_LOCALE, "rep.categories.search.label")}
         </label>
@@ -291,7 +291,7 @@ export default function RepCategoryExplorer() {
       {!selectedCategory && (
         <section className="tw-flex tw-flex-col tw-gap-5">
           <div>
-            <h2 className="tw-mb-1 tw-mt-0 tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50">
+            <h2 className="tw-mb-1 tw-mt-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50">
               {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.title")}
             </h2>
             <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-text-iron-400">
