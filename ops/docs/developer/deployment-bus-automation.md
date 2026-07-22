@@ -209,6 +209,26 @@ shadow and inspect real decisions; then enable reuse with the 24-hour TTL.
 Disable reuse independently or return the frontend to `legacy`/one shard before
 considering a code rollback.
 
+Candidate preflight uses the same fail-closed Jest inventory model without
+sharing the base-canary reuse identity. Lint, typecheck, the complete Jest
+inventory, deterministic Jest shards, and immutable staging/production builds
+run as independent jobs. The final preflight aggregate requires every job to
+succeed and proves every expected test file executed exactly once, with no
+missing, duplicate, unexpected, skipped, todo, or rerun-masked tests. Jest runs
+with `--maxWorkers=2 --bail=0`; Release Bus full, isolation, base, and preflight
+execution never uses `--runInBand`.
+
+`FRONTEND_PREFLIGHT_SHARD_COUNT` accepts `1`, `2`, or `4` and defaults to `2`.
+Setting it to `1` is the no-deploy rollback for shard fan-out while retaining
+bounded Jest workers and complete inventory enforcement. The preflight
+fingerprint covers the exact candidate lockfile/Jest/runtime contract and the
+workflow, action pins, authorization helper, gate, evidence, and reporting
+tooling from the pinned workflow commit. Its content-addressed
+`behavior_digest` permits continuity across ancestry-only changes; any covered
+byte, runtime, worker, or shard-count change invalidates continuity. Workflow
+and candidate SHAs remain exact provenance and are never replaced by the
+content digest.
+
 Frontend workflows report lint, typecheck, unit-test, and build outcomes as
 separate structured stages. Jest JSON is reduced to bounded repository-relative
 suite names and exact failing test names; failure messages and raw output are
