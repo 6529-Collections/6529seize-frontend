@@ -471,8 +471,8 @@ describe("Release Bus structured Jest reporting", () => {
 
     expect(preflightReport).toEqual(
       expect.objectContaining({
-        if: "always()",
-        run: "node scripts/release-bus-report-progress.mjs",
+        if: "always() && inputs.validation_only != true",
+        run: 'node "$RELEASE_BUS_REPORT_TOOL"',
       })
     );
     expect(isolationReport).toEqual(
@@ -493,6 +493,9 @@ describe("Release Bus structured Jest reporting", () => {
     );
     expect(gateContract?.run).toContain(
       "scripts/release-bus-summarize-jest.mjs"
+    );
+    expect(gateContract?.run).toContain(
+      "scripts/release-bus-preflight-evidence.cjs"
     );
     expect(gateContract?.run).toContain(
       "__tests__/scripts/release-bus-jest-reporting.test.ts"

@@ -40,6 +40,7 @@ const FRONTEND_GATE_BASE_FILES = [
   "pnpm-lock.yaml",
 ];
 const FRONTEND_GATE_TOOLING_FILES = [
+  "scripts/release-bus-authorize-operation.sh",
   "scripts/release-bus-frontend-gate.sh",
   "scripts/release-bus-gate-evidence.cjs",
   "scripts/release-bus-report-progress.mjs",
@@ -611,7 +612,7 @@ function buildGateSummary({
   if (sourceEvidence.some((record) => record.kind === "manifest_error"))
     errors.push("Jest manifest capture failed");
   for (const [job, result] of Object.entries(jobResults)) {
-    if (result !== "success" && result !== "skipped") {
+    if (result !== "success") {
       errors.push(`${safeText(job, 80)} job did not succeed`);
     }
   }

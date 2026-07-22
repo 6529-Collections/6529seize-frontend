@@ -12,6 +12,7 @@ describe("Release Bus frontend gate contract", () => {
   const preflight = read(".github/workflows/release-bus-preflight.yml");
   const isolation = read(".github/workflows/release-bus-isolate-candidate.yml");
   const canary = read(".github/workflows/release-bus-base-canary.yml");
+  const authorization = read("scripts/release-bus-authorize-operation.sh");
   const appPrCi = read(".github/workflows/app-pr-ci.yml");
   const reporter = read("scripts/release-bus-report-progress.mjs");
 
@@ -27,7 +28,27 @@ describe("Release Bus frontend gate contract", () => {
         inputs?: Record<string, { required?: boolean }>;
       };
     };
-    jobs?: Record<string, { steps?: WorkflowStep[] }>;
+    jobs?: Record<
+      string,
+      { steps?: WorkflowStep[]; "timeout-minutes"?: number }
+    >;
+  };
+  const preflightWorkflow = parseYaml(preflight) as {
+    on?: {
+      workflow_dispatch?: {
+        inputs?: Record<string, { required?: boolean }>;
+      };
+    };
+    jobs?: Record<
+      string,
+      {
+        needs?: string[] | string;
+        outputs?: Record<string, string>;
+        steps?: WorkflowStep[];
+        strategy?: { "fail-fast"?: boolean };
+        "timeout-minutes"?: number;
+      }
+    >;
   };
 
   it("keeps deployed worker dispatch and authorization backward compatible", () => {
@@ -51,12 +72,88 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain(
       '\'{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}\''
     );
-    expect(canary).toContain(
-      "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
-    );
+    expect(authorization).toContain('"$api_url/deploy/release-bus/authorize"');
     expect(canary).toContain("release-bus-report-progress.mjs");
     expect(canary).toContain("Report sanitized terminal evidence");
     expect(reporter).toContain("/deploy/release-bus/report-progress");
+  });
+
+  it("bounds and retries an ambiguous authorization transport failure", () => {
+    expect(canaryWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
+    expect(canary).toContain(
+      'git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh"'
+    );
+
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-authorize-")
+    );
+    const attemptFile = path.join(tempDir, "attempts.txt");
+    try {
+      fs.writeFileSync(
+        path.join(tempDir, "curl"),
+        `#!/usr/bin/env bash\ncount=0\nif [ -f "$RELEASE_BUS_ATTEMPT_FILE" ]; then count="$(cat "$RELEASE_BUS_ATTEMPT_FILE")"; fi\ncount=$((count + 1))\nprintf '%s' "$count" > "$RELEASE_BUS_ATTEMPT_FILE"\nif [ "$count" -eq 1 ]; then exit 28; fi\nprintf '200'\n`
+      );
+      fs.writeFileSync(path.join(tempDir, "sleep"), "#!/usr/bin/env bash\n");
+      fs.chmodSync(path.join(tempDir, "curl"), 0o755);
+      fs.chmodSync(path.join(tempDir, "sleep"), 0o755);
+
+      execFileSync(
+        "bash",
+        ["scripts/release-bus-authorize-operation.sh", '{"operation":"same"}'],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            PATH: `${tempDir}:${process.env.PATH}`,
+            RELEASE_BUS_API_URL: "https://api.example.test",
+            RELEASE_BUS_ATTEMPT_FILE: attemptFile,
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+          },
+        }
+      );
+
+      expect(fs.readFileSync(attemptFile, "utf8")).toBe("2");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not retry a deterministic authorization rejection", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-authorize-reject-")
+    );
+    const attemptFile = path.join(tempDir, "attempts.txt");
+    try {
+      fs.writeFileSync(
+        path.join(tempDir, "curl"),
+        `#!/usr/bin/env bash\nprintf '1' > "$RELEASE_BUS_ATTEMPT_FILE"\nprintf '409'\n`
+      );
+      fs.chmodSync(path.join(tempDir, "curl"), 0o755);
+
+      expect(() =>
+        execFileSync(
+          "bash",
+          [
+            "scripts/release-bus-authorize-operation.sh",
+            '{"operation":"same"}',
+          ],
+          {
+            cwd: process.cwd(),
+            env: {
+              ...process.env,
+              PATH: `${tempDir}:${process.env.PATH}`,
+              RELEASE_BUS_API_URL: "https://api.example.test",
+              RELEASE_BUS_ATTEMPT_FILE: attemptFile,
+              RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+            },
+            stdio: "pipe",
+          }
+        )
+      ).toThrow();
+      expect(fs.readFileSync(attemptFile, "utf8")).toBe("1");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it("owns the only Release Bus Jest invocation", () => {
@@ -116,6 +213,7 @@ describe("Release Bus frontend gate contract", () => {
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
         "__tests__/scripts/release-bus-gate-evidence.test.ts",
         "__tests__/scripts/release-bus-jest-reporting.test.ts",
+        "__tests__/scripts/release-bus-preflight-evidence.test.ts",
       ]);
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
@@ -177,9 +275,11 @@ describe("Release Bus frontend gate contract", () => {
   });
 
   it("is shared by preflight, isolation, and exact-base canary", () => {
-    expect(preflight).toContain(
-      "./scripts/release-bus-frontend-gate.sh validate"
-    );
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" phase lint');
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" phase typecheck');
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" phase build');
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" inventory');
+    expect(preflight).toContain('"$RELEASE_BUS_GATE_TOOL" jest');
     expect(isolation).toContain("./scripts/release-bus-frontend-gate.sh full");
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" serial');
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase lint');
@@ -291,6 +391,13 @@ describe("Release Bus frontend gate contract", () => {
       expect(gate).toContain(identityFlag);
     }
     expect(canary).toContain("fail-fast: false");
+    expect(preflight).toContain("fail-fast: false");
+    expect(preflight).toContain("FRONTEND_PREFLIGHT_SHARD_COUNT");
+    expect(preflight).toContain("validation_shard_count");
+    expect(preflight).toContain("validation_inject_failure");
+    expect(preflight).toContain("RELEASE_BUS_INJECT_SHARD_FAILURE");
+    expect(preflight).toContain("Aggregate fail-closed preflight evidence");
+    expect(preflight).toContain("release-bus-preflight-evidence.cjs");
     expect(canary).toContain("FRONTEND_GATE_SHARD_COUNT");
     expect(canary).toContain("RELEASE_BUS_FRONTEND_GATE_MODE");
     expect(canary).toContain("validation_only");
@@ -308,6 +415,86 @@ describe("Release Bus frontend gate contract", () => {
   it("executes its argument-forwarding contract in ordinary PR CI", () => {
     expect(appPrCi).toContain(
       "./scripts/release-bus-frontend-gate.sh contract"
+    );
+    expect(appPrCi).toContain("scripts/release-bus-authorize-operation.sh");
+    expect(appPrCi).toContain("scripts/release-bus-gate-evidence.cjs");
+    expect(appPrCi).toContain("scripts/release-bus-preflight-evidence.cjs");
+    expect(appPrCi).toContain(
+      "__tests__/scripts/release-bus-gate-evidence.test.ts"
+    );
+  });
+
+  it("keeps preflight dispatch backward compatible and fail-closed", () => {
+    const inputs = preflightWorkflow.on?.workflow_dispatch?.inputs ?? {};
+    expect(
+      Object.entries(inputs)
+        .filter(([, contract]) => contract.required === true)
+        .map(([name]) => name)
+        .sort()
+    ).toEqual(
+      [
+        "release_train_id",
+        "release_train_revision",
+        "operation_key",
+        "target_lane",
+        "release_branch",
+        "deploy_units",
+        "expected_sha",
+      ].sort()
+    );
+    expect(inputs.validation_only?.required).toBe(false);
+    expect(inputs.validation_shard_count?.required).toBe(false);
+    expect(inputs.validation_inject_failure?.required).toBe(false);
+    expect(preflightWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
+    expect(preflightWorkflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.build?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.authorize?.outputs).toMatchObject({
+      inject_failure: "${{ steps.inputs.outputs.inject_failure }}",
+    });
+    expect(preflightWorkflow.jobs?.aggregate?.needs).toEqual([
+      "authorize",
+      "lint",
+      "typecheck",
+      "jest-inventory",
+      "jest",
+      "build",
+    ]);
+
+    const steps = Object.values(preflightWorkflow.jobs ?? {}).flatMap(
+      (job) => job.steps ?? []
+    );
+    for (const step of steps) {
+      expect(step.run ?? "").not.toMatch(/\$\{\{\s*inputs\./);
+    }
+    const aggregate = steps.find(
+      (step) => step.name === "Aggregate fail-closed preflight evidence"
+    );
+    const jestGate = preflightWorkflow.jobs?.jest?.steps?.find(
+      (step) => step.name === "Run complete deterministic Jest shard"
+    );
+    expect(jestGate?.env).toMatchObject({
+      RELEASE_BUS_INJECT_SHARD_FAILURE:
+        "${{ needs.authorize.outputs.inject_failure == 'true' && '1' || '0' }}",
+    });
+    expect(aggregate?.env).toMatchObject({
+      BUILD_RESULT: "${{ needs.build.result }}",
+      INVENTORY_RESULT: "${{ needs.jest-inventory.result }}",
+      JEST_RESULT: "${{ needs.jest.result }}",
+      LINT_RESULT: "${{ needs.lint.result }}",
+      TYPECHECK_RESULT: "${{ needs.typecheck.result }}",
+    });
+    expect(aggregate?.run).toContain(
+      '--arg source_mutation "$MUTATION_RESULT"'
+    );
+    expect(aggregate?.run).toContain(
+      'test "$PASSED_BEHAVIOR_DIGEST" = "$behavior_digest"'
+    );
+    expect(preflight).toContain('test "$VALIDATION_ONLY" = true');
+    expect(preflight).toContain(
+      'echo "inject_failure=$VALIDATION_INJECT_FAILURE"'
+    );
+    expect(preflight).toContain(
+      'git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh"'
     );
   });
 });
