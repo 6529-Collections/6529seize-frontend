@@ -104,11 +104,24 @@ export const getMessageIdFromPathname = (
   }
 };
 
+export const isWaveCreatePathname = (
+  pathname: string | null | undefined
+): boolean => {
+  if (!pathname?.startsWith("/waves/")) {
+    return false;
+  }
+  const [, wavesSegment, waveSegment] = pathname.split("/");
+  return wavesSegment === "waves" && waveSegment === CREATE_SEGMENT;
+};
+
 export const hidesMobileBottomNavigation = ({
   pathname,
 }: {
   pathname: string | null | undefined;
 }): boolean =>
+  // The create-wave route is a focused full-screen flow with its own sticky
+  // footer; hide the floating dock so it doesn't overlap Prev/Next.
+  isWaveCreatePathname(pathname) ||
   getWaveIdFromPathname(pathname) !== null ||
   getMessageIdFromPathname(pathname) !== null;
 

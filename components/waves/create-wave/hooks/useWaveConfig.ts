@@ -38,6 +38,7 @@ export function useWaveConfig() {
     return {
       overview: {
         type,
+        typeSelected: false,
         name: "",
         image: null,
       },

@@ -44,6 +44,8 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await gotoCreateWave(page);
 
     await page.getByLabel(/Wave Name/).fill(SANDBOX_CREATED_WAVE_NAME);
+    // The wave type must be explicitly chosen now (no default); pick Chat.
+    await page.getByText("Chat", { exact: true }).click();
     await expect(nextStepButton(page)).toBeEnabled();
     await nextStepButton(page).click();
 
