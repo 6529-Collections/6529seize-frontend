@@ -109,7 +109,7 @@ function ProfileCell({
       <Link
         href={getProfileHref(profile)}
         prefetch={false}
-        className={`rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline tw-decoration-primary-400/70 tw-underline-offset-2 hover:tw-underline focus-visible:tw-underline ${
+        className={`rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline tw-decoration-iron-400/80 tw-underline-offset-2 hover:tw-underline focus-visible:tw-underline ${
           compact ? "tw-gap-2" : "tw-gap-3"
         }`}
       >
