@@ -212,6 +212,7 @@ describe("Release Bus frontend gate contract", () => {
         "--runTestsByPath",
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
         "__tests__/scripts/release-bus-gate-evidence.test.ts",
+        "__tests__/scripts/release-bus-install-dependencies.test.ts",
         "__tests__/scripts/release-bus-jest-reporting.test.ts",
         "__tests__/scripts/release-bus-preflight-evidence.test.ts",
       ]);
@@ -418,6 +419,7 @@ describe("Release Bus frontend gate contract", () => {
     );
     expect(appPrCi).toContain("scripts/release-bus-authorize-operation.sh");
     expect(appPrCi).toContain("scripts/release-bus-gate-evidence.cjs");
+    expect(appPrCi).toContain("scripts/release-bus-install-dependencies.cjs");
     expect(appPrCi).toContain("scripts/release-bus-preflight-evidence.cjs");
     expect(appPrCi).toContain(
       "__tests__/scripts/release-bus-gate-evidence.test.ts"

@@ -117,9 +117,13 @@ merged unnoticed.
 Before composing a train that contains frontend work, the worker dispatches
 `release-bus-base-canary.yml` against the train's exact recorded frontend base
 SHA. The canary runs lint, typecheck, the complete Jest suite, and a production
-build. Failure requeues the train's candidates, pauses the lane, and records the
-exact Actions run as operator evidence; it never attributes the base failure to
-a candidate. Backend-only trains skip this frontend canary.
+build. A deterministic source/gate failure requeues the train's candidates,
+pauses the lane, and records the exact Actions run as operator evidence; it
+never attributes the base failure to a candidate. This pause also applies to an
+unclassified failure. A dependency-install failure explicitly classified as
+transient infrastructure keeps the candidates attached, keeps the lane
+running, and retries the same immutable operation. Backend-only trains skip
+this frontend canary.
 
 The frontend base canary has three independently selectable execution modes:
 
@@ -134,11 +138,19 @@ Jest shard jobs against the same SHA, but only the serial outcome controls the
 train. `sharded` makes the parallel aggregate authoritative. Every deterministic
 Jest `--shard=N/M` uses `--maxWorkers=2 --bail=0`, bounding memory and process
 fan-out without forcing serial execution. The matrix has `fail-fast: false` and
-no automatic retry. Returning to
+does not retry source gates. Only verified transient dependency infrastructure
+is retried. Returning to
 `legacy`/one shard is the no-code rollback.
 
 Each validation job detaches the exact base SHA, installs frozen dependencies
-through `./bin/6529`, and proves that source files were not mutated. Gate and
+through `./bin/6529`, verifies every direct package, required binary, and pnpm
+installation metadata, and proves that source files were not mutated. A
+Socket Firewall or package-transport failure, timeout, or false-success partial
+install is recorded as bounded `dependency_install` evidence. The job removes
+the partial `node_modules` tree and retries the exact frozen install up to three
+times; lockfile/contract failures are source failures and are never retried.
+The aggregate job uses staged built-in Node tooling and does not install
+dependencies, removing an unnecessary third-party failure point. Gate and
 reporting tooling is copied to runner temporary storage from the exact workflow
 commit, so a workflow dispatched from pinned `main` can validate an older base
 without substituting that base's control-plane policy. The fingerprint covers
@@ -462,9 +474,15 @@ are verified.
   irreversible operation.
 - A missed workflow response remains `AMBIGUOUS` until exact-run reconciliation
   proves its state.
+- A failed base-canary or preflight operation carrying authenticated
+  `INFRASTRUCTURE_TRANSIENT` dependency evidence is retried with a new exact
+  attempt key. The first retries are prompt; continued outages use bounded
+  5/10/15-minute backoff. The train remains visible as
+  `INFRASTRUCTURE_RETRY_BACKOFF`, candidates stay attached, and the lane is not
+  paused. Source and unknown failures retain fail-closed behavior.
 - The incident card distinguishes `PRE_EXISTING_BASE`,
   `DETERMINISTIC_CANDIDATE`, and train/environment failures. A pre-existing
-  base failure returns every candidate, quarantines none, applies
+  deterministic base failure returns every candidate, quarantines none, applies
   `BASE_FAILURE_NO_CANDIDATE_BLAMED`, pauses the lane, and records the exact
   recovery recommendation. Candidate quarantine is allowed only after
   deterministic isolation proves the candidate-owned failure.

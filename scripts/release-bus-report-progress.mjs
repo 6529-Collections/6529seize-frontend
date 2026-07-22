@@ -139,6 +139,20 @@ function projectAggregateProgress(value) {
     throw new Error("Release Bus aggregate summary is invalid");
   }
   const status = value.status === "SUCCEEDED" ? "SUCCEEDED" : "FAILED";
+  const failureClass =
+    status === "SUCCEEDED"
+      ? null
+      : ["SOURCE", "INFRASTRUCTURE_TRANSIENT", "UNKNOWN"].includes(
+            value.failure_class
+          )
+        ? value.failure_class
+        : "UNKNOWN";
+  const failurePhase =
+    status === "SUCCEEDED"
+      ? null
+      : ["dependency_install", "gate"].includes(value.failure_phase)
+        ? value.failure_phase
+        : "gate";
   const phases = Array.isArray(value.phases) ? value.phases : [];
   const stages = STAGES.map((name) => {
     const phase = phases.find((item) => item?.name === name);
@@ -161,7 +175,16 @@ function projectAggregateProgress(value) {
     failing_tests: value.failing_tests,
   });
   if (!isVersionedAggregate(value)) {
-    return { status, stages, jest, summary: null };
+    return {
+      status,
+      stages,
+      jest,
+      summary: null,
+      failure_class: failureClass,
+      failure_phase: failurePhase,
+      retryable:
+        failureClass === "INFRASTRUCTURE_TRANSIENT" && value.retryable === true,
+    };
   }
   const artifactDigest = String(
     process.env.RELEASE_BUS_SUMMARY_ARTIFACT_DIGEST ?? ""
@@ -217,6 +240,10 @@ function projectAggregateProgress(value) {
     status,
     stages,
     jest,
+    failure_class: failureClass,
+    failure_phase: failurePhase,
+    retryable:
+      failureClass === "INFRASTRUCTURE_TRANSIENT" && value.retryable === true,
     summary: {
       base_sha: value.base_sha,
       environment: value.environment,
@@ -290,6 +317,9 @@ export function buildProgressPayload() {
     workflow_run_id: process.env.GITHUB_RUN_ID,
     phase: process.env.RELEASE_BUS_REPORT_PHASE ?? "complete",
     status: failed ? "FAILED" : "SUCCEEDED",
+    failure_class: failed ? "UNKNOWN" : null,
+    failure_phase: failed ? "gate" : null,
+    retryable: false,
     stages,
     jest: readJestSummary(),
     summary: null,

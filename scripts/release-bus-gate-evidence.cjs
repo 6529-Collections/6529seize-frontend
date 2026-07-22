@@ -26,6 +26,7 @@ const EVIDENCE_IDENTITY_FIELDS = [
   "package_manager",
 ];
 const EVIDENCE_RECORD_KINDS = new Set([
+  "dependency_install",
   "manifest",
   "manifest_error",
   "phase",
@@ -43,6 +44,7 @@ const FRONTEND_GATE_TOOLING_FILES = [
   "scripts/release-bus-authorize-operation.sh",
   "scripts/release-bus-frontend-gate.sh",
   "scripts/release-bus-gate-evidence.cjs",
+  "scripts/release-bus-install-dependencies.cjs",
   "scripts/release-bus-report-progress.mjs",
 ];
 
@@ -560,6 +562,10 @@ function buildGateSummary({
     (record) =>
       record.source === source && EVIDENCE_RECORD_KINDS.has(record.kind)
   );
+  const failedDependencyInstall = sourceEvidence.find(
+    (record) =>
+      record.kind === "dependency_install" && record.status === "FAILED"
+  );
   if (
     identity &&
     (sourceEvidence.length === 0 ||
@@ -636,23 +642,49 @@ function buildGateSummary({
   const minimumShardDuration = shardDurations.length
     ? Math.min(...shardDurations)
     : 0;
+  const status = errors.length === 0 ? "SUCCEEDED" : "FAILED";
+  const failureClass =
+    status === "SUCCEEDED"
+      ? null
+      : failedDependencyInstall?.failure_class === "INFRASTRUCTURE_TRANSIENT"
+        ? "INFRASTRUCTURE_TRANSIENT"
+        : failedDependencyInstall?.failure_class === "SOURCE"
+          ? "SOURCE"
+          : failedDependencyInstall
+            ? "UNKNOWN"
+            : "SOURCE";
+  const shardSummaries = Array.from({ length: shardCount }, (_, offset) => {
+    const index = offset + 1;
+    const shard = shards.find(
+      (candidate) =>
+        candidate.shard_index === index && candidate.shard_count === shardCount
+    );
+    return shard
+      ? {
+          index: shard.shard_index,
+          count: shard.shard_count,
+          status: shard.status,
+          injected_failure: shard.injected_failure === true,
+          duration_ms: shard.duration_ms,
+          counts: shard.counts,
+        }
+      : {
+          index,
+          count: shardCount,
+          status: "FAILED",
+          injected_failure: false,
+          duration_ms: 0,
+          counts: sumCounts([]),
+        };
+  });
   return {
-    status: errors.length === 0 ? "SUCCEEDED" : "FAILED",
+    status,
+    failure_class: failureClass,
+    failure_phase: failedDependencyInstall ? "dependency_install" : "gate",
+    retryable: failureClass === "INFRASTRUCTURE_TRANSIENT",
     phases,
     counts,
-    shards: stableSort(
-      shards.map(
-        (shard) =>
-          `${String(shard.shard_index).padStart(2, "0")}:${JSON.stringify({
-            index: shard.shard_index,
-            count: shard.shard_count,
-            status: shard.status,
-            injected_failure: shard.injected_failure === true,
-            duration_ms: shard.duration_ms,
-            counts: shard.counts,
-          })}`
-      )
-    ).map((value) => JSON.parse(value.slice(value.indexOf(":") + 1))),
+    shards: shardSummaries,
     shard_imbalance_ms: maximumShardDuration - minimumShardDuration,
     missing_files: missingFiles.slice(0, MAX_FAILURES),
     duplicate_files: duplicateFiles.slice(0, MAX_FAILURES),
@@ -743,6 +775,15 @@ function finalSummary({ args, records, jobResults }) {
     schema_version: 1,
     kind: "base_canary_summary",
     status: authoritative?.status ?? "FAILED",
+    failure_class:
+      authoritative?.status === "SUCCEEDED"
+        ? null
+        : (authoritative?.failure_class ?? "UNKNOWN"),
+    failure_phase:
+      authoritative?.status === "SUCCEEDED"
+        ? null
+        : (authoritative?.failure_phase ?? "gate"),
+    retryable: authoritative?.retryable === true,
     gate_mode: mode,
     fresh_or_reused: "fresh",
     ...identity,

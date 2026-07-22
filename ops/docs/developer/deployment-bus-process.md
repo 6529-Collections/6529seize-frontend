@@ -129,13 +129,17 @@ discovered, or no recent workflow progress. Do not retry while GitHub still
 shows a healthy active run.
 
 During a base canary, the incident card says: “Frontend base canary running
-for staging SHA … Candidates have not been tested yet.” If it fails, the card
-says: “Existing staging base failed … No candidate was blamed. STAGING was
-paused.” It also lists the failed gate/job/step, exact failing Jest suite/test
-when reported, candidates returned or quarantined, and the recommended
-recovery. For a base failure, repair and validate the existing staging base,
-deploy that isolated repair, verify it, and only then resume the lane. Do not
-change, cancel, or blame queued candidates to work around a base failure.
+for staging SHA … Candidates have not been tested yet.” A verified transient
+dependency-infrastructure failure instead says that the same immutable
+operation will retry automatically. The candidates remain attached and
+STAGING remains running; initial retries are prompt and a continued outage uses
+bounded 5/10/15-minute backoff. A deterministic source failure still says:
+“Existing staging base failed … No candidate was blamed. STAGING was paused.”
+It also lists the failed gate/job/step, exact failing Jest suite/test when
+reported, candidates returned or quarantined, and the recommended recovery.
+For a deterministic base failure, repair and validate the existing staging
+base, deploy that isolated repair, verify it, and only then resume the lane. Do
+not change, cancel, or blame queued candidates to work around a base failure.
 
 ## How a train departs
 
@@ -253,8 +257,11 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   Release Bus gate. Pull-request CI executes the gate's regression contract
   whenever that gate or a Release Bus workflow changes. Before candidate
   composition, the bus also runs the full gate against the exact recorded
-  frontend base SHA. A base-canary failure requeues every candidate and pauses
-  the lane without quarantining a developer branch.
+  frontend base SHA. A deterministic or unknown base-canary failure requeues
+  every candidate and pauses the lane without quarantining a developer branch.
+  Authenticated transient dependency-infrastructure evidence retries the exact
+  operation without pausing or detaching candidates. The same behavior applies
+  to frontend preflight infrastructure failures before candidate isolation.
 - Ambiguous external calls are reconciled by exact operation key before any
   retry. A timeout is not treated as proof that an operation did not happen.
 - Before production mutation, an unexpected target-branch move safely cancels

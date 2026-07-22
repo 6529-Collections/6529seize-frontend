@@ -60,13 +60,16 @@ describe("Release Bus structured Jest reporting", () => {
 
     for (const name of requiredJobs) {
       const steps = workflow.jobs?.[name]?.steps ?? [];
+      const expectedSteps = [
+        "Check out exact frontend base",
+        "Stage immutable gate tooling",
+        "Verify gate did not mutate source",
+      ];
+      if (name !== "aggregate") {
+        expectedSteps.push("Install and verify frozen dependencies");
+      }
       expect(steps.map((step) => step.name)).toEqual(
-        expect.arrayContaining([
-          "Check out exact frontend base",
-          "Stage immutable gate tooling",
-          "Install frozen dependencies",
-          "Verify gate did not mutate source",
-        ])
+        expect.arrayContaining(expectedSteps)
       );
     }
     expect(workflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
@@ -355,6 +358,9 @@ describe("Release Bus structured Jest reporting", () => {
 
       expect(payload).toMatchObject({
         status: "SUCCEEDED",
+        failure_class: null,
+        failure_phase: null,
+        retryable: false,
         summary: {
           base_sha: "a".repeat(40),
           shard_count: 1,
