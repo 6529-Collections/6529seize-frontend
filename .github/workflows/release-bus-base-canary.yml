@@ -32,7 +32,83 @@ permissions: {}
 run-name: Canary frontend base ${{ inputs.base_sha }} [${{ inputs.operation_key }}]
 
 jobs:
+  build_profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Validate profile inputs before using credentials
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$BASE_SHA" = "$EXPECTED_SHA"
+      - &checkout
+        name: Check out exact frontend base
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git init .
+          git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
+          git fetch --no-tags origin "$BASE_SHA"
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+      - &setup-node
+        name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with: { node-version: "22" }
+      - name: Derive protected staging build profile
+        env:
+          RELEASE_BUS_BUILD_PROFILE_HMAC_KEY: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          NODE_ENV: production
+          API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
+          WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
+          ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
+          BASE_ENDPOINT: https://staging.6529.io
+          VERSION: ${{ inputs.base_sha }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
+          MOBILE_APP_SCHEME: mobile6529
+          CORE_SCHEME: core6529
+          IPFS_API_ENDPOINT: https://api-ipfs.6529.io
+          IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+          ASSETS_FROM_S3: "false"
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          ANNOUNCED_VERSION_ENDPOINT: ""
+          BASE_SHA: ${{ inputs.base_sha }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
+            git fetch --no-tags origin "$WORKFLOW_SHA"
+          profile_tool="$RUNNER_TEMP/release-bus-build-profile.cjs"
+          git show "$WORKFLOW_SHA:scripts/release-bus-build-profile.cjs" > "$profile_tool"
+          node "$profile_tool" \
+            --source-sha "$BASE_SHA" \
+            --environment staging \
+            --output "$RUNNER_TEMP/release-bus-build-profile.json"
+      - name: Upload protected build profile
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-bus-build-profile-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-build-profile.json
+          if-no-files-found: error
+          retention-days: 14
+
   authorize:
+    needs: build_profile
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -109,61 +185,32 @@ jobs:
             echo "shard_count=$FRONTEND_GATE_SHARD_COUNT"
             echo "shard_matrix=$shard_matrix"
           } >> "$GITHUB_OUTPUT"
-      - &checkout
-        name: Check out exact frontend base
-        env:
-          BASE_SHA: ${{ inputs.base_sha }}
-        run: |
-          set -euo pipefail
-          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          git init .
-          git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
-          git fetch --no-tags origin "$BASE_SHA"
-          git checkout --detach "$BASE_SHA"
-          test "$(git rev-parse HEAD)" = "$BASE_SHA"
-      - &setup-node
-        name: Install Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with: { node-version: "22" }
-      - name: Derive protected staging build profile
+      - *checkout
+      - *setup-node
+      - name: Download protected build profile
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release-bus-build-profile-${{ github.run_id }}
+          path: ${{ runner.temp }}/protected-build-profile
+      - name: Verify protected staging build profile
         id: build-profile
         env:
-          RELEASE_BUS_BUILD_PROFILE_HMAC_KEY: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          NODE_ENV: production
-          API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
-          WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
-          ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
-          BASE_ENDPOINT: https://staging.6529.io
-          VERSION: ${{ inputs.base_sha }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-          NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
-          MOBILE_APP_SCHEME: mobile6529
-          CORE_SCHEME: core6529
-          IPFS_API_ENDPOINT: https://api-ipfs.6529.io
-          IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
-          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
-          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
-          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
-          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
-          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
-          ASSETS_FROM_S3: "false"
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          ANNOUNCED_VERSION_ENDPOINT: ""
           BASE_SHA: ${{ inputs.base_sha }}
-          WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
-            git fetch --no-tags origin "$WORKFLOW_SHA"
-          profile_tool="$RUNNER_TEMP/release-bus-build-profile.cjs"
-          git show "$WORKFLOW_SHA:scripts/release-bus-build-profile.cjs" > "$profile_tool"
-          node "$profile_tool" \
-            --source-sha "$BASE_SHA" \
-            --environment staging \
-            --output "$RUNNER_TEMP/release-bus-build-profile.json"
-          echo "digest=$(jq -r '.digest' "$RUNNER_TEMP/release-bus-build-profile.json")" >> "$GITHUB_OUTPUT"
+          profile="$RUNNER_TEMP/protected-build-profile/release-bus-build-profile.json"
+          jq -e \
+            --arg source_sha "$BASE_SHA" \
+            'type == "object" and
+             .schema_version == 1 and
+             .kind == "release_bus_frontend_build_profile" and
+             .environment == "staging" and
+             .source_sha == $source_sha and
+             .node_version == "22" and
+             .timestamp_policy == "utc_workflow_run_start_seconds" and
+             (.digest | test("^[a-f0-9]{64}$"))' \
+            "$profile" >/dev/null
+          echo "digest=$(jq -r '.digest' "$profile")" >> "$GITHUB_OUTPUT"
       - name: Derive and verify immutable gate fingerprint
         id: fingerprint
         env:

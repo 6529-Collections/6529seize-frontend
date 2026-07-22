@@ -31,7 +31,12 @@ describe("Release Bus frontend gate contract", () => {
     };
     jobs?: Record<
       string,
-      { steps?: WorkflowStep[]; "timeout-minutes"?: number }
+      {
+        needs?: string[] | string;
+        outputs?: Record<string, string>;
+        steps?: WorkflowStep[];
+        "timeout-minutes"?: number;
+      }
     >;
   };
   const preflightWorkflow = parseYaml(preflight) as {
@@ -86,6 +91,27 @@ describe("Release Bus frontend gate contract", () => {
     expect(buildProfileStep?.run?.indexOf("git cat-file")).toBeLessThan(
       buildProfileStep?.run?.indexOf("git show") ?? -1
     );
+    const buildProfileJob = canaryWorkflow.jobs?.build_profile;
+    const authorizeJob = canaryWorkflow.jobs?.authorize;
+    expect(buildProfileJob?.outputs).toBeUndefined();
+    expect(authorizeJob?.needs).toBe("build_profile");
+    expect(buildProfileJob?.steps?.map((step) => step.name)).toEqual(
+      expect.arrayContaining([
+        "Derive protected staging build profile",
+        "Upload protected build profile",
+      ])
+    );
+    expect(authorizeJob?.steps?.map((step) => step.name)).toEqual(
+      expect.arrayContaining([
+        "Download protected build profile",
+        "Verify protected staging build profile",
+      ])
+    );
+    expect(
+      authorizeJob?.steps?.some((step) =>
+        Object.keys(step.env ?? {}).includes("ALCHEMY_API_KEY")
+      )
+    ).toBe(false);
     expect(reporter).toContain("/deploy/release-bus/report-progress");
   });
 
