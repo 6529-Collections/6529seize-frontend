@@ -146,6 +146,26 @@ describe("UserPageRepNewRepSearch", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("requires an explicit choice before selecting a look-alike with Enter", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const input = screen.getByPlaceholderText("Category to grant REP for");
+
+    await user.type(input, "memes nominee{enter}");
+
+    expect(input).toHaveValue("memes nominee");
+    expect(screen.getByTestId("dropdown")).toBeInTheDocument();
+    expect(commonApiFetch).not.toHaveBeenCalledWith({
+      endpoint: "/rep/categories/availability",
+      params: { param: "memes nominee" },
+    });
+  });
+
   it("surfaces only the exact submission category ahead of its presentation variant", () => {
     expect(
       getGrantRepCategoriesToDisplay({

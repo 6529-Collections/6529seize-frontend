@@ -274,6 +274,10 @@ export default function UserPageRepNewRepSearch({
   const onSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!repSearch) return;
+    if (isMemesNomineeLookalike(repSearch)) {
+      setIsOpen(true);
+      return;
+    }
     void onRepSelect(repSearch);
   };
 
