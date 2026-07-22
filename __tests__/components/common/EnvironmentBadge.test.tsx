@@ -26,7 +26,11 @@ describe("EnvironmentBadge", () => {
       "Environment: ALICESTG (alicestaging.6529.io)"
     );
     expect(badge).toHaveTextContent("ALICESTG");
-    expect(badge).toHaveAttribute("title", "Environment: alicestaging.6529.io");
+    expect(badge).toHaveAttribute("data-tooltip-id");
+    expect(badge).toHaveAttribute(
+      "data-tooltip-content",
+      "Environment: alicestaging.6529.io"
+    );
   });
 
   it("includes the local port", () => {
@@ -38,6 +42,10 @@ describe("EnvironmentBadge", () => {
       "Environment: LCL:3001 (localhost:3001)"
     );
     expect(badge).toHaveTextContent("LCL:3001");
-    expect(badge).toHaveAttribute("title", "Environment: localhost:3001");
+    expect(badge).toHaveAttribute("data-tooltip-id");
+    expect(badge).toHaveAttribute(
+      "data-tooltip-content",
+      "Environment: localhost:3001"
+    );
   });
 });

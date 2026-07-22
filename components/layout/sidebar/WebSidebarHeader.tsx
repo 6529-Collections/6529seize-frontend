@@ -30,7 +30,11 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
           />
         </Link>
       </div>
-      <div className="tw-flex tw-justify-center tw-pb-2 empty:tw-hidden">
+      <div
+        className={`tw-flex tw-pb-2 empty:tw-hidden ${
+          collapsed ? "tw-justify-center" : "tw-ml-3 tw-justify-start"
+        }`}
+      >
         <EnvironmentBadge compact />
       </div>
       <button
