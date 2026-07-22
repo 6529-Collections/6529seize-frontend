@@ -28,23 +28,29 @@ export default async function AboutPage(props: Readonly<Props>) {
     notFound();
   }
 
-  const isSubscriptions = section === AboutSection.SUBSCRIPTIONS;
+  const aboutSection = section as AboutSection;
+  const isMemes = aboutSection === AboutSection.MEMES;
+  const isSubscriptions = aboutSection === AboutSection.SUBSCRIPTIONS;
 
   return (
     <main
-      className={`${styles["main"]} tailwind-scope ${
+      className={`${styles["main"] ?? ""} tailwind-scope ${
         isSubscriptions
           ? "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
           : ""
       }`}
     >
-      <Container fluid className="tw-pt-4">
-        <Row>
-          <Col>
-            <About section={section as AboutSection} />
-          </Col>
-        </Row>
-      </Container>
+      {isMemes ? (
+        <About section={AboutSection.MEMES} />
+      ) : (
+        <Container fluid className="tw-pt-4">
+          <Row>
+            <Col>
+              <About section={aboutSection} />
+            </Col>
+          </Row>
+        </Container>
+      )}
     </main>
   );
 }

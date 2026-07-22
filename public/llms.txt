@@ -7,7 +7,7 @@ Site data such as TDH, REP, and Wave activity changes continuously. Fetch the fi
 ## Machine-readable files
 
 - [llms.txt](https://6529.io/llms.txt): this file — the stable entry point.
-- [help-index.json](https://6529.io/help-index.json): 195 curated records covering routes, workflows, UI affordances, business rules, and glossary terms. Each record has an id, title, aliases, facts, and a canonical_path that is validated against the app's real routes at build time. This is the primary reference for answering questions about 6529.io.
+- [help-index.json](https://6529.io/help-index.json): 196 curated records covering routes, workflows, UI affordances, business rules, and glossary terms. Each record has an id, title, aliases, facts, and a canonical_path that is validated against the app's real routes at build time. This is the primary reference for answering questions about 6529.io.
 - [glossary.json](https://6529.io/glossary.json): 27 term definitions (TDH, xTDH, REP, NIC, Waves, Drops, Groups, Subscriptions, and more) projected from the same help corpus. Each term carries its help-index record id, definition facts, and canonical page path.
 - [sitemap.xml](https://6529.io/sitemap.xml): the crawlable page list, regenerated on every deploy.
 - [robots.txt](https://6529.io/robots.txt): standard crawler directives; it also references the files above.
