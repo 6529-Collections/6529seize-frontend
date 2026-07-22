@@ -13,6 +13,8 @@ import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCuration
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, type ReactNode } from "react";
 import { useLayout } from "../layout/LayoutContext";
@@ -48,6 +50,7 @@ function MyStreamWaveCurationDropItem({
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }) {
+  const locale = useBrowserLocale();
   const { updateMembership, isPending } = useDropCurationMembershipMutation({
     dropId: drop.id,
   });
@@ -73,21 +76,21 @@ function MyStreamWaveCurationDropItem({
           aria-busy={isPending}
           aria-label={
             isPending
-              ? "Removing drop from this curation"
-              : "Remove drop from this curation"
+              ? t(locale, "waves.myStream.curation.removingAriaLabel")
+              : t(locale, "waves.myStream.curation.removeAriaLabel")
           }
-          title="Remove from curation"
-          className="tw-touch-action-manipulation tw-pointer-events-auto tw-absolute tw-right-4 tw-top-5 tw-z-40 tw-inline-flex tw-h-8 tw-min-w-8 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-shadow-[0_10px_30px_rgba(0,0,0,0.32)] tw-backdrop-blur-sm tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 active:tw-bg-rose-500/15 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-right-7 sm:tw-top-4"
+          title={t(locale, "waves.myStream.curation.removeTitle")}
+          className="tw-pointer-events-auto tw-absolute tw-right-4 tw-top-5 tw-z-40 tw-inline-flex tw-h-8 tw-min-w-8 tw-touch-manipulation tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-shadow-[0_10px_30px_rgba(0,0,0,0.32)] tw-backdrop-blur-sm tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 active:tw-bg-rose-500/15 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400 sm:tw-right-7 sm:tw-top-4"
         >
           {isPending ? (
             <>
               <Spinner dimension={12} />
-              <span>Removing</span>
+              <span>{t(locale, "waves.myStream.curation.removing")}</span>
             </>
           ) : (
             <>
-              <XMarkIcon className="tw-size-3.5 tw-flex-shrink-0 -tw-ml-0.5" />
-              <span>Remove</span>
+              <XMarkIcon className="-tw-ml-0.5 tw-size-3.5 tw-flex-shrink-0" />
+              <span>{t(locale, "waves.myStream.curation.remove")}</span>
             </>
           )}
         </button>
