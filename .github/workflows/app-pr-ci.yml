@@ -235,6 +235,34 @@ jobs:
         if: needs.plan.outputs.agent_files_sync_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
+      - name: Verify Release Bus gate command contract
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet "origin/${BASE_REF}...HEAD" -- \
+            bin/6529 \
+            jest.config.js \
+            jest.setup.js \
+            package.json \
+            pnpm-lock.yaml \
+            .github/workflows/release-bus-*.yml \
+            scripts/release-bus-authorize-operation.sh \
+            scripts/release-bus-frontend-gate.sh \
+            scripts/release-bus-gate-evidence.cjs \
+            scripts/release-bus-preflight-evidence.cjs \
+            scripts/release-bus-summarize-jest.mjs \
+            scripts/release-bus-report-progress.mjs \
+            __tests__/scripts/release-bus-frontend-gate.test.ts \
+            __tests__/scripts/release-bus-gate-evidence.test.ts \
+            __tests__/scripts/release-bus-jest-reporting.test.ts \
+            __tests__/scripts/release-bus-preflight-evidence.test.ts \
+            __tests__/scripts/release-bus-shard-injection.test.ts; then
+            echo "Release Bus gate files are unchanged."
+            exit 0
+          fi
+          ./scripts/release-bus-frontend-gate.sh contract
+
       - name: Lint changed source
         if: needs.plan.outputs.lint_changed_required == 'true'
         run: ./bin/6529 run lint:changed

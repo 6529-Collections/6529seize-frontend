@@ -36,7 +36,7 @@ function RepCategorySearchResults({
 }) {
   if (showPrompt) {
     return (
-      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+      <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
         {t(REP_CATEGORY_LOCALE, "rep.categories.search.minChars")}
       </p>
     );
@@ -70,16 +70,16 @@ function RepCategorySearchResults({
   }
 
   return (
-    <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
+    <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1.5 tw-p-0">
       {categories.map((category) => (
         <li key={category}>
           <button
             type="button"
             onClick={() => onSelect(category)}
-            className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-primary-400/40 hover:tw-bg-primary-500/10"
+            className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-900/40 tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors hover:tw-border-primary-400/40 hover:tw-bg-primary-500/[0.08] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60"
           >
             <span className="tw-min-w-0 tw-break-words">{category}</span>
-            <span className="tw-flex-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+            <span className="tw-flex-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400 tw-transition-colors group-hover:tw-text-iron-200">
               {t(REP_CATEGORY_LOCALE, "rep.categories.search.view")}
             </span>
           </button>
@@ -100,25 +100,25 @@ function SuggestedCategoryButton({
     <button
       type="button"
       onClick={() => onSelect(item.category)}
-      className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-p-4 tw-text-left tw-transition-colors hover:tw-border-primary-400/40 hover:tw-bg-primary-500/10"
+      className="tw-grid tw-h-full tw-w-full tw-grid-cols-2 tw-gap-x-4 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-900/40 tw-p-4 tw-text-left tw-transition-colors hover:tw-border-primary-400/40 hover:tw-bg-primary-500/[0.08] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60"
     >
-      <span className="tw-break-words tw-text-base tw-font-semibold tw-text-white">
+      <span className="tw-col-span-2 tw-break-words tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50">
         {item.category}
       </span>
-      <span className="tw-grid tw-w-full tw-grid-cols-2 tw-gap-2 tw-text-xs tw-text-iron-400">
-        <span>
-          <span className="tw-block tw-font-semibold tw-uppercase tw-text-iron-500">
-            {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.rep")}
-          </span>
-          <span className="tw-text-primary-300">
-            {formatNumberWithCommas(item.total_rep)}
-          </span>
+      <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+        <span className="tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wider tw-text-iron-500">
+          {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.rep")}
         </span>
-        <span>
-          <span className="tw-block tw-font-semibold tw-uppercase tw-text-iron-500">
-            {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.ratings")}
-          </span>
-          <span>{formatNumberWithCommas(item.rating_count)}</span>
+        <span className="tw-text-sm tw-leading-none tw-text-primary-300">
+          {formatNumberWithCommas(item.total_rep)}
+        </span>
+      </span>
+      <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+        <span className="tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wider tw-text-iron-500">
+          {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.ratings")}
+        </span>
+        <span className="tw-text-sm tw-leading-none tw-text-iron-400">
+          {formatNumberWithCommas(item.rating_count)}
         </span>
       </span>
     </button>
@@ -168,7 +168,7 @@ function SuggestedCategories({
   }
 
   return (
-    <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 md:tw-grid-cols-2 xl:tw-grid-cols-3">
+    <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2 tw-p-0 md:tw-grid-cols-2 xl:tw-grid-cols-3">
       {categories.map((item) => (
         <li key={item.category}>
           <SuggestedCategoryButton item={item} onSelect={onSelect} />
@@ -250,10 +250,10 @@ export default function RepCategoryExplorer() {
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-6 tw-text-iron-100">
-      <section className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-p-4 sm:tw-p-5">
+      <section className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-900 tw-pb-6">
         <label
           htmlFor="global-rep-category-search"
-          className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-200"
+          className="tw-mb-3 tw-block tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
         >
           {t(REP_CATEGORY_LOCALE, "rep.categories.search.label")}
         </label>
@@ -262,7 +262,7 @@ export default function RepCategoryExplorer() {
           type="search"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm"
+          className="tw-form-input tw-block tw-w-full tw-max-w-2xl tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm [&::-webkit-search-cancel-button]:tw-cursor-pointer [&::-webkit-search-cancel-button]:tw-[filter:brightness(0)_saturate(100%)_invert(60%)_sepia(89%)_saturate(1732%)_hue-rotate(319deg)_brightness(101%)_contrast(96%)]"
           placeholder={t(
             REP_CATEGORY_LOCALE,
             "rep.categories.search.placeholder"
@@ -271,7 +271,7 @@ export default function RepCategoryExplorer() {
         />
 
         <section
-          className="tw-mt-4"
+          className="tw-mt-2 tw-max-w-2xl"
           aria-live="polite"
           aria-label={t(
             REP_CATEGORY_LOCALE,
@@ -289,12 +289,12 @@ export default function RepCategoryExplorer() {
       </section>
 
       {!selectedCategory && (
-        <section className="tw-flex tw-flex-col tw-gap-4">
+        <section className="tw-flex tw-flex-col tw-gap-5">
           <div>
-            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-white">
+            <h2 className="tw-mb-1 tw-mt-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50">
               {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.title")}
             </h2>
-            <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+            <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-text-iron-400">
               {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.description")}
             </p>
           </div>
@@ -313,6 +313,7 @@ export default function RepCategoryExplorer() {
             key={selectedCategory}
             category={selectedCategory}
             mode="page"
+            className="!tw-pt-0"
           />
         </div>
       )}
