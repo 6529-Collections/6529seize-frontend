@@ -8,7 +8,7 @@ import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
-import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
+import type { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
 import {
   getWalletActivityEmptyMessage,
   getWalletActivityMessage,
@@ -54,7 +54,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   }
 
   return (
-    <div className="tw-mt-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02] lg:tw-mt-4">
+    <div className="tw-mt-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.04] lg:tw-mt-4">
       <div className="tw-mt-6 tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-space-x-4 tw-px-4 sm:tw-px-6">
         <UserPageStatsActivityWalletFilter
           activeFilter={filter}
