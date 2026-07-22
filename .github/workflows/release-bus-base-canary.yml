@@ -34,7 +34,7 @@ run-name: Canary frontend base ${{ inputs.base_sha }} [${{ inputs.operation_key 
 jobs:
   authorize:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     outputs:
       gate_mode: ${{ steps.inputs.outputs.gate_mode }}
       shard_count: ${{ steps.inputs.outputs.shard_count }}
@@ -171,14 +171,14 @@ jobs:
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           TRAIN_ID: ${{ inputs.release_train_id }}
+          WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+          authorize_tool="$RUNNER_TEMP/release-bus-authorize-operation.sh"
+          git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh" > "$authorize_tool"
+          chmod 700 "$authorize_tool"
+          "$authorize_tool" "$payload"
       - name: Verify authorization did not mutate source
         run: test -z "$(git status --porcelain --untracked-files=all)"
 
