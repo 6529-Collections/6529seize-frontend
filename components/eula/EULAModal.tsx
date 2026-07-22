@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEULAConsent } from "./EULAConsentContext";
 import { useEffect, useRef, useState } from "react";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import EULAIntroSections from "./EULAIntroSections";
+import EULACommunicationsSection from "./EULACommunicationsSection";
 
 export default function EULAModal() {
   const { consent } = useEULAConsent();
@@ -38,9 +40,9 @@ export default function EULAModal() {
   };
 
   return (
-    <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-bg-black/60 tw-backdrop-blur tw-p-2">
-      <div className="tw-bg-iron-800 tw-rounded-lg tw-shadow-lg tw-w-full tw-max-h-full tw-overflow-y-auto tw-max-w-lg sm:tw-w-3/4 sm:tw-max-w-4xl tw-relative tw-px-6 sm:tw-px-12 tw-py-8 sm:tw-py-10">
-        <div className="tw-text-center tw-mb-10">
+    <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-bg-black/60 tw-p-2 tw-backdrop-blur">
+      <div className="tw-relative tw-max-h-full tw-w-full tw-max-w-lg tw-overflow-y-auto tw-rounded-lg tw-bg-iron-800 tw-px-6 tw-py-8 tw-shadow-lg sm:tw-w-3/4 sm:tw-max-w-4xl sm:tw-px-12 sm:tw-py-10">
+        <div className="tw-mb-10 tw-text-center">
           <h3>End User License Agreement</h3>
         </div>
         <div className="tw-mb-10">
@@ -51,151 +53,11 @@ export default function EULAModal() {
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className="tw-max-h-[50vh] tw-overflow-y-auto tw-p-4 tw-border tw-border-gray-300 tw-rounded tw-shadow">
-              <ol className="tw-list-decimal tw-space-y-2 tw-text-sm tw-pl-6">
-                <li>
-                  <p>
-                    <strong>Abbreviations Make Documents More Readable</strong>
-                  </p>
-                  <p>These are the abbreviations used in this document.</p>
-                  <p>
-                    "Terms" or "EULA": End User License Agreement (EULA)
-                    <br />
-                    "We": 6529 Collection LLC
-                    <br />
-                    "6529 NFTs": The Memes, 6529 Gradient, Meme Lab, GenMemes,
-                    6529 Intern and other NFTs that may be added from time to
-                    time.
-                    <br />
-                    "You": An adult, at least 18 years of age, who is not
-                    subject to sanctions by the US government.
-                    <br />
-                    "Third Parties": Everyone else who is not "We" or "You"
-                    <br />
-                    "Our App": The 6529Mobile application and any associated
-                    services we may offer
-                    <br />
-                    "Our Platform": Our App, the website located at{" "}
-                    <a
-                      href="https://6529.io"
-                      target="_blank"
-                      rel="noopener noreferrer">
-                      6529.io
-                    </a>
-                    , any websites hosted at sub-domains of{" "}
-                    <a
-                      href="https://6529.io"
-                      target="_blank"
-                      rel="noopener noreferrer">
-                      6529.io
-                    </a>
-                    , including hosted minting or primary sales pages, any
-                    primary mints or sales directly from our smart contracts,
-                    any mobile or metaverse applications we may make, and any
-                    content (data, descriptions or otherwise) on our website or
-                    decentralized file storage platforms like IPFS or Arweave.
-                    <br />
-                    "Not Our Platform": Everything else that is not included in
-                    "Our Platform" including your Ethereum wallet, NFT
-                    marketplaces, and publicly accessible secondary functions on
-                    our smart contracts, such as token transfers.
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    <strong>The Underlying Principles Of These Terms</strong>
-                  </p>
-                  <p>There are two underlying principles of these terms:</p>
-                  <p>
-                    Our main ongoing activity is primary minting CC0 NFTs (The
-                    Memes, Meme Lab, GenMemes are CC0) with a mission-based
-                    focus at fairly affordable prices.
-                  </p>
-                  <p>
-                    Once the NFTs have been primary minted:
-                    <br />
-                    a) You and Third Parties can do whatever you want with the
-                    NFT
-                    <br />
-                    and
-                    <br />
-                    b) We do not have any further obligations toward you
-                  </p>
-                  <p>
-                    Most of the Clauses in the Terms relate to making (b)
-                    absolutely clear.
-                  </p>
-                  <p>
-                    We do not have control of what someone does with The Memes,
-                    Meme Lab and GenMemes NFTs after minting, either at the
-                    level of the token or the art.
-                  </p>
-                  <p>
-                    "Our Platforms" provide a (hopefully) convenient way to see
-                    information about 6529 NFTs and their collectors, but they
-                    are not the token nor the art. We do not make any claims on
-                    the token post-minting or on the art for the CC0 6529 NFTs,
-                    nor do we take any responsibility for either.
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    <strong>Our Platform, Our House Rules I</strong>
-                  </p>
-                  <p>
-                    Agreeing to these terms is the only way you are allowed to
-                    use 6529Mobile. If you do not agree with our Terms, that is
-                    fine, but you cannot use 6529Mobile.
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    <strong>Our Platform, Our House Rules II</strong>
-                  </p>
-                  <p>
-                    We can terminate or pause your access to Our Platform at any
-                    time, for any reason.
-                  </p>
-                  <p>
-                    We strive for a positive community, and that means no
-                    abusive behavior or posting objectionable user-generated
-                    content. Please report any concerns to us at{" "}
-                    <a href="mailto:support@6529.io">support@6529.io</a>. Our
-                    policy is to respond to these reports within 24 hours, which
-                    includes removing content or blocking users as warranted.
-                  </p>
-                  <p>
-                    Please note: We monitor material posted to the app to filter
-                    for objectionable material.
-                  </p>
-                </li>
-                <li>
-                  <p>
-                    <strong>Our Platform, Our House Rules III</strong>
-                  </p>
-                  <p>
-                    <a
-                      href="https://twitter.com/punk6529"
-                      target="_blank"
-                      rel="noopener noreferrer">
-                      @punk6529
-                    </a>{" "}
-                    tweets a lot and has a lot of ideas that may change from
-                    time to time.
-                  </p>
-                  <p>
-                    You should have no expectation whatsoever that what he (or
-                    other team members) are going to tweet or otherwise
-                    communicate is going to match your current or future
-                    understanding of the 6529 NFTs.
-                  </p>
-                  <p>
-                    His, or any other person or team member's, retweets, likes,
-                    twitter or discord communications, podcasts, essays or other
-                    communications are not endorsements nor do they reflect
-                    changes in Terms.
-                  </p>
-                </li>
+              className="tw-max-h-[50vh] tw-overflow-y-auto tw-rounded tw-border tw-border-gray-300 tw-p-4 tw-shadow"
+            >
+              <ol className="tw-list-decimal tw-space-y-2 tw-pl-6 tw-text-sm">
+                <EULAIntroSections />
+                <EULACommunicationsSection />
                 <li>
                   <p>
                     <strong>The Only Constant In This World Is Change I</strong>
@@ -255,28 +117,32 @@ export default function EULAModal() {
                     <a
                       href="https://6529.io/about/the-memes"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/about/the-memes
                     </a>
                     <br />
                     <a
                       href="https://6529.io/about/6529-gradient"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/about/6529-gradient
                     </a>
                     <br />
                     <a
                       href="https://6529.io/about/meme-lab"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/about/meme-lab
                     </a>
                     <br />
                     <a
                       href="https://6529.io/about/faq"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/about/faq
                     </a>
                   </p>
@@ -296,7 +162,8 @@ export default function EULAModal() {
                     <a
                       href="https://6529.io/about/license"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/about/license
                     </a>
                   </p>
@@ -320,7 +187,8 @@ export default function EULAModal() {
                     <a
                       href="https://6529.io/about/minting"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/about/minting
                     </a>
                   </p>
@@ -339,14 +207,16 @@ export default function EULAModal() {
                     <a
                       href="https://6529.io/about/privacy-policy"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/about/privacy-policy
                     </a>
                     <br />
                     <a
                       href="https://6529.io/about/cookie-policy"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       https://6529.io/about/cookie-policy
                     </a>
                   </p>
@@ -361,7 +231,8 @@ export default function EULAModal() {
                     <a
                       href="https://6529.io/about/copyright"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/about/copyright
                     </a>
                   </p>
@@ -696,7 +567,8 @@ export default function EULAModal() {
                     <a
                       href="https://6529.io/dispute-resolution"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       6529.io/dispute-resolution
                     </a>
                   </p>
@@ -884,23 +756,21 @@ export default function EULAModal() {
             {!scrolledToBottom && (
               <button
                 onClick={scrollToBottom}
-                className="tw-absolute tw-border-none tw-bottom-2 tw-right-2 tw-bg-white tw-text-gray-800 tw-rounded-full tw-flex tw-items-center tw-justify-center hover:tw-bg-gray-200 tw-transition tw-duration-150 tw-bg-opacity-50 hover:tw-bg-opacity-80 tw-p-2">
+                className="tw-absolute tw-bottom-2 tw-right-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-bg-opacity-50 tw-p-2 tw-text-gray-800 tw-transition tw-duration-150 hover:tw-bg-gray-200 hover:tw-bg-opacity-80"
+              >
                 <FontAwesomeIcon icon={faArrowDown} height={16} width={16} />
               </button>
             )}
           </div>
         </div>
-        <div className="tw-flex tw-justify-center tw-mt-6">
+        <div className="tw-mt-6 tw-flex tw-justify-center">
           <button
             onClick={consent}
             disabled={!scrolledToBottom}
-            className={`tw-bg-white tw-text-gray-900 tw-font-medium tw-px-8 tw-py-3 tw-rounded tw-shadow 
-              hover:tw-bg-iron-300 
-              focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-gray-300 
-              tw-transition tw-duration-150 tw-border-none
-              ${
-                !scrolledToBottom ? "tw-opacity-50 tw-cursor-not-allowed" : ""
-              }`}>
+            className={`tw-rounded tw-border-none tw-bg-white tw-px-8 tw-py-3 tw-font-medium tw-text-gray-900 tw-shadow tw-transition tw-duration-150 hover:tw-bg-iron-300 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-gray-300 ${
+              !scrolledToBottom ? "tw-cursor-not-allowed tw-opacity-50" : ""
+            }`}
+          >
             Agree
           </button>
         </div>
