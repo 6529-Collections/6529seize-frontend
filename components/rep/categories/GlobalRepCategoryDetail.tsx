@@ -291,7 +291,7 @@ function OverviewContent({ category }: { readonly category: string }) {
         </MiniList>
       </div>
 
-      <div className="tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-6">
+      <div className="tw-pt-6">
         <MiniList title="Recent activity">
           {overview.recently_updated.length > 0 ? (
             overview.recently_updated.map((item) => (
