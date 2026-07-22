@@ -40,6 +40,7 @@ const FRONTEND_GATE_BASE_FILES = [
   "pnpm-lock.yaml",
 ];
 const FRONTEND_GATE_TOOLING_FILES = [
+  "scripts/release-bus-authorize-operation.sh",
   "scripts/release-bus-frontend-gate.sh",
   "scripts/release-bus-gate-evidence.cjs",
 ];
