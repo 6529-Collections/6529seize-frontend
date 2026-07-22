@@ -43,11 +43,7 @@ export default function EnvironmentBadge({
         )}
         <span className="tw-min-w-0 tw-truncate">{badge}</span>
       </span>
-      <Tooltip
-        id={tooltipId}
-        place="right"
-        style={TOOLTIP_STYLES}
-      />
+      <Tooltip id={tooltipId} place="right" style={TOOLTIP_STYLES} />
     </>
   );
 }
