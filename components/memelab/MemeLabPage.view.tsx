@@ -199,7 +199,10 @@ export function MemeLabCollectors({
         </div>
       )}
       <div className="tw-pt-3">
-        <MemeLabLeaderboard contract={nft.contract} nftId={parseInt(nftId)} />
+        <MemeLabLeaderboard
+          contract={nft.contract}
+          nftId={Number.parseInt(nftId)}
+        />
       </div>
     </section>
   );

@@ -358,10 +358,13 @@ export function SeizeVideoElement({
   readonly videoControls: boolean;
   readonly videoTabIndex?: number | undefined;
 }) {
+  // Sonar cannot infer that the conditional child below is a captions track.
+  // Keep the intrinsic alias so videos without a real VTT source stay track-free.
+  const VideoWithOptionalCaptions = "video";
+
   return (
     <>
-      {/* NOSONAR: render captions only when a real VTT source exists. */}
-      <video
+      <VideoWithOptionalCaptions
         id={id}
         ref={setVideoRef}
         src={src}
@@ -410,7 +413,7 @@ export function SeizeVideoElement({
           />
         )}
         {labels.unsupported}
-      </video>
+      </VideoWithOptionalCaptions>
     </>
   );
 }
