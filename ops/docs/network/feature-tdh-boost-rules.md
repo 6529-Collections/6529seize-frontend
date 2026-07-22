@@ -13,8 +13,7 @@ boosters.
 - Sidebar path (web): `Network -> TDH`
 - Sidebar path (app): `Network -> TDH`
 - Current rule anchor: `#tdh-1-4`
-- Current rule heading: `TDH 1.4`
-- Current rule effective label: `Effective October 10, 2025 — present`
+- Current rule heading: `TDH 1.4 (October 10, 2025 — present)`
 
 ## Entry Points
 
@@ -27,15 +26,14 @@ boosters.
 ## User Journey
 
 1. Open `/network/tdh`.
-2. Use the overview facts to confirm what TDH measures, when it updates, and
-   which model is active.
-3. Read `How TDH is calculated`:
+2. Read the opening definition of the TDH holding metric.
+3. Read `How TDH is computed`:
    unweighted days -> edition weighting -> collection boosters.
-4. Review `TDH 1.4`, where the rule map shows the Category A or Category B
-   comparison before Category C is added.
+4. Review `TDH 1.4 (October 10, 2025 — present)`, where one focused rules panel
+   presents Category A and Category B before Category C.
 5. Scan the Category A formulas and examples, the Category B season grid, and
    the Category C Gradient limit.
-6. Use `Continue exploring TDH` to open historic rules, definitions, Network
+6. Use the linked reference cards to open historic rules, definitions, Network
    TDH stats, or Levels.
 
 ## Page Behavior and States
@@ -44,7 +42,7 @@ boosters.
 - Same content for signed-in and signed-out users (no wallet gating).
 - No route-specific loading, empty, or retry state on this page.
 - Related destinations appear as linked reference cards:
-  `Historic boosts`, `Definitions`, `Network TDH stats`, and `Levels`.
+  `View Historic Boosts`, `Definitions`, `Network TDH Stats`, and `Levels`.
 - Dates and numbers use the browser locale. Untranslated TDH copy falls back to
   the canonical `en-US` messages.
 

@@ -3,46 +3,90 @@
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import ProgressChart from "@/components/levels/ProgressChart";
 import TableOfLevels from "@/components/levels/TableOfLevels";
+import {
+  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
+  NETWORK_REFERENCE_PAGE_CLASSES,
+} from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+
+type NetworkLevelsMessageKey = Extract<MessageKey, `network.levels.${string}`>;
+
+const SECTION_HEADING_CLASS =
+  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+const PANEL_CLASS =
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60";
+const EDITORIAL_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:tw-gap-12";
+
+const m = (locale: SupportedLocale, key: NetworkLevelsMessageKey) =>
+  t(locale, key);
 
 export default function LevelsClient() {
+  const locale = useBrowserLocale();
+
   useSetTitle("Levels | Network");
 
   return (
-    <div className="tailwind-scope">
-      <div className="tw-pb-12 tw-pt-12">
-        <div className="tw-mx-auto tw-px-2 lg:tw-px-6 xl:tw-px-8">
-          <AboutContentsDropdown currentHref="/network/levels" />
-          <h1 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
-            Levels
-          </h1>
-          <div className="tw-my-6 tw-flex tw-flex-col">
+    <main
+      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-text-iron-100`}
+    >
+      <div className="tw-w-full">
+        <AboutContentsDropdown
+          className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+          currentHref="/network/levels"
+          withDivider
+        />
+
+        <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
+          <header className="tw-pb-8 sm:tw-pb-12">
+            <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+              {m(locale, "network.levels.hero.title")}
+            </h1>
+            <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+              {m(locale, "network.levels.intro")}
+            </p>
+          </header>
+
+          <div className={`${PANEL_CLASS} tw-overflow-hidden tw-p-4 sm:tw-p-6`}>
             <ProgressChart />
-            <ul className="tw-ml-4 tw-pl-0">
-              <li className="tw-mb-0 tw-mt-2 tw-text-justify tw-text-base tw-font-normal tw-text-iron-100">
-                Levels are our integrated metric of TDH and Rep.
-              </li>
-              <li className="tw-mb-0 tw-mt-2 tw-text-justify tw-text-base tw-font-normal tw-text-iron-100">
-                TDH and rep are added together and the level is determined by
-                the table below. It is our most integrated measure of trust in
-                our ecosystem.
-              </li>
-              <li className="tw-mb-0 tw-mt-2 tw-text-justify tw-text-base tw-font-normal tw-text-iron-100">
-                Levels start at zero and are currently capped at 100 (for
-                25,000,000 TDH).
-              </li>
-              <li className="tw-mb-0 tw-mt-2 tw-text-justify tw-text-base tw-font-normal tw-text-iron-100">
-                Levels are determined by the table below.
-              </li>
-              <li className="tw-mb-0 tw-mt-2 tw-text-justify tw-text-base tw-font-normal tw-text-iron-100">
-                As with all metrics, they may be adjusted to better meet their
-                objectives.
-              </li>
-            </ul>
           </div>
-          <TableOfLevels />
-        </div>
+
+          <section
+            aria-labelledby="levels-thresholds-heading"
+            className={`${EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12`}
+          >
+            <div className="lg:tw-sticky lg:tw-top-28">
+              <h2
+                className={SECTION_HEADING_CLASS}
+                id="levels-thresholds-heading"
+              >
+                {m(locale, "network.levels.table.caption")}
+              </h2>
+              <div className="tw-mt-4">
+                <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
+                  {m(locale, "network.levels.trust")}
+                </p>
+                <div className="tw-mt-4 tw-space-y-3 tw-text-sm tw-leading-6 tw-text-iron-500">
+                  <p className="tw-m-0">{m(locale, "network.levels.limit")}</p>
+                  <p className="tw-m-0">
+                    {m(locale, "network.levels.determinedByTable")}
+                  </p>
+                  <p className="tw-m-0">
+                    {m(locale, "network.levels.adjustments")}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="tw-min-w-0">
+              <TableOfLevels />
+            </div>
+          </section>
+        </article>
       </div>
-    </div>
+    </main>
   );
 }

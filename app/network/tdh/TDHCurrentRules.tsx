@@ -1,5 +1,7 @@
-import type { SupportedLocale } from "@/i18n/locales";
+import Link from "next/link";
+
 import { formatInteger, formatNumber } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
 type TdhMessageKey = Extract<MessageKey, `network.tdh.${string}`>;
@@ -10,6 +12,8 @@ interface AdditionalSetExample {
   readonly result: number;
 }
 
+const EDITORIAL_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
 const PANEL_CLASS =
   "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60";
 
@@ -73,171 +77,77 @@ export default function TDHCurrentRules({
   return (
     <section
       aria-labelledby="tdh-current-heading"
-      className="tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-py-10 sm:tw-py-14"
+      className={`${EDITORIAL_GRID_CLASS} tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12`}
       id="tdh-1-4"
     >
-      <header className="tw-max-w-3xl">
-        <div className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300">
-          <span
-            aria-hidden="true"
-            className="tw-size-1.5 tw-rounded-full tw-bg-primary-300"
-          />
-          {m(locale, "network.tdh.current.status")}
-        </div>
+      <div className="lg:tw-sticky lg:tw-top-28">
         <h2
-          className="tw-mb-0 tw-mt-4 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl"
+          className="tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
           id="tdh-current-heading"
         >
-          {m(locale, "network.tdh.current.title")}
+          {m(locale, "network.tdh.current.title", { date: effectiveDate })}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-500">
-          {m(locale, "network.tdh.current.effective", {
-            date: effectiveDate,
-          })}
-        </p>
-        <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+      </div>
+
+      <div className={`${PANEL_CLASS} tw-overflow-hidden tw-p-4 sm:tw-p-6`}>
+        <p className="tw-m-0 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pb-5 tw-text-sm tw-leading-6 tw-text-iron-400">
           {m(locale, "network.tdh.current.intro")}
         </p>
-      </header>
 
-      <RuleMap locale={locale} />
-
-      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-5 lg:tw-grid-cols-2">
         <CategoryA locale={locale} />
         <CategoryB locale={locale} />
+        <CategoryC locale={locale} />
+        <RuleActions locale={locale} />
       </div>
-      <CategoryC locale={locale} />
     </section>
-  );
-}
-
-function RuleMap({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <div
-      aria-labelledby="tdh-rule-map-heading"
-      className={`${PANEL_CLASS} tw-mt-6 tw-p-4 sm:tw-p-6`}
-    >
-      <h3
-        className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300"
-        id="tdh-rule-map-heading"
-      >
-        {m(locale, "network.tdh.current.map.title")}
-      </h3>
-
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-items-stretch tw-gap-3 md:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:tw-gap-4">
-        <RuleMapCard
-          label={m(locale, "network.tdh.current.map.categoryA")}
-          value={m(locale, "network.tdh.current.map.categoryAValue")}
-        />
-        <div className="tw-flex tw-items-center tw-justify-center">
-          <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-            {m(locale, "network.tdh.current.map.or")}
-          </span>
-        </div>
-        <RuleMapCard
-          label={m(locale, "network.tdh.current.map.categoryB")}
-          value={m(locale, "network.tdh.current.map.categoryBValue")}
-        />
-      </div>
-
-      <div className="tw-flex tw-flex-col tw-items-center tw-py-3">
-        <span className="tw-h-5 tw-w-px tw-bg-iron-700" />
-        <span className="tw-rounded-full tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400">
-          {m(locale, "network.tdh.current.map.higher")}
-        </span>
-        <span className="tw-h-5 tw-w-px tw-bg-iron-700" />
-      </div>
-
-      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-p-4 sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-6">
-        <div>
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300">
-            {m(locale, "network.tdh.current.map.then")}
-          </p>
-          <p className="tw-mb-0 tw-mt-1 tw-text-base tw-font-medium tw-text-iron-100">
-            {m(locale, "network.tdh.current.map.categoryC")}
-          </p>
-        </div>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400 sm:tw-mt-0 sm:tw-max-w-md sm:tw-text-right">
-          {m(locale, "network.tdh.current.map.categoryCValue")}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function RuleMapCard({
-  label,
-  value,
-}: {
-  readonly label: string;
-  readonly value: string;
-}) {
-  return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/25 tw-p-4">
-      <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
-        {label}
-      </p>
-      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-200">
-        {value}
-      </p>
-    </div>
   );
 }
 
 function CategoryA({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <section
-      aria-labelledby="tdh-category-a-heading"
-      className={`${PANEL_CLASS} tw-p-5 sm:tw-p-6`}
-    >
+    <section aria-labelledby="tdh-category-a-heading" className="tw-pt-6">
       <CategoryHeading
         id="tdh-category-a-heading"
-        label={m(locale, "network.tdh.current.categoryA.label")}
         title={m(locale, "network.tdh.current.categoryA.title")}
       />
 
-      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/25 tw-p-4 sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-5">
-        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {m(locale, "network.tdh.current.categoryA.completeSet")}
-        </p>
-        <p className="tw-mb-0 tw-mt-2 tw-shrink-0 tw-font-mono tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-mt-0">
-          {formatMultiplier(locale, 1.6)}
-        </p>
-      </div>
+      <ul className="tw-m-0 tw-mt-4 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+        <li>
+          {m(locale, "network.tdh.current.categoryA.completeSet")}{" "}
+          <span className="tw-font-mono tw-font-medium tw-text-[#00f0ff]">
+            {formatMultiplier(locale, 1.6)}
+          </span>
+        </li>
+      </ul>
 
-      <div className="tw-mt-6">
-        <h4 className="tw-m-0 tw-text-base tw-font-medium tw-text-iron-100">
-          {m(locale, "network.tdh.current.categoryA.additionalTitle")}
-        </h4>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-          {m(locale, "network.tdh.current.categoryA.additionalIntro")}
-        </p>
-        <p
-          aria-label={m(locale, "network.tdh.current.categoryA.formulaAria")}
-          className="tw-mb-0 tw-mt-4 tw-break-words tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900/60 tw-p-4 tw-font-mono tw-text-sm tw-font-medium tw-leading-7 tw-text-iron-100"
-        >
-          {formatFixed(locale, 0.05, 2)} &times; (
-          {formatFixed(locale, 0.6529, 4)})<sup>(n&minus;1)</sup>
-        </p>
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
-          {m(locale, "network.tdh.current.categoryA.formulaNote")}
-        </p>
-      </div>
+      <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-400">
+        {m(locale, "network.tdh.current.categoryA.additionalTitle")}
+      </p>
+      <p
+        aria-label={m(locale, "network.tdh.current.categoryA.formulaAria")}
+        className="tw-mb-0 tw-mt-4 tw-w-fit tw-max-w-full tw-break-words tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/40 tw-px-4 tw-py-3 tw-font-mono tw-text-xs tw-font-medium tw-leading-6 tw-text-iron-200"
+      >
+        <span className="tw-font-sans tw-font-normal tw-text-iron-400">
+          {m(locale, "network.tdh.current.categoryA.formulaLabel")}{" "}
+        </span>
+        {formatFixed(locale, 0.05, 2)} &times; ({formatFixed(locale, 0.6529, 4)}
+        )<sup>(n-1)</sup>
+      </p>
 
-      <div className="tw-mt-6">
-        <h4 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/20 tw-p-4">
+        <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
           {m(locale, "network.tdh.current.categoryA.examplesTitle")}
-        </h4>
-        <dl className="tw-mb-0 tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-2">
+        </p>
+        <dl className="tw-mb-0 tw-mt-4 tw-space-y-2.5">
           {ADDITIONAL_SET_EXAMPLES.map((example) => (
             <div
-              className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-black/20 tw-p-3"
+              className="tw-grid tw-grid-cols-1 tw-gap-1 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-gap-4"
               key={example.labelKey}
             >
               <dt className="tw-text-xs tw-leading-5 tw-text-iron-500">
                 {m(locale, example.labelKey)}
               </dt>
-              <dd className="tw-m-0 tw-mt-1 tw-break-words tw-font-mono tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-200">
+              <dd className="tw-m-0 tw-break-words tw-font-mono tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-300 sm:tw-text-right">
                 <AdditionalSetFormula example={example} locale={locale} />
               </dd>
             </div>
@@ -245,19 +155,16 @@ function CategoryA({ locale }: { readonly locale: SupportedLocale }) {
         </dl>
       </div>
 
-      <div className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-5">
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-          {m(locale, "network.tdh.current.categoryA.maximumTitle")}
-        </p>
-        <p
+      <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-400">
+        {m(locale, "network.tdh.current.categoryA.maximumTitle")}{" "}
+        <span
           aria-label={m(locale, "network.tdh.current.categoryA.maximumAria")}
-          className="tw-mb-0 tw-mt-2 tw-break-words tw-font-mono tw-text-xs tw-font-medium tw-leading-6 tw-text-iron-300"
+          className="tw-inline-block tw-break-words tw-rounded tw-border tw-border-solid tw-border-white/[0.06] tw-bg-black/30 tw-px-2 tw-py-1 tw-font-mono tw-text-xs tw-font-medium tw-text-iron-300"
         >
-          {formatFixed(locale, 0.6, 2)} + {formatFixed(locale, 0.05, 2)} / (1
-          &minus; {formatFixed(locale, 0.6529, 4)}) ={" "}
-          {formatFixed(locale, 0.744051, 6)}
-        </p>
-      </div>
+          {formatFixed(locale, 0.6, 2)} + {formatFixed(locale, 0.05, 2)} / (1 -{" "}
+          {formatFixed(locale, 0.6529, 4)}) = {formatFixed(locale, 0.744051, 6)}
+        </span>
+      </p>
     </section>
   );
 }
@@ -286,62 +193,51 @@ function CategoryB({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="tdh-category-b-heading"
-      className={`${PANEL_CLASS} tw-p-5 sm:tw-p-6`}
+      className="tw-mt-8 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-8"
     >
       <CategoryHeading
         id="tdh-category-b-heading"
-        label={m(locale, "network.tdh.current.categoryB.label")}
         title={m(locale, "network.tdh.current.categoryB.title")}
       />
-      <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
         {m(locale, "network.tdh.current.categoryB.applies")}
       </p>
 
-      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/25 tw-p-4">
-        <h4 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
-          {m(locale, "network.tdh.current.categoryB.szn1")}
-        </h4>
-        <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:tw-items-center">
-          <SetChoice
-            label={m(locale, "network.tdh.current.categoryB.completeSet")}
-            value={formatMultiplier(locale, 1.05)}
-          />
-          <p className="tw-m-0 tw-text-center tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-            {m(locale, "network.tdh.current.categoryB.or")}
-          </p>
-          <div className="tw-rounded-lg tw-bg-iron-900/70 tw-p-3">
-            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/20 tw-p-4">
+        <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pb-4">
+          <h4 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+            {m(locale, "network.tdh.current.categoryB.szn1")}
+          </h4>
+          <ul className="tw-m-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-500 marker:tw-text-iron-600">
+            <li>
+              {m(locale, "network.tdh.current.categoryB.completeSet")}{" "}
+              <Multiplier locale={locale} value={1.05} />{" "}
+              {m(locale, "network.tdh.current.categoryB.or")}
+            </li>
+            <li>
               {m(locale, "network.tdh.current.categoryB.genesisSet")}{" "}
-              <span className="tw-font-mono tw-font-medium tw-text-iron-100">
-                {formatMultiplier(locale, 1.01)}
-              </span>
-            </p>
-            <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+              <Multiplier locale={locale} value={1.01} />{" "}
+              {m(locale, "network.tdh.current.categoryB.and")}
+            </li>
+            <li>
               {m(locale, "network.tdh.current.categoryB.nakamotoSet")}{" "}
-              <span className="tw-font-mono tw-font-medium tw-text-iron-100">
-                {formatMultiplier(locale, 1.01)}
-              </span>
-            </p>
-          </div>
+              <Multiplier locale={locale} value={1.01} />
+            </li>
+          </ul>
         </div>
-      </div>
 
-      <div className="tw-mt-6">
-        <h4 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
-          {m(locale, "network.tdh.current.categoryB.remainingTitle")}
-        </h4>
-        <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2 tw-p-0 sm:tw-grid-cols-3">
+        <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-2 tw-gap-x-4 tw-gap-y-3 tw-p-0 sm:tw-grid-cols-3">
           {SEASONS.map((season) => (
             <li
-              className="tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-black/20 tw-px-3 tw-py-2"
+              className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-500"
               key={season}
             >
-              <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+              <span>
                 {m(locale, "network.tdh.current.categoryB.seasonLabel", {
                   number: formatInteger(locale, season),
                 })}
               </span>
-              <span className="tw-font-mono tw-text-xs tw-font-medium tw-text-iron-100">
+              <span className="tw-font-medium tw-text-[#00f0ff]">
                 {formatMultiplier(locale, 1.05)}
               </span>
             </li>
@@ -352,20 +248,17 @@ function CategoryB({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function SetChoice({
-  label,
+function Multiplier({
+  locale,
   value,
 }: {
-  readonly label: string;
-  readonly value: string;
+  readonly locale: SupportedLocale;
+  readonly value: number;
 }) {
   return (
-    <div className="tw-rounded-lg tw-bg-iron-900/70 tw-p-3">
-      <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">{label}</p>
-      <p className="tw-mb-0 tw-mt-1 tw-font-mono tw-text-base tw-font-medium tw-text-iron-100">
-        {value}
-      </p>
-    </div>
+    <span className="tw-font-mono tw-font-medium tw-text-[#00f0ff]">
+      {formatMultiplier(locale, value)}
+    </span>
   );
 }
 
@@ -373,54 +266,68 @@ function CategoryC({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="tdh-category-c-heading"
-      className={`${PANEL_CLASS} tw-mt-5 tw-p-5 sm:tw-p-6`}
+      className="tw-mt-8 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-8"
     >
-      <div className="tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-[minmax(0,1fr)_auto] md:tw-items-center md:tw-gap-8">
-        <div>
-          <CategoryHeading
-            id="tdh-category-c-heading"
-            label={m(locale, "network.tdh.current.categoryC.label")}
-            title={m(locale, "network.tdh.current.categoryC.title")}
-          />
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-            {m(locale, "network.tdh.current.categoryC.limit", {
-              count: formatInteger(locale, 5),
-            })}
-          </p>
-        </div>
-        <div className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-px-5 tw-py-4 md:tw-text-right">
-          <p className="tw-m-0 tw-font-mono tw-text-xl tw-font-semibold tw-text-iron-50">
+      <CategoryHeading
+        id="tdh-category-c-heading"
+        title={m(locale, "network.tdh.current.categoryC.title")}
+      />
+      <ul className="tw-m-0 tw-mt-4 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+        <li>
+          {m(locale, "network.tdh.current.categoryC.gradientLead")}{" "}
+          <span className="tw-font-mono tw-font-medium tw-text-[#00f0ff]">
             {formatMultiplier(locale, 1.02)}
-          </p>
-          <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
-            {m(locale, "network.tdh.current.categoryC.perGradient")}
-          </p>
-        </div>
-      </div>
+          </span>{" "}
+          {m(locale, "network.tdh.current.categoryC.gradientTail", {
+            count: formatInteger(locale, 5),
+          })}
+        </li>
+      </ul>
     </section>
+  );
+}
+
+function RuleActions({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <nav
+      aria-label={m(locale, "network.tdh.hero.title")}
+      className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-6"
+    >
+      <Link
+        className="tw-rounded-md tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-black tw-no-underline tw-transition-colors hover:tw-bg-iron-200 hover:tw-text-black hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 motion-reduce:tw-transition-none"
+        href="/network/tdh/historic-boosts"
+      >
+        {m(locale, "network.tdh.related.historic.title")}
+      </Link>
+      <Link
+        className="tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-white/[0.12] hover:tw-bg-iron-800 hover:tw-text-iron-50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 motion-reduce:tw-transition-none"
+        href="/network/definitions"
+      >
+        {m(locale, "network.tdh.related.definitions.title")}
+      </Link>
+    </nav>
   );
 }
 
 function CategoryHeading({
   id,
-  label,
   title,
 }: {
   readonly id: string;
-  readonly label: string;
   readonly title: string;
 }) {
   return (
-    <header>
-      <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
-        {label}
-      </p>
+    <div className="tw-flex tw-items-center tw-gap-3">
       <h3
-        className="tw-mb-0 tw-mt-2 tw-text-lg tw-font-medium tw-leading-7 tw-text-iron-100"
+        className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 sm:tw-text-lg"
         id={id}
       >
         {title}
       </h3>
-    </header>
+      <span
+        aria-hidden="true"
+        className="tw-h-px tw-flex-1 tw-bg-gradient-to-r tw-from-white/10 tw-to-transparent"
+      />
+    </div>
   );
 }
