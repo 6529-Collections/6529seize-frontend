@@ -12,7 +12,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isMatchingAttachment(
   value: Record<string, unknown>,
   attachmentId: string
-): boolean {
+): value is Record<string, unknown> & ApiAttachment {
   return (
     (value["attachment_id"] === attachmentId || value["id"] === attachmentId) &&
     typeof value["file_name"] === "string" &&
@@ -34,7 +34,7 @@ function replaceAttachment(value: unknown, attachment: ApiAttachment): unknown {
   }
 
   if (isMatchingAttachment(value, attachment.attachment_id)) {
-    return attachment;
+    return reconcileAttachmentStatusUpdate(value, attachment);
   }
 
   let changed = false;
@@ -68,6 +68,20 @@ function isFinalizedAttachment(value: unknown): value is ApiAttachment {
     typeof value["attachment_id"] === "string" &&
     FINALIZED_ATTACHMENT_STATUSES.has(value["status"] as ApiAttachmentStatus)
   );
+}
+
+export function reconcileAttachmentStatusUpdate(
+  existingAttachment: ApiAttachment,
+  incomingAttachment: ApiAttachment
+): ApiAttachment {
+  if (
+    isFinalizedAttachment(existingAttachment) &&
+    !isFinalizedAttachment(incomingAttachment)
+  ) {
+    return existingAttachment;
+  }
+
+  return incomingAttachment;
 }
 
 export function reconcileFinalizedDropAttachments(
