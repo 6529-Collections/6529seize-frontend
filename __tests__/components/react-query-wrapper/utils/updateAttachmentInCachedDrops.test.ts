@@ -1,8 +1,11 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
+  reconcileFinalizedDropAttachments,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
 import { QueryClient } from "@tanstack/react-query";
 
 const createQueryClient = () =>
@@ -189,5 +192,222 @@ describe("cached drop websocket updates", () => {
       status: "BAD",
       error_reason: "Blocked",
     });
+  });
+
+  it("preserves finalized attachments when a stale drop update downgrades them", () => {
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.pdf",
+      mime_type: "application/pdf",
+      kind: "pdf",
+      status: ApiAttachmentStatus.Ready,
+      url: "https://example.com/sample.pdf",
+    };
+    const existingDrop = {
+      id: "drop-1",
+      updated_at: 100,
+      parts: [
+        {
+          part_id: 1,
+          content: "",
+          media: [],
+          attachments: [readyAttachment],
+        },
+      ],
+    };
+    const staleDrop = {
+      id: "drop-1",
+      updated_at: 100,
+      parts: [
+        {
+          part_id: 1,
+          content: "",
+          media: [],
+          attachments: [
+            {
+              ...readyAttachment,
+              status: ApiAttachmentStatus.Processing,
+              url: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = reconcileFinalizedDropAttachments(
+      staleDrop as ApiDrop,
+      existingDrop
+    );
+
+    expect(result.parts[0]?.attachments).toEqual([readyAttachment]);
+  });
+
+  it("preserves omitted finalized attachments when updated_at is null", () => {
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.csv",
+      mime_type: "text/csv",
+      kind: "csv",
+      status: ApiAttachmentStatus.Ready,
+      url: "https://example.com/sample.csv",
+    };
+    const existingDrop = {
+      id: "drop-1",
+      updated_at: null,
+      parts: [
+        {
+          part_id: 1,
+          content: "",
+          media: [],
+          attachments: [readyAttachment],
+        },
+      ],
+    };
+    const staleDrop = {
+      id: "drop-1",
+      updated_at: null,
+      parts: [{ part_id: 1, content: "", media: [], attachments: [] }],
+    };
+
+    const result = reconcileFinalizedDropAttachments(
+      staleDrop as ApiDrop,
+      existingDrop
+    );
+
+    expect(result.parts[0]?.attachments).toEqual([readyAttachment]);
+  });
+
+  it("matches reordered parts by part id", () => {
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.pdf",
+      mime_type: "application/pdf",
+      kind: "pdf",
+      status: ApiAttachmentStatus.Ready,
+      url: "https://example.com/sample.pdf",
+    };
+    const existingDrop = {
+      id: "drop-1",
+      updated_at: 100,
+      parts: [
+        { part_id: 1, attachments: [readyAttachment] },
+        { part_id: 2, attachments: [] },
+      ],
+    };
+    const staleDrop = {
+      id: "drop-1",
+      updated_at: 100,
+      parts: [
+        { part_id: 2, attachments: [] },
+        {
+          part_id: 1,
+          attachments: [
+            {
+              ...readyAttachment,
+              status: ApiAttachmentStatus.Processing,
+              url: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = reconcileFinalizedDropAttachments(
+      staleDrop as ApiDrop,
+      existingDrop
+    );
+
+    expect(result.parts[0]?.attachments).toEqual([]);
+    expect(result.parts[1]?.attachments).toEqual([readyAttachment]);
+  });
+
+  it("trusts newer drop payloads that intentionally remove an attachment", () => {
+    const existingDrop = {
+      id: "drop-1",
+      updated_at: 100,
+      parts: [
+        {
+          part_id: 1,
+          attachments: [
+            {
+              attachment_id: "attachment-1",
+              status: ApiAttachmentStatus.Ready,
+            },
+          ],
+        },
+      ],
+    };
+    const newerDrop = {
+      id: "drop-1",
+      updated_at: 101,
+      parts: [{ part_id: 1, attachments: [] }],
+    };
+
+    expect(
+      reconcileFinalizedDropAttachments(newerDrop as ApiDrop, existingDrop)
+        .parts[0]?.attachments
+    ).toEqual([]);
+  });
+
+  it("preserves finalized attachments through the cached-drop update path", () => {
+    const queryClient = createQueryClient();
+    const queryKey = [QueryKey.DROPS, { waveId: "wave-1" }];
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.pdf",
+      mime_type: "application/pdf",
+      kind: "pdf",
+      status: ApiAttachmentStatus.Ready,
+      url: "https://example.com/sample.pdf",
+    };
+    queryClient.setQueryData(queryKey, {
+      pages: [
+        [
+          {
+            id: "drop-1",
+            updated_at: 100,
+            parts: [
+              { part_id: 1, content: "", attachments: [readyAttachment] },
+            ],
+          },
+        ],
+      ],
+    });
+
+    updateDropInCachedDrops(
+      queryClient,
+      {
+        id: "drop-1",
+        updated_at: 100,
+        parts: [
+          {
+            part_id: 1,
+            content: "",
+            attachments: [
+              {
+                ...readyAttachment,
+                status: ApiAttachmentStatus.Processing,
+                url: null,
+              },
+            ],
+          },
+        ],
+      } as ApiDrop,
+      { mergeWithExisting: true }
+    );
+
+    expect(
+      queryClient.getQueryData<any>(queryKey).pages[0][0].parts[0].attachments
+    ).toEqual([readyAttachment]);
+  });
+
+  it("returns partial drops without parts unchanged", () => {
+    const partialDrop = { id: "drop-1", parts: undefined } as any;
+
+    expect(
+      reconcileFinalizedDropAttachments(partialDrop, {
+        parts: [{ part_id: 1, attachments: [] }],
+      })
+    ).toBe(partialDrop);
   });
 });
