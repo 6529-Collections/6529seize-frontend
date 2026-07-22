@@ -3,14 +3,17 @@
 ## Temporary Release Bus v2 Maintenance
 
 This section overrides the deployment skill and older Release Bus documentation
-until the v2 cutover is complete.
+until the v2 production cutover and rollback observation criteria in branch
+`agent/simple-release-bus-v2-plan` at commit `0d8fb5e726279b4a80592b3dc7d4ec3db75065e9`
+are complete and this section is deliberately removed.
 
 - Do not register a candidate with Release Bus v1.
 - Before any staging or production mutation, run
-  `node ops/scripts/release-bus-status.mjs`. Continue only when it reports
-  `mode: OFF`; otherwise wait and retry.
+  `./bin/6529 exec node ops/scripts/release-bus-status.mjs`. Continue only when
+  it reports `mode: OFF`; otherwise wait and retry.
 - For a manual route, require `RELEASE_BUS_ENFORCEMENT` to be absent or exactly
-  `false`. Stop on `true`, any other value, or a failed variable lookup.
+  `false`. The `OFF` result and this enforcement result are one AND gate: both
+  must pass. Stop on disagreement, `true`, any other value, or a failed lookup.
 - Inspect active frontend and backend staging/production workflows and fetch the
   exact remote target ref before merging or dispatching. Wait for other actors;
   never cancel their workflows or force-push a shared branch.

@@ -3,6 +3,9 @@
 Status: v1 rollback reference during Release Bus v2 maintenance. V1 must not
 accept new readiness or scheduler claims. The temporary manual-deployment
 protocol in `deployment-bus-process.md` is authoritative until v2 cutover.
+Removal is tracked by branch `agent/simple-release-bus-v2-plan` at commit
+`0d8fb5e726279b4a80592b3dc7d4ec3db75065e9` and occurs only after the v2
+production cutover and rollback observation criteria pass.
 
 ## Maintenance boundary
 
@@ -22,6 +25,10 @@ protocol in `deployment-bus-process.md` is authoritative until v2 cutover.
   manual route is active.
 
 ## Runtime architecture
+
+> **Suspended during v2 maintenance:** this v1 architecture is rollback
+> reference only. The API and workers remain `OFF`, and the scheduler remains
+> disabled.
 
 - The existing application MySQL database is the durable release ledger.
 - `releaseBusStarter` runs every minute with reserved concurrency `1`.
@@ -389,7 +396,7 @@ bounded Jest suite/test report when available.
 Agents discover live mode only through the repository helper:
 
 ```bash
-node ops/scripts/release-bus-status.mjs
+./bin/6529 exec node ops/scripts/release-bus-status.mjs
 ```
 
 It uses the authenticated `gh` token internally to call
@@ -405,6 +412,9 @@ docs, workflows, or earlier state.
 Run the helper on receipt of a release request, immediately before readiness or
 manual mutation, and again before production after a significant wait. Stop if
 `ALL` or the relevant lane is paused.
+
+> **Suspended during v2 maintenance:** only the `OFF` row below is authorized.
+> The other rows and readiness behavior are v1 rollback reference only.
 
 | Live mode    | Staging route                        | Production route                           |
 | ------------ | ------------------------------------ | ------------------------------------------ |
@@ -444,6 +454,11 @@ the live Actions variable in every repository selected for a manual route.
 `OFF` or `SHADOW` with enforcement enabled is a rollout mismatch and blocks the
 release until an operator reconciles configuration. Enable enforcement only
 after the corresponding bus mode is healthy.
+
+During the temporary v2 maintenance window, the paragraph above is rollback
+reference only. A fresh `mode: OFF` result and absent/exactly-`false`
+enforcement are one fail-closed AND gate; disagreement stops the release and
+break glass cannot override it.
 
 ## Required external setup
 
