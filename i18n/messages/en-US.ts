@@ -352,6 +352,14 @@ const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   fallbackCuration: "Curation",
 } as const);
 
+const MY_STREAM_CURATION_MESSAGES = objectMessages("waves.myStream.curation", {
+  remove: "Remove",
+  removing: "Removing",
+  removeAriaLabel: "Remove drop from this curation",
+  removingAriaLabel: "Removing drop from this curation",
+  removeTitle: "Remove from curation",
+} as const);
+
 const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
   "back.wave": "Back to wave",
   "back.previous": "Back to previous page",
@@ -2182,6 +2190,7 @@ export const EN_US_MESSAGES = {
   ...NAVIGATION_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
+  ...MY_STREAM_CURATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
