@@ -3890,7 +3890,7 @@
         "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
-        "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, or punctuation; the typed value remains available and other categories keep their existing behavior.",
+        "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, or punctuation; look-alikes use subdued styling, and selecting one shows an amber note explaining that it remains a separate category.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",

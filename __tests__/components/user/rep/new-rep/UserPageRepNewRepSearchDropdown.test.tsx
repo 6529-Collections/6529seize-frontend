@@ -29,7 +29,7 @@ describe("UserPageRepNewRepSearchDropdown", () => {
     expect(defaultProps.onRepSelect).toHaveBeenCalledWith("NFT");
   });
 
-  it("marks only the exact Memes submission category", () => {
+  it("distinguishes the exact submission category from its look-alikes", () => {
     render(
       <UserPageRepNewRepSearchDropdown
         {...defaultProps}
@@ -46,14 +46,14 @@ describe("UserPageRepNewRepSearchDropdown", () => {
     ).toHaveClass(
       "tw-border-emerald-500/30",
       "tw-bg-emerald-500/10",
-      "tw-text-emerald-50"
+      "tw-text-white"
     );
     expect(
       screen.getByRole("button", { name: "Memes Nominee" })
-    ).not.toHaveClass(
-      "tw-border-emerald-500/30",
-      "tw-bg-emerald-500/10",
-      "tw-text-emerald-50"
+    ).not.toHaveClass("tw-border-emerald-500/30", "tw-bg-emerald-500/10");
+    expect(screen.getByRole("button", { name: "Memes Nominee" })).toHaveClass(
+      "tw-bg-transparent",
+      "tw-text-iron-300"
     );
   });
 

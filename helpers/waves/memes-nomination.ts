@@ -25,3 +25,6 @@ export const isMemesNomineeSearchPrefix = (search: string): boolean => {
     MEMES_NOMINEE_PRESENTATION_KEY.startsWith(searchKey)
   );
 };
+
+export const isMemesNomineeLookalike = (category: string): boolean =>
+  category !== MEMES_NOMINEE_CATEGORY && isMemesNomineeSearchPrefix(category);

@@ -5,6 +5,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "./rep-search-types";
@@ -32,6 +33,7 @@ import { getRepCategoryViolation } from "@/components/utils/input/rep-category/r
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
+  isMemesNomineeLookalike,
   isMemesNomineeSearchPrefix,
   MEMES_NOMINEE_CATEGORY,
   MEMES_NOMINEE_REQUIRED_REP,
@@ -41,6 +43,7 @@ const SEARCH_LENGTH = {
   MIN: 3,
   MAX: 100,
 };
+const SUBMISSION_GUIDANCE_ID = "grant-rep-submission-guidance";
 
 export function getGrantRepCategoriesToDisplay({
   search,
@@ -312,16 +315,53 @@ export default function UserPageRepNewRepSearch({
     });
   }, [debouncedValue, categories, matchingSearchLength]);
 
-  const showSubmissionHint = categoriesToDisplay.includes(
-    MEMES_NOMINEE_CATEGORY
-  );
+  const hasSelectedSubmissionCategory =
+    selectedCategory === MEMES_NOMINEE_CATEGORY;
+  const selectedNonQualifyingLookalike =
+    selectedCategory && isMemesNomineeLookalike(selectedCategory)
+      ? selectedCategory
+      : null;
+  const showSubmissionSearchHint =
+    !selectedCategory && categoriesToDisplay.includes(MEMES_NOMINEE_CATEGORY);
+  const showSubmissionGuidance =
+    hasSelectedSubmissionCategory ||
+    !!selectedNonQualifyingLookalike ||
+    showSubmissionSearchHint;
   const submissionHint = t(locale, "rep.categories.grant.submissionHint", {
     category: MEMES_NOMINEE_CATEGORY,
     amount: formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP),
   });
+  const submissionLookalikeInfo = selectedNonQualifyingLookalike
+    ? t(locale, "rep.categories.grant.submissionLookalikeInfo", {
+        category: selectedNonQualifyingLookalike,
+        submissionCategory: MEMES_NOMINEE_CATEGORY,
+      })
+    : null;
   const submissionCategoryStart = submissionHint.indexOf(
     MEMES_NOMINEE_CATEGORY
   );
+  let submissionGuidanceContent: React.ReactNode = submissionHint;
+  if (submissionLookalikeInfo) {
+    submissionGuidanceContent = submissionLookalikeInfo;
+  } else if (submissionCategoryStart >= 0) {
+    submissionGuidanceContent = (
+      <>
+        {submissionHint.slice(0, submissionCategoryStart)}
+        <span
+          className={`tw-font-medium ${
+            hasSelectedSubmissionCategory
+              ? "tw-text-emerald-400"
+              : "tw-text-iron-200"
+          }`}
+        >
+          {MEMES_NOMINEE_CATEGORY}
+        </span>
+        {submissionHint.slice(
+          submissionCategoryStart + MEMES_NOMINEE_CATEGORY.length
+        )}
+      </>
+    );
+  }
 
   const repSearchState = useMemo(() => {
     const searchLength = repSearch.length;
@@ -368,7 +408,7 @@ export default function UserPageRepNewRepSearch({
                   <span className="tw-h-3 tw-w-px tw-bg-white/20" />
                   <span>
                     {t(locale, "rep.categories.grant.assignedRep", {
-                      name: profile.query,
+                      name: profile.query ?? "",
                       amount: formatNumberWithCommas(
                         overview?.authenticated_user_contribution ?? 0
                       ),
@@ -409,6 +449,11 @@ export default function UserPageRepNewRepSearch({
                       value={repSearch}
                       onChange={handleRepSearchChange}
                       onFocus={() => setIsOpen(true)}
+                      aria-describedby={
+                        showSubmissionGuidance
+                          ? SUBMISSION_GUIDANCE_ID
+                          : undefined
+                      }
                       className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-py-3 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-400 tw-transition tw-duration-300 tw-ease-out placeholder:tw-font-normal placeholder:tw-text-iron-500 focus:tw-border-blue-500/50 focus:tw-outline-none lg:tw-font-semibold lg:placeholder:tw-text-iron-400"
                       placeholder={t(
                         locale,
@@ -421,22 +466,23 @@ export default function UserPageRepNewRepSearch({
                       </div>
                     )}
                   </div>
-                  {showSubmissionHint && (
-                    <p className="tw-mb-0 tw-mt-2 tw-px-1 tw-text-xs tw-font-normal tw-leading-relaxed tw-text-iron-400">
-                      {submissionCategoryStart >= 0 ? (
-                        <>
-                          {submissionHint.slice(0, submissionCategoryStart)}
-                          <span className="tw-font-medium tw-text-emerald-400">
-                            {MEMES_NOMINEE_CATEGORY}
-                          </span>
-                          {submissionHint.slice(
-                            submissionCategoryStart +
-                              MEMES_NOMINEE_CATEGORY.length
-                          )}
-                        </>
-                      ) : (
-                        submissionHint
+                  {showSubmissionGuidance && (
+                    <p
+                      id={SUBMISSION_GUIDANCE_ID}
+                      role="status"
+                      className={`tw-mb-0 tw-mt-2 tw-flex tw-items-start tw-gap-1.5 tw-px-1 tw-text-xs tw-font-normal tw-leading-relaxed ${
+                        selectedNonQualifyingLookalike
+                          ? "tw-text-amber-300"
+                          : "tw-text-iron-400"
+                      }`}
+                    >
+                      {selectedNonQualifyingLookalike && (
+                        <InformationCircleIcon
+                          aria-hidden="true"
+                          className="tw-mt-0.5 tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
+                        />
                       )}
+                      <span>{submissionGuidanceContent}</span>
                     </p>
                   )}
                   <AnimatePresence initial={false}>
@@ -448,7 +494,7 @@ export default function UserPageRepNewRepSearch({
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         className="tw-mt-1 tw-will-change-transform"
                       >
-                        <div className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/10">
+                        <div className="tw-rounded-lg tw-bg-iron-900/70 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/5">
                           <UserPageRepNewRepSearchDropdown
                             categories={categoriesToDisplay}
                             state={repSearchState}

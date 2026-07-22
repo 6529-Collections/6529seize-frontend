@@ -190,6 +190,8 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "grant.submissionBadge": "Counts for submissions",
   "grant.submissionHint":
     "Memes submissions require {amount} REP in {category}.",
+  "grant.submissionLookalikeInfo":
+    '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
   "grant.actions.grant": "Grant REP",

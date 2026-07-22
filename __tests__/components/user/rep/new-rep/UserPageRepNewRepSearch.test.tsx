@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageRepNewRepSearch, {
   getGrantRepCategoriesToDisplay,
@@ -95,6 +95,9 @@ describe("UserPageRepNewRepSearch", () => {
     );
     await user.click(screen.getByRole("button", { name: "MemesNominee" }));
     await waitFor(() => expect(input).toHaveValue("MemesNominee"));
+    expect(
+      within(screen.getByRole("status")).getByText("MemesNominee")
+    ).toHaveClass("tw-text-emerald-400");
 
     await user.click(input);
     await user.clear(input);
@@ -107,6 +110,41 @@ describe("UserPageRepNewRepSearch", () => {
       endpoint: "/rep/categories/availability",
       params: { param: "MemesNominee" },
     });
+  });
+
+  it("warns after a non-qualifying MemesNominee look-alike is selected", async () => {
+    const user = userEvent.setup();
+    (useQuery as jest.Mock).mockReturnValue({
+      isFetching: false,
+      data: ["MemesNominee", "Memes nominee"],
+    });
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const input = screen.getByPlaceholderText("Category to grant REP for");
+
+    await user.type(input, "Memes nominee");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Memes nominee" })
+      ).toBeVisible()
+    );
+    await user.click(screen.getByRole("button", { name: "Memes nominee" }));
+
+    await waitFor(() => expect(input).toHaveValue("Memes nominee"));
+    expect(input).toHaveClass("tw-border-white/10");
+    expect(input).not.toHaveClass("tw-border-amber-400/50");
+    expect(
+      screen.getByText(
+        '"Memes nominee" is a separate category. Only MemesNominee counts for submissions.'
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Memes submissions require/)
+    ).not.toBeInTheDocument();
   });
 
   it("surfaces only the exact submission category ahead of its presentation variant", () => {

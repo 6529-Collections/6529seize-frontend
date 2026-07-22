@@ -1,4 +1,5 @@
 import {
+  isMemesNomineeLookalike,
   isMemesNomineePresentationVariant,
   isMemesNomineeSearchPrefix,
 } from "@/helpers/waves/memes-nomination";
@@ -48,6 +49,22 @@ describe("isMemesNomineeSearchPrefix", () => {
     "does not match an ambiguous or differently spelled search: %s",
     (value) => {
       expect(isMemesNomineeSearchPrefix(value)).toBe(false);
+    }
+  );
+});
+
+describe("isMemesNomineeLookalike", () => {
+  it.each(["Memes nominee", "memes-nomin", "MEMESNOMINEE"])(
+    "matches a non-qualifying look-alike: %s",
+    (value) => {
+      expect(isMemesNomineeLookalike(value)).toBe(true);
+    }
+  );
+
+  it.each(["MemesNominee", "meme", "Top Artist"])(
+    "does not match the canonical or an unrelated category: %s",
+    (value) => {
+      expect(isMemesNomineeLookalike(value)).toBe(false);
     }
   );
 });
