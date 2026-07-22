@@ -44,6 +44,7 @@ describe("Release Bus gate evidence", () => {
       "scripts/release-bus-authorize-operation.sh": "authorize",
       "scripts/release-bus-frontend-gate.sh": "gate",
       "scripts/release-bus-gate-evidence.cjs": "evidence",
+      "scripts/release-bus-install-dependencies.cjs": "installer",
       "scripts/release-bus-report-progress.mjs": "reporter",
     };
     const input = {
@@ -59,9 +60,9 @@ describe("Release Bus gate evidence", () => {
     expect(frontendGateContract(input)).toEqual(baseline);
     expect(baseline).toMatchObject({
       behavior_digest:
-        "7fcd636de546cfc19c57db6f876b57c5157c264710c15848cf56bd2409f0ba68",
+        "c3ae3169f9e467e9c2b97e4202b7c9e2cb09a6efbbdd3070083196152f23c6ee",
       gate_fingerprint:
-        "04b7cea66d8075f2c1b8e246bb41ee0d86b7ecc284af42bbe4540de489ea7c6c",
+        "e125874c704b5ef9776819709444b938eeb9477315d15e1df92b25507b87386d",
       workflow_digest:
         "da7f739f627198465eeab537a6f7a435dc4a0c332f9e4a8462293eb3f4ab7ee0",
     });
@@ -210,6 +211,16 @@ describe("Release Bus gate evidence", () => {
           identity: evidenceIdentity,
         })
       ),
+      ...["staging", "production"].map((buildEnvironment) => ({
+        schema_version: 1,
+        kind: "dependency_install",
+        source: "parallel",
+        ...evidenceIdentity,
+        build_environment: buildEnvironment,
+        status: "SUCCEEDED",
+        failure_class: null,
+        failure_code: null,
+      })),
     ];
 
     const summary = buildGateSummary({
@@ -229,9 +240,44 @@ describe("Release Bus gate evidence", () => {
 
     expect(summary).toMatchObject({
       status: "SUCCEEDED",
+      failure_class: null,
+      retryable: false,
       counts: { test_files: 2, test_suites: 2, tests: 4 },
       missing_files: [],
       duplicate_files: [],
+    });
+
+    expect(
+      buildGateSummary({
+        records: [
+          ...records,
+          {
+            schema_version: 1,
+            kind: "dependency_install",
+            source: "parallel",
+            ...evidenceIdentity,
+            status: "FAILED",
+            failure_class: "INFRASTRUCTURE_TRANSIENT",
+            failure_code: "DEPENDENCY_TRANSPORT_FAILURE",
+          },
+        ],
+        source: "parallel",
+        shardCount: 2,
+        jobResults: {
+          lint: "success",
+          typecheck: "success",
+          build: "failure",
+          inventory: "success",
+          jest: "success",
+          source_mutation: "success",
+        },
+        identity: evidenceIdentity,
+      })
+    ).toMatchObject({
+      status: "FAILED",
+      failure_class: "INFRASTRUCTURE_TRANSIENT",
+      failure_phase: "dependency_install",
+      retryable: true,
     });
 
     for (const result of ["failure", "cancelled", "skipped", ""] as const) {
