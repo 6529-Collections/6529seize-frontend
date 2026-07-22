@@ -104,7 +104,7 @@ export const getMessageIdFromPathname = (
   }
 };
 
-export const isWaveCreatePathname = (
+const isWaveCreatePathname = (
   pathname: string | null | undefined
 ): boolean => {
   if (!pathname?.startsWith("/waves/")) {
