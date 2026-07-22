@@ -33,6 +33,10 @@ export enum CreateWaveGroupConfigType {
 
 export interface WaveOverviewConfig {
   readonly type: ApiWaveType;
+  // Starts false so the type selector opens with nothing highlighted, forcing
+  // an explicit choice; flips true once the user picks. `type` still holds a
+  // valid value throughout, so downstream steps never see an unset type.
+  readonly typeSelected: boolean;
   readonly name: string;
   readonly image: File | null;
 }
