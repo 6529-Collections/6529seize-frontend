@@ -10,7 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
-import { MEMES_CONTRACT } from "@/constants/memes";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
