@@ -30,7 +30,7 @@ test.describe("About Pages @smoke @medium @large", () => {
     await waitForRouteReady(page);
     await expect(page).toHaveTitle("The Memes | About");
     await expectNoHorizontalOverflow(page);
-    const text = page.getByText("large edition, CCO (public domain) NFTs");
+    const text = page.getByText("large edition, CC0 (public domain) NFTs");
     await expect(text).toBeVisible();
   });
 
