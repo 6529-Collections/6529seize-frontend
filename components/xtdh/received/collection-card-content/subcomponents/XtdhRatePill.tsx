@@ -14,14 +14,14 @@ export function XtdhRatePill({
   return (
     <div
       className={clsx(
-        "tw-flex tw-flex-wrap tw-items-center tw-gap-2",
+        "tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-5 tw-gap-y-2 sm:tw-w-auto sm:tw-min-w-[250px] sm:tw-justify-end sm:tw-text-right",
         className
       )}
     >
-      <span className="tw-text-sm tw-font-medium tw-text-iron-500">
+      <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-500">
         <span className="tw-tabular-nums">{rateLabel}</span> / day
       </span>
-      <span className="tw-min-w-[120px] tw-text-sm tw-font-semibold tw-text-iron-100">
+      <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
         Total <span className="tw-tabular-nums">{totalLabel}</span> xTDH
       </span>
     </div>

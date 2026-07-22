@@ -10,7 +10,7 @@ export function XtdhMetricsSection({
   return (
     <section
       aria-labelledby="base-xtdh-metrics-heading"
-      className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3"
+      className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3"
     >
       <h2 id="base-xtdh-metrics-heading" className="tw-sr-only">
         Base xTDH Metrics
@@ -21,18 +21,21 @@ export function XtdhMetricsSection({
         tooltip="Current xTDH multiplier applied to your TDH Rate"
         value={multiplier}
         subtext="x"
+        variant="network"
       />
       <XtdhStatCard
         label="xTDH Rate"
         tooltip="Total xTDH you can generate per day (TDH Rate × Multiplier)"
         value={producedXtdhRate}
         subtext="/day"
+        variant="network"
       />
       <XtdhStatCard
         label="Granted"
         tooltip="Total xTDH granted to you per day"
         value={granted}
         subtext="/day"
+        variant="network"
       />
     </section>
   );
