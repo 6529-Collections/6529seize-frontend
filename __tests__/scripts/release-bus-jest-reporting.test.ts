@@ -197,6 +197,51 @@ describe("Release Bus structured Jest reporting", () => {
     expect(JSON.stringify(payload)).not.toContain("OPENAI");
   });
 
+  it("classifies a failed dependency install as retryable infrastructure", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-dependency-report-")
+    );
+    const evidencePath = path.join(tempDir, "dependency-install.json");
+    try {
+      fs.writeFileSync(
+        evidencePath,
+        JSON.stringify({
+          status: "FAILED",
+          failure_class: "INFRASTRUCTURE_TRANSIENT",
+          failure_code: "DEPENDENCY_TRANSPORT_FAILURE",
+          raw_output: "must not leave the runner",
+        })
+      );
+      const output = execFileSync(
+        process.execPath,
+        ["scripts/release-bus-report-progress.mjs", "--payload-only"],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            GITHUB_RUN_ID: "29920703076",
+            RELEASE_BUS_JOB_STATUS: "failure",
+            RELEASE_BUS_REPORT_INCLUDE_STAGES: "false",
+            RELEASE_BUS_INSTALL_EVIDENCE: evidencePath,
+          },
+        }
+      );
+      const payload = JSON.parse(output.toString("utf8"));
+
+      expect(payload).toMatchObject({
+        status: "FAILED",
+        failure_class: "INFRASTRUCTURE_TRANSIENT",
+        failure_phase: "dependency_install",
+        retryable: true,
+        stages: [],
+      });
+      expect(JSON.stringify(payload)).not.toContain("raw_output");
+      expect(JSON.stringify(payload)).not.toContain("must not leave");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("omits malformed or unsafe Jest details deterministically", () => {
     const tempDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "release-bus-report-")

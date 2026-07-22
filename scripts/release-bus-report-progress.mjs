@@ -77,6 +77,30 @@ function readJestSummary() {
   }
 }
 
+function readDependencyInstallEvidence() {
+  const filename = process.env.RELEASE_BUS_INSTALL_EVIDENCE;
+  if (!filename || !fs.existsSync(filename)) return null;
+  try {
+    const value = JSON.parse(fs.readFileSync(filename, "utf8"));
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw new Error("invalid dependency-install evidence");
+    }
+    return {
+      status: value.status === "SUCCEEDED" ? "SUCCEEDED" : "FAILED",
+      failure_class: ["SOURCE", "INFRASTRUCTURE_TRANSIENT", "UNKNOWN"].includes(
+        value.failure_class
+      )
+        ? value.failure_class
+        : "UNKNOWN",
+    };
+  } catch {
+    process.stderr.write(
+      "Release Bus dependency-install evidence is invalid; classifying the failure as unknown.\n"
+    );
+    return { status: "FAILED", failure_class: "UNKNOWN" };
+  }
+}
+
 function safeDuration(value) {
   if (!Number.isInteger(value) || value < 0 || value > MAX_DURATION_MS) {
     throw new Error("Release Bus summary contains an invalid duration");
@@ -312,18 +336,30 @@ export function buildProgressPayload() {
   const jobStatus = String(
     process.env.RELEASE_BUS_JOB_STATUS ?? ""
   ).toLowerCase();
+  const dependencyInstall = readDependencyInstallEvidence();
   const failed =
     ["failure", "cancelled"].includes(jobStatus) ||
     stages.some((stage) => stage.status === "FAILED");
+  const dependencyInstallFailed =
+    failed && dependencyInstall?.status === "FAILED";
+  const failureClass = dependencyInstallFailed
+    ? dependencyInstall.failure_class
+    : failed
+      ? "UNKNOWN"
+      : null;
   return {
     train_id: process.env.RELEASE_BUS_TRAIN_ID,
     operation_key: process.env.RELEASE_BUS_OPERATION_KEY,
     workflow_run_id: process.env.GITHUB_RUN_ID,
     phase: process.env.RELEASE_BUS_REPORT_PHASE ?? "complete",
     status: failed ? "FAILED" : "SUCCEEDED",
-    failure_class: failed ? "UNKNOWN" : null,
-    failure_phase: failed ? "gate" : null,
-    retryable: false,
+    failure_class: failureClass,
+    failure_phase: dependencyInstallFailed
+      ? "dependency_install"
+      : failed
+        ? "gate"
+        : null,
+    retryable: failureClass === "INFRASTRUCTURE_TRANSIENT",
     stages,
     jest: readJestSummary(),
     summary: null,
