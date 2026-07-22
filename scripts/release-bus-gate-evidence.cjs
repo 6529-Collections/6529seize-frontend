@@ -796,7 +796,26 @@ function finalSummary({ args, records, jobResults }) {
           },
           identity,
         });
-  const authoritative = mode === "sharded" ? sharded : legacy;
+  // Valid modes normally select a buildGateSummary result, including when no
+  // records exist (that result is FAILED with zeroed counts). Keep an explicit
+  // bounded fallback so an internal producer regression still emits terminal
+  // FAILED evidence instead of suppressing the workflow's failure report.
+  const authoritative = (mode === "sharded" ? sharded : legacy) ?? {
+    status: "FAILED",
+    failure_class: "UNKNOWN",
+    failure_phase: "gate",
+    retryable: false,
+    phases: [],
+    counts: sumCounts([]),
+    shards: [],
+    shard_imbalance_ms: 0,
+    missing_files: [],
+    duplicate_files: [],
+    unexpected_files: [],
+    failing_suites: [],
+    failing_tests: [],
+    errors: ["authoritative evidence missing"],
+  };
   const equivalent =
     mode === "shadow"
       ? legacy.status === sharded.status &&
