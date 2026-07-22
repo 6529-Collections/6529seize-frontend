@@ -147,11 +147,17 @@ function safePathList(value) {
 
 function isVersionedAggregate(value) {
   return (
+    [
+      "base_canary_summary",
+      "frontend_preflight_base_evidence_summary",
+    ].includes(value?.kind) &&
     /^[a-f0-9]{40}$/.test(String(value?.base_sha ?? "")) &&
     value?.environment === "orchestration" &&
     /^[a-f0-9]{64}$/.test(String(value?.gate_fingerprint ?? "")) &&
     /^[a-f0-9]{40}$/.test(String(value?.workflow_sha ?? "")) &&
     /^[a-f0-9]{64}$/.test(String(value?.workflow_digest ?? "")) &&
+    /^[a-f0-9]{64}$/.test(String(value?.behavior_digest ?? "")) &&
+    /^[a-f0-9]{64}$/.test(String(value?.build_profile_digest ?? "")) &&
     typeof value?.node_version === "string" &&
     value.node_version.length > 0 &&
     value.node_version.length <= 64 &&
@@ -273,13 +279,17 @@ function projectAggregateProgress(value) {
     retryable:
       failureClass === "INFRASTRUCTURE_TRANSIENT" && value.retryable === true,
     summary: {
+      kind: value.kind,
       base_sha: value.base_sha,
       environment: value.environment,
       gate_fingerprint: value.gate_fingerprint,
+      behavior_digest: value.behavior_digest,
+      build_profile_digest: value.build_profile_digest,
       workflow_sha: value.workflow_sha,
       workflow_digest: value.workflow_digest,
       node_version: safeText(value.node_version),
       package_manager: safeText(value.package_manager),
+      gate_mode: value.gate_mode,
       shard_count: shardCount,
       summary_artifact_name: safePath(value.summary_artifact_name),
       summary_artifact_digest: artifactDigest,
@@ -298,11 +308,57 @@ function projectAggregateProgress(value) {
             strictCount(totals.todo_tests, 10_000_000),
           10_000_000
         ),
+        skipped_test_suites: strictCount(value.skipped_test_suites, 10_000_000),
       },
       fresh_or_reused: "fresh",
       shards,
       missing_files: safePathList(value.missing_files),
       duplicate_files: safePathList(value.duplicate_files),
+      unexpected_files: safePathList(value.unexpected_files),
+      proof_origin:
+        value.kind === "frontend_preflight_base_evidence_summary"
+          ? safeText(value.proof_origin)
+          : null,
+      build_environments: Array.isArray(value.build_environments)
+        ? value.build_environments
+            .map((environment) => safeText(environment))
+            .filter(Boolean)
+            .slice(0, 2)
+        : [],
+      build_coverage:
+        value.build_coverage && typeof value.build_coverage === "object"
+          ? {
+              authoritative_profile: safeText(
+                value.build_coverage.authoritative_profile
+              ),
+              compilation_count: strictCount(
+                value.build_coverage.compilation_count,
+                10
+              ),
+              deployed_artifact_bound:
+                value.build_coverage.deployed_artifact_bound === true,
+            }
+          : null,
+      immutable_artifact:
+        value.immutable_artifact &&
+        typeof value.immutable_artifact === "object" &&
+        !Array.isArray(value.immutable_artifact)
+          ? {
+              artifact_name: safePath(value.immutable_artifact.artifact_name),
+              run_id: String(value.immutable_artifact.run_id ?? ""),
+              source_sha: String(value.immutable_artifact.source_sha ?? ""),
+              environment: safeText(value.immutable_artifact.environment),
+              package_digest: String(
+                value.immutable_artifact.package_digest ?? ""
+              ),
+              upload_digest: String(
+                value.immutable_artifact.upload_digest ?? ""
+              ),
+              build_profile_digest: String(
+                value.immutable_artifact.build_profile_digest ?? ""
+              ),
+            }
+          : null,
     },
   };
 }
@@ -363,6 +419,11 @@ export function buildProgressPayload() {
     stages,
     jest: readJestSummary(),
     summary: null,
+    ...(process.env.RELEASE_BUS_BUILD_PROFILE_DIGEST
+      ? {
+          build_profile_digest: process.env.RELEASE_BUS_BUILD_PROFILE_DIGEST,
+        }
+      : {}),
   };
 }
 

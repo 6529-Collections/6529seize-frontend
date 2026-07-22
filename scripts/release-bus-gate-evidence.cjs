@@ -16,9 +16,11 @@ const STATUSES = new Set([
 ]);
 const MAX_FAILURES = 100;
 const MAX_TEXT_LENGTH = 500;
+const BASE_EVIDENCE_CONTRACT_VERSION = 2;
 const EVIDENCE_IDENTITY_FIELDS = [
   "base_sha",
   "environment",
+  "build_profile_digest",
   "gate_fingerprint",
   "workflow_sha",
   "workflow_digest",
@@ -33,6 +35,10 @@ const EVIDENCE_RECORD_KINDS = new Set([
   "jest_shard",
 ]);
 const FRONTEND_GATE_WORKFLOW = ".github/workflows/release-bus-base-canary.yml";
+const FRONTEND_PREFLIGHT_WORKFLOW =
+  ".github/workflows/release-bus-preflight.yml";
+const FRONTEND_BASE_IDENTITY_WORKFLOW =
+  ".github/workflows/release-bus-base-evidence-identity.yml";
 const FRONTEND_GATE_BASE_FILES = [
   "bin/6529",
   "jest.config.js",
@@ -42,9 +48,11 @@ const FRONTEND_GATE_BASE_FILES = [
 ];
 const FRONTEND_GATE_TOOLING_FILES = [
   "scripts/release-bus-authorize-operation.sh",
+  "scripts/release-bus-build-profile.cjs",
   "scripts/release-bus-frontend-gate.sh",
   "scripts/release-bus-gate-evidence.cjs",
   "scripts/release-bus-install-dependencies.cjs",
+  "scripts/release-bus-preflight-evidence.cjs",
   "scripts/release-bus-report-progress.mjs",
 ];
 
@@ -125,6 +133,7 @@ function frontendGateContract({
   workflowFileContents,
   gateMode,
   shardCount,
+  buildProfileDigest,
   nodeVersion = "22",
 }) {
   if (!/^[a-f0-9]{40}$/.test(baseSha)) throw new Error("Invalid base SHA");
@@ -136,8 +145,12 @@ function frontendGateContract({
     throw new Error("Unsupported shard count");
   if (!/^[1-9][0-9]{0,2}$/.test(nodeVersion))
     throw new Error("Invalid Node version");
+  if (!/^[a-f0-9]{64}$/.test(buildProfileDigest))
+    throw new Error("Invalid build-profile digest");
   const workflowFiles = [
     FRONTEND_GATE_WORKFLOW,
+    FRONTEND_PREFLIGHT_WORKFLOW,
+    FRONTEND_BASE_IDENTITY_WORKFLOW,
     ...FRONTEND_GATE_TOOLING_FILES,
   ];
   for (const file of FRONTEND_GATE_BASE_FILES) {
@@ -166,19 +179,22 @@ function frontendGateContract({
   const workflowDigest = componentDigests[FRONTEND_GATE_WORKFLOW];
   const behaviorDigest = sha256(
     JSON.stringify({
-      schema_version: 1,
+      schema_version: BASE_EVIDENCE_CONTRACT_VERSION,
+      kind: "frontend_base_evidence_contract",
       repository: "frontend",
       environment: "orchestration",
       node_version: nodeVersion,
       package_manager: packageManager,
       gate_mode: gateMode,
       shard_count: shardCount,
+      build_profile_digest: buildProfileDigest,
       component_digests: componentDigests,
     })
   );
   const fingerprint = sha256(
     JSON.stringify({
-      schema_version: 1,
+      schema_version: BASE_EVIDENCE_CONTRACT_VERSION,
+      kind: "frontend_base_evidence_contract",
       repository: "frontend",
       environment: "orchestration",
       base_sha: baseSha,
@@ -188,11 +204,13 @@ function frontendGateContract({
       package_manager: packageManager,
       gate_mode: gateMode,
       shard_count: shardCount,
+      build_profile_digest: buildProfileDigest,
       component_digests: componentDigests,
     })
   );
   return {
-    schema_version: 1,
+    schema_version: BASE_EVIDENCE_CONTRACT_VERSION,
+    kind: "frontend_base_evidence_contract",
     repository: "frontend",
     environment: "orchestration",
     base_sha: baseSha,
@@ -204,6 +222,7 @@ function frontendGateContract({
     package_manager: packageManager,
     gate_mode: gateMode,
     shard_count: shardCount,
+    build_profile_digest: buildProfileDigest,
     component_digests: componentDigests,
   };
 }
@@ -224,7 +243,12 @@ function contractFromRepository(args) {
     ])
   );
   const workflowFileContents = Object.fromEntries(
-    [FRONTEND_GATE_WORKFLOW, ...FRONTEND_GATE_TOOLING_FILES].map((file) => [
+    [
+      FRONTEND_GATE_WORKFLOW,
+      FRONTEND_PREFLIGHT_WORKFLOW,
+      FRONTEND_BASE_IDENTITY_WORKFLOW,
+      ...FRONTEND_GATE_TOOLING_FILES,
+    ].map((file) => [
       file,
       execFileSync("git", ["-C", repoRoot, "show", `${workflowSha}:${file}`], {
         encoding: "utf8",
@@ -239,6 +263,7 @@ function contractFromRepository(args) {
     workflowFileContents,
     gateMode: required(args, "mode"),
     shardCount: integer(required(args, "shard-count"), "shard-count", 1),
+    buildProfileDigest: digest(args, "build-profile-digest"),
   });
 }
 
@@ -254,6 +279,9 @@ function validateEvidenceIdentity(identity) {
   }
   if (!/^[a-f0-9]{64}$/.test(String(identity.gate_fingerprint ?? ""))) {
     throw new Error("Evidence identity has an invalid gate fingerprint");
+  }
+  if (!/^[a-f0-9]{64}$/.test(String(identity.build_profile_digest ?? ""))) {
+    throw new Error("Evidence identity has an invalid build-profile digest");
   }
   if (!/^[a-f0-9]{40}$/.test(String(identity.workflow_sha ?? ""))) {
     throw new Error("Evidence identity has an invalid workflow SHA");
@@ -280,6 +308,7 @@ function evidenceIdentityFromArgs(args) {
   return validateEvidenceIdentity({
     base_sha: required(args, "base-sha"),
     environment: required(args, "environment"),
+    build_profile_digest: digest(args, "build-profile-digest"),
     gate_fingerprint: required(args, "gate-fingerprint"),
     workflow_sha: required(args, "workflow-sha"),
     workflow_digest: required(args, "workflow-digest"),
@@ -754,6 +783,9 @@ function finalSummary({ args, records, jobResults }) {
             inventory: jobResults.inventory,
             jest: jobResults.jest,
             source_mutation: jobResults.source_mutation,
+            ...(jobResults.packaging_build === undefined
+              ? {}
+              : { packaging_build: jobResults.packaging_build }),
           },
           identity,
         });
@@ -797,6 +829,8 @@ function finalSummary({ args, records, jobResults }) {
       ])
     ),
     totals: authoritative?.counts ?? sumCounts([]),
+    skipped_test_suites:
+      authoritative?.counts?.pending_test_suites ?? Number.MAX_SAFE_INTEGER,
     shards: authoritative?.shards ?? [],
     shard_imbalance_ms: authoritative?.shard_imbalance_ms ?? 0,
     missing_files: authoritative?.missing_files ?? [],
