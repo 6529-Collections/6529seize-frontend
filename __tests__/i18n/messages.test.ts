@@ -478,6 +478,22 @@ describe("frontend i18n helpers", () => {
     );
   });
 
+  it("backs curation removal controls with source-locale fallbacks", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(t(locale, "waves.myStream.curation.remove")).toBe("Remove");
+      expect(t(locale, "waves.myStream.curation.removing")).toBe("Removing");
+      expect(t(locale, "waves.myStream.curation.removeAriaLabel")).toBe(
+        "Remove drop from this curation"
+      );
+      expect(t(locale, "waves.myStream.curation.removingAriaLabel")).toBe(
+        "Removing drop from this curation"
+      );
+      expect(t(locale, "waves.myStream.curation.removeTitle")).toBe(
+        "Remove from curation"
+      );
+    }
+  });
+
   it("keeps shared search control copy namespaced", () => {
     expect(EN_US_MESSAGES["headerSearch.clear"]).toBe("Clear search");
     expect(EN_US_MESSAGES["headerSearch.clearShort"]).toBe("Clear");

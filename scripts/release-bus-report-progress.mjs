@@ -14,6 +14,10 @@ const OUTCOME_STATUS = {
   cancelled: "FAILED",
   skipped: "SKIPPED",
 };
+const REPORT_MAX_ATTEMPTS = 3;
+const REPORT_TIMEOUT_MS = 15_000;
+
+class NonRetryableProgressResponseError extends Error {}
 
 function stageStatus(name) {
   const key = `RELEASE_BUS_GATE_${name.toUpperCase()}_OUTCOME`;
@@ -21,8 +25,12 @@ function stageStatus(name) {
   return OUTCOME_STATUS[outcome] ?? "PENDING";
 }
 
-function safeText(value) {
+function safeText(value, maximum = MAX_TEXT) {
   if (typeof value !== "string") return null;
+  const limit =
+    Number.isInteger(maximum) && maximum > 0
+      ? Math.min(maximum, MAX_TEXT)
+      : MAX_TEXT;
   const sanitized = Array.from(value)
     .map((character) => {
       const code = character.codePointAt(0) ?? 0;
@@ -30,7 +38,7 @@ function safeText(value) {
     })
     .join("")
     .trim();
-  return sanitized ? sanitized.slice(0, MAX_TEXT) : null;
+  return sanitized ? sanitized.slice(0, limit) : null;
 }
 
 function safeCount(value, maximum) {
@@ -70,6 +78,30 @@ function readJestSummary() {
   } catch {
     process.stderr.write("Release Bus Jest summary is invalid; omitting it.\n");
     return null;
+  }
+}
+
+function readDependencyInstallEvidence() {
+  const filename = process.env.RELEASE_BUS_INSTALL_EVIDENCE;
+  if (!filename || !fs.existsSync(filename)) return null;
+  try {
+    const value = JSON.parse(fs.readFileSync(filename, "utf8"));
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw new Error("invalid dependency-install evidence");
+    }
+    return {
+      status: value.status === "SUCCEEDED" ? "SUCCEEDED" : "FAILED",
+      failure_class: ["SOURCE", "INFRASTRUCTURE_TRANSIENT", "UNKNOWN"].includes(
+        value.failure_class
+      )
+        ? value.failure_class
+        : "UNKNOWN",
+    };
+  } catch {
+    process.stderr.write(
+      "Release Bus dependency-install evidence is invalid; classifying the failure as unknown.\n"
+    );
+    return { status: "FAILED", failure_class: "UNKNOWN" };
   }
 }
 
@@ -119,11 +151,17 @@ function safePathList(value) {
 
 function isVersionedAggregate(value) {
   return (
+    [
+      "base_canary_summary",
+      "frontend_preflight_base_evidence_summary",
+    ].includes(value?.kind) &&
     /^[a-f0-9]{40}$/.test(String(value?.base_sha ?? "")) &&
     value?.environment === "orchestration" &&
     /^[a-f0-9]{64}$/.test(String(value?.gate_fingerprint ?? "")) &&
     /^[a-f0-9]{40}$/.test(String(value?.workflow_sha ?? "")) &&
     /^[a-f0-9]{64}$/.test(String(value?.workflow_digest ?? "")) &&
+    /^[a-f0-9]{64}$/.test(String(value?.behavior_digest ?? "")) &&
+    /^[a-f0-9]{64}$/.test(String(value?.build_profile_digest ?? "")) &&
     typeof value?.node_version === "string" &&
     value.node_version.length > 0 &&
     value.node_version.length <= 64 &&
@@ -139,6 +177,20 @@ function projectAggregateProgress(value) {
     throw new Error("Release Bus aggregate summary is invalid");
   }
   const status = value.status === "SUCCEEDED" ? "SUCCEEDED" : "FAILED";
+  const failureClass =
+    status === "SUCCEEDED"
+      ? null
+      : ["SOURCE", "INFRASTRUCTURE_TRANSIENT", "UNKNOWN"].includes(
+            value.failure_class
+          )
+        ? value.failure_class
+        : "UNKNOWN";
+  const failurePhase =
+    status === "SUCCEEDED"
+      ? null
+      : ["dependency_install", "gate"].includes(value.failure_phase)
+        ? value.failure_phase
+        : "gate";
   const phases = Array.isArray(value.phases) ? value.phases : [];
   const stages = STAGES.map((name) => {
     const phase = phases.find((item) => item?.name === name);
@@ -161,7 +213,16 @@ function projectAggregateProgress(value) {
     failing_tests: value.failing_tests,
   });
   if (!isVersionedAggregate(value)) {
-    return { status, stages, jest, summary: null };
+    return {
+      status,
+      stages,
+      jest,
+      summary: null,
+      failure_class: failureClass,
+      failure_phase: failurePhase,
+      retryable:
+        failureClass === "INFRASTRUCTURE_TRANSIENT" && value.retryable === true,
+    };
   }
   const artifactDigest = String(
     process.env.RELEASE_BUS_SUMMARY_ARTIFACT_DIGEST ?? ""
@@ -217,14 +278,22 @@ function projectAggregateProgress(value) {
     status,
     stages,
     jest,
+    failure_class: failureClass,
+    failure_phase: failurePhase,
+    retryable:
+      failureClass === "INFRASTRUCTURE_TRANSIENT" && value.retryable === true,
     summary: {
+      kind: value.kind,
       base_sha: value.base_sha,
       environment: value.environment,
       gate_fingerprint: value.gate_fingerprint,
+      behavior_digest: value.behavior_digest,
+      build_profile_digest: value.build_profile_digest,
       workflow_sha: value.workflow_sha,
       workflow_digest: value.workflow_digest,
       node_version: safeText(value.node_version),
       package_manager: safeText(value.package_manager),
+      gate_mode: value.gate_mode,
       shard_count: shardCount,
       summary_artifact_name: safePath(value.summary_artifact_name),
       summary_artifact_digest: artifactDigest,
@@ -243,11 +312,60 @@ function projectAggregateProgress(value) {
             strictCount(totals.todo_tests, 10_000_000),
           10_000_000
         ),
+        skipped_test_suites: strictCount(value.skipped_test_suites, 10_000_000),
       },
       fresh_or_reused: "fresh",
       shards,
       missing_files: safePathList(value.missing_files),
       duplicate_files: safePathList(value.duplicate_files),
+      unexpected_files: safePathList(value.unexpected_files),
+      proof_origin:
+        value.kind === "frontend_preflight_base_evidence_summary"
+          ? safeText(value.proof_origin)
+          : null,
+      build_environments: Array.isArray(value.build_environments)
+        ? value.build_environments
+            .map((environment) => safeText(environment))
+            .filter(Boolean)
+            .slice(0, 2)
+        : [],
+      build_coverage:
+        value.build_coverage && typeof value.build_coverage === "object"
+          ? {
+              authoritative_profile: safeText(
+                value.build_coverage.authoritative_profile
+              ),
+              compilation_count: strictCount(
+                value.build_coverage.compilation_count,
+                10
+              ),
+              deployed_artifact_bound:
+                value.build_coverage.deployed_artifact_bound === true,
+            }
+          : null,
+      immutable_artifact:
+        value.immutable_artifact &&
+        typeof value.immutable_artifact === "object" &&
+        !Array.isArray(value.immutable_artifact)
+          ? {
+              artifact_name: safePath(value.immutable_artifact.artifact_name),
+              run_id: safeText(value.immutable_artifact.run_id, 20),
+              source_sha: safeText(value.immutable_artifact.source_sha, 40),
+              environment: safeText(value.immutable_artifact.environment),
+              package_digest: safeText(
+                value.immutable_artifact.package_digest,
+                64
+              ),
+              upload_digest: safeText(
+                value.immutable_artifact.upload_digest,
+                64
+              ),
+              build_profile_digest: safeText(
+                value.immutable_artifact.build_profile_digest,
+                64
+              ),
+            }
+          : null,
     },
   };
 }
@@ -281,19 +399,91 @@ export function buildProgressPayload() {
   const jobStatus = String(
     process.env.RELEASE_BUS_JOB_STATUS ?? ""
   ).toLowerCase();
+  const dependencyInstall = readDependencyInstallEvidence();
   const failed =
     ["failure", "cancelled"].includes(jobStatus) ||
     stages.some((stage) => stage.status === "FAILED");
+  const dependencyInstallFailed =
+    failed && dependencyInstall?.status === "FAILED";
+  const failureClass = dependencyInstallFailed
+    ? dependencyInstall.failure_class
+    : failed
+      ? "UNKNOWN"
+      : null;
   return {
     train_id: process.env.RELEASE_BUS_TRAIN_ID,
     operation_key: process.env.RELEASE_BUS_OPERATION_KEY,
     workflow_run_id: process.env.GITHUB_RUN_ID,
     phase: process.env.RELEASE_BUS_REPORT_PHASE ?? "complete",
     status: failed ? "FAILED" : "SUCCEEDED",
+    failure_class: failureClass,
+    failure_phase: dependencyInstallFailed
+      ? "dependency_install"
+      : failed
+        ? "gate"
+        : null,
+    retryable: failureClass === "INFRASTRUCTURE_TRANSIENT",
     stages,
     jest: readJestSummary(),
     summary: null,
+    ...(process.env.RELEASE_BUS_BUILD_PROFILE_DIGEST
+      ? {
+          build_profile_digest: process.env.RELEASE_BUS_BUILD_PROFILE_DIGEST,
+        }
+      : {}),
   };
+}
+
+export async function postProgress(
+  apiUrl,
+  token,
+  payload,
+  {
+    fetchImpl = fetch,
+    sleep = (milliseconds) =>
+      new Promise((resolve) => setTimeout(resolve, milliseconds)),
+    timeoutMs = REPORT_TIMEOUT_MS,
+  } = {}
+) {
+  let lastStatus = null;
+  for (let attempt = 1; attempt <= REPORT_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetchImpl(
+        `${apiUrl.replace(/\/$/, "")}/deploy/release-bus/report-progress`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(timeoutMs),
+        }
+      );
+      if (response.ok) return;
+      lastStatus = response.status;
+      if (response.status < 500 || response.status > 599) {
+        throw new NonRetryableProgressResponseError(
+          `Release Bus progress report failed (${response.status})`
+        );
+      }
+      if (attempt === REPORT_MAX_ATTEMPTS) {
+        throw new Error("Release Bus progress report retryable server failure");
+      }
+    } catch (error) {
+      if (error instanceof NonRetryableProgressResponseError) throw error;
+      if (attempt === REPORT_MAX_ATTEMPTS) {
+        throw new Error(
+          `Release Bus progress report failed after bounded transport retries${lastStatus ? ` (${lastStatus})` : ""}`
+        );
+      }
+    }
+    process.stderr.write(
+      `Release Bus progress report transport attempt ${attempt} failed; retrying the same operation/run payload.\n`
+    );
+    await sleep(1_000 * attempt);
+  }
+  throw new Error("Release Bus progress report retry loop exited unexpectedly");
 }
 
 async function main() {
@@ -313,20 +503,7 @@ async function main() {
   // Only the strict, bounded projection above is sent to the configured Release
   // Bus endpoint. Unknown fields, failure messages, and raw logs are discarded.
   // lgtm[js/file-access-to-http]
-  const response = await fetch(
-    `${apiUrl.replace(/\/$/, "")}/deploy/release-bus/report-progress`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
-  if (!response.ok) {
-    throw new Error(`Release Bus progress report failed (${response.status})`);
-  }
+  await postProgress(apiUrl, token, payload);
 }
 
 if (

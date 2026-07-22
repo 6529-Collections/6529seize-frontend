@@ -1,49 +1,92 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import React from "react";
 import UserPageRepNewRepSearchDropdown from "@/components/user/rep/new-rep/UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "@/components/user/rep/new-rep/rep-search-types";
 
+const defaultProps = {
+  minSearchLength: 3,
+  maxSearchLength: 100,
+  onRepSelect: jest.fn(),
+};
+
 describe("UserPageRepNewRepSearchDropdown", () => {
-  it("renders categories and handles selection", async () => {
-    const onSelect = jest.fn();
+  beforeEach(() => {
+    defaultProps.onRepSelect.mockClear();
+  });
+
+  it("renders compact category pills and handles selection", async () => {
     render(
       <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
         categories={["Art", "NFT"]}
-        onRepSelect={onSelect}
         state={RepSearchState.HAVE_RESULTS}
-        minSearchLength={3}
-        maxSearchLength={100}
       />
     );
 
     const buttons = screen.getAllByRole("button");
     expect(buttons).toHaveLength(2);
-    await userEvent.click(buttons[1]);
-    expect(onSelect).toHaveBeenCalledWith("NFT");
+    await userEvent.click(buttons[1]!);
+    expect(defaultProps.onRepSelect).toHaveBeenCalledWith("NFT");
   });
 
-  it("shows error messages for min and max length", () => {
-    const { rerender } = render(
+  it("distinguishes the exact submission category from its look-alikes", () => {
+    render(
       <UserPageRepNewRepSearchDropdown
-        categories={[]}
-        onRepSelect={() => {}}
-        state={RepSearchState.MIN_LENGTH_ERROR}
-        minSearchLength={3}
-        maxSearchLength={10}
+        {...defaultProps}
+        categories={["MemesNominee", "Memes Nominee"]}
+        state={RepSearchState.HAVE_RESULTS}
       />
     );
-    expect(screen.getByText("Type at least 3 characters")).toBeInTheDocument();
+
+    expect(screen.getByText("Counts for submissions")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "MemesNominee Counts for submissions",
+      })
+    ).toHaveClass(
+      "tw-border-emerald-500/30",
+      "tw-bg-emerald-500/10",
+      "tw-text-white"
+    );
+    expect(
+      screen.getByRole("button", { name: "Memes Nominee" })
+    ).not.toHaveClass("tw-border-emerald-500/30", "tw-bg-emerald-500/10");
+    expect(screen.getByRole("button", { name: "Memes Nominee" })).toHaveClass(
+      "tw-bg-transparent",
+      "tw-text-iron-300"
+    );
+  });
+
+  it("shows minimum, maximum, and loading states", () => {
+    const { rerender } = render(
+      <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
+        categories={[]}
+        state={RepSearchState.MIN_LENGTH_ERROR}
+      />
+    );
+    expect(screen.getByText("Type at least 3 characters.")).toBeInTheDocument();
 
     rerender(
       <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
         categories={[]}
-        onRepSelect={() => {}}
         state={RepSearchState.MAX_LENGTH_ERROR}
-        minSearchLength={3}
-        maxSearchLength={10}
       />
     );
-    expect(screen.getByText("Type at most 10 characters")).toBeInTheDocument();
+    expect(
+      screen.getByText("Type at most 100 characters.")
+    ).toBeInTheDocument();
+
+    rerender(
+      <UserPageRepNewRepSearchDropdown
+        {...defaultProps}
+        categories={[]}
+        state={RepSearchState.LOADING}
+      />
+    );
+    expect(
+      screen.getByText("Finding existing categories...")
+    ).toBeInTheDocument();
   });
 });

@@ -1,0 +1,90 @@
+import { getAppEnvironment } from "@/config/appEnvironment";
+
+describe("getAppEnvironment", () => {
+  it.each(["https://6529.io", "https://www.6529.io"])(
+    "treats %s as production",
+    (baseEndpoint) => {
+      expect(getAppEnvironment(baseEndpoint)).toEqual({
+        hostname: new URL(baseEndpoint).hostname,
+        host: new URL(baseEndpoint).host,
+        isProduction: true,
+        title: "6529.io",
+        badge: null,
+        favicon: "/favicon.svg",
+        faviconFallback: "/favicon.png",
+      });
+    }
+  );
+
+  it.each(["", "not-a-url"])(
+    "falls back to production identity for invalid endpoint %p",
+    (baseEndpoint) => {
+      expect(getAppEnvironment(baseEndpoint)).toEqual({
+        hostname: "6529.io",
+        host: "6529.io",
+        isProduction: true,
+        title: "6529.io",
+        badge: null,
+        favicon: "/favicon.svg",
+        faviconFallback: "/favicon.png",
+      });
+    }
+  );
+
+  it("formats the shared staging environment", () => {
+    expect(getAppEnvironment("https://staging.6529.io")).toEqual({
+      hostname: "staging.6529.io",
+      host: "staging.6529.io",
+      isProduction: false,
+      title: "6529 Staging",
+      badge: "STG",
+      favicon: "/favicon-staging.svg",
+      faviconFallback: "/favicon-staging.png",
+    });
+  });
+
+  it.each([
+    ["prxtstaging", "6529 PRXTStaging", "PRXTSTG"],
+    ["alicestaging", "6529 ALICEStaging", "ALICESTG"],
+    ["bobstaging", "6529 BOBStaging", "BOBSTG"],
+  ])(
+    "derives personal staging identity for %s without named environment configuration",
+    (subdomain, title, badge) => {
+      expect(getAppEnvironment(`https://${subdomain}.6529.io`)).toEqual({
+        hostname: `${subdomain}.6529.io`,
+        host: `${subdomain}.6529.io`,
+        isProduction: false,
+        title,
+        badge,
+        favicon: "/favicon-alt.svg",
+        faviconFallback: "/favicon-alt.png",
+      });
+    }
+  );
+
+  it("derives other non-production environments from the first hostname label", () => {
+    expect(getAppEnvironment("https://preview.6529.io")).toEqual({
+      hostname: "preview.6529.io",
+      host: "preview.6529.io",
+      isProduction: false,
+      title: "6529 Preview",
+      badge: "PREVIEW",
+      favicon: "/favicon-alt.svg",
+      faviconFallback: "/favicon-alt.png",
+    });
+  });
+
+  it.each([
+    ["http://localhost:3001", "LCL:3001"],
+    ["http://127.0.0.1:3001", "LCL:3001"],
+    ["http://localhost", "LCL"],
+  ])("formats local environment %s", (baseEndpoint, badge) => {
+    expect(getAppEnvironment(baseEndpoint)).toMatchObject({
+      isProduction: false,
+      title: "6529 Localhost",
+      badge,
+      favicon: "/favicon-alt.svg",
+      faviconFallback: "/favicon-alt.png",
+    });
+  });
+});

@@ -1,6 +1,7 @@
 import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
+import { publicEnv } from "@/config/env";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -655,6 +656,8 @@ describe("Subscriptions report page", () => {
   it("exposes metadata", async () => {
     const metadata = await generateMetadata();
     expect(metadata.title).toEqual("Subscriptions Report | Tools");
-    expect(metadata.description).toEqual("Tools | 6529.io");
+    expect(metadata.description).toEqual(
+      `Tools | ${new URL(publicEnv.BASE_ENDPOINT).hostname}`
+    );
   });
 });

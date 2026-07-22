@@ -68,6 +68,10 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
     // Compose config
     const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
+    const developmentDistDir =
+      phase === PHASE_DEVELOPMENT_SERVER
+        ? process.env["NEXT_DEV_DIST_DIR"]?.trim()
+        : undefined;
 
     // Dev-only: hosts (e.g. a LAN IP for phone testing) allowed to load
     // /_next/* dev assets; without this Next 403s them and pages render as
@@ -83,6 +87,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
       ...(phase === PHASE_DEVELOPMENT_SERVER && allowedDevOrigins?.length
         ? { allowedDevOrigins }
         : {}),
+      ...(developmentDistDir ? { distDir: developmentDistDir } : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,

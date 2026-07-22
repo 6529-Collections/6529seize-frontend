@@ -32,7 +32,83 @@ permissions: {}
 run-name: Canary frontend base ${{ inputs.base_sha }} [${{ inputs.operation_key }}]
 
 jobs:
+  build_profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Validate profile inputs before using credentials
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$BASE_SHA" = "$EXPECTED_SHA"
+      - &checkout
+        name: Check out exact frontend base
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git init .
+          git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+      - &setup-node
+        name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with: { node-version: "22" }
+      - name: Derive protected staging build profile
+        env:
+          RELEASE_BUS_BUILD_PROFILE_HMAC_KEY: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          NODE_ENV: production
+          API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
+          WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
+          ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
+          BASE_ENDPOINT: https://staging.6529.io
+          VERSION: ${{ inputs.base_sha }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
+          MOBILE_APP_SCHEME: mobile6529
+          CORE_SCHEME: core6529
+          IPFS_API_ENDPOINT: https://api-ipfs.6529.io
+          IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+          ASSETS_FROM_S3: "false"
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          ANNOUNCED_VERSION_ENDPOINT: ""
+          BASE_SHA: ${{ inputs.base_sha }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
+            git fetch --no-tags --depth=1 origin "$WORKFLOW_SHA"
+          profile_tool="$RUNNER_TEMP/release-bus-build-profile.cjs"
+          git show "$WORKFLOW_SHA:scripts/release-bus-build-profile.cjs" > "$profile_tool"
+          node "$profile_tool" \
+            --source-sha "$BASE_SHA" \
+            --environment staging \
+            --output "$RUNNER_TEMP/release-bus-build-profile.json"
+      - name: Upload protected build profile
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-bus-build-profile-${{ github.run_id }}
+          path: ${{ runner.temp }}/release-bus-build-profile.json
+          if-no-files-found: error
+          retention-days: 14
+
   authorize:
+    needs: build_profile
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -45,6 +121,7 @@ jobs:
       workflow_digest: ${{ steps.fingerprint.outputs.workflow_digest }}
       evidence_environment: ${{ steps.fingerprint.outputs.evidence_environment }}
       package_manager: ${{ steps.fingerprint.outputs.package_manager }}
+      build_profile_digest: ${{ steps.build-profile.outputs.digest }}
     steps:
       - name: Validate immutable inputs
         id: inputs
@@ -80,11 +157,12 @@ jobs:
               --arg base_sha "$BASE_SHA" \
               --arg workflow_sha "$GITHUB_SHA" \
               'type == "object" and
-               .schema_version == 1 and
+               .schema_version == 2 and
                .repository == "frontend" and
                .environment == "orchestration" and
                .base_sha == $base_sha and
                .workflow_sha == $workflow_sha and
+               (.build_profile_digest | test("^[a-f0-9]{64}$")) and
                .node_version == "22" and
                (.gate_mode | IN("legacy", "shadow", "sharded")) and
                (.shard_count | IN(1, 2, 4))' \
@@ -107,22 +185,32 @@ jobs:
             echo "shard_count=$FRONTEND_GATE_SHARD_COUNT"
             echo "shard_matrix=$shard_matrix"
           } >> "$GITHUB_OUTPUT"
-      - &checkout
-        name: Check out exact frontend base
+      - *checkout
+      - *setup-node
+      - name: Download protected build profile
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release-bus-build-profile-${{ github.run_id }}
+          path: ${{ runner.temp }}/protected-build-profile
+      - name: Verify protected staging build profile
+        id: build-profile
         env:
           BASE_SHA: ${{ inputs.base_sha }}
         run: |
           set -euo pipefail
-          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          git init .
-          git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
-          git fetch --no-tags origin "$BASE_SHA"
-          git checkout --detach "$BASE_SHA"
-          test "$(git rev-parse HEAD)" = "$BASE_SHA"
-      - &setup-node
-        name: Install Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with: { node-version: "22" }
+          profile="$RUNNER_TEMP/protected-build-profile/release-bus-build-profile.json"
+          jq -e \
+            --arg source_sha "$BASE_SHA" \
+            'type == "object" and
+             .schema_version == 1 and
+             .kind == "release_bus_frontend_build_profile" and
+             .environment == "staging" and
+             .source_sha == $source_sha and
+             .node_version == "22" and
+             .timestamp_policy == "utc_workflow_run_start_seconds" and
+             (.digest | test("^[a-f0-9]{64}$"))' \
+            "$profile" >/dev/null
+          echo "digest=$(jq -r '.digest' "$profile")" >> "$GITHUB_OUTPUT"
       - name: Derive and verify immutable gate fingerprint
         id: fingerprint
         env:
@@ -130,12 +218,13 @@ jobs:
           GATE_CONTRACT_INPUT: ${{ inputs.gate_contract }}
           GATE_MODE: ${{ steps.inputs.outputs.gate_mode }}
           SHARD_COUNT: ${{ steps.inputs.outputs.shard_count }}
+          BUILD_PROFILE_DIGEST: ${{ steps.build-profile.outputs.digest }}
           WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
           git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
-            git fetch --no-tags origin "$WORKFLOW_SHA"
+            git fetch --no-tags --depth=1 origin "$WORKFLOW_SHA"
           evidence_tool="$RUNNER_TEMP/release-bus-gate-evidence.cjs"
           contract="$RUNNER_TEMP/release-bus-gate-contract.json"
           git show "$WORKFLOW_SHA:scripts/release-bus-gate-evidence.cjs" > "$evidence_tool"
@@ -145,6 +234,7 @@ jobs:
             --workflow-sha "$WORKFLOW_SHA" \
             --mode "$GATE_MODE" \
             --shard-count "$SHARD_COUNT" \
+            --build-profile-digest "$BUILD_PROFILE_DIGEST" \
             --output "$contract"
           gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
           behavior_digest="$(jq -r '.behavior_digest' "$contract")"
@@ -154,6 +244,7 @@ jobs:
             test "$(jq -r '.gate_fingerprint' <<< "$GATE_CONTRACT_INPUT")" = "$gate_fingerprint"
             test "$(jq -r '.workflow_digest' <<< "$GATE_CONTRACT_INPUT")" = "$workflow_digest"
             test "$(jq -r '.package_manager' <<< "$GATE_CONTRACT_INPUT")" = "$package_manager"
+            test "$(jq -r '.build_profile_digest' <<< "$GATE_CONTRACT_INPUT")" = "$BUILD_PROFILE_DIGEST"
           fi
           {
             echo "gate_fingerprint=$gate_fingerprint"
@@ -209,12 +300,14 @@ jobs:
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$WORKFLOW_DIGEST" =~ ^[a-f0-9]{64}$ ]]
           git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
-            git fetch --no-tags origin "$WORKFLOW_SHA"
+            git fetch --no-tags --depth=1 origin "$WORKFLOW_SHA"
           tooling="$RUNNER_TEMP/release-bus-tooling/scripts"
           mkdir -p "$tooling"
           for file in \
             scripts/release-bus-frontend-gate.sh \
+            scripts/release-bus-build-profile.cjs \
             scripts/release-bus-gate-evidence.cjs \
+            scripts/release-bus-install-dependencies.cjs \
             scripts/release-bus-report-progress.mjs
           do
             git show "$WORKFLOW_SHA:$file" > "$RUNNER_TEMP/release-bus-tooling/$file"
@@ -223,6 +316,7 @@ jobs:
           {
             echo "RELEASE_BUS_GATE_TOOL=$tooling/release-bus-frontend-gate.sh"
             echo "RELEASE_BUS_EVIDENCE_TOOL=$tooling/release-bus-gate-evidence.cjs"
+            echo "RELEASE_BUS_INSTALL_TOOL=$tooling/release-bus-install-dependencies.cjs"
             echo "RELEASE_BUS_REPORT_TOOL=$tooling/release-bus-report-progress.mjs"
             echo "RELEASE_BUS_BASE_SHA=$BASE_SHA"
             echo "RELEASE_BUS_EVIDENCE_ENVIRONMENT=$EVIDENCE_ENVIRONMENT"
@@ -231,6 +325,7 @@ jobs:
             echo "RELEASE_BUS_WORKFLOW_DIGEST=$WORKFLOW_DIGEST"
             echo "RELEASE_BUS_NODE_VERSION=22"
             echo "RELEASE_BUS_PACKAGE_MANAGER=$PACKAGE_MANAGER"
+            echo "RELEASE_BUS_BUILD_PROFILE_DIGEST=${{ needs.authorize.outputs.build_profile_digest }}"
           } >> "$GITHUB_ENV"
       - *setup-node
       - &activate-pnpm
@@ -241,39 +336,47 @@ jobs:
       - &socket-firewall
         name: Install Socket Firewall
         id: socket-firewall
+        continue-on-error: true
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with: { mode: firewall }
       - &install
-        name: Install frozen dependencies
+        name: Install and verify frozen dependencies
         env:
+          RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket-firewall.outcome }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: node "$RELEASE_BUS_INSTALL_TOOL"
+      - &capture-build-timestamp
+        name: Capture build timestamp
+        run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
       - name: Run authoritative serial gate
         id: gate
         continue-on-error: true
         env: &build-env
           NODE_ENV: production
-          API_ENDPOINT: https://api.staging.6529.io
-          WS_ENDPOINT: wss://ws.staging.6529.io
-          ALLOWLIST_API_ENDPOINT: https://allowlist-api.staging.6529.io
+          API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
+          WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
+          ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
           BASE_ENDPOINT: https://staging.6529.io
           VERSION: ${{ inputs.base_sha }}
-          VERSION_BUILD_TIMESTAMP: "1970-01-01T00:00:00Z"
-          ALCHEMY_API_KEY: canary
-          NEXTGEN_CHAIN_ID: "11155111"
+          VERSION_BUILD_TIMESTAMP: ${{ env.VERSION_BUILD_TIMESTAMP }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
           MOBILE_APP_SCHEME: mobile6529
           CORE_SCHEME: core6529
           IPFS_API_ENDPOINT: https://api-ipfs.6529.io
           IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
-          GIPHY_API_KEY: release-bus-canary
-          AWS_RUM_APP_ID: release-bus-canary
-          AWS_RUM_REGION: us-east-1
-          AWS_RUM_SAMPLE_RATE: "0"
-          NEXT_PUBLIC_MIXPANEL_TOKEN: release-bus-canary
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
           ASSETS_FROM_S3: "false"
-          SENTRY_AUTH_TOKEN: ""
-          SENTRY_DSN: ""
-        run: RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" serial "$RUNNER_TEMP/release-bus-evidence"
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          ANNOUNCED_VERSION_ENDPOINT: ""
+        run: |
+          unset ANNOUNCED_VERSION_ENDPOINT
+          RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" serial "$RUNNER_TEMP/release-bus-evidence"
       - &source-mutation
         name: Verify gate did not mutate source
         id: source-mutation
@@ -376,11 +479,14 @@ jobs:
       - *activate-pnpm
       - *socket-firewall
       - *install
+      - *capture-build-timestamp
       - name: Run production build
         id: gate
         continue-on-error: true
         env: *build-env
-        run: RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" phase build "$RUNNER_TEMP/release-bus-evidence"
+        run: |
+          unset ANNOUNCED_VERSION_ENDPOINT
+          RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" phase build "$RUNNER_TEMP/release-bus-evidence"
       - *source-mutation
       - name: Upload build evidence
         if: always()
@@ -493,8 +599,6 @@ jobs:
       - *stage-tooling
       - *setup-node
       - *activate-pnpm
-      - *socket-firewall
-      - *install
       - name: Download all gate evidence
         id: evidence-download
         continue-on-error: true
@@ -529,6 +633,7 @@ jobs:
           MUTATION_RESULT: ${{ steps.source-mutation.outcome }}
           PASSED_GATE_FINGERPRINT: ${{ needs.authorize.outputs.gate_fingerprint }}
           PASSED_BEHAVIOR_DIGEST: ${{ needs.authorize.outputs.behavior_digest }}
+          BUILD_PROFILE_DIGEST: ${{ needs.authorize.outputs.build_profile_digest }}
           PASSED_PACKAGE_MANAGER: ${{ needs.authorize.outputs.package_manager }}
           PASSED_WORKFLOW_DIGEST: ${{ needs.authorize.outputs.workflow_digest }}
           TYPECHECK_RESULT: ${{ needs.typecheck.result }}
@@ -542,6 +647,7 @@ jobs:
             --workflow-sha "${{ needs.authorize.outputs.workflow_sha }}" \
             --mode "${{ needs.authorize.outputs.gate_mode }}" \
             --shard-count "${{ needs.authorize.outputs.shard_count }}" \
+            --build-profile-digest "$BUILD_PROFILE_DIGEST" \
             --output "$contract"
           gate_fingerprint="$(jq -r '.gate_fingerprint' "$contract")"
           behavior_digest="$(jq -r '.behavior_digest' "$contract")"
@@ -574,6 +680,7 @@ jobs:
             --workflow-digest "$workflow_digest" \
             --node-version "22" \
             --package-manager "$package_manager" \
+            --build-profile-digest "$BUILD_PROFILE_DIGEST" \
             --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --jobs-file "$RUNNER_TEMP/release-bus-jobs.json" \
             --artifact-name "release-bus-base-canary-summary-$GITHUB_RUN_ID" \

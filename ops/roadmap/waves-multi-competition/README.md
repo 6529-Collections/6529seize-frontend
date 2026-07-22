@@ -300,7 +300,7 @@ Update this table and the phase's tracking section together.
 | Phase | Milestone | Status | User-visible impact |
 | --- | --- | --- | --- |
 | [0](./phase-0-contract-and-baseline.md) | Contract and baseline | Complete | None |
-| [1](./phase-1-additive-backend-foundation.md) | Additive backend foundation | Not started | None |
+| [1](./phase-1-additive-backend-foundation.md) | Additive backend foundation | In progress | None |
 | [2](./phase-2-frontend-competition-context.md) | Frontend competition context | Not started | No intended visual change |
 | [3](./phase-3-separate-creation-flows.md) | Separate hub and competition creation | Not started | New creation/admin flow behind rollout controls |
 | [4](./phase-4-native-competition-runtime.md) | Native competition execution | Not started | Multiple competitions become operational for cohorts |
