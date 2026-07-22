@@ -14,6 +14,19 @@ describe("getAppEnvironment", () => {
     }
   );
 
+  it.each(["", "not-a-url"])(
+    "falls back to production identity for invalid endpoint %p",
+    (baseEndpoint) => {
+      expect(getAppEnvironment(baseEndpoint)).toEqual({
+        hostname: "6529.io",
+        isProduction: true,
+        title: "6529.io",
+        badge: null,
+        favicon: "/favicon.ico",
+      });
+    }
+  );
+
   it("formats the shared staging environment", () => {
     expect(getAppEnvironment("https://staging.6529.io")).toEqual({
       hostname: "staging.6529.io",

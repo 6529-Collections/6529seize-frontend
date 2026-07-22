@@ -1,4 +1,5 @@
 const PRODUCTION_HOSTNAMES = new Set(["6529.io", "www.6529.io"]);
+// Only loopback hosts are treated as local; custom aliases remain visibly non-production.
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1"]);
 const STAGING_SUFFIX = "staging";
 
@@ -9,6 +10,14 @@ interface AppEnvironment {
   readonly badge: string | null;
   readonly favicon: string;
 }
+
+const PRODUCTION_ENVIRONMENT: AppEnvironment = {
+  hostname: "6529.io",
+  isProduction: true,
+  title: "6529.io",
+  badge: null,
+  favicon: "/favicon.ico",
+};
 
 function getEnvironmentName(firstLabel: string): string {
   const normalizedLabel = firstLabel.toLowerCase();
@@ -23,14 +32,14 @@ function getEnvironmentName(firstLabel: string): string {
 
 function getEnvironmentBadge({
   firstLabel,
-  hostname,
+  isLocal,
   port,
 }: {
   readonly firstLabel: string;
-  readonly hostname: string;
+  readonly isLocal: boolean;
   readonly port: string;
 }): string {
-  if (LOCAL_HOSTNAMES.has(hostname)) {
+  if (isLocal) {
     return port ? `LOCAL:${port}` : "LOCAL";
   }
 
@@ -43,12 +52,33 @@ function getEnvironmentBadge({
   return normalizedLabel.toUpperCase();
 }
 
+function getFavicon(hostname: string, isProduction: boolean): string {
+  // The dedicated staging artwork belongs only to the shared staging host.
+  // Personal and future non-production hosts intentionally use the alt icon.
+  if (hostname === "staging.6529.io") {
+    return "/favicon-staging.ico";
+  }
+
+  if (isProduction) {
+    return "/favicon.ico";
+  }
+
+  return "/favicon-alt.ico";
+}
+
 export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
-  const url = new URL(baseEndpoint);
+  let url: URL;
+  try {
+    url = new URL(baseEndpoint);
+  } catch {
+    return PRODUCTION_ENVIRONMENT;
+  }
+
   const hostname = url.hostname.toLowerCase();
   const isProduction = PRODUCTION_HOSTNAMES.has(hostname);
+  const isLocal = LOCAL_HOSTNAMES.has(hostname);
   const firstLabel = hostname.split(".")[0] ?? hostname;
-  const environmentName = LOCAL_HOSTNAMES.has(hostname)
+  const environmentName = isLocal
     ? "Localhost"
     : getEnvironmentName(firstLabel);
 
@@ -60,14 +90,9 @@ export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
       ? null
       : getEnvironmentBadge({
           firstLabel,
-          hostname,
+          isLocal,
           port: url.port,
         }),
-    favicon:
-      hostname === "staging.6529.io"
-        ? "/favicon-staging.ico"
-        : isProduction
-          ? "/favicon.ico"
-          : "/favicon-alt.ico",
+    favicon: getFavicon(hostname, isProduction),
   };
 }

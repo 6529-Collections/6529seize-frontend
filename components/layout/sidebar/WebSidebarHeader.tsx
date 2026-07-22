@@ -27,10 +27,10 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
           width={40}
           height={40}
         />
-        <div className="tw-absolute tw-left-1/2 tw-top-9 tw-flex -tw-translate-x-1/2 tw-justify-center">
-          <EnvironmentBadge compact />
-        </div>
       </Link>
+      <div className="tw-pointer-events-none tw-absolute tw-left-10 tw-top-11 tw-flex -tw-translate-x-1/2 tw-justify-center">
+        <EnvironmentBadge compact />
+      </div>
       <button
         type="button"
         onClick={onToggle}
