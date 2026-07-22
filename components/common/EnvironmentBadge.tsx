@@ -8,7 +8,7 @@ interface EnvironmentBadgeProps {
 export default function EnvironmentBadge({
   compact = false,
 }: EnvironmentBadgeProps) {
-  const { badge } = getAppEnvironment(publicEnv.BASE_ENDPOINT);
+  const { badge, host } = getAppEnvironment(publicEnv.BASE_ENDPOINT);
 
   if (!badge) {
     return null;
@@ -16,8 +16,8 @@ export default function EnvironmentBadge({
 
   return (
     <span
-      aria-label={`Environment: ${badge}`}
-      title={`Environment: ${badge}`}
+      aria-label={`Environment: ${badge} (${host})`}
+      title={`Environment: ${host}`}
       className={`tw-inline-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-1 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-500/10 tw-font-mono tw-text-xs tw-font-semibold tw-leading-none tw-text-amber-200 ${
         compact
           ? "tw-max-w-[4.75rem] tw-px-0.5 tw-py-1"

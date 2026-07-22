@@ -22,9 +22,11 @@ describe("EnvironmentBadge", () => {
 
     render(<EnvironmentBadge compact />);
 
-    expect(screen.getByLabelText("Environment: ALICESTG")).toHaveTextContent(
-      "ALICESTG"
+    const badge = screen.getByLabelText(
+      "Environment: ALICESTG (alicestaging.6529.io)"
     );
+    expect(badge).toHaveTextContent("ALICESTG");
+    expect(badge).toHaveAttribute("title", "Environment: alicestaging.6529.io");
   });
 
   it("includes the local port", () => {
@@ -32,8 +34,10 @@ describe("EnvironmentBadge", () => {
 
     render(<EnvironmentBadge />);
 
-    expect(screen.getByLabelText("Environment: LOCAL:3001")).toHaveTextContent(
-      "LOCAL:3001"
+    const badge = screen.getByLabelText(
+      "Environment: LCL:3001 (localhost:3001)"
     );
+    expect(badge).toHaveTextContent("LCL:3001");
+    expect(badge).toHaveAttribute("title", "Environment: localhost:3001");
   });
 });

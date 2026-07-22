@@ -5,6 +5,7 @@ const STAGING_SUFFIX = "staging";
 
 interface AppEnvironment {
   readonly hostname: string;
+  readonly host: string;
   readonly isProduction: boolean;
   readonly title: string;
   readonly badge: string | null;
@@ -13,6 +14,7 @@ interface AppEnvironment {
 
 const PRODUCTION_ENVIRONMENT: AppEnvironment = {
   hostname: "6529.io",
+  host: "6529.io",
   isProduction: true,
   title: "6529.io",
   badge: null,
@@ -40,7 +42,7 @@ function getEnvironmentBadge({
   readonly port: string;
 }): string {
   if (isLocal) {
-    return port ? `LOCAL:${port}` : "LOCAL";
+    return port ? `LCL:${port}` : "LCL";
   }
 
   const normalizedLabel = firstLabel.toLowerCase();
@@ -75,6 +77,7 @@ export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
   }
 
   const hostname = url.hostname.toLowerCase();
+  const host = url.host.toLowerCase();
   const isProduction = PRODUCTION_HOSTNAMES.has(hostname);
   const isLocal = LOCAL_HOSTNAMES.has(hostname);
   const firstLabel = hostname.split(".")[0] ?? hostname;
@@ -84,6 +87,7 @@ export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
 
   return {
     hostname,
+    host,
     isProduction,
     title: isProduction ? "6529.io" : `6529 ${environmentName}`,
     badge: isProduction

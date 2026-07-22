@@ -6,6 +6,7 @@ describe("getAppEnvironment", () => {
     (baseEndpoint) => {
       expect(getAppEnvironment(baseEndpoint)).toEqual({
         hostname: new URL(baseEndpoint).hostname,
+        host: new URL(baseEndpoint).host,
         isProduction: true,
         title: "6529.io",
         badge: null,
@@ -19,6 +20,7 @@ describe("getAppEnvironment", () => {
     (baseEndpoint) => {
       expect(getAppEnvironment(baseEndpoint)).toEqual({
         hostname: "6529.io",
+        host: "6529.io",
         isProduction: true,
         title: "6529.io",
         badge: null,
@@ -30,6 +32,7 @@ describe("getAppEnvironment", () => {
   it("formats the shared staging environment", () => {
     expect(getAppEnvironment("https://staging.6529.io")).toEqual({
       hostname: "staging.6529.io",
+      host: "staging.6529.io",
       isProduction: false,
       title: "6529 Staging",
       badge: "STG",
@@ -46,6 +49,7 @@ describe("getAppEnvironment", () => {
     (subdomain, title, badge) => {
       expect(getAppEnvironment(`https://${subdomain}.6529.io`)).toEqual({
         hostname: `${subdomain}.6529.io`,
+        host: `${subdomain}.6529.io`,
         isProduction: false,
         title,
         badge,
@@ -57,6 +61,7 @@ describe("getAppEnvironment", () => {
   it("derives other non-production environments from the first hostname label", () => {
     expect(getAppEnvironment("https://preview.6529.io")).toEqual({
       hostname: "preview.6529.io",
+      host: "preview.6529.io",
       isProduction: false,
       title: "6529 Preview",
       badge: "PREVIEW",
@@ -65,9 +70,9 @@ describe("getAppEnvironment", () => {
   });
 
   it.each([
-    ["http://localhost:3001", "LOCAL:3001"],
-    ["http://127.0.0.1:3001", "LOCAL:3001"],
-    ["http://localhost", "LOCAL"],
+    ["http://localhost:3001", "LCL:3001"],
+    ["http://127.0.0.1:3001", "LCL:3001"],
+    ["http://localhost", "LCL"],
   ])("formats local environment %s", (baseEndpoint, badge) => {
     expect(getAppEnvironment(baseEndpoint)).toMatchObject({
       isProduction: false,
