@@ -735,7 +735,7 @@ export default function GlobalRepCategoryWaveScope({
 
   return (
     <div className="rep-category-wave-content tw-flex tw-flex-col tw-gap-5">
-      <div className="rep-category-metrics rep-category-wave-metrics tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3">
+      <div className="rep-category-metrics rep-category-wave-metrics tw-grid tw-w-full tw-max-w-xl tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3">
         <MetricTile
           label={t(REP_CATEGORY_LOCALE, "rep.categories.wave.metrics.rep")}
           value={overview.total_rep}

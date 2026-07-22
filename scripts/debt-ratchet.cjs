@@ -540,45 +540,6 @@ function getCountStatus(baselineCount, actualCount) {
   return "ok";
 }
 
-function countOversizedGroups(files, wordpressMigratedFiles) {
-  let wordpress = 0;
-  for (const file of files) {
-    if (wordpressMigratedFiles.has(file)) wordpress += 1;
-  }
-  return {
-    app: files.length - wordpress,
-    wordpress,
-  };
-}
-
-function buildOversizedBreakdownRows(baseline, actuals) {
-  const baselineGroups = countOversizedGroups(
-    baseline.oversized_file_allowlist ?? [],
-    actuals.wordpressMigratedFiles
-  );
-  const actualGroups = countOversizedGroups(
-    actuals.oversizedFiles,
-    actuals.wordpressMigratedFiles
-  );
-
-  return [
-    {
-      metric: "  breakdown:",
-      kind: "label",
-    },
-    {
-      metric: "    app_source",
-      baseline: baselineGroups.app,
-      actual: actualGroups.app,
-    },
-    {
-      metric: "    wp_migrated",
-      baseline: baselineGroups.wordpress,
-      actual: actualGroups.wordpress,
-    },
-  ];
-}
-
 function getReportColumnWidths(rows) {
   const dataRows = rows.filter((row) => row.kind !== "label");
   const maxWidth = (selectValue) =>
@@ -664,10 +625,7 @@ function runCheck() {
 
   console.log("Debt ratchet report");
   console.log("===================");
-  const oversizedBreakdownRows = buildOversizedBreakdownRows(baseline, actuals);
-  const reportRows = rows.flatMap((row) =>
-    row.metric === "oversized_files" ? [row, ...oversizedBreakdownRows] : [row]
-  );
+  const reportRows = rows;
   const reportColumnWidths = getReportColumnWidths(reportRows);
   for (const row of reportRows) {
     console.log(formatReportRow(row, reportColumnWidths));

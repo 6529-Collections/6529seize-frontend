@@ -23,6 +23,9 @@ export default function GrantRepDialog({
       onClose={onClose}
       tabletModal
       maxWidthClass="md:tw-max-w-md"
+      headerClassName="-tw-mt-2 tw-mb-4"
+      headerCloseButtonClassName="!tw-mr-0 !tw-h-9 !tw-w-9 !tw-rounded-lg !tw-p-0 [&_svg]:!tw-h-5 [&_svg]:!tw-w-5"
+      mobileCloseButtonClassName="!tw-rounded-lg [&_svg]:!tw-h-5 [&_svg]:!tw-w-5"
     >
       <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
         <UserPageRepNewRep

@@ -55,6 +55,40 @@ export * from '../models/ApiCommunityMetric';
 export * from '../models/ApiCommunityMetricSample';
 export * from '../models/ApiCommunityMetrics';
 export * from '../models/ApiCommunityMetricsSeries';
+export * from '../models/ApiCompetition';
+export * from '../models/ApiCompetitionCapability';
+export * from '../models/ApiCompetitionComputedPhase';
+export * from '../models/ApiCompetitionConfigVersion';
+export * from '../models/ApiCompetitionConfigVersionPage';
+export * from '../models/ApiCompetitionDecision';
+export * from '../models/ApiCompetitionDecisionConfig';
+export * from '../models/ApiCompetitionDecisionPage';
+export * from '../models/ApiCompetitionDecisionStatus';
+export * from '../models/ApiCompetitionDecisionWinner';
+export * from '../models/ApiCompetitionDistributionItem';
+export * from '../models/ApiCompetitionDistributionItemPage';
+export * from '../models/ApiCompetitionEntry';
+export * from '../models/ApiCompetitionEntryPage';
+export * from '../models/ApiCompetitionEntryStatus';
+export * from '../models/ApiCompetitionEntryVote';
+export * from '../models/ApiCompetitionEntryVotePage';
+export * from '../models/ApiCompetitionError';
+export * from '../models/ApiCompetitionLeaderboardEntry';
+export * from '../models/ApiCompetitionLeaderboardPage';
+export * from '../models/ApiCompetitionLifecycle';
+export * from '../models/ApiCompetitionOutcome';
+export * from '../models/ApiCompetitionOutcomePage';
+export * from '../models/ApiCompetitionPage';
+export * from '../models/ApiCompetitionParticipationConfig';
+export * from '../models/ApiCompetitionPause';
+export * from '../models/ApiCompetitionPausePage';
+export * from '../models/ApiCompetitionPermissions';
+export * from '../models/ApiCompetitionSortDirection';
+export * from '../models/ApiCompetitionType';
+export * from '../models/ApiCompetitionVoter';
+export * from '../models/ApiCompetitionVoterPage';
+export * from '../models/ApiCompetitionVotingConfig';
+export * from '../models/ApiCompetitionWinnerConfig';
 export * from '../models/ApiCompleteAttachmentMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequestPart';
@@ -440,6 +474,9 @@ export * from '../models/ApiWaveScoreVisibilityComponentWeights';
 export * from '../models/ApiWaveSubscriptionActions';
 export * from '../models/ApiWaveSubscriptionTargetAction';
 export * from '../models/ApiWaveType';
+export * from '../models/ApiWaveV3';
+export * from '../models/ApiWaveV3Capabilities';
+export * from '../models/ApiWaveV3Permissions';
 export * from '../models/ApiWaveVisibilityConfig';
 export * from '../models/ApiWaveVisibilityTier';
 export * from '../models/ApiWaveVoter';
@@ -574,6 +611,40 @@ import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
 import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
 import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
 import { ApiCommunityMetricsSeries } from '../models/ApiCommunityMetricsSeries';
+import { ApiCompetition                      } from '../models/ApiCompetition';
+import { ApiCompetitionCapability } from '../models/ApiCompetitionCapability';
+import { ApiCompetitionComputedPhase } from '../models/ApiCompetitionComputedPhase';
+import { ApiCompetitionConfigVersion } from '../models/ApiCompetitionConfigVersion';
+import { ApiCompetitionConfigVersionPage } from '../models/ApiCompetitionConfigVersionPage';
+import { ApiCompetitionDecision       } from '../models/ApiCompetitionDecision';
+import { ApiCompetitionDecisionConfig } from '../models/ApiCompetitionDecisionConfig';
+import { ApiCompetitionDecisionPage } from '../models/ApiCompetitionDecisionPage';
+import { ApiCompetitionDecisionStatus } from '../models/ApiCompetitionDecisionStatus';
+import { ApiCompetitionDecisionWinner } from '../models/ApiCompetitionDecisionWinner';
+import { ApiCompetitionDistributionItem } from '../models/ApiCompetitionDistributionItem';
+import { ApiCompetitionDistributionItemPage } from '../models/ApiCompetitionDistributionItemPage';
+import { ApiCompetitionEntry            } from '../models/ApiCompetitionEntry';
+import { ApiCompetitionEntryPage } from '../models/ApiCompetitionEntryPage';
+import { ApiCompetitionEntryStatus } from '../models/ApiCompetitionEntryStatus';
+import { ApiCompetitionEntryVote } from '../models/ApiCompetitionEntryVote';
+import { ApiCompetitionEntryVotePage } from '../models/ApiCompetitionEntryVotePage';
+import { ApiCompetitionError } from '../models/ApiCompetitionError';
+import { ApiCompetitionLeaderboardEntry } from '../models/ApiCompetitionLeaderboardEntry';
+import { ApiCompetitionLeaderboardPage } from '../models/ApiCompetitionLeaderboardPage';
+import { ApiCompetitionLifecycle } from '../models/ApiCompetitionLifecycle';
+import { ApiCompetitionOutcome } from '../models/ApiCompetitionOutcome';
+import { ApiCompetitionOutcomePage } from '../models/ApiCompetitionOutcomePage';
+import { ApiCompetitionPage } from '../models/ApiCompetitionPage';
+import { ApiCompetitionParticipationConfig    , ApiCompetitionParticipationConfigRequiredMediaEnum         } from '../models/ApiCompetitionParticipationConfig';
+import { ApiCompetitionPause } from '../models/ApiCompetitionPause';
+import { ApiCompetitionPausePage } from '../models/ApiCompetitionPausePage';
+import { ApiCompetitionPermissions } from '../models/ApiCompetitionPermissions';
+import { ApiCompetitionSortDirection } from '../models/ApiCompetitionSortDirection';
+import { ApiCompetitionType } from '../models/ApiCompetitionType';
+import { ApiCompetitionVoter } from '../models/ApiCompetitionVoter';
+import { ApiCompetitionVoterPage } from '../models/ApiCompetitionVoterPage';
+import { ApiCompetitionVotingConfig } from '../models/ApiCompetitionVotingConfig';
+import { ApiCompetitionWinnerConfig } from '../models/ApiCompetitionWinnerConfig';
 import { ApiCompleteAttachmentMultipartUploadRequest } from '../models/ApiCompleteAttachmentMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
@@ -959,6 +1030,9 @@ import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVi
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
+import { ApiWaveV3 } from '../models/ApiWaveV3';
+import { ApiWaveV3Capabilities } from '../models/ApiWaveV3Capabilities';
+import { ApiWaveV3Permissions } from '../models/ApiWaveV3Permissions';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
 import { ApiWaveVisibilityTier } from '../models/ApiWaveVisibilityTier';
 import { ApiWaveVoter } from '../models/ApiWaveVoter';
@@ -1061,6 +1135,14 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCmsAgentPatchOperationOpEnum",
     "ApiCmsAgentPatchProvenanceAuthorTypeEnum",
     "ApiCommunityMembersSortOption",
+    "ApiCompetitionCapability",
+    "ApiCompetitionComputedPhase",
+    "ApiCompetitionDecisionStatus",
+    "ApiCompetitionEntryStatus",
+    "ApiCompetitionLifecycle",
+    "ApiCompetitionParticipationConfigRequiredMediaEnum",
+    "ApiCompetitionSortDirection",
+    "ApiCompetitionType",
     "ApiConsolidatedTdhMetricsCollector",
     "ApiConsolidatedTdhMetricsContent",
     "ApiConsolidatedTdhMetricsSort",
@@ -1208,6 +1290,33 @@ let typeMap: {[index: string]: any} = {
     "ApiCommunityMetricSample": ApiCommunityMetricSample,
     "ApiCommunityMetrics": ApiCommunityMetrics,
     "ApiCommunityMetricsSeries": ApiCommunityMetricsSeries,
+    "ApiCompetition": ApiCompetition,
+    "ApiCompetitionConfigVersion": ApiCompetitionConfigVersion,
+    "ApiCompetitionConfigVersionPage": ApiCompetitionConfigVersionPage,
+    "ApiCompetitionDecision": ApiCompetitionDecision,
+    "ApiCompetitionDecisionConfig": ApiCompetitionDecisionConfig,
+    "ApiCompetitionDecisionPage": ApiCompetitionDecisionPage,
+    "ApiCompetitionDecisionWinner": ApiCompetitionDecisionWinner,
+    "ApiCompetitionDistributionItem": ApiCompetitionDistributionItem,
+    "ApiCompetitionDistributionItemPage": ApiCompetitionDistributionItemPage,
+    "ApiCompetitionEntry": ApiCompetitionEntry,
+    "ApiCompetitionEntryPage": ApiCompetitionEntryPage,
+    "ApiCompetitionEntryVote": ApiCompetitionEntryVote,
+    "ApiCompetitionEntryVotePage": ApiCompetitionEntryVotePage,
+    "ApiCompetitionError": ApiCompetitionError,
+    "ApiCompetitionLeaderboardEntry": ApiCompetitionLeaderboardEntry,
+    "ApiCompetitionLeaderboardPage": ApiCompetitionLeaderboardPage,
+    "ApiCompetitionOutcome": ApiCompetitionOutcome,
+    "ApiCompetitionOutcomePage": ApiCompetitionOutcomePage,
+    "ApiCompetitionPage": ApiCompetitionPage,
+    "ApiCompetitionParticipationConfig": ApiCompetitionParticipationConfig,
+    "ApiCompetitionPause": ApiCompetitionPause,
+    "ApiCompetitionPausePage": ApiCompetitionPausePage,
+    "ApiCompetitionPermissions": ApiCompetitionPermissions,
+    "ApiCompetitionVoter": ApiCompetitionVoter,
+    "ApiCompetitionVoterPage": ApiCompetitionVoterPage,
+    "ApiCompetitionVotingConfig": ApiCompetitionVotingConfig,
+    "ApiCompetitionWinnerConfig": ApiCompetitionWinnerConfig,
     "ApiCompleteAttachmentMultipartUploadRequest": ApiCompleteAttachmentMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequest": ApiCompleteMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequestPart": ApiCompleteMultipartUploadRequestPart,
@@ -1551,6 +1660,9 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveScoreQualityGate": ApiWaveScoreQualityGate,
     "ApiWaveScoreVisibilityComponentWeights": ApiWaveScoreVisibilityComponentWeights,
     "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,
+    "ApiWaveV3": ApiWaveV3,
+    "ApiWaveV3Capabilities": ApiWaveV3Capabilities,
+    "ApiWaveV3Permissions": ApiWaveV3Permissions,
     "ApiWaveVisibilityConfig": ApiWaveVisibilityConfig,
     "ApiWaveVoter": ApiWaveVoter,
     "ApiWaveVotersPage": ApiWaveVotersPage,

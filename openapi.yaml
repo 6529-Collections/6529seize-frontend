@@ -2,9 +2,12 @@ openapi: 3.0.3
 info:
   title: 6529.io API
   description: >-
-    This is the API interface description. Brief terminology overview and an
-    authentication example can be found at <a
-    href="https://6529.io/about/api">https://6529.io/about/api</a>.
+    JSON REST API for 6529.io. New here? A terminology overview and a
+    step-by-step authentication walkthrough (guides &amp; auth) live at <a
+    href="https://6529.io/tools/api">https://6529.io/tools/api</a>. The raw
+    machine-readable spec is downloadable at <a
+    href="/openapi.yaml">/openapi.yaml</a> and <a
+    href="/openapi.json">/openapi.json</a>.
   version: 1.0.0
 servers:
   - url: /api
@@ -743,6 +746,1011 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMintMetricsPage"
+  /v3/waves/{wave_id}:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: Read a wave as a competition hub without selecting a competition
+      operationId: getWaveHubV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleGetWaveHubV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      responses:
+        "200":
+          description: Visible competition hub
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveV3"
+        "400":
+          description: Invalid wave identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Wave is absent, private, or unified reads are disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List zero, one, or many competitions owned by a visible wave
+      operationId: listWaveCompetitionsV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListWaveCompetitionsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: lifecycle
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: array
+            maxItems: 5
+            uniqueItems: true
+            items:
+              $ref: "#/components/schemas/ApiCompetitionLifecycle"
+        - name: phase
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: array
+            maxItems: 8
+            uniqueItems: true
+            items:
+              $ref: "#/components/schemas/ApiCompetitionComputedPhase"
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - created_at
+              - starts_at
+              - updated_at
+            default: created_at
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Stable cursor page; no active or current competition is inferred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionPage"
+        "400":
+          description: Invalid filter, sort, limit, or request-bound cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Wave is absent, private, or unified reads are disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: Read one competition after checking both parent identifiers
+      operationId: getWaveCompetitionV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleGetWaveCompetitionV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Competition resource without internal routing state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetition"
+        "400":
+          description: Invalid wave or competition identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: >-
+            Parent or child is absent, private, mismatched, or reads are
+            disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/versions:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List immutable competition configuration versions newest first
+      operationId: listCompetitionVersionsV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionVersionsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Newest-first version page; non-public actor fields are omitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionConfigVersionPage"
+        "400":
+          description: Invalid limit or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entries:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List competition entries with stable competition context
+      operationId: listCompetitionEntriesV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionEntriesV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: array
+            maxItems: 4
+            uniqueItems: true
+            items:
+              $ref: "#/components/schemas/ApiCompetitionEntryStatus"
+        - name: submitter
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - submitted_at
+              - rating
+              - rank
+            default: submitted_at
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Entry page ordered by submitted_at then immutable entry ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionEntryPage"
+        "400":
+          description: Invalid filter, sort, limit, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: Read one entry after checking every parent identifier
+      operationId: getCompetitionEntryV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleGetCompetitionEntryV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Competition entry with entry-relative winner context
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionEntry"
+        "400":
+          description: Invalid wave, competition, or entry identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}/votes:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List the normalized vote history for one competition entry
+      operationId: listCompetitionEntryVotesV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionEntryVotesV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Vote page ordered by update time then stable vote ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionEntryVotePage"
+        "400":
+          description: Invalid limit, direction, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/leaderboard:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List the authoritative competition leaderboard
+      operationId: listCompetitionLeaderboardV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionLeaderboardV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - rating
+            default: rating
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: DESC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Rating order with current legacy tie rules and stable ID tie breaker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionLeaderboardPage"
+        "400":
+          description: Invalid sort, limit, direction, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/voters:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List voter totals and credit spend for a competition or entry
+      operationId: listCompetitionVotersV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionVotersV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - votes
+            default: votes
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: DESC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Voter aggregate page ordered by votes then profile ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionVoterPage"
+        "400":
+          description: Invalid entry, sort, limit, direction, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent, competition, or entry mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/decisions:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List competition decisions and ordered winners
+      operationId: listCompetitionDecisionsV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionDecisionsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Decision page ordered by scheduled time then decision ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionDecisionPage"
+        "400":
+          description: Invalid limit, direction, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/winners:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List winner entries with stable competition context
+      operationId: listCompetitionWinnersV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionWinnersV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Winner entry page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionEntryPage"
+        "400":
+          description: Invalid limit, direction, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/outcomes:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List competition outcomes with stable IDs and legacy positions
+      operationId: listCompetitionOutcomesV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionOutcomesV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Outcome page ordered by explicit position then stable ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionOutcomePage"
+        "400":
+          description: Invalid limit, direction, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/outcomes/{outcome_id}/distribution:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List ordered distribution items for one competition outcome
+      operationId: listCompetitionOutcomeDistributionV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionOutcomeDistributionV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: outcome_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Distribution page ordered by explicit position then stable ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionDistributionItemPage"
+        "400":
+          description: Invalid limit, direction, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent, competition, or outcome mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/pauses:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List immutable pause history for a competition
+      operationId: listCompetitionPausesV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionPausesV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: direction
+          in: query
+          required: false
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiCompetitionSortDirection"
+            default: ASC
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Pause page ordered by start time then stable pause ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionPausePage"
+        "400":
+          description: Invalid limit, direction, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
   /distribution_phases/{contract}/{nft_id}:
     get:
       tags:
@@ -6650,7 +7658,7 @@ paths:
       tags:
         - Ratings
       summary: >-
-        Change REP rating of multiple targets and categories in one go. Targets 
+        Change REP rating of multiple targets and categories in one go. Targets
         final REP value will be the value you supply here. If you supply
         multiple  addresses for one consolidation group then those amounts will
         be summed together.
@@ -11990,6 +12998,813 @@ components:
           items:
             type: number
             format: int64
+    ApiCompetition:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - wave_id
+        - type
+        - title
+        - description
+        - lifecycle
+        - computed_phase
+        - config_version
+        - participation
+        - voting
+        - decisions
+        - winners
+        - outcome_config
+        - capabilities
+        - permissions
+        - created_at
+        - updated_at
+        - published_at
+        - ended_at
+        - cancelled_at
+        - archived_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        wave_id:
+          type: string
+        type:
+          $ref: "#/components/schemas/ApiCompetitionType"
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        lifecycle:
+          $ref: "#/components/schemas/ApiCompetitionLifecycle"
+        computed_phase:
+          $ref: "#/components/schemas/ApiCompetitionComputedPhase"
+        config_version:
+          type: integer
+          format: int64
+          minimum: 1
+        participation:
+          $ref: "#/components/schemas/ApiCompetitionParticipationConfig"
+        voting:
+          $ref: "#/components/schemas/ApiCompetitionVotingConfig"
+        decisions:
+          $ref: "#/components/schemas/ApiCompetitionDecisionConfig"
+        winners:
+          $ref: "#/components/schemas/ApiCompetitionWinnerConfig"
+        outcome_config:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        capabilities:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionCapability"
+        permissions:
+          $ref: "#/components/schemas/ApiCompetitionPermissions"
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
+        published_at:
+          type: integer
+          format: int64
+          nullable: true
+        ended_at:
+          type: integer
+          format: int64
+          nullable: true
+        cancelled_at:
+          type: integer
+          format: int64
+          nullable: true
+        archived_at:
+          type: integer
+          format: int64
+          nullable: true
+    ApiCompetitionCapability:
+      type: string
+      enum:
+        - MAIN_STAGE
+        - CURATION
+        - QUORUM
+        - ANNOUNCEMENTS
+    ApiCompetitionComputedPhase:
+      type: string
+      enum:
+        - DRAFT
+        - UPCOMING
+        - PARTICIPATION_OPEN
+        - VOTING_OPEN
+        - DECIDING
+        - COMPLETED
+        - CANCELLED
+        - ARCHIVED
+    ApiCompetitionConfigVersion:
+      type: object
+      additionalProperties: false
+      required:
+        - competition_id
+        - version
+        - config
+        - created_at
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+        config:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: integer
+          format: int64
+    ApiCompetitionConfigVersionPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionConfigVersion"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionDecision:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - competition_id
+        - scheduled_at
+        - decided_at
+        - status
+        - winners
+      properties:
+        id:
+          type: string
+          format: uuid
+        competition_id:
+          type: string
+          format: uuid
+        scheduled_at:
+          type: integer
+          format: int64
+        decided_at:
+          type: integer
+          format: int64
+          nullable: true
+        status:
+          $ref: "#/components/schemas/ApiCompetitionDecisionStatus"
+        winners:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionDecisionWinner"
+    ApiCompetitionDecisionConfig:
+      type: object
+      additionalProperties: false
+      required:
+        - strategy
+        - next_decision_time
+        - winning_min_threshold
+        - winning_max_threshold
+        - winning_threshold_min_duration_ms
+        - max_winners
+        - time_lock_ms
+      properties:
+        strategy:
+          type: object
+          additionalProperties: true
+          nullable: true
+        next_decision_time:
+          type: integer
+          format: int64
+          nullable: true
+        winning_min_threshold:
+          type: integer
+          format: int64
+          nullable: true
+        winning_max_threshold:
+          type: integer
+          format: int64
+          nullable: true
+        winning_threshold_min_duration_ms:
+          type: integer
+          format: int64
+        max_winners:
+          type: integer
+          format: int64
+          nullable: true
+        time_lock_ms:
+          type: integer
+          format: int64
+          nullable: true
+    ApiCompetitionDecisionPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionDecision"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionDecisionStatus:
+      type: string
+      enum:
+        - PENDING
+        - COMPLETED
+        - CANCELLED
+    ApiCompetitionDecisionWinner:
+      type: object
+      additionalProperties: false
+      required:
+        - entry_id
+        - rank
+        - final_rating
+      properties:
+        entry_id:
+          type: string
+          format: uuid
+        rank:
+          type: integer
+          format: int64
+          minimum: 1
+        final_rating:
+          type: integer
+          format: int64
+    ApiCompetitionDistributionItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - outcome_id
+        - position
+        - amount
+        - description
+      properties:
+        id:
+          type: string
+          format: uuid
+        outcome_id:
+          type: string
+          format: uuid
+        position:
+          type: integer
+          format: int64
+          minimum: 1
+        amount:
+          type: number
+          format: double
+          nullable: true
+        description:
+          type: string
+          nullable: true
+    ApiCompetitionDistributionItemPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionDistributionItem"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - wave_id
+        - competition_id
+        - drop_id
+        - submitter
+        - status
+        - config_version
+        - submitted_at
+        - rank
+        - won_at
+        - decision_id
+      properties:
+        id:
+          type: string
+          format: uuid
+        wave_id:
+          type: string
+        competition_id:
+          type: string
+          format: uuid
+        drop_id:
+          type: string
+        submitter:
+          $ref: "#/components/schemas/ApiProfileMin"
+        status:
+          $ref: "#/components/schemas/ApiCompetitionEntryStatus"
+        config_version:
+          type: integer
+          format: int64
+          minimum: 1
+        submitted_at:
+          type: integer
+          format: int64
+        rank:
+          type: integer
+          format: int64
+          nullable: true
+        won_at:
+          type: integer
+          format: int64
+          nullable: true
+        decision_id:
+          type: string
+          format: uuid
+          nullable: true
+    ApiCompetitionEntryPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntry"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionEntryStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - WITHDRAWN
+        - DISQUALIFIED
+        - WINNER
+    ApiCompetitionEntryVote:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - entry_id
+        - voter_profile_id
+        - value
+        - credit_spent
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
+        voter_profile_id:
+          type: string
+        value:
+          type: integer
+          format: int64
+        credit_spent:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
+    ApiCompetitionEntryVotePage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryVote"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionError:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+    ApiCompetitionLeaderboardEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - competition_id
+        - entry_id
+        - drop_id
+        - rating
+        - real_time_rating
+        - rank
+        - submitted_at
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
+        drop_id:
+          type: string
+        rating:
+          type: integer
+          format: int64
+        real_time_rating:
+          type: integer
+          format: int64
+        rank:
+          type: integer
+          format: int64
+          nullable: true
+        submitted_at:
+          type: integer
+          format: int64
+    ApiCompetitionLeaderboardPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionLeaderboardEntry"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionLifecycle:
+      type: string
+      enum:
+        - DRAFT
+        - PUBLISHED
+        - ENDED
+        - CANCELLED
+        - ARCHIVED
+    ApiCompetitionOutcome:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - competition_id
+        - decision_id
+        - position
+        - legacy_index
+        - type
+        - subtype
+        - description
+        - credit
+        - rep_category
+        - amount
+      properties:
+        id:
+          type: string
+          format: uuid
+        competition_id:
+          type: string
+          format: uuid
+        decision_id:
+          type: string
+          format: uuid
+          nullable: true
+        position:
+          type: integer
+          format: int64
+          minimum: 1
+        legacy_index:
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        type:
+          type: string
+        subtype:
+          type: string
+          nullable: true
+        description:
+          type: string
+        credit:
+          type: string
+          nullable: true
+        rep_category:
+          type: string
+          nullable: true
+        amount:
+          type: number
+          format: double
+          nullable: true
+    ApiCompetitionOutcomePage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionOutcome"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetition"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionParticipationConfig:
+      type: object
+      additionalProperties: false
+      required:
+        - group_id
+        - signature_required
+        - max_entries_per_participant
+        - required_metadata
+        - required_media
+        - submission_type
+        - identity_submission_strategy
+        - identity_submission_duplicates
+        - starts_at
+        - ends_at
+        - terms
+      properties:
+        group_id:
+          type: string
+          nullable: true
+        signature_required:
+          type: boolean
+        max_entries_per_participant:
+          type: integer
+          format: int64
+          nullable: true
+        required_metadata:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        required_media:
+          type: array
+          items:
+            type: string
+            enum:
+              - IMAGE
+              - VIDEO
+              - AUDIO
+        submission_type:
+          type: string
+          nullable: true
+        identity_submission_strategy:
+          type: string
+          nullable: true
+        identity_submission_duplicates:
+          type: string
+          nullable: true
+        starts_at:
+          type: integer
+          format: int64
+          nullable: true
+        ends_at:
+          type: integer
+          format: int64
+          nullable: true
+        terms:
+          type: string
+          nullable: true
+    ApiCompetitionPause:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - competition_id
+        - start_time
+        - end_time
+        - reason
+      properties:
+        id:
+          type: string
+          format: uuid
+        competition_id:
+          type: string
+          format: uuid
+        start_time:
+          type: integer
+          format: int64
+        end_time:
+          type: integer
+          format: int64
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+    ApiCompetitionPausePage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionPause"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionPermissions:
+      type: object
+      additionalProperties: false
+      required:
+        - view
+        - submit
+        - vote
+        - administer
+      properties:
+        view:
+          type: boolean
+        submit:
+          type: boolean
+        vote:
+          type: boolean
+        administer:
+          type: boolean
+    ApiCompetitionSortDirection:
+      type: string
+      enum:
+        - ASC
+        - DESC
+    ApiCompetitionType:
+      type: string
+      enum:
+        - RANK
+        - APPROVE
+    ApiCompetitionVoter:
+      type: object
+      additionalProperties: false
+      required:
+        - profile_id
+        - votes
+        - credit_spent
+      properties:
+        profile_id:
+          type: string
+        votes:
+          type: integer
+          format: int64
+        credit_spent:
+          type: integer
+          format: int64
+    ApiCompetitionVoterPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionVoter"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCompetitionVotingConfig:
+      type: object
+      additionalProperties: false
+      required:
+        - group_id
+        - credit_type
+        - credit_scope
+        - credit_category
+        - credit_creditor
+        - credit_nfts
+        - signature_required
+        - starts_at
+        - ends_at
+        - max_votes_per_identity_to_entry
+        - forbid_negative_votes
+      properties:
+        group_id:
+          type: string
+          nullable: true
+        credit_type:
+          type: string
+        credit_scope:
+          type: string
+        credit_category:
+          type: string
+          nullable: true
+        credit_creditor:
+          type: string
+          nullable: true
+        credit_nfts:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        signature_required:
+          type: boolean
+        starts_at:
+          type: integer
+          format: int64
+          nullable: true
+        ends_at:
+          type: integer
+          format: int64
+          nullable: true
+        max_votes_per_identity_to_entry:
+          type: integer
+          format: int64
+          nullable: true
+        forbid_negative_votes:
+          type: boolean
+    ApiCompetitionWinnerConfig:
+      type: object
+      additionalProperties: false
+      required:
+        - max_winners
+        - winning_min_threshold
+        - winning_max_threshold
+        - winning_threshold_min_duration_ms
+      properties:
+        max_winners:
+          type: integer
+          format: int64
+          nullable: true
+        winning_min_threshold:
+          type: integer
+          format: int64
+          nullable: true
+        winning_max_threshold:
+          type: integer
+          format: int64
+          nullable: true
+        winning_threshold_min_duration_ms:
+          type: integer
+          format: int64
     ApiCompleteAttachmentMultipartUploadRequest:
       type: object
       required:
@@ -20347,6 +22162,56 @@ components:
         - APPROVE
         - RANK
         - CHAT
+    ApiWaveV3:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - picture
+        - created_at
+        - capabilities
+        - permissions
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        picture:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+        capabilities:
+          $ref: "#/components/schemas/ApiWaveV3Capabilities"
+        permissions:
+          $ref: "#/components/schemas/ApiWaveV3Permissions"
+    ApiWaveV3Capabilities:
+      type: object
+      additionalProperties: false
+      required:
+        - chat
+        - competitions
+      properties:
+        chat:
+          type: boolean
+        competitions:
+          type: boolean
+    ApiWaveV3Permissions:
+      type: object
+      additionalProperties: false
+      required:
+        - view
+        - chat
+        - administer
+      properties:
+        view:
+          type: boolean
+        chat:
+          type: boolean
+        administer:
+          type: boolean
     ApiWaveVisibilityConfig:
       type: object
       required:
