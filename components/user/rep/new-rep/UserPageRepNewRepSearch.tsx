@@ -44,6 +44,7 @@ const SEARCH_LENGTH = {
   MAX: 100,
 };
 const SUBMISSION_GUIDANCE_ID = "grant-rep-submission-guidance";
+const getSearchLength = (value: string): number => Array.from(value).length;
 
 const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
   if (error instanceof Error && error.message.trim()) {
@@ -101,9 +102,10 @@ export default function UserPageRepNewRepSearch({
     [repSearch]
   );
 
+  const debouncedSearchLength = getSearchLength(debouncedValue);
   const matchingSearchLength =
-    debouncedValue.length >= SEARCH_LENGTH.MIN &&
-    debouncedValue.length <= SEARCH_LENGTH.MAX;
+    debouncedSearchLength >= SEARCH_LENGTH.MIN &&
+    debouncedSearchLength <= SEARCH_LENGTH.MAX;
 
   const { isFetching, data: categories } = useQuery<string[]>({
     queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedValue],
@@ -169,7 +171,7 @@ export default function UserPageRepNewRepSearch({
     // Search-specific minimum (below the server's 1-char floor): surface it
     // instead of silently dropping the input. Count code points to stay
     // consistent with the validator's length semantics.
-    if (Array.from(rep).length < SEARCH_LENGTH.MIN) {
+    if (getSearchLength(rep) < SEARCH_LENGTH.MIN) {
       setErrorMsg(
         t(locale, "rep.categories.validation.tooShort", {
           min: SEARCH_LENGTH.MIN,
@@ -338,7 +340,7 @@ export default function UserPageRepNewRepSearch({
   }
 
   const repSearchState = useMemo(() => {
-    const searchLength = repSearch.length;
+    const searchLength = getSearchLength(repSearch);
     if (searchLength < SEARCH_LENGTH.MIN)
       return RepSearchState.MIN_LENGTH_ERROR;
     if (searchLength > SEARCH_LENGTH.MAX)

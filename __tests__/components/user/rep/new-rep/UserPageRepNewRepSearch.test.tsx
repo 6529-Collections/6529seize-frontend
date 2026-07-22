@@ -78,6 +78,23 @@ describe("UserPageRepNewRepSearch", () => {
     expect(screen.getByText("LOADING")).toBeInTheDocument();
   });
 
+  it("counts Unicode characters consistently for the search minimum", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+
+    await user.type(
+      screen.getByPlaceholderText("Category to grant REP for"),
+      "😀😀"
+    );
+
+    expect(screen.getByText("MIN_LENGTH_ERROR")).toBeInTheDocument();
+  });
+
   it("keeps the production select, edit, and search-again interaction", async () => {
     const user = userEvent.setup();
     render(

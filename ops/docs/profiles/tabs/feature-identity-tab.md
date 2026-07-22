@@ -89,12 +89,13 @@ Mobile (`< lg`):
 - Similar categories remain independent and selectable. The exact
   `MemesNominee` pill is marked as counting toward the 50,000 REP submission
   requirement. When the typed value differs from it only by capitalization,
-  spacing, or punctuation, the exact pill is surfaced first; the typed value
-  remains available and look-alikes use subdued styling.
-  Selecting exact `MemesNominee` confirms the requirement in green; selecting
-  a look-alike instead shows an amber informational note explaining that the
-  categories are separate and only exact `MemesNominee` counts toward the
-  requirement. All other category pills keep their existing behavior.
+  spacing, punctuation, or Unicode width, the exact pill is surfaced first; the
+  typed value remains available and look-alikes use subdued styling. Search
+  guidance stays neutral until a category is selected. Selecting exact
+  `MemesNominee` confirms the requirement in green; selecting a look-alike
+  instead shows an amber informational note explaining that the categories are
+  separate and only exact `MemesNominee` counts toward the requirement. All
+  other category pills keep their existing behavior.
 - Selecting an option validates availability before enabling the REP amount.
 - If availability fails, inline error is shown.
 - Editing text after category selection clears selected category and amount.
