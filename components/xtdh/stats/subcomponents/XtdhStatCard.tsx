@@ -7,7 +7,6 @@ interface XtdhStatCardProps {
   readonly subtext?: string | undefined;
   readonly tooltip?: string | undefined;
   readonly onClick?: (() => void) | undefined;
-  readonly variant?: "default" | "network" | undefined;
 }
 
 export function XtdhStatCard({
@@ -16,35 +15,21 @@ export function XtdhStatCard({
   subtext,
   tooltip,
   onClick,
-  variant = "default",
 }: XtdhStatCardProps) {
   const tooltipDescriptionId = useId();
-  const isNetworkVariant = variant === "network";
 
   const LabelContent = (
-    <span
-      className={`tw-block tw-font-medium tw-uppercase tw-tracking-wider ${
-        isNetworkVariant
-          ? "tw-mb-3 tw-text-[11px] tw-text-iron-500"
-          : "tw-mb-1 tw-text-[10px] tw-text-iron-400"
-      }`}
-    >
+    <div className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400 tw-mb-1">
       {label}
-    </span>
+    </div>
   );
 
   return (
-    <div
-      className={
-        isNetworkVariant
-          ? "tw-relative tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]"
-          : "tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-4"
-      }
-    >
+    <div className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-4">
       {onClick && (
         <button
           onClick={onClick}
-          className="tw-absolute tw-right-3 tw-top-3 tw-flex tw-h-6 tw-w-6 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-primary-500 tw-text-white tw-transition-colors hover:tw-bg-primary-400"
+          className="tw-absolute tw-top-3 tw-right-3 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400 tw-transition-colors tw-border-none tw-cursor-pointer"
           title="Action"
           type="button"
         >
@@ -54,7 +39,7 @@ export function XtdhStatCard({
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className="tw-h-4 tw-w-4"
+            className="tw-w-4 tw-h-4"
           >
             <path
               strokeLinecap="round"
@@ -82,28 +67,12 @@ export function XtdhStatCard({
           LabelContent
         )}
 
-        <div
-          className={`tw-flex tw-items-baseline ${
-            isNetworkVariant ? "tw-flex-wrap tw-gap-x-2 tw-gap-y-1" : "tw-gap-1"
-          }`}
-        >
-          <span
-            className={`tw-tabular-nums ${
-              isNetworkVariant
-                ? "tw-text-2xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl"
-                : "tw-text-xl tw-font-semibold tw-text-iron-50"
-            }`}
-          >
+        <div className="tw-flex tw-items-baseline tw-gap-1">
+          <span className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-tabular-nums">
             {value}
           </span>
           {subtext && (
-            <span
-              className={`tw-text-iron-500 ${
-                isNetworkVariant ? "tw-text-sm" : "tw-text-xs"
-              }`}
-            >
-              {subtext}
-            </span>
+            <span className="tw-text-xs tw-text-iron-500">{subtext}</span>
           )}
         </div>
       </div>

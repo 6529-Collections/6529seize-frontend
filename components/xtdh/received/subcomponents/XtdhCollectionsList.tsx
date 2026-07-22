@@ -1,5 +1,6 @@
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 
+import { EmptyState } from "@/components/common/EmptyState";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -70,7 +71,7 @@ export function XtdhCollectionsList({
   if (!collections.length) {
     if (normalizedSearchTerm) {
       return (
-        <CollectionsEmptyState
+        <EmptyState
           title={t(locale, "xtdh.collections.search.emptyTitle", {
             query: normalizedSearchTerm,
           })}
@@ -80,7 +81,7 @@ export function XtdhCollectionsList({
     }
 
     return (
-      <CollectionsEmptyState
+      <EmptyState
         title={isIdentityScoped ? "No xTDH received" : "No collections found"}
         message={
           isIdentityScoped
@@ -95,7 +96,7 @@ export function XtdhCollectionsList({
 
   return (
     <div>
-      <ul className="tw-m-0 tw-flex tw-flex-col tw-p-1">
+      <ul className="tw-m-0 tw-flex tw-flex-col tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
         {collections.map((collection, index) => (
           <XtdhReceivedCollectionCard
             key={getCollectionKey(collection, index)}
@@ -120,42 +121,25 @@ export function XtdhCollectionsList({
 
 function CollectionsSkeleton() {
   return (
-    <div className="tw-p-1">
-      <output className="tw-sr-only" aria-live="polite">
-        Loading xTDH collections
-      </output>
-      <ul className="tw-m-0 tw-flex tw-flex-col tw-p-0" aria-busy="true">
-        {SKELETON_ROWS.map((row) => (
+    <div className="tw-px-6 tw-pb-6">
+      <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
+        {SKELETON_INDICES.map((index) => (
           <li
-            key={row}
-            aria-hidden="true"
-            className="tw-animate-pulse tw-list-none tw-rounded-xl tw-p-4 motion-reduce:tw-animate-none"
+            key={`skeleton-${index}`}
+            className="tw-animate-pulse tw-list-none tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
           >
-            <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
-                <div className="tw-size-14 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800" />
-                <div className="tw-flex-1 tw-space-y-2">
-                  <div className="tw-h-4 tw-w-36 tw-max-w-full tw-rounded-full tw-bg-iron-800" />
-                  <div className="tw-h-3 tw-w-24 tw-rounded-full tw-bg-iron-800" />
-                </div>
-              </div>
-              <div className="tw-grid tw-w-full tw-grid-cols-2 tw-gap-6 sm:tw-w-[250px]">
-                {SKELETON_SUMMARY_KEYS.map((summaryKey) => (
-                  <div
-                    key={summaryKey}
-                    className="tw-space-y-2 sm:tw-text-right"
-                  >
-                    <div className="tw-h-3 tw-w-16 tw-rounded-full tw-bg-iron-800 sm:tw-ml-auto" />
-                    <div className="tw-h-4 tw-w-20 tw-rounded-full tw-bg-iron-800 sm:tw-ml-auto" />
-                  </div>
-                ))}
+            <div className="tw-flex tw-items-center tw-gap-3">
+              <div className="tw-h-14 tw-w-14 tw-rounded-lg tw-bg-iron-800" />
+              <div className="tw-flex-1 tw-space-y-2">
+                <div className="tw-h-4 tw-w-32 tw-rounded tw-bg-iron-800" />
+                <div className="tw-bg-iron-850 tw-h-3 tw-w-48 tw-rounded" />
               </div>
             </div>
-            <div className="tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-4 sm:tw-grid-cols-3 lg:tw-grid-cols-6">
+            <div className="tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
               {SKELETON_METRIC_KEYS.map((metricKey) => (
                 <div key={metricKey} className="tw-space-y-2">
-                  <div className="tw-h-3 tw-w-20 tw-max-w-full tw-rounded-full tw-bg-iron-800" />
-                  <div className="tw-h-4 tw-w-16 tw-rounded-full tw-bg-iron-800" />
+                  <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
+                  <div className="tw-bg-iron-850 tw-h-4 tw-w-24 tw-rounded" />
                 </div>
               ))}
             </div>
@@ -166,31 +150,11 @@ function CollectionsSkeleton() {
   );
 }
 
-const SKELETON_ROWS = ["first", "second", "third"] as const;
-const SKELETON_SUMMARY_KEYS = ["rate", "total"];
+const SKELETON_INDICES = [0, 1, 2];
 const SKELETON_METRIC_KEYS = Array.from(
-  { length: 6 },
+  { length: 9 },
   (_, index) => `metric-${index}`
 );
-
-function CollectionsEmptyState({
-  title,
-  message,
-}: Readonly<{ title: string; message: string }>) {
-  return (
-    <div
-      role="status"
-      className="tw-m-1 tw-flex tw-min-h-32 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-900/20 tw-p-6 tw-text-center"
-    >
-      <span className="tw-text-sm tw-font-medium tw-text-iron-400">
-        {title}
-      </span>
-      <span className="tw-max-w-md tw-text-sm tw-leading-5 tw-text-iron-500">
-        {message}
-      </span>
-    </div>
-  );
-}
 
 function getCollectionKey(
   collection: ApiXtdhCollection,

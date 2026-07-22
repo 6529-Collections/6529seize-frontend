@@ -105,15 +105,12 @@ export default function XtdhReceivedSection({
   }
 
   return (
-    <section aria-labelledby="xtdh-received-heading" className="tw-min-w-0">
-      <header className="tw-mb-5">
-        <h2
-          id="xtdh-received-heading"
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-100"
-        >
+    <section className="tw-space-y-6 tw-rounded-b-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+      <header className="tw-px-6 tw-pt-6">
+        <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           {isViewingTokens ? "xTDH Tokens" : "xTDH Collections"}
         </h2>
-        <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-500">
+        <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
           {description}
         </p>
       </header>
@@ -127,7 +124,7 @@ export default function XtdhReceivedSection({
           requireIdentity={requireIdentity}
         />
       ) : (
-        <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
+        <>
           {(collections.length > 0 || searchTerm) && (
             <XtdhCollectionsControls
               activeSortField={activeSortField}
@@ -151,18 +148,18 @@ export default function XtdhReceivedSection({
             searchTerm={searchTerm}
           />
           {showLoadMore ? (
-            <div className="tw-flex tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-p-4">
+            <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">
               <button
                 type="button"
                 onClick={handleLoadMore}
                 disabled={isFetchingNextPage}
-                className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-5 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
               >
                 {isFetchingNextPage ? "Loading..." : "Load More"}
               </button>
             </div>
           ) : null}
-        </div>
+        </>
       )}
     </section>
   );

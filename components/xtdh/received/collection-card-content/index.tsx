@@ -27,7 +27,10 @@ type InteractionMode = "button" | "static";
 interface XtdhReceivedCollectionCardProps {
   readonly collection: ApiXtdhCollection;
   readonly isSelected?: boolean | undefined;
-  readonly onSelect?: ((contract: string | null) => void) | undefined;
+  readonly onSelect?:
+    | ((contract: string | null) => void)
+    | undefined
+    | undefined;
   readonly interactionMode?: InteractionMode | undefined;
 }
 
@@ -38,7 +41,7 @@ export function XtdhReceivedCollectionCard({
   interactionMode = "button",
 }: Readonly<XtdhReceivedCollectionCardProps>) {
   const contractAddress = useMemo(() => {
-    const trimmed = collection.contract.trim();
+    const trimmed = collection.contract?.trim() ?? "";
     return isValidEthAddress(trimmed) ? (trimmed as `0x${string}`) : null;
   }, [collection.contract]);
   const {
@@ -49,7 +52,6 @@ export function XtdhReceivedCollectionCard({
     address: contractAddress ?? undefined,
     enabled: Boolean(contractAddress),
   });
-  const isMetadataLoading = Boolean(contractAddress) && isLoading;
 
   const displayName = useMemo(() => {
     if (contract?.name) {
@@ -81,7 +83,7 @@ export function XtdhReceivedCollectionCard({
         secondaryLabelTitle: normalized,
       };
     }
-    const fallback = collection.contract;
+    const fallback = collection.contract ?? "Unknown contract";
     return {
       secondaryLabel: fallback,
       secondaryLabelTitle: fallback,
@@ -106,91 +108,57 @@ export function XtdhReceivedCollectionCard({
   const isSelectable =
     interactionMode === "button" && Boolean(onSelect && collection.contract);
 
-  let collectionImage = (
-    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
-      NFT
-    </div>
-  );
-  if (imageUrl) {
-    collectionImage = (
-      <Image
-        src={imageUrl}
-        alt=""
-        fill
-        sizes="56px"
-        className="tw-h-full tw-w-full tw-object-cover"
-      />
-    );
-  }
-  if (isMetadataLoading) {
-    collectionImage = (
-      <div
-        aria-hidden="true"
-        className="tw-h-full tw-w-full tw-animate-pulse tw-bg-iron-800 motion-reduce:tw-animate-none"
-      />
-    );
-  }
-
   const content = (
     <div
-      aria-busy={isMetadataLoading}
       className={clsx(
-        "tw-group tw-flex tw-w-full tw-flex-col tw-items-stretch tw-overflow-hidden tw-text-left tw-transition-colors tw-duration-300 motion-reduce:tw-transition-none",
+        "tw-group tw-flex tw-w-full tw-flex-col tw-items-stretch tw-overflow-hidden tw-text-left tw-transition-colors tw-duration-300",
         interactionMode === "static"
-          ? "tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-ring-1 tw-ring-white/[0.05]"
-          : "tw-rounded-xl tw-p-4 desktop-hover:hover:tw-bg-iron-900/40",
-        isSelected && "tw-bg-white/[0.03]",
+          ? "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4"
+          : "tw-rounded-b-xl tw-px-6 tw-py-6 desktop-hover:hover:tw-bg-iron-900",
+        isSelected && "tw-bg-iron-900/50",
         !isSelectable &&
           interactionMode === "button" &&
           "tw-cursor-not-allowed tw-opacity-70"
       )}
     >
-      <header className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 sm:tw-flex-row sm:tw-items-center">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
-          <div className="tw-relative tw-size-14 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-shadow-inner tw-transition-transform tw-duration-300 group-hover:tw-scale-105 motion-reduce:tw-transform-none motion-reduce:tw-transition-none">
-            {collectionImage}
-          </div>
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-1">
-            {isMetadataLoading ? (
-              <>
-                <div
-                  aria-hidden="true"
-                  className="tw-animate-pulse motion-reduce:tw-animate-none"
-                >
-                  <div className="tw-h-4 tw-w-36 tw-max-w-full tw-rounded-full tw-bg-iron-800" />
-                </div>
-                <output className="tw-text-xs tw-text-iron-500">
-                  Loading metadata...
-                </output>
-              </>
+      <header className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6 md:tw-flex-row">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
+          <div className="tw-relative tw-h-16 tw-w-16 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-shadow-inner tw-transition-transform tw-duration-300 group-hover:tw-scale-105">
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={displayName}
+                fill
+                sizes="64px"
+                className="tw-h-full tw-w-full tw-object-cover"
+              />
             ) : (
-              <>
-                <p className="tw-m-0 tw-break-words tw-text-base tw-font-semibold tw-leading-5 tw-text-iron-100">
-                  {displayName}
-                </p>
-                <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
-                  <p
-                    className="tw-m-0 tw-truncate tw-text-xs tw-text-iron-500"
-                    title={secondaryLabelTitle}
-                  >
-                    {secondaryLabel}
-                  </p>
-                  <span className="tw-inline-flex tw-items-center tw-rounded-md tw-bg-white/[0.04] tw-px-2 tw-py-1 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-ring-1 tw-ring-inset tw-ring-white/[0.05]">
-                    {tokenTypeLabel}
-                  </span>
-                </div>
-              </>
+              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                NFT
+              </div>
             )}
+          </div>
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+              {displayName}
+            </p>
+            <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
+              <p
+                className="tw-m-0 tw-mb-0 tw-text-xs tw-text-iron-500"
+                title={secondaryLabelTitle}
+              >
+                {secondaryLabel}
+              </p>
+              <span className="tw-inline-flex tw-items-center tw-rounded tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2 tw-py-1 tw-text-[10px] tw-font-bold tw-uppercase tw-text-iron-400">
+                {tokenTypeLabel}
+              </span>
+            </div>
           </div>
         </div>
         <XtdhRatePill rateLabel={xtdhRateLabel} totalLabel={xtdhValueLabel} />
       </header>
-      <dl className="tw-mb-0 tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-4 sm:tw-grid-cols-3 lg:tw-grid-cols-6">
-        <CollectionMetric
-          label="Total supply"
-          value={totalSupplyLabel}
-          isLoading={isMetadataLoading}
-        />
+      <dl className="tw-mb-0 tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-ml-20 md:tw-mt-4 md:tw-grid-cols-3">
+        <CollectionMetric label="Total supply" value={totalSupplyLabel} />
         <CollectionMetric
           label="Active tokens"
           value={activeTokensGrantedLabel}
@@ -199,11 +167,7 @@ export function XtdhReceivedCollectionCard({
           label="Tokens granted"
           value={totalTokensGrantedLabel}
         />
-        <CollectionMetric
-          label="Floor price"
-          value={floorPriceLabel}
-          isLoading={isMetadataLoading}
-        />
+        <CollectionMetric label="Floor price" value={floorPriceLabel} />
         <CollectionMetric
           label="Active contributors"
           value={activeContributorsLabel}
@@ -231,7 +195,7 @@ export function XtdhReceivedCollectionCard({
         onClick={handleSelect}
         disabled={!isSelectable}
         aria-pressed={isSelected}
-        className="tw-w-full tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 tw-text-left focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        className="tw-w-full tw-border-none tw-bg-transparent tw-p-0 tw-text-left"
       >
         {content}
       </button>
@@ -243,27 +207,14 @@ function CollectionMetric({
   label,
   value,
   className,
-  isLoading = false,
-}: Readonly<{
-  label: string;
-  value: string;
-  className?: string | undefined;
-  isLoading?: boolean | undefined;
-}>) {
+}: Readonly<{ label: string; value: string; className?: string | undefined }>) {
   return (
     <div className={clsx("tw-flex tw-flex-col tw-text-left", className)}>
-      <dt className="tw-mb-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
+      <dt className="tw-mb-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
         {label}
       </dt>
-      <dd className="tw-m-0 tw-min-h-5 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 sm:tw-text-base">
-        {isLoading ? (
-          <span
-            aria-hidden="true"
-            className="tw-block tw-h-4 tw-w-16 tw-animate-pulse tw-rounded-full tw-bg-iron-800 motion-reduce:tw-animate-none"
-          />
-        ) : (
-          value
-        )}
+      <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+        {value}
       </dd>
     </div>
   );
