@@ -95,6 +95,9 @@ describe("UserPageStatsActivityWalletTableWrapper", () => {
     expect(screen.getByTestId("table")).toBeInTheDocument();
     expect(screen.getByTestId("table")).toHaveAttribute("data-locale", "de-DE");
     expect(screen.getByTestId("pagination")).toHaveAttribute("data-total", "2");
+    expect(screen.getByTestId("filter").closest(".tw-rounded-xl")).toHaveClass(
+      "tw-bg-white/[0.04]"
+    );
   });
 
   it("shows no data message when list empty", () => {

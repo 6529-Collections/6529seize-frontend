@@ -71,7 +71,8 @@ When the table selects a bus route, use the Release Bus panel at
 2. Resolve and review its exact 40-character head SHA.
 3. Declare cross-repository candidate dependencies. Backend candidates also
    declare allowlisted deploy units and ordering edges.
-4. Mark that exact SHA ready for staging.
+4. If this frontend candidate must not reuse an exact-base success, select
+   **Fresh base canary required**, then mark the exact SHA ready for staging.
 5. Wait for the bus to compose, deploy, and validate the staging train.
 6. After the same candidate shows `STAGING_VALIDATED`, separately mark it ready
    for production.
@@ -92,6 +93,49 @@ Submitting live readiness creates a pending `Release Bus` commit status. A
 successful validation completes it, and cancelling a candidate with an
 existing live status completes it as `release readiness cancelled` so source
 PRs are not left with a permanent pending status.
+
+## Reading an active train
+
+The active-train card on `/deploy/ui/bus` is authoritative for train progress.
+It shows the current phase, elapsed time, exact operation, expected SHA,
+included candidates, worker heartbeat, last meaningful event, and the durable
+event timeline. When the operation is a GitHub Actions run, it also shows the
+run ID, a direct allowlisted link, and the active or failed job and step.
+
+The train phases are explicit: `COLLECTING`, `FROZEN`,
+`BASE_CANARY_RUNNING`, `COMPOSING`, `PREFLIGHTING`, `ISOLATING_FAILURE`,
+`DEPLOYING_BACKEND`, `DEPLOYING_FRONTEND`, `E2E_RUNNING`,
+`VALIDATING_STAGING`, `MERGING_PRODUCTION`, `VALIDATING_PRODUCTION`,
+`SYNCING_STAGING`, and the terminal or control states `PAUSED`, `COMPLETED`,
+`FAILED`, `ROLLED_BACK`, and `CANCELLED`. `FROZEN` means only that the
+candidate set and base SHAs are immutable. It must never be used as a generic
+label for an active canary, workflow, deployment, or lease wait.
+
+Every worker `WAIT` includes both `wait_reason` and `current_operation` (which
+is explicitly `null` during a bounded transition with no operation yet). The
+reason states exactly what is awaited, for example a GitHub workflow, a
+non-workflow operation, an external deployment, a paused control, or a
+specific lease. Lease owner, heartbeat, and expiry appear only after an actual
+lease acquisition guard fails; an active workflow is never diagnosed as a
+lease failure.
+
+Long-running and stalled are different states. Recent workflow/job/step
+progress remains `RUNNING`. A base canary, preflight, or isolation workflow is
+`STALLED` only after 60 minutes without progress; frontend deployment after 45
+minutes; backend deployment or E2E after 30 minutes; and composition, merge,
+or staging synchronization after 15 minutes. A stalled card names the
+deterministic reason, such as workflow reconciliation stale, workflow not
+discovered, or no recent workflow progress. Do not retry while GitHub still
+shows a healthy active run.
+
+During a base canary, the incident card says: “Frontend base canary running
+for staging SHA … Candidates have not been tested yet.” If it fails, the card
+says: “Existing staging base failed … No candidate was blamed. STAGING was
+paused.” It also lists the failed gate/job/step, exact failing Jest suite/test
+when reported, candidates returned or quarantined, and the recommended
+recovery. For a base failure, repair and validate the existing staging base,
+deploy that isolated repair, verify it, and only then resume the lane. Do not
+change, cancel, or blame queued candidates to work around a base failure.
 
 ## How a train departs
 
@@ -128,13 +172,21 @@ It then:
 - runs the shared frontend validation/build gate against the exact fresh
   `1a-staging` base before composing any frontend candidate, so a broken base or
   control-plane command cannot be blamed on candidate code;
-- runs immutable preflight builds;
+- runs parallel fail-closed frontend preflight lint, typecheck, complete Jest
+  inventory/shards, and immutable builds, with an independently reversible
+  `1|2|4` shard count and bounded Jest workers;
 - deploys backend units in service-DAG order;
 - deploys frontend after backend succeeds;
 - runs the existing staging E2E packs against the exact train, including for a
   backend-only train by using the currently deployed staging frontend;
 - records workflow, SHA, artifact, service, and E2E evidence;
 - fast-forwards `1a-staging` only after all required validation passes.
+
+A reused base-canary result is visible as reused evidence, with a link to the
+original train and Actions run. It proves only the unchanged pre-existing base
+under the same gate fingerprint. Candidate composition, preflight, deployment,
+and E2E still run fresh. The operator force-fresh choice is immutable after
+readiness; cancel and resubmit the candidate to change it.
 
 Backend units declared `production-only` in the deploy registry are built and
 tested during preflight but are not runtime-deployed to staging. Their staging
@@ -186,8 +238,8 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   bus publishes the conflict-free candidate prefix (which can be empty when
   the first candidate conflicts), verifies candidate ancestry, quarantines the
   first omitted immutable candidate, and returns the others to the queue.
-  Deterministic isolation still works and its raw log remains the diagnostic
-  source of truth.
+  Deterministic isolation and failure attribution still work; structured gate
+  evidence remains the operator source of truth.
 - Isolation uses non-secret placeholder analytics and Sentry values. It helps
   diagnose deterministic candidate failures but does not replace the real
   preflight build or prove behavior that depends on credential value formats.
