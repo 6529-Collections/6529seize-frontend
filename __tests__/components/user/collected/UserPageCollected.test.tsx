@@ -46,9 +46,7 @@ jest.mock(
           </button>
           <button
             data-testid="filters-set-memes"
-            onClick={() =>
-              props.setCollection?.(CollectedCollectionType.MEMES)
-            }
+            onClick={() => props.setCollection?.(CollectedCollectionType.MEMES)}
           >
             Set The Memes
           </button>
@@ -452,6 +450,31 @@ describe("UserPageCollected", () => {
 
     await waitFor(() => {
       expect(routerReplace).toHaveBeenCalledWith("/testuser/collected", {
+        scroll: false,
+      });
+    });
+    expect(routerPush).not.toHaveBeenCalled();
+  });
+
+  it("replaces automatic overflow-page corrections", async () => {
+    mockSearchParams.get.mockImplementation((key: string) =>
+      key === "page" ? "5" : null
+    );
+    mockSearchParams.toString.mockReturnValue("page=5");
+    useQueryMock.mockReturnValue({
+      isFetching: false,
+      isLoading: false,
+      data: {
+        data: [],
+        count: 60,
+        page: 5,
+      },
+    });
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await waitFor(() => {
+      expect(routerReplace).toHaveBeenCalledWith("/testuser/collected?page=3", {
         scroll: false,
       });
     });
