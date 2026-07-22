@@ -69,7 +69,7 @@ function preflightContract({
 }) {
   validateSha(sourceSha, "source");
   validateSha(workflowSha, "workflow");
-  if (!ALLOWED_SHARD_COUNTS.has(shardCount)) {
+  if (!Number.isInteger(shardCount) || !ALLOWED_SHARD_COUNTS.has(shardCount)) {
     throw new Error("Unsupported shard count");
   }
   if (nodeVersion !== "22") throw new Error("Invalid Node version");
@@ -85,9 +85,14 @@ function preflightContract({
       throw new Error(`Missing preflight workflow file ${file}`);
     }
   }
-  const packageManager = JSON.parse(
-    baseFileContents["package.json"]
-  )?.packageManager;
+  let packageManager;
+  try {
+    packageManager = JSON.parse(
+      baseFileContents["package.json"]
+    )?.packageManager;
+  } catch {
+    throw new Error("Invalid package-manager contract");
+  }
   if (
     typeof packageManager !== "string" ||
     !/^pnpm@[A-Za-z0-9.+-]{1,122}$/.test(packageManager)

@@ -43,6 +43,7 @@ describe("Release Bus frontend gate contract", () => {
       string,
       {
         needs?: string[] | string;
+        outputs?: Record<string, string>;
         steps?: WorkflowStep[];
         strategy?: { "fail-fast"?: boolean };
         "timeout-minutes"?: number;
@@ -447,6 +448,9 @@ describe("Release Bus frontend gate contract", () => {
     expect(preflightWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
     expect(preflightWorkflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
     expect(preflightWorkflow.jobs?.build?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.authorize?.outputs).toMatchObject({
+      inject_failure: "${{ steps.inputs.outputs.inject_failure }}",
+    });
     expect(preflightWorkflow.jobs?.aggregate?.needs).toEqual([
       "authorize",
       "lint",
@@ -465,6 +469,13 @@ describe("Release Bus frontend gate contract", () => {
     const aggregate = steps.find(
       (step) => step.name === "Aggregate fail-closed preflight evidence"
     );
+    const jestGate = preflightWorkflow.jobs?.jest?.steps?.find(
+      (step) => step.name === "Run complete deterministic Jest shard"
+    );
+    expect(jestGate?.env).toMatchObject({
+      RELEASE_BUS_INJECT_SHARD_FAILURE:
+        "${{ needs.authorize.outputs.inject_failure == 'true' && '1' || '0' }}",
+    });
     expect(aggregate?.env).toMatchObject({
       BUILD_RESULT: "${{ needs.build.result }}",
       INVENTORY_RESULT: "${{ needs.jest-inventory.result }}",
@@ -479,6 +490,9 @@ describe("Release Bus frontend gate contract", () => {
       'test "$PASSED_BEHAVIOR_DIGEST" = "$behavior_digest"'
     );
     expect(preflight).toContain('test "$VALIDATION_ONLY" = true');
+    expect(preflight).toContain(
+      'echo "inject_failure=$VALIDATION_INJECT_FAILURE"'
+    );
     expect(preflight).toContain(
       'git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh"'
     );

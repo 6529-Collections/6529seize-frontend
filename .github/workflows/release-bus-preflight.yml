@@ -33,6 +33,7 @@ jobs:
     outputs:
       shard_count: ${{ steps.inputs.outputs.shard_count }}
       shard_matrix: ${{ steps.inputs.outputs.shard_matrix }}
+      inject_failure: ${{ steps.inputs.outputs.inject_failure }}
       gate_fingerprint: ${{ steps.fingerprint.outputs.gate_fingerprint }}
       behavior_digest: ${{ steps.fingerprint.outputs.behavior_digest }}
       workflow_sha: ${{ steps.fingerprint.outputs.workflow_sha }}
@@ -78,6 +79,7 @@ jobs:
           {
             echo "shard_count=$PREFLIGHT_SHARD_COUNT"
             echo "shard_matrix=$shard_matrix"
+            echo "inject_failure=$VALIDATION_INJECT_FAILURE"
           } >> "$GITHUB_OUTPUT"
       - &checkout
         name: Check out exact train SHA
@@ -319,7 +321,7 @@ jobs:
         id: gate
         continue-on-error: true
         env:
-          RELEASE_BUS_INJECT_SHARD_FAILURE: ${{ inputs.validation_inject_failure && '1' || '0' }}
+          RELEASE_BUS_INJECT_SHARD_FAILURE: ${{ needs.authorize.outputs.inject_failure == 'true' && '1' || '0' }}
         run: RELEASE_BUS_REPO_ROOT="$GITHUB_WORKSPACE" "$RELEASE_BUS_GATE_TOOL" jest "${{ matrix.index }}" "${{ matrix.total }}" "$RUNNER_TEMP/release-bus-evidence"
       - *source-mutation
       - name: Upload sanitized shard evidence

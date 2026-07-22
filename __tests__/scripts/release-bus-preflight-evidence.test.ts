@@ -89,5 +89,11 @@ describe("Release Bus preflight evidence", () => {
     expect(() => preflightContract({ ...input, maxWorkers: 3 })).toThrow(
       "Invalid Jest worker contract"
     );
+    expect(() =>
+      preflightContract({
+        ...input,
+        baseFileContents: { ...baseFileContents, "package.json": "{" },
+      })
+    ).toThrow("Invalid package-manager contract");
   });
 });

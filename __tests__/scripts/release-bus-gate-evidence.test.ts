@@ -234,6 +234,28 @@ describe("Release Bus gate evidence", () => {
       duplicate_files: [],
     });
 
+    for (const result of ["failure", "cancelled", "skipped", ""] as const) {
+      expect(
+        buildGateSummary({
+          records,
+          source: "parallel",
+          shardCount: 2,
+          jobResults: {
+            lint: "success",
+            typecheck: "success",
+            build: "success",
+            inventory: "success",
+            jest: result,
+            source_mutation: "success",
+          },
+          identity: evidenceIdentity,
+        })
+      ).toMatchObject({
+        status: "FAILED",
+        errors: expect.arrayContaining(["jest job did not succeed"]),
+      });
+    }
+
     for (const requiredJob of ["lint", "typecheck", "jest"] as const) {
       const evidenceWithoutSkippedJob = records.filter((record) =>
         requiredJob === "jest"
