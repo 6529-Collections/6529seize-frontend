@@ -577,11 +577,13 @@ export default function GlobalRepCategoryDetail({
   mode = "page",
   showFullPageLink = false,
   showSearchLink = false,
+  className = "",
 }: {
   readonly category: string;
   readonly mode?: "page" | "dialog";
   readonly showFullPageLink?: boolean;
   readonly showSearchLink?: boolean;
+  readonly className?: string;
 }) {
   const [activeTab, setActiveTab] = useState<GlobalRepCategoryTab>("overview");
   const [sort, setSort] = useState<GlobalRepCategorySort>("rep_desc");
@@ -591,7 +593,7 @@ export default function GlobalRepCategoryDetail({
     <div
       className={`rep-category-dialog-content tailwind-scope tw-text-iron-100 ${PRESENTATION_CLASSNAME} ${
         mode === "page" ? "tw-py-8" : ""
-      }`}
+      } ${className}`}
     >
       <div className="rep-category-layout tw-flex tw-flex-col tw-gap-5">
         <div className="rep-category-header tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">

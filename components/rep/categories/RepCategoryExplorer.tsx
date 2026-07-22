@@ -313,6 +313,7 @@ export default function RepCategoryExplorer() {
             key={selectedCategory}
             category={selectedCategory}
             mode="page"
+            className="!tw-pt-0"
           />
         </div>
       )}
