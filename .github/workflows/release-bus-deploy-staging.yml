@@ -9,6 +9,13 @@ on:
       source_ref: { type: string, required: true }
       expected_sha: { type: string, required: true }
       artifact_run_id: { type: string, required: true }
+      artifact_environment:
+        {
+          type: choice,
+          required: false,
+          default: staging,
+          options: [staging, production],
+        }
 
 permissions:
   actions: read
@@ -34,6 +41,7 @@ jobs:
     environment: staging
     env:
       ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+      ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
       EXPECTED_SHA: ${{ inputs.expected_sha }}
       OPERATION_KEY: ${{ inputs.operation_key }}
       SOURCE_REF: ${{ inputs.source_ref }}
@@ -43,6 +51,7 @@ jobs:
       - name: Validate dispatch inputs before using credentials
         env:
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           SOURCE_REF: ${{ inputs.source_ref }}
@@ -52,6 +61,7 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$ARTIFACT_ENVIRONMENT" =~ ^(staging|production)$ ]]
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
@@ -71,7 +81,7 @@ jobs:
         with:
           github-token: ${{ github.token }}
           run-id: ${{ inputs.artifact_run_id }}
-          name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-staging
+          name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-${{ inputs.artifact_environment }}
           path: release-bus-artifact
       - name: Verify and bind immutable artifact
         id: artifact
@@ -88,7 +98,8 @@ jobs:
           jq -e \
             --arg train_id "$TRAIN_ID" \
             --arg source_sha "$EXPECTED_SHA" \
-            '.train_id == $train_id and .source_sha == $source_sha and .environment == "staging"' \
+            --arg artifact_environment "$ARTIFACT_ENVIRONMENT" \
+            '.train_id == $train_id and .source_sha == $source_sha and .environment == $artifact_environment' \
             manifest.json >/dev/null
           sha256sum -c SHA256SUMS
           package_digest="$(sha256sum target/package.zip | cut -d' ' -f1)"

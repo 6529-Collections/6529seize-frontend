@@ -196,20 +196,21 @@ describe("navigation.helpers", () => {
   });
 
   describe("hidesMobileBottomNavigation", () => {
-    it("hides on canonical wave and message detail routes", () => {
+    it("hides on canonical wave/message detail routes and the create-wave flow", () => {
       expect(hidesMobileBottomNavigation({ pathname: "/waves/wave-123" })).toBe(
         true
       );
       expect(
         hidesMobileBottomNavigation({ pathname: "/messages/dm-123" })
       ).toBe(true);
+      // Create-wave is a focused full-screen flow with its own sticky footer.
+      expect(hidesMobileBottomNavigation({ pathname: "/waves/create" })).toBe(
+        true
+      );
     });
 
-    it("keeps the dock on list and create routes", () => {
+    it("keeps the dock on list routes and the messages/create route", () => {
       expect(hidesMobileBottomNavigation({ pathname: "/waves" })).toBe(false);
-      expect(hidesMobileBottomNavigation({ pathname: "/waves/create" })).toBe(
-        false
-      );
       expect(hidesMobileBottomNavigation({ pathname: "/messages" })).toBe(
         false
       );

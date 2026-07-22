@@ -197,6 +197,51 @@ describe("Release Bus structured Jest reporting", () => {
     expect(JSON.stringify(payload)).not.toContain("OPENAI");
   });
 
+  it("classifies a failed dependency install as retryable infrastructure", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-dependency-report-")
+    );
+    const evidencePath = path.join(tempDir, "dependency-install.json");
+    try {
+      fs.writeFileSync(
+        evidencePath,
+        JSON.stringify({
+          status: "FAILED",
+          failure_class: "INFRASTRUCTURE_TRANSIENT",
+          failure_code: "DEPENDENCY_TRANSPORT_FAILURE",
+          raw_output: "must not leave the runner",
+        })
+      );
+      const output = execFileSync(
+        process.execPath,
+        ["scripts/release-bus-report-progress.mjs", "--payload-only"],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            GITHUB_RUN_ID: "29920703076",
+            RELEASE_BUS_JOB_STATUS: "failure",
+            RELEASE_BUS_REPORT_INCLUDE_STAGES: "false",
+            RELEASE_BUS_INSTALL_EVIDENCE: evidencePath,
+          },
+        }
+      );
+      const payload = JSON.parse(output.toString("utf8"));
+
+      expect(payload).toMatchObject({
+        status: "FAILED",
+        failure_class: "INFRASTRUCTURE_TRANSIENT",
+        failure_phase: "dependency_install",
+        retryable: true,
+        stages: [],
+      });
+      expect(JSON.stringify(payload)).not.toContain("raw_output");
+      expect(JSON.stringify(payload)).not.toContain("must not leave");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("omits malformed or unsafe Jest details deterministically", () => {
     const tempDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "release-bus-report-")
@@ -378,11 +423,14 @@ describe("Release Bus structured Jest reporting", () => {
       fs.writeFileSync(
         aggregatePath,
         JSON.stringify({
+          kind: "base_canary_summary",
           status: "SUCCEEDED",
           gate_mode: "sharded",
           base_sha: "a".repeat(40),
           environment: "orchestration",
           gate_fingerprint: "b".repeat(64),
+          behavior_digest: "f".repeat(64),
+          build_profile_digest: "9".repeat(64),
           workflow_sha: "c".repeat(40),
           workflow_digest: "d".repeat(64),
           node_version: "22",
@@ -427,6 +475,8 @@ describe("Release Bus structured Jest reporting", () => {
           ],
           missing_files: [],
           duplicate_files: [],
+          unexpected_files: [],
+          skipped_test_suites: 0,
           failing_suites: [],
           failing_tests: [],
           raw_log: "must never leave the runner",
@@ -467,19 +517,28 @@ describe("Release Bus structured Jest reporting", () => {
       expect(Object.keys(payload.summary).sort()).toEqual(
         [
           "base_sha",
+          "behavior_digest",
+          "build_profile_digest",
+          "build_coverage",
+          "build_environments",
           "duplicate_files",
           "environment",
           "fresh_or_reused",
           "gate_fingerprint",
+          "gate_mode",
+          "kind",
+          "immutable_artifact",
           "missing_files",
           "node_version",
           "package_manager",
           "phase_durations_ms",
+          "proof_origin",
           "shard_count",
           "shards",
           "summary_artifact_digest",
           "summary_artifact_name",
           "totals",
+          "unexpected_files",
           "workflow_digest",
           "workflow_sha",
         ].sort()
@@ -506,6 +565,34 @@ describe("Release Bus structured Jest reporting", () => {
       const shadowPayload = JSON.parse(shadowOutput.toString("utf8"));
       expect(payload.summary.phase_durations_ms.total).toBe(40);
       expect(shadowPayload.summary.phase_durations_ms.total).toBe(100);
+
+      fs.writeFileSync(
+        aggregatePath,
+        JSON.stringify({
+          ...shadowAggregate,
+          status: "FAILED",
+          skipped_test_suites: Number.MAX_SAFE_INTEGER,
+          errors: ["authoritative evidence missing"],
+        })
+      );
+      const invalidAuthoritativeEvidence = spawnSync(
+        process.execPath,
+        ["scripts/release-bus-report-progress.mjs", "--payload-only"],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            GITHUB_RUN_ID: "123",
+            RELEASE_BUS_AGGREGATE_SUMMARY: aggregatePath,
+            RELEASE_BUS_SUMMARY_ARTIFACT_DIGEST: "e".repeat(64),
+          },
+          encoding: "utf8",
+        }
+      );
+      expect(invalidAuthoritativeEvidence.status).not.toBe(0);
+      expect(invalidAuthoritativeEvidence.stderr).toContain(
+        "Release Bus summary contains an invalid count"
+      );
     } finally {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
