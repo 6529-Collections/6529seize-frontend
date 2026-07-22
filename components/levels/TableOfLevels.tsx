@@ -14,12 +14,7 @@ export default function TableOfLevels() {
 
   return (
     <div className="tw-flex tw-w-full tw-flex-col">
-      <div
-        aria-label={caption}
-        className="tw-max-h-[34rem] tw-w-full tw-overflow-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-white/20 desktop-hover:hover:tw-scrollbar-thumb-iron-700"
-        role="region"
-        tabIndex={0}
-      >
+      <div className="tw-max-h-[34rem] tw-w-full tw-overflow-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-700">
         <table
           className="tw-m-0 tw-w-full tw-border-collapse tw-border-0"
           aria-labelledby="levels-caption"
