@@ -127,9 +127,11 @@ export default function TDHMainPage() {
       }
 
       globalThis.requestAnimationFrame(() => {
+        const currentRule = globalThis.document.getElementById("tdh-1-4");
+        currentRule?.scrollIntoView({ block: "start" });
         globalThis.document
-          .getElementById("tdh-1-4")
-          ?.scrollIntoView({ block: "start" });
+          .getElementById("tdh-current-heading")
+          ?.focus({ preventScroll: true });
       });
     };
 

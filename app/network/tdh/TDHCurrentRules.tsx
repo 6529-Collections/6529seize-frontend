@@ -82,8 +82,9 @@ export default function TDHCurrentRules({
     >
       <div className="lg:tw-sticky lg:tw-top-28">
         <h2
-          className="tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
+          className="tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 focus:tw-outline-none sm:tw-text-xl"
           id="tdh-current-heading"
+          tabIndex={-1}
         >
           {m(locale, "network.tdh.current.title", { date: effectiveDate })}
         </h2>

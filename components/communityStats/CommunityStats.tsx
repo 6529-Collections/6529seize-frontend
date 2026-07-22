@@ -4,8 +4,8 @@ import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { GlobalTDHHistory } from "@/entities/ITDH";
-import { numberWithCommas } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t as translate, type MessageKey } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
@@ -123,7 +123,7 @@ export default function CommunityStats() {
           })}
         </th>
         <td className="tw-py-1 tw-text-right tw-font-mono tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-py-1.5">
-          {numberWithCommas(getEstimatedDaysUntil(history, x))}
+          {formatInteger(locale, getEstimatedDaysUntil(history, x))}
         </td>
       </tr>
     ));
@@ -338,7 +338,7 @@ export default function CommunityStats() {
                       {m(locale, "network.stats.summary.networkTdh")}
                     </th>
                     <td className="tw-py-1 tw-text-right tw-font-mono tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-py-1.5">
-                      {numberWithCommas(latestHistory!.total_boosted_tdh)}
+                      {formatInteger(locale, latestHistory!.total_boosted_tdh)}
                     </td>
                   </tr>
                   <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07]">
@@ -349,7 +349,7 @@ export default function CommunityStats() {
                       {m(locale, "network.stats.summary.dailyChange")}
                     </th>
                     <td className="tw-py-1 tw-text-right tw-font-mono tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-py-1.5">
-                      {numberWithCommas(latestHistory!.net_boosted_tdh)}
+                      {formatInteger(locale, latestHistory!.net_boosted_tdh)}
                     </td>
                   </tr>
                   <tr>
@@ -360,12 +360,16 @@ export default function CommunityStats() {
                       {m(locale, "network.stats.summary.dailyPercentChange")}
                     </th>
                     <td className="tw-py-1 tw-text-right tw-font-mono tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-py-1.5">
-                      {(
-                        (latestHistory!.net_boosted_tdh /
-                          latestHistory!.total_boosted_tdh) *
-                        100
-                      ).toFixed(2)}
-                      %
+                      {formatNumber(
+                        locale,
+                        latestHistory!.net_boosted_tdh /
+                          latestHistory!.total_boosted_tdh,
+                        {
+                          maximumFractionDigits: 2,
+                          minimumFractionDigits: 2,
+                          style: "percent",
+                        }
+                      )}
                     </td>
                   </tr>
                 </tbody>
