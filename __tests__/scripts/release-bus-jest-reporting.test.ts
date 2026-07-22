@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const YAML = require("yaml") as { parse: (text: string) => unknown };
@@ -60,13 +61,16 @@ describe("Release Bus structured Jest reporting", () => {
 
     for (const name of requiredJobs) {
       const steps = workflow.jobs?.[name]?.steps ?? [];
+      const expectedSteps = [
+        "Check out exact frontend base",
+        "Stage immutable gate tooling",
+        "Verify gate did not mutate source",
+      ];
+      if (name !== "aggregate") {
+        expectedSteps.push("Install and verify frozen dependencies");
+      }
       expect(steps.map((step) => step.name)).toEqual(
-        expect.arrayContaining([
-          "Check out exact frontend base",
-          "Stage immutable gate tooling",
-          "Install frozen dependencies",
-          "Verify gate did not mutate source",
-        ])
+        expect.arrayContaining(expectedSteps)
       );
     }
     expect(workflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
@@ -274,6 +278,97 @@ describe("Release Bus structured Jest reporting", () => {
     expect(result.stderr).toContain("not configured; skipping");
   });
 
+  it("retries only transport and server failures with the exact payload", () => {
+    const moduleUrl = pathToFileURL(
+      path.join(process.cwd(), "scripts/release-bus-report-progress.mjs")
+    ).href;
+    const output = execFileSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "--eval",
+        `import { postProgress } from ${JSON.stringify(moduleUrl)};
+         let attempts = 0;
+         const bodies = [];
+         await postProgress("https://api.example.test", "token", {operation:"same"}, {
+           fetchImpl: async (_url, options) => {
+             attempts += 1;
+             bodies.push(options.body);
+             return {ok: attempts === 2, status: attempts === 2 ? 200 : 503};
+           },
+           sleep: async () => {},
+           timeoutMs: 10
+         });
+         process.stdout.write(JSON.stringify({attempts,bodies}));`,
+      ],
+      { cwd: process.cwd() }
+    );
+    const result = JSON.parse(output.toString("utf8"));
+
+    expect(result).toEqual({
+      attempts: 2,
+      bodies: ['{"operation":"same"}', '{"operation":"same"}'],
+    });
+  });
+
+  it("fails after three persistent server responses", () => {
+    const moduleUrl = pathToFileURL(
+      path.join(process.cwd(), "scripts/release-bus-report-progress.mjs")
+    ).href;
+    const source = `import { postProgress } from ${JSON.stringify(moduleUrl)};
+      let attempts = 0;
+      try {
+        await postProgress("https://api.example.test", "token", {operation:"same"}, {
+          fetchImpl: async () => { attempts += 1; return {ok:false,status:503}; },
+          sleep: async () => {},
+          timeoutMs: 10
+        });
+      } catch (error) {
+        process.stdout.write(JSON.stringify({attempts,message:error.message}));
+      }`;
+    const output = execFileSync(
+      process.execPath,
+      ["--input-type=module", "--eval", source],
+      { cwd: process.cwd() }
+    );
+
+    expect(JSON.parse(output.toString("utf8"))).toEqual({
+      attempts: 3,
+      message:
+        "Release Bus progress report failed after bounded transport retries (503)",
+    });
+  });
+
+  it.each([401, 600])(
+    "fails immediately for non-retryable HTTP status %s",
+    (status) => {
+      const moduleUrl = pathToFileURL(
+        path.join(process.cwd(), "scripts/release-bus-report-progress.mjs")
+      ).href;
+      const source = `import { postProgress } from ${JSON.stringify(moduleUrl)};
+        let attempts = 0;
+        try {
+          await postProgress("https://api.example.test", "token", {operation:"same"}, {
+            fetchImpl: async () => { attempts += 1; return {ok:false,status:${status}}; },
+            sleep: async () => {},
+            timeoutMs: 10
+          });
+        } catch (error) {
+          process.stdout.write(JSON.stringify({attempts,message:error.message}));
+        }`;
+      const output = execFileSync(
+        process.execPath,
+        ["--input-type=module", "--eval", source],
+        { cwd: process.cwd() }
+      );
+
+      expect(JSON.parse(output.toString("utf8"))).toEqual({
+        attempts: 1,
+        message: `Release Bus progress report failed (${status})`,
+      });
+    }
+  );
+
   it("projects a versioned aggregate into the strict reusable summary", () => {
     const tempDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "release-bus-aggregate-")
@@ -355,6 +450,9 @@ describe("Release Bus structured Jest reporting", () => {
 
       expect(payload).toMatchObject({
         status: "SUCCEEDED",
+        failure_class: null,
+        failure_phase: null,
+        retryable: false,
         summary: {
           base_sha: "a".repeat(40),
           shard_count: 1,
