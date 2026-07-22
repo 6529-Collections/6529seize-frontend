@@ -22,7 +22,7 @@ describe("Release Bus frontend gate contract", () => {
     name?: string;
     run?: string;
     uses?: string;
-    with?: Record<string, string>;
+    with?: Record<string, unknown>;
   };
 
   const canaryWorkflow = parseYaml(canary) as {
@@ -53,6 +53,7 @@ describe("Release Bus frontend gate contract", () => {
         env?: Record<string, string>;
         needs?: string[] | string;
         outputs?: Record<string, string>;
+        permissions?: Record<string, string>;
         steps?: WorkflowStep[];
         strategy?: { "fail-fast"?: boolean };
         "timeout-minutes"?: number;
@@ -532,6 +533,9 @@ describe("Release Bus frontend gate contract", () => {
     });
     const buildProfileSteps =
       preflightWorkflow.jobs?.build_profile?.steps ?? [];
+    expect(preflightWorkflow.jobs?.build_profile?.permissions).toEqual({
+      contents: "read",
+    });
     expect(
       buildProfileSteps.find(
         (step) => step.name === "Derive protected target build profile"
@@ -545,6 +549,7 @@ describe("Release Bus frontend gate contract", () => {
       uses: expect.stringContaining("actions/upload-artifact@"),
       with: expect.objectContaining({
         name: "release-bus-preflight-build-profile-${{ github.run_id }}",
+        "retention-days": 1,
       }),
     });
     const authorizeSteps = preflightWorkflow.jobs?.authorize?.steps ?? [];
@@ -563,7 +568,12 @@ describe("Release Bus frontend gate contract", () => {
         (step) => step.name === "Verify protected target build profile"
       )?.run
     ).toContain("digest=$(jq -r '.digest' \"$profile\")");
-    expect(JSON.stringify(authorizeSteps)).not.toContain(
+    const nonProducerJobs = Object.fromEntries(
+      Object.entries(preflightWorkflow.jobs ?? {}).filter(
+        ([name]) => name !== "build_profile"
+      )
+    );
+    expect(JSON.stringify(nonProducerJobs)).not.toContain(
       "RELEASE_BUS_BUILD_PROFILE_HMAC_KEY"
     );
     expect(preflightWorkflow.jobs?.aggregate?.needs).toEqual([

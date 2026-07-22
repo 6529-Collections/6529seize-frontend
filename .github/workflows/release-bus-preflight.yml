@@ -93,7 +93,7 @@ jobs:
           name: release-bus-preflight-build-profile-${{ github.run_id }}
           path: ${{ runner.temp }}/release-bus-build-profile.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
 
   authorize:
     needs: build_profile
@@ -170,6 +170,10 @@ jobs:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - *setup-node
+      # download-artifact without a run-id or repository is scoped to this
+      # workflow run. The v4 artifact is immutable, and build_profile is the
+      # only job that can run before this consumer and publish this run-bound
+      # name. A compromised producer would already possess the HMAC key.
       - name: Download protected build profile
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
