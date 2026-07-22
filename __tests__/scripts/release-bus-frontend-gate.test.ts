@@ -12,6 +12,7 @@ describe("Release Bus frontend gate contract", () => {
   const preflight = read(".github/workflows/release-bus-preflight.yml");
   const isolation = read(".github/workflows/release-bus-isolate-candidate.yml");
   const canary = read(".github/workflows/release-bus-base-canary.yml");
+  const authorization = read("scripts/release-bus-authorize-operation.sh");
   const appPrCi = read(".github/workflows/app-pr-ci.yml");
   const reporter = read("scripts/release-bus-report-progress.mjs");
 
@@ -27,7 +28,10 @@ describe("Release Bus frontend gate contract", () => {
         inputs?: Record<string, { required?: boolean }>;
       };
     };
-    jobs?: Record<string, { steps?: WorkflowStep[] }>;
+    jobs?: Record<
+      string,
+      { steps?: WorkflowStep[]; "timeout-minutes"?: number }
+    >;
   };
 
   it("keeps deployed worker dispatch and authorization backward compatible", () => {
@@ -51,12 +55,90 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain(
       '\'{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}\''
     );
-    expect(canary).toContain(
-      "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+    expect(authorization).toContain(
+      '"$api_url/deploy/release-bus/authorize"'
     );
     expect(canary).toContain("release-bus-report-progress.mjs");
     expect(canary).toContain("Report sanitized terminal evidence");
     expect(reporter).toContain("/deploy/release-bus/report-progress");
+  });
+
+  it("bounds and retries an ambiguous authorization transport failure", () => {
+    expect(canaryWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
+    expect(canary).toContain(
+      'git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh"'
+    );
+
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-authorize-")
+    );
+    const attemptFile = path.join(tempDir, "attempts.txt");
+    try {
+      fs.writeFileSync(
+        path.join(tempDir, "curl"),
+        `#!/usr/bin/env bash\ncount=0\nif [ -f "$RELEASE_BUS_ATTEMPT_FILE" ]; then count="$(cat "$RELEASE_BUS_ATTEMPT_FILE")"; fi\ncount=$((count + 1))\nprintf '%s' "$count" > "$RELEASE_BUS_ATTEMPT_FILE"\nif [ "$count" -eq 1 ]; then exit 28; fi\nprintf '200'\n`
+      );
+      fs.writeFileSync(path.join(tempDir, "sleep"), "#!/usr/bin/env bash\n");
+      fs.chmodSync(path.join(tempDir, "curl"), 0o755);
+      fs.chmodSync(path.join(tempDir, "sleep"), 0o755);
+
+      execFileSync(
+        "bash",
+        ["scripts/release-bus-authorize-operation.sh", '{"operation":"same"}'],
+        {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            PATH: `${tempDir}:${process.env.PATH}`,
+            RELEASE_BUS_API_URL: "https://api.example.test",
+            RELEASE_BUS_ATTEMPT_FILE: attemptFile,
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+          },
+        }
+      );
+
+      expect(fs.readFileSync(attemptFile, "utf8")).toBe("2");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not retry a deterministic authorization rejection", () => {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-authorize-reject-")
+    );
+    const attemptFile = path.join(tempDir, "attempts.txt");
+    try {
+      fs.writeFileSync(
+        path.join(tempDir, "curl"),
+        `#!/usr/bin/env bash\nprintf '1' > "$RELEASE_BUS_ATTEMPT_FILE"\nprintf '409'\n`
+      );
+      fs.chmodSync(path.join(tempDir, "curl"), 0o755);
+
+      expect(() =>
+        execFileSync(
+          "bash",
+          [
+            "scripts/release-bus-authorize-operation.sh",
+            '{"operation":"same"}',
+          ],
+          {
+            cwd: process.cwd(),
+            env: {
+              ...process.env,
+              PATH: `${tempDir}:${process.env.PATH}`,
+              RELEASE_BUS_API_URL: "https://api.example.test",
+              RELEASE_BUS_ATTEMPT_FILE: attemptFile,
+              RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+            },
+            stdio: "pipe",
+          }
+        )
+      ).toThrow();
+      expect(fs.readFileSync(attemptFile, "utf8")).toBe("1");
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it("owns the only Release Bus Jest invocation", () => {
@@ -308,6 +390,11 @@ describe("Release Bus frontend gate contract", () => {
   it("executes its argument-forwarding contract in ordinary PR CI", () => {
     expect(appPrCi).toContain(
       "./scripts/release-bus-frontend-gate.sh contract"
+    );
+    expect(appPrCi).toContain("scripts/release-bus-authorize-operation.sh");
+    expect(appPrCi).toContain("scripts/release-bus-gate-evidence.cjs");
+    expect(appPrCi).toContain(
+      "__tests__/scripts/release-bus-gate-evidence.test.ts"
     );
   });
 });

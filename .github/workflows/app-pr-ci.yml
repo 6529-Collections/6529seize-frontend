@@ -247,6 +247,7 @@ jobs:
             package.json \
             pnpm-lock.yaml \
             .github/workflows/release-bus-*.yml \
+            scripts/release-bus-authorize-operation.sh \
             scripts/release-bus-frontend-gate.sh \
             scripts/release-bus-gate-evidence.cjs \
             scripts/release-bus-summarize-jest.mjs \

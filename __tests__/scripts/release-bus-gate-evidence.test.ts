@@ -41,6 +41,7 @@ describe("Release Bus gate evidence", () => {
     };
     const workflowFileContents = {
       ".github/workflows/release-bus-base-canary.yml": "workflow",
+      "scripts/release-bus-authorize-operation.sh": "authorize",
       "scripts/release-bus-frontend-gate.sh": "gate",
       "scripts/release-bus-gate-evidence.cjs": "evidence",
       "scripts/release-bus-report-progress.mjs": "reporter",
@@ -58,9 +59,9 @@ describe("Release Bus gate evidence", () => {
     expect(frontendGateContract(input)).toEqual(baseline);
     expect(baseline).toMatchObject({
       behavior_digest:
-        "56bdbaf1d0a50a6f6bd34149014bc9a0da9d69d38019e9013cdb888b08da6107",
+        "7fcd636de546cfc19c57db6f876b57c5157c264710c15848cf56bd2409f0ba68",
       gate_fingerprint:
-        "78870a761c2c085d2ca6a9386a3c6e77ccda5348667526972718a5832c530b49",
+        "04b7cea66d8075f2c1b8e246bb41ee0d86b7ecc284af42bbe4540de489ea7c6c",
       workflow_digest:
         "da7f739f627198465eeab537a6f7a435dc4a0c332f9e4a8462293eb3f4ab7ee0",
     });
