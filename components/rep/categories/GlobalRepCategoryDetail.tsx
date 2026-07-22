@@ -243,7 +243,7 @@ function OverviewContent({ category }: { readonly category: string }) {
 
   return (
     <div className="rep-category-overview tw-flex tw-flex-col tw-gap-6">
-      <div className="rep-category-metrics tw-grid tw-grid-cols-2 tw-gap-3 lg:tw-grid-cols-4">
+      <div className="rep-category-metrics tw-grid tw-w-full tw-max-w-3xl tw-grid-cols-2 tw-gap-3 lg:tw-grid-cols-4">
         <MetricTile label="Total REP" value={overview.total_rep} />
         <MetricTile label="Givers" value={overview.giver_count} />
         <MetricTile label="Recipients" value={overview.recipient_count} />
