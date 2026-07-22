@@ -1,5 +1,30 @@
 # AGENTS.md
 
+## Temporary Release Bus v2 Maintenance
+
+This section overrides the deployment skill and older Release Bus documentation
+until the v2 cutover is complete.
+
+- Do not register a candidate with Release Bus v1.
+- Before any staging or production mutation, run
+  `node ops/scripts/release-bus-status.mjs`. Continue only when it reports
+  `mode: OFF`; otherwise wait and retry.
+- For a manual route, require `RELEASE_BUS_ENFORCEMENT` to be absent or exactly
+  `false`. Stop on `true`, any other value, or a failed variable lookup.
+- Inspect active frontend and backend staging/production workflows and fetch the
+  exact remote target ref before merging or dispatching. Wait for other actors;
+  never cancel their workflows or force-push a shared branch.
+- Re-fetch immediately before pushing. If the target moved, recompute the merge
+  from its new head.
+- Deploy required backend units before dependent frontend work. Dispatch only
+  independent backend DAG units concurrently, and only with
+  `cancel-in-progress: false`.
+- Record exact deployed frontend/backend SHAs before E2E and do not mutate
+  staging until that E2E run is terminal.
+- Production still requires explicit owner authorization and successful staging
+  validation of the intended exact release set. Do not publish a release note
+  manually.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # Next.js: ALWAYS read docs before coding

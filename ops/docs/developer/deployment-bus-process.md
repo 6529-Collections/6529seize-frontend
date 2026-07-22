@@ -1,8 +1,50 @@
 # Staging and Production Deployment Bus
 
-Status: implemented behind rollout controls. The live API mode selects the
-release route; repository enforcement separately controls whether a manual
-route requires audited break glass.
+Status: Release Bus v1 maintenance. V1 is being disabled while Release Bus v2
+is implemented and proven. The v1 material below is retained only as rollback
+reference.
+
+## Temporary manual-deployment protocol
+
+Do not register new candidates with Release Bus v1. Before any staging or
+production mutation, run:
+
+```bash
+node ops/scripts/release-bus-status.mjs
+```
+
+Continue only when the helper reports `mode: OFF`. If it reports any other mode
+or cannot validate the response, wait and retry. Do not queue in v1 and do not
+use break glass merely to bypass the cutover.
+
+For every repository in the release set, require the
+`RELEASE_BUS_ENFORCEMENT` Actions variable to be absent or exactly `false`.
+Stop on `true`, any other value, or lookup failure.
+
+For each manual release:
+
+1. Fetch the exact remote target head and inspect active frontend and backend
+   staging/production workflows. Wait if another actor is mutating a shared
+   environment; never cancel another actor's workflow.
+2. Merge from the current remote target without force-pushing. Re-fetch
+   immediately before the push and recompute the merge if the target moved.
+3. For backend work, merge the development branch into current `1a-staging`,
+   then dispatch only the required units in dependency-DAG order. Independent
+   units may run concurrently only when their workflows use
+   `cancel-in-progress: false`.
+4. For frontend work, merge the development branch into current `1a-staging`;
+   the existing workflow deploys staging automatically. Coupled releases deploy
+   and verify the required backend units before changing frontend staging.
+5. Record the exact deployed frontend and backend SHAs before E2E. Freeze all
+   staging mutations until that E2E run is terminal.
+6. Require explicit owner authorization and successful staging validation of
+   the intended exact release set before production. Preserve dependency order,
+   re-fetch `main`, never cancel another production workflow, and do not publish
+   a release note manually.
+
+The v2 bus will replace this manual route only after its live acceptance
+criteria pass. Staging validation will not automatically schedule production;
+production readiness remains an explicit action for an exact validated SHA.
 
 ## What changes for developers
 

@@ -1,7 +1,25 @@
 # Deployment Bus Automation and Operations
 
-Status: implementation reference and go-live runbook. Code is feature-gated;
-merging it does not by itself enable autonomous deployments.
+Status: v1 rollback reference during Release Bus v2 maintenance. V1 must not
+accept new readiness or scheduler claims. The temporary manual-deployment
+protocol in `deployment-bus-process.md` is authoritative until v2 cutover.
+
+## Maintenance boundary
+
+- Pause v1 `ALL` with an audited maintenance reason before waiting for an active
+  train.
+- Let already-dispatched workflows reach terminal state naturally; never cancel
+  them for cutover.
+- At the first boundary where the active train and all of its workflows are
+  terminal, set runtime `RELEASE_BUS_MODE=OFF`, deploy the API before the worker,
+  and pause or disable the scheduler trigger as needed.
+- Verify the API reports `OFF` and rejects readiness. Prove the disabled worker
+  cannot claim, create, dispatch, merge, or deploy.
+- Reconcile nonterminal v1 test candidates only after claiming is disabled.
+- Keep v1 code and infrastructure disabled as rollback until v2 staging and
+  production are proven; do not delete it during cutover.
+- Keep repository `RELEASE_BUS_ENFORCEMENT` absent or exactly `false` while the
+  manual route is active.
 
 ## Runtime architecture
 

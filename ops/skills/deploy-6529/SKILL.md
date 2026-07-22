@@ -5,6 +5,33 @@ description: Determine the live 6529 Release Bus mode through authenticated gh, 
 
 # Deploy 6529
 
+## Temporary v2 maintenance override
+
+Until this section is removed after Release Bus v2 cutover:
+
+1. Do not submit readiness to Release Bus v1.
+2. Run `node ops/scripts/release-bus-status.mjs` before any staging or
+   production mutation and continue only when it reports `mode: OFF`. If it is
+   not `OFF`, wait and retry; do not use break glass to bypass the transition.
+3. Require `RELEASE_BUS_ENFORCEMENT` to be absent or exactly `false` in every
+   repository in the release set. Stop on `true`, any other value, or lookup
+   failure.
+4. Fetch the exact remote target head and inspect active frontend and backend
+   staging/production workflows. Wait for every other actor; never cancel their
+   workflow or force-push a shared branch. Re-fetch immediately before pushing
+   and recompute the merge if the target moved.
+5. Deploy required backend units before dependent frontend work. Dispatch only
+   independent backend DAG units concurrently, and only when their workflows
+   use `cancel-in-progress: false`.
+6. Record exact deployed frontend/backend SHAs before E2E and freeze staging
+   until that E2E run is terminal.
+7. Require explicit owner authorization and successful exact staging validation
+   for production. Do not publish a release note manually.
+
+When the helper reports `OFF`, use the legacy manual route described below.
+The older pause and mode-routing text remains rollback documentation, but it
+does not authorize v1 readiness during this maintenance window.
+
 Determine the live Release Bus mode before choosing either the bus or a manual
 path. Read
 `ops/docs/developer/deployment-bus-process.md` for lifecycle policy and
