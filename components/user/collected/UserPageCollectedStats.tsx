@@ -158,43 +158,41 @@ export default function UserPageCollectedStats({
   return (
     <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black">
       <div className="tw-p-4 sm:tw-p-5">
-        <div className="tw-space-y-4">
-          <CollectedStatsHeader
-            metrics={mainMetrics}
-            activeCollection={activeCollection}
-            isDetailsOpen={isDetailsOpen}
-            detailsId={detailsId}
-            locale={locale}
-            onToggleDetails={() => setIsDetailsOpen((current) => !current)}
-            onCollectionShortcut={onCollectionShortcut}
-          />
-
-          <CollectedStatsSeasons
-            allSeasonCount={allSeasons.length}
-            startedSeasons={startedSeasons}
-            visibleStartedSeasons={visibleStartedSeasons}
-            hiddenStartedSeasonCount={hiddenStartedSeasonCount}
-            notStartedSeasons={notStartedSeasons}
-            activeSeasonId={activeSeasonId}
-            activeSeasonNumber={activeSeasonNumber}
-            locale={locale}
-            hasTouchScreen={hasTouchScreen}
-            isDesktopLayout={isDesktopSeasonsLayout}
-            isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
-            desktopSeasonsRef={desktopSeasonsRef}
-            onActivateSeason={(seasonId) =>
-              setPreferredSeasonPreview({
-                seasonId,
-                activeSeasonFilterId,
-              })
-            }
-            onSeasonShortcut={onSeasonShortcut}
-            onToggleExpanded={() =>
-              setIsDesktopSeasonListExpanded((current) => !current)
-            }
-          />
-        </div>
+        <CollectedStatsHeader
+          metrics={mainMetrics}
+          activeCollection={activeCollection}
+          isDetailsOpen={isDetailsOpen}
+          detailsId={detailsId}
+          locale={locale}
+          onToggleDetails={() => setIsDetailsOpen((current) => !current)}
+          onCollectionShortcut={onCollectionShortcut}
+        />
       </div>
+
+      <CollectedStatsSeasons
+        allSeasonCount={allSeasons.length}
+        startedSeasons={startedSeasons}
+        visibleStartedSeasons={visibleStartedSeasons}
+        hiddenStartedSeasonCount={hiddenStartedSeasonCount}
+        notStartedSeasons={notStartedSeasons}
+        activeSeasonId={activeSeasonId}
+        activeSeasonNumber={activeSeasonNumber}
+        locale={locale}
+        hasTouchScreen={hasTouchScreen}
+        isDesktopLayout={isDesktopSeasonsLayout}
+        isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
+        desktopSeasonsRef={desktopSeasonsRef}
+        onActivateSeason={(seasonId) =>
+          setPreferredSeasonPreview({
+            seasonId,
+            activeSeasonFilterId,
+          })
+        }
+        onSeasonShortcut={onSeasonShortcut}
+        onToggleExpanded={() =>
+          setIsDesktopSeasonListExpanded((current) => !current)
+        }
+      />
 
       <CollectedStatsDetailsPanel
         isOpen={isDetailsOpen}

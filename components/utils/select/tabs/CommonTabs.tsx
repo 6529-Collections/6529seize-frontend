@@ -1,17 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import type { CommonSelectProps } from "../CommonSelect";
+import type { CommonSelectItem, CommonSelectProps } from "../CommonSelect";
 import CommonTabsTab from "./CommonTabsTab";
 
+type CommonTabsProps<T, U> = CommonSelectProps<T, U> & {
+  readonly isItemDisabled?:
+    | ((item: CommonSelectItem<T, U>) => boolean)
+    | undefined;
+};
+
 export default function CommonTabs<T, U = unknown>(
-  props: Readonly<CommonSelectProps<T, U>>
+  props: Readonly<CommonTabsProps<T, U>>
 ) {
   const { items, activeItem, setSelected, filterLabel } = props;
   const sortDirection =
     "sortDirection" in props ? props.sortDirection : undefined;
   const disabled = "disabled" in props ? (props.disabled ?? false) : false;
   const size = "size" in props ? props.size : undefined;
+  const isItemDisabled = useCallback(
+    (item: CommonSelectItem<T, U>) =>
+      disabled || props.isItemDisabled?.(item) === true,
+    [disabled, props.isItemDisabled]
+  );
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
@@ -71,28 +82,33 @@ export default function CommonTabs<T, U = unknown>(
   }, [updateFadeIndicators]);
 
   const focusTab = useCallback(
-    (index: number) => {
+    (index: number, step: 1 | -1) => {
       const total = items.length;
-      if (!total) {
+      if (!total || disabled) {
         return undefined;
       }
 
-      const normalizedIndex = ((index % total) + total) % total;
-      const targetItem = items[normalizedIndex];
-      if (!targetItem) {
-        return undefined;
+      for (let offset = 0; offset < total; offset += 1) {
+        const candidateIndex = index + offset * step;
+        const normalizedIndex = ((candidateIndex % total) + total) % total;
+        const targetItem = items[normalizedIndex];
+        if (!targetItem || isItemDisabled(targetItem)) {
+          continue;
+        }
+
+        const tab = tabRefs.current.get(targetItem.key);
+        tab?.focus();
+        return targetItem;
       }
 
-      const tab = tabRefs.current.get(targetItem.key);
-      tab?.focus();
-      return targetItem;
+      return undefined;
     },
-    [items]
+    [disabled, isItemDisabled, items]
   );
 
   const focusAndSelectTab = useCallback(
-    (index: number) => {
-      const targetItem = focusTab(index);
+    (index: number, step: 1 | -1) => {
+      const targetItem = focusTab(index, step);
       if (!targetItem || targetItem.value === activeItem) {
         return;
       }
@@ -108,23 +124,23 @@ export default function CommonTabs<T, U = unknown>(
         case "ArrowRight":
         case "Right": {
           event.preventDefault();
-          focusAndSelectTab(currentIndex + 1);
+          focusAndSelectTab(currentIndex + 1, 1);
           break;
         }
         case "ArrowLeft":
         case "Left": {
           event.preventDefault();
-          focusAndSelectTab(currentIndex - 1);
+          focusAndSelectTab(currentIndex - 1, -1);
           break;
         }
         case "Home": {
           event.preventDefault();
-          focusAndSelectTab(0);
+          focusAndSelectTab(0, 1);
           break;
         }
         case "End": {
           event.preventDefault();
-          focusAndSelectTab(items.length - 1);
+          focusAndSelectTab(items.length - 1, -1);
           break;
         }
         default:
@@ -168,7 +184,7 @@ export default function CommonTabs<T, U = unknown>(
 
                 tabRefs.current.set(item.key, node);
               }}
-              disabled={disabled}
+              disabled={isItemDisabled(item)}
               fill={props.fill ?? true}
               size={size}
             />

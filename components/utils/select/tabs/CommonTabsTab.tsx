@@ -110,7 +110,7 @@ export default function CommonTabsTab<T, U = unknown>(
           </span>
         )}
         {sortDirection && (
-          <span className="-tw-mt-1">
+          <span className="tw-flex tw-items-center">
             <CommonTableSortIcon
               direction={isActive ? sortDirection : SortDirection.DESC}
               isActive={isActive}
