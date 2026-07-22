@@ -116,8 +116,9 @@ merged unnoticed.
 
 Before composing a train that contains frontend work, the worker dispatches
 `release-bus-base-canary.yml` against the train's exact recorded frontend base
-SHA. The canary runs lint, typecheck, the complete Jest suite, and a production
-build. A deterministic source/gate failure requeues the train's candidates,
+SHA. The canary runs lint, typecheck, the complete Jest suite, and a build with
+the exact protected staging configuration profile. A deterministic source/gate
+failure requeues the train's candidates,
 pauses the lane, and records the exact Actions run as operator evidence; it
 never attributes the base failure to a candidate. This pause also applies to an
 unclassified failure. A dependency-install failure explicitly classified as
@@ -175,7 +176,9 @@ Every shard uploads bounded JSON counts, timing, its planned manifest, its
 executed-file manifest, exact shard coordinates, and failing suite/test
 identities. Every phase, manifest, and shard record also repeats the exact base
 SHA, `orchestration` environment, gate fingerprint, workflow SHA/digest, Node
-version, and package-manager contract. The authorize job derives that identity
+version, package-manager contract, and opaque HMAC-protected build-profile
+digest. The digest binds every relevant public value and secret without placing
+those values in evidence. The authorize job derives that identity
 from the immutable base and workflow commits before calling the Release Bus
 API. The fail-closed aggregate requires every selected job to succeed, requires
 every expected Jest file in exactly one shard, compares each shard's plan to
@@ -216,6 +219,31 @@ candidate composition, preflight, deployment, or E2E. A hit writes durable
 creation, and expiry, then advances within that worker cycle. Shadow lookup
 writes `BASE_CANARY_EVIDENCE_WOULD_REUSE` but still dispatches a fresh gate.
 
+There are two trusted evidence origins: a freshly completed base canary and a
+`BASE_EVIDENCE_PROMOTED` record from a successful staging train. Promotion is
+created after the expected-old-SHA `1a-staging` update and is cryptographically
+bound to the exact final frontend SHA, schema-v2 gate contract, complete
+preflight aggregate, preflight artifact, immutable staging deployment, and
+staging E2E workflow runs. The preflight performs exactly one application
+compilation with the protected staging profile, packages that output once, and
+deploys that same immutable artifact. That single build is also the required
+base-canary-equivalent build coverage; there is no placeholder or second
+promotion-only compilation. The proof additionally requires complete Jest
+inventory with zero missing/duplicate/unexpected/skipped/todo tests and
+successful lint/typecheck/build stages. The proof digest covers the contract,
+summary, operation keys, run IDs/URLs, artifact digests, source train, and
+expiry.
+
+Promotion and reuse records use deterministic idempotency keys, so worker
+retries cannot duplicate a decision. A transient rejected promotion can later
+be superseded by a valid exact proof, while repeated identical decisions remain
+single records. A reused-only summary is never promotable: every promoted SHA
+must be anchored in that train's own fresh preflight, deploy, and E2E proof.
+Missing, malformed, stale, failed, untrusted, or mismatched evidence is a cache
+miss, not an authorization, and dispatches the fresh base-canary workflow. The
+status API and dashboard distinguish `CARRIED_FORWARD_REUSED` from
+`FRESH_EXECUTED`/`FRESH_EXECUTING` and expose the bounded source provenance.
+
 Rollout is ordered and reversible: deploy the additive candidate column first;
 deploy the API/worker with both reuse flags false; merge the frontend workflow
 with `legacy`/one shard; collect serial-versus-sharded equivalence in `shadow`;
@@ -224,12 +252,19 @@ shadow and inspect real decisions; then enable reuse with the 24-hour TTL.
 Disable reuse independently or return the frontend to `legacy`/one shard before
 considering a code rollback.
 
-Candidate preflight uses the same fail-closed Jest inventory model without
-sharing the base-canary reuse identity. Lint, typecheck, the complete Jest
-inventory, deterministic Jest shards, and immutable staging/production builds
-run as independent jobs. The final preflight aggregate requires every job to
-succeed and proves every expected test file executed exactly once, with no
-missing, duplicate, unexpected, skipped, todo, or rerun-masked tests. Jest runs
+Candidate preflight uses the same fail-closed Jest inventory model. It selects
+one build profile from the target lane: staging for a staging train and
+production for a production train. Lint, typecheck, the complete Jest
+inventory, deterministic Jest shards, and the single target build run as
+independent jobs. That one compilation produces the immutable artifact consumed
+by deployment. The final preflight aggregate requires every selected
+job to succeed and proves every expected test file executed exactly once, with
+no missing, duplicate, unexpected, skipped, todo, or rerun-masked tests. The
+aggregate and artifact digest are terminally bound to the exact preflight
+operation and workflow run through the Release Bus API. Only an exact staging
+profile whose gate mode and shard count match the current base-canary contract
+is eligible for carry-forward promotion. Production preflight produces only its
+production artifact and is never staging-base evidence. Jest runs
 with `--maxWorkers=2 --bail=0`; Release Bus full, isolation, base, and preflight
 execution never uses `--runInBand`.
 

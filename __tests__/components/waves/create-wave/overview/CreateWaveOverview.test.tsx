@@ -71,7 +71,8 @@ describe("CreateWaveOverview", () => {
   const mockOverview: WaveOverviewConfig = {
     name: "",
     image: null,
-    type: null,
+    type: ApiWaveType.Chat,
+    typeSelected: false,
   };
 
   const mockSetOverview = jest.fn();
@@ -149,6 +150,7 @@ describe("CreateWaveOverview", () => {
       name: "Test Wave",
       image: new File(["test"], "test.png", { type: "image/png" }),
       type: ApiWaveType.Chat,
+      typeSelected: true,
     };
 
     render(
@@ -227,9 +229,11 @@ describe("CreateWaveOverview", () => {
     const typeSelect = screen.getByTestId("type-select");
     fireEvent.change(typeSelect, { target: { value: "APPROVE" } });
 
+    // Picking a type also records the explicit selection so the gate clears.
     expect(mockSetOverview).toHaveBeenCalledWith({
       ...mockOverview,
       type: "APPROVE",
+      typeSelected: true,
     });
   });
 
@@ -238,6 +242,7 @@ describe("CreateWaveOverview", () => {
       name: "Existing Wave",
       image: new File(["existing"], "existing.png", { type: "image/png" }),
       type: ApiWaveType.Chat,
+      typeSelected: true,
     };
 
     render(
@@ -307,7 +312,8 @@ describe("CreateWaveOverview", () => {
     const nullOverview: WaveOverviewConfig = {
       name: null as any,
       image: null,
-      type: null,
+      type: null as any,
+      typeSelected: false,
     };
 
     render(

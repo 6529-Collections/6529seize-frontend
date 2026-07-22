@@ -25,6 +25,7 @@ const identityEnvironment = (runnerTemp: string) => ({
   RELEASE_BUS_WORKFLOW_DIGEST: "d".repeat(64),
   RELEASE_BUS_NODE_VERSION: "22",
   RELEASE_BUS_PACKAGE_MANAGER: "pnpm@10.14.0",
+  RELEASE_BUS_BUILD_PROFILE_DIGEST: "e".repeat(64),
   RUNNER_TEMP: runnerTemp,
 });
 
@@ -90,6 +91,7 @@ describe("Release Bus verified dependency installation", () => {
       status: "SUCCEEDED",
       failure_class: null,
       recovered: true,
+      build_profile_digest: "e".repeat(64),
     });
     expect(evidence.attempts).toHaveLength(2);
     expect(

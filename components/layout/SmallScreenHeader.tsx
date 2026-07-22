@@ -2,6 +2,7 @@
 
 import NetworkHealthCTA from "@/components/header/NetworkHealthCTA";
 import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
+import EnvironmentBadge from "@/components/common/EnvironmentBadge";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,18 +23,21 @@ export default function SmallScreenHeader({
   return (
     <header className="tailwind-scope tw-sticky tw-top-0 tw-z-50 tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black">
       <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-px-5">
-        <Link href="/" className="tw-flex tw-items-center">
-          <Image
-            unoptimized
-            loading="eager"
-            priority
-            alt="6529Seize"
-            src="/6529.svg"
-            className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-transition-all tw-duration-100 desktop-hover:hover:tw-scale-[1.02] desktop-hover:hover:tw-shadow-[0_0_20px_10px_rgba(255,215,215,0.3)]"
-            width={40}
-            height={40}
-          />
-        </Link>
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+          <Link href="/" className="tw-flex tw-items-center">
+            <Image
+              unoptimized
+              loading="eager"
+              priority
+              alt="6529Seize"
+              src="/6529.svg"
+              className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-transition-all tw-duration-100 desktop-hover:hover:tw-scale-[1.02] desktop-hover:hover:tw-shadow-[0_0_20px_10px_rgba(255,215,215,0.3)]"
+              width={40}
+              height={40}
+            />
+          </Link>
+          <EnvironmentBadge compact />
+        </div>
         <div className="tw-flex tw-items-center tw-gap-3">
           {isHomeRoute && <NetworkHealthCTA />}
           <HeaderSearchButton wave={null} />

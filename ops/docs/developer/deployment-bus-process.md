@@ -180,7 +180,7 @@ It then:
   `1a-staging` base before composing any frontend candidate, so a broken base or
   control-plane command cannot be blamed on candidate code;
 - runs parallel fail-closed frontend preflight lint, typecheck, complete Jest
-  inventory/shards, and immutable builds, with an independently reversible
+  inventory/shards, and exactly one immutable staging build, with an independently reversible
   `1|2|4` shard count and bounded Jest workers;
 - deploys backend units in service-DAG order;
 - deploys frontend after backend succeeds;
@@ -194,6 +194,17 @@ original train and Actions run. It proves only the unchanged pre-existing base
 under the same gate fingerprint. Candidate composition, preflight, deployment,
 and E2E still run fresh. The operator force-fresh choice is immutable after
 readiness; cancel and resubmit the candidate to change it.
+
+After a successful frontend staging train, the bus promotes the exact final
+`1a-staging` SHA into reusable base evidence only when that train's fresh
+preflight is gate-equivalent to the base canary and the immutable staging
+deployment plus staging E2E both succeeded. The next serial staging train may
+therefore skip a redundant base-canary workflow for that exact SHA and exact
+current gate contract. The dashboard labels this as **CARRIED_FORWARD_REUSED**
+and shows the source train, workflow run, artifact digest, and proof digest;
+fresh execution remains separately labelled. Any ref, workflow, tooling,
+runtime, package-manager, mode, shard, inventory, build, deployment, E2E, age,
+or provenance mismatch falls back to a fresh base canary.
 
 Backend units declared `production-only` in the deploy registry are built and
 tested during preflight but are not runtime-deployed to staging. Their staging
@@ -209,8 +220,8 @@ candidates are requeued against the new base instead of overwriting it.
 
 Only an exact SHA with durable staging validation can be marked ready for
 production. A production train starts from fresh `main` in each represented
-repository and produces both staging-configured and production-configured
-immutable artifacts.
+repository and compiles exactly one production-configured immutable artifact,
+which is the artifact deployed after the production gates pass.
 
 The bus restages and revalidates the exact combined production release set. It
 does not treat older candidate-level staging evidence as proof for a newly

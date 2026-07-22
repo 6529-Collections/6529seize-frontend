@@ -1,7 +1,10 @@
 import NFTActivityPage, { generateMetadata } from "@/app/nft-activity/page";
+import { AuthContext } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { AuthContext } from "@/components/auth/Auth";
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -98,7 +101,7 @@ describe("NFTActivityPage", () => {
     const metadata = await generateMetadata();
     expect(metadata).toMatchObject({
       title: "NFT Activity | Network",
-      description: "Network | 6529.io",
+      description: `Network | ${domain}`,
     });
   });
 

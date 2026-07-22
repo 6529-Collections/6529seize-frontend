@@ -12,7 +12,12 @@ describe("create-wave.validation", () => {
   const HOUR_IN_MS = 60 * 60 * 1000;
 
   const baseConfig: any = {
-    overview: { type: ApiWaveType.Rank, name: "name", image: null },
+    overview: {
+      type: ApiWaveType.Rank,
+      typeSelected: true,
+      name: "name",
+      image: null,
+    },
     groups: {
       canView: null,
       canDrop: null,
@@ -77,6 +82,30 @@ describe("create-wave.validation", () => {
       config,
     });
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
+  });
+
+  it("requires an explicit wave type selection on the overview step", () => {
+    const unselected = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, typeSelected: false },
+    };
+    expect(
+      getCreateWaveValidationErrors({
+        step: CreateWaveStep.OVERVIEW,
+        config: unselected,
+      })
+    ).toContain(CREATE_WAVE_VALIDATION_ERROR.TYPE_REQUIRED);
+
+    const selected = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, typeSelected: true },
+    };
+    expect(
+      getCreateWaveValidationErrors({
+        step: CreateWaveStep.OVERVIEW,
+        config: selected,
+      })
+    ).not.toContain(CREATE_WAVE_VALIDATION_ERROR.TYPE_REQUIRED);
   });
 
   it("requires outcomes for scheduled rank waves", () => {
