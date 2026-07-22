@@ -11,6 +11,7 @@ import {
   getLargeSocialCardMetadata,
   getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
+import { publicEnv } from "@/config/env";
 
 describe("Metadata functionality (migrated from _document.tsx)", () => {
   describe("Version Meta Tag (core functionality from _document.tsx)", () => {
@@ -55,6 +56,16 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
   });
 
   describe("Standard Metadata Structure", () => {
+    const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
+
+    beforeEach(() => {
+      publicEnv.BASE_ENDPOINT = "https://6529.io";
+    });
+
+    afterEach(() => {
+      publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
+    });
+
     it("includes favicon icon", () => {
       const metadata = getAppMetadata();
       expect(metadata.icons).toEqual({
@@ -89,6 +100,26 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
       expect(metadata.title).toBe("6529.io");
       expect(metadata.openGraph?.title).toBe("6529.io");
     });
+
+    it.each([
+      ["https://staging.6529.io", "6529 Staging", "/favicon-staging.ico"],
+      ["https://prxtstaging.6529.io", "6529 PRXTStaging", "/favicon-alt.ico"],
+      ["http://localhost:3001", "6529 Localhost", "/favicon-alt.ico"],
+    ])(
+      "derives metadata from %s",
+      (baseEndpoint, expectedTitle, expectedFavicon) => {
+        publicEnv.BASE_ENDPOINT = baseEndpoint;
+        const metadata = getAppMetadata({ description: "Environment test" });
+        const hostname = new URL(baseEndpoint).hostname;
+
+        expect(metadata.title).toBe(expectedTitle);
+        expect(metadata.description).toBe(`Environment test | ${hostname}`);
+        expect(metadata.icons).toEqual({ icon: expectedFavicon });
+        expect(metadata.openGraph?.description).toBe(
+          `Environment test | ${hostname}`
+        );
+      }
+    );
 
     it("accepts custom metadata overrides", () => {
       const customMetadata = {

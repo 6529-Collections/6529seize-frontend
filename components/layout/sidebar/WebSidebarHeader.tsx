@@ -3,6 +3,7 @@
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import EnvironmentBadge from "@/components/common/EnvironmentBadge";
 
 interface WebSidebarHeaderProps {
   readonly collapsed: boolean;
@@ -11,10 +12,11 @@ interface WebSidebarHeaderProps {
 
 function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
   return (
-    <div className="tw-relative tw-shrink-0 tw-h-12 tw-flex tw-items-center tw-justify-between tw-px-2">
+    <div className="tw-relative tw-flex tw-h-16 tw-shrink-0 tw-items-center tw-justify-between tw-px-2">
       <Link
         href="/"
-        className="tw-relative tw-z-10 tw-flex tw-items-center tw-ml-3 tw-ease-in-out">
+        className="tw-relative tw-z-10 tw-ml-3 tw-flex tw-size-10 tw-items-center tw-ease-in-out"
+      >
         <Image
           unoptimized
           loading="eager"
@@ -25,20 +27,24 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
           width={40}
           height={40}
         />
+        <div className="tw-absolute tw-left-1/2 tw-top-9 tw-flex -tw-translate-x-1/2 tw-justify-center">
+          <EnvironmentBadge compact />
+        </div>
       </Link>
       <button
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className={`desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)] tw-border-iron-700  tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid   ${
+        className={`tw-absolute tw-top-1/2 tw-flex -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)] ${
           collapsed
-            ? "tw-rotate-180 tw-h-6 tw-w-6 tw-rounded-lg -tw-right-3"
-            : " tw-h-8 tw-w-8 tw-right-4 tw-rounded-xl"
+            ? "-tw-right-3 tw-h-6 tw-w-6 tw-rotate-180 tw-rounded-lg"
+            : "tw-right-4 tw-h-8 tw-w-8 tw-rounded-xl"
         }`}
-        aria-label="Toggle right sidebar">
+        aria-label="Toggle right sidebar"
+      >
         <ChevronDoubleLeftIcon
           strokeWidth={2}
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 group-hover:desktop-hover:hover:tw-text-white tw-transition-all tw-duration-300 tw-ease-in-out"
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition-all tw-duration-300 tw-ease-in-out group-hover:desktop-hover:hover:tw-text-white"
         />
       </button>
     </div>
