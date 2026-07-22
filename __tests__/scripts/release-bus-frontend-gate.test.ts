@@ -15,6 +15,7 @@ describe("Release Bus frontend gate contract", () => {
   const authorization = read("scripts/release-bus-authorize-operation.sh");
   const appPrCi = read(".github/workflows/app-pr-ci.yml");
   const reporter = read("scripts/release-bus-report-progress.mjs");
+  const stagingE2e = read(".github/workflows/staging-e2e.yml");
 
   type WorkflowStep = {
     env?: Record<string, string>;
@@ -77,6 +78,18 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain("release-bus-report-progress.mjs");
     expect(canary).toContain("Report sanitized terminal evidence");
     expect(reporter).toContain("/deploy/release-bus/report-progress");
+  });
+
+  it("fails closed and reports retryable dependency failures from staging E2E", () => {
+    expect(stagingE2e).toContain(
+      "scripts/release-bus-install-dependencies.cjs"
+    );
+    expect(stagingE2e).toContain("continue-on-error: true");
+    expect(stagingE2e).toContain("Report structured Release Bus E2E result");
+    expect(stagingE2e).toContain("Return staging E2E result");
+    expect(stagingE2e).toContain('run: node "$RELEASE_BUS_INSTALL_TOOL"');
+    expect(stagingE2e).not.toContain("run: ./bin/6529 install:frozen");
+    expect(reporter).toContain("RELEASE_BUS_INSTALL_EVIDENCE");
   });
 
   it("bounds and retries an ambiguous authorization transport failure", () => {
