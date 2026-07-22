@@ -1,12 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import AboutMemes from "@/components/about/AboutMemes";
 
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img alt={props.alt ?? ""} {...props} />
-  ),
-}));
+jest.mock("next/image", () => {
+  const React = jest.requireActual<typeof import("react")>("react");
+
+  return {
+    __esModule: true,
+    default: React.forwardRef<
+      HTMLImageElement,
+      React.ImgHTMLAttributes<HTMLImageElement>
+    >((props, ref) => <img alt={props.alt ?? ""} ref={ref} {...props} />),
+  };
+});
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -33,6 +38,11 @@ describe("AboutMemes", () => {
       name: "Awakening OM, Meme Card #17",
     });
     expect(artwork).toHaveAttribute("src", expect.stringContaining("/17.WEBP"));
+    expect(artwork).toHaveClass("tw-opacity-0");
+
+    fireEvent.load(artwork);
+
+    expect(artwork).toHaveClass("tw-opacity-100");
   });
 
   it("preserves resource destinations and new-tab behavior", () => {
@@ -50,6 +60,15 @@ describe("AboutMemes", () => {
     });
     expect(network).toHaveAttribute("href", "/network");
     expect(network).toHaveAttribute("target", "_blank");
+
+    const chat = screen.getByRole("link", {
+      name: /The Memes chat on Brain/,
+    });
+    expect(chat).toHaveAttribute(
+      "href",
+      "/waves/0849642f-1770-4de2-9cbc-70aae59c17ff"
+    );
+    expect(chat).not.toHaveAttribute("target");
   });
 
   it("shows a resilient fallback when artwork fails to load", () => {

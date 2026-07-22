@@ -8,8 +8,9 @@ import {
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
+import { MEMES_CONTRACT } from "@/constants/memes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
@@ -30,7 +31,6 @@ type Resource = {
   readonly opensNewTab: boolean;
 };
 
-const MEMES_CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
 const MEMES_IMAGE_ROOT = `https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/${MEMES_CONTRACT}`;
 
 const ARTWORKS: readonly MemeArtwork[] = [
@@ -84,7 +84,7 @@ const RESOURCES: readonly Resource[] = [
   },
   {
     titleKey: "about.memes.resources.chat.title",
-    href: "https://6529.io/waves/0849642f-1770-4de2-9cbc-70aae59c17ff",
+    href: "/waves/0849642f-1770-4de2-9cbc-70aae59c17ff",
     destination: "Memes-Chat",
     opensNewTab: false,
   },
@@ -110,6 +110,11 @@ function ResilientImage({
   readonly src: string;
 }) {
   const [status, setStatus] = useState<ImageStatus>("loading");
+  const handleImageRef = useCallback((image: HTMLImageElement | null) => {
+    if (image?.complete && image.naturalWidth > 0) {
+      setStatus("loaded");
+    }
+  }, []);
 
   return (
     <div
@@ -146,6 +151,7 @@ function ResilientImage({
           loading={eager ? "eager" : "lazy"}
           onError={() => setStatus("error")}
           onLoad={() => setStatus("loaded")}
+          ref={handleImageRef}
           sizes={sizes}
           src={src}
         />
@@ -190,7 +196,7 @@ function ArtworkCard({
           />
         </div>
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-px-1.5 tw-pb-1 tw-pt-2">
-          <span className="tw-min-w-0 tw-truncate tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.1em] tw-text-iron-300">
+          <span className="tw-min-w-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-300">
             {artwork.name}
           </span>
           <span className="tw-shrink-0 tw-text-[10px] tw-font-semibold tw-text-primary-300">

@@ -1,8 +1,9 @@
 import { mainnet } from "wagmi/chains";
 
+export { MEMES_CONTRACT } from "./memes";
+
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
 
-export const MEMES_CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
 export const MEMES_DEPLOYER = "0x4B76837F8D8Ad0A28590d06E53dCD44b6B7D4554";
 export const NEXTGEN_CONTRACT = "0x45882f9bc325e14fbb298a1df930c43a874b83ae";
 export const MANIFOLD_LAZY_CLAIM_CONTRACT =
