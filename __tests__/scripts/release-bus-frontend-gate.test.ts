@@ -623,6 +623,7 @@ describe("Release Bus frontend gate contract", () => {
     expect(aggregate?.run).toContain(
       'node "$RELEASE_BUS_EVIDENCE_TOOL" fingerprint'
     );
+    expect(aggregate?.run).toContain('--base-sha "$SOURCE_SHA"');
     expect(aggregate?.run).not.toContain(
       '"$RELEASE_BUS_GATE_TOOL" fingerprint'
     );
