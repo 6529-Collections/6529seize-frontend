@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getAppEnvironment } from "@/config/appEnvironment";
 import type { PageSSRMetadata } from "@/helpers/Types";
 import type { Metadata } from "next";
 
@@ -181,10 +182,9 @@ export function getAppMetadata(
   customMetadata?: Partial<PageSSRMetadata>
 ): Metadata {
   const baseEndpoint = publicEnv.BASE_ENDPOINT;
-  const isStaging = baseEndpoint.includes("staging");
+  const environment = getAppEnvironment(baseEndpoint);
 
-  const title =
-    customMetadata?.title ?? (isStaging ? "6529 Staging" : "6529.io");
+  const title = customMetadata?.title ?? environment.title;
   const description = customMetadata?.description ?? "";
   const ogImage = getAbsoluteOgImageUrl(
     customMetadata?.ogImage ?? DEFAULT_OG_IMAGE_PATH,
@@ -200,13 +200,21 @@ export function getAppMetadata(
     ogImageAlt: customMetadata?.ogImageAlt,
   });
 
-  const domain = isStaging ? "staging.6529.io" : "6529.io";
+  const domain = environment.hostname;
 
   return {
     title,
     description: description ? `${description} | ${domain}` : domain,
     icons: {
-      icon: "/favicon.ico",
+      // Keep SVG last so supporting browsers prefer it over the PNG fallback.
+      icon: [
+        {
+          url: environment.faviconFallback,
+          type: "image/png",
+          sizes: "96x96",
+        },
+        { url: environment.favicon, type: "image/svg+xml", sizes: "any" },
+      ],
     },
     openGraph: {
       type: "website",

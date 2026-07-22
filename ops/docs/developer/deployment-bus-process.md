@@ -129,13 +129,20 @@ discovered, or no recent workflow progress. Do not retry while GitHub still
 shows a healthy active run.
 
 During a base canary, the incident card says: “Frontend base canary running
-for staging SHA … Candidates have not been tested yet.” If it fails, the card
-says: “Existing staging base failed … No candidate was blamed. STAGING was
-paused.” It also lists the failed gate/job/step, exact failing Jest suite/test
-when reported, candidates returned or quarantined, and the recommended
-recovery. For a base failure, repair and validate the existing staging base,
-deploy that isolated repair, verify it, and only then resume the lane. Do not
-change, cancel, or blame queued candidates to work around a base failure.
+for staging SHA … Candidates have not been tested yet.” A verified transient
+dependency-infrastructure failure instead says that the same immutable
+operation will retry automatically. The candidates remain attached and
+STAGING remains running; initial retries are prompt and a continued outage uses
+bounded 5/10-minute backoff. After five failed workflow attempts, the failed
+train becomes terminal and its immutable candidates are automatically returned
+to the still-running lane for a later fresh train. A deterministic source
+failure still says:
+“Existing staging base failed … No candidate was blamed. STAGING was paused.”
+It also lists the failed gate/job/step, exact failing Jest suite/test when
+reported, candidates returned or quarantined, and the recommended recovery.
+For a deterministic base failure, repair and validate the existing staging
+base, deploy that isolated repair, verify it, and only then resume the lane. Do
+not change, cancel, or blame queued candidates to work around a base failure.
 
 ## How a train departs
 
@@ -173,7 +180,7 @@ It then:
   `1a-staging` base before composing any frontend candidate, so a broken base or
   control-plane command cannot be blamed on candidate code;
 - runs parallel fail-closed frontend preflight lint, typecheck, complete Jest
-  inventory/shards, and immutable builds, with an independently reversible
+  inventory/shards, and exactly one immutable staging build, with an independently reversible
   `1|2|4` shard count and bounded Jest workers;
 - deploys backend units in service-DAG order;
 - deploys frontend after backend succeeds;
@@ -187,6 +194,17 @@ original train and Actions run. It proves only the unchanged pre-existing base
 under the same gate fingerprint. Candidate composition, preflight, deployment,
 and E2E still run fresh. The operator force-fresh choice is immutable after
 readiness; cancel and resubmit the candidate to change it.
+
+After a successful frontend staging train, the bus promotes the exact final
+`1a-staging` SHA into reusable base evidence only when that train's fresh
+preflight is gate-equivalent to the base canary and the immutable staging
+deployment plus staging E2E both succeeded. The next serial staging train may
+therefore skip a redundant base-canary workflow for that exact SHA and exact
+current gate contract. The dashboard labels this as **CARRIED_FORWARD_REUSED**
+and shows the source train, workflow run, artifact digest, and proof digest;
+fresh execution remains separately labelled. Any ref, workflow, tooling,
+runtime, package-manager, mode, shard, inventory, build, deployment, E2E, age,
+or provenance mismatch falls back to a fresh base canary.
 
 Backend units declared `production-only` in the deploy registry are built and
 tested during preflight but are not runtime-deployed to staging. Their staging
@@ -202,8 +220,8 @@ candidates are requeued against the new base instead of overwriting it.
 
 Only an exact SHA with durable staging validation can be marked ready for
 production. A production train starts from fresh `main` in each represented
-repository and produces both staging-configured and production-configured
-immutable artifacts.
+repository and compiles exactly one production-configured immutable artifact,
+which is the artifact deployed after the production gates pass.
 
 The bus restages and revalidates the exact combined production release set. It
 does not treat older candidate-level staging evidence as proof for a newly
@@ -253,8 +271,13 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   Release Bus gate. Pull-request CI executes the gate's regression contract
   whenever that gate or a Release Bus workflow changes. Before candidate
   composition, the bus also runs the full gate against the exact recorded
-  frontend base SHA. A base-canary failure requeues every candidate and pauses
-  the lane without quarantining a developer branch.
+  frontend base SHA. A deterministic or unknown base-canary failure requeues
+  every candidate and pauses the lane without quarantining a developer branch.
+  Authenticated transient dependency-infrastructure evidence retries the exact
+  operation without pausing or detaching candidates. Retries are capped at five
+  workflow attempts; exhaustion terminates only that train, requeues its
+  candidates, and leaves the lane running. The same behavior applies to
+  frontend preflight infrastructure failures before candidate isolation.
 - Ambiguous external calls are reconciled by exact operation key before any
   retry. A timeout is not treated as proof that an operation did not happen.
 - Before production mutation, an unexpected target-branch move safely cancels

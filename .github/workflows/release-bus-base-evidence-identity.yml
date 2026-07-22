@@ -1,0 +1,115 @@
+name: Release Bus - Frontend Base Evidence Identity
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_train_id: { type: string, required: true }
+      release_train_revision: { type: string, required: true }
+      operation_key: { type: string, required: true }
+      base_sha: { type: string, required: true }
+      expected_sha: { type: string, required: true }
+
+permissions: {}
+
+run-name: Identify frontend base ${{ inputs.base_sha }} [${{ inputs.operation_key }}]
+
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Validate immutable inputs
+        env:
+          BASE_SHA: ${{ inputs.base_sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$BASE_SHA" = "$EXPECTED_SHA"
+          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+      - name: Check out exact frontend base
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.base_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with: { node-version: "22" }
+      - name: Derive protected staging build profile without compiling
+        id: profile
+        env:
+          RELEASE_BUS_BUILD_PROFILE_HMAC_KEY: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          NODE_ENV: production
+          API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
+          WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
+          ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
+          BASE_ENDPOINT: https://staging.6529.io
+          VERSION: ${{ inputs.base_sha }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
+          MOBILE_APP_SCHEME: mobile6529
+          CORE_SCHEME: core6529
+          IPFS_API_ENDPOINT: https://api-ipfs.6529.io
+          IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
+          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+          ASSETS_FROM_S3: "false"
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          ANNOUNCED_VERSION_ENDPOINT: ""
+          BASE_SHA: ${{ inputs.base_sha }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || git fetch --no-tags origin "$WORKFLOW_SHA"
+          profile_tool="$RUNNER_TEMP/release-bus-build-profile.cjs"
+          git show "$WORKFLOW_SHA:scripts/release-bus-build-profile.cjs" > "$profile_tool"
+          node "$profile_tool" \
+            --source-sha "$BASE_SHA" \
+            --environment staging \
+            --output "$RUNNER_TEMP/release-bus-build-profile.json"
+          digest="$(jq -r '.digest' "$RUNNER_TEMP/release-bus-build-profile.json")"
+          [[ "$digest" =~ ^[a-f0-9]{64}$ ]]
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      - name: Authorize Release Bus identity operation
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          authorize_tool="$RUNNER_TEMP/release-bus-authorize-operation.sh"
+          git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh" > "$authorize_tool"
+          chmod 700 "$authorize_tool"
+          "$authorize_tool" "$payload"
+      - name: Report exact profile identity
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          RELEASE_BUS_TRAIN_ID: ${{ inputs.release_train_id }}
+          RELEASE_BUS_OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_REPORT_INCLUDE_STAGES: "false"
+          RELEASE_BUS_BUILD_PROFILE_DIGEST: ${{ steps.profile.outputs.digest }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          report_tool="$RUNNER_TEMP/release-bus-report-progress.mjs"
+          git show "$WORKFLOW_SHA:scripts/release-bus-report-progress.mjs" > "$report_tool"
+          node "$report_tool"
+      - name: Verify identity check did not mutate source
+        run: test -z "$(git status --porcelain --untracked-files=all)"
