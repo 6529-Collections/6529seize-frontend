@@ -36,7 +36,7 @@ function RepCategorySearchResults({
 }) {
   if (showPrompt) {
     return (
-      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+      <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
         {t(REP_CATEGORY_LOCALE, "rep.categories.search.minChars")}
       </p>
     );
@@ -76,7 +76,7 @@ function RepCategorySearchResults({
           <button
             type="button"
             onClick={() => onSelect(category)}
-            className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-900/30 tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors hover:tw-border-iron-800/80 hover:tw-bg-iron-900/50 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60"
+            className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-900/40 tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors hover:tw-border-iron-800/80 hover:tw-bg-iron-900/50 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60"
           >
             <span className="tw-min-w-0 tw-break-words">{category}</span>
             <span className="tw-flex-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400 tw-transition-colors group-hover:tw-text-iron-200">
@@ -100,7 +100,7 @@ function SuggestedCategoryButton({
     <button
       type="button"
       onClick={() => onSelect(item.category)}
-      className="tw-grid tw-h-full tw-w-full tw-grid-cols-2 tw-gap-x-4 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-900/30 tw-p-4 tw-text-left tw-transition-colors hover:tw-border-iron-800/80 hover:tw-bg-iron-900/50 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60"
+      className="tw-grid tw-h-full tw-w-full tw-grid-cols-2 tw-gap-x-4 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-900/40 tw-p-4 tw-text-left tw-transition-colors hover:tw-border-iron-800/80 hover:tw-bg-iron-900/50 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60"
     >
       <span className="tw-col-span-2 tw-break-words tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50">
         {item.category}
@@ -109,7 +109,7 @@ function SuggestedCategoryButton({
         <span className="tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wider tw-text-iron-500">
           {t(REP_CATEGORY_LOCALE, "rep.categories.suggested.rep")}
         </span>
-        <span className="tw-text-sm tw-leading-none tw-text-iron-200">
+        <span className="tw-text-sm tw-leading-none tw-text-primary-300">
           {formatNumberWithCommas(item.total_rep)}
         </span>
       </span>
@@ -271,7 +271,7 @@ export default function RepCategoryExplorer() {
         />
 
         <section
-          className="tw-mt-4 tw-max-w-2xl"
+          className="tw-mt-2 tw-max-w-2xl"
           aria-live="polite"
           aria-label={t(
             REP_CATEGORY_LOCALE,
