@@ -441,9 +441,8 @@ export default function UserPageRepNewRepSearch({
                     )}
                   </div>
                   {showSubmissionGuidance && (
-                    <p
+                    <output
                       id={SUBMISSION_GUIDANCE_ID}
-                      role="status"
                       className={`tw-mb-0 tw-mt-2 tw-flex tw-items-start tw-gap-1.5 tw-px-1 tw-text-xs tw-font-normal tw-leading-relaxed ${
                         selectedNonQualifyingLookalike
                           ? "tw-text-amber-300"
@@ -457,7 +456,7 @@ export default function UserPageRepNewRepSearch({
                         />
                       )}
                       <span>{submissionGuidanceContent}</span>
-                    </p>
+                    </output>
                   )}
                   <AnimatePresence initial={false}>
                     {isOpen && !selectedCategory && (
