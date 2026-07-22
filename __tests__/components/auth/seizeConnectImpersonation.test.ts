@@ -85,12 +85,31 @@ describe("getSeizeConnectImpersonation", () => {
     expect(mockGetAgentLoginActiveAddress).not.toHaveBeenCalled();
   });
 
+  it("rejects a malformed configured dev-auth wallet", () => {
+    mockPublicEnv.USE_DEV_AUTH = "true";
+    mockPublicEnv.DEV_MODE_WALLET_ADDRESS = "not-an-address";
+
+    expect(getSeizeConnectImpersonation()).toEqual({
+      agentLoginImpersonatedAddress: undefined,
+      impersonatedAddress: undefined,
+    });
+  });
+
   it("uses the active agent-login wallet when dev auth is disabled", () => {
     mockGetAgentLoginActiveAddress.mockReturnValue(agentAddress);
 
     expect(getSeizeConnectImpersonation()).toEqual({
       agentLoginImpersonatedAddress: getAddress(agentAddress),
       impersonatedAddress: getAddress(agentAddress),
+    });
+  });
+
+  it("rejects a malformed active agent-login wallet", () => {
+    mockGetAgentLoginActiveAddress.mockReturnValue("not-an-address");
+
+    expect(getSeizeConnectImpersonation()).toEqual({
+      agentLoginImpersonatedAddress: undefined,
+      impersonatedAddress: undefined,
     });
   });
 });
