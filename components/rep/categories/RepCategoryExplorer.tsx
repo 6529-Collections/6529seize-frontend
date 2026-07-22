@@ -262,7 +262,7 @@ export default function RepCategoryExplorer() {
           type="search"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          className="tw-form-input tw-block tw-w-full tw-max-w-2xl tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm"
+          className="tw-form-input tw-block tw-w-full tw-max-w-2xl tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm [&::-webkit-search-cancel-button]:tw-cursor-pointer [&::-webkit-search-cancel-button]:tw-[filter:brightness(0)_saturate(100%)_invert(60%)_sepia(89%)_saturate(1732%)_hue-rotate(319deg)_brightness(101%)_contrast(96%)]"
           placeholder={t(
             REP_CATEGORY_LOCALE,
             "rep.categories.search.placeholder"
