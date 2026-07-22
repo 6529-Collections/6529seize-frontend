@@ -6,6 +6,8 @@ const STAGES = ["lint", "typecheck", "unit_tests", "build"];
 const MAX_SUITES = 50;
 const MAX_TESTS = 100;
 const MAX_TEXT = 500;
+const MAX_FILES = 200;
+const MAX_DURATION_MS = 24 * 60 * 60 * 1000;
 const OUTCOME_STATUS = {
   success: "SUCCEEDED",
   failure: "FAILED",
@@ -71,7 +73,207 @@ function readJestSummary() {
   }
 }
 
+function safeDuration(value) {
+  if (!Number.isInteger(value) || value < 0 || value > MAX_DURATION_MS) {
+    throw new Error("Release Bus summary contains an invalid duration");
+  }
+  return value;
+}
+
+function strictCount(value, maximum) {
+  if (!Number.isInteger(value) || value < 0 || value > maximum) {
+    throw new Error("Release Bus summary contains an invalid count");
+  }
+  return value;
+}
+
+function safePath(value) {
+  const text = safeText(value);
+  const allowed =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._/@+-";
+  const segments = text?.split("/") ?? [];
+  if (
+    !text ||
+    text.length > MAX_TEXT ||
+    text.startsWith("/") ||
+    segments.some(
+      (segment) => !segment || segment === "." || segment === ".."
+    ) ||
+    Array.from(text).some((character) => !allowed.includes(character))
+  ) {
+    throw new Error("Release Bus summary contains an invalid path");
+  }
+  return text;
+}
+
+function safePathList(value) {
+  if (!Array.isArray(value) || value.length > MAX_FILES) {
+    throw new Error("Release Bus summary contains an invalid path list");
+  }
+  const paths = value.map(safePath);
+  if (new Set(paths).size !== paths.length) {
+    throw new Error("Release Bus summary path list contains duplicates");
+  }
+  return paths;
+}
+
+function isVersionedAggregate(value) {
+  return (
+    /^[a-f0-9]{40}$/.test(String(value?.base_sha ?? "")) &&
+    value?.environment === "orchestration" &&
+    /^[a-f0-9]{64}$/.test(String(value?.gate_fingerprint ?? "")) &&
+    /^[a-f0-9]{40}$/.test(String(value?.workflow_sha ?? "")) &&
+    /^[a-f0-9]{64}$/.test(String(value?.workflow_digest ?? "")) &&
+    typeof value?.node_version === "string" &&
+    value.node_version.length > 0 &&
+    value.node_version.length <= 64 &&
+    typeof value?.package_manager === "string" &&
+    value.package_manager.length > 0 &&
+    value.package_manager.length <= 128 &&
+    ["legacy", "shadow", "sharded"].includes(value?.gate_mode)
+  );
+}
+
+function projectAggregateProgress(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Release Bus aggregate summary is invalid");
+  }
+  const status = value.status === "SUCCEEDED" ? "SUCCEEDED" : "FAILED";
+  const phases = Array.isArray(value.phases) ? value.phases : [];
+  const stages = STAGES.map((name) => {
+    const phase = phases.find((item) => item?.name === name);
+    const phaseStatus = [
+      "PENDING",
+      "RUNNING",
+      "SUCCEEDED",
+      "FAILED",
+      "SKIPPED",
+    ].includes(phase?.status)
+      ? phase.status
+      : "FAILED";
+    return { name, status: phaseStatus };
+  });
+  const totals = value.totals ?? {};
+  const jest = projectJestSummary({
+    num_failed_test_suites: totals.failed_test_suites,
+    num_failed_tests: totals.failed_tests,
+    failing_suites: value.failing_suites,
+    failing_tests: value.failing_tests,
+  });
+  if (!isVersionedAggregate(value)) {
+    return { status, stages, jest, summary: null };
+  }
+  const artifactDigest = String(
+    process.env.RELEASE_BUS_SUMMARY_ARTIFACT_DIGEST ?? ""
+  ).replace(/^sha256:/, "");
+  if (!/^[a-f0-9]{64}$/.test(artifactDigest)) {
+    throw new Error("Release Bus summary artifact digest is invalid");
+  }
+  const phaseDurations = Object.fromEntries(
+    STAGES.map((name) => [name, safeDuration(value.phase_durations_ms?.[name])])
+  );
+  const durationValues = Object.values(phaseDurations);
+  const totalDuration =
+    value.gate_mode === "sharded"
+      ? Math.max(...durationValues)
+      : durationValues.reduce((total, duration) => total + duration, 0);
+  const shardCount = strictCount(value.shard_count, 256);
+  if (![1, 2, 4].includes(shardCount)) {
+    throw new Error("Release Bus shard count is invalid");
+  }
+  if (!Array.isArray(value.shards) || value.shards.length !== shardCount) {
+    throw new Error("Release Bus shard summary is incomplete");
+  }
+  const shards = value.shards.map((shard) => {
+    const index = strictCount(shard?.index, 255);
+    const count = strictCount(shard?.count, 256);
+    if (index < 1 || index > shardCount || count !== shardCount) {
+      throw new Error("Release Bus shard coordinate is invalid");
+    }
+    return {
+      index,
+      count,
+      coordinate: `${index}/${count}`,
+      status: ["PENDING", "RUNNING", "SUCCEEDED", "FAILED", "SKIPPED"].includes(
+        shard?.status
+      )
+        ? shard.status
+        : "FAILED",
+      duration_ms: safeDuration(shard?.duration_ms),
+      files: strictCount(shard?.counts?.test_files, 10_000_000),
+      test_suites: strictCount(shard?.counts?.test_suites, 10_000_000),
+      tests: strictCount(shard?.counts?.tests, 10_000_000),
+      failed_test_suites: strictCount(
+        shard?.counts?.failed_test_suites,
+        10_000_000
+      ),
+      failed_tests: strictCount(shard?.counts?.failed_tests, 10_000_000),
+    };
+  });
+  if (new Set(shards.map((shard) => shard.index)).size !== shardCount) {
+    throw new Error("Release Bus shard coordinates contain duplicates");
+  }
+  return {
+    status,
+    stages,
+    jest,
+    summary: {
+      base_sha: value.base_sha,
+      environment: value.environment,
+      gate_fingerprint: value.gate_fingerprint,
+      workflow_sha: value.workflow_sha,
+      workflow_digest: value.workflow_digest,
+      node_version: safeText(value.node_version),
+      package_manager: safeText(value.package_manager),
+      shard_count: shardCount,
+      summary_artifact_name: safePath(value.summary_artifact_name),
+      summary_artifact_digest: artifactDigest,
+      phase_durations_ms: {
+        ...phaseDurations,
+        total: safeDuration(totalDuration),
+      },
+      totals: {
+        files: strictCount(totals.test_files, 10_000_000),
+        test_suites: strictCount(totals.test_suites, 10_000_000),
+        tests: strictCount(totals.tests, 10_000_000),
+        failed_test_suites: strictCount(totals.failed_test_suites, 10_000_000),
+        failed_tests: strictCount(totals.failed_tests, 10_000_000),
+        skipped_tests: strictCount(
+          strictCount(totals.pending_tests, 10_000_000) +
+            strictCount(totals.todo_tests, 10_000_000),
+          10_000_000
+        ),
+      },
+      fresh_or_reused: "fresh",
+      shards,
+      missing_files: safePathList(value.missing_files),
+      duplicate_files: safePathList(value.duplicate_files),
+    },
+  };
+}
+
+function readAggregateProgress() {
+  const filename = process.env.RELEASE_BUS_AGGREGATE_SUMMARY;
+  if (!filename) return null;
+  if (!fs.existsSync(filename)) {
+    throw new Error("Release Bus aggregate summary is missing");
+  }
+  return projectAggregateProgress(
+    JSON.parse(fs.readFileSync(filename, "utf8"))
+  );
+}
+
 export function buildProgressPayload() {
+  const aggregate = readAggregateProgress();
+  if (aggregate) {
+    return {
+      train_id: process.env.RELEASE_BUS_TRAIN_ID,
+      operation_key: process.env.RELEASE_BUS_OPERATION_KEY,
+      workflow_run_id: process.env.GITHUB_RUN_ID,
+      phase: "complete",
+      ...aggregate,
+    };
+  }
   const stages =
     process.env.RELEASE_BUS_REPORT_INCLUDE_STAGES === "false"
       ? []
