@@ -460,8 +460,8 @@ describe("Release Bus frontend gate contract", () => {
     expect(buildEvidenceStep?.env).toEqual({
       BUILD_ENVIRONMENT: "${{ matrix.environment }}",
     });
-    expect(buildEvidenceStep?.run).toContain(
-      "RELEASE_BUS_INSTALL_EVIDENCE=$RUNNER_TEMP/release-bus-evidence/dependency-install-$BUILD_ENVIRONMENT.json"
+    expect(buildEvidenceStep?.run).toBe(
+      'echo "RELEASE_BUS_INSTALL_EVIDENCE=$RUNNER_TEMP/release-bus-evidence/dependency-install-$BUILD_ENVIRONMENT.json" >> "$GITHUB_ENV"'
     );
     expect(preflightWorkflow.jobs?.authorize?.outputs).toMatchObject({
       inject_failure: "${{ steps.inputs.outputs.inject_failure }}",
