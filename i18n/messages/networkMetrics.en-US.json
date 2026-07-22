@@ -31,6 +31,7 @@
   "network.levels.determinedByTable": "Levels are determined by the table below.",
   "network.levels.adjustments": "As with all metrics, they may be adjusted to better meet their objectives.",
   "network.levels.table.caption": "Thresholds by Level",
+  "network.levels.table.accessibleCaption": "Level and TDH + Rep thresholds",
   "network.levels.table.level": "Level",
   "network.levels.table.tdhRep": "TDH + Rep"
 }

@@ -10,18 +10,16 @@ interface LevelData {
 
 export default function TableOfLevels() {
   const locale = useBrowserLocale();
-  const caption = t(locale, "network.levels.table.caption");
+  const caption = t(locale, "network.levels.table.accessibleCaption");
 
   return (
     <div className="tw-flex tw-w-full tw-flex-col">
-      <div className="tw-max-h-[34rem] tw-w-full tw-overflow-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-700">
-        <table
-          className="tw-m-0 tw-w-full tw-border-collapse tw-border-0"
-          aria-labelledby="levels-caption"
-        >
-          <caption id="levels-caption" className="tw-sr-only">
-            {caption}
-          </caption>
+      <div
+        className="tw-max-h-[34rem] tw-w-full tw-overflow-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-white/20 desktop-hover:hover:tw-scrollbar-thumb-iron-700"
+        tabIndex={0 /* NOSONAR -- keyboard access for the scroll container */}
+      >
+        <table className="tw-m-0 tw-w-full tw-border-collapse tw-border-0">
+          <caption className="tw-sr-only">{caption}</caption>
           <thead className="tw-bg-iron-900/80">
             <tr className="tw-border-0">
               <th
