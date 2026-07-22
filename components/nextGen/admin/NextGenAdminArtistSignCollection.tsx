@@ -10,7 +10,7 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { printAdminErrors } from "./NextGenAdmin";
+import { printAdminErrors } from "./NextGenAdminErrors";
 import {
   Button,
   Col,
