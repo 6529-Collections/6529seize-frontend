@@ -56,7 +56,7 @@ type RepCategoryScope = "profile" | "wave";
 const REP_CATEGORY_LOCALE = DEFAULT_LOCALE;
 
 const CATEGORY_ACTION_LINK_CLASSNAME =
-  "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-iron-700 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60";
+  "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-iron-700 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60";
 
 const SCOPES: ReadonlyArray<CommonSelectItem<RepCategoryScope>> = [
   { key: "profile", label: "Profile REP", value: "profile" },
