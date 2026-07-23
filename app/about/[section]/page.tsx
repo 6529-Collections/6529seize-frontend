@@ -33,6 +33,7 @@ export default async function AboutPage(props: Readonly<Props>) {
   }
 
   const aboutSection = section as AboutSection;
+  const isMemes = aboutSection === AboutSection.MEMES;
   const usesFeatureLayout = isAboutFeatureSection(aboutSection);
 
   return (
@@ -44,13 +45,17 @@ export default async function AboutPage(props: Readonly<Props>) {
           "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]"
       )}
     >
-      <Container fluid className="tw-pt-4">
-        <Row>
-          <Col>
-            <About section={aboutSection} />
-          </Col>
-        </Row>
-      </Container>
+      {isMemes ? (
+        <About section={AboutSection.MEMES} />
+      ) : (
+        <Container fluid className="tw-pt-4">
+          <Row>
+            <Col>
+              <About section={aboutSection} />
+            </Col>
+          </Row>
+        </Container>
+      )}
     </main>
   );
 }
