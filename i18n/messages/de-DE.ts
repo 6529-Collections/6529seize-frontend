@@ -3,6 +3,7 @@ import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-to
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { DE_DE_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerDeMessages from "@/i18n/messages/stormComposer.de-DE.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
@@ -460,4 +461,5 @@ export const DE_DE_MESSAGES = {
   "theMemes.volume.7Days": "7 Tage",
   "theMemes.volume.30Days": "30 Tage",
   "theMemes.volume.allTime": "Gesamt",
+  ...DE_DE_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

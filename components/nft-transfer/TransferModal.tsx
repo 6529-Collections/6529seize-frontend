@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTransfer } from "./TransferState";
 
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t as translate } from "@/i18n/messages";
 import { ContractType } from "@/types/enums";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -109,6 +111,7 @@ export default function TransferModal({
   readonly onClose: (opts?: { completed?: boolean | undefined }) => void;
 }) {
   const t = useTransfer();
+  const locale = useBrowserLocale();
   const [selectedProfile, setSelectedProfile] =
     useState<CommunityMemberMinimal | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
@@ -587,7 +590,7 @@ export default function TransferModal({
     >
       <div
         className={[
-          "tw-flex tw-h-[90dvh] tw-max-h-[900px] tw-w-[95vw] tw-max-w-[1100px] tw-flex-col tw-overflow-hidden tw-rounded-2xl tw-bg-[#0c0c0d] tw-text-white tw-shadow-xl tw-ring-[3px] tw-ring-white/30 sm:tw-h-[85dvh] sm:tw-w-[90vw] md:tw-h-[75vh] md:tw-w-[70vw]",
+          "tw-flex tw-h-[85dvh] tw-max-h-[720px] tw-w-[95vw] tw-max-w-[1000px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-white tw-shadow-2xl tw-ring-1 tw-ring-white/10 sm:tw-w-[90vw] md:tw-h-[min(720px,80dvh)] md:tw-w-[78vw]",
           isClosing
             ? "tw-scale-95 tw-opacity-0 tw-transition-all tw-duration-150"
             : "tw-scale-100 tw-opacity-100 tw-transition-all tw-duration-150",
@@ -597,20 +600,24 @@ export default function TransferModal({
         ].join(" ")}
       >
         {/* header */}
-        <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-p-4">
+        <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-p-4 sm:tw-px-6 sm:tw-py-5">
           <div className="tw-min-w-0 tw-flex-1 tw-pr-2 tw-text-base tw-font-semibold sm:tw-text-lg">
-            <FlowTitle flow={flow} txs={txs} />
+            <FlowTitle flow={flow} txs={txs} locale={locale} />
           </div>
           <HeaderRight
             flow={flow}
             trxPending={trxPending}
             onClose={handleClose}
+            locale={locale}
           />
         </div>
         <p id="transfer-desc" className="tw-sr-only">
-          {flow === "review"
-            ? "Review selected NFTs and choose the destination recipient and wallet."
-            : "Follow wallet prompts. Each transaction will indicate its current status."}
+          {translate(
+            locale,
+            flow === "review"
+              ? "transfer.modal.description.review"
+              : "transfer.modal.description.submission"
+          )}
         </p>
 
         {/* body */}
@@ -627,23 +634,22 @@ export default function TransferModal({
           selectedWallet={selectedWallet}
           publicClient={publicClient}
           txs={txs}
+          locale={locale}
         />
 
         {/* footer */}
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-gap-3 sm:tw-p-4">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-p-4 sm:tw-gap-3 sm:tw-px-6 sm:tw-py-5">
           <div className="tw-flex tw-items-center tw-gap-2">
             {flow === "submission" && anyTxsPending(txs) && (
               <>
                 <FontAwesomeIcon
                   icon={faExclamationTriangle}
-                  className="tw-size-8"
-                  color="#FFD60A"
+                  className="tw-size-8 tw-text-amber-300"
                 />
-                <span className="tw-text-sm tw-font-medium tw-text-[#FFD60A]">
-                  Double-check the recipient address and token details before
-                  signing.
+                <span className="tw-text-sm tw-font-medium tw-text-amber-300">
+                  {translate(locale, "transfer.modal.warning.checkRecipient")}
                   <br />
-                  NFT transfers are irreversible once submitted on-chain.
+                  {translate(locale, "transfer.modal.warning.irreversible")}
                 </span>
               </>
             )}
@@ -655,6 +661,7 @@ export default function TransferModal({
             onConfirm={handleConfirm}
             onClose={handleClose}
             txs={txs}
+            locale={locale}
           />
         </div>
       </div>
