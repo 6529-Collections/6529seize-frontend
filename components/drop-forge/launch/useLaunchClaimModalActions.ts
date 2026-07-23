@@ -133,21 +133,21 @@ export function useLaunchClaimModalActions({
       return;
     }
 
-    const claimParameters = [
-      manifoldClaim.totalMax,
-      manifoldClaim.walletMax,
-      manifoldClaim.startDate,
-      manifoldClaim.endDate,
-      manifoldClaim.storageProtocol,
-      manifoldClaim.merkleRoot,
-      claim.metadata_location,
-      manifoldClaim.costWei,
-      manifoldClaim.paymentReceiver,
-      manifoldClaim.erc20,
-      manifoldClaim.signingAddress,
-    ] as const;
-
     runConnectedAction(() => {
+      const claimParameters = [
+        manifoldClaim.totalMax,
+        manifoldClaim.walletMax,
+        manifoldClaim.startDate,
+        manifoldClaim.endDate,
+        manifoldClaim.storageProtocol,
+        manifoldClaim.merkleRoot,
+        claim.metadata_location,
+        manifoldClaim.costWei,
+        manifoldClaim.paymentReceiver,
+        manifoldClaim.erc20,
+        manifoldClaim.signingAddress,
+      ] as const;
+
       setClaimTxModal({
         status: "confirm_wallet",
         actionLabel: "Update Claim",

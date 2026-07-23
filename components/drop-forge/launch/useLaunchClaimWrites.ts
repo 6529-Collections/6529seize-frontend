@@ -184,31 +184,6 @@ export function useLaunchClaimWrites({
         return;
       }
 
-      const priceEth = (
-        phasePricesEth[phaseKey] ?? DEFAULT_PHASE_PRICE_ETH
-      ).trim();
-      let cost: bigint;
-      try {
-        cost = parseEther(priceEth);
-      } catch {
-        setToast({ message: "Enter a valid ETH cost.", type: "error" });
-        return;
-      }
-
-      const claimParameters = [
-        claim.edition_size,
-        0,
-        startDate,
-        endDate,
-        2,
-        merkleRoot,
-        claim.metadata_location,
-        cost,
-        MEMES_DEPLOYER,
-        NULL_ADDRESS,
-        NULL_ADDRESS,
-      ] as const;
-
       const action =
         forceAction ??
         (phaseKey === "phase0" && !isInitialized ? "initialize" : "update");
@@ -218,6 +193,31 @@ export function useLaunchClaimWrites({
         action === "initialize" ? "initializeClaim" : "updateClaim";
 
       runConnectedAction(() => {
+        const priceEth = (
+          phasePricesEth[phaseKey] ?? DEFAULT_PHASE_PRICE_ETH
+        ).trim();
+        let cost: bigint;
+        try {
+          cost = parseEther(priceEth);
+        } catch {
+          setToast({ message: "Enter a valid ETH cost.", type: "error" });
+          return;
+        }
+
+        const claimParameters = [
+          claim.edition_size,
+          0,
+          startDate,
+          endDate,
+          2,
+          merkleRoot,
+          claim.metadata_location,
+          cost,
+          MEMES_DEPLOYER,
+          NULL_ADDRESS,
+          NULL_ADDRESS,
+        ] as const;
+
         setClaimTxModal({
           status: "confirm_wallet",
           actionLabel,
@@ -286,33 +286,33 @@ export function useLaunchClaimWrites({
         return;
       }
 
-      const parsedEntries = entries
-        .map((entry) => ({
-          wallet: (entry.wallet ?? "").trim(),
-          amount: Number(entry.amount ?? 0),
-        }))
-        .filter(
-          (entry) =>
-            isAddress(entry.wallet as `0x${string}`) &&
-            Number.isFinite(entry.amount) &&
-            Number.isInteger(entry.amount) &&
-            entry.amount > 0
-        );
-
-      if (parsedEntries.length === 0) {
-        setToast({
-          message: `${actionLabel} has no valid recipients/amounts`,
-          type: "error",
-        });
-        return;
-      }
-
-      const recipients = parsedEntries.map(
-        (entry) => entry.wallet as `0x${string}`
-      );
-      const amounts = parsedEntries.map((entry) => BigInt(entry.amount));
-
       runConnectedAction(() => {
+        const parsedEntries = entries
+          .map((entry) => ({
+            wallet: (entry.wallet ?? "").trim(),
+            amount: Number(entry.amount ?? 0),
+          }))
+          .filter(
+            (entry) =>
+              isAddress(entry.wallet as `0x${string}`) &&
+              Number.isFinite(entry.amount) &&
+              Number.isInteger(entry.amount) &&
+              entry.amount > 0
+          );
+
+        if (parsedEntries.length === 0) {
+          setToast({
+            message: `${actionLabel} has no valid recipients/amounts`,
+            type: "error",
+          });
+          return;
+        }
+
+        const recipients = parsedEntries.map(
+          (entry) => entry.wallet as `0x${string}`
+        );
+        const amounts = parsedEntries.map((entry) => BigInt(entry.amount));
+
         setClaimTxModal({
           status: "confirm_wallet",
           actionLabel,
@@ -413,6 +413,29 @@ export function useLaunchClaimWrites({
       }
 
       runConnectedAction(() => {
+        const amountEth = payArtistAmountEth.trim();
+        let amountWei: bigint;
+        try {
+          amountWei = parseEther(amountEth);
+        } catch {
+          setToast({
+            message: "Enter a valid artist payment in ETH.",
+            type: "error",
+          });
+          return;
+        }
+        const resolvedAddress = payArtistResolvedAddressTrimmed.trim();
+        if (amountWei <= 0n || !isAddress(resolvedAddress)) {
+          setToast({
+            message:
+              amountWei <= 0n
+                ? "Enter a valid artist payment in ETH."
+                : "Enter a valid payment address.",
+            type: "error",
+          });
+          return;
+        }
+
         setPayArtistTxModal({
           status: "confirm_wallet",
           actionLabel: "Pay Artist",
@@ -424,8 +447,8 @@ export function useLaunchClaimWrites({
         try {
           payArtistWrite.sendTransaction({
             chainId: forgeMintingChain.id,
-            to: payArtistResolvedAddressTrimmed as `0x${string}`,
-            value: payArtistAmountWei,
+            to: resolvedAddress,
+            value: amountWei,
           });
         } catch (error) {
           pendingPayArtistMintingClaimActionRef.current = null;
