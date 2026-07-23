@@ -96,7 +96,7 @@ export default function AboutMemes() {
             {t(DEFAULT_LOCALE, "about.memes.eyebrow")}
           </p>
           <h1
-            className="tw-m-0 tw-max-w-[76rem] tw-text-4xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 sm:tw-text-6xl lg:tw-text-7xl xl:tw-text-[5.5rem]"
+            className="tw-m-0 tw-max-w-[76rem] tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl"
             id="about-memes-title"
           >
             {t(DEFAULT_LOCALE, "about.memes.title")}
@@ -131,7 +131,7 @@ export default function AboutMemes() {
               {t(DEFAULT_LOCALE, "about.memes.shared.eyebrow")}
             </p>
             <h2
-              className="tw-m-0 tw-max-w-lg tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
+              className="tw-m-0 tw-max-w-lg tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
               id="about-memes-shared-title"
             >
               {t(DEFAULT_LOCALE, "about.memes.shared.title")}
@@ -159,7 +159,7 @@ export default function AboutMemes() {
               {t(DEFAULT_LOCALE, "about.memes.collection.eyebrow")}
             </p>
             <h2
-              className="tw-m-0 tw-max-w-lg tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
+              className="tw-m-0 tw-max-w-lg tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
               id="about-memes-collection-title"
             >
               {t(DEFAULT_LOCALE, "about.memes.collection.title")}
@@ -187,7 +187,7 @@ export default function AboutMemes() {
               {t(DEFAULT_LOCALE, "about.memes.resources.eyebrow")}
             </p>
             <h2
-              className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
+              className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
               id="about-memes-resources-title"
             >
               {t(DEFAULT_LOCALE, "about.memes.resources.title")}
