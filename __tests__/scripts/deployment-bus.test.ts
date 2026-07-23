@@ -267,6 +267,24 @@ describe("release bus v2 combined preflight", () => {
     )
   );
 
+  it("keeps candidate execution jobs secretless and read-only", () => {
+    for (const jobName of ["quality", "build"]) {
+      const job = workflow.jobs[jobName];
+      expect(job.permissions).toEqual({ contents: "read" });
+      expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
+    }
+    const source = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
+    );
+    expect(
+      source.match(/codeql\[actions\/untrusted-checkout\/medium\]/g)
+    ).toHaveLength(2);
+  });
+
   it("shards Jest and proves exact inventory before artifact publication", () => {
     expect(workflow.jobs.quality.strategy.matrix.shard).toEqual([
       "lint",
