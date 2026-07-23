@@ -7,7 +7,11 @@ import {
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
-import { replaceAttachmentInDrops } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
+import {
+  ProcessIncomingDropType,
+  replaceAttachmentInDrops,
+  updateCachedDrop,
+} from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { QueryClient } from "@tanstack/react-query";
 
@@ -420,6 +424,85 @@ describe("cached drop websocket updates", () => {
       reconcileFinalizedDropAttachments(newerDrop as ApiDrop, existingDrop)
         .parts[0]?.attachments
     ).toEqual([]);
+  });
+
+  it("trusts a first edit when the existing updated_at is null", () => {
+    const existingDrop = {
+      id: "drop-1",
+      updated_at: null,
+      parts: [
+        {
+          part_id: 1,
+          attachments: [
+            {
+              attachment_id: "attachment-1",
+              status: ApiAttachmentStatus.Ready,
+            },
+          ],
+        },
+      ],
+    };
+    const firstEdit = {
+      id: "drop-1",
+      updated_at: 101,
+      parts: [{ part_id: 1, attachments: [] }],
+    };
+
+    expect(
+      reconcileFinalizedDropAttachments(firstEdit as ApiDrop, existingDrop)
+        .parts[0]?.attachments
+    ).toEqual([]);
+  });
+
+  it("reconciles stale attachments before websocket cache upserts", () => {
+    const queryClient = createQueryClient();
+    const queryKey = [
+      QueryKey.DROPS,
+      { limit: 50, waveId: "wave-1", dropId: null },
+    ];
+    const readyAttachment = {
+      attachment_id: "attachment-1",
+      file_name: "sample.pdf",
+      mime_type: "application/pdf",
+      kind: "pdf",
+      status: ApiAttachmentStatus.Ready,
+      url: "https://example.com/sample.pdf",
+    };
+    const existingDrop = {
+      id: "drop-1",
+      wave: { id: "wave-1" },
+      updated_at: null,
+      parts: [{ part_id: 1, attachments: [readyAttachment] }],
+    };
+    queryClient.setQueryData(queryKey, {
+      pages: [{ drops: [existingDrop] }],
+    });
+
+    updateCachedDrop({
+      drop: {
+        ...existingDrop,
+        parts: [
+          {
+            part_id: 1,
+            attachments: [
+              {
+                ...readyAttachment,
+                status: ApiAttachmentStatus.Processing,
+                url: null,
+              },
+            ],
+          },
+        ],
+      } as ApiDrop,
+      options: {},
+      queryClient,
+      type: ProcessIncomingDropType.DROP_INSERT,
+    });
+
+    expect(
+      queryClient.getQueryData<any>(queryKey).pages[0].drops[0].parts[0]
+        .attachments
+    ).toEqual([readyAttachment]);
   });
 
   it("preserves finalized attachments through the cached-drop update path", () => {
