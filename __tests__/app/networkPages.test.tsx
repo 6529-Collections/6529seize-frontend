@@ -11,6 +11,7 @@ import NetworkWaveScorePage, {
   generateMetadata as generateWaveScoreMetadata,
 } from "@/app/network/wave-score/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -68,6 +69,8 @@ jest.mock("@/contexts/TitleContext", () => ({
 }));
 
 describe("network pages render", () => {
+  const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -134,26 +137,26 @@ describe("network pages render", () => {
   it("generates metadata for Groups page", async () => {
     const metadata = await generateGroupsMetadata();
     expect(metadata.title).toEqual("Groups | Network");
-    expect(metadata.description).toEqual("Network | 6529.io");
+    expect(metadata.description).toEqual(`Network | ${domain}`);
   });
 
   it("generates metadata for TDH page", async () => {
     const metadata = await generateTDHMetadata();
     expect(metadata.title).toEqual("TDH | Network");
-    expect(metadata.description).toEqual("Network | 6529.io");
+    expect(metadata.description).toEqual(`Network | ${domain}`);
   });
 
   it("generates metadata for Definitions page", async () => {
     const metadata = await generateDefinitionsMetadata();
     expect(metadata.title).toEqual("Definitions | Network");
-    expect(metadata.description).toEqual("Network | 6529.io");
+    expect(metadata.description).toEqual(`Network | ${domain}`);
   });
 
   it("generates metadata for Wave Score page", async () => {
     const metadata = await generateWaveScoreMetadata();
     expect(metadata.title).toEqual("Wave Score | Network");
     expect(metadata.description).toEqual(
-      "Network wave score formula and calculator | 6529.io"
+      `Network wave score formula and calculator | ${domain}`
     );
   });
 });

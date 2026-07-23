@@ -8,6 +8,12 @@ on:
       operation_key: { type: string, required: true }
       source_ref: { type: string, required: true }
       expected_sha: { type: string, required: true }
+      release_manifest_id: { type: string, required: true }
+      release_manifest_identity_sha256: { type: string, required: true }
+      frontend_sha: { type: string, required: false, default: "" }
+      backend_sha: { type: string, required: false, default: "" }
+      frontend_artifact_digest: { type: string, required: false, default: "" }
+      backend_artifact_digest: { type: string, required: false, default: "" }
 
 permissions:
   contents: read
@@ -22,6 +28,12 @@ jobs:
       - name: Validate and authorize immutable inputs
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
+          FRONTEND_SHA: ${{ inputs.frontend_sha }}
+          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
+          BACKEND_SHA: ${{ inputs.backend_sha }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
@@ -35,12 +47,19 @@ jobs:
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"prod",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
+          [[ "$MANIFEST_IDENTITY" =~ ^[a-f0-9]{64}$ ]]
+          [[ -z "$FRONTEND_SHA" || "$FRONTEND_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ -z "$BACKEND_SHA" || "$BACKEND_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ -z "$FRONTEND_ARTIFACT_DIGEST" || "$FRONTEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ -z "$BACKEND_ARTIFACT_DIGEST" || "$BACKEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          test -n "$FRONTEND_SHA$BACKEND_SHA"
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" --arg artifact_digest "$MANIFEST_IDENTITY" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"prod",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
             --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
       - name: Check out exact production SHA
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -59,13 +78,68 @@ jobs:
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
       - name: Install Socket Firewall
         id: socket-firewall
+        continue-on-error: true
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with: { mode: firewall }
       - name: Install frozen dependencies
+        id: dependencies
+        if: steps.socket-firewall.outcome == 'success'
+        continue-on-error: true
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
       - name: Install Playwright browser
+        id: playwright
+        if: steps.dependencies.outcome == 'success'
+        continue-on-error: true
         run: ./bin/6529 exec playwright install --with-deps chromium
       - name: Run production-safe read-only packs
+        id: e2e
+        if: steps.playwright.outcome == 'success'
+        continue-on-error: true
         run: ./bin/6529 run test:e2e:production:readonly
+      - name: Report structured Release Bus E2E result
+        if: always()
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+        run: |
+          set -euo pipefail
+          status=SUCCEEDED
+          failure_class=null
+          failure_phase=null
+          retryable=false
+          if [ "$SOCKET_OUTCOME" != success ] || [ "$DEPENDENCIES_OUTCOME" != success ] || [ "$PLAYWRIGHT_OUTCOME" != success ]; then
+            status=FAILED
+            failure_class=INFRASTRUCTURE
+            failure_phase=production_e2e_setup
+            retryable=true
+          elif [ "$E2E_OUTCOME" != success ]; then
+            status=FAILED
+            failure_class=E2E
+            failure_phase=production_e2e
+          fi
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:null,stages:[],jest:null,backend_evidence:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
+      - name: Return production E2E result
+        if: always()
+        env:
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+        run: |
+          test "$SOCKET_OUTCOME" = success
+          test "$DEPENDENCIES_OUTCOME" = success
+          test "$PLAYWRIGHT_OUTCOME" = success
+          test "$E2E_OUTCOME" = success

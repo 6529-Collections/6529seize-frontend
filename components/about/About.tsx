@@ -37,6 +37,7 @@ import { getAboutSectionDocumentTitle } from "./about.routes";
 export default function About({ section }: { readonly section: AboutSection }) {
   const locale = DEFAULT_LOCALE;
   const sectionTitle = getAboutSectionDocumentTitle(section, locale);
+  const isSubscriptions = section === AboutSection.SUBSCRIPTIONS;
   useSetTitle(
     t(locale, "about.contents.documentTitle", { section: sectionTitle })
   );
@@ -61,7 +62,15 @@ export default function About({ section }: { readonly section: AboutSection }) {
     >
       <Row>
         <Col>
-          <AboutContentsDropdown currentSection={section} />
+          <AboutContentsDropdown
+            className={
+              isSubscriptions
+                ? "-tw-mx-6 -tw-mt-6 tw-w-[calc(100%+3rem)] tw-px-6"
+                : undefined
+            }
+            currentSection={section}
+            withDivider={isSubscriptions}
+          />
           <div className="tw-w-full">
             <AboutSectionContent section={section} />
           </div>

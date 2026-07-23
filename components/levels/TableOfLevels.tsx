@@ -1,4 +1,7 @@
 import levels from "@/constants/levels.json";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 
 interface LevelData {
   level: number;
@@ -6,40 +9,63 @@ interface LevelData {
 }
 
 export default function TableOfLevels() {
+  const locale = useBrowserLocale();
+  const caption = t(locale, "network.levels.table.accessibleCaption");
+
   return (
-    <div className="tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center">
-      <div className="tw-w-full tw-overflow-x-auto tw-rounded-lg tw-ring-1 tw-ring-white/[0.15] xl:tw-max-w-4xl">
-        <table
-          className="tw-min-w-full tw-divide-y tw-divide-iron-700/60"
-          aria-labelledby="levels-caption"
-        >
-          <caption id="levels-caption" className="tw-sr-only">
-            Thresholds by Level
-          </caption>
-          <thead className="tw-sticky tw-top-0 tw-z-10 tw-bg-iron-700">
-            <tr>
-              <td className="uppercase tw-py-3 tw-pl-4 tw-pr-3 tw-text-left tw-text-xs tw-font-semibold tw-text-white sm:tw-pl-6">
-                Level
-              </td>
-              <td className="uppercase tw-py-3 tw-pl-4 tw-pr-3 tw-text-left tw-text-xs tw-font-semibold tw-text-white sm:tw-pl-6">
-                TDH + Rep
-              </td>
+    <div className="tw-flex tw-w-full tw-flex-col">
+      <div
+        className="tw-max-h-[34rem] tw-w-full tw-overflow-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-white/20 desktop-hover:hover:tw-scrollbar-thumb-iron-700"
+        tabIndex={0 /* NOSONAR -- keyboard access for the scroll container */}
+      >
+        <table className="tw-m-0 tw-w-full tw-border-collapse tw-border-0">
+          <caption className="tw-sr-only">{caption}</caption>
+          <thead className="tw-bg-iron-900/80">
+            <tr className="tw-border-0">
+              <th
+                className="tw-w-1/2 tw-border-0 tw-py-3.5 tw-pl-4 tw-pr-3 tw-text-left tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 sm:tw-pl-6"
+                scope="col"
+              >
+                {t(locale, "network.levels.table.level")}
+              </th>
+              <th
+                className="tw-w-1/2 tw-border-0 tw-py-3.5 tw-pl-4 tw-pr-4 tw-text-right tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400 sm:tw-pr-6"
+                scope="col"
+              >
+                {t(locale, "network.levels.table.tdhRep")}
+              </th>
             </tr>
           </thead>
-          <tbody className="tw-divide-y tw-divide-iron-700/60 tw-bg-[#222222]">
-            {(levels as LevelData[]).map((level) => (
-              <tr
-                key={`level-${level.level}`}
-                className="tw-transition tw-duration-300 tw-ease-out odd:tw-bg-iron-800/40 hover:tw-bg-iron-700/40"
-              >
-                <td className="tw-whitespace-nowrap tw-py-3 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-pl-6">
-                  {level.level}
-                </td>
-                <td className="tw-whitespace-nowrap tw-py-3 tw-pl-4 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-pl-6">
-                  {level.threshold.toLocaleString()}
-                </td>
-              </tr>
-            ))}
+          <tbody className="tw-divide-y tw-divide-white/[0.04] tw-bg-iron-950/40">
+            {(levels as LevelData[]).map((level) => {
+              const isMilestone = level.level !== 0 && level.level % 10 === 0;
+              const isSubMilestone =
+                level.level !== 0 && !isMilestone && level.level % 5 === 0;
+              let numberClassName = "tw-text-iron-400";
+              if (isMilestone) {
+                numberClassName = "tw-text-[#00f0ff]";
+              } else if (isSubMilestone) {
+                numberClassName = "tw-text-iron-200";
+              }
+
+              return (
+                <tr
+                  key={`level-${level.level}`}
+                  className="tw-border-0 tw-transition-colors tw-duration-200 tw-ease-out odd:tw-bg-white/[0.015] hover:tw-bg-white/[0.04] motion-reduce:tw-transition-none"
+                >
+                  <td
+                    className={`tw-whitespace-nowrap tw-border-0 tw-py-3 tw-pl-4 tw-pr-3 tw-font-mono tw-text-[13px] tw-font-normal tw-tabular-nums sm:tw-pl-6 ${numberClassName}`}
+                  >
+                    {level.level}
+                  </td>
+                  <td
+                    className={`tw-whitespace-nowrap tw-border-0 tw-py-3 tw-pl-4 tw-pr-4 tw-text-right tw-font-mono tw-text-[13px] tw-font-normal tw-tabular-nums sm:tw-pr-6 ${numberClassName}`}
+                  >
+                    {formatInteger(locale, level.threshold)}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
