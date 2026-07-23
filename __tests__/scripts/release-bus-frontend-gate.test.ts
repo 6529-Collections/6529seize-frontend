@@ -61,6 +61,14 @@ describe("Release Bus frontend gate contract", () => {
     >;
   };
 
+  it("binds reusable PR artifacts to the immutable checked-out run SHA", () => {
+    expect(appPrCi).not.toContain("github.event.pull_request.merge_commit_sha");
+    expect(
+      appPrCi.match(/EXPECTED_MERGE_SHA: \$\{\{ github\.sha \}\}/g)
+    ).toHaveLength(2);
+    expect(appPrCi).toContain("name: release-bus-v2-pr-${{ github.sha }}");
+  });
+
   it("keeps deployed worker dispatch and authorization backward compatible", () => {
     const inputs = canaryWorkflow.on?.workflow_dispatch?.inputs ?? {};
     expect(

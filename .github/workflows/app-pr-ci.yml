@@ -415,7 +415,7 @@ jobs:
       - name: Package exact PR merge-tree production profile
         if: needs.plan.outputs.build_required == 'true'
         env:
-          EXPECTED_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          EXPECTED_MERGE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
@@ -451,7 +451,7 @@ jobs:
       - name: Package exact PR merge-tree staging profile
         if: needs.plan.outputs.build_required == 'true'
         env:
-          EXPECTED_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          EXPECTED_MERGE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
@@ -479,7 +479,7 @@ jobs:
         if: needs.plan.outputs.build_required == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: release-bus-v2-pr-${{ github.event.pull_request.merge_commit_sha }}
+          name: release-bus-v2-pr-${{ github.sha }}
           path: release-bus-v2-pr-artifact
           include-hidden-files: true
           if-no-files-found: error
