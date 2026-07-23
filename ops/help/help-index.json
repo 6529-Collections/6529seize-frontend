@@ -950,9 +950,7 @@
         "brain tab",
         "profile brain",
         "brain activity",
-        "activity heatmap",
-        "quick tags",
-        "quick tag settings"
+        "activity heatmap"
       ],
       "keywords": [
         "profile",
@@ -965,7 +963,6 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
-        "When viewing your own profile without an active proxy, the Brain sidebar includes private Quick Tags beneath the wave sections.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -974,7 +971,31 @@
       "source_refs": [
         "ops/docs/profiles/tabs/feature-brain-tab.md",
         "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md",
-        "ops/docs/profiles/tabs/feature-brain-wave-sidebar.md",
+        "ops/docs/profiles/tabs/feature-brain-wave-sidebar.md"
+      ]
+    },
+    {
+      "id": "profiles.quick-tags",
+      "kind": "route",
+      "title": "Profile Quick Tags",
+      "aliases": [
+        "quick tags",
+        "quick tag settings",
+        "mention shortcuts",
+        "personal mention aliases"
+      ],
+      "keywords": ["profile", "quick tags", "mentions", "aliases", "shortcuts"],
+      "facts": [
+        "Quick Tags are managed from the owner-only Quick Tags profile tab.",
+        "The tab is hidden on other profiles and while acting through a proxy.",
+        "Browser Back and Forward restore the Quick Tags tab through its dedicated profile route.",
+        "Use /{user}/mention-shortcuts to manage Quick Tags on your own profile."
+      ],
+      "canonical_path": "/{user}/mention-shortcuts",
+      "related_paths": ["/{user}/mention-shortcuts", "/waves"],
+      "tags": ["profiles", "waves", "mentions", "glossary"],
+      "source_refs": [
+        "ops/docs/profiles/navigation/feature-tabs.md",
         "ops/docs/waves/composer/feature-personal-mention-shortcuts.md"
       ]
     },
@@ -4431,13 +4452,13 @@
         "Any profile with Chat access can invoke @contributors, @admins, or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
         "Editing stored global-mention tokens does not resend permission-group notifications; mentioned_groups describes tokens in the current displayed content, not historical notification delivery.",
         "Global mentions stay visible in posted content; personal Quick Tags expand into individual profile mentions before submission.",
-        "Profiles can create private Quick Tags beneath the wave sections on their own profile's Brain tab; a Quick Tag such as @frens expands inline into ordinary profile mentions.",
+        "Profiles can create private Quick Tags from the owner-only Quick Tags profile tab; a Quick Tag such as @frens expands inline into ordinary profile mentions.",
         "Quick Tags are case-insensitive, cannot use reserved global mention names, and are not stored in the posted drop after expansion.",
         "Mention behavior depends on composer state, supported metadata, and the user's eligibility in the current wave.",
         "The @help6529 helper bot trigger also uses mention detection, but the bot runtime is implemented in the backend."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves", "/{user}/brain"],
+      "related_paths": ["/waves", "/{user}/mention-shortcuts"],
       "tags": ["waves", "composer", "mentions"],
       "source_refs": [
         "ops/docs/waves/composer/feature-wave-mentions.md",

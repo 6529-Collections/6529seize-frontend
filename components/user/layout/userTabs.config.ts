@@ -5,6 +5,7 @@ export type UserPageVisibilityContext = {
   readonly hasProfileWave: boolean;
   readonly hideSubscriptions: boolean;
   readonly isOwnProfile: boolean;
+  readonly hasActiveProfileProxy: boolean;
 };
 
 type UserPageTabDefinition = {
@@ -58,6 +59,15 @@ const TAB_DEFINITIONS = [
     titleKey: "user.profile.tabs.proxy",
     route: "proxy",
     isVisible: ({ isOwnProfile }: UserPageVisibilityContext) => isOwnProfile,
+  },
+  {
+    id: "mention-shortcuts",
+    titleKey: "user.profile.tabs.quickTags",
+    route: "mention-shortcuts",
+    isVisible: ({
+      isOwnProfile,
+      hasActiveProfileProxy,
+    }: UserPageVisibilityContext) => isOwnProfile && !hasActiveProfileProxy,
   },
 ] as const satisfies readonly UserPageTabDefinition[];
 

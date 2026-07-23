@@ -76,11 +76,12 @@ describe("UserPageMentionShortcuts", () => {
     } as ReturnType<typeof useMentionAliases>);
   });
 
-  it("renders owner-only Quick Tags in the Brain sidebar style", () => {
+  it("renders owner-only Quick Tags as a standalone profile tab", () => {
     renderQuickTags();
 
+    expect(screen.getByTestId("quick-tags-page")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Quick Tags" })
+      screen.getByRole("heading", { level: 1, name: "Quick Tags" })
     ).toBeInTheDocument();
     expect(
       screen.getByText(/each Quick Tag expands into the profile handles/i)
@@ -107,7 +108,7 @@ describe("UserPageMentionShortcuts", () => {
       connectedProfileId: "profile-2",
     });
 
-    expect(screen.queryByTestId("brain-quick-tags")).toBeNull();
+    expect(screen.queryByTestId("quick-tags-page")).toBeNull();
 
     const queryClient = new QueryClient();
     rerender(
@@ -126,6 +127,6 @@ describe("UserPageMentionShortcuts", () => {
       </QueryClientProvider>
     );
 
-    expect(screen.queryByTestId("brain-quick-tags")).toBeNull();
+    expect(screen.queryByTestId("quick-tags-page")).toBeNull();
   });
 });
