@@ -1,0 +1,848 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-30",
+  "description": "Cross-cultural concept mappings for 6529 ecosystem terms. Helps agents translate concepts for users across cultures, and helps non-English speakers understand 6529 jargon through cultural equivalents.",
+  "meta": {
+    "origin": "These cultural mappings were developed through the OM Album's 49-country, 423-artist cultural engineering process. The 6529 community contributed the cultural knowledge. This file contributes it back as structured data.",
+    "self_improving_loop": "Community creates culture \u2192 OM Album captures it \u2192 this file structures it \u2192 agents distribute it \u2192 community benefits",
+    "cultures_covered": [
+      "ko",
+      "es",
+      "ja",
+      "sw",
+      "hi",
+      "zh",
+      "ru"
+    ],
+    "note": "7 cultures initially mapped. The structure supports adding more cultures without breaking existing consumers. Translations and cultural equivalents are starting points, not authoritative \u2014 the 6529 community should refine them."
+  },
+  "methodology": {
+    "source": "Cultural mappings were developed through the OM Album \u2014 a 6529 community creative project spanning 49 countries and 423 artists. The OM Album explored how 6529 concepts resonate across cultures through music, lyrics, and cultural commentary. These mappings translate that creative exploration into structured data.",
+    "process": "Each of the 20 key 6529 concepts was mapped to 7 cultures (Korean, Spanish, Japanese, Swahili, Hindi, Chinese, Russian), producing 140 cultural equivalents. All entries were reviewed for uniqueness within each language and conceptual accuracy. Mappings that used the same cultural concept for different 6529 terms were differentiated, and entries where the cultural equivalent did not match the 6529 concept were corrected.",
+    "limitations": "These mappings are interpretive, not authoritative. A cultural_equivalent is a starting point \u2014 a concept from the target culture that resonates with the 6529 term. It is not a definitive translation, and it does not claim to capture every nuance of either the 6529 concept or the cultural concept. Mappings may oversimplify complex cultural traditions. Native speakers and cultural experts should refine these over time. The 7 cultures initially mapped cover Asia, Latin America, Africa, South Asia, and Eastern Europe \u2014 additional cultures can be added without breaking existing consumers.",
+    "governance": "The 6529 community owns these mappings. To propose a correction or addition: (1) identify the term, culture, and current cultural_equivalent, (2) propose the replacement with a brief explanation of why it better captures the 6529 concept, (3) submit via GitHub PR or 6529 Wave. Mappings should be reviewed by someone familiar with both the 6529 concept and the target culture. Disagreements about interpretation are expected and healthy \u2014 the mappings are designed to evolve."
+  },
+  "mappings": [
+    {
+      "term": "Hodl",
+      "concept": "Long-term commitment to holding an asset despite price volatility",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\ub048\uae30 (kkun-gi) \u2014 persistence, endurance through difficulty",
+          "notes": "Korean crypto culture adopted '\ud640\ub4dc' as a loanword. \ub048\uae30 maps to hodling through bear markets.",
+          "om_reference": "Track 15: jeong \u2014 bonds that strengthen through time endured together"
+        },
+        "es": {
+          "cultural_equivalent": "Aguantar \u2014 to endure, to hold steady",
+          "notes": "Spanish crypto communities use 'hodl' as-is. 'Aguantar' captures the cultural spirit.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u6211\u6162 (gaman) \u2014 endurance, perseverance",
+          "notes": "\u6211\u6162 is enduring the unbearable with patience and dignity. Maps to hodling through crashes.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Kubomicsa \u2014 to persevere through hardship",
+          "notes": "Swahili has a strong tradition of communal perseverance (Harambee). Individual holding maps to personal patience.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0927\u0948\u0930\u094d\u092f (dhairya) \u2014 patience, steadfastness",
+          "notes": "\u0927\u0948\u0930\u094d\u092f is a virtue in Hindu philosophy \u2014 patient endurance. Maps to holding through volatility.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u575a\u6301 (ji\u0101nch\u00ed) \u2014 to persist, to hold firm",
+          "notes": "Chinese crypto culture uses \u6301\u6709 for hodl. \u575a\u6301 captures the perseverance through market cycles.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0422\u0435\u0440\u043f\u0435\u043d\u0438\u0435 (terpeniye) \u2014 patience, endurance",
+          "notes": "Russian crypto community uses '\u0445\u043e\u0434\u043b' (transliteration). \u0422\u0435\u0440\u043f\u0435\u043d\u0438\u0435 captures the Russian cultural value of enduring hardship.",
+          "om_reference": "Track 14: post-punk persistence and defiance"
+        }
+      }
+    },
+    {
+      "term": "Schelling Point",
+      "concept": "Coordination without communication \u2014 people independently choosing the same thing",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\ub208\uce58 (nunchi) \u2014 reading the room, anticipating others without explicit communication",
+          "notes": "Korean nunchi is the closest cultural equivalent \u2014 coordinating through situational awareness rather than direct communication.",
+          "om_reference": "Track 15: nunchi as a 6529 concept"
+        },
+        "es": {
+          "cultural_equivalent": "Sentido com\u00fan \u2014 common sense that everyone shares without discussing",
+          "notes": "The Spanish concept of shared common sense maps to Schelling's coordination without communication.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u7a7a\u6c17\u3092\u8aad\u3080 (kuuki wo yomu) \u2014 reading the atmosphere, coordinating without words",
+          "notes": "Japanese kuuki wo yomu (reading the air) is the cultural practice of coordination without explicit communication.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Harambee \u2014 pulling together without explicit coordination",
+          "notes": "Harambee embodies collective action where everyone contributes without needing to discuss who does what.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u093e\u092e\u0942\u0939\u093f\u0915 \u091a\u0947\u0924\u0928\u093e (s\u0101m\u016bhik chetna) \u2014 collective consciousness",
+          "notes": "Indian philosophy's concept of collective consciousness maps to Schelling's independent coordination.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u9ed8\u5951 (m\u00f2q\u00ec) \u2014 tacit understanding, unspoken agreement",
+          "notes": "Chinese \u9ed8\u5951 is exactly Schelling's concept \u2014 people coordinating without communication through shared understanding.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0411\u0435\u0437\u043c\u043e\u043b\u0432\u043d\u043e\u0435 \u0441\u043e\u0433\u043b\u0430\u0441\u0438\u0435 \u2014 silent agreement, tacit coordination",
+          "notes": "Russian concept of tacit coordination through shared cultural understanding.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "CC0",
+      "concept": "Public domain dedication \u2014 releasing creative work with no rights reserved",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uc815 (jeong) \u2014 bonds that strengthen through mutual giving without expectation of return",
+          "notes": "CC0 maps to jeong \u2014 creative work given to the commons without reservation, like jeong accumulates through mutual giving.",
+          "om_reference": "Track 15: jeong as communal bond"
+        },
+        "es": {
+          "cultural_equivalent": "Bien com\u00fan \u2014 the common good",
+          "notes": "Hispanic tradition of collective creation (flamenco, corridos) where ownership is communal. CC0 formalizes what folk culture has always practiced.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u7121\u511f (mush\u014d) \u2014 without compensation, given freely",
+          "notes": "Japanese tradition of mush\u014d (free, without compensation) and doujin culture (fan works tolerated as communal). CC0 provides legal framework.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Ubuntu \u2014 'I am because we are'. Knowledge belongs to the community.",
+          "notes": "Ubuntu philosophy: individual creation is an expression of collective capacity. CC0 returns creative work to the community that enabled it.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0926\u093e\u0928 (d\u0101na) \u2014 charitable giving without expectation of return; \u092a\u094d\u0930\u0938\u093e\u0926 (pras\u0101d) \u2014 blessed offering",
+          "notes": "The gurukul tradition: knowledge freely given by teachers. Pras\u0101d: blessed offering distributed at temples without conditions.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u5929\u4e0b\u4e3a\u516c (ti\u0101nxi\u00e0 w\u00e8i g\u014dng) \u2014 the world belongs to all",
+          "notes": "Chinese classical philosophy (\u793c\u8bb0/Liji): 'the world belongs to everyone.' CC0 operationalizes this ancient concept for digital works.",
+          "om_reference": "Track 10: Chinese opera and the portal as Schelling point"
+        },
+        "ru": {
+          "cultural_equivalent": "\u0414\u0430\u0440 (dar) \u2014 gift to all",
+          "notes": "Russian tradition of \u0434\u0430\u0440 (gift) \u2014 giving creative work to the community. The samizdat tradition of freely sharing literature maps to CC0's spirit.",
+          "om_reference": "Track 14: persistence through open culture"
+        }
+      }
+    },
+    {
+      "term": "Wave",
+      "concept": "Conversational channel for community interaction, content sharing, and curation",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\ud30c\ub3c4 (pado) \u2014 wave, but in 6529 context = \ub300\ud654 \ucc44\ub110 (conversation channel)",
+          "notes": "Korean '\ud30c\ub3c4' means ocean wave \u2014 clarify that 6529 Wave = conversation channel, not literal waves.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Foro \u2014 forum, but with real-time reactions and voting",
+          "notes": "Spanish 'ola' = ocean wave. 6529 Wave is closer to a forum with live interaction mechanics.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u30c1\u30e3\u30f3\u30cd\u30eb (channel) \u2014 but with rating and curation mechanics",
+          "notes": "Japanese '\u6ce2' (nami) = ocean wave. 6529 Wave is closer to a chat channel with voting/curation.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Baraza \u2014 community gathering for discussion",
+          "notes": "Swahili 'wimbi' = ocean wave. 6529 Wave maps to baraza (community gathering place) with interactive features.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u092d\u093e (sabha) \u2014 assembly, gathering for discussion",
+          "notes": "Hindi '\u0932\u0939\u0930' (lahar) = ocean wave. 6529 Wave maps to sabha (assembly) with voting/reacting.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u8bba\u575b (l\u00f9nt\u00e1n) \u2014 forum, but with real-time curation",
+          "notes": "Chinese '\u6ce2' = wave. 6529 Wave is closer to a forum with live interaction. Clarify to avoid ocean-wave confusion.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0412\u043e\u043b\u043d\u0430 \u043e\u0431\u0441\u0443\u0436\u0434\u0435\u043d\u0438\u044f \u2014 wave of discussion",
+          "notes": "Russian '\u0432\u043e\u043b\u043d\u0430' can mean both ocean wave and metaphorical wave of discussion. 6529 Wave = discussion channel with curation.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "TDH",
+      "concept": "Time-weighted measure of commitment \u2014 how long and how much you've held",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uc5f0\uacf5\uc11c\uc5f4 (yeongong seoyeol) \u2014 seniority by years of service",
+          "notes": "Korean seniority system maps to TDH \u2014 longer holding = higher status, like longer service = higher rank.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Antig\u00fcedad \u2014 seniority, length of service",
+          "notes": "Spanish concept of antig\u00fcedad (seniority through time) maps to TDH's time-weighted commitment.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u5e74\u529f (nenk\u014d) \u2014 seniority by years",
+          "notes": "Japanese nenk\u014d (seniority) system maps to TDH \u2014 longer commitment = higher standing.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Uzoefu \u2014 experience measured by time",
+          "notes": "Swahili concept of uzoefu (experience through time) maps to TDH's time-weighted metric.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0935\u0930\u093f\u0937\u094d\u0920\u0924\u093e (vari\u1e63\u1e6dhat\u0101) \u2014 seniority through sustained commitment",
+          "notes": "Indian concept of seniority through sustained commitment maps to TDH.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u8d44\u5386 (z\u012bl\u00ec) \u2014 seniority, qualifications through time",
+          "notes": "Chinese concept of \u8d44\u5386 (qualifications through time) maps to TDH's time-weighted commitment metric.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0421\u0442\u0430\u0436 (stazh) \u2014 length of service, seniority",
+          "notes": "Russian concept of \u0441\u0442\u0430\u0436 (length of service) maps to TDH \u2014 time as commitment metric.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Boost",
+      "concept": "Collective amplification \u2014 multiplying a signal through community support",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uc751\uc6d0 (eungwon) \u2014 cheering, collective support",
+          "notes": "Korean eungwon (collective cheering) maps to boosting \u2014 community amplifying a signal.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Apoyo colectivo \u2014 collective support",
+          "notes": "Spanish concept of collective support/amplification.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u5fdc\u63f4 (\u014den) \u2014 cheering, support",
+          "notes": "Japanese \u014den (cheering/support) maps to boosting \u2014 collective amplification.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Kuinua \u2014 to lift up, to amplify a signal collectively",
+          "notes": "Swahili kuinua (to lift up) specifically captures the amplification aspect of boosting \u2014 the community lifting up content or a person. This is distinct from harambee (used for Schelling Point = coordinating without central authority). Boost is about amplification, not coordination. Kuinua is the act of raising something up; harambee is the act of pulling together.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u0902\u0935\u0930\u094d\u0927\u0928 (sanvardhan) \u2014 nurturing, amplifying through support",
+          "notes": "Indian concept of collective nurturing/amplification.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u52a9\u529b (zh\u00f9l\u00ec) \u2014 collective assistance, boosting",
+          "notes": "Chinese \u52a9\u529b (assistance/boost) maps to 6529's boost mechanic \u2014 community amplifying content.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430 (podderzhka) \u2014 collective support",
+          "notes": "Russian collective support/amplification concept.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Salmat (living well)",
+      "concept": "Life has flavor \u2014 the quality of living, not just the speed of doing",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uc0b6\uc758 \ub9db \u2014 the taste/flavor of life",
+          "notes": "Korean salmat = 'life has flavor.' The original term \u2014 6529 OM Album Track 15 explores this Korean concept.",
+          "om_reference": "Track 15: \uc0b4\ub9db (How to Living)"
+        },
+        "es": {
+          "cultural_equivalent": "Sabor de vida \u2014 flavor of life, living well",
+          "notes": "Spanish 'vivir bien' (living well) captures salmat's quality-over-speed philosophy.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u751f\u304d\u7532\u6590 \u2014 reason for living, life's worth",
+          "notes": "Japanese ikigai (reason for living) maps to salmat \u2014 the quality that makes life worth living.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Uhai mwema \u2014 good life, life with quality",
+          "notes": "Swahili concept of a life with quality/flavor, not just survival.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u091c\u0940\u0935\u0928 \u0915\u093e \u0930\u0938 \u2014 the juice/flavor of life",
+          "notes": "Hindi '\u091c\u0940\u0935\u0928 \u0915\u093e \u0938\u094d\u0935\u093e\u0926' (taste of life) directly maps to salmat. Indian concept of ras (flavor/essence).",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u6709\u6ecb\u6709\u5473 (y\u01d2u z\u012b y\u01d2u w\u00e8i) \u2014 life with flavor and meaning",
+          "notes": "Chinese \u6709\u6ecb\u6709\u5473 (life with flavor and substance) maps to salmat \u2014 quality over mere existence.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0412\u043a\u0443\u0441 \u043a \u0436\u0438\u0437\u043d\u0438 \u2014 taste for life, zest",
+          "notes": "Russian '\u0432\u043a\u0443\u0441 \u043a \u0436\u0438\u0437\u043d\u0438' (zest for life) maps to salmat \u2014 living with flavor, not just surviving.",
+          "om_reference": "Track 14: persistence and finding meaning"
+        }
+      }
+    },
+    {
+      "term": "Brain",
+      "concept": "Social network showing your activity, wave participation, and community interactions",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\ud65c\ub3d9 \uae30\ub85d \u2014 activity record, social presence",
+          "notes": "Korean \u2014 translate as social activity record, not literal 'brain'.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Red social \u2014 social network, activity feed",
+          "notes": "Spanish \u2014 translate as social network/activity, not the organ.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u30bd\u30fc\u30b7\u30e3\u30eb\u30a2\u30af\u30c6\u30a3\u30d3\u30c6\u30a3 \u2014 social activity",
+          "notes": "Japanese \u2014 clarify it's a social network feature, not the organ.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Mtandao wa kijamii \u2014 social network",
+          "notes": "Swahili \u2014 translate as social network, not literal 'brain'.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u093e\u092e\u093e\u091c\u093f\u0915 \u0917\u0924\u093f\u0935\u093f\u0927\u093f \u2014 social activity",
+          "notes": "Hindi \u2014 clarify it's a social feature, not the organ.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u793e\u4ea4\u52a8\u6001 \u2014 social activity feed",
+          "notes": "Chinese \u2014 translate as social activity, not literal 'brain organ'.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0421\u043e\u0446\u0438\u0430\u043b\u044c\u043d\u0430\u044f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c \u2014 social activity",
+          "notes": "Russian \u2014 clarify it's a social network feature, not the organ.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "REP",
+      "concept": "Peer-given reputation \u2014 community trust earned through contributions",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uba85\uc608 (myeongye) \u2014 honor, reputation",
+          "notes": "Korean \uba85\uc608 (honor) maps to REP \u2014 community-awarded reputation.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Honor \u2014 honor, respect earned through contributions",
+          "notes": "Spanish honor/reputation tradition maps to REP.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u4fe1\u983c (shinrai) \u2014 trust, reliability",
+          "notes": "Japanese shinrai (trust) maps to REP \u2014 earned through consistent contribution.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Heshima \u2014 respect, honor in community",
+          "notes": "Swahili heshima (respect/honor) maps to REP \u2014 community-awarded standing.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u092e\u094d\u092e\u093e\u0928 (samman) \u2014 respect, honor",
+          "notes": "Hindi \u0938\u092e\u094d\u092e\u093e\u0928 (respect) maps to REP \u2014 earned through community contribution.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u58f0\u671b (sh\u0113ngw\u00e0ng) \u2014 prestige, reputation",
+          "notes": "Chinese \u58f0\u671b (prestige) maps to REP \u2014 community-recognized standing.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0410\u0432\u0442\u043e\u0440\u0438\u0442\u0435\u0442 (avtoritet) \u2014 authority, standing",
+          "notes": "Russian avtoritet (authority through reputation) maps to REP.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "NIC",
+      "concept": "Network identity trust \u2014 does the community believe you are who you say you are?",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uc2e0\uc6d0 \ubcf4\uc99d (shiwon bojeung) \u2014 identity verification by community",
+          "notes": "Korean \u2014 community-verified identity, not self-claimed.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Identidad verificada \u2014 verified identity by peers",
+          "notes": "Spanish \u2014 peer-verified identity trust.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u8eab\u5143\u4fdd\u8a3c (mimoto hosh\u014d) \u2014 identity guarantee",
+          "notes": "Japanese \u2014 community-guaranteed identity.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Uthibitisho wa jamii \u2014 community verification",
+          "notes": "Swahili \u2014 community confirms your identity.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u093e\u092e\u0941\u0926\u093e\u092f\u093f\u0915 \u092a\u094d\u0930\u092e\u093e\u0923\u0940\u0915\u0930\u0923 \u2014 community authentication",
+          "notes": "Hindi \u2014 community-verified identity.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u793e\u533a\u8ba4\u8bc1 \u2014 community certification",
+          "notes": "Chinese \u2014 community-verified identity trust.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0414\u043e\u0432\u0435\u0440\u0438\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0430 \u2014 community trust in identity",
+          "notes": "Russian \u2014 community-verified identity.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Network Society",
+      "concept": "A society organized around shared values and digital participation rather than geographic borders; identity is your wallet, reputation comes from peers (REP), and governance emerges through Schelling points.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uc5f0\ub300 (yeoldae) \u2014 solidarity across boundaries, collective identity through shared values",
+          "notes": "Korean \uc5f0\ub300 (yeoldae, solidarity) captures the network society: collective identity formed through shared values rather than geography. Korea's democratization and labor movements built \uc5f0\ub300 across regional and class lines \u2014 a direct analog to how network society members bond across borders through shared commitment (TDH, REP, waves). \uc815 (jeong) is the bond itself; \uc5f0\ub300 is the active solidarity that creates the network.",
+          "om_reference": "Track 4: From Network Society with Love (SZN15, card #484)"
+        },
+        "es": {
+          "cultural_equivalent": "El bien com\u00fan \u2014 a collective resource maintained by community participation",
+          "notes": "The Spanish concept of bien com\u00fan (common good) frames society as a shared enterprise. In Latin American communitarian traditions, the comunidad organizes around mutual aid (mutualismo) \u2014 analogous to network society where governance emerges from peer consensus.",
+          "om_reference": "Track 4: From Network Society with Love (SZN15, card #484)"
+        },
+        "ja": {
+          "cultural_equivalent": "\u7e01 (en) \u2014 invisible bonds connecting people across distance and time",
+          "notes": "Japanese en (\u7e01) refers to karmic and social bonds connecting people across distance. The concept of \u548c (wa, harmony) through consensus mirrors Schelling-point governance \u2014 converging through implicit understanding rather than explicit commands.",
+          "om_reference": "Track 4: From Network Society with Love (SZN15, card #484)"
+        },
+        "sw": {
+          "cultural_equivalent": "Umoja \u2014 unity, the principle that a community is stronger together than apart",
+          "notes": "Swahili umoja (unity) is the foundational principle of network society: a community unified by shared values rather than geography. Umoja is one of the seven principles of Kwanzaa (Nguzo Saba). Harambee (used for Schelling Point) is about coordinating action; umoja is about the identity of the collective. A network society is umoja at global scale \u2014 unity without borders.",
+          "om_reference": "Track 4: From Network Society with Love (SZN15, card #484)"
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u0902\u0918 (sangh) \u2014 voluntary association organized around shared principles",
+          "notes": "The Indian concept of sangh (\u0938\u0902\u0918) maps directly to a network society. The Panchayat tradition of decentralized village governance mirrors Schelling-point governance: authority emerges from peer reputation (REP) rather than caste or state.",
+          "om_reference": "Track 4: From Network Society with Love (SZN15, card #484)"
+        },
+        "zh": {
+          "cultural_equivalent": "\u5929\u4e0b (ti\u0101nxi\u00e0) \u2014 'all under heaven,' a community bound by shared values",
+          "notes": "The Chinese concept of ti\u0101nxi\u00e0 (\u5929\u4e0b) envisions a community united by shared values rather than borders. \u9ed8\u5951 (m\u00f2q\u00ec) maps to Schelling-point governance. The classical ideal ti\u0101nxi\u00e0 w\u00e9i g\u014dng (\u5929\u4e0b\u4e3a\u516c, 'the world belongs to all') captures the permissionless, borderless nature.",
+          "om_reference": "Track 4: From Network Society with Love (SZN15, card #484)"
+        },
+        "ru": {
+          "cultural_equivalent": "\u043c\u0438\u0440 (mir) \u2014 a self-governing community without central authority",
+          "notes": "The Russian concept of mir (\u043c\u0438\u0440) historically referred to a peasant commune that governed itself through collective decision-making. The samizdat tradition \u2014 self-publishing outside state control \u2014 is an early analog of permissionless network participation.",
+          "om_reference": "Track 4: From Network Society with Love (SZN15, card #484)"
+        }
+      }
+    },
+    {
+      "term": "Decentralized Network Society",
+      "concept": "A network society operating without central authority using blockchain for coordination; coordination through code, shared values (CC0), and peer trust (NIC/REP/TDH). 6529's dGDP: $85M over 4 years.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uc790\uce58 (jachi) \u2014 self-governance, a community that coordinates without external authority",
+          "notes": "Korean \uc790\uce58 (jichi, self-governance) captures the essence of a decentralized network society: a community that coordinates through shared values and code rather than central direction. Korea's autonomous local councils (\uc790\uce58\ud68c) and the democratization movement's demand for \uc790\uce58 (self-rule) map directly to how a decentralized network society operates \u2014 through consensus, shared protocols, and peer trust rather than top-down authority. Unlike \ube68\ub9ac\ube68\ub9ac (speed culture), \uc790\uce58 is about the structure of governance, not its pace.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Mutualismo \u2014 anarchist mutual aid networks coordinating without hierarchy",
+          "notes": "Latin American mutualismo \u2014 mutual aid societies providing insurance, healthcare, education without state or church \u2014 is a direct cultural ancestor. Autogesti\u00f3n (self-management) envisions workers coordinating without bosses \u2014 blockchain equivalent is smart contracts.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u81ea\u6cbb (jichi) \u2014 self-governance, as practiced in Edo-period village councils",
+          "notes": "Japanese jichi (\u81ea\u6cbb) has deep roots in Edo-period villages managing affairs through council consensus. The \u7121\u511f (mush\u014d) ethic sustains public goods like CC0 art. \u4fe1\u983c\u3068\u5951\u7d04 (trust and contract) captures how blockchain replaces personal trust with cryptographic guarantees.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Umoja wa kujitawala \u2014 self-governing unity, a community that rules itself",
+          "notes": "Swahili umoja wa kujitawala (self-governing unity) combines umoja (unity) with kujitawala (self-rule) \u2014 a community that governs itself without external authority. This is distinct from baraza (used for Wave = community gathering). A decentralized network society is not just a gathering (baraza); it is a self-governing collective that coordinates through code and shared values.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0917\u0923\u0924\u0902\u0924\u094d\u0930 (ganatantra) \u2014 republic/self-governance; Panchayat decentralization",
+          "notes": "Ganatantra (\u0917\u0923\u0924\u0902\u0924\u094d\u0930) describes governance by the people through assembly. A decentralized network society is ganatantra at digital scale: smart contracts replace the village council, REP replaces social standing, TDH replaces land ownership.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u65e0\u4e3a\u800c\u6cbb (w\u00faw\u00e9i \u00e9r zh\u00ec) \u2014 governance through non-action, letting systems self-organize",
+          "notes": "The Daoist principle of \u65e0\u4e3a\u800c\u6cbb describes the highest form of governance: systems that self-organize without a ruler. \u9ed8\u5951 (m\u00f2q\u00ec) is how Schelling-point governance works. The tianxia wei gong ideal is the philosophical foundation for CC0 and permissionless participation.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0412\u0435\u0447\u0435 (veche) \u2014 medieval Slavic popular assembly for self-governance",
+          "notes": "The veche (\u0432\u0435\u0447\u0435) was a popular assembly in medieval Novgorod where citizens governed themselves \u2014 no prince, no central authority. Samizdat tradition demonstrates decentralized coordination through shared values.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Decentralization",
+      "concept": "The distribution of power, control, and decision-making away from a central authority to a network of participants. In blockchain: no single server \u2014 every node holds a copy of the ledger.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\ubd84\uc0b0 (bunsan) \u2014 distributed/dispersed, distribution of power across many hands",
+          "notes": "Korean \ubd84\uc0b0 (bunsan) captures the technical meaning. Korea's democratization in the 1980s \u2014 power moving from military dictatorship to distributed civic participation \u2014 gives decentralization lived resonance.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Autogesti\u00f3n \u2014 workers' self-management, distributing control to participants",
+          "notes": "Spanish autogesti\u00f3n (self-management) emerged from anarchist traditions where factories and communities were managed by workers without bosses. This is decentralization in practice: no single administrator, decisions made collectively.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u5206\u6563 (bunsan) \u2014 distribution of authority across multiple autonomous units",
+          "notes": "Japanese \u5206\u6563 (bunsan) captures the technical meaning. The Edo-period han system \u2014 domains with significant autonomy under a loose central framework \u2014 is a balance of local sovereignty and shared protocol.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Ugatuzi \u2014 devolution, distribution of power from center to periphery",
+          "notes": "Swahili ugatuzi (devolution) specifically means distributing power from a central authority to local units \u2014 Kenya's 2010 constitution created 47 counties through ugatuzi. This is distinct from harambee (collective action). Decentralization is about power distribution; harambee is about collective effort. Ugatuzi is the political and architectural reality of distributing authority.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0935\u093f\u0915\u0947\u0928\u094d\u0926\u094d\u0930\u0940\u0915\u0930\u0923 (vikendrikaran) \u2014 dispersal of authority; Panchayat system as local self-rule",
+          "notes": "India's Panchayati Raj system constitutionally distributes governance from national to village councils. Every village holds a copy of governance, just as every node holds a copy of the blockchain ledger.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u5206\u6743 (f\u0113nqu\u00e1n) \u2014 separation and distribution of power",
+          "notes": "Chinese \u5206\u6743 (f\u0113nqu\u00e1n) captures the political dimension. The Zhou dynasty's enfeoffment system \u2014 many semi-autonomous states under a shared protocol \u2014 is a loose, decentralized confederation that endured for centuries.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0417\u0435\u043c\u0449\u0438\u043d\u0430 (zemshchina) \u2014 land/community self-governance versus centralized autocracy",
+          "notes": "Russian \u0437\u0435\u043c\u0449\u0438\u043d\u0430 refers to land-governed communities versus Ivan the Terrible's centralized oprichnina \u2014 the historical tension between self-governance and centralized autocracy.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Byzantine General's Problem",
+      "concept": "A classic computer science problem: how can distributed parties reach consensus when some participants may be unreliable or malicious? Bitcoin's proof-of-work and Ethereum's proof-of-stake are solutions.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\ud22c\uba85\ud55c \uacf5\uac1c \uac80\uc99d (tumyeonghan gonggae geomjeung) \u2014 transparent public verification when trust fails",
+          "notes": "Korean \ub208\uce58 (nunchi) fits Schelling Point (coordinating without communication) but NOT Byzantine Generals (consensus when some parties lie). The Korean cultural analog is \ud22c\uba85\ud55c \uacf5\uac1c \uac80\uc99d \u2014 the principle that when intermediaries cannot be trusted, truth is established through transparent, public verification. Korea's democratization movement demanded exactly this: open verification of elections and government actions when official channels were unreliable.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Consenso por reputaci\u00f3n \u2014 reaching agreement through demonstrated reliability",
+          "notes": "In Latin American cultures where institutional trust has historically been low, communities developed sophisticated informal consensus mechanisms. Proof-of-work is a cultural translation of 'show me, don't tell me' \u2014 consensus through demonstrated action.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u6839\u56de\u3057 (nemawashi) \u2014 building consensus through indirect verification before formal decision",
+          "notes": "Japanese nemawashi (\u6839\u56de\u3057) is a consensus-building process where parties verify commitments through multiple indirect channels before a formal decision \u2014 solving the Byzantine problem through redundant verification.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Baraza ya wazee \u2014 council of elders reaching consensus despite unreliable informants",
+          "notes": "The Swahili baraza ya wazee verified information through multiple independent witnesses before committing to collective action. Consensus requires independent verification from multiple sources, exactly as proof-of-work requires independent computation.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "Panchayat \u0938\u092d\u093e (sabha) \u2014 village assembly reaching consensus through multiple witnesses",
+          "notes": "The Indian Panchayat solves the Byzantine problem through sabha (assembly): when a single informant's word cannot be trusted, the council hears from multiple independent witnesses before deciding \u2014 cultural Byzantine fault tolerance.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u516c\u5f00\u9a8c\u8bc1 (g\u014dngk\u0101i y\u00e0nzh\u00e8ng) \u2014 public verification, consensus through transparent proof when trust fails",
+          "notes": "Chinese \u9ed8\u5951 (m\u00f2q\u00ec) fits Schelling Point (tacit consensus) but NOT Byzantine Generals (adversarial consensus). The correct Chinese cultural analog is \u516c\u5f00\u9a8c\u8bc1 (g\u014dngk\u0101i y\u00e0nzh\u00e8ng, public verification) \u2014 the principle that when parties cannot be trusted, truth is established through transparent, verifiable proof. The Warring States period required \u516c\u5f00\u9a8c\u8bc1: alliances were verified through demonstrated actions (troop movements, gifts) rather than trusted words. Proof-of-work is \u516c\u5f00\u9a8c\u8bc1 at computational scale.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "samizdat cross-verification \u2014 verifying through multiple independent channels when official sources are unreliable",
+          "notes": "Russian samizdat solved the Byzantine problem in practice: when official sources were unreliable, dissidents verified information through multiple independent underground channels. A document was trusted only if it arrived through multiple independent paths.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "BTC (Bitcoin)",
+      "concept": "The first decentralized cryptocurrency, created by Satoshi Nakamoto in 2009. A peer-to-peer electronic cash system that solves the Byzantine General's Problem through proof-of-work.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\ube44\ud2b8\ucf54\uc778 (Bitcoin) \u2014 the first decentralized cryptocurrency",
+          "notes": "Korean uses \ube44\ud2b8\ucf54\uc778 (biteutokoin) as the direct translation. The concept does not require a cultural equivalent \u2014 Bitcoin is a globally recognized term. The cultural context is in how Korean crypto culture adopted it, not in a mapping to a pre-existing Korean concept.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Bitcoin \u2014 the first decentralized cryptocurrency",
+          "notes": "Spanish uses \"Bitcoin\" as-is. The concept does not require a cultural equivalent \u2014 Bitcoin is a globally recognized term. Spanish crypto communities use \"bitcoin\" without translation.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u30d3\u30c3\u30c8\u30b3\u30a4\u30f3 (Bitokoin) \u2014 the first decentralized cryptocurrency",
+          "notes": "Japanese uses \u30d3\u30c3\u30c8\u30b3\u30a4\u30f3 (bittokoin) as the direct translation. The concept does not require a cultural equivalent \u2014 Bitcoin is a globally recognized term. The pseudonym \"Satoshi Nakamoto\" uses a Japanese name, which creates cultural resonance.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Bitcoin \u2014 the first decentralized cryptocurrency",
+          "notes": "Swahili uses \"Bitcoin\" as-is. The concept does not require a cultural equivalent \u2014 Bitcoin is a globally recognized term. In African contexts where M-Pesa leapfrogged traditional banking, Bitcoin represents a similar leapfrog in store-of-value.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u092c\u093f\u091f\u0915\u0949\u0907\u0928 (Bitcoin) \u2014 the first decentralized cryptocurrency",
+          "notes": "Hindi uses \u092c\u093f\u091f\u0915\u0949\u0907\u0928 (bitkoin) as the direct translation. The concept does not require a cultural equivalent \u2014 Bitcoin is a globally recognized term.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u6bd4\u7279\u5e01 (B\u01d0t\u00e8b\u00ec) \u2014 the first decentralized cryptocurrency",
+          "notes": "Chinese uses \u6bd4\u7279\u5e01 (b\u01d0t\u00e8b\u00ec) as the direct translation. The concept does not require a cultural equivalent \u2014 Bitcoin is a globally recognized term.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0411\u0438\u0442\u043a\u043e\u0438\u043d (Bitcoin) \u2014 the first decentralized cryptocurrency",
+          "notes": "Russian uses \u0411\u0438\u0442\u043a\u043e\u0438\u043d (bitkoin) as the direct translation. The concept does not require a cultural equivalent \u2014 Bitcoin is a globally recognized term.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "ETH (Ether)",
+      "concept": "The native cryptocurrency of the Ethereum blockchain. Used to pay for transactions (gas) and smart contract execution. 6529's meme cards are NFTs on Ethereum \u2014 every mint requires ETH for gas.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uc774\ub354 (ETH) \u2014 the native cryptocurrency of Ethereum",
+          "notes": "Korean uses \uc774\ub354 (ideo) as the direct translation of Ether. ETH is a globally recognized term in crypto \u2014 the concept does not require a cultural equivalent.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "\u00c9ter (ETH) \u2014 the native cryptocurrency of Ethereum",
+          "notes": "Spanish uses \"\u00e9ter\" or \"ETH\" directly. The concept does not require a cultural equivalent \u2014 Ether is a globally recognized technical term.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u30a4\u30fc\u30b5 (ETH) \u2014 the native cryptocurrency of Ethereum",
+          "notes": "Japanese uses \u30a4\u30fc\u30b5 (\u012bsa) as the direct translation of Ether. ETH is a globally recognized term in crypto \u2014 the concept does not require a cultural equivalent.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "ETH (Etha) \u2014 the native cryptocurrency of Ethereum",
+          "notes": "Swahili uses \"ETH\" directly. The concept does not require a cultural equivalent \u2014 Ether is a globally recognized technical term.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0908\u0925 (ETH) \u2014 the native cryptocurrency of Ethereum",
+          "notes": "Hindi uses \u0908\u0925 (\u012bth) as the direct translation of Ether. ETH is a globally recognized term in crypto \u2014 the concept does not require a cultural equivalent.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u4ee5\u592a\u5e01 (ETH) \u2014 the native cryptocurrency of Ethereum",
+          "notes": "Chinese uses \u4ee5\u592a\u5e01 (y\u01d0t\u00e0i b\u00ec) as the direct translation of Ether. ETH is a globally recognized term in crypto \u2014 the concept does not require a cultural equivalent.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u042d\u0444\u0438\u0440 (ETH) \u2014 the native cryptocurrency of Ethereum",
+          "notes": "Russian uses \u042d\u0444\u0438\u0440 (efir) as the direct translation of Ether. ETH is a globally recognized term in crypto \u2014 the concept does not require a cultural equivalent.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Blockchain",
+      "concept": "A distributed ledger that records transactions across many computers so that the record cannot be altered retroactively. The foundational technology for NFTs, cryptocurrencies, and decentralized applications.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uacf5\ub3d9 \uc7a5\ubd80 (gongdong jangbu) \u2014 communal ledger; the \ub208\uce58 consensus applied to record-keeping",
+          "notes": "Korean \uacf5\ub3d9 \uc7a5\ubd80 (communal ledger): in traditional markets, communal ledgers were maintained by multiple participants, each keeping a copy to prevent fraud \u2014 an early analog of distributed ledgers.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Libro mayor comunitario \u2014 communal ledger maintained through mutualismo",
+          "notes": "Spanish libro mayor comunitario: in mutualismo traditions, communities maintained shared records of contributions \u2014 each member held a copy to prevent corruption. Blockchain is this principle at computational scale.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u53f0\u5e33 (daich\u014d) \u2014 shared ledger; nemawashi consensus applied to record-keeping",
+          "notes": "Japanese \u53f0\u5e33 (daich\u014d, ledger): Edo-period village registries were maintained by multiple officials with independent copies to prevent falsification. Nemawashi consensus \u2014 verifying through multiple channels \u2014 is how blockchain nodes work.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Daftari la jamii \u2014 community record book maintained through baraza consensus",
+          "notes": "Swahili daftari la jamii (community record book): important records were maintained by multiple elders with independent copies. Blockchain is this practice at computational scale. The Ubuntu principle means the ledger's truth exists through collective verification.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u093e\u091d\u093e \u092c\u0939\u0940 (s\u0101jh\u0101 bah\u012b) \u2014 shared ledger; Panchayat record-keeping with multiple witnesses",
+          "notes": "Hindi \u0938\u093e\u091d\u093e \u092c\u0939\u0940 (shared ledger): Panchayat maintained communal records \u2014 multiple witnesses verified each entry to prevent fraud. Blockchain is this principle at computational scale.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u516c\u5171\u8d26\u672c (g\u014dngg\u00f2ng zh\u00e0ngb\u011bn) \u2014 public ledger; \u9ed8\u5951 consensus applied to record-keeping",
+          "notes": "Chinese \u516c\u5171\u8d26\u672c (public ledger): guilds maintained shared ledgers with multiple copies to prevent fraud. \u9ed8\u5951 (m\u00f2q\u00ec) describes how nodes reach agreement through observation and convergence.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u041e\u0431\u0449\u0430\u044f \u0442\u0435\u0442\u0440\u0430\u0434\u044c (obshchaya tetrad') \u2014 shared notebook; samizdat distribution applied to record-keeping",
+          "notes": "Russian \u043e\u0431\u0449\u0430\u044f \u0442\u0435\u0442\u0440\u0430\u0434\u044c (shared notebook): in samizdat, texts were copied across multiple independent locations so no single raid could destroy the record. Blockchain is samizdat at computational scale.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Public Domain",
+      "concept": "Creative works not protected by intellectual property rights \u2014 anyone can use, remix, sell, or build upon them. CC0 is the most robust public domain dedication tool. In 6529: all meme card art is CC0.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uacf5\uc720 (gongyu) \u2014 shared/common; the Korean tradition of open scholarship",
+          "notes": "Korean \uacf5\uc720 (gongyu, shared). Hangul itself was created by King Sejong and given freely \u2014 a public domain gift. The \ube68\ub9ac\ube68\ub9ac remix culture thrives with CC0: anyone can use and build upon the art.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Patrimonio cultural \u2014 cultural patrimony/heritage that belongs to everyone",
+          "notes": "Spanish patrimonio cultural (cultural patrimony) specifically refers to creative works that are part of the collective heritage \u2014 indigenous art, folk music, public murals. This is distinct from bien com\u00fan (the common good, used for CC0 = the act of giving) and from bienes p\u00fablicos (public goods = the economic concept). Public domain is the legal status; patrimonio cultural is the cultural reality it describes.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u516c\u6709 (k\u014dy\u016b) \u2014 public ownership, works that belong to the public sphere",
+          "notes": "Japanese \u516c\u6709 (k\u014dy\u016b, public ownership) specifically refers to works that have entered the public sphere \u2014 distinct from \u7121\u511f (mush\u014d = given freely, used for CC0). CC0 is the act of giving (mush\u014d); Public Domain is the resulting legal status (k\u014dy\u016b). Japanese law recognizes \u516c\u6709\u7269 (k\u014dy\u016bbutsu, public property) as resources that cannot be privately owned \u2014 directly analogous to public domain creative works.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Urithi wa jamii \u2014 community heritage, cultural works inherited and shared by all",
+          "notes": "Swahili urithi wa jamii (community heritage) refers to cultural works passed down through generations \u2014 oral literature, music, dance traditions that belong to the community. This is distinct from mali ya umma (used for Public-goods = public property/infrastructure). Public Domain is about cultural heritage; public goods is about infrastructure. Urithi is what you inherit; mali is what you maintain.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0915\u094d\u0937\u0947\u0924\u094d\u0930 (s\u0101rvajanik k\u1e63etra) \u2014 the public sphere, works that have entered the commons",
+          "notes": "Hindi \u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0915\u094d\u0937\u0947\u0924\u094d\u0930 (s\u0101rvajanik k\u1e63etra, public sphere/domain) refers to creative works that have entered the public commons \u2014 distinct from \u0917\u0941\u0930\u0941\u0915\u0941\u0932 (gurukul = the tradition of freely sharing knowledge, used for CC0's giving principle). CC0 is the act of giving (gurukul/d\u0101na); Public Domain is the resulting legal status (s\u0101rvajanik k\u1e63etra). Indian law recognizes \u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0938\u0902\u092a\u0926\u093e as public property; s\u0101rvajanik k\u1e63etra emphasizes the sphere of free use.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u516c\u5171\u9886\u57df (g\u014dngg\u00f2ng l\u01d0ngy\u00f9) \u2014 the public sphere, works that have entered the commons",
+          "notes": "Chinese \u516c\u5171\u9886\u57df (g\u014dngg\u00f2ng l\u01d0ngy\u00f9, public sphere/domain) specifically refers to the legal and cultural space where works are free for all to use. This is distinct from \u5929\u4e0b\u4e3a\u516c (ti\u0101nxi\u00e0 w\u00e9i g\u014dng = 'the world belongs to all', used for CC0 = the giving principle). CC0 is the philosophical act of dedication (\u5929\u4e0b\u4e3a\u516c); Public Domain is the resulting legal status (\u516c\u5171\u9886\u57df).",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u041e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0435 \u0434\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 (obshchestvennoye dostoyaniye) \u2014 public domain, the legal status of works belonging to all",
+          "notes": "Russian \u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0435 \u0434\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 (public domain) is the specific legal term for creative works that belong to everyone. This is distinct from \u0434\u0430\u0440 (dar = gift, used for CC0 = the act of giving). CC0 is the gift (\u0434\u0430\u0440); public domain is the resulting status (\u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0435 \u0434\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435). Russian law recognizes \u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0435 \u0434\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 as works whose copyright has expired or been waived \u2014 directly analogous to CC0-dedicated art.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Permissionlessness",
+      "concept": "The property of a system where anyone can participate without needing approval from a gatekeeper. Blockchain networks are permissionless \u2014 anyone with an internet connection and a wallet can participate.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\ub204\uad6c\ub098 (nuguna) \u2014 'anyone can'; the Korean democratization principle of open participation",
+          "notes": "Korean \ub204\uad6c\ub098 (nuguna, 'anyone can'): Korea's democratization was fundamentally about permissionlessness \u2014 the right to participate without state approval. \ube68\ub9ac\ube68\ub9ac culture thrives in permissionless systems.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Libre acceso \u2014 free access; the mutualismo principle of open participation",
+          "notes": "Spanish libre acceso (free access): mutual aid societies were open to all who contributed \u2014 no gatekeeper could exclude. Permissionlessness is the digital extension: anyone with a wallet can participate.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u8ab0\u3067\u3082 (daredemo) \u2014 'anyone can'; the mush\u014d ethic of open participation",
+          "notes": "Japanese \u8ab0\u3067\u3082 (daredemo, 'anyone can'): the tradition of free temple access \u2014 anyone can enter regardless of status \u2014 embodies permissionlessness.",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Uhuru \u2014 freedom, the right to participate without asking permission",
+          "notes": "Swahili uhuru (freedom/independence) is Kenya's founding principle \u2014 uhuru means the right to self-determination without colonial permission. Permissionlessness is uhuru in the digital realm: anyone can participate without a gatekeeper. Ubuntu (used for CC0) is about collective identity; uhuru is about individual freedom to act. Permissionlessness is uhuru applied to network access.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0916\u0941\u0932\u093e \u0926\u094d\u0935\u093e\u0930 (khul\u0101 dv\u0101ra) \u2014 'open door'; the gurukul tradition of open access to knowledge",
+          "notes": "Hindi \u0916\u0941\u0932\u093e \u0926\u094d\u0935\u093e\u0930 (khul\u0101 dv\u0101ra, 'open door'): the gurukul tradition was permissionless \u2014 any student who sought knowledge could approach a guru, regardless of caste or background.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u5f00\u95e8 (k\u0101im\u00e9n) \u2014 'open door'; the tianxia wei gong principle of open participation",
+          "notes": "Chinese \u5f00\u95e8 (k\u0101im\u00e9n, 'open door'): the tianxia wei gong principle implies open access \u2014 if the world belongs to everyone, no one can be excluded.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u044b\u0439 \u0434\u043e\u0441\u0442\u0443\u043f \u2014 free access; the samizdat principle of open participation",
+          "notes": "Russian \u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b\u0439 \u0434\u043e\u0441\u0442\u0443\u043f (free access): samizdat was fundamentally permissionless \u2014 anyone could read, copy, or contribute without approval. Permissionlessness in blockchain is the digital extension of samizdat.",
+          "om_reference": null
+        }
+      }
+    },
+    {
+      "term": "Public-goods",
+      "concept": "Resources available to all whose use by one person does not reduce availability to others. In 6529's network society: CC0 art, open-source code, the prenode oracle, and the help-index are digital public goods.",
+      "mappings": {
+        "ko": {
+          "cultural_equivalent": "\uacf5\uc720\uc7ac (gongyuje) \u2014 shared resources; the Korean tradition of communal infrastructure",
+          "notes": "Korean \uacf5\uc720\uc7ac (shared resources). Korea's rapid development was built on public goods \u2014 roads, schools, internet infrastructure. The \uc815 (jeong) bonds form through shared use of public goods. The \ub048\uae30 (persistence) required to maintain public goods mirrors the persistence of open-source maintainers.",
+          "om_reference": null
+        },
+        "es": {
+          "cultural_equivalent": "Bienes comunales \u2014 communal goods maintained through collective contribution",
+          "notes": "Spanish bienes comunales (communal goods) specifically refers to resources maintained through collective contribution \u2014 communal water systems, shared grazing lands, community-built schools. This is distinct from bien com\u00fan (the common good = CC0's giving principle) and patrimonio cultural (cultural patrimony = Public Domain's heritage). Public-goods is the economic concept; bienes comunales is the lived Latin American practice of maintaining shared infrastructure.",
+          "om_reference": null
+        },
+        "ja": {
+          "cultural_equivalent": "\u516c\u5171\u8ca1 (k\u014dky\u014dzai) \u2014 public goods; the mush\u014d ethic of contributing to shared resources",
+          "notes": "Japanese \u516c\u5171\u8ca1 (k\u014dky\u014dzai): the \u7121\u511f (mush\u014d) ethic underpins public goods \u2014 contributors give without expectation of return. Japanese tradition of maintaining shared public spaces through voluntary community labor (\u30dc\u30e9\u30f3\u30c6\u30a3\u30a2).",
+          "om_reference": null
+        },
+        "sw": {
+          "cultural_equivalent": "Mali ya umma \u2014 public wealth/property; the harambee tradition of building shared infrastructure",
+          "notes": "Swahili mali ya umma (public wealth): harambee is fundamentally about creating public goods \u2014 the community builds a school collectively, everyone benefits. CC0 art and the prenode oracle are digital mali ya umma.",
+          "om_reference": null
+        },
+        "hi": {
+          "cultural_equivalent": "\u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0938\u0902\u092a\u0924\u094d\u0924\u093f (s\u0101rvajanik sampatti) \u2014 public wealth; gurukul and Panchayat traditions",
+          "notes": "Hindi \u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0938\u0902\u092a\u0924\u094d\u0924\u093f (public wealth): the gurukul tradition \u2014 knowledge freely shared \u2014 is a classic public good. The Panchayat manages shared village resources as public goods. The \u0926\u093e\u0928 (d\u0101na) tradition sustains them.",
+          "om_reference": null
+        },
+        "zh": {
+          "cultural_equivalent": "\u516c\u5171\u7269\u54c1 (g\u014dngg\u00f2ng w\u00f9p\u01d0n) \u2014 public goods, non-rivalrous resources available to all",
+          "notes": "Chinese \u516c\u5171\u7269\u54c1 (g\u014dngg\u00f2ng w\u00f9p\u01d0n, public goods) is the standard economic term for non-rivalrous, non-excludable resources. This is distinct from \u5929\u4e0b\u4e3a\u516c (used for CC0 = the philosophical principle) and \u516c\u5171\u9886\u57df (used for Public Domain = the legal status). Public-goods is the economic concept; \u516c\u5171\u7269\u54c1 is the technical term used in Chinese economics textbooks.",
+          "om_reference": null
+        },
+        "ru": {
+          "cultural_equivalent": "\u041e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0435 \u0431\u043b\u0430\u0433\u0430 (obshchestvennye blaga) \u2014 public goods; the dar (gift) culture of shared resources",
+          "notes": "Russian \u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0435 \u0431\u043b\u0430\u0433\u0430: the dar (\u0434\u0430\u0440, gift) culture sustains public goods. The samizdat tradition created a public good \u2014 freely circulating literature that anyone could read. CC0 art and the prenode oracle are digital obshchestvennye blaga.",
+          "om_reference": null
+        }
+      }
+    }
+  ],
+  "freshness": "stable"
+}
