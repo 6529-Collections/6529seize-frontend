@@ -1129,7 +1129,7 @@ import { ReleaseBusV2DeployPlan } from '../models/ReleaseBusV2DeployPlan';
 import { ReleaseBusV2Manifest  , ReleaseBusV2ManifestLaneEnum   , ReleaseBusV2ManifestStatusEnum             } from '../models/ReleaseBusV2Manifest';
 import { ReleaseBusV2ManifestListResponse } from '../models/ReleaseBusV2ManifestListResponse';
 import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
-import { ReleaseBusV2RegisterRequest, ReleaseBusV2RegisterRequestRepositoryEnum        } from '../models/ReleaseBusV2RegisterRequest';
+import { ReleaseBusV2RegisterRequest , ReleaseBusV2RegisterRequestRepositoryEnum        } from '../models/ReleaseBusV2RegisterRequest';
 import { ReleaseBusV2Train , ReleaseBusV2TrainLaneEnum  , ReleaseBusV2TrainStatusEnum                    } from '../models/ReleaseBusV2Train';
 import { ReleaseBusV2TrainDetailResponse } from '../models/ReleaseBusV2TrainDetailResponse';
 import { ReleaseBusV2TrainListResponse   } from '../models/ReleaseBusV2TrainListResponse';
