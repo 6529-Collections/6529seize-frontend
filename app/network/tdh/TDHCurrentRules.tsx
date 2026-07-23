@@ -82,7 +82,7 @@ export default function TDHCurrentRules({
     >
       <div className="lg:tw-sticky lg:tw-top-28">
         <h2
-          className="tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-[-0.04em] tw-text-iron-100 focus:tw-outline-none sm:tw-text-xl"
+          className="tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 focus:tw-outline-none sm:tw-text-xl"
           id="tdh-current-heading"
           tabIndex={-1}
         >

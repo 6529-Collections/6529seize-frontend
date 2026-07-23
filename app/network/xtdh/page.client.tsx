@@ -17,7 +17,7 @@ const REFERENCE_CONTENT_CLASSES =
 const INTRO_CONTENT_CLASSES =
   "tw-min-w-0 tw-max-w-3xl tw-space-y-5 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400";
 const SECTION_HEADING_CLASSES =
-  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-[-0.04em] tw-text-iron-100 sm:tw-text-xl";
+  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
 const FORMULA_CLASSES =
   "tw-m-0 tw-w-full tw-overflow-x-auto tw-whitespace-pre tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-4 tw-font-mono tw-text-sm tw-font-medium tw-leading-6 tw-text-[#00f0ff]";
 const ORDERED_LIST_CLASSES =
