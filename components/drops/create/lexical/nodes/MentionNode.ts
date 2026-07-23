@@ -22,6 +22,7 @@ import {
 type SerializedMentionNode = Spread<
   {
     mentionName: string;
+    mentionedProfileId?: string | null;
   },
   SerializedTextNode
 >;
@@ -32,7 +33,10 @@ function convertMentionElement(
   const textContent = domNode.textContent;
 
   if (textContent !== null) {
-    const node = $createMentionNode(textContent);
+    const node = $createMentionNode(
+      textContent,
+      domNode.dataset["mentionedProfileId"] ?? null
+    );
     return {
       node,
     };
@@ -43,18 +47,27 @@ function convertMentionElement(
 
 export class MentionNode extends TextNode {
   __mention: string;
+  __mentionedProfileId: string | null;
 
   static override getType(): string {
     return "mention";
   }
 
   static override clone(node: MentionNode): MentionNode {
-    return new MentionNode(node.__mention, node.__text, node.__key);
+    return new MentionNode(
+      node.__mention,
+      node.__mentionedProfileId,
+      node.__text,
+      node.__key
+    );
   }
   static override importJSON(
     serializedNode: SerializedMentionNode
   ): MentionNode {
-    const node = $createMentionNode(serializedNode.mentionName);
+    const node = $createMentionNode(
+      serializedNode.mentionName,
+      serializedNode.mentionedProfileId ?? null
+    );
     node.setTextContent(serializedNode.text);
     node.setFormat(serializedNode.format);
     node.setDetail(serializedNode.detail);
@@ -63,15 +76,22 @@ export class MentionNode extends TextNode {
     return node;
   }
 
-  constructor(mentionName: string, text?: string, key?: NodeKey) {
+  constructor(
+    mentionName: string,
+    mentionedProfileId: string | null = null,
+    text?: string,
+    key?: NodeKey
+  ) {
     super(text ?? mentionName, key);
     this.__mention = mentionName;
+    this.__mentionedProfileId = mentionedProfileId;
   }
 
   override exportJSON(): SerializedMentionNode {
     return {
       ...super.exportJSON(),
       mentionName: this.__mention,
+      mentionedProfileId: this.__mentionedProfileId,
       type: "mention",
       version: 1,
     };
@@ -86,6 +106,9 @@ export class MentionNode extends TextNode {
   override exportDOM(): DOMExportOutput {
     const element = document.createElement("span");
     element.setAttribute("data-lexical-mention", "true");
+    if (this.__mentionedProfileId) {
+      element.dataset["mentionedProfileId"] = this.__mentionedProfileId;
+    }
     element.textContent = this.__text;
     return { element };
   }
@@ -115,10 +138,17 @@ export class MentionNode extends TextNode {
   override canInsertTextAfter(): boolean {
     return false;
   }
+
+  getMentionedProfileId(): string | null {
+    return this.__mentionedProfileId;
+  }
 }
 
-export function $createMentionNode(mentionName: string): MentionNode {
-  const mentionNode = new MentionNode(mentionName);
+export function $createMentionNode(
+  mentionName: string,
+  mentionedProfileId: string | null = null
+): MentionNode {
+  const mentionNode = new MentionNode(mentionName, mentionedProfileId);
   mentionNode.setMode("segmented").toggleDirectionless();
   return $applyNodeReplacement(mentionNode);
 }

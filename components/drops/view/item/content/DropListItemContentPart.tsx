@@ -18,7 +18,9 @@ export default function DropListItemContentPart({
     case DropContentPartType.MENTION:
       return <DropListItemContentMention user={value} />;
     case DropContentPartType.GROUP_MENTION:
-      return <DropListItemContentGroupMention />;
+      return (
+        <DropListItemContentGroupMention group={value} text={part.match} />
+      );
     case DropContentPartType.HASHTAG:
       return <DropListItemContentNft nft={value} />;
     case DropContentPartType.WAVE_MENTION:

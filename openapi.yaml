@@ -7452,6 +7452,107 @@ paths:
           description: Forbidden
         "404":
           description: Profile not found
+  /mention-aliases:
+    get:
+      tags:
+        - Profiles
+      summary: List the authenticated profile's personal mention shortcuts
+      operationId: listMentionAliases
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiMentionAlias"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    post:
+      tags:
+        - Profiles
+      summary: Create a personal mention shortcut
+      operationId: createMentionAlias
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMentionAliasRequest"
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMentionAlias"
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /mention-aliases/{aliasId}:
+    parameters:
+      - name: aliasId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags:
+        - Profiles
+      summary: Update a personal mention shortcut
+      operationId: updateMentionAlias
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMentionAliasRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMentionAlias"
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    delete:
+      tags:
+        - Profiles
+      summary: Delete a personal mention shortcut
+      operationId: deleteMentionAlias
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: deleted
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
   /profiles/{identity}/proxies:
     get:
       tags:
@@ -15716,6 +15817,9 @@ components:
       type: string
       enum:
         - ALL
+        - CONTRIBUTORS
+        - ADMINS
+        - DEVS_6529
     ApiDropId:
       type: object
       required:
@@ -17696,6 +17800,59 @@ components:
         artist_split_usd:
           type: number
           format: double
+    ApiMentionAlias:
+      type: object
+      required:
+        - id
+        - alias
+        - members
+      properties:
+        id:
+          type: string
+          format: uuid
+        alias:
+          type: string
+          minLength: 3
+          maxLength: 15
+          pattern: ^[A-Za-z0-9_]+$
+        members:
+          type: array
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/ApiMentionAliasMember"
+    ApiMentionAliasMember:
+      type: object
+      required:
+        - profile_id
+        - handle
+      properties:
+        profile_id:
+          type: string
+        handle:
+          type: string
+        pfp:
+          type: string
+          nullable: true
+    ApiMentionAliasRequest:
+      type: object
+      required:
+        - alias
+        - member_profile_ids
+      properties:
+        alias:
+          type: string
+          minLength: 3
+          maxLength: 16
+          pattern: ^@?[A-Za-z0-9_]{3,15}$
+        member_profile_ids:
+          type: array
+          minItems: 1
+          maxItems: 25
+          uniqueItems: true
+          items:
+            type: string
+            maxLength: 100
+            pattern: ^[A-Za-z0-9_-]+$
     ApiMentionedWave:
       type: object
       required:

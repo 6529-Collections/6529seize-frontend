@@ -16,19 +16,29 @@ jest.mock("@lexical/react/LexicalTypeaheadMenuPlugin", () => ({
     return <div data-testid="typeahead" />;
   },
   MenuOption: class {},
-  useBasicTypeaheadTriggerMatch: () => jest.fn(),
+  useBasicTypeaheadTriggerMatch: () => jest.fn(() => null),
 }));
 
 jest.mock("@/hooks/useIdentitiesSearch", () => ({
   IDENTITY_SEARCH_MIN_HANDLE_LENGTH: 3,
   useIdentitiesSearch: jest.fn(),
 }));
+jest.mock("@/hooks/useMentionAliases", () => ({
+  useMentionAliases: jest.fn(),
+}));
+jest.mock(
+  "@/components/drops/create/lexical/utils/codeContextDetection",
+  () => ({
+    isInCodeContext: jest.fn(() => false),
+  })
+);
 
 jest.mock("@/components/drops/create/lexical/nodes/MentionNode", () => ({
   $createMentionNode: jest.fn(() => ({
     replace: jest.fn(),
     select: jest.fn(),
   })),
+  $isMentionNode: jest.fn(() => false),
 }));
 jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
   $createGroupMentionNode: jest.fn(() => ({
@@ -38,6 +48,7 @@ jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
 }));
 
 const { useIdentitiesSearch } = require("@/hooks/useIdentitiesSearch");
+const { useMentionAliases } = require("@/hooks/useMentionAliases");
 const {
   $createMentionNode,
 } = require("@/components/drops/create/lexical/nodes/MentionNode");
@@ -48,6 +59,7 @@ const {
 describe("MentionsPlugin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useMentionAliases as jest.Mock).mockReturnValue({ aliases: [] });
   });
 
   it("builds options from identities and exposes open state", () => {
@@ -70,6 +82,37 @@ describe("MentionsPlugin", () => {
     expect(ref.current.isMentionsOpen()).toBe(false);
   });
 
+  it.each([
+    ["@alice", 0, "alice", "@alice"],
+    ["hello @alice", 6, "alice", "@alice"],
+    ["hello (@alice", 7, "alice", "@alice"],
+    ["@alice.smith", 0, "alice.smith", "@alice.smith"],
+    ["@alice smith", 0, "alice smith", "@alice smith"],
+  ])(
+    "matches mention query %s",
+    (text, leadOffset, matchingString, replaceableString) => {
+      (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+      render(
+        <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+      );
+
+      expect(capturedProps.triggerFn(text)).toEqual({
+        leadOffset,
+        matchingString,
+        replaceableString,
+      });
+    }
+  );
+
+  it("does not match an at-sign in the middle of a word", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    expect(capturedProps.triggerFn("email@example")).toBeNull();
+  });
+
   it("calls onSelect with mention info", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
       identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
@@ -83,7 +126,10 @@ describe("MentionsPlugin", () => {
     act(() => {
       capturedProps.onSelectOption(option, null, close);
     });
-    expect($createMentionNode).toHaveBeenCalledWith(`@${option.handle}`);
+    expect($createMentionNode).toHaveBeenCalledWith(
+      `@${option.handle}`,
+      option.id
+    );
     expect(onSelect).toHaveBeenCalledWith({
       mentioned_profile_id: option.id,
       handle_in_content: option.handle,
@@ -194,5 +240,99 @@ describe("MentionsPlugin", () => {
     expect($createGroupMentionNode).toHaveBeenCalledWith("@all");
     expect(onSelectGroupMention).toHaveBeenCalledWith("ALL");
     expect(close).toHaveBeenCalled();
+  });
+
+  it.each([
+    ["CON", "@contributors", "CONTRIBUTORS"],
+    ["ADM", "@admins", "ADMINS"],
+    ["DEV", "@devs6529", "DEVS_6529"],
+  ])(
+    "offers %s global mentions to chat participants",
+    (query, token, group) => {
+      (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+      const onSelectGroupMention = jest.fn();
+      render(
+        <NewMentionsPlugin
+          waveId="w1"
+          onSelect={jest.fn()}
+          onSelectGroupMention={onSelectGroupMention}
+          ref={createRef()}
+        />
+      );
+
+      act(() => capturedProps.onQueryChange(query));
+      const option = capturedProps.options[0];
+      act(() => capturedProps.onSelectOption(option, null, jest.fn()));
+
+      expect(option.handle).toBe(token);
+      expect($createGroupMentionNode).toHaveBeenCalledWith(token);
+      expect(onSelectGroupMention).toHaveBeenCalledWith(group);
+    }
+  );
+
+  it("adds case-insensitive personal shortcut options", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [
+        {
+          id: "alias-1",
+          alias: "frens",
+          members: [
+            { profile_id: "1", handle: "alice", pfp: null },
+            { profile_id: "2", handle: "bob", pfp: null },
+          ],
+        },
+      ],
+    });
+
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+    expect(capturedProps.options).toHaveLength(0);
+
+    act(() => capturedProps.onQueryChange("FRE"));
+
+    expect(capturedProps.options).toHaveLength(1);
+    expect(capturedProps.options[0]).toEqual(
+      expect.objectContaining({
+        type: "alias",
+        handle: "@frens",
+        display: "Mention shortcut · 2 profiles",
+      })
+    );
+  });
+
+  it("keeps an exact profile match visible when its handle collides with an alias", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [
+        { id: "1", handle: "frens-one", display: null, pfp: null },
+        { id: "2", handle: "frens-two", display: null, pfp: null },
+        { id: "3", handle: "frens-three", display: null, pfp: null },
+        { id: "4", handle: "frens-four", display: null, pfp: null },
+        { id: "5", handle: "frens", display: "Exact profile", pfp: null },
+      ],
+    });
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [
+        {
+          id: "alias-1",
+          alias: "frens",
+          members: [{ profile_id: "6", handle: "alice", pfp: null }],
+        },
+      ],
+    });
+
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+    act(() => capturedProps.onQueryChange("FRENS"));
+
+    expect(capturedProps.options).toHaveLength(5);
+    expect(capturedProps.options[0]).toEqual(
+      expect.objectContaining({ type: "alias", handle: "@frens" })
+    );
+    expect(capturedProps.options[1]).toEqual(
+      expect.objectContaining({ type: "identity", handle: "frens" })
+    );
   });
 });

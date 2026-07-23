@@ -4,6 +4,7 @@ import type {
   MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
+import { useAuth } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -11,6 +12,8 @@ import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restric
 import type { MissingRequirements } from "@/components/waves/utils/getMissingRequirements";
 import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import type { EditorState } from "lexical";
 import dynamic from "next/dynamic";
@@ -29,14 +32,13 @@ import CreateDropReplyingWrapper from "../CreateDropReplyingWrapper";
 import CreateDropStormParts from "../CreateDropStormParts";
 import { CreateDropSubmit } from "../CreateDropSubmit";
 import SlowModeChatNotice from "../SlowModeChatNotice";
+import { exportComposerMarkdown } from "./exportComposerMarkdown";
 import InlineIdentityPicker from "./InlineIdentityPicker";
 import type {
   CreateDropMetadataType,
   MutableCurrentRef,
   UploadingFile,
 } from "./types";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 
 const TermsSignatureFlow = dynamic(
   () => import("../../terms/TermsSignatureFlow"),
@@ -107,7 +109,7 @@ interface CreateDropLayoutProps {
   readonly handleRequestEditLastDrop: () => boolean;
   readonly initialMarkdown: string | null;
   readonly initialMarkdownKey: string | null;
-  readonly onDrop: () => Promise<void>;
+  readonly onDrop: (resolvedMarkdown?: string) => Promise<void>;
   readonly pollDraft: CreateDropPollDraft | null;
   readonly pollValidationError: string | null;
   readonly updatePollDraft: (value: CreateDropPollDraft) => void;
@@ -219,6 +221,7 @@ export default function CreateDropLayout({
   termsSignatureFlowEnabled,
   suppressInitialHeightAnimation = false,
 }: CreateDropLayoutProps) {
+  const { setToast } = useAuth();
   const { initialDraftJson } = useWaveDraftPersistence({
     waveId: wave.id,
     activeDrop,
@@ -226,6 +229,28 @@ export default function CreateDropLayout({
     dropEditorRefreshKey,
   });
   const locale = useBrowserLocale();
+  const submitWithResolvedAliases = async () => {
+    let expansion: Awaited<
+      ReturnType<CreateDropInputHandles["expandMentionAliases"]>
+    >;
+    try {
+      const expandMentionAliases =
+        createDropInputRef.current?.expandMentionAliases;
+      if (!expandMentionAliases) {
+        throw new Error("Mention shortcuts are not ready yet.");
+      }
+      expansion = await expandMentionAliases();
+    } catch {
+      setToast({
+        type: "error",
+        title: t(locale, "waves.composer.mentionShortcuts.loadErrorTitle"),
+        message: t(locale, "waves.composer.mentionShortcuts.loadErrorMessage"),
+      });
+      return;
+    }
+    if (!expansion.completed) return;
+    await onDrop(exportComposerMarkdown(expansion.editorState));
+  };
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
   const displayedStormPartNumber =
@@ -380,14 +405,14 @@ export default function CreateDropLayout({
                 onRequestEditLastDrop={handleRequestEditLastDrop}
                 initialMarkdown={initialMarkdown}
                 initialMarkdownKey={initialMarkdownKey}
-                onDrop={onDrop}
+                onDrop={submitWithResolvedAliases}
               />
             </div>
             <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
               <CreateDropSubmit
                 submitting={submitting}
                 canSubmit={canSubmit}
-                onDrop={onDrop}
+                onDrop={submitWithResolvedAliases}
                 isDropMode={isDropMode}
                 label={submitLabel}
                 showLabelOnMobile={isStormModeActive}

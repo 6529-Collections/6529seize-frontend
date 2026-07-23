@@ -1,6 +1,5 @@
 "use client";
 
-import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -17,32 +16,25 @@ import React, {
   useState,
 } from "react";
 import { useAuth } from "../auth/Auth";
-import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
-import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
-import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import {
   validateCreateDropPollDraft,
   type CreateDropPollDraft,
 } from "./CreateDropPoll";
 
-import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
-import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import {
   hasPendingInlineImageUploadDrop,
@@ -69,6 +61,7 @@ import { useCreateDropFileHandlers } from "./create-drop-content/useCreateDropFi
 import { useCreateDropFocusBehavior } from "./create-drop-content/useCreateDropFocusBehavior";
 import { useCreateDropIdentityState } from "./create-drop-content/useCreateDropIdentityState";
 import { useCreateDropSubmission } from "./create-drop-content/useCreateDropSubmission";
+import { exportComposerMarkdown } from "./create-drop-content/exportComposerMarkdown";
 import { useCreateDropContainerWidth } from "./create-drop-content/useCreateDropContainerWidth";
 import { useCreateDropPollActions } from "./create-drop-content/useCreateDropPollActions";
 import { useStormPartActions } from "./create-drop-content/useStormPartActions";
@@ -262,21 +255,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     pollDraft !== null && pollValidation.error !== null;
 
   const getMarkdown = useMemo(
-    () =>
-      editorState
-        ? normalizeTypedEmojiShortcuts(
-            exportDropMarkdown(editorState, [
-              ...SAFE_MARKDOWN_TRANSFORMERS,
-              MENTION_TRANSFORMER,
-              ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-              HASHTAG_TRANSFORMER,
-              WAVE_MENTION_TRANSFORMER,
-              IMAGE_TRANSFORMER,
-              EMOJI_TRANSFORMER,
-            ])
-          )
-        : null,
-    [canMentionAll, editorState]
+    () => (editorState ? exportComposerMarkdown(editorState) : null),
+    [editorState]
   );
   const collapseOptions = useCallback(() => {
     shouldAnimateOptionsRef.current = true;
@@ -471,9 +451,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldCollapseOptionsAfterMarkdownSyncRef,
   });
 
+  const showMentionAliasExpansionError = useCallback(() => {
+    setToast({
+      type: "error",
+      title: t(locale, "waves.composer.mentionShortcuts.loadErrorTitle"),
+      message: t(locale, "waves.composer.mentionShortcuts.loadErrorMessage"),
+    });
+  }, [locale, setToast]);
+
   const {
     breakIntoStorm,
-    finalizeAndAddDropPart,
+    finalizeResolvedDropPart,
     onCancelPartEdit,
     onDiscardStorm,
     onEditPart,
@@ -488,6 +476,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     editingPartIndex,
     finalizeAndAddDropPartDraft,
     keepOptionsVisible: keepDesktopOptionsVisible,
+    onMentionAliasExpansionError: showMentionAliasExpansionError,
     refreshState,
     setDrop,
     setEditingPartIndex,
@@ -572,7 +561,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     disableIdentityPickerAutoOpen,
     getUpdatedDrop,
     createGifDrop,
-    finalizeAndAddDropPart,
+    finalizeAndAddDropPart: finalizeResolvedDropPart,
     refreshState,
     setSubmitting,
     setUploadingFiles,

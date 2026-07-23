@@ -46,7 +46,10 @@ import ExampleTheme from "../drops/create/lexical/ExampleTheme";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import type { ClearEditorPluginHandles } from "../drops/create/lexical/plugins/ClearEditorPlugin";
 import ClearEditorPlugin from "../drops/create/lexical/plugins/ClearEditorPlugin";
-import type { NewMentionsPluginHandles } from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type {
+  MentionAliasExpansionResult,
+  NewMentionsPluginHandles,
+} from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import type { NewHastagsPluginHandles } from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
 import NewHashtagsPlugin from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
@@ -60,13 +63,7 @@ import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "@/hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
-import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
-import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
-import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
-import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
-import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
+import { CREATE_DROP_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
@@ -77,6 +74,7 @@ import { t } from "@/i18n/messages";
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
   setMarkdown: (markdown: string) => void;
+  expandMentionAliases: () => Promise<MentionAliasExpansionResult>;
   focus: () => void;
   blur: () => void;
 }
@@ -110,36 +108,30 @@ interface EditorCommandsPluginHandles {
   blur: () => void;
 }
 
-const EditorCommandsPlugin = forwardRef<
-  EditorCommandsPluginHandles,
-  { readonly canMentionAll: boolean }
->(({ canMentionAll }, ref) => {
-  const [editor] = useLexicalComposerContext();
+const EditorCommandsPlugin = forwardRef<EditorCommandsPluginHandles>(
+  (_props, ref) => {
+    const [editor] = useLexicalComposerContext();
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      focus: () => editor.focus(),
-      blur: () => editor.blur(),
-      setMarkdown: (markdown: string) => {
-        editor.update(() => {
-          $convertFromMarkdownString(markdown, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-            HASHTAG_TRANSFORMER,
-            WAVE_MENTION_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ]);
-        });
-      },
-    }),
-    [canMentionAll, editor]
-  );
+    useImperativeHandle(
+      ref,
+      () => ({
+        focus: () => editor.focus(),
+        blur: () => editor.blur(),
+        setMarkdown: (markdown: string) => {
+          editor.update(() => {
+            $convertFromMarkdownString(
+              markdown,
+              CREATE_DROP_MARKDOWN_TRANSFORMERS
+            );
+          });
+        },
+      }),
+      [editor]
+    );
 
-  return null;
-});
+    return null;
+  }
+);
 EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
 
 /**
@@ -191,7 +183,10 @@ function InitialMarkdownPlugin({
     editor.update(() => {
       const root = $getRoot();
       root.clear();
-      $convertFromMarkdownString(initialMarkdown, SAFE_MARKDOWN_TRANSFORMERS);
+      $convertFromMarkdownString(
+        initialMarkdown,
+        CREATE_DROP_MARKDOWN_TRANSFORMERS
+      );
       $selectEndOfRootBlock(root);
     });
     editor.focus();
@@ -357,6 +352,7 @@ const CreateDropInput = forwardRef<
 
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
     const editorCommandsRef = useRef<EditorCommandsPluginHandles | null>(null);
+    const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const clearEditorState = useCallback(() => {
       clearEditorRef.current?.clearEditorState();
     }, []);
@@ -367,13 +363,19 @@ const CreateDropInput = forwardRef<
         clearEditorState,
         setMarkdown: (markdown: string) =>
           editorCommandsRef.current?.setMarkdown(markdown),
+        expandMentionAliases: async () => {
+          const mentionsPlugin = mentionsPluginRef.current;
+          if (!mentionsPlugin) {
+            throw new Error("Mention shortcuts are not ready yet.");
+          }
+          return mentionsPlugin.expandMentionAliases();
+        },
         focus: () => editorCommandsRef.current?.focus(),
         blur: () => editorCommandsRef.current?.blur(),
       }),
       [clearEditorState]
     );
 
-    const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
     const waveMentionsPluginRef = useRef<NewWaveMentionsPluginHandles | null>(
       null
@@ -467,15 +469,12 @@ const CreateDropInput = forwardRef<
               <ListPlugin />
               <PlainTextPastePlugin />
               <MarkdownShortcutPlugin
-                transformers={SAFE_MARKDOWN_TRANSFORMERS}
+                transformers={CREATE_DROP_MARKDOWN_TRANSFORMERS}
               />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
-              <EditorCommandsPlugin
-                ref={editorCommandsRef}
-                canMentionAll={canMentionAll}
-              />
+              <EditorCommandsPlugin ref={editorCommandsRef} />
               <DisableEditPlugin disabled={submitting} />
               <InitialMarkdownPlugin
                 initialMarkdown={initialMarkdown}
