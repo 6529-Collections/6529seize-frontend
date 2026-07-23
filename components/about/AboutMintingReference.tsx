@@ -275,7 +275,12 @@ function AllowlistCurrentPractices({
               </ul>
             </div>
 
-            <ExpandablePanel title="Our general approach is to allowlist:">
+            <ExpandablePanel
+              title={m(
+                locale,
+                "about.minting.current.phaseOne.generalApproach.title"
+              )}
+            >
               <ul className={LIST_CLASS}>
                 <li>
                   Some of the &quot;larger&quot; Meme Card collectors with a
@@ -305,7 +310,12 @@ function AllowlistCurrentPractices({
               </ul>
             </ExpandablePanel>
 
-            <ExpandablePanel title="Why do we allowlist these categories?">
+            <ExpandablePanel
+              title={m(
+                locale,
+                "about.minting.current.phaseOne.categories.title"
+              )}
+            >
               <ul className={LIST_CLASS}>
                 <li>
                   We often allowlist the larger collectors not only because they
@@ -457,7 +467,7 @@ function Improvements({ locale }: { readonly locale: SupportedLocale }) {
         <li>
           For our full analysis of our Network Definitions, go here:{" "}
           <Link
-            className="tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
+            className="tw-break-all tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
             href="/network/definitions"
             target="_blank"
             rel="noopener noreferrer"
@@ -498,7 +508,7 @@ function Tools({ locale }: { readonly locale: SupportedLocale }) {
           On a daily basis, we publish to Arweave the statistics we use to
           create our own allowlists. You can find them here:{" "}
           <Link
-            className="tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
+            className="tw-break-all tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
             href="/open-data"
             target="_blank"
             rel="noopener noreferrer"
@@ -524,7 +534,7 @@ function TechnicalIssues({ locale }: { readonly locale: SupportedLocale }) {
       id="minting-technical-issues"
       title={m(locale, "about.minting.technicalIssues.title")}
     >
-      <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-orange-300/80 marker:tw-text-orange-400 sm:tw-space-y-3">
+      <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-orange-400 sm:tw-space-y-3">
         <li>
           Sometimes under heavy load the minting page will fail to load or fail
           to load a transaction. You may have to refresh multiple times to be

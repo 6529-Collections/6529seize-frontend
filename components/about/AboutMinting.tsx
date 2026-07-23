@@ -51,7 +51,7 @@ const m = (key: MintingMessageKey, params: Parameters<typeof t>[2] = {}) =>
 const TOC_ITEMS = [
   {
     href: "#minting-overview",
-    labelKey: "about.minting.toc.overview",
+    labelKey: "about.minting.summary.label",
   },
   {
     href: "#minting-philosophy",
@@ -158,7 +158,7 @@ function MintingOverview() {
           <p className="tw-m-0">
             The minting website for The Memes is:{" "}
             <Link
-              className="tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
+              className="tw-break-all tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
               href="/the-memes/mint"
             >
               https://6529.io/the-memes/mint
@@ -188,7 +188,7 @@ function MintingOverview() {
         <p className="tw-m-0">
           Minting time and dates are announced on{" "}
           <a
-            className="tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
+            className="tw-break-all tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
             href="https://x.com/6529collections"
             target="_blank"
             rel="noopener noreferrer"
@@ -309,7 +309,7 @@ function MintingPhilosophy() {
       icon: faEarthAmericas,
       iconClassName: "tw-text-orange-400",
       iconWrapperClassName: "tw-bg-orange-500/10",
-      title: "Public Mints:",
+      title: m("about.minting.philosophy.publicMints.title"),
       content: (
         <p className="tw-m-0">
           Public unrestricted mints will be won by a small number of parties
@@ -322,7 +322,7 @@ function MintingPhilosophy() {
       icon: faChartLine,
       iconClassName: "tw-text-[#8f5cff]",
       iconWrapperClassName: "tw-bg-[#7000ff]/20",
-      title: "Raise Prices (either directly or through auctions):",
+      title: m("about.minting.philosophy.raisePrices.title"),
       content: (
         <p className="tw-m-0">
           The benefit of higher prices is that they help avoid gas wars and
@@ -338,7 +338,7 @@ function MintingPhilosophy() {
       icon: faListCheck,
       iconClassName: "tw-text-[#00f0ff]",
       iconWrapperClassName: "tw-bg-[#00f0ff]/10",
-      title: "Allowlists:",
+      title: m("about.minting.philosophy.allowlists.title"),
       content: (
         <p className="tw-m-0">
           Allowlists work on a technical basis by restricting which addresses
@@ -354,7 +354,7 @@ function MintingPhilosophy() {
       icon: faSliders,
       iconClassName: "tw-text-iron-300",
       iconWrapperClassName: "tw-bg-iron-900",
-      title: "Open Editions:",
+      title: m("about.minting.philosophy.openEditions.title"),
       content: (
         <p className="tw-m-0">
           Open editions absorb all demand by having unlimited size editions.
