@@ -88,7 +88,7 @@ function WebSidebarExpandable({
   const flyoutId = `sidebar-flyout-${section.key}`;
 
   return (
-    <>
+    <div className="tw-@container/sidebar">
       <WebSidebarNavItem
         onClick={(e) => onToggle(e)}
         onPointerEnter={onPointerEnter}
@@ -125,7 +125,7 @@ function WebSidebarExpandable({
               aria-label={t(DEFAULT_LOCALE, "navigation.sidebar.panelLabel", {
                 section: section.name,
               })}
-              className="tw-relative tw-m-0 tw-p-0"
+              className="tw-pointer-events-none tw-relative tw-m-0 tw-p-0 tw-opacity-0 tw-transition-opacity tw-duration-150 @[15.5rem]/sidebar:tw-pointer-events-auto @[15.5rem]/sidebar:tw-opacity-100 motion-reduce:tw-transition-none"
             >
               <div
                 className={`tw-absolute tw-bottom-0 tw-left-7 tw-top-0 tw-w-px tw-bg-iron-800 tw-transition-opacity tw-duration-300 motion-reduce:tw-transition-none ${
@@ -141,7 +141,7 @@ function WebSidebarExpandable({
                     <li key={item.href} className="tw-m-0 tw-p-0">
                       <Link
                         href={item.href}
-                        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-10 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-py-2 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
+                        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-py-2 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:tw-min-h-10 motion-reduce:tw-transition-none ${
                           active
                             ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
                             : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
@@ -180,7 +180,7 @@ function WebSidebarExpandable({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
