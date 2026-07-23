@@ -11,7 +11,7 @@ import {
 } from "@/types/waves.types";
 import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 
 export default function CreateWaveOutcomesRepRank({
   onOutcome,
@@ -123,21 +123,20 @@ export default function CreateWaveOutcomesRepRank({
         />
       )}
       <div className="tw-flex tw-justify-end tw-gap-x-3">
-        <button
+        <Button
+          variant="secondary"
+          size="lg"
           onClick={onCancel}
-          type="button"
-          className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700"
         >
           Cancel
-        </button>
-        <PrimaryButton
-          onClicked={onSubmit}
-          disabled={false}
-          loading={false}
-          padding="tw-px-4 tw-py-3"
+        </Button>
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={onSubmit}
         >
           Save
-        </PrimaryButton>
+        </Button>
       </div>
     </div>
   );

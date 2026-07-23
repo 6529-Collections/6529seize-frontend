@@ -12,7 +12,7 @@ import {
   calculateDecisionTimes,
   formatDate,
 } from "../services/waveDecisionService";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 
 interface SubsequentDecisionsProps {
   readonly firstDecisionTime: number;
@@ -217,13 +217,14 @@ export default function SubsequentDecisions({
           </div>
 
           <div className="tw-ml-3 tw-flex-shrink-0">
-            <PrimaryButton
-              onClicked={handleAddTimeframe}
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleAddTimeframe}
               disabled={!additionalTime}
-              loading={false}
-              padding="tw-px-4 tw-py-2.5">
+            >
               Add to Timeline
-            </PrimaryButton>
+            </Button>
           </div>
         </div>
 
