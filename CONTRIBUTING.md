@@ -83,9 +83,9 @@ Useful commands:
 6529 run check:changed
 ```
 
-`lint:changed` applies the tight ESLint rules only to lines changed from the
-branch's merge base with `origin/main`, so legacy violations on untouched lines
-do not block a focused contribution.
+`lint:changed` runs the tight ESLint rules through `eslint.config.diff.mjs`,
+reporting only lines changed from the branch's merge base with `origin/main`.
+Legacy violations on untouched lines do not block a focused contribution.
 
 Use focused checks for narrow changes. Use `6529 run build` when changes touch
 build-time behavior, generated API models, Next.js configuration, routing, or
