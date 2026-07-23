@@ -1,5 +1,24 @@
 # AGENTS.md
 
+## Simple Release Bus v2
+
+- Never register with Release Bus v1. It remains disabled rollback reference.
+- Before staging, production, promotion, or release mutation, run
+  `./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follow
+  `deploy-6529`.
+- `OFF` uses the serialized manual fallback and requires enforcement absent or
+  `false`. `STAGING` routes staging readiness through v2. `PRODUCTION` routes
+  staging through v2 and requires a separate explicit exact-SHA production
+  action after `STAGING_VALIDATED`.
+- Stop an active v2 lane when `ALL` or that lane is paused. Paused controls in
+  `OFF` intentionally disable v2 and do not block the documented manual route.
+- For coupled work, declare backend dependencies and preserve backend-before-
+  frontend ordering. Only independent backend DAG frontier units run together.
+- `STAGING_DEPLOYED` is not validation. Do not mutate staging during manifest-
+  bound E2E, and never infer production readiness from staging validation.
+- Never cancel another actor's workflow, force-push a shared ref, bypass exact
+  SHA/artifact checks, or publish a release note manually.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # Next.js: ALWAYS read docs before coding
