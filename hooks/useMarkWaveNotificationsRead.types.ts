@@ -23,7 +23,7 @@ export interface WaveNotificationsReadMarkerState {
 }
 
 export interface WaveNotificationsReadMarkerConfig extends WaveReadIdentityConfig {
-  readonly invalidateNotifications: () => void;
+  readonly invalidateWaveReadState: () => void;
 }
 
 export type WaveReadAddressEpoch = object;
