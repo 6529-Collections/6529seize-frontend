@@ -1,32 +1,23 @@
 # AGENTS.md
 
-## Temporary Release Bus v2 Maintenance
+## Simple Release Bus v2
 
-This section overrides the deployment skill and older Release Bus documentation
-until the v2 production cutover and rollback observation criteria in branch
-`agent/simple-release-bus-v2-plan` at commit `0d8fb5e726279b4a80592b3dc7d4ec3db75065e9`
-are complete and this section is deliberately removed.
-
-- Do not register a candidate with Release Bus v1.
-- Before any staging or production mutation, run
-  `./bin/6529 exec node ops/scripts/release-bus-status.mjs`. Continue only when
-  it reports `mode: OFF`; otherwise wait and retry.
-- For a manual route, require `RELEASE_BUS_ENFORCEMENT` to be absent or exactly
-  `false`. The `OFF` result and this enforcement result are one AND gate: both
-  must pass. Stop on disagreement, `true`, any other value, or a failed lookup.
-- Inspect active frontend and backend staging/production workflows and fetch the
-  exact remote target ref before merging or dispatching. Wait for other actors;
-  never cancel their workflows or force-push a shared branch.
-- Re-fetch immediately before pushing. If the target moved, recompute the merge
-  from its new head.
-- Deploy required backend units before dependent frontend work. Dispatch only
-  independent backend DAG units concurrently, and only with
-  `cancel-in-progress: false`.
-- Record exact deployed frontend/backend SHAs before E2E and do not mutate
-  staging until that E2E run is terminal.
-- Production still requires explicit owner authorization and successful staging
-  validation of the intended exact release set. Do not publish a release note
-  manually.
+- Never register with Release Bus v1. It remains disabled rollback reference.
+- Before staging, production, promotion, or release mutation, run
+  `./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follow
+  `deploy-6529`.
+- `OFF` uses the serialized manual fallback and requires enforcement absent or
+  `false`. `STAGING` routes staging readiness through v2. `PRODUCTION` routes
+  staging through v2 and requires a separate explicit exact-SHA production
+  action after `STAGING_VALIDATED`.
+- Stop an active v2 lane when `ALL` or that lane is paused. Paused controls in
+  `OFF` intentionally disable v2 and do not block the documented manual route.
+- For coupled work, declare backend dependencies and preserve backend-before-
+  frontend ordering. Only independent backend DAG frontier units run together.
+- `STAGING_DEPLOYED` is not validation. Do not mutate staging during manifest-
+  bound E2E, and never infer production readiness from staging validation.
+- Never cancel another actor's workflow, force-push a shared ref, bypass exact
+  SHA/artifact checks, or publish a release note manually.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

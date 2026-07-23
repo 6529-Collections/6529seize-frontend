@@ -1,13 +1,16 @@
 import { execFile } from "node:child_process";
+import { once } from "node:events";
 import { chmod, mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { createServer, type RequestListener, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 
 /* eslint-disable security/detect-non-literal-fs-filename -- Test paths are confined to a fresh OS temp directory. */
 
 const HELPER_PATH = path.resolve(__dirname, "release-bus-status.mjs");
 const TOKEN = "test-token-that-must-never-be-printed";
+const execFileAsync = promisify(execFile);
 const VALID_CONTROLS = [
   { scope: "ALL", paused: 0 },
   { scope: "STAGING", paused: false },
@@ -60,50 +63,45 @@ afterAll(async () => {
   await rm(tempRoot, { recursive: true, force: true });
 });
 
-function runHelper(overrides: NodeJS.ProcessEnv = {}): Promise<HelperResult> {
-  return new Promise((resolve, reject) => {
-    execFile(
-      process.execPath,
-      [HELPER_PATH],
-      {
-        env: {
-          // eslint-disable-next-line no-restricted-syntax -- The isolated subprocess needs the test runner environment.
-          ...process.env,
-          PATH: mockBin,
-          MOCK_GH_AUTHENTICATED: "1",
-          MOCK_GH_TOKEN: TOKEN,
-          ...overrides,
-        },
-        maxBuffer: 1024 * 1024,
-        timeout: 5_000,
+async function runHelper(
+  overrides: NodeJS.ProcessEnv = {}
+): Promise<HelperResult> {
+  let code = 0;
+  let stdout = "";
+  let stderr = "";
+  try {
+    const result = await execFileAsync(process.execPath, [HELPER_PATH], {
+      env: {
+        // eslint-disable-next-line no-restricted-syntax -- The isolated subprocess needs the test runner environment.
+        ...process.env,
+        PATH: mockBin,
+        MOCK_GH_AUTHENTICATED: "1",
+        MOCK_GH_TOKEN: TOKEN,
+        ...overrides,
       },
-      (error, stdout, stderr) => {
-        try {
-          expect(`${stdout}${stderr}`).not.toContain(TOKEN);
-          resolve({
-            code:
-              error === null
-                ? 0
-                : typeof error.code === "number"
-                  ? error.code
-                  : 1,
-            stdout,
-            stderr,
-          });
-        } catch (assertionError) {
-          reject(assertionError);
-        }
-      }
-    );
-  });
+      maxBuffer: 1024 * 1024,
+      timeout: 5_000,
+    });
+    stdout = result.stdout;
+    stderr = result.stderr;
+  } catch (error) {
+    const failure = error as Error & {
+      readonly code?: number;
+      readonly stdout?: string;
+      readonly stderr?: string;
+    };
+    code = typeof failure.code === "number" ? failure.code : 1;
+    stdout = failure.stdout ?? "";
+    stderr = failure.stderr ?? failure.message;
+  }
+  expect(`${stdout}${stderr}`).not.toContain(TOKEN);
+  return { code, stdout, stderr };
 }
 
 async function startServer(listener: RequestListener): Promise<TestServer> {
   const server = createServer(listener);
-  await new Promise<void>((resolve, reject) => {
-    server.once("error", reject);
-    server.listen(0, "127.0.0.1", resolve);
-  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
   const address = server.address();
   if (address === null || typeof address === "string") {
     throw new Error("Test server did not bind to a TCP port");
@@ -112,13 +110,20 @@ async function startServer(listener: RequestListener): Promise<TestServer> {
 }
 
 async function stopServer(server: Server): Promise<void> {
-  server.closeAllConnections?.();
-  await new Promise<void>((resolve, reject) => {
-    server.close((error) => {
-      if (error) reject(error);
-      else resolve();
-    });
-  });
+  server.closeAllConnections();
+  const closed = once(server, "close");
+  server.close();
+  await closed;
+}
+
+function parseStatus(stdout: string): {
+  readonly mode: string;
+  readonly controls: Readonly<Record<string, string>>;
+} {
+  return JSON.parse(stdout) as {
+    readonly mode: string;
+    readonly controls: Readonly<Record<string, string>>;
+  };
 }
 
 async function runWithResponse(
@@ -141,6 +146,7 @@ async function runWithResponse(
   }
 }
 
+// eslint-disable-next-line max-lines-per-function -- The helper's behavioral matrix belongs in one contract suite.
 describe("release-bus-status helper", () => {
   test.each(["OFF", "SHADOW", "STAGING", "PRODUCTION"])(
     "prints sanitized status for %s mode",
@@ -153,7 +159,7 @@ describe("release-bus-status helper", () => {
       expect(result.code).toBe(0);
       expect(result.stderr).toBe("");
       expect(result.authorization).toBe(`Bearer ${TOKEN}`);
-      expect(JSON.parse(result.stdout)).toEqual({
+      expect(parseStatus(result.stdout)).toEqual({
         mode,
         controls: {
           ALL: "RUNNING",
@@ -176,9 +182,33 @@ describe("release-bus-status helper", () => {
       });
 
       expect(result.code).toBe(0);
-      expect(JSON.parse(result.stdout).controls[pausedScope]).toBe("PAUSED");
+      expect(parseStatus(result.stdout).controls[pausedScope]).toBe("PAUSED");
     }
   );
+
+  it("falls back to the disabled legacy endpoint before v2 is deployed", async () => {
+    const paths: string[] = [];
+    const testServer = await startServer((request, response) => {
+      paths.push(request.url ?? "");
+      if (request.url === "/deploy/release-bus-v2/controls") {
+        response.writeHead(404).end();
+        return;
+      }
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ mode: "OFF", controls: VALID_CONTROLS }));
+    });
+    try {
+      const result = await runHelper({ RELEASE_BUS_API_URL: testServer.url });
+      expect(result.code).toBe(0);
+      expect(parseStatus(result.stdout).mode).toBe("OFF");
+      expect(paths).toEqual([
+        "/deploy/release-bus-v2/controls",
+        "/deploy/release-bus/controls",
+      ]);
+    } finally {
+      await stopServer(testServer.server);
+    }
+  });
 
   it("fails when gh is missing", async () => {
     const result = await runHelper({ PATH: emptyBin });

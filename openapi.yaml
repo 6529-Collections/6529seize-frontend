@@ -12,6 +12,244 @@ info:
 servers:
   - url: /api
 paths:
+  /deploy/release-bus-v2/candidates:
+    get:
+      tags: [Release Bus v2]
+      summary: List Release Bus v2 candidates
+      operationId: listReleaseBusV2Candidates
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/ReleaseBusV2CandidateStatus" }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 500, default: 100 }
+      responses:
+        "200":
+          description: Current candidates and runtime mode
+          content:
+            application/json:
+              schema:
+                {
+                  $ref: "#/components/schemas/ReleaseBusV2CandidateListResponse",
+                }
+    post:
+      tags: [Release Bus v2]
+      summary: Register an exact green PR candidate for staging
+      operationId: registerReleaseBusV2Candidate
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReleaseBusV2RegisterRequest" }
+      responses:
+        "202":
+          description: Candidate accepted for the staging queue
+          content:
+            application/json:
+              schema:
+                { $ref: "#/components/schemas/ReleaseBusV2CandidateResponse" }
+  /deploy/release-bus-v2/candidates/{id}/mark-ready-for-production:
+    post:
+      tags: [Release Bus v2]
+      summary: Explicitly opt an exact staging-validated candidate into production
+      operationId: markReleaseBusV2CandidateReadyForProduction
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - {
+            name: id,
+            in: path,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "#/components/schemas/ReleaseBusV2CandidateActionRequest",
+              }
+      responses:
+        "200":
+          description: Exact candidate is ready for production claim
+          content:
+            application/json:
+              schema:
+                { $ref: "#/components/schemas/ReleaseBusV2CandidateResponse" }
+  /deploy/release-bus-v2/candidates/{id}/revoke-production-readiness:
+    post:
+      tags: [Release Bus v2]
+      summary: Revoke production readiness before claim
+      operationId: revokeReleaseBusV2CandidateProductionReadiness
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - {
+            name: id,
+            in: path,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "#/components/schemas/ReleaseBusV2VersionedActionRequest",
+              }
+      responses:
+        "200":
+          description: Candidate returned to staging-validated state
+          content:
+            application/json:
+              schema:
+                { $ref: "#/components/schemas/ReleaseBusV2CandidateResponse" }
+  /deploy/release-bus-v2/candidates/{id}/cancel:
+    post:
+      tags: [Release Bus v2]
+      summary: Cancel an unclaimed Release Bus v2 candidate
+      operationId: cancelReleaseBusV2Candidate
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - {
+            name: id,
+            in: path,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "#/components/schemas/ReleaseBusV2VersionedActionRequest",
+              }
+      responses:
+        "200":
+          description: Candidate cancelled
+          content:
+            application/json:
+              schema:
+                { $ref: "#/components/schemas/ReleaseBusV2CandidateResponse" }
+  /deploy/release-bus-v2/trains:
+    get:
+      tags: [Release Bus v2]
+      summary: List staging, qualification, and production trains
+      operationId: listReleaseBusV2Trains
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Current and recent trains
+          content:
+            application/json:
+              schema:
+                { $ref: "#/components/schemas/ReleaseBusV2TrainListResponse" }
+  /deploy/release-bus-v2/trains/{id}:
+    get:
+      tags: [Release Bus v2]
+      summary: Get an exact train with candidates, operations, and events
+      operationId: getReleaseBusV2Train
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - {
+            name: id,
+            in: path,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      responses:
+        "200":
+          description: Exact train detail
+          content:
+            application/json:
+              schema:
+                { $ref: "#/components/schemas/ReleaseBusV2TrainDetailResponse" }
+  /deploy/release-bus-v2/manifests:
+    get:
+      tags: [Release Bus v2]
+      summary: List exact Release Bus v2 deployment manifests
+      operationId: listReleaseBusV2Manifests
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Exact staging and production manifests
+          content:
+            application/json:
+              schema:
+                {
+                  $ref: "#/components/schemas/ReleaseBusV2ManifestListResponse",
+                }
+  /deploy/release-bus-v2/controls:
+    get:
+      tags: [Release Bus v2]
+      summary: Read runtime mode, pause controls, and environment locks
+      operationId: getReleaseBusV2Controls
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Runtime controls and leases
+          content:
+            application/json:
+              schema:
+                { $ref: "#/components/schemas/ReleaseBusV2ControlsResponse" }
+  /deploy/release-bus-v2/pause:
+    post:
+      tags: [Release Bus v2]
+      summary: Pause a Release Bus v2 control scope
+      operationId: pauseReleaseBusV2
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReleaseBusV2ControlRequest" }
+      responses:
+        "200":
+          description: Updated controls
+          content:
+            application/json:
+              schema:
+                {
+                  $ref: "#/components/schemas/ReleaseBusV2ControlUpdateResponse",
+                }
+  /deploy/release-bus-v2/resume:
+    post:
+      tags: [Release Bus v2]
+      summary: Resume a Release Bus v2 control scope
+      operationId: resumeReleaseBusV2
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReleaseBusV2ControlRequest" }
+      responses:
+        "200":
+          description: Updated controls
+          content:
+            application/json:
+              schema:
+                {
+                  $ref: "#/components/schemas/ReleaseBusV2ControlUpdateResponse",
+                }
+  /deploy/release-bus-v2/reconcile:
+    post:
+      tags: [Release Bus v2]
+      summary: Reconcile durable Release Bus v2 state now
+      operationId: reconcileReleaseBusV2
+      security: [{ bearerAuth: [] }]
+      responses:
+        "202":
+          description: Reconciliation queued on the reserved worker, or safely disabled while OFF
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
   /aggregated-activity:
     get:
       tags:
@@ -11598,6 +11836,313 @@ components:
       type: http
       scheme: bearer
   schemas:
+    ReleaseBusV2Mode:
+      type: string
+      enum: [OFF, STAGING, PRODUCTION]
+    ReleaseBusV2CandidateStatus:
+      type: string
+      enum:
+        - READY_FOR_STAGING
+        - STAGING_IN_TRAIN
+        - STAGING_BUILDING
+        - STAGING_DEPLOYING
+        - STAGING_DEPLOYED
+        - STAGING_VALIDATING
+        - STAGING_VALIDATED
+        - READY_FOR_PRODUCTION
+        - PRODUCTION_IN_TRAIN
+        - PRODUCTION_BUILDING_OR_QUALIFYING
+        - PRODUCTION_DEPLOYING
+        - PRODUCTION_DEPLOYED
+        - NEEDS_REBASE
+        - WAITING_FOR_DEPENDENCY
+        - SUPERSEDED
+        - FAILED
+        - CANCELLED
+    ReleaseBusV2DeployPlan:
+      type: object
+      required: [units, edges]
+      properties:
+        units:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items: { type: string, pattern: "^[A-Za-z0-9_-]+$" }
+        edges:
+          type: array
+          maxItems: 500
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items: { type: string, pattern: "^[A-Za-z0-9_-]+$" }
+    ReleaseBusV2DependencyRequest:
+      type: object
+      required: [candidate_id, environment]
+      properties:
+        candidate_id: { type: string, format: uuid }
+        environment:
+          type: string
+          enum: [STAGING, PRODUCTION, BOTH]
+    ReleaseBusV2RegisterRequest:
+      type: object
+      required: [repository, pr_number, branch_name, expected_head_sha]
+      properties:
+        repository: { type: string, enum: [frontend, backend] }
+        pr_number: { type: integer, minimum: 1 }
+        branch_name: { type: string, minLength: 1, maxLength: 255 }
+        expected_head_sha: { type: string, pattern: "^[a-f0-9]{40}$" }
+        deploy_plan:
+          nullable: true
+          allOf: [{ $ref: "#/components/schemas/ReleaseBusV2DeployPlan" }]
+        dependencies:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/ReleaseBusV2DependencyRequest" }
+    ReleaseBusV2CandidateActionRequest:
+      type: object
+      required: [expected_head_sha, expected_row_version]
+      properties:
+        expected_head_sha: { type: string, pattern: "^[a-f0-9]{40}$" }
+        expected_row_version: { type: integer, minimum: 1 }
+    ReleaseBusV2VersionedActionRequest:
+      type: object
+      required: [expected_row_version]
+      properties:
+        expected_row_version: { type: integer, minimum: 1 }
+    ReleaseBusV2Candidate:
+      type: object
+      required:
+        - id
+        - repository
+        - pr_number
+        - branch_name
+        - head_sha
+        - requested_by
+        - status
+        - created_at
+        - updated_at
+        - row_version
+      properties:
+        id: { type: string, format: uuid }
+        repository: { type: string, enum: [frontend, backend] }
+        pr_number: { type: integer }
+        branch_name: { type: string }
+        head_sha: { type: string, pattern: "^[a-f0-9]{40}$" }
+        requested_by: { type: string }
+        status: { $ref: "#/components/schemas/ReleaseBusV2CandidateStatus" }
+        deploy_plan_json:
+          nullable: true
+          allOf: [{ $ref: "#/components/schemas/ReleaseBusV2DeployPlan" }]
+        pr_evidence_json:
+          { type: object, nullable: true, additionalProperties: true }
+        current_train_id: { type: string, format: uuid, nullable: true }
+        staging_validated_train_id:
+          { type: string, format: uuid, nullable: true }
+        staging_validated_manifest_id:
+          { type: string, format: uuid, nullable: true }
+        production_requested_at:
+          { type: integer, format: int64, nullable: true }
+        production_requested_by: { type: string, nullable: true }
+        hold_reason: { type: string, nullable: true }
+        superseded_at: { type: integer, format: int64, nullable: true }
+        created_at: { type: integer, format: int64 }
+        updated_at: { type: integer, format: int64 }
+        row_version: { type: integer, minimum: 1 }
+        dependencies:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Dependency" }
+    ReleaseBusV2Dependency:
+      type: object
+      required:
+        [id, candidate_id, prerequisite_candidate_id, environment, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        candidate_id: { type: string, format: uuid }
+        prerequisite_candidate_id: { type: string, format: uuid }
+        environment: { type: string, enum: [STAGING, PRODUCTION, BOTH] }
+        created_at: { type: integer, format: int64 }
+    ReleaseBusV2CandidateResponse:
+      type: object
+      required: [candidate]
+      properties:
+        candidate: { $ref: "#/components/schemas/ReleaseBusV2Candidate" }
+        mode: { $ref: "#/components/schemas/ReleaseBusV2Mode" }
+    ReleaseBusV2CandidateListResponse:
+      type: object
+      required: [candidates, mode]
+      properties:
+        candidates:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Candidate" }
+        mode: { $ref: "#/components/schemas/ReleaseBusV2Mode" }
+    ReleaseBusV2Train:
+      type: object
+      required: [id, lane, status, created_at, updated_at, row_version]
+      properties:
+        id: { type: string, format: uuid }
+        lane:
+          {
+            type: string,
+            enum: [STAGING, PRODUCTION, PRODUCTION_QUALIFICATION],
+          }
+        status:
+          type: string
+          enum:
+            [
+              CLAIMED,
+              COMPOSING,
+              PREFLIGHTING,
+              PREPARED,
+              WAITING_FOR_ENVIRONMENT,
+              DEPLOYING,
+              STAGING_DEPLOYED,
+              E2E_RUNNING,
+              STAGING_VALIDATED,
+              MERGING_PRODUCTION,
+              PRODUCTION_DEPLOYING,
+              PRODUCTION_DEPLOYED,
+              FAILED,
+              PAUSED,
+              CANCELLED,
+            ]
+        frontend_base_sha: { type: string, nullable: true }
+        backend_base_sha: { type: string, nullable: true }
+        frontend_composed_sha: { type: string, nullable: true }
+        backend_composed_sha: { type: string, nullable: true }
+        frontend_artifact_digest: { type: string, nullable: true }
+        backend_artifact_digest: { type: string, nullable: true }
+        parent_train_id: { type: string, format: uuid, nullable: true }
+        qualification_train_id: { type: string, format: uuid, nullable: true }
+        manifest_id: { type: string, format: uuid, nullable: true }
+        failure_class: { type: string, nullable: true }
+        failure_message: { type: string, nullable: true }
+        recovery_message: { type: string, nullable: true }
+        phase_started_at: { type: integer, format: int64, nullable: true }
+        completed_at: { type: integer, format: int64, nullable: true }
+        created_at: { type: integer, format: int64 }
+        updated_at: { type: integer, format: int64 }
+        row_version: { type: integer, minimum: 1 }
+    ReleaseBusV2TrainListResponse:
+      type: object
+      required: [trains, mode]
+      properties:
+        trains:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Train" }
+        mode: { $ref: "#/components/schemas/ReleaseBusV2Mode" }
+    ReleaseBusV2TrainMembership:
+      type: object
+      additionalProperties: true
+    ReleaseBusV2Operation:
+      type: object
+      additionalProperties: true
+    ReleaseBusV2Event:
+      type: object
+      additionalProperties: true
+    ReleaseBusV2TrainDetailResponse:
+      type: object
+      required:
+        [train, memberships, candidates, dependencies, operations, events]
+      properties:
+        train: { $ref: "#/components/schemas/ReleaseBusV2Train" }
+        memberships:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2TrainMembership" }
+        candidates:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Candidate" }
+        dependencies:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Dependency" }
+        operations:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Operation" }
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Event" }
+    ReleaseBusV2Manifest:
+      type: object
+      required:
+        [
+          id,
+          train_id,
+          lane,
+          identity_sha256,
+          status,
+          manifest_json,
+          created_at,
+          updated_at,
+        ]
+      properties:
+        id: { type: string, format: uuid }
+        train_id: { type: string, format: uuid }
+        lane:
+          {
+            type: string,
+            enum: [STAGING, PRODUCTION, PRODUCTION_QUALIFICATION],
+          }
+        identity_sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
+        status:
+          {
+            type: string,
+            enum:
+              [
+                STAGING_DEPLOYED,
+                STAGING_VALIDATED,
+                PRODUCTION_DEPLOYED,
+                FAILED,
+              ],
+          }
+        frontend_sha: { type: string, nullable: true }
+        backend_sha: { type: string, nullable: true }
+        frontend_artifact_digest: { type: string, nullable: true }
+        backend_artifact_digest: { type: string, nullable: true }
+        e2e_run_id: { type: string, nullable: true }
+        manifest_json: { type: object, additionalProperties: true }
+        deployed_at: { type: integer, format: int64, nullable: true }
+        validated_at: { type: integer, format: int64, nullable: true }
+        created_at: { type: integer, format: int64 }
+        updated_at: { type: integer, format: int64 }
+    ReleaseBusV2ManifestListResponse:
+      type: object
+      required: [manifests]
+      properties:
+        manifests:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Manifest" }
+    ReleaseBusV2Control:
+      type: object
+      additionalProperties: true
+    ReleaseBusV2Lock:
+      type: object
+      additionalProperties: true
+    ReleaseBusV2ControlsResponse:
+      type: object
+      required: [controls, locks, mode]
+      properties:
+        controls:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Control" }
+        locks:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Lock" }
+        mode: { $ref: "#/components/schemas/ReleaseBusV2Mode" }
+    ReleaseBusV2ControlRequest:
+      type: object
+      required: [scope, reason]
+      properties:
+        scope: { type: string, enum: [ALL, STAGING, PRODUCTION] }
+        reason: { type: string, minLength: 3, maxLength: 1000 }
+    ReleaseBusV2ControlUpdateResponse:
+      type: object
+      required: [controls, mode]
+      properties:
+        controls:
+          type: array
+          items: { $ref: "#/components/schemas/ReleaseBusV2Control" }
+        mode: { $ref: "#/components/schemas/ReleaseBusV2Mode" }
     AirdropAddressResponse:
       type: object
       required:

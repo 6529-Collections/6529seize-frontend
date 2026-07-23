@@ -45,6 +45,18 @@ on:
         description: Immutable deployed SHA
         type: string
         required: false
+      release_manifest_id:
+        description: Exact Release Bus v2 manifest id
+        type: string
+        required: false
+      release_manifest_identity_sha256:
+        description: Exact Release Bus v2 manifest identity digest
+        type: string
+        required: false
+      frontend_sha: { type: string, required: false }
+      backend_sha: { type: string, required: false }
+      frontend_artifact_digest: { type: string, required: false }
+      backend_artifact_digest: { type: string, required: false }
 
 permissions:
   contents: read
@@ -53,9 +65,10 @@ run-name: Staging E2E [${{ inputs.operation_key || 'automatic' }}]
 
 concurrency:
   group: staging-e2e
-  # Staging is a single mutable environment. Cancel superseded runs so an
-  # older deployed SHA does not keep testing after a newer staging deploy lands.
-  cancel-in-progress: true
+  # Staging is a single mutable environment. Release Bus v2 freezes staging
+  # during exact E2E ownership, so an older run must never be cancelled by a
+  # later dispatch.
+  cancel-in-progress: false
 
 jobs:
   staging-packs:
@@ -82,6 +95,12 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
+          FRONTEND_SHA: ${{ inputs.frontend_sha }}
+          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
+          BACKEND_SHA: ${{ inputs.backend_sha }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           SOURCE_REF: ${{ inputs.source_ref }}
           TRAIN_ID: ${{ inputs.release_train_id }}
@@ -93,23 +112,31 @@ jobs:
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
+          [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
+          [[ "$MANIFEST_IDENTITY" =~ ^[a-f0-9]{64}$ ]]
+          [[ -z "$FRONTEND_SHA" || "$FRONTEND_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ -z "$BACKEND_SHA" || "$BACKEND_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ -z "$FRONTEND_ARTIFACT_DIGEST" || "$FRONTEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ -z "$BACKEND_ARTIFACT_DIGEST" || "$BACKEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          test -n "$FRONTEND_SHA$BACKEND_SHA"
 
       - name: Authorize Release Bus E2E operation
         if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           TRAIN_ID: ${{ inputs.release_train_id }}
         run: |
           set -euo pipefail
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" --arg artifact_digest "$MANIFEST_IDENTITY" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
             --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
 
       # workflow_run: the exact SHA the staging deploy shipped. Manual
       # dispatch falls back to the branch tip, which may differ from what is
@@ -148,14 +175,12 @@ jobs:
           tooling="$RUNNER_TEMP/release-bus-tooling/scripts"
           mkdir -p "$tooling" "$RUNNER_TEMP/release-bus-evidence"
           for file in \
-            scripts/release-bus-install-dependencies.cjs \
-            scripts/release-bus-report-progress.mjs
+            scripts/release-bus-install-dependencies.cjs
           do
             git show "$WORKFLOW_SHA:$file" > "$RUNNER_TEMP/release-bus-tooling/$file"
           done
           {
             echo "RELEASE_BUS_INSTALL_TOOL=$tooling/release-bus-install-dependencies.cjs"
-            echo "RELEASE_BUS_REPORT_TOOL=$tooling/release-bus-report-progress.mjs"
             echo "RELEASE_BUS_INSTALL_EVIDENCE=$RUNNER_TEMP/release-bus-evidence/dependency-install.json"
           } >> "$GITHUB_ENV"
 
@@ -334,13 +359,36 @@ jobs:
       - name: Report structured Release Bus E2E result
         if: always() && github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
         env:
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          RELEASE_BUS_TRAIN_ID: ${{ inputs.release_train_id }}
-          RELEASE_BUS_OPERATION_KEY: ${{ inputs.operation_key }}
-          RELEASE_BUS_REPORT_INCLUDE_STAGES: "false"
-          RELEASE_BUS_JOB_STATUS: ${{ steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success' && steps.e2e.outcome == 'success' && 'success' || 'failure' }}
-        run: node "$RELEASE_BUS_REPORT_TOOL"
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          SOCKET_OUTCOME: ${{ steps.socket_firewall.outcome }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          status=SUCCEEDED
+          failure_class=null
+          failure_phase=null
+          retryable=false
+          if [ "$SOCKET_OUTCOME" != success ] || [ "$DEPENDENCIES_OUTCOME" != success ] || [ "$PLAYWRIGHT_OUTCOME" != success ]; then
+            status=FAILED
+            failure_class=INFRASTRUCTURE
+            failure_phase=staging_e2e_setup
+            retryable=true
+          elif [ "$E2E_OUTCOME" != success ]; then
+            status=FAILED
+            failure_class=E2E
+            failure_phase=staging_e2e
+          fi
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:null,stages:[],jest:null,backend_evidence:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
 
       - name: Return staging E2E result
         if: always() && steps.release-bus-marker.outputs.skip != 'true'
