@@ -13,10 +13,10 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
 import {
-  SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
-  SUBSCRIPTIONS_PANEL_CLASS,
-  SUBSCRIPTIONS_SECTION_HEADING_CLASS,
-} from "./aboutSubscriptionsStyles";
+  ABOUT_FEATURE_INTERACTIVE_PANEL_CLASS,
+  ABOUT_FEATURE_PANEL_CLASS,
+  ABOUT_FEATURE_SECTION_HEADING_CLASS,
+} from "./aboutFeaturePageStyles";
 
 type SubscriptionMessageKey = Extract<
   MessageKey,
@@ -65,7 +65,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
     >
       <div className="tw-mb-4 sm:tw-mb-5">
         <h2
-          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          className={ABOUT_FEATURE_SECTION_HEADING_CLASS}
           id="subscription-how-it-works-heading"
         >
           {m(locale, "about.subscriptions.how.title")}
@@ -217,7 +217,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
         />
       </span>
       <details
-        className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-group tw-cursor-pointer tw-overflow-hidden`}
+        className={`${ABOUT_FEATURE_PANEL_CLASS} tw-group tw-cursor-pointer tw-overflow-hidden`}
       >
         <summary className="tw-flex tw-min-h-12 tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/45 tw-px-4 tw-py-3 tw-text-iron-100 tw-transition-colors hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/50 sm:tw-px-6 [&::-webkit-details-marker]:tw-hidden">
           <h3
@@ -322,14 +322,14 @@ function GasSavings({ locale }: { readonly locale: SupportedLocale }) {
           <FontAwesomeIcon aria-hidden="true" icon={faGasPump} />
         </span>
         <h2
-          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          className={ABOUT_FEATURE_SECTION_HEADING_CLASS}
           id="subscription-gas-savings-heading"
         >
           {m(locale, "about.subscriptions.reference.gas.title")}
         </h2>
       </div>
       <div
-        className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-mt-4 tw-border-t-2 tw-border-t-[#00f0ff]/50 tw-p-4 sm:tw-mt-5 sm:tw-p-6`}
+        className={`${ABOUT_FEATURE_PANEL_CLASS} tw-mt-4 tw-border-t-2 tw-border-t-[#00f0ff]/50 tw-p-4 sm:tw-mt-5 sm:tw-p-6`}
       >
         <ul className={LIST_CLASS}>
           <li>
@@ -387,7 +387,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
           <FontAwesomeIcon aria-hidden="true" icon={faEarthAmericas} />
         </span>
         <h2
-          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          className={ABOUT_FEATURE_SECTION_HEADING_CLASS}
           id="subscription-remote-minting-heading"
         >
           {m(locale, "about.subscriptions.reference.remote.title")}
@@ -396,7 +396,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
       <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 sm:tw-mt-5 md:tw-grid-cols-3 md:tw-gap-6">
         {REMOTE_MESSAGE_KEYS.map((messageKey) => (
           <li
-            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-4 tw-text-base tw-leading-7 tw-text-iron-400 md:tw-p-6`}
+            className={`${ABOUT_FEATURE_INTERACTIVE_PANEL_CLASS} tw-p-4 tw-text-base tw-leading-7 tw-text-iron-400 md:tw-p-6`}
             key={messageKey}
           >
             {m(locale, messageKey)}

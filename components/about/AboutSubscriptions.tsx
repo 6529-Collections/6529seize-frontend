@@ -20,10 +20,10 @@ import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
 import {
-  SUBSCRIPTIONS_PANEL_CLASS,
-  SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
-  SUBSCRIPTIONS_SECTION_HEADING_CLASS,
-} from "./aboutSubscriptionsStyles";
+  ABOUT_FEATURE_INTERACTIVE_PANEL_CLASS,
+  ABOUT_FEATURE_PANEL_CLASS,
+  ABOUT_FEATURE_SECTION_HEADING_CLASS,
+} from "./aboutFeaturePageStyles";
 
 type SubscriptionMessageKey = Extract<
   MessageKey,
@@ -126,7 +126,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
     >
       <div className="tw-max-w-3xl">
         <h2
-          className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+          className={ABOUT_FEATURE_SECTION_HEADING_CLASS}
           id="subscription-overview-heading"
         >
           {m(locale, "about.subscriptions.overview.title")}
@@ -140,7 +140,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         {OVERVIEW_BENEFITS.map((benefit) => {
           return (
             <li
-              className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-flex tw-flex-row tw-items-center tw-gap-4 tw-p-4 md:tw-flex-col md:tw-items-start md:tw-gap-0 md:tw-p-6`}
+              className={`${ABOUT_FEATURE_INTERACTIVE_PANEL_CLASS} tw-flex tw-flex-row tw-items-center tw-gap-4 tw-p-4 md:tw-flex-col md:tw-items-start md:tw-gap-0 md:tw-p-6`}
               key={benefit.messageKey}
             >
               <span
@@ -211,7 +211,7 @@ function OverviewRule({
   readonly title: string;
 }) {
   return (
-    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-6`}>
+    <div className={`${ABOUT_FEATURE_PANEL_CLASS} tw-p-4 sm:tw-p-6`}>
       <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
         {title}
       </h3>

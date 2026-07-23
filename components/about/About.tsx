@@ -32,33 +32,34 @@ import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTech from "./tech/AboutTech";
 import AboutTermsOfService from "./AboutTermsOfService";
 import { AboutContentsDropdown } from "./AboutContentsDropdown";
-import { getAboutSectionDocumentTitle } from "./about.routes";
+import {
+  getAboutSectionDocumentTitle,
+  isAboutFeatureSection,
+} from "./about.routes";
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const locale = DEFAULT_LOCALE;
   const sectionTitle = getAboutSectionDocumentTitle(section, locale);
-  const isSubscriptions = section === AboutSection.SUBSCRIPTIONS;
+  const usesFeatureLayout = isAboutFeatureSection(section);
   useSetTitle(
     t(locale, "about.contents.documentTitle", { section: sectionTitle })
   );
 
   return (
     <Container
-      fluid={
-        section === AboutSection.TECH || section === AboutSection.SUBSCRIPTIONS
-      }
+      fluid={section === AboutSection.TECH || usesFeatureLayout}
       className="tw-pt-2"
     >
       <Row>
         <Col>
           <AboutContentsDropdown
             className={
-              isSubscriptions
+              usesFeatureLayout
                 ? "-tw-mx-6 -tw-mt-6 tw-w-[calc(100%+3rem)] tw-px-6"
                 : undefined
             }
             currentSection={section}
-            withDivider={isSubscriptions}
+            withDivider={usesFeatureLayout}
           />
           <div className="tw-w-full">
             <AboutSectionContent section={section} />

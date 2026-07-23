@@ -244,6 +244,16 @@ const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
   [AboutSection.MEMES, "about.contents.documentTitles.memes"],
 ]);
 
+const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
+  AboutSection.SUBSCRIPTIONS,
+  AboutSection.MEME_LAB,
+  AboutSection.GRADIENTS,
+]);
+
+export function isAboutFeatureSection(section: AboutSection): boolean {
+  return ABOUT_FEATURE_SECTIONS.has(section);
+}
+
 function normalizeVisibilityOptions(
   options: AboutNavVisibilityOptions | boolean
 ): Required<AboutNavVisibilityOptions> {

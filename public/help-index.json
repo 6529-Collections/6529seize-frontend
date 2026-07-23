@@ -3243,12 +3243,16 @@
       "facts": [
         "Meme Lab is a collection area separate from The Memes.",
         "Meme Lab has collection, individual card, and distribution routes.",
+        "The /about/meme-lab overview explains the experimental CC0 artist contract and links to the Meme Lab collection.",
         "Use /meme-lab when users ask where Meme Lab cards live."
       ],
       "canonical_path": "/meme-lab",
-      "related_paths": ["/the-memes"],
+      "related_paths": ["/the-memes", "/about/meme-lab"],
       "tags": ["collections", "meme-lab"],
-      "source_refs": ["ops/docs/media/README.md"]
+      "source_refs": [
+        "components/about/AboutMemeLab.tsx",
+        "ops/docs/media/README.md"
+      ]
     },
     {
       "id": "nextgen.overview",
@@ -6024,12 +6028,14 @@
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",
         "Individual Gradient detail routes use /6529-gradient/{id}.",
+        "The /about/6529-gradient overview explains the grayscale design system, animated #50, museum-held pieces, and community purpose, and links to the collection.",
         "Use this route when users ask where to view the 6529 Gradient collection."
       ],
       "canonical_path": "/6529-gradient",
-      "related_paths": ["/6529-gradient/{id}"],
+      "related_paths": ["/6529-gradient/{id}", "/about/6529-gradient"],
       "tags": ["gradient", "collection"],
       "source_refs": [
+        "components/about/AboutGradients.tsx",
         "app/6529-gradient/page.tsx",
         "app/6529-gradient/[id]/page.tsx"
       ]
