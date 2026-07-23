@@ -48,6 +48,15 @@ function normalizeMintCount(value: number | string | null | undefined): number {
   return Math.max(0, Math.trunc(parsed));
 }
 
+function resolveMintErrorMessage(fullError: string): string {
+  const resolvedError = fullError
+    .split("Request Arguments")[0]
+    ?.split(".")[0]
+    ?.split("Contract Call")[0];
+
+  return !resolvedError || resolvedError.length < 5 ? fullError : resolvedError;
+}
+
 function getTransactionModalMessage(
   locale: SupportedLocale,
   status: OnchainTransactionModalStatus | null,
@@ -418,28 +427,14 @@ export default function ManifoldMintingWidget(
 
   useEffect(() => {
     if (mintWrite.error) {
-      const fullError = mintWrite.error.message;
-      const resolvedError = fullError
-        .split("Request Arguments")[0]
-        ?.split(".")[0]
-        ?.split("Contract Call")[0];
-      if (!resolvedError || resolvedError.length < 5) {
-        setMintError(fullError);
-      } else {
-        setMintError(resolvedError);
-      }
+      setMintError(resolveMintErrorMessage(mintWrite.error.message));
       setTransactionModalStatus("error");
     }
   }, [mintWrite.error]);
 
   useEffect(() => {
     if (waitMintWrite.error) {
-      const resolvedError =
-        waitMintWrite.error.message
-          ?.split("Request Arguments")[0]
-          ?.split(".")[0]
-          ?.split("Contract Call")[0] ?? waitMintWrite.error.message;
-      setMintError(resolvedError);
+      setMintError(resolveMintErrorMessage(waitMintWrite.error.message));
       setTransactionModalStatus("error");
     }
   }, [waitMintWrite.error]);

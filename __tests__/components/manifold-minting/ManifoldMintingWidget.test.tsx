@@ -186,4 +186,26 @@ describe("ManifoldMintingWidget", () => {
       screen.getByRole("textbox", { name: "Transaction error details" })
     ).toHaveValue("Receipt polling failed");
   });
+
+  it("keeps the full receipt error when its parsed snippet is too short", async () => {
+    (useWriteContract as jest.Mock).mockReturnValue({
+      writeContract,
+      reset,
+      data: `0x${"d".repeat(64)}`,
+      error: null,
+      isPending: false,
+    });
+    (useWaitForTransactionReceipt as jest.Mock).mockReturnValue({
+      error: new Error("RPC. Request Arguments"),
+      isPending: false,
+      isSuccess: false,
+    });
+
+    render(<ManifoldMintingWidget {...baseProps} />);
+
+    await screen.findByRole("dialog");
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("RPC. Request Arguments");
+  });
 });
