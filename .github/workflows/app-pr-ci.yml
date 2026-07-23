@@ -214,6 +214,13 @@ jobs:
       - name: Run Knip dead-code check
         run: ./bin/6529 run deadcode:knip
 
+      # Dedicated config (eslint.config.e2e-selectors.mjs): the main lint
+      # surface globally ignores tests/**, and new spec code must locate
+      # elements through the accessibility tree. Grandfathered legacy specs
+      # are listed in the config; the list only shrinks.
+      - name: Lint e2e selector usage
+        run: ./bin/6529 run lint:e2e-selectors
+
       - name: Lint package.json versions
         if: needs.plan.outputs.dependency_governance_required == 'true'
         run: ./bin/6529 lint:package-json
