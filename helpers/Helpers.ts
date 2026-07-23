@@ -2,7 +2,6 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
-import { getLargeSocialCardMetadata } from "@/components/providers/metadata";
 import {
   DEFAULT_USER_PAGE_TAB,
   type UserPageTabKey,
@@ -27,32 +26,22 @@ import type { BaseNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { CICType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { DateIntervalsSelection } from "@/types/enums";
 import emojiRegex from "emoji-regex";
 import { goerli, mainnet, sepolia } from "wagmi/chains";
-import type { PageSSRMetadata } from "./Types";
+
+export { getDateFilters } from "./dateFilterHelpers";
+export { formatAddress, isValidEthAddress } from "./addressFormatting";
+export {
+  getTimeAgo,
+  getTimeAgoShort,
+  getTimeUntil,
+} from "./timeDisplayHelpers";
+export { getMetadataForUserPage } from "./userPageMetadataHelpers";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
 
 const unicodeEmojiRegex = emojiRegex();
 const codePointRegex = /U\+([\dA-Fa-f]{1,6})/g;
-
-export function formatAddress(address: string) {
-  if (
-    !address ||
-    !isValidEthAddress(address) ||
-    address.endsWith(".eth") ||
-    address.includes(" ")
-  ) {
-    return address;
-  }
-  if (address.length > 11) {
-    return `${address.substring(0, 6)}...${address.substring(
-      address.length - 4
-    )}`;
-  }
-  return address;
-}
 
 export function isMemesContract(contract: string) {
   return contract.toUpperCase() === MEMES_CONTRACT.toUpperCase();
@@ -308,9 +297,6 @@ export function getValuesForVolumeType(
   return 0;
 }
 
-export const isValidEthAddress = (address: string) =>
-  /^0x[0-9a-fA-F]{40}$/.test(address);
-
 export function getTransactionLink(chain_id: number, hash: string) {
   switch (chain_id) {
     case sepolia.id:
@@ -524,89 +510,6 @@ export function areEqualURLS(s1: string, s2: string) {
   }
 }
 
-function formatDateFilterDate(d: Date) {
-  const year = d.getUTCFullYear();
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-export function getDateFilters(
-  dateSelection: DateIntervalsSelection,
-  fromDate: Date | undefined,
-  toDate: Date | undefined
-) {
-  let filters = "";
-  switch (dateSelection) {
-    case DateIntervalsSelection.ALL:
-      break;
-    case DateIntervalsSelection.TODAY:
-      filters += `&from_date=${formatDateFilterDate(new Date())}`;
-      break;
-    case DateIntervalsSelection.YESTERDAY: {
-      const yesterday = new Date();
-      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-      filters += `&from_date=${formatDateFilterDate(yesterday)}`;
-      filters += `&to_date=${formatDateFilterDate(yesterday)}`;
-      break;
-    }
-    case DateIntervalsSelection.LAST_7: {
-      const weekAgo = new Date();
-      weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
-      filters += `&from_date=${formatDateFilterDate(weekAgo)}`;
-      break;
-    }
-    case DateIntervalsSelection.THIS_MONTH: {
-      const firstDayOfMonth = new Date();
-      firstDayOfMonth.setUTCDate(1);
-      filters += `&from_date=${formatDateFilterDate(firstDayOfMonth)}`;
-      break;
-    }
-    case DateIntervalsSelection.PREVIOUS_MONTH: {
-      const firstDayOfPreviousMonth = new Date();
-      firstDayOfPreviousMonth.setUTCMonth(
-        firstDayOfPreviousMonth.getUTCMonth() - 1
-      );
-      firstDayOfPreviousMonth.setUTCDate(1);
-      const lastDayOfPreviousMonth = new Date();
-      lastDayOfPreviousMonth.setUTCDate(0);
-      filters += `&from_date=${formatDateFilterDate(firstDayOfPreviousMonth)}`;
-      filters += `&to_date=${formatDateFilterDate(lastDayOfPreviousMonth)}`;
-      break;
-    }
-    case DateIntervalsSelection.YEAR_TO_DATE: {
-      const firstDayOfYear = new Date();
-      firstDayOfYear.setUTCMonth(0);
-      firstDayOfYear.setUTCDate(1);
-      filters += `&from_date=${formatDateFilterDate(firstDayOfYear)}`;
-      break;
-    }
-    case DateIntervalsSelection.LAST_YEAR: {
-      const firstDayOfLastYear = new Date();
-      firstDayOfLastYear.setUTCFullYear(
-        firstDayOfLastYear.getUTCFullYear() - 1
-      );
-      firstDayOfLastYear.setUTCMonth(0);
-      firstDayOfLastYear.setUTCDate(1);
-      const lastDayOfLastYear = new Date();
-      lastDayOfLastYear.setUTCMonth(0);
-      lastDayOfLastYear.setUTCDate(0);
-      filters += `&from_date=${formatDateFilterDate(firstDayOfLastYear)}`;
-      filters += `&to_date=${formatDateFilterDate(lastDayOfLastYear)}`;
-      break;
-    }
-    case DateIntervalsSelection.CUSTOM_DATES:
-      if (fromDate) {
-        filters += `&from_date=${formatDateFilterDate(fromDate)}`;
-      }
-      if (toDate) {
-        filters += `&to_date=${formatDateFilterDate(toDate)}`;
-      }
-      break;
-  }
-  return filters;
-}
-
 export const cicToType = (cic: number): CICType => {
   if (cic < -20) {
     return CICType.INACCURATE;
@@ -657,108 +560,6 @@ export const createPossessionStr = (name: string | null): string => {
     return possession;
   }
   return "";
-};
-
-export const getTimeAgo = (milliseconds: number): string => {
-  const currentTime = new Date().getTime();
-  const timeDifference = currentTime - milliseconds;
-
-  const seconds = Math.floor(timeDifference / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  const months = Math.floor(days / 30);
-  const years = Math.floor(months / 12);
-
-  if (years > 0) {
-    return `${years} year${years > 1 ? "s" : ""} ago`;
-  } else if (months > 0) {
-    return `${months} month${months > 1 ? "s" : ""} ago`;
-  } else if (days > 0) {
-    return `${days} day${days > 1 ? "s" : ""} ago`;
-  } else if (hours > 0) {
-    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  } else if (minutes > 0) {
-    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  } else {
-    return `Just now`;
-  }
-};
-
-export const getTimeAgoShort = (
-  milliseconds: number,
-  referenceTime: number = Date.now(),
-  alwaysRelative: boolean = false
-): string => {
-  const timeDifference = referenceTime - milliseconds;
-
-  const seconds = Math.floor(timeDifference / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (alwaysRelative) {
-    if (days > 0) return `${days}d`;
-    if (hours > 0) return `${hours}h`;
-    if (minutes > 0) return `${minutes}m`;
-    return "<1m";
-  }
-
-  if (days > 1) {
-    const date = new Date(milliseconds);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  } else if (days === 1) {
-    return "Yesterday";
-  } else if (hours > 0) {
-    return `${hours}h`;
-  } else if (minutes > 0) {
-    return `${minutes}m`;
-  } else {
-    return `Just now`;
-  }
-};
-
-export const getTimeUntil = (milliseconds: number): string => {
-  const currentTime = new Date().getTime();
-  let timeDifference = milliseconds - currentTime;
-
-  const isFuture = timeDifference >= 0;
-
-  timeDifference = Math.abs(timeDifference);
-
-  const seconds = Math.floor(timeDifference / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  const months = Math.floor(days / 30);
-  const years = Math.floor(months / 12);
-
-  if (years > 0) {
-    return `${isFuture ? "in" : ""} ${years} year${years > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
-  } else if (months > 0) {
-    return `${isFuture ? "in" : ""} ${months} month${months > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
-  } else if (days > 0) {
-    return `${isFuture ? "in" : ""} ${days} day${days > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
-  } else if (hours > 0) {
-    return `${isFuture ? "in" : ""} ${hours} hour${hours > 1 ? "s" : ""} ${
-      isFuture ? "" : "ago"
-    }`;
-  } else if (minutes > 0) {
-    return `${isFuture ? "in" : ""} ${minutes} minute${
-      minutes > 1 ? "s" : ""
-    } ${isFuture ? "" : "ago"}`;
-  } else {
-    return `Just now`;
-  }
 };
 
 export const getStringAsNumberOrZero = (value: string): number => {
@@ -947,43 +748,6 @@ export const removeBaseEndpoint = (link: string) => {
     return link;
   }
   return link.replaceAll(baseEndpoint, "");
-};
-
-const formatUserPageMetadataPath = (path: string): string | null => {
-  const words = path
-    .split(/[/_-]+/)
-    .map((word) => word.trim())
-    .filter(Boolean);
-
-  if (words.length === 0) {
-    return null;
-  }
-
-  return words
-    .map((word) => {
-      const normalized = word.toLowerCase();
-      return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}`;
-    })
-    .join(" ");
-};
-
-export const getMetadataForUserPage = (
-  profile: ApiIdentity,
-  path?: string
-): PageSSRMetadata => {
-  const display = profile.handle ?? formatAddress(profile.display);
-  const pathTitle = path ? formatUserPageMetadataPath(path) : null;
-  const imageIdentity =
-    profile.normalised_handle ??
-    profile.handle ??
-    profile.primary_wallet ??
-    profile.display;
-  return getLargeSocialCardMetadata({
-    title: pathTitle ? `${display} - ${pathTitle}` : display,
-    ogImage: `/api/og-metadata/profiles/${encodeURIComponent(imageIdentity)}`,
-    ogImageAlt: `${display} profile social card`,
-    description: "Identity",
-  });
 };
 
 export async function fetchFileContent(filePath: string): Promise<string> {
