@@ -1,7 +1,10 @@
 "use client";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
+import {
+  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
+  NETWORK_REFERENCE_PAGE_CLASSES,
+} from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -19,11 +22,17 @@ export default function XTDHMainPage() {
   useSetTitle("xTDH Overview | Network");
 
   return (
-    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
-      <div className="tw-mx-auto tw-w-full tw-max-w-6xl">
-        <AboutContentsDropdown currentHref="/network/xtdh" />
+    <main
+      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-text-iron-100`}
+    >
+      <div className="tw-w-full">
+        <AboutContentsDropdown
+          className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+          currentHref="/network/xtdh"
+          withDivider
+        />
 
-        <div className="tw-pt-8 lg:tw-pt-12">
+        <div className="tw-mx-auto tw-w-full tw-max-w-6xl tw-pt-4 sm:tw-pt-8">
           <section
             aria-labelledby="xtdh-overview-heading"
             className="tw-grid tw-gap-6 tw-pb-12 sm:tw-gap-8 lg:tw-grid-cols-3 lg:tw-gap-16 lg:tw-pb-16"
