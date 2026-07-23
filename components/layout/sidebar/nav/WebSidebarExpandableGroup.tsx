@@ -31,17 +31,23 @@ function WebSidebarExpandableGroup({
     onToggle(!expanded);
   }, [expanded, onToggle]);
 
+  let stateClassName =
+    "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white";
+  if (hasActiveItem) {
+    stateClassName =
+      "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
+  } else if (expanded) {
+    stateClassName =
+      "tw-bg-iron-900/70 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
+  }
+
   return (
     <div>
       {/* Group header with expand button */}
       <button
         type="button"
         onClick={handleToggle}
-        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-10 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border-none tw-py-1 tw-pl-3 tw-pr-3 tw-text-left tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
-          hasActiveItem
-            ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
-            : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
-        }`}
+        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-10 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border-none tw-py-1 tw-pl-3 tw-pr-3 tw-text-left tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${stateClassName}`}
         aria-expanded={expanded}
         aria-controls={`group-${name}`}
       >
