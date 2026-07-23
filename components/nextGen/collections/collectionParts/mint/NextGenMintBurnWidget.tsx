@@ -2,6 +2,7 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
+import Button from "@/components/utils/button/Button";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -27,7 +28,6 @@ import { useEffect, useState } from "react";
 import { useChainId, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
 import {
-  MINT_ACTION_BUTTON_CLASSNAME,
   MINT_SELECT_CLASSNAME,
   MintInfoTooltip,
   NextGenMintErrors,
@@ -352,15 +352,17 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
           </select>
         </div>
         <div>
-          <button
+          <Button
             type="button"
-            className={MINT_ACTION_BUTTON_CLASSNAME}
+            variant="success"
+            size="lg"
+            fullWidth
             disabled={disableMint()}
             onClick={handleMintClick}
           >
             {getButtonText()}
             {isMinting && <Spinner />}
-          </button>
+          </Button>
         </div>
         {errors.length > 0 && (
           <NextGenMintErrors errors={errors} className="tw-py-1" />

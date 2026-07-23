@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants/constants";
 import type { NextGenToken } from "@/entities/INextgen";
@@ -177,15 +178,16 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
             }}
           />
         </label>
-        <button
+        <Button
           type="button"
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition hover:tw-bg-iron-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          variant="primary"
+          size="lg"
           onClick={() => {
             go();
           }}
         >
           Open Render
-        </button>
+        </Button>
       </div>
     </section>
   );
