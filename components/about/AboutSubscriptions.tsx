@@ -20,8 +20,8 @@ import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
 import {
-  SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
+  SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "./aboutSubscriptionsStyles";
 

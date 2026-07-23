@@ -1,7 +1,10 @@
 import styles from "@/styles/Home.module.css";
 
 import About from "@/components/about/About";
-import { getAboutSectionDocumentTitle } from "@/components/about/about.routes";
+import {
+  getAboutSectionDocumentTitle,
+  isAboutFeatureSection,
+} from "@/components/about/about.routes";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -31,16 +34,14 @@ export default async function AboutPage(props: Readonly<Props>) {
 
   const aboutSection = section as AboutSection;
   const isMemes = aboutSection === AboutSection.MEMES;
-  const isFeaturePage =
-    aboutSection === AboutSection.SUBSCRIPTIONS ||
-    aboutSection === AboutSection.MINTING;
+  const usesFeatureLayout = isAboutFeatureSection(aboutSection);
 
   return (
     <main
       className={clsx(
         styles["main"],
         "tailwind-scope",
-        isFeaturePage &&
+        usesFeatureLayout &&
           "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]"
       )}
     >
