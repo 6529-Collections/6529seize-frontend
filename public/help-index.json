@@ -487,12 +487,16 @@
         "The Memes minting website is /the-memes/mint; there is no other official minting website for The Memes.",
         "The page says Meme Cards are minted when the art for the next Meme Card is ready, currently about three times per week, though frequency and timing can vary.",
         "The page says The Memes generally use an allowlist model to avoid gas wars and bot wars and to give a broad range of people a chance to mint.",
+        "The page has horizontal section navigation for its summary, minting philosophy, allowlist background and current practices, provability, improvements, tools, and technical issues.",
         "Users should follow @6529collections for current mint dates and times."
       ],
       "canonical_path": "/about/minting",
       "related_paths": ["/the-memes/mint", "/the-memes", "/about/the-memes"],
       "tags": ["about", "memes", "minting"],
-      "source_refs": ["components/about/AboutMinting.tsx"]
+      "source_refs": [
+        "components/about/AboutMinting.tsx",
+        "components/about/AboutMintingReference.tsx"
+      ]
     },
     {
       "id": "about.license",
