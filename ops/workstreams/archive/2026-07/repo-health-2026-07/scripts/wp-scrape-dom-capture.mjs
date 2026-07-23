@@ -3,8 +3,10 @@
 import { createRequire } from "node:module";
 import fs from "node:fs";
 import path from "node:path";
-// Resolve playwright from the repo the script runs in.
-const require = createRequire(new URL("../../../../package.json", import.meta.url));
+// Resolve Playwright from the repository root after this helper was archived.
+const require = createRequire(
+  new URL("../../../../../../package.json", import.meta.url)
+);
 const { chromium } = require("playwright");
 
 const [outDir, routesFile] = process.argv.slice(2);
