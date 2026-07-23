@@ -1,6 +1,7 @@
 import ManifoldMintingWidget from "@/components/manifold-minting/ManifoldMintingWidget";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   useReadContract,
@@ -12,7 +13,7 @@ import {
 jest.mock("wagmi");
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(() => ({ address: "0x1" })),
+  useSeizeConnectContext: jest.fn(),
 }));
 
 jest.mock(
@@ -34,6 +35,8 @@ jest.mock(
 
 const writeContract = jest.fn();
 const reset = jest.fn();
+const seizeConnect = jest.fn();
+const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
 
 const baseProps = {
   contract: "0xC",
@@ -57,6 +60,12 @@ const baseProps = {
 describe("ManifoldMintingWidget", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useSeizeConnectContextMock.mockReturnValue({
+      address: "0x1",
+      canSignActiveWallet: true,
+      seizeConnect,
+      seizeConnectOpen: false,
+    } as ReturnType<typeof useSeizeConnectContext>);
     (useWriteContract as jest.Mock).mockReturnValue({
       writeContract,
       reset,
@@ -103,6 +112,42 @@ describe("ManifoldMintingWidget", () => {
     await user.click(btn);
     expect(reset).toHaveBeenCalled();
     expect(writeContract).toHaveBeenCalled();
+  });
+
+  it("connects and then continues the intended mint", async () => {
+    const user = userEvent.setup();
+    let connectionState = {
+      address: "0x1",
+      canSignActiveWallet: false,
+      seizeConnect,
+      seizeConnectOpen: false,
+    } as ReturnType<typeof useSeizeConnectContext>;
+    useSeizeConnectContextMock.mockImplementation(() => connectionState);
+    const { rerender } = render(<ManifoldMintingWidget {...baseProps} />);
+
+    await user.click(screen.getByTestId("connect"));
+    await user.click(screen.getByRole("button", { name: /SEIZE x1/i }));
+
+    expect(seizeConnect).toHaveBeenCalledTimes(1);
+    expect(writeContract).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    connectionState = {
+      ...connectionState,
+      seizeConnectOpen: true,
+    };
+    rerender(<ManifoldMintingWidget {...baseProps} />);
+    connectionState = {
+      ...connectionState,
+      canSignActiveWallet: true,
+      seizeConnectOpen: false,
+    };
+    rerender(<ManifoldMintingWidget {...baseProps} />);
+
+    await waitFor(() => expect(writeContract).toHaveBeenCalledTimes(1));
+    expect(await screen.findByRole("dialog")).toHaveTextContent(
+      "Confirm in your wallet"
+    );
   });
 
   it("shows a submitted transaction in the onchain modal", async () => {

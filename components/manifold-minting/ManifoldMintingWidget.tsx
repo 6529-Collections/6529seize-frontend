@@ -22,6 +22,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useConnectedAction } from "../auth/useConnectedAction";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import {
@@ -122,6 +123,7 @@ export default function ManifoldMintingWidget(
   }>
 ) {
   const connectedAddress = useSeizeConnectContext();
+  const runConnectedAction = useConnectedAction();
   const locale = useBrowserLocale();
   const searchParams = useSearchParams();
   const [mintForAddress, setMintForAddress] = useState<string | null>(null);
@@ -414,14 +416,16 @@ export default function ManifoldMintingWidget(
       setMintError("Select a valid recipient wallet");
       return;
     }
-    setTransactionModalStatus("confirm_wallet");
-    mintWrite.writeContract({
-      address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-      abi: props.abi,
-      chainId: props.chain.id,
-      value,
-      functionName: args.functionName,
-      args: args.args,
+    runConnectedAction(() => {
+      setTransactionModalStatus("confirm_wallet");
+      mintWrite.writeContract({
+        address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+        abi: props.abi,
+        chainId: props.chain.id,
+        value,
+        functionName: args.functionName,
+        args: args.args,
+      });
     });
   };
 

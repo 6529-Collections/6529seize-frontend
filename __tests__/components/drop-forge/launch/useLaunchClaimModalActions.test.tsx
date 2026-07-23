@@ -36,6 +36,7 @@ function useTestLaunchClaimModalActions() {
     onChainClaimSpinnerVisible: false,
     setOnChainClaimSpinnerVisible: jest.fn(),
     showErrorToast,
+    runConnectedAction: (action) => action(),
     state,
   });
 
