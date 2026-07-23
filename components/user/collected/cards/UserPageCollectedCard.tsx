@@ -3,7 +3,6 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { CollectedCard } from "@/entities/IProfile";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
@@ -73,17 +72,16 @@ export default function UserPageCollectedCard({
       : typeof card.seized_count === "number" && card.seized_count > 0);
 
   const getSeizedCountDisplay = () => {
-    if (isSelectMode) {
-      return formatNumberWithCommasOrDash(copiesMax);
-    }
-    return formatNumberWithCommasOrDash(card.seized_count ?? 0);
+    const count = isSelectMode ? copiesMax : (card.seized_count ?? 0);
+    return count ? formatInteger(locale, count) : "-";
   };
 
   const getTdhDisplay = () => {
     if (card.collection === CollectedCollectionType.MEMELAB) {
       return "N/A";
     } else {
-      return formatNumberWithCommasOrDash(+(card.tdh ?? 0).toFixed(0));
+      const tdh = +(card.tdh ?? 0).toFixed(0);
+      return tdh ? formatInteger(locale, tdh) : "-";
     }
   };
 
@@ -91,7 +89,7 @@ export default function UserPageCollectedCard({
     if (card.collection === CollectedCollectionType.MEMELAB) {
       return "N/A";
     } else {
-      return card.tdh ? formatNumberWithCommasOrDash(card.rank ?? 0) : "-";
+      return card.tdh ? formatInteger(locale, card.rank ?? 0) : "-";
     }
   };
 
