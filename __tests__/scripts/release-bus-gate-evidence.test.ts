@@ -27,6 +27,7 @@ describe("Release Bus gate evidence", () => {
     gate_fingerprint: "b".repeat(64),
     workflow_sha: "c".repeat(40),
     workflow_digest: "d".repeat(64),
+    build_profile_digest: "e".repeat(64),
     node_version: "22",
     package_manager: "pnpm@10.14.0",
   };
@@ -41,10 +42,17 @@ describe("Release Bus gate evidence", () => {
     };
     const workflowFileContents = {
       ".github/workflows/release-bus-base-canary.yml": "workflow",
+      ".github/workflows/release-bus-preflight.yml": "preflight workflow",
+      ".github/workflows/release-bus-base-evidence-identity.yml":
+        "identity workflow",
+      ".github/workflows/release-bus-deploy-staging.yml": "deploy workflow",
+      ".github/workflows/staging-e2e.yml": "e2e workflow",
       "scripts/release-bus-authorize-operation.sh": "authorize",
+      "scripts/release-bus-build-profile.cjs": "profile",
       "scripts/release-bus-frontend-gate.sh": "gate",
       "scripts/release-bus-gate-evidence.cjs": "evidence",
       "scripts/release-bus-install-dependencies.cjs": "installer",
+      "scripts/release-bus-preflight-evidence.cjs": "preflight evidence",
       "scripts/release-bus-report-progress.mjs": "reporter",
     };
     const input = {
@@ -54,15 +62,16 @@ describe("Release Bus gate evidence", () => {
       workflowFileContents,
       gateMode: "sharded",
       shardCount: 4,
+      buildProfileDigest: evidenceIdentity.build_profile_digest,
     };
 
     const baseline = frontendGateContract(input);
     expect(frontendGateContract(input)).toEqual(baseline);
     expect(baseline).toMatchObject({
       behavior_digest:
-        "c3ae3169f9e467e9c2b97e4202b7c9e2cb09a6efbbdd3070083196152f23c6ee",
+        "44b542ea4662499111b042348135517772ac467565f24f0142ffcb2346f9d171",
       gate_fingerprint:
-        "e125874c704b5ef9776819709444b938eeb9477315d15e1df92b25507b87386d",
+        "cb1daea78be19e5be1302b0015986a2497bea560f99c8884ae971507caea1764",
       workflow_digest:
         "da7f739f627198465eeab537a6f7a435dc4a0c332f9e4a8462293eb3f4ab7ee0",
     });
@@ -736,6 +745,7 @@ describe("Release Bus gate evidence", () => {
         "workflow-digest": evidenceIdentity.workflow_digest,
         "node-version": evidenceIdentity.node_version,
         "package-manager": evidenceIdentity.package_manager,
+        "build-profile-digest": evidenceIdentity.build_profile_digest,
         "artifact-name": "release-bus-base-canary-summary-123",
         "jobs-file": jobsFile,
       },
@@ -782,6 +792,7 @@ describe("Release Bus gate evidence", () => {
         "workflow-digest": evidenceIdentity.workflow_digest,
         "node-version": evidenceIdentity.node_version,
         "package-manager": evidenceIdentity.package_manager,
+        "build-profile-digest": evidenceIdentity.build_profile_digest,
         "artifact-name": "release-bus-base-canary-summary-123",
         "jobs-file": jobsFile,
       },
@@ -812,6 +823,7 @@ describe("Release Bus gate evidence", () => {
         "workflow-digest": evidenceIdentity.workflow_digest,
         "node-version": evidenceIdentity.node_version,
         "package-manager": evidenceIdentity.package_manager,
+        "build-profile-digest": evidenceIdentity.build_profile_digest,
         "artifact-name": "release-bus-base-canary-summary-123",
         "jobs-file": jobsFile,
       },
@@ -828,5 +840,46 @@ describe("Release Bus gate evidence", () => {
     });
     expect(mutated.status).toBe("FAILED");
     expect(mutated.errors).toContain("source_mutation job did not succeed");
+
+    const missingAuthoritativeRecords = finalSummary({
+      args: {
+        mode: "sharded",
+        "shard-count": "1",
+        "run-url":
+          "https://github.com/6529-Collections/6529seize-frontend/actions/runs/123",
+        "base-sha": evidenceIdentity.base_sha,
+        environment: evidenceIdentity.environment,
+        "gate-fingerprint": evidenceIdentity.gate_fingerprint,
+        "behavior-digest": "e".repeat(64),
+        "workflow-sha": evidenceIdentity.workflow_sha,
+        "workflow-digest": evidenceIdentity.workflow_digest,
+        "node-version": evidenceIdentity.node_version,
+        "package-manager": evidenceIdentity.package_manager,
+        "build-profile-digest": evidenceIdentity.build_profile_digest,
+        "artifact-name": "release-bus-base-canary-summary-123",
+        "jobs-file": jobsFile,
+      },
+      records: [],
+      jobResults: {
+        legacy: "skipped",
+        lint: "failure",
+        typecheck: "failure",
+        build: "failure",
+        inventory: "failure",
+        jest: "failure",
+        source_mutation: "failure",
+      },
+    });
+    expect(missingAuthoritativeRecords).toMatchObject({
+      status: "FAILED",
+      skipped_test_suites: 0,
+      errors: expect.arrayContaining([
+        "lint job did not succeed",
+        "jest job did not succeed",
+      ]),
+    });
+    expect(missingAuthoritativeRecords.skipped_test_suites).toBeLessThanOrEqual(
+      10_000_000
+    );
   });
 });
