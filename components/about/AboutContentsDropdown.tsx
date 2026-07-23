@@ -116,7 +116,7 @@ export function AboutContentsDropdown({
           ? "sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
           : "tw-items-end sm:tw-flex-row sm:tw-justify-end",
         withDivider &&
-          "tw-h-16 tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-white/10 !tw-py-0 sm:tw-items-center",
+          "tw-h-16 tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] !tw-bg-[#0D0D0F]/85 !tw-py-0 sm:tw-items-center",
         className
       )}
     >
