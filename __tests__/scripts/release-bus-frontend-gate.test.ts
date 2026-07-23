@@ -15,25 +15,17 @@ describe("Release Bus frontend gate contract", () => {
   const authorization = read("scripts/release-bus-authorize-operation.sh");
   const appPrCi = read(".github/workflows/app-pr-ci.yml");
   const reporter = read("scripts/release-bus-report-progress.mjs");
+  const stagingE2e = read(".github/workflows/staging-e2e.yml");
 
   type WorkflowStep = {
     env?: Record<string, string>;
     name?: string;
     run?: string;
+    uses?: string;
+    with?: Record<string, unknown>;
   };
 
   const canaryWorkflow = parseYaml(canary) as {
-    on?: {
-      workflow_dispatch?: {
-        inputs?: Record<string, { required?: boolean }>;
-      };
-    };
-    jobs?: Record<
-      string,
-      { steps?: WorkflowStep[]; "timeout-minutes"?: number }
-    >;
-  };
-  const preflightWorkflow = parseYaml(preflight) as {
     on?: {
       workflow_dispatch?: {
         inputs?: Record<string, { required?: boolean }>;
@@ -45,11 +37,40 @@ describe("Release Bus frontend gate contract", () => {
         needs?: string[] | string;
         outputs?: Record<string, string>;
         steps?: WorkflowStep[];
+        "timeout-minutes"?: number;
+      }
+    >;
+  };
+  const preflightWorkflow = parseYaml(preflight) as {
+    on?: {
+      workflow_dispatch?: {
+        inputs?: Record<string, { required?: boolean }>;
+      };
+    };
+    jobs?: Record<
+      string,
+      {
+        env?: Record<string, string>;
+        needs?: string[] | string;
+        outputs?: Record<string, string>;
+        permissions?: Record<string, string>;
+        steps?: WorkflowStep[];
         strategy?: { "fail-fast"?: boolean };
         "timeout-minutes"?: number;
       }
     >;
   };
+
+  it("binds reusable PR artifacts to the immutable checked-out run SHA", () => {
+    expect(appPrCi).not.toContain("github.event.pull_request.merge_commit_sha");
+    expect(
+      appPrCi.match(/EXPECTED_MERGE_SHA: \$\{\{ github\.sha \}\}/g)
+    ).toHaveLength(2);
+    expect(appPrCi).toContain("name: release-bus-v2-pr-${{ github.sha }}");
+    expect(appPrCi).toContain(
+      "unset ANNOUNCED_VERSION_ENDPOINT\n          rm -rf .next"
+    );
+  });
 
   it("keeps deployed worker dispatch and authorization backward compatible", () => {
     const inputs = canaryWorkflow.on?.workflow_dispatch?.inputs ?? {};
@@ -75,7 +96,56 @@ describe("Release Bus frontend gate contract", () => {
     expect(authorization).toContain('"$api_url/deploy/release-bus/authorize"');
     expect(canary).toContain("release-bus-report-progress.mjs");
     expect(canary).toContain("Report sanitized terminal evidence");
+    const buildProfileStep = Object.values(canaryWorkflow.jobs ?? {})
+      .flatMap((job) => job.steps ?? [])
+      .find((step) => step.name === "Derive protected staging build profile");
+    expect(buildProfileStep?.run).toContain(
+      'git cat-file -e "$WORKFLOW_SHA^{commit}"'
+    );
+    expect(buildProfileStep?.run?.indexOf("git cat-file")).toBeLessThan(
+      buildProfileStep?.run?.indexOf("git show") ?? -1
+    );
+    const buildProfileJob = canaryWorkflow.jobs?.build_profile;
+    const authorizeJob = canaryWorkflow.jobs?.authorize;
+    expect(buildProfileJob?.outputs).toBeUndefined();
+    expect(authorizeJob?.needs).toBe("build_profile");
+    expect(buildProfileJob?.steps?.map((step) => step.name)).toEqual(
+      expect.arrayContaining([
+        "Derive protected staging build profile",
+        "Upload protected build profile",
+      ])
+    );
+    expect(authorizeJob?.steps?.map((step) => step.name)).toEqual(
+      expect.arrayContaining([
+        "Download protected build profile",
+        "Verify protected staging build profile",
+      ])
+    );
+    expect(
+      authorizeJob?.steps?.some((step) =>
+        Object.keys(step.env ?? {}).includes("ALCHEMY_API_KEY")
+      )
+    ).toBe(false);
+    const canaryFetches = canary
+      .split("\n")
+      .filter((line) => line.includes("git fetch --no-tags"));
+    expect(canaryFetches.length).toBeGreaterThan(0);
+    expect(canaryFetches.every((line) => line.includes("--depth=1"))).toBe(
+      true
+    );
     expect(reporter).toContain("/deploy/release-bus/report-progress");
+  });
+
+  it("fails closed and reports retryable dependency failures from staging E2E", () => {
+    expect(stagingE2e).toContain(
+      "scripts/release-bus-install-dependencies.cjs"
+    );
+    expect(stagingE2e).toContain("continue-on-error: true");
+    expect(stagingE2e).toContain("Report structured Release Bus E2E result");
+    expect(stagingE2e).toContain("Return staging E2E result");
+    expect(stagingE2e).toContain('run: node "$RELEASE_BUS_INSTALL_TOOL"');
+    expect(stagingE2e).not.toContain("run: ./bin/6529 install:frozen");
+    expect(reporter).toContain("RELEASE_BUS_INSTALL_EVIDENCE");
   });
 
   it("bounds and retries an ambiguous authorization transport failure", () => {
@@ -212,6 +282,7 @@ describe("Release Bus frontend gate contract", () => {
         "--runTestsByPath",
         "__tests__/scripts/release-bus-frontend-gate.test.ts",
         "__tests__/scripts/release-bus-gate-evidence.test.ts",
+        "__tests__/scripts/release-bus-install-dependencies.test.ts",
         "__tests__/scripts/release-bus-jest-reporting.test.ts",
         "__tests__/scripts/release-bus-preflight-evidence.test.ts",
       ]);
@@ -232,6 +303,7 @@ describe("Release Bus frontend gate contract", () => {
       RELEASE_BUS_GATE_FINGERPRINT: "b".repeat(64),
       RELEASE_BUS_WORKFLOW_SHA: "c".repeat(40),
       RELEASE_BUS_WORKFLOW_DIGEST: "d".repeat(64),
+      RELEASE_BUS_BUILD_PROFILE_DIGEST: "e".repeat(64),
       RELEASE_BUS_NODE_VERSION: "22",
       RELEASE_BUS_PACKAGE_MANAGER: "pnpm@10.14.0",
     };
@@ -266,6 +338,7 @@ describe("Release Bus frontend gate contract", () => {
         gate_fingerprint: identity.RELEASE_BUS_GATE_FINGERPRINT,
         workflow_sha: identity.RELEASE_BUS_WORKFLOW_SHA,
         workflow_digest: identity.RELEASE_BUS_WORKFLOW_DIGEST,
+        build_profile_digest: identity.RELEASE_BUS_BUILD_PROFILE_DIGEST,
         node_version: identity.RELEASE_BUS_NODE_VERSION,
         package_manager: identity.RELEASE_BUS_PACKAGE_MANAGER,
       });
@@ -286,7 +359,9 @@ describe("Release Bus frontend gate contract", () => {
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase typecheck');
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" phase build');
     expect(canary).toContain('"$RELEASE_BUS_GATE_TOOL" jest');
-    expect(canary).toContain('git fetch --no-tags origin "$BASE_SHA"');
+    expect(canary).toContain(
+      'git fetch --no-tags --depth=1 origin "$BASE_SHA"'
+    );
     expect(canary).toContain('git show "$WORKFLOW_SHA:$file"');
     expect(canary).toContain("Derive and verify immutable gate fingerprint");
     expect(canary).toContain("RELEASE_BUS_GATE_FINGERPRINT=$GATE_FINGERPRINT");
@@ -418,6 +493,7 @@ describe("Release Bus frontend gate contract", () => {
     );
     expect(appPrCi).toContain("scripts/release-bus-authorize-operation.sh");
     expect(appPrCi).toContain("scripts/release-bus-gate-evidence.cjs");
+    expect(appPrCi).toContain("scripts/release-bus-install-dependencies.cjs");
     expect(appPrCi).toContain("scripts/release-bus-preflight-evidence.cjs");
     expect(appPrCi).toContain(
       "__tests__/scripts/release-bus-gate-evidence.test.ts"
@@ -445,12 +521,72 @@ describe("Release Bus frontend gate contract", () => {
     expect(inputs.validation_only?.required).toBe(false);
     expect(inputs.validation_shard_count?.required).toBe(false);
     expect(inputs.validation_inject_failure?.required).toBe(false);
+    expect(preflightWorkflow.jobs?.authorize?.needs).toBe("build_profile");
     expect(preflightWorkflow.jobs?.authorize?.["timeout-minutes"]).toBe(10);
     expect(preflightWorkflow.jobs?.jest?.strategy?.["fail-fast"]).toBe(false);
-    expect(preflightWorkflow.jobs?.build?.strategy?.["fail-fast"]).toBe(false);
+    expect(preflightWorkflow.jobs?.build?.strategy).toBeUndefined();
+    expect(preflightWorkflow.jobs?.build?.env).toMatchObject({
+      BUILD_ENVIRONMENT: "${{ needs.authorize.outputs.build_environment }}",
+    });
+    expect(preflightWorkflow.jobs?.build?.env).not.toHaveProperty(
+      "RELEASE_BUS_INSTALL_EVIDENCE"
+    );
+    const buildEvidenceStep = preflightWorkflow.jobs?.build?.steps?.find(
+      (step) => step.name === "Select build dependency evidence path"
+    );
+    expect(buildEvidenceStep?.env).toBeUndefined();
+    expect(buildEvidenceStep?.run).toBe(
+      'echo "RELEASE_BUS_INSTALL_EVIDENCE=$RUNNER_TEMP/release-bus-evidence/dependency-install-$BUILD_ENVIRONMENT.json" >> "$GITHUB_ENV"'
+    );
     expect(preflightWorkflow.jobs?.authorize?.outputs).toMatchObject({
       inject_failure: "${{ steps.inputs.outputs.inject_failure }}",
+      build_profile_digest: "${{ steps.build-profile.outputs.digest }}",
     });
+    const buildProfileSteps =
+      preflightWorkflow.jobs?.build_profile?.steps ?? [];
+    expect(preflightWorkflow.jobs?.build_profile?.permissions).toEqual({
+      contents: "read",
+    });
+    expect(
+      buildProfileSteps.find(
+        (step) => step.name === "Derive protected target build profile"
+      )?.env
+    ).toHaveProperty("RELEASE_BUS_BUILD_PROFILE_HMAC_KEY");
+    expect(
+      buildProfileSteps.find(
+        (step) => step.name === "Upload protected build profile"
+      )
+    ).toMatchObject({
+      uses: expect.stringContaining("actions/upload-artifact@"),
+      with: expect.objectContaining({
+        name: "release-bus-preflight-build-profile-${{ github.run_id }}",
+        "retention-days": 1,
+      }),
+    });
+    const authorizeSteps = preflightWorkflow.jobs?.authorize?.steps ?? [];
+    expect(
+      authorizeSteps.find(
+        (step) => step.name === "Download protected build profile"
+      )
+    ).toMatchObject({
+      uses: expect.stringContaining("actions/download-artifact@"),
+      with: expect.objectContaining({
+        name: "release-bus-preflight-build-profile-${{ github.run_id }}",
+      }),
+    });
+    expect(
+      authorizeSteps.find(
+        (step) => step.name === "Verify protected target build profile"
+      )?.run
+    ).toContain("digest=$(jq -r '.digest' \"$profile\")");
+    const nonProducerJobs = Object.fromEntries(
+      Object.entries(preflightWorkflow.jobs ?? {}).filter(
+        ([name]) => name !== "build_profile"
+      )
+    );
+    expect(JSON.stringify(nonProducerJobs)).not.toContain(
+      "RELEASE_BUS_BUILD_PROFILE_HMAC_KEY"
+    );
     expect(preflightWorkflow.jobs?.aggregate?.needs).toEqual([
       "authorize",
       "lint",
@@ -469,6 +605,9 @@ describe("Release Bus frontend gate contract", () => {
     const aggregate = steps.find(
       (step) => step.name === "Aggregate fail-closed preflight evidence"
     );
+    const aggregateResult = steps.find(
+      (step) => step.name === "Return aggregate result"
+    );
     const jestGate = preflightWorkflow.jobs?.jest?.steps?.find(
       (step) => step.name === "Run complete deterministic Jest shard"
     );
@@ -477,10 +616,10 @@ describe("Release Bus frontend gate contract", () => {
         "${{ needs.authorize.outputs.inject_failure == 'true' && '1' || '0' }}",
     });
     expect(aggregate?.env).toMatchObject({
-      BUILD_RESULT: "${{ needs.build.result }}",
       INVENTORY_RESULT: "${{ needs.jest-inventory.result }}",
       JEST_RESULT: "${{ needs.jest.result }}",
       LINT_RESULT: "${{ needs.lint.result }}",
+      PROMOTION_ELIGIBLE: "${{ needs.authorize.outputs.promotion_eligible }}",
       TYPECHECK_RESULT: "${{ needs.typecheck.result }}",
     });
     expect(aggregate?.run).toContain(
@@ -489,12 +628,31 @@ describe("Release Bus frontend gate contract", () => {
     expect(aggregate?.run).toContain(
       'test "$PASSED_BEHAVIOR_DIGEST" = "$behavior_digest"'
     );
+    expect(aggregate?.run).toContain('"$RELEASE_BUS_GATE_TOOL" fingerprint');
+    expect(aggregate?.run).not.toContain('node "$RELEASE_BUS_GATE_TOOL"');
+    expect(gate.startsWith("#!/usr/bin/env bash\n")).toBe(true);
+    expect(preflight).toContain(
+      'chmod +x "$tooling/release-bus-frontend-gate.sh"'
+    );
+    expect(aggregateResult?.run).toContain(
+      'test "$AGGREGATE_OUTCOME" = success'
+    );
     expect(preflight).toContain('test "$VALIDATION_ONLY" = true');
     expect(preflight).toContain(
       'echo "inject_failure=$VALIDATION_INJECT_FAILURE"'
     );
     expect(preflight).toContain(
       'git show "$WORKFLOW_SHA:scripts/release-bus-authorize-operation.sh"'
+    );
+    expect(preflight).toContain('if [ "$PROMOTION_ELIGIBLE" = true ]; then');
+    expect(preflight).toContain("Report terminal preflight base evidence");
+    expect(preflight).not.toContain("matrix.environment");
+    expect(preflight).not.toContain("base-canary-build");
+    expect(preflight.match(/name: Build immutable application/g)).toHaveLength(
+      1
+    );
+    expect(preflight).toContain(
+      "Bind the single target compilation to its immutable artifact"
     );
   });
 });

@@ -18,8 +18,10 @@ const PREFLIGHT_BASE_FILES = [
 ];
 const PREFLIGHT_TOOLING_FILES = [
   "scripts/release-bus-authorize-operation.sh",
+  "scripts/release-bus-build-profile.cjs",
   "scripts/release-bus-frontend-gate.sh",
   "scripts/release-bus-gate-evidence.cjs",
+  "scripts/release-bus-install-dependencies.cjs",
   "scripts/release-bus-preflight-evidence.cjs",
   "scripts/release-bus-report-progress.mjs",
 ];
@@ -217,18 +219,70 @@ function aggregate(args) {
   const summary = finalSummary({
     args: {
       ...args,
-      mode: "sharded",
+      mode: required(args, "mode"),
       "base-sha": required(args, "source-sha"),
     },
     records,
     jobResults,
   });
+  const immutableArtifacts = records.filter(
+    (record) => record?.kind === "immutable_build_artifact"
+  );
+  const immutableArtifact = immutableArtifacts[0];
+  const expectedSourceSha = required(args, "source-sha");
+  const expectedProfileDigest = required(args, "build-profile-digest");
+  const expectedBuildEnvironment =
+    targetLane === "PRODUCTION" ? "production" : "staging";
+  const artifactValid =
+    immutableArtifacts.length === 1 &&
+    immutableArtifact?.schema_version === 1 &&
+    immutableArtifact?.environment === expectedBuildEnvironment &&
+    immutableArtifact?.source_sha === expectedSourceSha &&
+    immutableArtifact?.build_profile_digest === expectedProfileDigest &&
+    /^[a-f0-9]{64}$/.test(String(immutableArtifact?.package_digest ?? "")) &&
+    /^[a-f0-9]{64}$/.test(String(immutableArtifact?.upload_digest ?? "")) &&
+    new RegExp(
+      `^release-bus-frontend-[A-Za-z0-9._-]+-r[1-9][0-9]{0,8}-${expectedBuildEnvironment}$`
+    ).test(String(immutableArtifact?.artifact_name ?? "")) &&
+    /^[1-9][0-9]{0,19}$/.test(String(immutableArtifact?.run_id ?? ""));
+  const status =
+    summary.status === "SUCCEEDED" && artifactValid ? "SUCCEEDED" : "FAILED";
   return {
     ...summary,
-    kind: "frontend_preflight_summary",
+    status,
+    failure_class:
+      status === "SUCCEEDED" ? null : (summary.failure_class ?? "SOURCE"),
+    failure_phase:
+      status === "SUCCEEDED" ? null : (summary.failure_phase ?? "gate"),
+    errors: artifactValid
+      ? summary.errors
+      : [
+          ...summary.errors,
+          "immutable staging artifact evidence is missing or invalid",
+        ],
+    kind: "frontend_preflight_base_evidence_summary",
+    proof_origin: "fresh_preflight",
     target_lane: targetLane,
-    build_environments:
-      targetLane === "PRODUCTION" ? ["production", "staging"] : ["staging"],
+    build_environments: [expectedBuildEnvironment],
+    build_coverage: {
+      authoritative_profile:
+        jobResults.build === "success" && artifactValid
+          ? "SUCCEEDED"
+          : "FAILED",
+      compilation_count: 1,
+      deployed_artifact_bound: artifactValid,
+    },
+    immutable_artifact: artifactValid
+      ? {
+          artifact_name: immutableArtifact.artifact_name,
+          run_id: immutableArtifact.run_id,
+          source_sha: immutableArtifact.source_sha,
+          environment: immutableArtifact.environment,
+          package_digest: immutableArtifact.package_digest,
+          upload_digest: immutableArtifact.upload_digest,
+          build_profile_digest: immutableArtifact.build_profile_digest,
+        }
+      : null,
   };
 }
 
@@ -246,7 +300,7 @@ function run(command, args) {
   throw new Error(`Unknown command: ${command}`);
 }
 
-module.exports = { preflightContract };
+module.exports = { aggregate, preflightContract };
 
 if (require.main === module) {
   try {

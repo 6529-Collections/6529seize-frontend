@@ -25,6 +25,7 @@ type AboutContentsDropdownProps = {
   readonly currentHref?: string | undefined;
   readonly className?: string | undefined;
   readonly leadingAction?: ReactNode;
+  readonly withDivider?: boolean | undefined;
 };
 
 export function AboutContentsDropdown({
@@ -32,9 +33,11 @@ export function AboutContentsDropdown({
   currentHref,
   className,
   leadingAction,
+  withDivider = false,
 }: AboutContentsDropdownProps) {
   const locale = DEFAULT_LOCALE;
   const capacitor = useCapacitor();
+  const hasLeadingAction = Boolean(leadingAction);
   const cookieConsent = useOptionalCookieConsent();
   const { appWalletsSupported } = useAppWallets();
   const { spaces } = useLayout();
@@ -109,16 +112,18 @@ export function AboutContentsDropdown({
       style={{ top: spaces.headerSpace }}
       className={clsx(
         "tw-sticky tw-z-30 tw-mb-4 tw-flex tw-flex-col tw-gap-2 tw-bg-black/85 tw-py-2 tw-backdrop-blur-sm",
-        leadingAction
+        hasLeadingAction
           ? "sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
           : "tw-items-end sm:tw-flex-row sm:tw-justify-end",
+        withDivider &&
+          "tw-h-16 tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] !tw-bg-[#0D0D0F]/85 !tw-py-0 sm:tw-items-center",
         className
       )}
     >
       <div
         className={clsx(
           "tw-order-1 tw-flex tw-justify-end",
-          leadingAction && "sm:tw-order-2"
+          hasLeadingAction && "sm:tw-order-2"
         )}
         data-testid="about-contents-menu-trigger"
       >
@@ -142,7 +147,7 @@ export function AboutContentsDropdown({
           focusItemClassName="tw-bg-iron-900 tw-text-iron-50"
         />
       </div>
-      {leadingAction && (
+      {hasLeadingAction && (
         <div
           className="tw-order-2 tw-flex tw-justify-start sm:tw-order-1"
           data-testid="about-contents-leading-action"

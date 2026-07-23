@@ -16,9 +16,11 @@ const STATUSES = new Set([
 ]);
 const MAX_FAILURES = 100;
 const MAX_TEXT_LENGTH = 500;
+const BASE_EVIDENCE_CONTRACT_VERSION = 2;
 const EVIDENCE_IDENTITY_FIELDS = [
   "base_sha",
   "environment",
+  "build_profile_digest",
   "gate_fingerprint",
   "workflow_sha",
   "workflow_digest",
@@ -26,12 +28,20 @@ const EVIDENCE_IDENTITY_FIELDS = [
   "package_manager",
 ];
 const EVIDENCE_RECORD_KINDS = new Set([
+  "dependency_install",
   "manifest",
   "manifest_error",
   "phase",
   "jest_shard",
 ]);
 const FRONTEND_GATE_WORKFLOW = ".github/workflows/release-bus-base-canary.yml";
+const FRONTEND_PREFLIGHT_WORKFLOW =
+  ".github/workflows/release-bus-preflight.yml";
+const FRONTEND_BASE_IDENTITY_WORKFLOW =
+  ".github/workflows/release-bus-base-evidence-identity.yml";
+const FRONTEND_STAGING_DEPLOY_WORKFLOW =
+  ".github/workflows/release-bus-deploy-staging.yml";
+const FRONTEND_STAGING_E2E_WORKFLOW = ".github/workflows/staging-e2e.yml";
 const FRONTEND_GATE_BASE_FILES = [
   "bin/6529",
   "jest.config.js",
@@ -41,8 +51,11 @@ const FRONTEND_GATE_BASE_FILES = [
 ];
 const FRONTEND_GATE_TOOLING_FILES = [
   "scripts/release-bus-authorize-operation.sh",
+  "scripts/release-bus-build-profile.cjs",
   "scripts/release-bus-frontend-gate.sh",
   "scripts/release-bus-gate-evidence.cjs",
+  "scripts/release-bus-install-dependencies.cjs",
+  "scripts/release-bus-preflight-evidence.cjs",
   "scripts/release-bus-report-progress.mjs",
 ];
 
@@ -123,6 +136,7 @@ function frontendGateContract({
   workflowFileContents,
   gateMode,
   shardCount,
+  buildProfileDigest,
   nodeVersion = "22",
 }) {
   if (!/^[a-f0-9]{40}$/.test(baseSha)) throw new Error("Invalid base SHA");
@@ -134,8 +148,14 @@ function frontendGateContract({
     throw new Error("Unsupported shard count");
   if (!/^[1-9][0-9]{0,2}$/.test(nodeVersion))
     throw new Error("Invalid Node version");
+  if (!/^[a-f0-9]{64}$/.test(buildProfileDigest))
+    throw new Error("Invalid build-profile digest");
   const workflowFiles = [
     FRONTEND_GATE_WORKFLOW,
+    FRONTEND_PREFLIGHT_WORKFLOW,
+    FRONTEND_BASE_IDENTITY_WORKFLOW,
+    FRONTEND_STAGING_DEPLOY_WORKFLOW,
+    FRONTEND_STAGING_E2E_WORKFLOW,
     ...FRONTEND_GATE_TOOLING_FILES,
   ];
   for (const file of FRONTEND_GATE_BASE_FILES) {
@@ -164,19 +184,22 @@ function frontendGateContract({
   const workflowDigest = componentDigests[FRONTEND_GATE_WORKFLOW];
   const behaviorDigest = sha256(
     JSON.stringify({
-      schema_version: 1,
+      schema_version: BASE_EVIDENCE_CONTRACT_VERSION,
+      kind: "frontend_base_evidence_contract",
       repository: "frontend",
       environment: "orchestration",
       node_version: nodeVersion,
       package_manager: packageManager,
       gate_mode: gateMode,
       shard_count: shardCount,
+      build_profile_digest: buildProfileDigest,
       component_digests: componentDigests,
     })
   );
   const fingerprint = sha256(
     JSON.stringify({
-      schema_version: 1,
+      schema_version: BASE_EVIDENCE_CONTRACT_VERSION,
+      kind: "frontend_base_evidence_contract",
       repository: "frontend",
       environment: "orchestration",
       base_sha: baseSha,
@@ -186,11 +209,13 @@ function frontendGateContract({
       package_manager: packageManager,
       gate_mode: gateMode,
       shard_count: shardCount,
+      build_profile_digest: buildProfileDigest,
       component_digests: componentDigests,
     })
   );
   return {
-    schema_version: 1,
+    schema_version: BASE_EVIDENCE_CONTRACT_VERSION,
+    kind: "frontend_base_evidence_contract",
     repository: "frontend",
     environment: "orchestration",
     base_sha: baseSha,
@@ -202,6 +227,7 @@ function frontendGateContract({
     package_manager: packageManager,
     gate_mode: gateMode,
     shard_count: shardCount,
+    build_profile_digest: buildProfileDigest,
     component_digests: componentDigests,
   };
 }
@@ -222,7 +248,14 @@ function contractFromRepository(args) {
     ])
   );
   const workflowFileContents = Object.fromEntries(
-    [FRONTEND_GATE_WORKFLOW, ...FRONTEND_GATE_TOOLING_FILES].map((file) => [
+    [
+      FRONTEND_GATE_WORKFLOW,
+      FRONTEND_PREFLIGHT_WORKFLOW,
+      FRONTEND_BASE_IDENTITY_WORKFLOW,
+      FRONTEND_STAGING_DEPLOY_WORKFLOW,
+      FRONTEND_STAGING_E2E_WORKFLOW,
+      ...FRONTEND_GATE_TOOLING_FILES,
+    ].map((file) => [
       file,
       execFileSync("git", ["-C", repoRoot, "show", `${workflowSha}:${file}`], {
         encoding: "utf8",
@@ -237,6 +270,7 @@ function contractFromRepository(args) {
     workflowFileContents,
     gateMode: required(args, "mode"),
     shardCount: integer(required(args, "shard-count"), "shard-count", 1),
+    buildProfileDigest: digest(args, "build-profile-digest"),
   });
 }
 
@@ -252,6 +286,9 @@ function validateEvidenceIdentity(identity) {
   }
   if (!/^[a-f0-9]{64}$/.test(String(identity.gate_fingerprint ?? ""))) {
     throw new Error("Evidence identity has an invalid gate fingerprint");
+  }
+  if (!/^[a-f0-9]{64}$/.test(String(identity.build_profile_digest ?? ""))) {
+    throw new Error("Evidence identity has an invalid build-profile digest");
   }
   if (!/^[a-f0-9]{40}$/.test(String(identity.workflow_sha ?? ""))) {
     throw new Error("Evidence identity has an invalid workflow SHA");
@@ -278,6 +315,7 @@ function evidenceIdentityFromArgs(args) {
   return validateEvidenceIdentity({
     base_sha: required(args, "base-sha"),
     environment: required(args, "environment"),
+    build_profile_digest: digest(args, "build-profile-digest"),
     gate_fingerprint: required(args, "gate-fingerprint"),
     workflow_sha: required(args, "workflow-sha"),
     workflow_digest: required(args, "workflow-digest"),
@@ -560,6 +598,10 @@ function buildGateSummary({
     (record) =>
       record.source === source && EVIDENCE_RECORD_KINDS.has(record.kind)
   );
+  const failedDependencyInstall = sourceEvidence.find(
+    (record) =>
+      record.kind === "dependency_install" && record.status === "FAILED"
+  );
   if (
     identity &&
     (sourceEvidence.length === 0 ||
@@ -636,23 +678,49 @@ function buildGateSummary({
   const minimumShardDuration = shardDurations.length
     ? Math.min(...shardDurations)
     : 0;
+  const status = errors.length === 0 ? "SUCCEEDED" : "FAILED";
+  const failureClass =
+    status === "SUCCEEDED"
+      ? null
+      : failedDependencyInstall?.failure_class === "INFRASTRUCTURE_TRANSIENT"
+        ? "INFRASTRUCTURE_TRANSIENT"
+        : failedDependencyInstall?.failure_class === "SOURCE"
+          ? "SOURCE"
+          : failedDependencyInstall
+            ? "UNKNOWN"
+            : "SOURCE";
+  const shardSummaries = Array.from({ length: shardCount }, (_, offset) => {
+    const index = offset + 1;
+    const shard = shards.find(
+      (candidate) =>
+        candidate.shard_index === index && candidate.shard_count === shardCount
+    );
+    return shard
+      ? {
+          index: shard.shard_index,
+          count: shard.shard_count,
+          status: shard.status,
+          injected_failure: shard.injected_failure === true,
+          duration_ms: shard.duration_ms,
+          counts: shard.counts,
+        }
+      : {
+          index,
+          count: shardCount,
+          status: "FAILED",
+          injected_failure: false,
+          duration_ms: 0,
+          counts: sumCounts([]),
+        };
+  });
   return {
-    status: errors.length === 0 ? "SUCCEEDED" : "FAILED",
+    status,
+    failure_class: failureClass,
+    failure_phase: failedDependencyInstall ? "dependency_install" : "gate",
+    retryable: failureClass === "INFRASTRUCTURE_TRANSIENT",
     phases,
     counts,
-    shards: stableSort(
-      shards.map(
-        (shard) =>
-          `${String(shard.shard_index).padStart(2, "0")}:${JSON.stringify({
-            index: shard.shard_index,
-            count: shard.shard_count,
-            status: shard.status,
-            injected_failure: shard.injected_failure === true,
-            duration_ms: shard.duration_ms,
-            counts: shard.counts,
-          })}`
-      )
-    ).map((value) => JSON.parse(value.slice(value.indexOf(":") + 1))),
+    shards: shardSummaries,
     shard_imbalance_ms: maximumShardDuration - minimumShardDuration,
     missing_files: missingFiles.slice(0, MAX_FAILURES),
     duplicate_files: duplicateFiles.slice(0, MAX_FAILURES),
@@ -722,15 +790,43 @@ function finalSummary({ args, records, jobResults }) {
             inventory: jobResults.inventory,
             jest: jobResults.jest,
             source_mutation: jobResults.source_mutation,
+            ...(jobResults.packaging_build === undefined
+              ? {}
+              : { packaging_build: jobResults.packaging_build }),
           },
           identity,
         });
-  const authoritative = mode === "sharded" ? sharded : legacy;
+  // Valid modes normally select a buildGateSummary result, including when no
+  // records exist (that result is FAILED with zeroed counts). Keep an explicit
+  // bounded fallback so an internal producer regression still emits terminal
+  // FAILED evidence instead of suppressing the workflow's failure report.
+  const authoritative = (mode === "sharded" ? sharded : legacy) ?? {
+    status: "FAILED",
+    failure_class: "UNKNOWN",
+    failure_phase: "gate",
+    retryable: false,
+    phases: [],
+    counts: sumCounts([]),
+    shards: [],
+    shard_imbalance_ms: 0,
+    missing_files: [],
+    duplicate_files: [],
+    unexpected_files: [],
+    failing_suites: [],
+    failing_tests: [],
+    errors: ["authoritative evidence missing"],
+  };
   const equivalent =
     mode === "shadow"
       ? legacy.status === sharded.status &&
         sameCounts(legacy.counts, sharded.counts)
       : null;
+  const skippedTestSuites = authoritative?.counts?.pending_test_suites;
+  if (!Number.isSafeInteger(skippedTestSuites) || skippedTestSuites < 0) {
+    throw new Error(
+      "Authoritative gate evidence has an invalid skipped-suite count"
+    );
+  }
   const runUrl = required(args, "run-url");
   if (
     !/^https:\/\/github\.com\/6529-Collections\/6529seize-frontend\/actions\/runs\/\d+$/.test(
@@ -743,6 +839,15 @@ function finalSummary({ args, records, jobResults }) {
     schema_version: 1,
     kind: "base_canary_summary",
     status: authoritative?.status ?? "FAILED",
+    failure_class:
+      authoritative?.status === "SUCCEEDED"
+        ? null
+        : (authoritative?.failure_class ?? "UNKNOWN"),
+    failure_phase:
+      authoritative?.status === "SUCCEEDED"
+        ? null
+        : (authoritative?.failure_phase ?? "gate"),
+    retryable: authoritative?.retryable === true,
     gate_mode: mode,
     fresh_or_reused: "fresh",
     ...identity,
@@ -756,6 +861,7 @@ function finalSummary({ args, records, jobResults }) {
       ])
     ),
     totals: authoritative?.counts ?? sumCounts([]),
+    skipped_test_suites: skippedTestSuites,
     shards: authoritative?.shards ?? [],
     shard_imbalance_ms: authoritative?.shard_imbalance_ms ?? 0,
     missing_files: authoritative?.missing_files ?? [],

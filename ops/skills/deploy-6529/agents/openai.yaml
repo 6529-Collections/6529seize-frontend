@@ -1,4 +1,4 @@
 interface:
   display_name: "Deploy 6529"
-  short_description: "Run 6529 staging and production deploys safely."
-  default_prompt: "Use $deploy-6529 to merge, deploy, validate, and coordinate a 6529 frontend or backend release."
+  short_description: "Route exact releases through Release Bus v2."
+  default_prompt: "Use $deploy-6529 to route, deploy, validate, and recover an exact 6529 frontend, backend, or coupled release."

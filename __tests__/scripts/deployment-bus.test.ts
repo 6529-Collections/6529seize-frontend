@@ -45,6 +45,41 @@ describe("release bus optional Codex workflow", () => {
     );
     expect(composeWorkflow).toContain('test "$missing_seen" = true');
   });
+
+  it("retries only idempotent publication from the verified composition artifact", () => {
+    const workflow = YAML.parse(composeWorkflow);
+    const retryInput =
+      workflow.on.workflow_dispatch.inputs.composition_artifact_run_id;
+    const download = workflow.jobs.publish.steps.find(
+      (step: { name?: string }) => step.name === "Download isolated composition"
+    );
+    const publish = workflow.jobs.publish.steps.find(
+      (step: { name?: string }) => step.name === "Publish release branch"
+    );
+    const report = workflow.jobs.publish.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Report structured publication result"
+    );
+
+    expect(retryInput).toMatchObject({ required: false, default: "" });
+    expect(workflow.jobs.compose.if).toBe(
+      "inputs.composition_artifact_run_id == ''"
+    );
+    expect(workflow.jobs.publish.if).toContain(
+      "inputs.composition_artifact_run_id != ''"
+    );
+    expect(download.with["run-id"]).toContain(
+      "inputs.composition_artifact_run_id"
+    );
+    expect(publish["continue-on-error"]).toBe(true);
+    expect(publish.run).toContain("INFRASTRUCTURE_TRANSIENT");
+    expect(publish.run).toContain("403|5[0-9]{2}");
+    expect(publish.run).toContain("requested url returned error");
+    expect(publish.run).not.toContain("(^|[^0-9])(403|5[0-9]{2})");
+    expect(report.run).toContain("${PUBLISH_FAILURE_CLASS:-UNKNOWN}");
+    expect(report.run).toContain("${PUBLISH_RETRYABLE:-false}");
+    expect(report.run).toContain("release_branch_publication");
+  });
 });
 
 describe("release bus immutable frontend artifact", () => {
@@ -88,6 +123,38 @@ describe("release bus staging artifact transfer", () => {
       "utf8"
     )
   );
+
+  it("selects staging from one immutable dual-profile artifact without rebuilding", () => {
+    const inputs = deployWorkflow.on.workflow_dispatch.inputs;
+    const downloadStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Download immutable preflight artifact"
+    );
+    const verifyStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Verify and bind immutable artifact"
+    );
+
+    expect(inputs.artifact_environment).toMatchObject({
+      required: false,
+      default: "staging",
+      options: ["staging", "production"],
+    });
+    expect(inputs.artifact_digest).toMatchObject({ required: true });
+    expect(downloadStep.with.name).toBe(
+      "release-bus-frontend-${{ inputs.artifact_train_id || inputs.release_train_id }}-r${{ inputs.release_train_revision }}"
+    );
+    expect(verifyStep.run).toContain('.environment == "dual"');
+    expect(verifyStep.run).toContain("profiles/staging/target/package.zip");
+    expect(verifyStep.run).toContain(
+      'test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"'
+    );
+    expect(
+      deployWorkflow.jobs.deploy.steps.filter((step: { name?: string }) =>
+        /build/i.test(step.name ?? "")
+      )
+    ).toEqual([]);
+  });
 
   it("uses the bucket region and rejects redirect bodies before activation", () => {
     const stageStep = deployWorkflow.jobs.deploy.steps.find(
@@ -153,6 +220,105 @@ describe("release bus staging artifact transfer", () => {
     expect(
       script.lastIndexOf('wait_for_local_version "$EXPECTED_SHA"')
     ).toBeLessThan(script.lastIndexOf("pm2 save"));
+  });
+});
+
+describe("release bus v2 E2E callbacks", () => {
+  const stagingE2E = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
+    "utf8"
+  );
+  const productionE2E = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/production-e2e.yml"),
+    "utf8"
+  );
+
+  it.each([
+    ["staging", stagingE2E],
+    ["production", productionE2E],
+  ])("binds %s E2E authorization and progress to v2", (_name, workflow) => {
+    expect(workflow).toContain("/deploy/release-bus-v2/authorize");
+    expect(workflow).toContain("/deploy/release-bus-v2/report-progress");
+    expect(workflow).not.toContain(
+      '"$RELEASE_BUS_API_URL/deploy/release-bus/authorize"'
+    );
+  });
+
+  it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain("id: socket-firewall");
+    expect(stagingE2E).toContain(
+      "SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}"
+    );
+    expect(stagingE2E).toContain("failure_class=INFRASTRUCTURE");
+    expect(stagingE2E).toContain("failure_phase=staging_e2e_setup");
+    expect(stagingE2E).toContain("failure_class=E2E");
+    expect(stagingE2E).toContain("failure_phase=staging_e2e");
+  });
+});
+
+describe("release bus v2 combined preflight", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
+    )
+  );
+
+  it("keeps candidate execution jobs secretless and read-only", () => {
+    for (const jobName of ["quality", "build"]) {
+      const job = workflow.jobs[jobName];
+      expect(job.permissions).toEqual({ contents: "read" });
+      expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
+    }
+    const source = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
+    );
+    expect(
+      source.match(/codeql\[actions\/untrusted-checkout\/medium\]/g)
+    ).toHaveLength(2);
+  });
+
+  it("omits the production-only announcement URL from staging builds", () => {
+    const build = workflow.jobs.build;
+    const buildStep = build.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Build exact environment profile once"
+    );
+    expect(build.env.BUILD_ENVIRONMENT).toBe("${{ matrix.environment }}");
+    expect(buildStep.run).toContain(
+      'if [ "$BUILD_ENVIRONMENT" = staging ]'
+    );
+    expect(buildStep.run).toContain("unset ANNOUNCED_VERSION_ENDPOINT");
+  });
+
+  it("shards Jest and proves exact inventory before artifact publication", () => {
+    expect(workflow.jobs.quality.strategy.matrix.shard).toEqual([
+      "lint",
+      "typecheck",
+      "inventory",
+      "tests-1",
+      "tests-2",
+      "tests-3",
+      "tests-4",
+    ]);
+    const verify = workflow.jobs.aggregate.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Prove sharded Jest inventory is exact"
+    );
+    const upload = workflow.jobs.aggregate.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Upload one exact frontend artifact"
+    );
+    expect(verify.run).toContain("uniq -d shards.sorted");
+    expect(verify.run).toContain("diff -u complete.sorted shards.sorted");
+    expect(upload.if).toContain("steps.inventory_verify.outcome == 'success'");
   });
 });
 

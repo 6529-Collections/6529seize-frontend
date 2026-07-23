@@ -44,6 +44,12 @@ jest.mock(
           >
             Set sort
           </button>
+          <button
+            data-testid="filters-set-memes"
+            onClick={() => props.setCollection?.(CollectedCollectionType.MEMES)}
+          >
+            Set The Memes
+          </button>
         </div>
       );
     }
@@ -134,7 +140,7 @@ describe("UserPageCollected", () => {
   const useQueryMock = useQuery as jest.Mock;
   const commonApiFetchMock = commonApiFetch as jest.Mock;
 
-  // Reusable router mocks (Next App Router) — component uses router.replace(...)
+  // Reusable router mocks (Next App Router)
   const routerReplace = jest.fn();
   const routerPush = jest.fn();
 
@@ -149,8 +155,8 @@ describe("UserPageCollected", () => {
     toString: jest.fn(() => ""),
     entries: jest.fn(() => [].values()),
   };
-  const getLastReplaceParams = () => {
-    const path = routerReplace.mock.calls.at(-1)?.[0] as string | undefined;
+  const getLastPushParams = () => {
+    const path = routerPush.mock.calls.at(-1)?.[0] as string | undefined;
     const query = path?.split("?")[1] ?? "";
     return new URLSearchParams(query);
   };
@@ -396,11 +402,11 @@ describe("UserPageCollected", () => {
     );
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
-    routerReplace.mockClear();
+    routerPush.mockClear();
 
     await user.click(screen.getByTestId("stats-collection-shortcut"));
 
-    const path = routerReplace.mock.calls[0]?.[0] as string | undefined;
+    const path = routerPush.mock.calls[0]?.[0] as string | undefined;
     const params = new URLSearchParams(path?.split("?")[1] ?? "");
 
     expect(params.get("collection")).toBe("nextgen");
@@ -413,6 +419,68 @@ describe("UserPageCollected", () => {
     expect(params.get("sort-direction")).toBeNull();
   });
 
+  it("adds each user-selected collection filter to browser history", async () => {
+    const user = userEvent.setup();
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await user.click(screen.getByTestId("stats-collection-shortcut"));
+    await user.click(screen.getByTestId("filters-set-memes"));
+
+    expect(routerPush).toHaveBeenNthCalledWith(
+      1,
+      "/testuser/collected?collection=nextgen",
+      { scroll: false }
+    );
+    expect(routerPush).toHaveBeenNthCalledWith(
+      2,
+      "/testuser/collected?collection=memes&seized=seized",
+      { scroll: false }
+    );
+    expect(routerReplace).not.toHaveBeenCalled();
+  });
+
+  it("replaces automatic invalid-page corrections", async () => {
+    mockSearchParams.get.mockImplementation((key: string) =>
+      key === "page" ? "3" : null
+    );
+    mockSearchParams.toString.mockReturnValue("page=3");
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await waitFor(() => {
+      expect(routerReplace).toHaveBeenCalledWith("/testuser/collected", {
+        scroll: false,
+      });
+    });
+    expect(routerPush).not.toHaveBeenCalled();
+  });
+
+  it("replaces automatic overflow-page corrections", async () => {
+    mockSearchParams.get.mockImplementation((key: string) =>
+      key === "page" ? "5" : null
+    );
+    mockSearchParams.toString.mockReturnValue("page=5");
+    useQueryMock.mockReturnValue({
+      isFetching: false,
+      isLoading: false,
+      data: {
+        data: [],
+        count: 60,
+        page: 5,
+      },
+    });
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    await waitFor(() => {
+      expect(routerReplace).toHaveBeenCalledWith("/testuser/collected?page=3", {
+        scroll: false,
+      });
+    });
+    expect(routerPush).not.toHaveBeenCalled();
+  });
+
   it("applies season shortcuts through the existing url filter flow", async () => {
     const user = userEvent.setup();
 
@@ -420,7 +488,7 @@ describe("UserPageCollected", () => {
 
     await user.click(screen.getByTestId("stats-season-shortcut"));
 
-    const params = getLastReplaceParams();
+    const params = getLastPushParams();
 
     expect(params.get("collection")).toBe("memes");
     expect(params.get("page")).toBeNull();
@@ -447,12 +515,12 @@ describe("UserPageCollected", () => {
 
     await user.click(screen.getByTestId("stats-collection-shortcut"));
 
-    const params = getLastReplaceParams();
+    const params = getLastPushParams();
 
     expect(params.get("collection")).toBeNull();
     expect(params.get("szn")).toBeNull();
     expect(params.get("page")).toBeNull();
-    expect(routerReplace).toHaveBeenLastCalledWith("/testuser/collected", {
+    expect(routerPush).toHaveBeenLastCalledWith("/testuser/collected", {
       scroll: false,
     });
   });
@@ -474,12 +542,12 @@ describe("UserPageCollected", () => {
 
     await user.click(screen.getByTestId("stats-season-shortcut"));
 
-    const params = getLastReplaceParams();
+    const params = getLastPushParams();
 
     expect(params.get("collection")).toBeNull();
     expect(params.get("szn")).toBeNull();
     expect(params.get("page")).toBeNull();
-    expect(routerReplace).toHaveBeenLastCalledWith("/testuser/collected", {
+    expect(routerPush).toHaveBeenLastCalledWith("/testuser/collected", {
       scroll: false,
     });
   });
@@ -626,7 +694,7 @@ describe("UserPageCollected", () => {
       "data-active-season-number",
       ""
     );
-    expect(routerReplace).toHaveBeenLastCalledWith("/testuser/collected", {
+    expect(routerPush).toHaveBeenLastCalledWith("/testuser/collected", {
       scroll: false,
     });
   });
@@ -670,15 +738,15 @@ describe("UserPageCollected", () => {
     });
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
-    routerReplace.mockClear();
+    routerPush.mockClear();
 
     await user.click(screen.getByTestId("stats-season-shortcut"));
 
     await waitFor(() => {
-      expect(routerReplace).toHaveBeenCalledTimes(1);
+      expect(routerPush).toHaveBeenCalledTimes(1);
     });
 
-    const params = getLastReplaceParams();
+    const params = getLastPushParams();
 
     expect(params.get("collection")).toBe("memes");
     expect(params.get("szn")).toBe("2");
@@ -692,7 +760,7 @@ describe("UserPageCollected", () => {
     await user.click(screen.getByTestId("stats-season-shortcut"));
     await user.click(screen.getByTestId("filters-set-szn"));
 
-    const params = getLastReplaceParams();
+    const params = getLastPushParams();
 
     expect(params.get("collection")).toBe("memes");
     expect(params.get("szn")).toBe("2");
@@ -706,7 +774,7 @@ describe("UserPageCollected", () => {
     await user.click(screen.getByTestId("stats-season-shortcut"));
     await user.click(screen.getByTestId("filters-set-sort"));
 
-    const params = getLastReplaceParams();
+    const params = getLastPushParams();
 
     expect(params.get("collection")).toBe("memes");
     expect(params.get("szn")).toBe("2");

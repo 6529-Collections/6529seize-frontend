@@ -147,7 +147,10 @@ function DialogHeader({
         {showDesktopCloseButton && (
           <DialogCloseButton
             onClick={onClose}
-            className="tw-hidden md:tw-inline-flex"
+            className={clsx(
+              "tw-hidden md:tw-inline-flex",
+              headerCloseButtonClassName
+            )}
           />
         )}
         {showHeaderCloseButton && (

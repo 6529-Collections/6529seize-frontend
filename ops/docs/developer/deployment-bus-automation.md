@@ -1,9 +1,36 @@
 # Deployment Bus Automation and Operations
 
-Status: implementation reference and go-live runbook. Code is feature-gated;
-merging it does not by itself enable autonomous deployments.
+Status: v1 rollback reference. Use
+[`simple-release-bus-v2.md`](./simple-release-bus-v2.md) for current routing and
+operations. V1 must not
+accept new readiness or scheduler claims. The temporary manual-deployment
+protocol in `deployment-bus-process.md` is authoritative until v2 cutover.
+Removal is tracked by branch `agent/simple-release-bus-v2-plan` at commit
+`0d8fb5e726279b4a80592b3dc7d4ec3db75065e9` and occurs only after the v2
+production cutover and rollback observation criteria pass.
+
+## Maintenance boundary
+
+- Pause v1 `ALL` with an audited maintenance reason before waiting for an active
+  train.
+- Let already-dispatched workflows reach terminal state naturally; never cancel
+  them for cutover.
+- At the first boundary where the active train and all of its workflows are
+  terminal, set runtime `RELEASE_BUS_MODE=OFF`, deploy the API before the worker,
+  and pause or disable the scheduler trigger as needed.
+- Verify the API reports `OFF` and rejects readiness. Prove the disabled worker
+  cannot claim, create, dispatch, merge, or deploy.
+- Reconcile nonterminal v1 test candidates only after claiming is disabled.
+- Keep v1 code and infrastructure disabled as rollback until v2 staging and
+  production are proven; do not delete it during cutover.
+- Keep repository `RELEASE_BUS_ENFORCEMENT` absent or exactly `false` while the
+  manual route is active.
 
 ## Runtime architecture
+
+> **Suspended during v2 maintenance:** this v1 architecture is rollback
+> reference only. The API and workers remain `OFF`, and the scheduler remains
+> disabled.
 
 - The existing application MySQL database is the durable release ledger.
 - `releaseBusStarter` runs every minute with reserved concurrency `1`.
@@ -116,10 +143,18 @@ merged unnoticed.
 
 Before composing a train that contains frontend work, the worker dispatches
 `release-bus-base-canary.yml` against the train's exact recorded frontend base
-SHA. The canary runs lint, typecheck, the complete Jest suite, and a production
-build. Failure requeues the train's candidates, pauses the lane, and records the
-exact Actions run as operator evidence; it never attributes the base failure to
-a candidate. Backend-only trains skip this frontend canary.
+SHA. The canary runs lint, typecheck, the complete Jest suite, and a build with
+the exact protected staging configuration profile. A deterministic source/gate
+failure requeues the train's candidates,
+pauses the lane, and records the exact Actions run as operator evidence; it
+never attributes the base failure to a candidate. This pause also applies to an
+unclassified failure. A dependency-install failure explicitly classified as
+transient infrastructure keeps the candidates attached, keeps the lane
+running, and retries the same immutable operation. A train gets at most five
+workflow attempts. If all five fail with authenticated transient-infrastructure
+evidence, the train ends, its candidates return to the queue, and the lane
+stays running so a later fresh train becomes the automatic recovery probe.
+Backend-only trains skip this frontend canary.
 
 The frontend base canary has three independently selectable execution modes:
 
@@ -134,11 +169,19 @@ Jest shard jobs against the same SHA, but only the serial outcome controls the
 train. `sharded` makes the parallel aggregate authoritative. Every deterministic
 Jest `--shard=N/M` uses `--maxWorkers=2 --bail=0`, bounding memory and process
 fan-out without forcing serial execution. The matrix has `fail-fast: false` and
-no automatic retry. Returning to
+does not retry source gates. Only verified transient dependency infrastructure
+is retried. Returning to
 `legacy`/one shard is the no-code rollback.
 
 Each validation job detaches the exact base SHA, installs frozen dependencies
-through `./bin/6529`, and proves that source files were not mutated. Gate and
+through `./bin/6529`, verifies every direct package, required binary, and pnpm
+installation metadata, and proves that source files were not mutated. A
+Socket Firewall or package-transport failure, timeout, or false-success partial
+install is recorded as bounded `dependency_install` evidence. The job removes
+the partial `node_modules` tree and retries the exact frozen install up to three
+times; lockfile/contract failures are source failures and are never retried.
+The aggregate job uses staged built-in Node tooling and does not install
+dependencies, removing an unnecessary third-party failure point. Gate and
 reporting tooling is copied to runner temporary storage from the exact workflow
 commit, so a workflow dispatched from pinned `main` can validate an older base
 without substituting that base's control-plane policy. The fingerprint covers
@@ -160,7 +203,9 @@ Every shard uploads bounded JSON counts, timing, its planned manifest, its
 executed-file manifest, exact shard coordinates, and failing suite/test
 identities. Every phase, manifest, and shard record also repeats the exact base
 SHA, `orchestration` environment, gate fingerprint, workflow SHA/digest, Node
-version, and package-manager contract. The authorize job derives that identity
+version, package-manager contract, and opaque HMAC-protected build-profile
+digest. The digest binds every relevant public value and secret without placing
+those values in evidence. The authorize job derives that identity
 from the immutable base and workflow commits before calling the Release Bus
 API. The fail-closed aggregate requires every selected job to succeed, requires
 every expected Jest file in exactly one shard, compares each shard's plan to
@@ -201,6 +246,31 @@ candidate composition, preflight, deployment, or E2E. A hit writes durable
 creation, and expiry, then advances within that worker cycle. Shadow lookup
 writes `BASE_CANARY_EVIDENCE_WOULD_REUSE` but still dispatches a fresh gate.
 
+There are two trusted evidence origins: a freshly completed base canary and a
+`BASE_EVIDENCE_PROMOTED` record from a successful staging train. Promotion is
+created after the expected-old-SHA `1a-staging` update and is cryptographically
+bound to the exact final frontend SHA, schema-v2 gate contract, complete
+preflight aggregate, preflight artifact, immutable staging deployment, and
+staging E2E workflow runs. The preflight performs exactly one application
+compilation with the protected staging profile, packages that output once, and
+deploys that same immutable artifact. That single build is also the required
+base-canary-equivalent build coverage; there is no placeholder or second
+promotion-only compilation. The proof additionally requires complete Jest
+inventory with zero missing/duplicate/unexpected/skipped/todo tests and
+successful lint/typecheck/build stages. The proof digest covers the contract,
+summary, operation keys, run IDs/URLs, artifact digests, source train, and
+expiry.
+
+Promotion and reuse records use deterministic idempotency keys, so worker
+retries cannot duplicate a decision. A transient rejected promotion can later
+be superseded by a valid exact proof, while repeated identical decisions remain
+single records. A reused-only summary is never promotable: every promoted SHA
+must be anchored in that train's own fresh preflight, deploy, and E2E proof.
+Missing, malformed, stale, failed, untrusted, or mismatched evidence is a cache
+miss, not an authorization, and dispatches the fresh base-canary workflow. The
+status API and dashboard distinguish `CARRIED_FORWARD_REUSED` from
+`FRESH_EXECUTED`/`FRESH_EXECUTING` and expose the bounded source provenance.
+
 Rollout is ordered and reversible: deploy the additive candidate column first;
 deploy the API/worker with both reuse flags false; merge the frontend workflow
 with `legacy`/one shard; collect serial-versus-sharded equivalence in `shadow`;
@@ -209,12 +279,19 @@ shadow and inspect real decisions; then enable reuse with the 24-hour TTL.
 Disable reuse independently or return the frontend to `legacy`/one shard before
 considering a code rollback.
 
-Candidate preflight uses the same fail-closed Jest inventory model without
-sharing the base-canary reuse identity. Lint, typecheck, the complete Jest
-inventory, deterministic Jest shards, and immutable staging/production builds
-run as independent jobs. The final preflight aggregate requires every job to
-succeed and proves every expected test file executed exactly once, with no
-missing, duplicate, unexpected, skipped, todo, or rerun-masked tests. Jest runs
+Candidate preflight uses the same fail-closed Jest inventory model. It selects
+one build profile from the target lane: staging for a staging train and
+production for a production train. Lint, typecheck, the complete Jest
+inventory, deterministic Jest shards, and the single target build run as
+independent jobs. That one compilation produces the immutable artifact consumed
+by deployment. The final preflight aggregate requires every selected
+job to succeed and proves every expected test file executed exactly once, with
+no missing, duplicate, unexpected, skipped, todo, or rerun-masked tests. The
+aggregate and artifact digest are terminally bound to the exact preflight
+operation and workflow run through the Release Bus API. Only an exact staging
+profile whose gate mode and shard count match the current base-canary contract
+is eligible for carry-forward promotion. Production preflight produces only its
+production artifact and is never staging-base evidence. Jest runs
 with `--maxWorkers=2 --bail=0`; Release Bus full, isolation, base, and preflight
 execution never uses `--runInBand`.
 
@@ -321,7 +398,7 @@ bounded Jest suite/test report when available.
 Agents discover live mode only through the repository helper:
 
 ```bash
-node ops/scripts/release-bus-status.mjs
+./bin/6529 exec node ops/scripts/release-bus-status.mjs
 ```
 
 It uses the authenticated `gh` token internally to call
@@ -337,6 +414,9 @@ docs, workflows, or earlier state.
 Run the helper on receipt of a release request, immediately before readiness or
 manual mutation, and again before production after a significant wait. Stop if
 `ALL` or the relevant lane is paused.
+
+> **Suspended during v2 maintenance:** only the `OFF` row below is authorized.
+> The other rows and readiness behavior are v1 rollback reference only.
 
 | Live mode    | Staging route                        | Production route                           |
 | ------------ | ------------------------------------ | ------------------------------------------ |
@@ -376,6 +456,11 @@ the live Actions variable in every repository selected for a manual route.
 `OFF` or `SHADOW` with enforcement enabled is a rollout mismatch and blocks the
 release until an operator reconciles configuration. Enable enforcement only
 after the corresponding bus mode is healthy.
+
+During the temporary v2 maintenance window, the paragraph above is rollback
+reference only. A fresh `mode: OFF` result and absent/exactly-`false`
+enforcement are one fail-closed AND gate; disagreement stops the release and
+break glass cannot override it.
 
 ## Required external setup
 
@@ -462,9 +547,18 @@ are verified.
   irreversible operation.
 - A missed workflow response remains `AMBIGUOUS` until exact-run reconciliation
   proves its state.
+- A failed base-canary or preflight operation carrying authenticated
+  `INFRASTRUCTURE_TRANSIENT` dependency evidence is retried with a new exact
+  attempt key. The first retries are prompt; continued outages use bounded
+  5/10-minute backoff. The train remains visible as
+  `INFRASTRUCTURE_RETRY_BACKOFF`, candidates stay attached, and the lane is not
+  paused. After five failed workflow attempts, the train terminates, candidates
+  are automatically requeued, and the lane remains running. This prevents a
+  permanent provider outage from monopolizing the train indefinitely. Source
+  and unknown failures retain fail-closed behavior.
 - The incident card distinguishes `PRE_EXISTING_BASE`,
   `DETERMINISTIC_CANDIDATE`, and train/environment failures. A pre-existing
-  base failure returns every candidate, quarantines none, applies
+  deterministic base failure returns every candidate, quarantines none, applies
   `BASE_FAILURE_NO_CANDIDATE_BLAMED`, pauses the lane, and records the exact
   recovery recommendation. Candidate quarantine is allowed only after
   deterministic isolation proves the candidate-owned failure.
