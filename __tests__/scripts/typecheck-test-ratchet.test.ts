@@ -1,7 +1,10 @@
+import baseline from "../../scripts/typecheck-test-baseline.json";
+
 const {
   SCHEMA_VERSION,
   compareDiagnosticCounts,
   createBaseline,
+  currentToolchain,
   diagnosticDirectory,
   isJestDiagnosticPath,
   parseOptions,
@@ -25,6 +28,7 @@ const {
     toolchain: Record<string, string>;
     files: Record<string, number>;
   };
+  currentToolchain: () => Record<string, string>;
   diagnosticDirectory: (filePath: string) => string;
   isJestDiagnosticPath: (filePath: string) => boolean;
   parseOptions: (args: string[]) => {
@@ -50,6 +54,8 @@ describe("test typecheck ratchet", () => {
 
   it.each([
     "tests/pages/about.spec.ts",
+    "tests/pages/about.test.ts",
+    "e2e/checkout.test.tsx",
     "components/Card.tsx",
     "__tests__/types.d.ts",
     "__mocks__/styleMock.js",
@@ -66,6 +72,17 @@ describe("test typecheck ratchet", () => {
     expect(diagnosticDirectory("ops/scripts/release-bus-status.test.ts")).toBe(
       "ops/scripts"
     );
+    expect(
+      diagnosticDirectory(
+        "__tests__/components/distribution-plan-tool/BuildPlan.test.tsx"
+      )
+    ).toBe("__tests__/components/distribution-plan-tool");
+  });
+
+  it("keeps the committed baseline schema and fingerprints aligned", () => {
+    expect(baseline.schema_version).toBe(SCHEMA_VERSION);
+    expect(baseline.config).toBe("tsconfig.jest.json");
+    expect(baseline.toolchain).toEqual(currentToolchain());
   });
 
   it("reports per-file increases and decreases without netting them", () => {

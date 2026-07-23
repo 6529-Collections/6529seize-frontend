@@ -5,7 +5,7 @@
     "incremental": false,
     "jsx": "react-jsx",
     "moduleDetection": "force",
-    "sourceMap": true,
+    "noEmit": true,
     "types": ["node", "jest", "@testing-library/jest-dom"]
   },
   "include": [

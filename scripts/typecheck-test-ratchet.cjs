@@ -33,6 +33,9 @@ function normalizePath(filePath) {
 
 function isJestDiagnosticPath(filePath) {
   const normalized = normalizePath(filePath);
+  if (normalized.startsWith("tests/") || normalized.startsWith("e2e/")) {
+    return false;
+  }
   const isTypeScript = /\.(?:ts|tsx)$/.test(normalized);
   if (!isTypeScript || normalized.endsWith(".d.ts")) {
     return false;
@@ -125,7 +128,9 @@ function collectSnapshot() {
       (total, count) => total + count,
       0
     ),
-    affectedFileCount: files.size,
+    affectedFileCount: [...files.keys()].filter(
+      (filePath) => filePath !== GLOBAL_DIAGNOSTIC_PATH
+    ).length,
     files: sortedRecord(files.entries()),
     codes: sortedRecord(codes.entries()),
     directories: sortedRecord(directories.entries()),
@@ -395,6 +400,7 @@ module.exports = {
   SCHEMA_VERSION,
   compareDiagnosticCounts,
   createBaseline,
+  currentToolchain,
   diagnosticDirectory,
   isJestDiagnosticPath,
   parseOptions,
