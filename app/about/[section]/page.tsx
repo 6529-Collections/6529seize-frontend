@@ -11,6 +11,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
+import clsx from "clsx";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -30,15 +31,18 @@ export default async function AboutPage(props: Readonly<Props>) {
 
   const aboutSection = section as AboutSection;
   const isMemes = aboutSection === AboutSection.MEMES;
-  const isSubscriptions = aboutSection === AboutSection.SUBSCRIPTIONS;
+  const isFeaturePage =
+    aboutSection === AboutSection.SUBSCRIPTIONS ||
+    aboutSection === AboutSection.MINTING;
 
   return (
     <main
-      className={`${styles["main"] ?? ""} tailwind-scope ${
-        isSubscriptions
-          ? "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]"
-          : ""
-      }`}
+      className={clsx(
+        styles["main"],
+        "tailwind-scope",
+        isFeaturePage &&
+          "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]"
+      )}
     >
       {isMemes ? (
         <About section={AboutSection.MEMES} />
