@@ -78,6 +78,7 @@ Useful commands:
 6529 run build
 6529 run test
 6529 run test:e2e
+6529 run typecheck:tests
 6529 run lint:changed
 6529 run typecheck:changed
 6529 run check:changed
@@ -86,6 +87,40 @@ Useful commands:
 Use focused checks for narrow changes. Use `6529 run build` when changes touch
 build-time behavior, generated API models, Next.js configuration, routing, or
 deployment-sensitive code.
+
+### Test Type Safety
+
+Production, Jest, and Playwright code use separate TypeScript checks. Run the
+complete test-code check with:
+
+```bash
+6529 run typecheck:tests
+```
+
+The Jest command compares current diagnostics with a per-file debt baseline:
+
+```bash
+6529 run typecheck:jest
+```
+
+Inspect the current dependency-sensitive diagnostic classification without
+changing the baseline:
+
+```bash
+6529 run typecheck:jest --inventory
+```
+
+The baseline is tied to the pinned TypeScript version, lockfile, and TypeScript
+configs. It is an observed compatibility snapshot, not a permanent error-count
+claim. When a change removes existing Jest diagnostics or legitimately refreshes
+an unchanged toolchain result, lock the result into the same PR:
+
+```bash
+6529 run typecheck:jest:update-baseline
+```
+
+The update command refuses any per-file increase or a newly affected file.
+Fix new diagnostics instead of widening the baseline.
 
 ## Generated Files
 
