@@ -83,7 +83,7 @@ function SubscriptionHeader({ locale }: { readonly locale: SupportedLocale }) {
     <header className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
       <div className="tw-max-w-4xl">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-          <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+          <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
             {m(locale, "about.subscriptions.hero.title")}
           </h1>
           <div className="tw-flex tw-justify-start empty:tw-hidden">
