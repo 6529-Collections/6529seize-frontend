@@ -2,6 +2,76 @@
 
 This directory contains browser tests for 6529.io.
 
+## Pack registry
+
+Every E2E pack is declared once in `tests/packs.manifest.ts`. The
+`test:e2e*` script block in package.json and the tables below are generated
+from it — edit the manifest, run `./bin/6529 run e2e-manifest:sync`, and
+commit the regenerated files together. The Debt Ratchet workflow fails PRs
+when they drift.
+
+<!-- BEGIN GENERATED: e2e-pack-tables -->
+
+This section is generated from `tests/packs.manifest.ts` by
+`./bin/6529 run e2e-manifest:sync`. Do not edit it by hand.
+
+| Pack | Safety | Environments | Triggers | Description |
+| --- | --- | --- | --- | --- |
+| `test:e2e` | local | local | manual | Full local suite on the desktop web shell. |
+| `test:e2e:all-projects` | local | local | manual | Full local suite across every configured project. |
+| `test:e2e:ui` | local | local | manual | Playwright UI mode for local debugging. |
+| `test:e2e:smoke` | local | local | pr-ci, manual | Fast @smoke subset of home, about and The Memes. |
+| `test:e2e:critical-shell` | local | local | pr-ci, manual | Boot/shell resilience pack. |
+| `test:e2e:social-readonly` | readonly | local | manual | Waves and profile read-only journeys. |
+| `test:e2e:media-readonly` | readonly | local | manual | Media and mint detail read-only coverage. |
+| `test:e2e:delegation-readonly` | readonly | local | manual | Delegation surfaces read-only coverage. |
+| `test:e2e:network-open-data-readonly` | readonly | local | manual | Network open data API read-only coverage. |
+| `test:e2e:collections-readonly` | readonly | local | manual | NextGen collections read-only coverage. |
+| `test:e2e:public-groups-tools-readonly` | readonly | local | manual | Public groups and tools read-only coverage. |
+| `test:e2e:admin-guards-readonly` | readonly | local | manual | Admin destructive-action fail-closed guards. |
+| `test:e2e:public-content-readonly` | readonly | local | manual | Public content pages read-only coverage. |
+| `test:e2e:authenticated-shells-readonly` | readonly | local | manual | Authenticated shells, read-only, dev-auth only. |
+| `test:e2e:notifications-mutation-guard` | readonly | local | manual | Negative contract: /notifications must not mutate. |
+| `test:e2e:profile-deep-links-readonly` | readonly | local | manual | Profile deep links read-only coverage. |
+| `test:e2e:search-waves-readonly` | readonly | local | manual | Wave search read-only coverage. |
+| `test:e2e:composer-sandbox` | sandbox | local | manual | Waves composer sandbox against the local mock API. |
+| `test:e2e:reaction-sandbox` | sandbox | local | manual | Drop reaction sandbox against the local mock API. |
+| `test:e2e:edit-drop-sandbox` | sandbox | local | manual | Drop edit sandbox against the local mock API. |
+| `test:e2e:signature-sandbox` | sandbox | local | manual | Signed participation sandbox; fails closed unsigned. |
+| `test:e2e:auth-sandbox` | sandbox | local | manual | Aggregate authenticated sandbox pack. |
+| `test:e2e:smoke:surface-matrix` | local | local | manual | @smoke subset on desktop and mobile web shells. |
+| `test:e2e:surface-matrix` | local | local | manual | Core surfaces on desktop and mobile web shells. |
+| `test:e2e:browser-diversity` | local | local | manual | Engine diversity pass on Firefox and WebKit. |
+| `test:e2e:native-sim` | local | local | manual | Capacitor/Electron simulation surface pass. |
+| `test:e2e:native-shell-readonly` | readonly | local | manual | Native shell read-only simulation coverage. |
+| `test:e2e:wcag-i18n` | local | local | manual | WCAG and i18n public-route evidence pack. |
+| `test:e2e:wcag-i18n:surface-matrix` | local | local | manual | WCAG/i18n pack on desktop and mobile web shells. |
+| `test:e2e:staging:smoke` | readonly | staging | post-deploy, manual | Staging @smoke subset on both web shells. |
+| `test:e2e:staging` | readonly | staging | post-deploy, manual | Staging core surfaces on both web shells. |
+| `test:e2e:staging:social-readonly` | readonly | staging | post-deploy, manual | Staging waves/profile read-only pack. |
+| `test:e2e:staging:public-groups-tools-readonly` | readonly | staging | post-deploy, manual | Staging public groups/tools read-only pack. |
+| `test:e2e:staging:delegation-readonly` | readonly | staging | post-deploy, manual | Staging delegation read-only pack. |
+| `test:e2e:staging:collections-readonly` | readonly | staging | post-deploy, manual | Staging NextGen collections read-only pack. |
+| `test:e2e:staging:admin-guards-readonly` | readonly | staging | post-deploy, manual | Staging admin fail-closed guard pack. |
+| `test:e2e:staging:public-content-readonly` | readonly | staging | post-deploy, manual | Staging public content read-only pack. |
+| `test:e2e:staging:profile-deep-links-readonly` | readonly | staging | post-deploy, manual | Staging profile deep links read-only pack. |
+| `test:e2e:staging:search-waves-readonly` | readonly | staging | post-deploy, manual | Staging wave search read-only pack. |
+| `test:e2e:staging:media-readonly` | readonly | staging | post-deploy, manual | Staging media/mint detail read-only pack. |
+| `test:e2e:staging:network-open-data-readonly` | readonly | staging | post-deploy, manual | Staging network open data read-only pack. |
+| `test:e2e:production:social-readonly` | readonly | production | cron, manual | Production waves/profile read-only canary. |
+| `test:e2e:production:public-groups-tools-readonly` | readonly | production | cron, manual | Production public groups/tools read-only canary. |
+| `test:e2e:production:delegation-readonly` | readonly | production | cron, manual | Production delegation read-only canary. |
+| `test:e2e:production:collections-readonly` | readonly | production | cron, manual | Production NextGen collections read-only canary. |
+| `test:e2e:production:admin-guards-readonly` | readonly | production | cron, manual | Production admin fail-closed guard canary. |
+| `test:e2e:production:public-content-readonly` | readonly | production | cron, manual | Production public content read-only canary. |
+| `test:e2e:production:profile-deep-links-readonly` | readonly | production | cron, manual | Production profile deep links read-only canary. |
+| `test:e2e:production:search-waves-readonly` | readonly | production | cron, manual | Production wave search read-only canary. |
+| `test:e2e:production:media-readonly` | readonly | production | cron, manual | Production media/mint detail read-only canary. |
+| `test:e2e:production:network-open-data-readonly` | readonly | production | cron, manual | Production network open data read-only canary. |
+| `test:e2e:production:readonly` | readonly | production | manual | Combined production read-only pass in one invocation. |
+
+<!-- END GENERATED: e2e-pack-tables -->
+
 Test size tags:
 
 - `@small`: single-process unit or helper tests. These normally live under
