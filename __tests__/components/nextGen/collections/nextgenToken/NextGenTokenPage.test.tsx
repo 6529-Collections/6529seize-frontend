@@ -1,4 +1,5 @@
 const mockIsNullAddress = jest.fn(() => false);
+const mockConnectedAddress = { value: undefined as string | undefined };
 
 jest.mock("@/helpers/Helpers", () => {
   const actual = jest.requireActual("@/helpers/Helpers");
@@ -34,7 +35,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
     isAuthenticated: false,
     seizeConnect: jest.fn(),
     seizeAcceptConnection: jest.fn(),
-    address: undefined,
+    address: mockConnectedAddress.value,
     hasInitializationError: false,
     initializationError: null,
   })),
@@ -69,6 +70,12 @@ jest.mock(
   "@/components/nextGen/collections/nextgenToken/NextGenTokenRenderCenter",
   () => () => <div data-testid="render" />
 );
+jest.mock("@/components/nft-transfer/TransferSingle", () => ({
+  __esModule: true,
+  default: ({ presentation }: { presentation?: string }) => (
+    <div data-presentation={presentation} data-testid="transfer-single" />
+  ),
+}));
 jest.mock(
   "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader",
   () => ({
@@ -125,6 +132,10 @@ function renderComponent(props?: Partial<typeof baseProps>) {
 }
 
 describe("NextGenTokenPage", () => {
+  beforeEach(() => {
+    mockConnectedAddress.value = undefined;
+  });
+
   describe("rendering", () => {
     it("renders token name", () => {
       renderComponent();
@@ -149,6 +160,22 @@ describe("NextGenTokenPage", () => {
     it("renders token art component", () => {
       renderComponent();
       expect(screen.getByTestId("art")).toBeInTheDocument();
+    });
+
+    it("renders the owner transfer action beside the About heading", () => {
+      mockConnectedAddress.value = "0x1";
+
+      renderComponent({ view: NextgenCollectionView.ABOUT });
+
+      const heading = screen.getByRole("heading", { name: "About" });
+      const transfer = screen.getByTestId("transfer-single");
+      const informationCard = screen
+        .getByTestId("about")
+        .closest(".tw-rounded-xl");
+
+      expect(heading.parentElement).toContainElement(transfer);
+      expect(transfer).toHaveAttribute("data-presentation", "inline");
+      expect(informationCard).not.toContainElement(transfer);
     });
   });
 
