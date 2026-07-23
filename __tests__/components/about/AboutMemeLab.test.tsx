@@ -21,7 +21,9 @@ describe("AboutMemeLab", () => {
   it("preserves the original contract wording", () => {
     render(<AboutMemeLab />);
     expect(
-      screen.getByText(/^The Meme Lab is an experimental CC0 contract/i)
+      screen.getByText(
+        "The Meme Lab is an experimental CC0 contract for artists who have already minted a Meme Card. They can use the Meme Lab contract to mint NFTs that they like, in any way that they like."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByText(

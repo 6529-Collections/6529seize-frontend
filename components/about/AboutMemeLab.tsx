@@ -24,14 +24,14 @@ export default function AboutMemeLab() {
       className={`tw-w-full tw-overflow-hidden tw-bg-[#0D0D0F] tw-pb-12 tw-text-iron-100 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
     >
       <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]">
-        <div className="tw-px-1 tw-pb-12 tw-pt-10 sm:tw-px-2 sm:tw-pb-16 sm:tw-pt-14">
-          <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl">
+        <div className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-0 sm:tw-pb-12 sm:tw-pt-8 lg:tw-px-2">
+          <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
             {m(locale, "about.memeLab.hero.title")}
           </h1>
 
           <Image
             alt={m(locale, "about.memeLab.hero.logoAlt")}
-            className="tw-mt-10 tw-h-auto tw-w-[250px] tw-max-w-full sm:tw-mt-12"
+            className="tw-mt-6 tw-h-auto tw-w-[250px] tw-max-w-full sm:tw-mt-8"
             height={54}
             loading="eager"
             src="/memelab.png"
@@ -40,7 +40,7 @@ export default function AboutMemeLab() {
         </div>
       </header>
 
-      <div className="tw-max-w-3xl tw-px-1 tw-py-10 sm:tw-px-2 sm:tw-py-16">
+      <div className="tw-max-w-3xl tw-px-1 tw-py-8 sm:tw-px-0 sm:tw-py-12 lg:tw-px-2">
         <p className="tw-m-0 tw-text-pretty tw-text-base tw-leading-6 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-7">
           {m(locale, "about.memeLab.body.intro")}
         </p>

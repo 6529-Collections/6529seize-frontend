@@ -38,12 +38,12 @@ export default function AboutGradients() {
 function GradientHeader({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]">
-      <div className="tw-px-1 tw-pb-12 tw-pt-10 sm:tw-px-2 sm:tw-pb-16 sm:tw-pt-14">
-        <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl">
+      <div className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-0 sm:tw-pb-12 sm:tw-pt-8 lg:tw-px-2">
+        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
           {m(locale, "about.gradient.hero.title")}
         </h1>
 
-        <div className="tw-mt-8 tw-text-center sm:tw-mt-10">
+        <div className="tw-mt-6 tw-text-center sm:tw-mt-8">
           <Image
             alt={m(locale, "about.gradient.preview.alt")}
             height="0"
@@ -67,7 +67,7 @@ function GradientHeader({ locale }: { readonly locale: SupportedLocale }) {
 
 function GradientOverview({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <div className="tw-max-w-3xl tw-px-1 tw-py-10 sm:tw-px-2 sm:tw-py-16">
+    <div className="tw-max-w-3xl tw-px-1 tw-py-8 sm:tw-px-0 sm:tw-py-12 lg:tw-px-2">
       <p className={BODY_CLASS}>{m(locale, "about.gradient.overview.intro")}</p>
       <p className={`${BODY_CLASS} tw-mt-6`}>
         {m(locale, "about.gradient.museum.permanent")}
@@ -83,7 +83,7 @@ function GradientDesign({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="gradient-design-heading"
-      className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-10 sm:tw-gap-8 sm:tw-px-2 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16"
+      className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-8 sm:tw-gap-8 sm:tw-px-0 sm:tw-py-12 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-px-2"
     >
       <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
         <h2
@@ -125,7 +125,7 @@ function GradientPurpose({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="gradient-purpose-heading"
-      className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-10 sm:tw-gap-8 sm:tw-px-2 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16"
+      className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-8 sm:tw-gap-8 sm:tw-px-0 sm:tw-py-12 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-px-2"
     >
       <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
         <h2
