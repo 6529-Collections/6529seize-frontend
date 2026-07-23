@@ -86,10 +86,10 @@ const mockJwtRole = (role: string | null) => {
 };
 
 const createReactQueryContextValue = (
-  invalidateNotifications: jest.Mock
+  invalidateWaveReadState: jest.Mock
 ): React.ContextType<typeof ReactQueryWrapperContext> =>
   ({
-    invalidateWaveReadState: invalidateNotifications,
+    invalidateWaveReadState,
   }) as React.ContextType<typeof ReactQueryWrapperContext>;
 
 let documentVisibilityState: DocumentVisibilityState = "visible";

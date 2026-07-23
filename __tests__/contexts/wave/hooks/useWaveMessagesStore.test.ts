@@ -40,7 +40,10 @@ describe("useWaveMessagesStore", () => {
     const listener = jest.fn();
 
     act(() => {
-      result.current.setProfileScopedWaveIds(new Set(["wave1"]));
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(["wave1"]),
+        publicWaveIds: new Set(),
+      });
       result.current.subscribe("wave1", listener);
     });
     listener.mockClear();
@@ -63,10 +66,29 @@ describe("useWaveMessagesStore", () => {
     );
   });
 
+  it("clears an off-list update that is not known to be public", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+
+    act(() => {
+      result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(result.current.getData("wave1")).toBeUndefined();
+  });
+
   it("preserves public cached messages when the profile switches", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
 
     act(() => {
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(),
+        publicWaveIds: new Set(["wave1"]),
+      });
       result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
@@ -483,6 +505,10 @@ describe("useWaveMessagesStore", () => {
     };
 
     act(() => {
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(),
+        publicWaveIds: new Set(["sentinel-wave"]),
+      });
       result.current.registerPendingServerFeedSeed("wave1", seedPromise);
       result.current.updateData({
         key: "queue-blocker",
@@ -512,7 +538,10 @@ describe("useWaveMessagesStore", () => {
     const listener = jest.fn();
 
     act(() => {
-      result.current.setProfileScopedWaveIds(new Set(["wave1"]));
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(["wave1"]),
+        publicWaveIds: new Set(),
+      });
       result.current.subscribe("wave1", listener);
       result.current.updateData({ key: "queue-blocker", drops: [] } as any);
       result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
@@ -541,9 +570,15 @@ describe("useWaveMessagesStore", () => {
 
     act(() => {
       result.current.updateData({ key: "queue-blocker", drops: [] } as any);
-      result.current.setProfileScopedWaveIds(new Set(["wave1"]));
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(["wave1"]),
+        publicWaveIds: new Set(),
+      });
       result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
-      result.current.setProfileScopedWaveIds(new Set());
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(),
+        publicWaveIds: new Set(["wave1"]),
+      });
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 

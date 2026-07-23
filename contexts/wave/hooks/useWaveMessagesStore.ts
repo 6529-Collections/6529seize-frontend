@@ -77,9 +77,10 @@ export type Listener = (data: WaveMessages | undefined) => void;
 
 type Listeners = Set<Listener>; // Keep internal types non-exported
 type KeyListeners = Record<string, Listeners>; // Keep internal types non-exported
+type WaveMessagesMergePolicy = "standard" | "preserve-existing";
 type QueuedWaveMessagesUpdate = {
   readonly update: WaveMessagesUpdate;
-  readonly mergePolicy: "standard" | "preserve-existing";
+  readonly mergePolicy: WaveMessagesMergePolicy;
   readonly onApplied?: (() => void) | undefined;
   readonly seedGeneration?: number | undefined;
 };
@@ -87,6 +88,84 @@ type PendingServerFeedSeed = {
   readonly gatePromise: Promise<ServerWaveFeedSeedResult>;
   readonly generation: number;
   readonly promise: Promise<ServerWaveFeedSeedResult>;
+};
+
+type KnownWaveScopes = {
+  readonly profileScopedWaveIds: ReadonlySet<string>;
+  readonly publicWaveIds: ReadonlySet<string>;
+};
+
+const createEmptyWaveMessages = (waveId: string): WaveMessages => ({
+  id: waveId,
+  isLoading: false,
+  isLoadingNextPage: false,
+  hasNextPage: false,
+  drops: [],
+  latestFetchedSerialNo: null,
+});
+
+const applyWaveMessagesUpdate = ({
+  existingWaveMessages,
+  hasAuthoritativePagination,
+  mergePolicy,
+  update,
+}: {
+  readonly existingWaveMessages: WaveMessages | undefined;
+  readonly hasAuthoritativePagination: boolean;
+  readonly mergePolicy: WaveMessagesMergePolicy;
+  readonly update: WaveMessagesUpdate;
+}): WaveMessages => {
+  const updatedWaveMessages = {
+    ...(existingWaveMessages ?? createEmptyWaveMessages(update.key)),
+  };
+  const canReplaceExistingFields =
+    mergePolicy === "standard" || existingWaveMessages === undefined;
+
+  if (update.isLoading !== undefined && canReplaceExistingFields) {
+    updatedWaveMessages.isLoading = update.isLoading;
+  }
+  if (update.isLoadingNextPage !== undefined && canReplaceExistingFields) {
+    updatedWaveMessages.isLoadingNextPage = update.isLoadingNextPage;
+  }
+  if (
+    update.hasNextPage !== undefined &&
+    (canReplaceExistingFields || !hasAuthoritativePagination)
+  ) {
+    updatedWaveMessages.hasNextPage = update.hasNextPage;
+  }
+  if (update.drops !== undefined) {
+    updatedWaveMessages.drops =
+      mergePolicy === "preserve-existing"
+        ? mergeDrops(update.drops, updatedWaveMessages.drops)
+        : mergeDrops(updatedWaveMessages.drops, update.drops);
+  }
+  if (typeof update.latestFetchedSerialNo === "number") {
+    updatedWaveMessages.latestFetchedSerialNo = maxOrNull(
+      updatedWaveMessages.latestFetchedSerialNo,
+      update.latestFetchedSerialNo
+    );
+  }
+
+  return updatedWaveMessages;
+};
+
+const shouldMarkAuthoritativePagination = ({
+  existingWaveMessages,
+  mergePolicy,
+  update,
+}: {
+  readonly existingWaveMessages: WaveMessages | undefined;
+  readonly mergePolicy: WaveMessagesMergePolicy;
+  readonly update: WaveMessagesUpdate;
+}): boolean => {
+  const hasMessages =
+    (existingWaveMessages?.drops.length ?? 0) > 0 ||
+    (update.drops?.length ?? 0) > 0;
+
+  return (
+    update.hasNextPage !== undefined &&
+    (mergePolicy === "preserve-existing" || hasMessages)
+  );
 };
 
 function useWaveMessagesStore() {
@@ -111,6 +190,7 @@ function useWaveMessagesStore() {
   );
   const authoritativePaginationWaveIdsRef = useRef<Set<string>>(new Set());
   const profileScopedWaveIdsRef = useRef<Set<string>>(new Set());
+  const publicWaveIdsRef = useRef<Set<string>>(new Set());
   const serverFeedSeedGenerationRef = useRef(0);
 
   const releaseServerFeedSeedIfReady = useCallback((waveId: string): void => {
@@ -194,9 +274,20 @@ function useWaveMessagesStore() {
     };
   }, []);
 
-  const setProfileScopedWaveIds = useCallback(
-    (waveIds: ReadonlySet<string>): void => {
-      profileScopedWaveIdsRef.current = new Set(waveIds);
+  const setKnownWaveScopes = useCallback(
+    ({ profileScopedWaveIds, publicWaveIds }: KnownWaveScopes): void => {
+      const nextPublicWaveIds = new Set(publicWaveIds);
+      for (const waveId of profileScopedWaveIds) {
+        nextPublicWaveIds.delete(waveId);
+      }
+      publicWaveIdsRef.current = nextPublicWaveIds;
+
+      for (const waveId of nextPublicWaveIds) {
+        profileScopedWaveIdsRef.current.delete(waveId);
+      }
+      for (const waveId of profileScopedWaveIds) {
+        profileScopedWaveIdsRef.current.add(waveId);
+      }
     },
     []
   );
@@ -248,76 +339,32 @@ function useWaveMessagesStore() {
       return;
     }
 
-    const newWaveMessages = { ...waveMessagesRef.current };
-    const existingWaveMessages = newWaveMessages[update.key];
-    if (!existingWaveMessages) {
-      newWaveMessages[update.key] = {
-        id: update.key,
-        isLoading: false,
-        isLoadingNextPage: false,
-        hasNextPage: false,
-        drops: [],
-        latestFetchedSerialNo: null,
-      };
-    }
-
-    const updatedWaveMessages = {
-      ...newWaveMessages[update.key]!,
-    };
+    const existingWaveMessages = waveMessagesRef.current[update.key];
     const hasAuthoritativePagination =
       authoritativePaginationWaveIdsRef.current.has(update.key);
-
-    if (
-      update.isLoading !== undefined &&
-      (mergePolicy === "standard" || existingWaveMessages === undefined)
-    ) {
-      updatedWaveMessages.isLoading = update.isLoading;
-    }
-    if (
-      update.isLoadingNextPage !== undefined &&
-      (mergePolicy === "standard" || existingWaveMessages === undefined)
-    ) {
-      updatedWaveMessages.isLoadingNextPage = update.isLoadingNextPage;
-    }
-    if (
-      update.hasNextPage !== undefined &&
-      (mergePolicy === "standard" ||
-        existingWaveMessages === undefined ||
-        !hasAuthoritativePagination)
-    ) {
-      updatedWaveMessages.hasNextPage = update.hasNextPage;
-    }
-    if (update.drops !== undefined) {
-      updatedWaveMessages.drops =
-        mergePolicy === "preserve-existing"
-          ? mergeDrops(update.drops, updatedWaveMessages.drops)
-          : mergeDrops(updatedWaveMessages.drops, update.drops);
-    }
-
-    if (typeof update.latestFetchedSerialNo === "number") {
-      updatedWaveMessages.latestFetchedSerialNo = maxOrNull(
-        updatedWaveMessages.latestFetchedSerialNo,
-        update.latestFetchedSerialNo
-      );
-    }
-
-    const notifyValue = updatedWaveMessages as WaveMessages;
+    const updatedWaveMessages = applyWaveMessagesUpdate({
+      existingWaveMessages,
+      hasAuthoritativePagination,
+      mergePolicy,
+      update,
+    });
+    const notifyValue = updatedWaveMessages;
     const nextState = {
-      ...newWaveMessages,
+      ...waveMessagesRef.current,
       [update.key]: updatedWaveMessages,
     };
     // Drops-only realtime/target updates create a default false cursor but do
     // not own pagination until a feed or page result supplies messages.
-    const hasMessagesForPagination =
-      (existingWaveMessages?.drops.length ?? 0) > 0 ||
-      (update.drops?.length ?? 0) > 0;
     if (
-      update.hasNextPage !== undefined &&
-      (mergePolicy === "preserve-existing" || hasMessagesForPagination)
+      shouldMarkAuthoritativePagination({
+        existingWaveMessages,
+        mergePolicy,
+        update,
+      })
     ) {
       authoritativePaginationWaveIdsRef.current.add(update.key);
     }
-    waveMessagesRef.current = nextState as Record<string, WaveMessages>;
+    waveMessagesRef.current = nextState;
     forceRender();
     onApplied?.();
 
@@ -344,6 +391,9 @@ function useWaveMessagesStore() {
   // Function to add an update to the queue and trigger processing
   const updateData = useCallback(
     (update: WaveMessagesUpdate) => {
+      if (!publicWaveIdsRef.current.has(update.key)) {
+        profileScopedWaveIdsRef.current.add(update.key);
+      }
       updateQueueRef.current.push({
         update,
         mergePolicy: "standard",
@@ -628,7 +678,7 @@ function useWaveMessagesStore() {
     getData,
     subscribe,
     unsubscribe,
-    setProfileScopedWaveIds,
+    setKnownWaveScopes,
     updateData,
     registerPendingServerFeedSeed,
     clearPendingServerFeedSeed,

@@ -27,7 +27,7 @@ export const useWaveNotificationsReadMarkerState = ({
   activeProfileProxyId,
   activeProfileProxyCreatorId,
   walletAuth,
-  invalidateNotifications,
+  invalidateWaveReadState,
 }: WaveNotificationsReadMarkerConfig): WaveNotificationsReadMarkerState => {
   const identityState = useWaveReadIdentityState({
     address,
@@ -53,7 +53,7 @@ export const useWaveNotificationsReadMarkerState = ({
     identityKey,
     temporaryProxyRoleIdentity,
     verifiedIdentity,
-    invalidateNotifications,
+    invalidateWaveReadState,
   });
   useSyncWaveReadVerifiedIdentityCaches({
     walletAuth,

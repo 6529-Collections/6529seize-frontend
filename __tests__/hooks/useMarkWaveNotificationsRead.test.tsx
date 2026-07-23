@@ -112,10 +112,10 @@ const jwtDecodeMock = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
 const jwtPayloadsByToken = new Map<string, JwtPayload>();
 
 const createWrapper =
-  (invalidateNotifications: jest.Mock) =>
+  (invalidateWaveReadState: jest.Mock) =>
   ({ children }: { readonly children: ReactNode }) => (
     <ReactQueryWrapperContext.Provider
-      value={{ invalidateWaveReadState: invalidateNotifications } as any}
+      value={{ invalidateWaveReadState } as any}
     >
       {children}
     </ReactQueryWrapperContext.Provider>

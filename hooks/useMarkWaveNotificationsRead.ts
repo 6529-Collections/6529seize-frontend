@@ -28,7 +28,7 @@ export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMark
     activeProfileProxyId,
     activeProfileProxyCreatorId,
     walletAuth: getAuthJwt(),
-    invalidateNotifications: invalidateWaveReadState,
+    invalidateWaveReadState,
   });
 }
 

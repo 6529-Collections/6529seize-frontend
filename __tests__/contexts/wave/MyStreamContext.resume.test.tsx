@@ -6,6 +6,7 @@ const mockRegisterWave = jest.fn();
 const mockSyncNewestMessages = jest.fn();
 const mockFetchNextPage = jest.fn();
 const mockFetchAroundSerialNo = jest.fn();
+const mockSetKnownWaveScopes = jest.fn();
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: jest.fn(() => ({
@@ -72,7 +73,7 @@ jest.mock("@/contexts/wave/hooks/useWaveMessagesStore", () => ({
     removeDrop: jest.fn(),
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
-    setProfileScopedWaveIds: jest.fn(),
+    setKnownWaveScopes: mockSetKnownWaveScopes,
     optimisticUpdateDrop: jest.fn(),
     hasServerFeedSeed: jest.fn(() => false),
     registerPendingServerFeedSeed: jest.fn(),
@@ -145,8 +146,11 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (handle: number) => void;
 };
 
-const createListData = (refetchAllWaves: jest.Mock) => ({
-  waves: [],
+const createListData = (
+  refetchAllWaves: jest.Mock,
+  waves: readonly { readonly id: string }[] = []
+) => ({
+  waves,
   isFetching: false,
   isFetchingNextPage: false,
   hasNextPage: false,
@@ -190,6 +194,26 @@ describe("MyStreamProvider resume sync", () => {
     });
     useWavesListMock.mockReturnValue(createListData(mainRefetch));
     useDmWavesListMock.mockReturnValue(createListData(dmRefetch));
+  });
+
+  it("registers loaded public and DM wave scopes with the message store", () => {
+    useWavesListMock.mockReturnValue(
+      createListData(mainRefetch, [{ id: "public-wave" }])
+    );
+    useDmWavesListMock.mockReturnValue(
+      createListData(dmRefetch, [{ id: "dm-wave" }])
+    );
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(["dm-wave"]),
+      publicWaveIds: new Set(["public-wave"]),
+    });
   });
 
   it("registers selected waves before delegating active wave navigation", () => {
