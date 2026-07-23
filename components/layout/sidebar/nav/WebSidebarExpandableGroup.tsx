@@ -37,7 +37,7 @@ function WebSidebarExpandableGroup({
       <button
         type="button"
         onClick={handleToggle}
-        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border-none tw-py-2 tw-pl-3 tw-pr-3 tw-text-left tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-10 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border-none tw-py-1 tw-pl-3 tw-pr-3 tw-text-left tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
           hasActiveItem
             ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
             : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
@@ -60,7 +60,7 @@ function WebSidebarExpandableGroup({
         }`}
       >
         <div className="tw-overflow-hidden">
-          <div id={`group-${name}`} className="tw-mt-1">
+          <div id={`group-${name}`} className="tw-mt-0.5">
             {items.map((item) => (
               <GroupLink key={item.name} item={item} pathname={pathname} />
             ))}
@@ -85,14 +85,14 @@ function GroupLink({
   return (
     <Link
       href={item.href}
-      className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-pl-3 tw-pr-3 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+      className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-9 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-py-2 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
         active
           ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
           : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
       }`}
       aria-current={active ? "page" : undefined}
     >
-      {item.name}
+      <span className="tw-min-w-0 tw-break-words">{item.name}</span>
     </Link>
   );
 }
