@@ -137,8 +137,10 @@ export default function TransferPanel({
               >
                 <span
                   className={[
-                    "tw-absolute tw-left-4 tw-top-1/2 tw-flex tw-h-9 tw-w-9 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-100 tw-text-black tw-transition-colors",
-                    isLoading ? "tw-opacity-50" : "group-hover:tw-bg-white",
+                    "tw-absolute tw-left-4 tw-top-1/2 tw-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-bg-white/5 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors",
+                    isLoading
+                      ? "tw-opacity-50"
+                      : "group-hover:tw-bg-white/10 group-hover:tw-text-white group-hover:tw-ring-white/20",
                   ].join(" ")}
                   aria-hidden="true"
                 >
@@ -151,7 +153,7 @@ export default function TransferPanel({
             )}
             {items.length > 0 && (
               <div
-                className="tw-pointer-events-none tw-relative tw-z-10 tw-h-9 tw-w-9 tw-shrink-0"
+                className="tw-pointer-events-none tw-relative tw-z-10 tw-size-10 tw-shrink-0"
                 aria-hidden="true"
               />
             )}
@@ -208,7 +210,7 @@ export default function TransferPanel({
                   t.clear();
                 }}
                 disabled={isLoading}
-                className="tw-pointer-events-auto tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                className="tw-pointer-events-auto tw-flex tw-h-10 tw-min-w-24 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
                 aria-label={translate(locale, "transfer.modal.cancel")}
               >
                 {translate(locale, "transfer.modal.cancel")}
@@ -217,7 +219,7 @@ export default function TransferPanel({
                 <button
                   type="button"
                   onClick={() => setShowModal(true)}
-                  className="tw-pointer-events-auto tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  className="tw-pointer-events-auto tw-flex tw-h-10 tw-min-w-24 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-white tw-px-4 tw-text-sm tw-font-medium tw-text-iron-950 tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
                   aria-label={translate(locale, "transfer.panel.continue")}
                 >
                   {translate(locale, "transfer.panel.continue")}
@@ -279,11 +281,11 @@ export default function TransferPanel({
                                   locale,
                                   "transfer.quantity.decrease"
                                 )}
-                                className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+                                className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-transition-colors hover:tw-bg-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
                               >
                                 <FontAwesomeIcon
                                   icon={faMinusCircle}
-                                  className={`tw-size-6 tw-cursor-pointer ${
+                                  className={`tw-size-5 ${
                                     qty <= 1
                                       ? "tw-text-iron-400"
                                       : "tw-text-white"
@@ -302,11 +304,11 @@ export default function TransferPanel({
                                   locale,
                                   "transfer.quantity.increase"
                                 )}
-                                className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+                                className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-transition-colors hover:tw-bg-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
                               >
                                 <FontAwesomeIcon
                                   icon={faPlusCircle}
-                                  className={`tw-size-6 tw-cursor-pointer ${
+                                  className={`tw-size-5 ${
                                     qty >= max
                                       ? "tw-text-iron-400"
                                       : "tw-text-white"
@@ -317,7 +319,7 @@ export default function TransferPanel({
                           )}
                           <button
                             type="button"
-                            className="tw-inline-flex tw-h-6 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-error tw-p-0 tw-text-lg tw-font-medium tw-text-black tw-transition-opacity hover:tw-opacity-90 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                            className="tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-error/15 tw-p-0 tw-text-base tw-font-medium tw-text-error tw-transition-colors hover:tw-bg-error/25 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                             onClick={() => t.unselect(it.key)}
                             aria-label={translate(locale, "transfer.remove")}
                           >

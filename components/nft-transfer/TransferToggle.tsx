@@ -58,8 +58,8 @@ export default function TransferToggle() {
         }
       }}
       className={[
-        "tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border-0 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white hover:tw-ring-iron-300",
-        "tw-whitespace-nowrap tw-bg-iron-200 tw-text-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-300",
+        "tw-inline-flex tw-h-10 tw-items-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-white tw-px-4 tw-text-sm tw-font-medium tw-text-iron-950 tw-transition-colors hover:tw-bg-iron-100",
+        "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
       ].join(" ")}
     >
       {t.enabled ? "Exit Transfer" : "Transfer"}
