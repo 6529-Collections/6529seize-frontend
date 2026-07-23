@@ -12,7 +12,7 @@ import {
   isSupportedLocale,
   normalizeLocale,
 } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
 
 const NEW_VERSION_TOAST_LOCALE_MESSAGES = [
@@ -59,6 +59,18 @@ const FILE_KIND_MESSAGE_KEYS = [
 ] as const;
 
 describe("frontend i18n helpers", () => {
+  it("keeps rich values in the message-defined order", () => {
+    const artistLink = { type: "artist-link" } as const;
+
+    expect(
+      tRich("en-US", "about.gradient.design.artist", { artistLink })
+    ).toEqual([
+      "It is the artist's (",
+      artistLink,
+      ") preferred interpretation of his work and his vision for it in its purest form. It reminds us of the Chromie Squiggles Perfect Spectrums - much less flashy than the HyperRainbows, but it is an iykyk choice.",
+    ]);
+  });
+
   it("defines the initial supported locale set", () => {
     expect(DEFAULT_LOCALE).toBe("en-US");
     expect(SUPPORTED_LOCALES).toEqual([
