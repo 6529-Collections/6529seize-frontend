@@ -150,4 +150,15 @@ describe("useWaveAbortController", () => {
       })
     );
   });
+
+  it("keeps bulk cancellation stable across rerenders", () => {
+    const { result, rerender } = renderHook(() =>
+      useWaveAbortController("feed")
+    );
+    const initialCancelAllFetches = result.current.cancelAllFetches;
+
+    rerender();
+
+    expect(result.current.cancelAllFetches).toBe(initialCancelAllFetches);
+  });
 });

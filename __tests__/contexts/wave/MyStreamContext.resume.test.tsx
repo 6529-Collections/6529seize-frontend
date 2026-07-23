@@ -72,6 +72,7 @@ jest.mock("@/contexts/wave/hooks/useWaveMessagesStore", () => ({
     removeDrop: jest.fn(),
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
+    setProfileScopedWaveIds: jest.fn(),
     optimisticUpdateDrop: jest.fn(),
     hasServerFeedSeed: jest.fn(() => false),
     registerPendingServerFeedSeed: jest.fn(),

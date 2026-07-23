@@ -13,7 +13,7 @@ import { getAuthJwt } from "@/services/auth/auth.utils";
 import { useContext } from "react";
 
 export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
-  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const { invalidateWaveReadState } = useContext(ReactQueryWrapperContext);
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy, connectedProfile } = useAuth();
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
@@ -28,7 +28,7 @@ export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMark
     activeProfileProxyId,
     activeProfileProxyCreatorId,
     walletAuth: getAuthJwt(),
-    invalidateNotifications,
+    invalidateNotifications: invalidateWaveReadState,
   });
 }
 

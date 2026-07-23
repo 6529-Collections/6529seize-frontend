@@ -35,16 +35,23 @@ describe("useWaveMessagesStore", () => {
     );
   });
 
-  it("clears normal cached messages when the profile switches", async () => {
+  it("clears profile-scoped cached messages when the profile switches", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
 
-    act(() => result.current.subscribe("wave1", listener));
+    act(() => {
+      result.current.setProfileScopedWaveIds(new Set(["wave1"]));
+      result.current.subscribe("wave1", listener);
+    });
     listener.mockClear();
 
     act(() => {
       result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
     expect(result.current.getData("wave1")).toBeUndefined();
@@ -54,6 +61,17 @@ describe("useWaveMessagesStore", () => {
         drops: expect.arrayContaining([expect.objectContaining({ id: "d1" })]),
       })
     );
+  });
+
+  it("preserves public cached messages when the profile switches", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+
+    act(() => {
+      result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    expect(result.current.getData("wave1")?.drops[0]?.id).toBe("d1");
   });
 
   it("removes drops and exposes updated state", async () => {
@@ -410,7 +428,7 @@ describe("useWaveMessagesStore", () => {
     }
   });
 
-  it("discards an old-profile seed after a profile switch without notifying", async () => {
+  it("discards an old-profile seed and notifies subscribers of the reset", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
     const oldProfilePromise = Promise.resolve({
@@ -444,7 +462,8 @@ describe("useWaveMessagesStore", () => {
     expect(didApply).toBe(false);
     expect(result.current.getData("wave1")).toBeUndefined();
     expect(result.current.hasServerFeedSeed("wave1")).toBe(false);
-    expect(listener).not.toHaveBeenCalled();
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledWith(undefined);
   });
 
   it("does not replay queued old-profile updates after seed invalidation", async () => {
@@ -480,7 +499,58 @@ describe("useWaveMessagesStore", () => {
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
-    expect(result.current.getData("sentinel-wave")).toBeUndefined();
+    await waitFor(() =>
+      expect(result.current.getData("sentinel-wave")?.drops[0]?.id).toBe(
+        "queue-sentinel"
+      )
+    );
+    expect(result.current.getData("wave1")).toBeUndefined();
+  });
+
+  it("notifies subscribers when a queued profile-scoped update is discarded", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const listener = jest.fn();
+
+    act(() => {
+      result.current.setProfileScopedWaveIds(new Set(["wave1"]));
+      result.current.subscribe("wave1", listener);
+      result.current.updateData({ key: "queue-blocker", drops: [] } as any);
+      result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
+    });
+    listener.mockClear();
+
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(result.current.getData("wave1")).toBeUndefined();
+    expect(listener).toHaveBeenCalledWith(undefined);
+    expect(listener).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        drops: expect.arrayContaining([expect.objectContaining({ id: "d1" })]),
+      })
+    );
+  });
+
+  it("drops a queued update stamped by an older profile generation", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+
+    act(() => {
+      result.current.updateData({ key: "queue-blocker", drops: [] } as any);
+      result.current.setProfileScopedWaveIds(new Set(["wave1"]));
+      result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
+      result.current.setProfileScopedWaveIds(new Set());
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
     expect(result.current.getData("wave1")).toBeUndefined();
   });
 

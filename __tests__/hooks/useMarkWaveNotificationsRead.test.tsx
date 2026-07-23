@@ -115,7 +115,7 @@ const createWrapper =
   (invalidateNotifications: jest.Mock) =>
   ({ children }: { readonly children: ReactNode }) => (
     <ReactQueryWrapperContext.Provider
-      value={{ invalidateNotifications } as any}
+      value={{ invalidateWaveReadState: invalidateNotifications } as any}
     >
       {children}
     </ReactQueryWrapperContext.Provider>

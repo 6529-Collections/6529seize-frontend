@@ -740,6 +740,7 @@ const createReactQueryContextValue = (
     invalidateAuthSensitiveQueries,
     invalidateIdentityTdhStats,
     invalidateNotifications,
+    invalidateWaveReadState,
   } = createGeneralQueryHandlers(queryClient, invalidateWavesV2);
 
   return {
@@ -769,6 +770,7 @@ const createReactQueryContextValue = (
     onIdentityFollowChange,
     invalidateDrops,
     invalidateNotifications,
+    invalidateWaveReadState,
     invalidateIdentityTdhStats,
   };
 };

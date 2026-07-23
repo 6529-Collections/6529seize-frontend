@@ -110,6 +110,7 @@ function useWaveMessagesStore() {
     new Map()
   );
   const authoritativePaginationWaveIdsRef = useRef<Set<string>>(new Set());
+  const profileScopedWaveIdsRef = useRef<Set<string>>(new Set());
   const serverFeedSeedGenerationRef = useRef(0);
 
   const releaseServerFeedSeedIfReady = useCallback((waveId: string): void => {
@@ -131,7 +132,12 @@ function useWaveMessagesStore() {
 
   useEffect(() => {
     const resetMessagesForProfileSwitch = () => {
-      const cachedWaveIds = Object.keys(waveMessagesRef.current);
+      const resetWaveIds = new Set([
+        ...pendingServerFeedSeedsRef.current.keys(),
+        ...activeServerFeedSeedsRef.current,
+        ...appliedServerFeedSeedWaveIdsRef.current,
+        ...profileScopedWaveIdsRef.current,
+      ]);
       serverFeedSeedGenerationRef.current += 1;
       pendingServerFeedSeedsRef.current.clear();
       activeServerFeedSeedsRef.current.clear();
@@ -140,16 +146,32 @@ function useWaveMessagesStore() {
       completedInitialRegistrationsRef.current.clear();
       committedServerFeedSeedsRef.current.clear();
       serverFeedSeedReadyCallbacksRef.current.clear();
-      updateQueueRef.current = [];
-      authoritativePaginationWaveIdsRef.current.clear();
+      updateQueueRef.current = updateQueueRef.current.filter(
+        ({ update }) => !resetWaveIds.has(update.key)
+      );
+      resetWaveIds.forEach((waveId) =>
+        authoritativePaginationWaveIdsRef.current.delete(waveId)
+      );
 
-      if (cachedWaveIds.length === 0) {
+      if (resetWaveIds.size === 0) {
         return;
       }
 
-      waveMessagesRef.current = {};
-      forceRender();
-      for (const waveId of cachedWaveIds) {
+      const nextState = { ...waveMessagesRef.current };
+      let didClearCachedData = false;
+      for (const waveId of resetWaveIds) {
+        if (nextState[waveId] !== undefined) {
+          delete nextState[waveId];
+          didClearCachedData = true;
+        }
+      }
+
+      if (didClearCachedData) {
+        waveMessagesRef.current = nextState;
+        forceRender();
+      }
+
+      for (const waveId of resetWaveIds) {
         const listeners = listenersRef.current[waveId];
         if (!listeners) {
           continue;
@@ -171,6 +193,13 @@ function useWaveMessagesStore() {
       );
     };
   }, []);
+
+  const setProfileScopedWaveIds = useCallback(
+    (waveIds: ReadonlySet<string>): void => {
+      profileScopedWaveIdsRef.current = new Set(waveIds);
+    },
+    []
+  );
 
   // Stable function to get data for a key
   const getData = useCallback((key: string): WaveMessages | undefined => {
@@ -210,6 +239,14 @@ function useWaveMessagesStore() {
       return; // Should not happen based on length check, but safety first
     }
     const { mergePolicy, onApplied, seedGeneration, update } = queuedUpdate;
+    if (
+      seedGeneration !== undefined &&
+      seedGeneration !== serverFeedSeedGenerationRef.current
+    ) {
+      isProcessingRef.current = false;
+      globalThis.queueMicrotask(processQueueItem);
+      return;
+    }
 
     const newWaveMessages = { ...waveMessagesRef.current };
     const existingWaveMessages = newWaveMessages[update.key];
@@ -310,7 +347,9 @@ function useWaveMessagesStore() {
       updateQueueRef.current.push({
         update,
         mergePolicy: "standard",
-        seedGeneration: serverFeedSeedGenerationRef.current,
+        seedGeneration: profileScopedWaveIdsRef.current.has(update.key)
+          ? serverFeedSeedGenerationRef.current
+          : undefined,
       });
       // Start processing if not already running
       processQueue();
@@ -589,6 +628,7 @@ function useWaveMessagesStore() {
     getData,
     subscribe,
     unsubscribe,
+    setProfileScopedWaveIds,
     updateData,
     registerPendingServerFeedSeed,
     clearPendingServerFeedSeed,

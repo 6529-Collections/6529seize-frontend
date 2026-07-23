@@ -242,6 +242,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     sortMutedLast: false,
   });
   const waveMessagesStore = useWaveMessagesStore();
+  useLayoutEffect(() => {
+    waveMessagesStore.setProfileScopedWaveIds(dmWaveIds);
+  }, [dmWaveIds, waveMessagesStore.setProfileScopedWaveIds]);
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
   const lastBrowserResumeSyncAtRef = useRef(0);
