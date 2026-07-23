@@ -199,7 +199,7 @@ jobs:
 
       - name: Install Socket Firewall
         if: steps.release-bus-marker.outputs.skip != 'true'
-        id: socket_firewall
+        id: socket-firewall
         continue-on-error: true
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with:
@@ -214,8 +214,8 @@ jobs:
         id: dependencies
         continue-on-error: true
         env:
-          RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket_firewall.outcome }}
-          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+          RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket-firewall.outcome }}
+          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: node "$RELEASE_BUS_INSTALL_TOOL"
 
       - name: Install Playwright browser
@@ -365,7 +365,7 @@ jobs:
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           OPERATION_KEY: ${{ inputs.operation_key }}
-          SOCKET_OUTCOME: ${{ steps.socket_firewall.outcome }}
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
           TRAIN_ID: ${{ inputs.release_train_id }}
         run: |
           set -euo pipefail

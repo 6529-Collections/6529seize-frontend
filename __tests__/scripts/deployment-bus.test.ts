@@ -245,6 +245,10 @@ describe("release bus v2 E2E callbacks", () => {
   });
 
   it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain("id: socket-firewall");
+    expect(stagingE2E).toContain(
+      "SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}"
+    );
     expect(stagingE2E).toContain("failure_class=INFRASTRUCTURE");
     expect(stagingE2E).toContain("failure_phase=staging_e2e_setup");
     expect(stagingE2E).toContain("failure_class=E2E");
