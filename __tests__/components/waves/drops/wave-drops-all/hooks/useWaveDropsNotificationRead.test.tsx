@@ -89,7 +89,7 @@ const createReactQueryContextValue = (
   invalidateNotifications: jest.Mock
 ): React.ContextType<typeof ReactQueryWrapperContext> =>
   ({
-    invalidateNotifications,
+    invalidateWaveReadState: invalidateNotifications,
   }) as React.ContextType<typeof ReactQueryWrapperContext>;
 
 let documentVisibilityState: DocumentVisibilityState = "visible";
@@ -149,7 +149,7 @@ describe("useWaveDropsNotificationRead", () => {
   it("skips read-sync when disabled", () => {
     render(
       <ReactQueryWrapperContext.Provider
-        value={{ invalidateNotifications } as any}
+        value={{ invalidateWaveReadState: invalidateNotifications } as any}
       >
         <TestComponent
           waveId="wave-1"
@@ -169,7 +169,7 @@ describe("useWaveDropsNotificationRead", () => {
 
     render(
       <ReactQueryWrapperContext.Provider
-        value={{ invalidateNotifications } as any}
+        value={{ invalidateWaveReadState: invalidateNotifications } as any}
       >
         <TestComponent
           waveId="wave-1"
@@ -192,7 +192,7 @@ describe("useWaveDropsNotificationRead", () => {
 
     render(
       <ReactQueryWrapperContext.Provider
-        value={{ invalidateNotifications } as any}
+        value={{ invalidateWaveReadState: invalidateNotifications } as any}
       >
         <TestComponent
           waveId="wave-1"
@@ -226,7 +226,7 @@ describe("useWaveDropsNotificationRead", () => {
   it("marks the wave as read when enabled", async () => {
     render(
       <ReactQueryWrapperContext.Provider
-        value={{ invalidateNotifications } as any}
+        value={{ invalidateWaveReadState: invalidateNotifications } as any}
       >
         <TestComponent
           waveId="wave-1"
