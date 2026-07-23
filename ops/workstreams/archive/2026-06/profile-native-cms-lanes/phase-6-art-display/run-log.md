@@ -33,8 +33,8 @@
 ## Validation Evidence
 
 - `seize run format:changed`
-- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx __tests__/lib/profile-cms/protocol/v1/fixtures.test.ts`
-  passed; the temporary Jest config was removed after the run.
+- Targeted `CmsSiteRenderer` and protocol fixture tests passed with a temporary
+  Jest config that was removed after the run.
 - `seize run lint:changed`
 - `seize run typecheck:changed`
 - `seize run react-doctor:diff`
@@ -62,8 +62,8 @@
 - `seize run format:changed` ran first; a legacy fixture JSON reflow was
   reverted because it was unrelated to the review fixes.
 - `seize exec prettier --write __tests__/components/profile-cms/CmsSiteRenderer.test.tsx components/profile-cms/CmsArtLightbox.tsx components/profile-cms/CmsSiteRenderer.tsx components/profile-cms/cmsArtGalleryClasses.ts i18n/messages/en-US.ts`
-- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx`
-  passed with 11 tests; the temporary Jest config was removed after the run.
+- The targeted `CmsSiteRenderer` suite passed with 11 tests; the temporary Jest
+  config was removed after the run.
 - `seize run lint:changed`
 - `seize run typecheck:changed`
 - `seize run react-doctor:diff` passed with two remaining warnings for
@@ -85,8 +85,8 @@
 ## Second Follow-up Validation Evidence
 
 - `seize exec prettier --write __tests__/components/profile-cms/CmsSiteRenderer.test.tsx components/profile-cms/CmsArtLightbox.tsx`
-- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx`
-  passed with 11 tests; the temporary Jest config was removed after the run.
+- The targeted `CmsSiteRenderer` suite passed with 11 tests; the temporary Jest
+  config was removed after the run.
 - `seize run lint:changed`
 - `seize run typecheck:changed`
 - `seize run react-doctor:diff` passed with the same two intentional lightbox
@@ -107,8 +107,8 @@
 ## Sonar Follow-up Validation Evidence
 
 - `seize run format:changed`
-- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx`
-  passed with 11 tests; the temporary Jest config was removed after the run.
+- The targeted `CmsSiteRenderer` suite passed with 11 tests; the temporary Jest
+  config was removed after the run.
 - `seize run lint:changed`
 - `seize run typecheck:changed`
 - `seize run react-doctor:diff`

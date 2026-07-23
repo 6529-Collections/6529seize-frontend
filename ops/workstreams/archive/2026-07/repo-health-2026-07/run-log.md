@@ -300,8 +300,8 @@ useDownloader.test.ts` failed to LOAD on main (its bare `@capacitor/core` mock
 
 ## 2026-07-05 (Thread B — Phase 5 follow-up: orphan dir cleanup)
 
-- Rescued a standalone desktop-hardening clone
-  1.1G): 8 dirty files of media-URL-sink hardening (new `lib/media/safe-media-url.ts`,
+- Rescued a standalone desktop-hardening clone (1.1G): 8 dirty files of
+  media-URL-sink hardening (new `lib/media/safe-media-url.ts`,
   open-graph utils, HLS player, sandboxed iframe, audio display + tests)
   secrets-scanned (clean), committed as `0c88192b9` and pushed as
   `origin/codex/harden-media-url-sinks-for-desktop-sync` (new remote branch; no

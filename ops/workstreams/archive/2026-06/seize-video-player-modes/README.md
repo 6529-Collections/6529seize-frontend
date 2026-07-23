@@ -51,7 +51,7 @@ surfaces.
 
 ## Implementation Snapshot
 
-Implemented on branch `codex/seize-video-player-templates`:
+Implemented in the completed change:
 
 - `SeizeVideoPlayer` resolves `card-preview`, `ambient-media`, `watch-media`,
   `poster-gated`, and `slideshow` templates through a small config helper.

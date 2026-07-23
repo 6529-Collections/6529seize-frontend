@@ -15,14 +15,9 @@ carry the approved change through staging and production validation.
 
 Implementation manager plus investigation manager.
 
-## Branch / Worktree State
+## Implementation State
 
-Implementation used a dedicated local worktree.
-
-Implementation branch: `codex/seize-video-player-templates`
-
-The original worktree had unrelated user changes, so the dedicated worktree
-was scoped to the owned paths listed in `README.md`.
+Implementation was isolated from unrelated changes.
 
 ## What We Learned
 
@@ -196,8 +191,8 @@ Validation so far:
   - broader media matrix rerun hit unrelated existing failures in
     `NFTImageRenderer.test.tsx` and `NFTHTMLRenderer.test.tsx`; both fail in
     isolation and this PR does not touch those renderer files
-- Browser verification on `http://localhost:3126/codex-video-harness` passed
-  with a temporary local harness route that was removed before commit:
+- Browser verification passed with a temporary local harness route that was
+  removed before commit:
   - initial route load: 0 console errors
   - `card-preview`: no controls/autoplay, muted, looped, inline, metadata
   - `watch-media`: native controls, no autoplay/loop, real caption track label

@@ -53,7 +53,7 @@ presence checks, PR-stack archaeology (gh), and per-cluster subagent review.
 | Sidebar touch-listener passive-option fix | Novel, tiny, independent — worth a micro-PR |
 | EnsAddressInput a11y (id/aria-describedby), `scripts/nextgen/count-pebbles.cjs`, read-only Playwright e2e harness (`tests/e2e`, `tests/support/e2e`) | Novel-wanted — small, standalone candidates |
 | Durable specs: `ops/docs/specs/2026-06-15-wave-rep.md`, `2026-06-17-tech-hub.md`, `2026-06-18-6529-spatial-network.md`; delegation source-of-truth + IPFS pilot docs; `ops/scripts/wave-score-snapshot.mjs` | Novel-wanted docs/tooling — candidates for a docs-only PR pending orchestrator/user call |
-| `tmp/**` (219 files), `.reviewbot-responsiveness/` | Session debris — archived in the branch snapshot only, never to be PRed |
+| Temporary review output and other session debris | Excluded from the rescued change |
 | Credential-bearing session artifact | Excluded from the rescued branch and handled through the private security process. No secret value, machine-local storage detail, or current remediation claim is retained here. |
 
 Related rescue (Phase 5 follow-up, 2026-07-05): the orphaned

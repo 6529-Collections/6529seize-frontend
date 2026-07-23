@@ -37,12 +37,7 @@
   - `playsInline` preservation for iPhone inline playback
   - preload/poster discipline by player mode
   - transcript/accessibility metadata hooks where data exists
-- Created review bundle
-  `tmp/seize-video-player-opus-review.zip` with PR 2700 files and current specs.
-- Obtained an independent model review through an approved credentialed client
-  and saved:
-  - `tmp/seize-video-player-opus-review-response.md`
-  - `tmp/seize-video-player-opus-review-response.json`
+- Completed an independent model review of the PR 2700 files and current specs.
 - Incorporated Opus 4.8 feedback into the roadmap:
   - kept the shared-player consolidation goal
   - replaced ambiguous `tile-preview` with first-class `poster-gated`
@@ -64,8 +59,7 @@
 
 ## Implementation Evidence
 
-- Created a dedicated worktree on `codex/seize-video-player-templates` from
-  `origin/main`.
+- Isolated implementation from unrelated changes.
 - Implemented template-aware `SeizeVideoPlayer` plus helper modules:
   - `components/drops/view/item/content/media/SeizeVideoPlayer.config.ts`
   - `components/drops/view/item/content/media/SeizeVideoPlayer.fullscreen.ts`
@@ -82,7 +76,7 @@
   - `seize run build` passed; existing generator/Sass/runtime warnings and a
     non-fatal `next-sitemap.config.ts` extension warning were observed
 - Browser validation:
-  - started local frontend on `http://localhost:3126`
+  - started the local frontend
   - `/the-memes` returned 200 and initially loaded with no console errors, but
     local data rendered no videos
   - temporary local `codex-video-harness` route initially loaded with no console

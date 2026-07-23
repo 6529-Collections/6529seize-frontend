@@ -816,9 +816,8 @@ Contract notes:
 Focused validation completed:
 
 - `seize run format:changed`
-- `seize exec jest --config jest.codex-temp.config.cjs --silent --verbose=false --coverage=false --runInBand __tests__/components/profile-cms/CmsSiteRenderer.test.tsx __tests__/lib/profile-cms/protocol/v1/fixtures.test.ts`
-  passed after the temporary config worked around the Windows worktree path
-  regex issue; the temporary config was removed.
+- Targeted `CmsSiteRenderer` and protocol fixture tests passed with a temporary
+  Jest path-compatibility config that was removed after the run.
 - `seize run lint:changed`
 - `seize run typecheck:changed`
 - `seize run react-doctor:diff`

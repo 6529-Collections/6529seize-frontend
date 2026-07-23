@@ -117,8 +117,17 @@ for (const file of files) {
   if (footEnd <= footStart || footStart <= headEnd) { fail("footer span inverted"); continue; }
 
   const footSpan = lines.slice(footStart, footEnd + 1).join("\n");
-  for (const marker of ["Page load link", "avada-footer-scripts", "sticky-social-icons-container", "fab-fa-twitter", "toTop", "Go to Top"]) {
-    if (!footSpan.includes(marker)) { fail(`footer span missing marker: ${marker}`); continue; }
+  const missingFooterMarker = [
+    "Page load link",
+    "avada-footer-scripts",
+    "sticky-social-icons-container",
+    "fab-fa-twitter",
+    "toTop",
+    "Go to Top",
+  ].find((marker) => !footSpan.includes(marker));
+  if (missingFooterMarker) {
+    fail(`footer span missing marker: ${missingFooterMarker}`);
+    continue;
   }
   const footIndent = lines[footStart].match(/^\s*/)[0];
 

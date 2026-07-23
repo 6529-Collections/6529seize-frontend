@@ -5,8 +5,6 @@
 > security, or execution guidance. Start at `ops/workstreams/README.md` and
 > verify current repository and GitHub state.
 
-First file to read after compaction: this file.
-
 ## Current Goal
 
 Operate the reviewbot production/frontend workstream through
