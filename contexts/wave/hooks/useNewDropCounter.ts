@@ -150,17 +150,47 @@ function useNewDropCounter(
     Record<string, MinimalWaveNewDropsCount>
   >({});
   const wavesRef = useRef(waves);
+  const serverSnapshotTimestampsRef = useRef<Map<string, number>>(new Map());
+  const serverSnapshotProfileIdRef = useRef<string | null>(
+    connectedProfile?.id ?? null
+  );
   const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
   const wasEnabledRef = useRef(enabled);
+  const connectedProfileId = connectedProfile?.id ?? null;
 
   useEffect(() => {
+    if (serverSnapshotProfileIdRef.current !== connectedProfileId) {
+      serverSnapshotProfileIdRef.current = connectedProfileId;
+      serverSnapshotTimestampsRef.current.clear();
+    }
+
     if (!enabled) {
       wavesRef.current = [];
+      serverSnapshotTimestampsRef.current.clear();
       return;
     }
 
     wavesRef.current = waves;
-  }, [enabled, waves]);
+    waves.forEach((wave) => {
+      const serverLatestDropTimestamp = wave.latestDropTimestamp;
+      if (typeof serverLatestDropTimestamp !== "number") {
+        return;
+      }
+
+      const previousTimestamp = serverSnapshotTimestampsRef.current.get(
+        wave.id
+      );
+      if (
+        previousTimestamp === undefined ||
+        serverLatestDropTimestamp > previousTimestamp
+      ) {
+        serverSnapshotTimestampsRef.current.set(
+          wave.id,
+          serverLatestDropTimestamp
+        );
+      }
+    });
+  }, [connectedProfileId, enabled, waves]);
 
   useEffect(() => {
     if (!enabled) {
@@ -321,6 +351,15 @@ function useNewDropCounter(
         if (isPollResponseDropUpdate(message)) return;
 
         const waveId = message.wave.id;
+        const serverSnapshotTimestamp =
+          serverSnapshotTimestampsRef.current.get(waveId);
+        if (
+          serverSnapshotTimestamp !== undefined &&
+          message.created_at <= serverSnapshotTimestamp
+        ) {
+          return;
+        }
+
         const wave = waves.find((w) => w.id === waveId);
 
         if (!wave) {

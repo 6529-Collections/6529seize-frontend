@@ -119,14 +119,24 @@ describe("useNewDropCounter", () => {
     });
 
     rerender({
-      latestDropTimestamp: 30,
+      latestDropTimestamp: 31,
       unreadDropsCount: 0,
     });
 
     expect(result.current.newDropsCounts["wave2"]).toEqual({
       count: 0,
-      latestDropTimestamp: 30,
+      latestDropTimestamp: 31,
       firstUnreadSerialNo: null,
+    });
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    emitDropUpdate({ createdAt: 32, serialNo: 6 });
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 32,
+      firstUnreadSerialNo: 6,
     });
   });
 
