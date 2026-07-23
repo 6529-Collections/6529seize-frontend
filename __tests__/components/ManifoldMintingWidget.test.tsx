@@ -1,6 +1,7 @@
 import ManifoldMintingWidget from "@/components/manifold-minting/ManifoldMintingWidget";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 jest.mock(
   "@/components/manifold-minting/ManifoldMintingConnect",
@@ -22,6 +23,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 
 const readContractsData = { data: [] };
+const mockWriteContract = jest.fn();
 jest.mock("wagmi", () => ({
   useReadContract: () => ({ data: 0n }),
   useReadContracts: () => readContractsData,
@@ -31,10 +33,10 @@ jest.mock("wagmi", () => ({
     error: null,
   }),
   useWriteContract: () => ({
-    writeContract: jest.fn(),
+    writeContract: mockWriteContract,
     data: null,
     reset: jest.fn(),
-    isPending: true,
+    isPending: false,
     error: null,
   }),
 }));
@@ -55,7 +57,8 @@ describe("ManifoldMintingWidget", () => {
     isFinalized: false,
   } as any;
 
-  it("shows seize button and pending text", () => {
+  it("shows wallet confirmation in the transaction modal", async () => {
+    const user = userEvent.setup();
     render(
       <ManifoldMintingWidget
         contract="0x"
@@ -68,7 +71,11 @@ describe("ManifoldMintingWidget", () => {
         setMintForAddress={() => {}}
       />
     );
-    expect(screen.getByText(/SEIZE x1/)).toBeInTheDocument();
-    expect(screen.getByText(/Confirm in your wallet/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /SEIZE x1/i }));
+
+    expect(mockWriteContract).toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toHaveTextContent(
+      "Confirm in your wallet"
+    );
   });
 });
