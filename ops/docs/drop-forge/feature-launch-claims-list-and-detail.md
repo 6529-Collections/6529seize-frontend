@@ -119,6 +119,9 @@ The launch surface combines:
   - Entering a target above the active claim max snaps the field back to that
     cap and shows a toast explaining the limit.
 - On-chain actions:
+  - If the authorized wallet is not currently connected, selecting an on-chain
+    action opens wallet connection and continues that action after connection.
+    Closing the connection dialog cancels the pending action.
   - Wallet confirmation, submitted, success, and error states appear in a
     transaction dialog using the active action name.
   - Submitted and terminal states can include a `View Tx` explorer link.

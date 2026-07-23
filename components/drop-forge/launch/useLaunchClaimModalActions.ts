@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react";
 import type { useAuth } from "@/components/auth/Auth";
+import type { RunConnectedAction } from "@/components/auth/useConnectedAction";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import {
   getErrorMessage,
@@ -47,6 +48,7 @@ interface UseLaunchClaimModalActionsParams {
   onChainClaimSpinnerVisible: boolean;
   setOnChainClaimSpinnerVisible: (visible: boolean) => void;
   showErrorToast: (message: string) => void;
+  runConnectedAction: RunConnectedAction;
   state: LaunchClaimState;
 }
 
@@ -70,6 +72,7 @@ export function useLaunchClaimModalActions({
   onChainClaimSpinnerVisible,
   setOnChainClaimSpinnerVisible,
   showErrorToast,
+  runConnectedAction,
   state,
 }: Readonly<UseLaunchClaimModalActionsParams>) {
   const {
@@ -144,27 +147,29 @@ export function useLaunchClaimModalActions({
       manifoldClaim.signingAddress,
     ] as const;
 
-    setClaimTxModal({
-      status: "confirm_wallet",
-      actionLabel: "Update Claim",
-    });
-    pendingMintingClaimActionRef.current = null;
-    try {
-      claimWrite.writeContract({
-        address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-        abi: MEMES_MANIFOLD_PROXY_ABI,
-        chainId: forgeMintingChain.id,
-        functionName: "updateClaim",
-        args: [forgeMintingContract, BigInt(claimId), claimParameters],
-      });
-    } catch (error) {
-      pendingMintingClaimActionRef.current = null;
+    runConnectedAction(() => {
       setClaimTxModal({
-        status: "error",
-        message: getErrorMessage(error, "Failed to submit transaction"),
+        status: "confirm_wallet",
         actionLabel: "Update Claim",
       });
-    }
+      pendingMintingClaimActionRef.current = null;
+      try {
+        claimWrite.writeContract({
+          address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+          abi: MEMES_MANIFOLD_PROXY_ABI,
+          chainId: forgeMintingChain.id,
+          functionName: "updateClaim",
+          args: [forgeMintingContract, BigInt(claimId), claimParameters],
+        });
+      } catch (error) {
+        pendingMintingClaimActionRef.current = null;
+        setClaimTxModal({
+          status: "error",
+          message: getErrorMessage(error, "Failed to submit transaction"),
+          actionLabel: "Update Claim",
+        });
+      }
+    });
   }, [
     claim,
     isInitialized,
@@ -174,6 +179,7 @@ export function useLaunchClaimModalActions({
     forgeMintingContract,
     claimId,
     setToast,
+    runConnectedAction,
   ]);
 
   const refreshLaunchClaimData = useCallback(async () => {

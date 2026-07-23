@@ -5320,6 +5320,7 @@
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
+        "If the authorized wallet is disconnected, selecting SEIZE opens wallet connection and continues the mint after connection succeeds.",
         "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
@@ -6070,6 +6071,7 @@
       "facts": [
         "Drop Forge launch claims live under /drop-forge/launch.",
         "Launch claim detail pages use /drop-forge/launch/{id}.",
+        "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],
       "canonical_path": "/drop-forge/launch",

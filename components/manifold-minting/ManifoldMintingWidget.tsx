@@ -22,6 +22,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useConnectedAction } from "../auth/useConnectedAction";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import {
@@ -46,6 +47,15 @@ function normalizeMintCount(value: number | string | null | undefined): number {
   }
 
   return Math.max(0, Math.trunc(parsed));
+}
+
+function resolveMintErrorMessage(fullError: string): string {
+  const resolvedError = fullError
+    .split("Request Arguments")[0]
+    ?.split(".")[0]
+    ?.split("Contract Call")[0];
+
+  return !resolvedError || resolvedError.length < 5 ? fullError : resolvedError;
 }
 
 function getTransactionModalMessage(
@@ -113,6 +123,7 @@ export default function ManifoldMintingWidget(
   }>
 ) {
   const connectedAddress = useSeizeConnectContext();
+  const runConnectedAction = useConnectedAction();
   const locale = useBrowserLocale();
   const searchParams = useSearchParams();
   const [mintForAddress, setMintForAddress] = useState<string | null>(null);
@@ -405,41 +416,29 @@ export default function ManifoldMintingWidget(
       setMintError("Select a valid recipient wallet");
       return;
     }
-    setTransactionModalStatus("confirm_wallet");
-    mintWrite.writeContract({
-      address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-      abi: props.abi,
-      chainId: props.chain.id,
-      value,
-      functionName: args.functionName,
-      args: args.args,
+    runConnectedAction(() => {
+      setTransactionModalStatus("confirm_wallet");
+      mintWrite.writeContract({
+        address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+        abi: props.abi,
+        chainId: props.chain.id,
+        value,
+        functionName: args.functionName,
+        args: args.args,
+      });
     });
   };
 
   useEffect(() => {
     if (mintWrite.error) {
-      const fullError = mintWrite.error.message;
-      const resolvedError = fullError
-        .split("Request Arguments")[0]
-        ?.split(".")[0]
-        ?.split("Contract Call")[0];
-      if (!resolvedError || resolvedError.length < 5) {
-        setMintError(fullError);
-      } else {
-        setMintError(resolvedError);
-      }
+      setMintError(resolveMintErrorMessage(mintWrite.error.message));
       setTransactionModalStatus("error");
     }
   }, [mintWrite.error]);
 
   useEffect(() => {
     if (waitMintWrite.error) {
-      const resolvedError =
-        waitMintWrite.error.message
-          ?.split("Request Arguments")[0]
-          ?.split(".")[0]
-          ?.split("Contract Call")[0] ?? waitMintWrite.error.message;
-      setMintError(resolvedError);
+      setMintError(resolveMintErrorMessage(waitMintWrite.error.message));
       setTransactionModalStatus("error");
     }
   }, [waitMintWrite.error]);

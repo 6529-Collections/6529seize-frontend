@@ -44,7 +44,9 @@
 7. User selects mint count.
    - Public phase: numeric input.
    - Allowlist phases: selectable up to available unminted spots.
-8. User selects `SEIZE xN` and confirms in wallet.
+8. User selects `SEIZE xN`. If the authorized wallet is not currently
+   connected, the wallet connection dialog opens and the mint continues after
+   connection succeeds.
 9. The on-chain transaction modal shows `Confirm in your wallet`, then
    `Transaction Submitted - SEIZING` with a `View Tx` link.
 10. After confirmation, the modal updates to `SEIZED!` with the same
@@ -98,7 +100,10 @@
 
 ## Edge Cases
 
-- If no wallet is connected, mint actions are replaced with wallet connect UI.
+- If an authorized wallet is not currently connected, selecting `SEIZE xN`
+  opens wallet connection and continues the intended mint after connection.
+  Closing the connection dialog cancels the pending mint without showing a
+  transaction error.
 - On iOS:
   - Country `US`: shows `Mint on 6529.io` handoff button.
   - Non-`US` or unknown country: mint controls are hidden.
