@@ -96,9 +96,9 @@ function useWaveMessagesStore() {
   const listenersRef = useRef<KeyListeners>({});
   const updateQueueRef = useRef<QueuedWaveMessagesUpdate[]>([]);
   const isProcessingRef = useRef<boolean>(false);
-  const pendingServerFeedSeedsRef = useRef<
-    Map<string, PendingServerFeedSeed>
-  >(new Map());
+  const pendingServerFeedSeedsRef = useRef<Map<string, PendingServerFeedSeed>>(
+    new Map()
+  );
   const activeServerFeedSeedsRef = useRef<Set<string>>(new Set());
   const activeServerFeedSeedGatePromisesRef = useRef<
     Map<string, Promise<ServerWaveFeedSeedResult>>
@@ -130,12 +130,8 @@ function useWaveMessagesStore() {
   }, []);
 
   useEffect(() => {
-    const invalidateServerFeedSeeds = () => {
-      const seededWaveIds = new Set([
-        ...pendingServerFeedSeedsRef.current.keys(),
-        ...activeServerFeedSeedsRef.current,
-        ...appliedServerFeedSeedWaveIdsRef.current,
-      ]);
+    const resetMessagesForProfileSwitch = () => {
+      const cachedWaveIds = Object.keys(waveMessagesRef.current);
       serverFeedSeedGenerationRef.current += 1;
       pendingServerFeedSeedsRef.current.clear();
       activeServerFeedSeedsRef.current.clear();
@@ -144,32 +140,16 @@ function useWaveMessagesStore() {
       completedInitialRegistrationsRef.current.clear();
       committedServerFeedSeedsRef.current.clear();
       serverFeedSeedReadyCallbacksRef.current.clear();
-      updateQueueRef.current = updateQueueRef.current.filter(
-        ({ update }) => !seededWaveIds.has(update.key)
-      );
-      seededWaveIds.forEach((waveId) =>
-        authoritativePaginationWaveIdsRef.current.delete(waveId)
-      );
+      updateQueueRef.current = [];
+      authoritativePaginationWaveIdsRef.current.clear();
 
-      if (seededWaveIds.size === 0) {
+      if (cachedWaveIds.length === 0) {
         return;
       }
 
-      const nextState = { ...waveMessagesRef.current };
-      const clearedWaveIds: string[] = [];
-      seededWaveIds.forEach((waveId) => {
-        if (nextState[waveId] !== undefined) {
-          delete nextState[waveId];
-          clearedWaveIds.push(waveId);
-        }
-      });
-      if (clearedWaveIds.length === 0) {
-        return;
-      }
-
-      waveMessagesRef.current = nextState;
+      waveMessagesRef.current = {};
       forceRender();
-      for (const waveId of clearedWaveIds) {
+      for (const waveId of cachedWaveIds) {
         const listeners = listenersRef.current[waveId];
         if (!listeners) {
           continue;
@@ -182,12 +162,12 @@ function useWaveMessagesStore() {
 
     globalThis.addEventListener(
       PROFILE_SWITCHED_EVENT,
-      invalidateServerFeedSeeds
+      resetMessagesForProfileSwitch
     );
     return () => {
       globalThis.removeEventListener(
         PROFILE_SWITCHED_EVENT,
-        invalidateServerFeedSeeds
+        resetMessagesForProfileSwitch
       );
     };
   }, []);
@@ -327,7 +307,11 @@ function useWaveMessagesStore() {
   // Function to add an update to the queue and trigger processing
   const updateData = useCallback(
     (update: WaveMessagesUpdate) => {
-      updateQueueRef.current.push({ update, mergePolicy: "standard" });
+      updateQueueRef.current.push({
+        update,
+        mergePolicy: "standard",
+        seedGeneration: serverFeedSeedGenerationRef.current,
+      });
       // Start processing if not already running
       processQueue();
     },

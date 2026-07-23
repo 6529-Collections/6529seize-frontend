@@ -50,6 +50,9 @@ export const createGeneralQueryHandlers = (
     queryClient
       .invalidateQueries({ queryKey: [QueryKey.IDENTITY_NOTIFICATIONS] })
       .catch(() => undefined);
+    queryClient
+      .invalidateQueries({ queryKey: [QueryKey.DM_DROPS_UNREAD] })
+      .catch(() => undefined);
     invalidateWavesV2();
   };
   const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {

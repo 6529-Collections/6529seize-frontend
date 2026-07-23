@@ -9,6 +9,8 @@ import {
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 
 const noopWaveAction = () => {};
 
@@ -24,10 +26,15 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     fetchingProfile,
     isAuthenticated,
   } = useAuth();
+  const authJwt = getAuthJwt();
+  const authFingerprint = getAuthTokenFingerprint(authJwt);
+  const connectedProfileId = connectedProfile?.id ?? null;
   const hasValidWalletAuthorization = hasValidWalletAuth !== false;
   const hasAuthenticatedProfile =
     hasValidWalletAuthorization &&
-    (isAuthenticated ?? !!connectedProfile?.handle);
+    (isAuthenticated ?? !!connectedProfile?.handle) &&
+    !!connectedProfileId &&
+    isAuthJwtUsable(authJwt);
   const isPendingAuthSwitch = Boolean(
     address && (!hasValidWalletAuthorization || fetchingProfile)
   );
@@ -39,13 +46,15 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
 
     const normalizedAddress = address.toLowerCase();
     if (activeProfileProxy?.id) {
-      return `${normalizedAddress}:proxy:${activeProfileProxy.id}`;
+      return `${normalizedAddress}:profile:${connectedProfileId}:proxy:${activeProfileProxy.id}:auth:${authFingerprint}`;
     }
 
-    return `${normalizedAddress}:primary`;
+    return `${normalizedAddress}:profile:${connectedProfileId}:primary:auth:${authFingerprint}`;
   }, [
     address,
     activeProfileProxy?.id,
+    authFingerprint,
+    connectedProfileId,
     hasAuthenticatedProfile,
     hasValidWalletAuthorization,
   ]);

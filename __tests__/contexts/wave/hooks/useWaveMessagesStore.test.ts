@@ -35,7 +35,7 @@ describe("useWaveMessagesStore", () => {
     );
   });
 
-  it("notifies normal updates when a profile switch precedes deferred delivery", async () => {
+  it("clears normal cached messages when the profile switches", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
 
@@ -47,15 +47,12 @@ describe("useWaveMessagesStore", () => {
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
-    expect(result.current.getData("wave1")?.drops[0]?.id).toBe("d1");
-    await waitFor(() =>
-      expect(listener).toHaveBeenCalledWith(
-        expect.objectContaining({
-          drops: expect.arrayContaining([
-            expect.objectContaining({ id: "d1" }),
-          ]),
-        })
-      )
+    expect(result.current.getData("wave1")).toBeUndefined();
+    expect(listener).toHaveBeenCalledWith(undefined);
+    expect(listener).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        drops: expect.arrayContaining([expect.objectContaining({ id: "d1" })]),
+      })
     );
   });
 
@@ -142,7 +139,10 @@ describe("useWaveMessagesStore", () => {
 
   it("tracks only the matching pending server seed promise", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
-    const firstPromise = Promise.resolve({ ok: false, waveId: "wave1" } as const);
+    const firstPromise = Promise.resolve({
+      ok: false,
+      waveId: "wave1",
+    } as const);
     const replacementPromise = Promise.resolve({
       ok: false,
       waveId: "wave1",
@@ -213,7 +213,10 @@ describe("useWaveMessagesStore", () => {
       serial_no: 2,
       created_at: "2022",
     };
-    const seedPromise = Promise.resolve({ ok: false, waveId: "wave1" } as const);
+    const seedPromise = Promise.resolve({
+      ok: false,
+      waveId: "wave1",
+    } as const);
 
     act(() => result.current.subscribe("wave1", listener));
     act(() => {
@@ -265,9 +268,7 @@ describe("useWaveMessagesStore", () => {
     expect(listener).toHaveBeenCalledTimes(1);
     expect(result.current.hasServerFeedSeed("wave1")).toBe(true);
 
-    act(() =>
-      result.current.completeInitialServerFeedRegistration("wave1")
-    );
+    act(() => result.current.completeInitialServerFeedRegistration("wave1"));
     await act(async () => {
       await Promise.resolve();
     });
@@ -421,10 +422,7 @@ describe("useWaveMessagesStore", () => {
 
     act(() => {
       result.current.subscribe("wave1", listener);
-      result.current.registerPendingServerFeedSeed(
-        "wave1",
-        oldProfilePromise
-      );
+      result.current.registerPendingServerFeedSeed("wave1", oldProfilePromise);
     });
     listener.mockClear();
 
@@ -482,11 +480,7 @@ describe("useWaveMessagesStore", () => {
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
-    await waitFor(() =>
-      expect(result.current.getData("sentinel-wave")?.drops[0]?.id).toBe(
-        "queue-sentinel"
-      )
-    );
+    expect(result.current.getData("sentinel-wave")).toBeUndefined();
     expect(result.current.getData("wave1")).toBeUndefined();
   });
 
