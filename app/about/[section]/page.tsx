@@ -34,7 +34,7 @@ export default async function AboutPage(props: Readonly<Props>) {
     <main
       className={`${styles["main"]} tailwind-scope ${
         isSubscriptions
-          ? "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
+          ? "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]"
           : ""
       }`}
     >

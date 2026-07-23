@@ -138,7 +138,8 @@ export interface MentionAliasExpansionResult {
   readonly editorState: EditorState;
 }
 
-const ALIAS_TOKEN_PATTERN = /(^|[^\w@])@(\w{3,15})(?=$|[^\w@])/g;
+const ALIAS_TOKEN_PATTERN =
+  /(^|[^\p{L}\p{N}_@])@(\w{3,15})(?=$|[^\p{L}\p{N}_@])/gu;
 
 const isInsideCodeOrLink = (node: LexicalNode): boolean => {
   let parent = node.getParent();
