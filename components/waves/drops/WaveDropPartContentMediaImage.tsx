@@ -1,6 +1,7 @@
 "use client";
 
 import { FallbackImage } from "@/components/common/FallbackImage";
+import Button from "@/components/utils/button/Button";
 import {
   ImageMediaModal,
   requestCenteredImageFullscreen,
@@ -62,13 +63,14 @@ function ImageLoadErrorState({ onRetry }: { readonly onRetry: () => void }) {
       <span className="tw-text-sm tw-text-iron-400">
         {t(DEFAULT_LOCALE, "drop.media.loadFailed")}
       </span>
-      <button
+      <Button
         type="button"
         onClick={onRetry}
-        className="tw-rounded-md tw-bg-iron-700 tw-px-3 tw-py-1 tw-text-xs tw-text-white hover:tw-bg-iron-600"
+        variant="tertiary"
+        size="xs"
       >
         {t(DEFAULT_LOCALE, "drop.media.retry")}
-      </button>
+      </Button>
     </div>
   );
 }

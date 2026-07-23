@@ -2,6 +2,7 @@
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 
@@ -11,9 +12,6 @@ const NAV_LINKS = [
   { href: "/network/health/network-tdh", label: "Network TDH Stats" },
   { href: "/network/levels", label: "Levels" },
 ] as const;
-
-const BUTTON_LINK_CLASSES =
-  "tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium hover:tw-bg-[#ddd] hover:tw-text-black tw-border-solid tw-border-[#222] tw-px-4 tw-py-2 tw-no-underline tw-w-full sm:tw-w-auto sm:tw-whitespace-nowrap";
 
 export default function DefinitionsClient() {
   useSetTitle("Definitions | Network");
@@ -102,9 +100,16 @@ export default function DefinitionsClient() {
 
       <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-3">
         {NAV_LINKS.map(({ href, label }) => (
-          <Link key={href} href={href} className={BUTTON_LINK_CLASSES}>
+          <ButtonLink
+            key={href}
+            href={href}
+            variant="primary"
+            size="md"
+            fullWidth
+            className="tw-min-w-[150px] sm:tw-w-auto sm:tw-flex-1"
+          >
             {label}
-          </Link>
+          </ButtonLink>
         ))}
       </div>
     </main>
