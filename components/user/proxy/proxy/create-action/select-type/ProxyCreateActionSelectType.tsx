@@ -3,6 +3,7 @@ import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAc
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ProxyCreateActionSelectTypeItem from "./ProxyCreateActionSelectTypeItem";
+import Button from "@/components/utils/button/Button";
 
 export default function ProxyCreateActionSelectType({
   currentActions,
@@ -81,13 +82,13 @@ export default function ProxyCreateActionSelectType({
         ))}
         {onCancel && (
           <li>
-            <button
+            <Button
+              variant="secondary"
+              size="md"
               onClick={onCancel}
-              type="button"
-              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
             >
               Cancel
-            </button>
+            </Button>
           </li>
         )}
       </ul>

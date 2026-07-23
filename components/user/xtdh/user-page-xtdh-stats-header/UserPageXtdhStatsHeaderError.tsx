@@ -12,13 +12,15 @@ export function UserPageXtdhStatsHeaderError({
       <p className="tw-text-sm tw-text-red-400" role="alert" aria-live="polite">
         {message}
       </p>
-      <button
-        type="button"
+      <Button
+        variant="tertiary"
+        size="sm"
         onClick={onRetry}
-        className="tw-mt-3 tw-inline-flex tw-items-center tw-justify-center tw-rounded tw-bg-primary-500 tw-border tw-border-solid tw-border-primary-400 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white hover:tw-bg-primary-400"
+        className="tw-mt-3"
       >
         Retry
-      </button>
+      </Button>
     </section>
   );
 }
+import Button from "@/components/utils/button/Button";

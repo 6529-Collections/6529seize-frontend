@@ -4,10 +4,9 @@ import { useContext } from "react";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import GroupCreateTest from "./GroupCreateTest";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import type { SubmitArgs } from "@/hooks/groups/useGroupMutations";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 
@@ -74,30 +73,22 @@ export default function GroupCreateActions({
           disabled={isActionsDisabled}
         />
         <div className="tw-flex tw-items-center tw-gap-x-3">
-          <SecondaryButton onClicked={() => onCompleted()}>
-            Cancel
-          </SecondaryButton>
-          <div
-            className={`${
-              isActionsDisabled ? "" : "tw-from-primary-400 tw-to-primary-500"
-            } tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-p-[1px]`}
+          <Button
+            onClick={onCompleted}
+            variant="secondary"
+            size="md"
           >
-            <button
-              onClick={onSave}
-              disabled={isActionsDisabled}
-              type="button"
-              className={`${
-                isActionsDisabled
-                  ? "tw-text-iron-300 tw-opacity-50"
-                  : "tw-text-white hover:tw-border-primary-600 hover:tw-bg-primary-600"
-              } tw-flex tw-items-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600`}
-            >
-              <div className="tw-flex tw-items-center tw-justify-center tw-gap-x-2">
-                {isSubmitting && <CircleLoader />}
-                <span>{submitLabel}</span>
-              </div>
-            </button>
-          </div>
+            Cancel
+          </Button>
+          <Button
+            onClick={onSave}
+            disabled={isActionsDisabled}
+            loading={isSubmitting}
+            variant="action"
+            size="md"
+          >
+            {submitLabel}
+          </Button>
         </div>
       </div>
     </div>

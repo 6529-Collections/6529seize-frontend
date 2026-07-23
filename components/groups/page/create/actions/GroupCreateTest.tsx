@@ -2,8 +2,8 @@
 
 import { useContext, useState } from "react";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { AuthContext } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { faUsers } from "@fortawesome/free-solid-svg-icons";
@@ -96,21 +96,15 @@ export default function GroupCreateTest({
   const loading = isFetching || isTesting;
   return (
     <div className="tw-flex tw-items-center tw-space-x-4">
-      <button
-        type="button"
+      <Button
         disabled={disabled || isTesting}
         onClick={onTest}
-        className={`${
-          disabled
-            ? "tw-text-iron-500 tw-opacity-70"
-            : "tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-300"
-        } tw-rounded-lg tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-950 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700`}
+        loading={loading}
+        variant="tertiary"
+        size="md"
       >
-        <div className="tw-flex tw-items-center tw-gap-x-3">
-          {loading && <CircleLoader />}
-          <span>Test</span>
-        </div>
-      </button>
+        Test
+      </Button>
       {!!members && (
         <div className="tw-self-center">
           <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">

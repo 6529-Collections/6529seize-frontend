@@ -12,7 +12,7 @@ import OnchainTransactionModal, {
   type OnchainTransactionModalStatus,
 } from "@/components/common/OnchainTransactionModal";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import {
   displayedEonNumberFromIndex,
   displayedEpochNumberFromIndex,
@@ -408,16 +408,19 @@ export default function UserPageSubscriptionsTopUp() {
           </div>
         </div>
         <div className="tw-flex tw-items-center tw-justify-end sm:tw-flex-shrink-0">
-          <PrimaryButton
+          <Button
+            variant="primary"
+            size="lg"
             loading={isSending}
             disabled={isSendDisabled}
-            onClicked={handleSend}
-            ariaLabel="Send top up"
-            className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+            onClick={handleSend}
+            aria-label="Send top up"
+            fullWidth
+            className="sm:tw-w-auto"
           >
             <BoltIcon className="tw-size-4" aria-hidden="true" />
             Send
-          </PrimaryButton>
+          </Button>
         </div>
       </div>
     </>

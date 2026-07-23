@@ -9,6 +9,7 @@ import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPa
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import GlobalRepCategoryDialog from "@/components/rep/categories/GlobalRepCategoryDialog";
@@ -426,13 +427,14 @@ export default function UserPageRep({
             />
           </UserPageRateWrapper>
           <div className="tw-mt-3">
-            <button
+            <Button
+              variant="secondary"
+              size="lg"
+              fullWidth
               onClick={() => setIsNicRateOpen(false)}
-              type="button"
-              className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </MobileWrapperDialog>

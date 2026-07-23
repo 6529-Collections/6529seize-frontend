@@ -12,6 +12,7 @@ import {
   ParticipationDropVoteDetailsLogRow,
   ParticipationDropVoteDetailsVoterRow,
 } from "./ParticipationDropVoteDetailsRows";
+import Button from "@/components/utils/button/Button";
 
 type VoteDetailsTab = "voters" | "logs";
 
@@ -65,16 +66,16 @@ function VoteDetailsErrorState({
       <span className="tw-text-center tw-text-sm tw-font-medium tw-text-rose-300">
         {label}
       </span>
-      <button
-        type="button"
+      <Button
         onClick={(event) => {
           event.stopPropagation();
           onRetry();
         }}
-        className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition-colors desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
+        variant="tertiary"
+        size="xs"
       >
         Try again
-      </button>
+      </Button>
     </div>
   );
 }

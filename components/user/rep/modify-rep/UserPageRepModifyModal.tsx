@@ -1,8 +1,8 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import Button from "@/components/utils/button/Button";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -255,30 +255,26 @@ export default function UserPageRepModifyModal({
 
             <div className="tw-mt-8">
               <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
-                <button
+                <Button
                   type="submit"
                   disabled={isSaveDisabled}
-                  className={`${
-                    !isSaveDisabled
-                      ? "tw-cursor-pointer hover:tw-border-primary-600 hover:tw-bg-primary-600"
-                      : "tw-cursor-not-allowed tw-opacity-50"
-                  } tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out sm:tw-w-auto`}
+                  loading={mutating}
+                  size="lg"
+                  fullWidth
+                  className="sm:tw-w-auto"
                 >
-                  {mutating ? (
-                    <div className="tw-w-8">
-                      <CircleLoader />
-                    </div>
-                  ) : (
-                    <>Save</>
-                  )}
-                </button>
-                <button
+                  Save
+                </Button>
+                <Button
                   onClick={onClose}
-                  type="button"
-                  className="tw-mt-3 tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 sm:tw-mt-0 sm:tw-w-auto"
+                  disabled={mutating}
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           </form>

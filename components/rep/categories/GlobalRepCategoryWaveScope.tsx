@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
@@ -592,16 +593,16 @@ function WaveRepLoadedContent({
             isLoading={rowsIsFetchingNextPage}
             onLoadMore={loadMoreActiveRows}
           />
-          <button
-            type="button"
-            disabled={rowsIsFetchingNextPage}
+          <Button
+            variant="tertiary"
+            loading={rowsIsFetchingNextPage}
             onClick={loadMoreActiveRows}
-            className="rep-category-load-more tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
+            className="rep-category-load-more tw-self-center"
           >
             {rowsIsFetchingNextPage
               ? t(REP_CATEGORY_LOCALE, "rep.categories.wave.loadingMore")
               : t(REP_CATEGORY_LOCALE, "rep.categories.wave.loadMore")}
-          </button>
+          </Button>
         </>
       )}
     </>

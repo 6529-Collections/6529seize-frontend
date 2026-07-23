@@ -1,13 +1,12 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
-  FOLLOW_BTN_BUTTON_CLASSES,
-  FOLLOW_BTN_LOADER_SIZES,
+  FOLLOW_BUTTON_SIZES,
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
+import Button from "@/components/utils/button/Button";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -135,24 +134,16 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
-      <button
+      <Button
         onClick={onFollow}
-        disabled={mutating}
-        type="button"
-        className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${
-          following
-            ? "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
-            : "tw-bg-primary-500 tw-text-white tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600"
-        } tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+        loading={mutating}
+        hideChildrenWhenLoading
+        variant={following ? "secondary" : "primary"}
+        size={FOLLOW_BUTTON_SIZES[size]}
       >
-        {(() => {
-          if (mutating)
-            return <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />;
-          if (following) return <FollowBtnCheckIcon />;
-          return <FollowBtnPlusIcon size={size} />;
-        })()}
+        {following ? <FollowBtnCheckIcon /> : <FollowBtnPlusIcon size={size} />}
         <span>{label}</span>
-      </button>
+      </Button>
     </div>
   );
 };

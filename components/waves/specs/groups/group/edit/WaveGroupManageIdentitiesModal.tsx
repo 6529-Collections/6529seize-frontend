@@ -10,6 +10,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import IdentitySearch, {
   IdentitySearchSize,
 } from "@/components/utils/input/identity/IdentitySearch";
+import Button from "@/components/utils/button/Button";
 
 export enum WaveGroupManageIdentitiesMode {
   INCLUDE = "INCLUDE",
@@ -132,22 +133,22 @@ export default function WaveGroupManageIdentitiesModal({
                   />
                 </div>
                 <div className="tw-mt-6 tw-flex tw-justify-end">
-                  <button
+                  <Button
                     onClick={onClose}
-                    type="button"
-                    className="tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-border-iron-600">
+                    variant="secondary"
+                    size="lg"
+                  >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
                     disabled={!identity}
-                    className={`tw-ml-3 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-rounded-lg tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
-                      identity
-                        ? "tw-bg-primary-500 tw-border-primary-500 tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600"
-                        : "tw-bg-iron-800 tw-border-iron-700 tw-text-iron-400 tw-opacity-60"
-                    }`}>
+                    variant="action"
+                    size="lg"
+                    className="tw-ml-3"
+                  >
                     {actionLabel}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </dialog>

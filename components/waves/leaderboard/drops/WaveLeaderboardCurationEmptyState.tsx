@@ -1,5 +1,5 @@
 import React from "react";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -76,14 +76,14 @@ export const WaveLeaderboardCurationEmptyState: React.FC<
             Be the first to create a curated drop in this wave
           </p>
           {onCreateDrop && (
-            <PrimaryButton
-              loading={false}
-              disabled={false}
-              onClicked={onCreateDrop}
-              padding="tw-px-4 tw-py-2"
+            <Button
+              onClick={onCreateDrop}
+              variant="primary"
+              size="sm"
+              className="tw-px-4"
             >
               <svg
-                className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
+                className="tw-h-4 tw-w-4 tw-flex-shrink-0"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
@@ -96,7 +96,7 @@ export const WaveLeaderboardCurationEmptyState: React.FC<
                 />
               </svg>
               <span>{createDropLabel}</span>
-            </PrimaryButton>
+            </Button>
           )}
         </>
       )}

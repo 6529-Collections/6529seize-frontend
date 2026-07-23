@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { resolveWaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
@@ -465,15 +465,14 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
           >
             {canCreateDrop && onCreateDrop && (
-              <PrimaryButton
-                loading={false}
-                disabled={false}
-                onClicked={onCreateDrop}
-                padding="tw-px-3 tw-py-2"
+              <Button
+                onClick={onCreateDrop}
+                variant="primary"
+                size="sm"
               >
-                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
                 <span>{createLabel}</span>
-              </PrimaryButton>
+              </Button>
             )}
           </div>
         )}

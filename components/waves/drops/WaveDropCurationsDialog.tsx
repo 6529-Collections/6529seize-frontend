@@ -5,8 +5,7 @@ import { useAuth } from "@/components/auth/Auth";
 import MyStreamWaveCurationCreateDialog from "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import clsx from "clsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -331,13 +330,13 @@ export default function WaveDropCurationsDialog({
                 </p>
                 {hasVisibleCurations && (
                   <div className="tw-flex tw-flex-shrink-0">
-                    <SecondaryButton
-                      onClicked={() => setIsCreateCurationOpen(true)}
-                      size="sm"
-                      className="!tw-text-xs"
+                    <Button
+                      onClick={() => setIsCreateCurationOpen(true)}
+                      variant="secondary"
+                      size="xs"
                     >
                       Create and add curation
-                    </SecondaryButton>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -358,13 +357,9 @@ export default function WaveDropCurationsDialog({
                   Unable to load curations for this drop.
                 </p>
                 <div className="tw-flex tw-justify-center">
-                  <SecondaryButton
-                    onClicked={handleRetry}
-                    size="sm"
-                    className="!tw-text-xs"
-                  >
+                  <Button onClick={handleRetry} variant="tertiary" size="xs">
                     Try again
-                  </SecondaryButton>
+                  </Button>
                 </div>
               </div>
             )}
@@ -378,14 +373,14 @@ export default function WaveDropCurationsDialog({
                   {emptyStateDescription}
                 </p>
                 <div className="tw-flex tw-justify-center">
-                  <PrimaryButton
-                    loading={false}
-                    disabled={false}
-                    onClicked={() => setIsCreateCurationOpen(true)}
-                    padding="tw-px-4 tw-py-2"
+                  <Button
+                    onClick={() => setIsCreateCurationOpen(true)}
+                    variant="primary"
+                    size="sm"
+                    className="tw-px-4"
                   >
                     Create first curation
-                  </PrimaryButton>
+                  </Button>
                 </div>
               </div>
             )}

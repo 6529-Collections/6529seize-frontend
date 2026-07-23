@@ -169,7 +169,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
         <ButtonLink
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
           variant="secondary"
-          size="sm"
+          size="xs"
         >
           Wallet Checker
         </ButtonLink>
@@ -178,7 +178,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             <ButtonLink
               href="/delegation/delegation-center"
               variant="secondary"
-              size="sm"
+              size="xs"
             >
               Delegation Center
             </ButtonLink>

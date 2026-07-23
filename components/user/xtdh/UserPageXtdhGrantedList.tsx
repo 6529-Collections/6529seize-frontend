@@ -14,6 +14,7 @@ import { getApiParamsFromFilters } from "@/components/user/xtdh/user-page-xtdh-g
 import { useUserPageXtdhGrantedListFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListFilters";
 import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
 import { usePendingGrantsCount } from "@/hooks/usePendingGrantsCount";
+import Button from "@/components/utils/button/Button";
 
 interface UserPageXtdhGrantedListProps {
   readonly grantor: string;
@@ -128,14 +129,14 @@ export default function UserPageXtdhGrantedList({
       />
       {showLoadMore && (
         <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">
-          <button
-            type="button"
+          <Button
+            variant="tertiary"
+            size="md"
             onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
+            loading={isFetchingNextPage}
           >
-            {isFetchingNextPage ? "Loading..." : "Load More"}
-          </button>
+            Load More
+          </Button>
         </div>
       )}
     </div>

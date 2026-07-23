@@ -1,5 +1,6 @@
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
 import {
   ArrowTopRightOnSquareIcon,
   ChevronDownIcon,
@@ -118,14 +119,14 @@ export function RetryButton({
   readonly onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="tertiary"
+      size="sm"
       onClick={onClick}
-      disabled={isLoading}
-      className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-400 disabled:tw-cursor-not-allowed disabled:tw-border-white/5 disabled:tw-text-iron-500 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
+      loading={isLoading}
     >
-      {isLoading ? <CircleLoader /> : "Retry"}
-    </button>
+      Retry
+    </Button>
   );
 }
 
@@ -218,14 +219,15 @@ export function OfficialWaveSummary({
       {canManageOwnOfficialWave && (
         <div className="tw-contents lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-flex lg:tw-items-start lg:tw-justify-end lg:tw-gap-2">
           {onAddPost !== undefined && (
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="sm"
               onClick={onAddPost}
-              className="tw-col-start-2 tw-row-start-1 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-self-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-100 sm:tw-py-1.5"
+              className="tw-col-start-2 tw-row-start-1 tw-self-center"
             >
               <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-              <span className="tw-text-xs sm:tw-text-sm">Add post</span>
-            </button>
+              <span>Add post</span>
+            </Button>
           )}
           <fieldset className="tw-no-scrollbar tw-col-span-full tw-row-start-3 tw-mx-0 tw-mb-0 tw-mt-2 tw-w-full tw-min-w-0 tw-overflow-x-auto tw-border-0 tw-p-0 lg:tw-mt-0 lg:tw-w-auto lg:tw-overflow-visible">
             <legend className="tw-sr-only">Profile wave switch controls</legend>

@@ -259,7 +259,7 @@ export function UserPageXtdhGrantListItem({
         message="This grant will be stopped immediately. All previously granted TDH will remain untouched."
         confirmText="Stop Grant"
         isConfirming={stopGrant.isPending}
-        confirmButtonClass="tw-cursor-pointer tw-bg-iron-800 tw-border-iron-800 hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-text-white"
+        confirmVariant="tertiary"
         icon={
           <span className="tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800">
             <svg
@@ -286,7 +286,7 @@ export function UserPageXtdhGrantListItem({
         message="This grant will be revoked. All granted TDH will be removed as if the grant never existed."
         confirmText="Revoke Grant"
         isConfirming={revokeGrant.isPending}
-        confirmButtonClass="tw-cursor-pointer tw-bg-[#F04438] tw-border-[#F04438] hover:tw-bg-[#D92D20] hover:tw-border-[#D92D20]"
+        confirmVariant="destructive"
         icon={
           <span className="tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-red/10 tw-bg-red/10">
             <svg

@@ -1,3 +1,4 @@
+import Button from "@/components/utils/button/Button";
 import { ChartBarIcon } from "@heroicons/react/24/outline";
 import type { CollectedCollectionType } from "@/entities/IProfile";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -131,23 +132,18 @@ export function CollectedStatsHeader({
         )}
       </div>
 
-      <button
-        type="button"
+      <Button
+        variant={isDetailsOpen ? "primary" : "tertiary"}
+        size="sm"
         aria-expanded={isDetailsOpen}
         aria-controls={detailsId}
         onClick={onToggleDetails}
-        className={[
-          "tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500",
-          isDetailsOpen
-            ? "tw-border-iron-200 tw-bg-iron-200 tw-text-iron-950"
-            : "tw-border-iron-800 tw-bg-iron-950/60 tw-text-iron-200 hover:tw-border-iron-700 hover:tw-bg-iron-900",
-        ].join(" ")}
       >
         <span className="-tw-ml-1 tw-inline-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0">
           <ChartBarIcon aria-hidden="true" className="tw-h-full tw-w-full" />
         </span>
         <span>{detailsButtonLabel}</span>
-      </button>
+      </Button>
     </div>
   );
 }

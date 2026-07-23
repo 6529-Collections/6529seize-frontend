@@ -6,8 +6,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import SelectGroupModalSearchName from "@/components/utils/select-group/SelectGroupModalSearchName";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -445,13 +444,14 @@ function CurationGroupSummaryState({
       <CurationGroupRow
         group={selectedGroup}
         trailingContent={
-          <SecondaryButton
-            onClicked={onOpenGroupSearch}
-            size="sm"
+          <Button
+            onClick={onOpenGroupSearch}
+            variant="secondary"
+            size="xs"
             className="tw-whitespace-nowrap"
           >
             Change group
-          </SecondaryButton>
+          </Button>
         }
       />
     );
@@ -463,13 +463,14 @@ function CurationGroupSummaryState({
         <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
           No group selected yet.
         </p>
-        <SecondaryButton
-          onClicked={onOpenGroupSearch}
-          size="sm"
+        <Button
+          onClick={onOpenGroupSearch}
+          variant="secondary"
+          size="xs"
           className="tw-whitespace-nowrap"
         >
           Choose group
-        </SecondaryButton>
+        </Button>
       </div>
     </div>
   );
@@ -757,20 +758,19 @@ export default function MyStreamWaveCurationCreateDialog({
 
         <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-5 sm:tw-px-6">
           <div className="tw-flex tw-justify-end tw-gap-3">
-            <SecondaryButton
-              onClicked={onClose}
-              className="tw-border-white/[0.06] tw-bg-transparent tw-text-iron-400 tw-ring-0 desktop-hover:hover:tw-border-white/[0.06] desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-100"
-            >
+            <Button onClick={onClose} variant="tertiary" size="md">
               Cancel
-            </SecondaryButton>
-            <PrimaryButton
+            </Button>
+            <Button
               loading={saveMutation.isPending}
               disabled={isSubmitDisabled}
-              onClicked={handleSubmit}
-              padding="tw-px-6 tw-py-2.5"
+              onClick={handleSubmit}
+              variant="primary"
+              size="md"
+              className="tw-px-6"
             >
               {submitButtonLabel}
-            </PrimaryButton>
+            </Button>
           </div>
         </div>
       </div>

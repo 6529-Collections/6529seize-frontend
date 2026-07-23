@@ -7,6 +7,7 @@ import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import IdentitySearch, {
   IdentitySearchSize,
 } from "@/components/utils/input/identity/IdentitySearch";
+import Button from "@/components/utils/button/Button";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { useXtdhGrantsSearchQuery } from "@/hooks/useXtdhGrantsSearchQuery";
@@ -230,13 +231,13 @@ export default function GroupCreateXtdhGrantModal({
                     })}
                   </div>
                 </div>
-                <button
-                  type="button"
+                <Button
                   onClick={onResetFilters}
-                  className="tw-h-[42px] tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+                  variant="tertiary"
+                  size="md"
                 >
                   Clear filters
-                </button>
+                </Button>
               </div>
 
               <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40">
@@ -261,17 +262,18 @@ export default function GroupCreateXtdhGrantModal({
                       <p className="tw-m-0 tw-text-sm tw-text-red">
                         {errorMessage ?? "Unable to load grants."}
                       </p>
-                      <button
-                        type="button"
+                      <Button
                         onClick={() => {
                           refetch().catch(() => {
                             // Query error state is already rendered.
                           });
                         }}
-                        className="tw-mt-3 tw-rounded-md tw-border tw-border-solid tw-border-red/40 tw-bg-red/20 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-red"
+                        variant="tertiary"
+                        size="xs"
+                        className="tw-mt-3"
                       >
                         Retry
-                      </button>
+                      </Button>
                     </div>
                   )}
 
@@ -301,14 +303,15 @@ export default function GroupCreateXtdhGrantModal({
 
                 {hasNextPage && (
                   <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-3">
-                    <button
-                      type="button"
+                    <Button
                       onClick={() => fetchNextPage()}
-                      disabled={isFetchingNextPage}
-                      className="tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800"
+                      loading={isFetchingNextPage}
+                      variant="tertiary"
+                      size="sm"
+                      fullWidth
                     >
                       {isFetchingNextPage ? "Loading..." : "Load more"}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

@@ -3,7 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import CreateDropReplyingWrapper from "@/components/waves/CreateDropReplyingWrapper";
 import type { DropMutationBody } from "@/components/waves/CreateDrop";
@@ -665,39 +665,43 @@ export default function QuorumProposalDropModal({
               )}
 
               <div className="tw-mt-6 tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-                <button
-                  type="button"
+                <Button
                   onClick={() =>
                     setCurrentStepIndex((current) => Math.max(0, current - 1))
                   }
                   disabled={currentStepIndex === 0 || submitting}
-                  className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-white"
+                  variant="tertiary"
+                  size="md"
+                  className="tw-px-4"
                 >
                   Back
-                </button>
+                </Button>
 
                 {isLastStep ? (
-                  <PrimaryButton
-                    onClicked={onSubmitClick}
+                  <Button
+                    onClick={onSubmitClick}
                     loading={submitting}
                     disabled={submitting || !hasProposalContent}
-                    padding="tw-px-5 tw-py-2.5"
+                    variant="primary"
+                    size="md"
+                    className="tw-px-5"
                   >
                     <span>Submit Proposal</span>
-                  </PrimaryButton>
+                  </Button>
                 ) : (
-                  <PrimaryButton
-                    onClicked={() =>
+                  <Button
+                    onClick={() =>
                       setCurrentStepIndex((current) =>
                         Math.min(QUORUM_PROPOSAL_STEPS.length - 1, current + 1)
                       )
                     }
-                    loading={false}
                     disabled={submitting}
-                    padding="tw-px-5 tw-py-2.5"
+                    variant="primary"
+                    size="md"
+                    className="tw-px-5"
                   >
                     <span>Next</span>
-                  </PrimaryButton>
+                  </Button>
                 )}
               </div>
             </div>

@@ -8,6 +8,7 @@ import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import type { SupportedChain } from "@/components/nft-picker/types";
 import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
 import Spinner from "@/components/utils/Spinner";
+import Button from "@/components/utils/button/Button";
 
 import type { GrantTokensDisclosureState } from "../types";
 import { useGrantTokensDisclosure } from "../hooks/useGrantTokensDisclosure";
@@ -145,13 +146,14 @@ function GrantTokensErrorState({
   return (
     <div className="tw-border-red-500/40 tw-bg-red-500/5 tw-rounded-lg tw-border tw-p-4">
       <p className="tw-text-red-300 tw-m-0 tw-text-sm">{message}</p>
-      <button
-        type="button"
-        className="tw-border-red-500/60 tw-text-red-200 desktop-hover:hover:tw-bg-red-500/10 tw-mt-3 tw-rounded-md tw-border tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold"
+      <Button
+        variant="tertiary"
+        size="sm"
+        className="tw-mt-3"
         onClick={onRetry}
       >
         Retry
-      </button>
+      </Button>
     </div>
   );
 }

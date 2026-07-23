@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useContext, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import Button from "@/components/utils/button/Button";
 
 export default function WaveDeleteModal({
   wave,
@@ -131,15 +132,13 @@ export default function WaveDeleteModal({
             <form>
               <div className="tw-mt-8">
                 <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
-                  <button
+                  <Button
                     disabled={mutating}
                     onClick={onDelete}
-                    type="button"
-                    className={`tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out sm:tw-w-auto ${
-                      mutating
-                        ? "tw-cursor-not-allowed tw-border-iron-400 tw-bg-iron-400"
-                        : "tw-cursor-pointer tw-border-[#F04438] tw-bg-[#F04438] hover:tw-border-[#D92D20] hover:tw-bg-[#D92D20]"
-                    }`}
+                    variant="destructive"
+                    size="lg"
+                    fullWidth
+                    className="tw-relative sm:tw-w-auto"
                   >
                     <div
                       style={{ visibility: mutating ? "hidden" : "visible" }}
@@ -166,19 +165,17 @@ export default function WaveDeleteModal({
                         ></path>
                       </svg>
                     )}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     disabled={mutating}
                     onClick={closeModal}
-                    type="button"
-                    className={`tw-mt-3 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out sm:tw-mt-0 sm:tw-w-auto ${
-                      mutating
-                        ? "tw-cursor-not-allowed"
-                        : "hover:tw-border-iron-700 hover:tw-bg-iron-800"
-                    }`}
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                    className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             </form>

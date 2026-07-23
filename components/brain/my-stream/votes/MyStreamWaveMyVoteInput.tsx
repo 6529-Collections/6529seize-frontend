@@ -16,6 +16,7 @@ import {
 } from "@/helpers/waves/waves.constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import Button from "@/components/utils/button/Button";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
@@ -293,7 +294,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         </div>
 
         <div className="tw-flex tw-items-center tw-gap-2">
-          <button
+          <Button
             onClick={(e) => {
               e.stopPropagation();
               void handleSubmit();
@@ -301,7 +302,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             disabled={
               !isEditing || isProcessing || isResetting || isVotingClosed
             }
-            className="tw-relative tw-flex tw-h-8 tw-min-w-[60px] tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-300 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-ring-iron-600"
+            variant="tertiary"
+            size="xs"
+            className="tw-relative tw-min-w-[60px]"
             aria-label="Submit vote"
           >
             {isProcessing || isResetting ? (
@@ -326,20 +329,20 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             ) : (
               "Vote"
             )}
-          </button>
+          </Button>
           {onExplainVote && (
-            <button
-              type="button"
+            <Button
               onClick={(e) => {
                 e.stopPropagation();
                 handleExplainVote();
               }}
               disabled={!canExplainVote}
-              className="tw-relative tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-300 active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-ring-iron-600"
+              variant="tertiary"
+              size="xs"
               aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
             >
               {t(locale, "waves.voteRationale.explain")}
-            </button>
+            </Button>
           )}
         </div>
       </div>
