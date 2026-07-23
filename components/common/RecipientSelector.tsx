@@ -599,6 +599,8 @@ export default function RecipientSelector({
     setQuery("");
     setTimeout(() => searchInputRef.current?.focus(), 0);
   };
+  const searchPlaceholderProps =
+    placeholder === undefined ? {} : { placeholder };
 
   return (
     <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-space-y-3">
@@ -640,7 +642,7 @@ export default function RecipientSelector({
           resultsAtEnd={resultsAtEnd}
           searchInputRef={searchInputRef}
           locale={locale}
-          {...(placeholder === undefined ? {} : { placeholder })}
+          {...searchPlaceholderProps}
         />
       )}
     </div>
