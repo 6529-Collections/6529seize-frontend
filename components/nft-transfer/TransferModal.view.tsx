@@ -3,6 +3,7 @@ import RecipientSelector from "@/components/common/RecipientSelector";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import {
   faAnglesDown,
@@ -297,21 +298,23 @@ export function FooterActions({
   if (flow === "review") {
     return (
       <div className="tw-flex tw-items-center tw-gap-2">
-        <button
+        <Button
           type="button"
           onClick={onCancel}
-          className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium hover:tw-bg-white/15"
+          variant="secondary"
+          size="md"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           disabled={!canConfirm}
           onClick={onConfirm}
-          className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white tw-px-4 tw-py-2 tw-font-medium tw-text-black disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          variant="primary"
+          size="md"
         >
           Transfer
-        </button>
+        </Button>
       </div>
     );
   }
@@ -319,24 +322,26 @@ export function FooterActions({
   const anyPending = anyTxsPending(txs);
   if (anyPending) {
     return (
-      <button
+      <Button
         type="button"
         disabled
-        className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium tw-opacity-60"
+        variant="secondary"
+        size="md"
       >
         Processing…
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={onClose}
-      className="tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-black hover:tw-bg-white/80 hover:tw-text-black"
+      variant="primary"
+      size="md"
     >
       Close
-    </button>
+    </Button>
   );
 }
 
