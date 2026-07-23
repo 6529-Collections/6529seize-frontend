@@ -32,10 +32,10 @@ export default function AboutMemeLab() {
           <Image
             alt={m(locale, "about.memeLab.hero.logoAlt")}
             className="tw-mt-6 tw-h-auto tw-w-[250px] tw-max-w-full sm:tw-mt-8"
-            height={54}
+            height={372}
             loading="eager"
             src="/memelab.png"
-            width={250}
+            width={1734}
           />
         </div>
       </header>

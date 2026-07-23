@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 
 import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 
@@ -99,16 +99,19 @@ function GradientDesign({ locale }: { readonly locale: SupportedLocale }) {
           {m(locale, "about.gradient.design.system")}
         </p>
         <p className={BODY_CLASS}>
-          {m(locale, "about.gradient.design.artistBefore")}
-          <Link
-            className="hover:tw-text-primary-200 tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-500/50 tw-underline-offset-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            href="https://x.com/6529er"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            @6529er
-          </Link>
-          {m(locale, "about.gradient.design.artistAfter")}
+          {tRich(locale, "about.gradient.design.artist", {
+            artistLink: (
+              <Link
+                key="artist-link"
+                className="hover:tw-text-primary-200 tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-500/50 tw-underline-offset-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                href="https://x.com/6529er"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                @6529er
+              </Link>
+            ),
+          })}
         </p>
         <p className={BODY_CLASS}>
           {m(locale, "about.gradient.design.onChain")}
