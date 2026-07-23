@@ -639,8 +639,8 @@ export default function RecipientSelector({
           resultsHasOverflow={resultsHasOverflow}
           resultsAtEnd={resultsAtEnd}
           searchInputRef={searchInputRef}
-          placeholder={placeholder}
           locale={locale}
+          {...(placeholder === undefined ? {} : { placeholder })}
         />
       )}
     </div>
