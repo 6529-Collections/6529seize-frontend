@@ -129,7 +129,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
             <p className="tw-m-0">
               {m(locale, "about.subscriptions.reference.modes.auto")}
             </p>
-            <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-p-4">
+            <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-4">
               <p className="tw-m-0">
                 {m(locale, "about.subscriptions.reference.modes.optOut")}
               </p>
@@ -232,7 +232,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
             icon={faChevronDown}
           />
         </summary>
-        <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/70 tw-p-4 sm:tw-p-6">
+        <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-bg-iron-950/70 tw-p-4 sm:tw-p-6">
           <ul className={LIST_CLASS}>
             <li>
               {m(locale, "about.subscriptions.reference.delegation.intro")}
@@ -315,7 +315,7 @@ function GasSavings({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-gas-savings-heading"
-      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
+      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
     >
       <div className="tw-flex tw-items-center tw-gap-3 sm:tw-gap-4">
         <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#00f0ff]/10 tw-text-lg tw-text-[#00f0ff] sm:tw-size-12 sm:tw-text-xl">
@@ -380,7 +380,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-remote-minting-heading"
-      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
+      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
     >
       <div className="tw-flex tw-items-center tw-gap-3 sm:tw-gap-4">
         <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#7000ff]/20 tw-text-lg tw-text-[#8f5cff] sm:tw-size-12 sm:tw-text-xl">
