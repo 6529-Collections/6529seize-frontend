@@ -17,7 +17,7 @@ describe("AboutGradients", () => {
         level: 1,
       })
     ).toBeInTheDocument();
-    const img = screen.getByRole("img", { name: /6529 Gradient artwork/i });
+    const img = screen.getByRole("img", { name: "6529 Gradient" });
     expect(img).toHaveAttribute("data-src", "/gradients-preview.png");
   });
 

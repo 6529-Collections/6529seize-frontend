@@ -18,14 +18,11 @@ describe("AboutMemeLab", () => {
     expect(img).toHaveAttribute("data-src", "/memelab.png");
   });
 
-  it("preserves the original contract wording and collection link", () => {
+  it("preserves the original contract wording", () => {
     render(<AboutMemeLab />);
     expect(
       screen.getByText(/^The Meme Lab is an experimental CC0 contract/i)
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /open meme lab collection/i })
-    ).toHaveAttribute("href", "/meme-lab");
     expect(
       screen.getByText(
         "We actively encourage the artists to experiment on any dimension they like on the Meme Lab's contract - artistic, community, edition size, price and so on."

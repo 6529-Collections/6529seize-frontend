@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -30,21 +29,14 @@ export default function AboutMemeLab() {
             {m(locale, "about.memeLab.hero.title")}
           </h1>
 
-          <Link
-            aria-label={m(locale, "about.memeLab.hero.collectionLinkAriaLabel")}
-            className="tw-mt-10 tw-block tw-w-full tw-max-w-4xl tw-rounded-sm focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-[#0D0D0F] sm:tw-mt-12"
-            href="/meme-lab"
-          >
-            <Image
-              alt={m(locale, "about.memeLab.hero.logoAlt")}
-              className="tw-h-auto tw-w-full"
-              height={372}
-              loading="eager"
-              sizes="(max-width: 1023px) 100vw, 900px"
-              src="/memelab.png"
-              width={1734}
-            />
-          </Link>
+          <Image
+            alt={m(locale, "about.memeLab.hero.logoAlt")}
+            className="tw-mt-10 tw-h-auto tw-w-[250px] tw-max-w-full sm:tw-mt-12"
+            height={54}
+            loading="eager"
+            src="/memelab.png"
+            width={250}
+          />
         </div>
       </header>
 

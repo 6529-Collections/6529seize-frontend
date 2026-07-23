@@ -43,15 +43,23 @@ function GradientHeader({ locale }: { readonly locale: SupportedLocale }) {
           {m(locale, "about.gradient.hero.title")}
         </h1>
 
-        <Image
-          alt={m(locale, "about.gradient.preview.alt")}
-          className="tw-mt-8 tw-h-auto tw-w-full sm:tw-mt-10"
-          height={600}
-          loading="eager"
-          sizes="(max-width: 1023px) 100vw, 1200px"
-          src="/gradients-preview.png"
-          width={2100}
-        />
+        <div className="tw-mt-8 tw-text-center sm:tw-mt-10">
+          <Image
+            alt={m(locale, "about.gradient.preview.alt")}
+            height="0"
+            loading="eager"
+            priority
+            src="/gradients-preview.png"
+            style={{
+              height: "auto",
+              width: "auto",
+              maxHeight: "400px",
+              maxWidth: "100%",
+            }}
+            unoptimized
+            width="0"
+          />
+        </div>
       </div>
     </header>
   );
