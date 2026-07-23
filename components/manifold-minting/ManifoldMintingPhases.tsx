@@ -161,6 +161,8 @@ export default function ManifoldMemesMintingPhases(
     }
 
     let isCancelled = false;
+    const controller = new AbortController();
+    const timeoutId = globalThis.setTimeout(() => controller.abort(), 30_000);
     setDistribution(undefined);
     setDistributionState("loading");
 
@@ -178,7 +180,8 @@ export default function ManifoldMemesMintingPhases(
           search: address,
         });
         const response = await fetch(
-          `https://api.6529.io/api/distributions?${query.toString()}`
+          `https://api.6529.io/api/distributions?${query.toString()}`,
+          { signal: controller.signal }
         );
         if (!response.ok) {
           throw new Error(
@@ -192,11 +195,13 @@ export default function ManifoldMemesMintingPhases(
           setDistributionState("ready");
         }
       } catch (error) {
-        console.error("Failed to fetch mint distribution", error);
         if (!isCancelled) {
+          console.error("Failed to fetch mint distribution", error);
           setDistribution(undefined);
           setDistributionState("error");
         }
+      } finally {
+        globalThis.clearTimeout(timeoutId);
       }
     };
 
@@ -204,6 +209,8 @@ export default function ManifoldMemesMintingPhases(
 
     return () => {
       isCancelled = true;
+      globalThis.clearTimeout(timeoutId);
+      controller.abort();
     };
   }, [props.address, props.contract, props.token_id]);
 

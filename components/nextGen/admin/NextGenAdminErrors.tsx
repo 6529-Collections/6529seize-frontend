@@ -3,10 +3,7 @@ export function printAdminErrors(errors: string[]) {
     <div className="tw-mb-4">
       <ul>
         {errors.map((error) => (
-          <li
-            key={`error-${error.replaceAll("", " ")}`}
-            className="tw-text-error"
-          >
+          <li key={error} className="tw-text-error">
             {error}
           </li>
         ))}
