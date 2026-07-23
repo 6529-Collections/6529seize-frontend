@@ -64,6 +64,24 @@ export const TRANSFER_MESSAGES = {
   "transfer.card.imageAltFallback": "NFT image",
   "transfer.card.tdh": "TDH",
   "transfer.card.rank": "Rank {rank}",
+  "recipientSelector.label": "Recipient",
+  "recipientSelector.search.searching": "Searching…",
+  "recipientSelector.search.charactersRemaining.one":
+    "Type {count} more character",
+  "recipientSelector.search.charactersRemaining.many":
+    "Type {count} more characters",
+  "recipientSelector.search.results.one": "Found {count} result",
+  "recipientSelector.search.results.many": "Found {count} results",
+  "recipientSelector.search.noResults": "No results.",
+  "recipientSelector.search.prompt": "Type to search.",
+  "recipientSelector.search.placeholder":
+    "Search profile by handle, ENS or wallet",
+  "recipientSelector.wallets.loading": "Loading wallets…",
+  "recipientSelector.wallets.noneFound": "No wallets found for {profile}.",
+  "recipientSelector.wallets.chooseDestination": "Choose destination wallet",
+  "recipientSelector.profileStats": "TDH: {tdh} — Level: {level}",
+  "recipientSelector.change": "Change",
+  "recipientSelector.scrollForMore": "Scroll for more",
 } as const;
 
 export const FR_FR_TRANSFER_MESSAGES = {
@@ -133,6 +151,26 @@ export const FR_FR_TRANSFER_MESSAGES = {
   "transfer.card.imageAltFallback": "Image du NFT",
   "transfer.card.tdh": "TDH",
   "transfer.card.rank": "Rang {rank}",
+  "recipientSelector.label": "Destinataire",
+  "recipientSelector.search.searching": "Recherche…",
+  "recipientSelector.search.charactersRemaining.one":
+    "Saisissez encore {count} caractère",
+  "recipientSelector.search.charactersRemaining.many":
+    "Saisissez encore {count} caractères",
+  "recipientSelector.search.results.one": "{count} résultat trouvé",
+  "recipientSelector.search.results.many": "{count} résultats trouvés",
+  "recipientSelector.search.noResults": "Aucun résultat.",
+  "recipientSelector.search.prompt": "Saisissez votre recherche.",
+  "recipientSelector.search.placeholder":
+    "Rechercher un profil par identifiant, ENS ou portefeuille",
+  "recipientSelector.wallets.loading": "Chargement des portefeuilles…",
+  "recipientSelector.wallets.noneFound":
+    "Aucun portefeuille trouvé pour {profile}.",
+  "recipientSelector.wallets.chooseDestination":
+    "Choisir le portefeuille de destination",
+  "recipientSelector.profileStats": "TDH : {tdh} — Niveau : {level}",
+  "recipientSelector.change": "Modifier",
+  "recipientSelector.scrollForMore": "Faire défiler pour en voir plus",
 } satisfies Partial<Record<keyof typeof TRANSFER_MESSAGES, string>>;
 
 export const ES_ES_TRANSFER_MESSAGES = {
@@ -203,6 +241,25 @@ export const ES_ES_TRANSFER_MESSAGES = {
   "transfer.card.imageAltFallback": "Imagen del NFT",
   "transfer.card.tdh": "TDH",
   "transfer.card.rank": "Rango {rank}",
+  "recipientSelector.label": "Destinatario",
+  "recipientSelector.search.searching": "Buscando…",
+  "recipientSelector.search.charactersRemaining.one":
+    "Escribe {count} carácter más",
+  "recipientSelector.search.charactersRemaining.many":
+    "Escribe {count} caracteres más",
+  "recipientSelector.search.results.one": "{count} resultado encontrado",
+  "recipientSelector.search.results.many": "{count} resultados encontrados",
+  "recipientSelector.search.noResults": "No hay resultados.",
+  "recipientSelector.search.prompt": "Escribe para buscar.",
+  "recipientSelector.search.placeholder":
+    "Buscar perfil por usuario, ENS o cartera",
+  "recipientSelector.wallets.loading": "Cargando carteras…",
+  "recipientSelector.wallets.noneFound":
+    "No se encontraron carteras para {profile}.",
+  "recipientSelector.wallets.chooseDestination": "Elige la cartera de destino",
+  "recipientSelector.profileStats": "TDH: {tdh} — Nivel: {level}",
+  "recipientSelector.change": "Cambiar",
+  "recipientSelector.scrollForMore": "Desplázate para ver más",
 } satisfies Partial<Record<keyof typeof TRANSFER_MESSAGES, string>>;
 
 export const DE_DE_TRANSFER_MESSAGES = {
@@ -273,4 +330,23 @@ export const DE_DE_TRANSFER_MESSAGES = {
   "transfer.card.imageAltFallback": "NFT-Bild",
   "transfer.card.tdh": "TDH",
   "transfer.card.rank": "Rang {rank}",
+  "recipientSelector.label": "Empfänger",
+  "recipientSelector.search.searching": "Suche…",
+  "recipientSelector.search.charactersRemaining.one":
+    "Gib noch {count} Zeichen ein",
+  "recipientSelector.search.charactersRemaining.many":
+    "Gib noch {count} Zeichen ein",
+  "recipientSelector.search.results.one": "{count} Ergebnis gefunden",
+  "recipientSelector.search.results.many": "{count} Ergebnisse gefunden",
+  "recipientSelector.search.noResults": "Keine Ergebnisse.",
+  "recipientSelector.search.prompt": "Zum Suchen tippen.",
+  "recipientSelector.search.placeholder":
+    "Profil nach Handle, ENS oder Wallet suchen",
+  "recipientSelector.wallets.loading": "Wallets werden geladen…",
+  "recipientSelector.wallets.noneFound":
+    "Keine Wallets für {profile} gefunden.",
+  "recipientSelector.wallets.chooseDestination": "Ziel-Wallet auswählen",
+  "recipientSelector.profileStats": "TDH: {tdh} — Level: {level}",
+  "recipientSelector.change": "Ändern",
+  "recipientSelector.scrollForMore": "Scrollen, um mehr zu sehen",
 } satisfies Partial<Record<keyof typeof TRANSFER_MESSAGES, string>>;

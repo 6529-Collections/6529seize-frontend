@@ -2,6 +2,7 @@
 
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import { useAuth } from "@/components/auth/Auth";
+import { useIsTransferModeActive } from "@/components/nft-transfer/TransferState";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import dynamic from "next/dynamic";
 import { useSyncExternalStore } from "react";
@@ -40,6 +41,7 @@ const subscribeDesktopViewport = (onStoreChange: () => void): (() => void) => {
 const useCanMountQuickDirectMessages = (): boolean => {
   const { connectedProfile, showWaves } = useAuth();
   const { isApp, isMobileDevice } = useDeviceInfo();
+  const isTransferModeActive = useIsTransferModeActive();
   const isDesktopViewport = useSyncExternalStore(
     subscribeDesktopViewport,
     getDesktopViewportSnapshot,
@@ -49,6 +51,7 @@ const useCanMountQuickDirectMessages = (): boolean => {
   return Boolean(
     !isApp &&
     !isMobileDevice &&
+    !isTransferModeActive &&
     isDesktopViewport &&
     connectedProfile?.handle &&
     showWaves
