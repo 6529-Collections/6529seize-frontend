@@ -96,7 +96,7 @@ export default function AboutMemes() {
             {t(DEFAULT_LOCALE, "about.memes.eyebrow")}
           </p>
           <h1
-            className="tw-m-0 tw-max-w-[76rem] tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl"
+            className="tw-m-0 tw-max-w-3xl tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl"
             id="about-memes-title"
           >
             {t(DEFAULT_LOCALE, "about.memes.title")}
