@@ -50,6 +50,10 @@ export class ApiDrop {
     * Time when the drop was updated in milliseconds since 1-1-1970 00:00:00.0 UTC
     */
     'updated_at': number | null;
+    /**
+    * Latest time the author can still edit this drop in milliseconds since 1-1-1970 00:00:00.0 UTC, or null when editing is not available.
+    */
+    'editable_until'?: number | null;
     'title': string | null;
     'parts': Array<ApiDropPart>;
     /**
@@ -138,6 +142,12 @@ export class ApiDrop {
         {
             "name": "updated_at",
             "baseName": "updated_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "editable_until",
+            "baseName": "editable_until",
             "type": "number",
             "format": "int64"
         },

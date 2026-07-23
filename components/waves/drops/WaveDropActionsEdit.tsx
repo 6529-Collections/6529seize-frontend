@@ -5,6 +5,7 @@ import { PencilIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useIsDropEditable } from "@/hooks/drops/useIsDropEditable";
 
 interface WaveDropActionsEditProps {
   readonly drop: ExtendedDrop;
@@ -18,9 +19,16 @@ export default function WaveDropActionsEdit({
   isDropdownItem = false,
 }: WaveDropActionsEditProps) {
   const { connectedProfile } = useContext(AuthContext);
+  const isEditable = useIsDropEditable(drop.editable_until);
 
   // Only show edit for drop authors
   if (connectedProfile?.handle !== drop.author.handle) {
+    return null;
+  }
+
+  // The API rejects edits after the drop's edit window; offering the action
+  // would let the user compose a change that is lost with an error.
+  if (!isEditable) {
     return null;
   }
 

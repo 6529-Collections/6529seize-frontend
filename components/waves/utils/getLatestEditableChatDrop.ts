@@ -1,5 +1,6 @@
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { isDropEditableAt } from "@/helpers/waves/drop-editability.helpers";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
@@ -35,12 +36,16 @@ export function getLatestEditableChatDrop({
 
   let latestDrop: ExtendedDrop | null = null;
 
+  const now = Date.now();
   for (const drop of drops) {
     if (
       drop.type !== DropSize.FULL ||
       drop.id.startsWith("temp-") ||
       drop.drop_type !== ApiDropType.Chat ||
-      drop.wave.id !== waveId
+      drop.wave.id !== waveId ||
+      // The API rejects edits after the drop's edit window; skip drops the
+      // arrow-up shortcut could no longer actually edit.
+      !isDropEditableAt({ editableUntil: drop.editable_until, atMillis: now })
     ) {
       continue;
     }

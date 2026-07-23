@@ -34,6 +34,10 @@ export class ApiDropV2 {
     'serial_no': number;
     'created_at': number;
     'updated_at'?: number;
+    /**
+    * Latest time the author can still edit this drop in milliseconds since 1-1-1970 00:00:00.0 UTC. Absent when editing is not available.
+    */
+    'editable_until'?: number;
     'is_signed': boolean;
     'hide_link_preview': boolean;
     'title'?: string;
@@ -83,6 +87,12 @@ export class ApiDropV2 {
         {
             "name": "updated_at",
             "baseName": "updated_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "editable_until",
+            "baseName": "editable_until",
             "type": "number",
             "format": "int64"
         },
