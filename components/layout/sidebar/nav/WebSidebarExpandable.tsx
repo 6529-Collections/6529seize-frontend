@@ -88,7 +88,7 @@ function WebSidebarExpandable({
   const flyoutId = `sidebar-flyout-${section.key}`;
 
   return (
-    <div className="tw-@container/sidebar">
+    <>
       <WebSidebarNavItem
         onClick={(e) => onToggle(e)}
         onPointerEnter={onPointerEnter}
@@ -125,7 +125,7 @@ function WebSidebarExpandable({
               aria-label={t(DEFAULT_LOCALE, "navigation.sidebar.panelLabel", {
                 section: section.name,
               })}
-              className="tw-pointer-events-none tw-relative tw-m-0 tw-p-0 tw-opacity-0 tw-transition-opacity tw-duration-150 @[15.5rem]/sidebar:tw-pointer-events-auto @[15.5rem]/sidebar:tw-opacity-100 motion-reduce:tw-transition-none"
+              className="tw-relative tw-m-0 tw-p-0"
             >
               <div
                 className={`tw-absolute tw-bottom-0 tw-left-7 tw-top-0 tw-w-px tw-bg-iron-800 tw-transition-opacity tw-duration-300 motion-reduce:tw-transition-none ${
@@ -180,7 +180,7 @@ function WebSidebarExpandable({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
