@@ -117,7 +117,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                     collection={props.collection}
                     token={props.token}
                   />
-                  <div className="tw-grid tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-pl-5 lg:tw-pt-0">
+                  <div className="tw-grid tw-content-start tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-pl-5 lg:tw-pt-0">
                     {transferSingle}
                     <NextgenTokenTraits
                       collection={props.collection}

@@ -126,10 +126,10 @@ export default function UserPageCollectedCard({
             "tw-items-center tw-justify-center",
             "tw-h-9 tw-w-9 tw-rounded-full",
             "tw-bg-iron-900/90 hover:tw-bg-primary-500/75",
-            "tw-ring-1 tw-ring-white/30",
+            "tw-text-white tw-ring-1 tw-ring-white/30",
           ].join(" ")}
         >
-          <FontAwesomeIcon icon={faPlus} className="tw-size-5" color="#fff" />
+          <FontAwesomeIcon icon={faPlus} className="tw-size-5" />
         </button>
       )}
 
@@ -158,11 +158,7 @@ export default function UserPageCollectedCard({
                 aria-label="Decrease quantity"
                 className="tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
               >
-                <FontAwesomeIcon
-                  icon={faMinusCircle}
-                  className="tw-size-5"
-                  color="#fff"
-                />
+                <FontAwesomeIcon icon={faMinusCircle} className="tw-size-5" />
               </button>
               <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-text-white">
                 {qtySelected}/{copiesMax}
@@ -178,11 +174,7 @@ export default function UserPageCollectedCard({
                 aria-label="Increase quantity"
                 className="tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none disabled:tw-opacity-50"
               >
-                <FontAwesomeIcon
-                  icon={faPlusCircle}
-                  className="tw-size-5"
-                  color="#fff"
-                />
+                <FontAwesomeIcon icon={faPlusCircle} className="tw-size-5" />
               </button>
             </div>
           ) : (
@@ -212,7 +204,7 @@ export default function UserPageCollectedCard({
 
   const getRingClasses = () => {
     if (selected) {
-      return "tw-ring-2 tw-ring-primary-500 tw-ring-inset";
+      return "!tw-border-primary-500 tw-ring-2 tw-ring-primary-500";
     }
     if (isDisabled) {
       return "tw-opacity-60";
@@ -319,14 +311,7 @@ export default function UserPageCollectedCard({
                   <Tooltip
                     id={tooltipId}
                     variant="light"
-                    className="tw-z-[9999]"
-                    style={{
-                      padding: "6px 10px",
-                      fontSize: "12px",
-                      maxWidth: "85%",
-                      whiteSpace: "normal",
-                      wordWrap: "break-word",
-                    }}
+                    className="tw-z-[9999] !tw-max-w-[85%] !tw-whitespace-normal !tw-px-2.5 !tw-py-1.5 !tw-text-xs [overflow-wrap:anywhere]"
                   >
                     Only the balance of the connected wallet is available for
                     transfer

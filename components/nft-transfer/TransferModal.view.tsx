@@ -106,8 +106,8 @@ function SelectedSummaryList({
   readonly leftAtEnd: boolean;
 }) {
   return (
-    <div className="tw-flex tw-max-h-full tw-min-h-0 tw-flex-col tw-space-y-2 tw-overflow-hidden">
-      <div className="tw-flex-shrink-0 tw-font-semibold">
+    <div className="tw-flex tw-max-h-full tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-hidden">
+      <div className="tw-flex-shrink-0 tw-pb-1 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
         You're transferring <span className="tw-font-bold">{items.length}</span>{" "}
         {items.length === 1 ? "NFT" : "NFTs"} ·{" "}
         <span className="tw-font-bold">
@@ -126,7 +126,7 @@ function SelectedSummaryList({
           return (
             <li
               key={it.key}
-              className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/10 tw-p-2"
+              className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-p-2.5 tw-ring-1 tw-ring-inset tw-ring-white/5"
             >
               {it.thumbUrl ? (
                 <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-white/10">
@@ -174,23 +174,19 @@ function TxStatusList({
 }) {
   const explorer = publicClient?.chain?.blockExplorers?.default.url;
 
-  const getBgColor = (state: TxState) => {
+  const getStatusClasses = (state: TxState) => {
     switch (state) {
       case "awaiting_approval":
-        return "#406AFE";
+        return "tw-bg-primary-500 tw-text-white";
       case "submitted":
-        return "#a1e1ff";
+        return "tw-bg-primary-300 tw-text-black";
       case "error":
-        return "#ffcccc";
+        return "tw-bg-error tw-text-white";
       case "success":
-        return "#ccffcc";
+        return "tw-bg-success tw-text-black";
       default:
-        return "rgba(255, 255, 255, 0.9)";
+        return "tw-bg-iron-100 tw-text-black";
     }
-  };
-  const getTextColor = (state: TxState) => {
-    if (state === "awaiting_approval") return "#fff";
-    return "#000";
   };
 
   const txLink = (hash: string) => {
@@ -212,11 +208,7 @@ function TxStatusList({
       {txs.map((t, index) => (
         <div
           key={t.id}
-          className="tw-rounded-lg tw-p-4"
-          style={{
-            backgroundColor: getBgColor(t.state),
-            color: getTextColor(t.state),
-          }}
+          className={`tw-rounded-lg tw-p-4 ${getStatusClasses(t.state)}`}
         >
           <div className="tw-font-medium">
             {index + 1}/ {t.label}
@@ -270,7 +262,7 @@ export function HeaderRight({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0"
+          className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           <FontAwesomeIcon icon={faXmarkCircle} className="tw-size-6" />
         </button>
@@ -300,7 +292,7 @@ export function FooterActions({
         <button
           type="button"
           onClick={onCancel}
-          className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium hover:tw-bg-white/15"
+          className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           Cancel
         </button>
@@ -308,7 +300,7 @@ export function FooterActions({
           type="button"
           disabled={!canConfirm}
           onClick={onConfirm}
-          className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white tw-px-4 tw-py-2 tw-font-medium tw-text-black disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          className="tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
         >
           Transfer
         </button>
@@ -391,7 +383,7 @@ export function BodyByFlow({
   }
 
   return (
-    <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-6 tw-overflow-hidden tw-px-4 tw-py-2 lg:tw-grid lg:tw-grid-cols-2">
+    <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-6 tw-overflow-hidden tw-p-4 sm:tw-p-6 lg:tw-grid lg:tw-grid-cols-2">
       <div className="tw-max-h-[50%] tw-min-h-0 lg:tw-max-h-none">
         <SelectedSummaryList
           items={items}

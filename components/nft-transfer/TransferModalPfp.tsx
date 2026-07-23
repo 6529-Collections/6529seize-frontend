@@ -23,12 +23,13 @@ export default function TransferModalPfp({
   const { data: resolved } = useResolvedIpfsUrl(src);
 
   const levelColor = getLevelBgColor(level);
+  const sizeClass = size === 56 ? "tw-size-14" : "tw-size-10";
 
   if (!resolved) {
     return (
       <div
-        style={{ width: size, height: size }}
-        className={`tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-sm tw-font-semibold ${levelColor}`}>
+        className={`${sizeClass} tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-sm tw-font-semibold ${levelColor}`}
+      >
         {level}
       </div>
     );
@@ -44,7 +45,8 @@ export default function TransferModalPfp({
         className="tw-rounded-full tw-object-cover"
       />
       <div
-        className={`tw-absolute tw-top-[-5px] tw-right-[-5px] tw-h-[18px] tw-w-[18px] tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-[8px] tw-font-semibold ${levelColor}`}>
+        className={`tw-absolute -tw-right-[5px] -tw-top-[5px] tw-flex tw-h-[18px] tw-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-text-[8px] tw-font-semibold ${levelColor}`}
+      >
         {level}
       </div>
     </div>
