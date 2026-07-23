@@ -117,6 +117,24 @@ describe("E2E pack manifest", () => {
     );
   });
 
+  it("rejects spec paths outside the repository", () => {
+    const absolute = clonePack(packs[0]);
+    absolute.specs = ["/etc/hosts"];
+    const traversing = clonePack(packs[0]);
+    traversing.specs = ["tests/../package.json"];
+
+    expect(manifestTools.validateManifest([absolute, traversing])).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'spec path "/etc/hosts" must be a safe repository-relative path'
+        ),
+        expect.stringContaining(
+          'spec path "tests/../package.json" must be a safe repository-relative path'
+        ),
+      ])
+    );
+  });
+
   it("adds generated scripts when a package has no previous E2E keys", () => {
     const nextPackage = manifestTools.applyScriptsToPackageJson(
       { scripts: { lint: "eslint ." } },

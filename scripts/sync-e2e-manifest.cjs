@@ -188,9 +188,13 @@ function validateCommandShape(problems, pack, root) {
     }
   }
   for (const spec of pack.specs ?? []) {
-    if (!/^[A-Za-z0-9_./*-]+$/.test(spec)) {
+    if (
+      !/^[A-Za-z0-9_./*-]+$/.test(spec) ||
+      path.isAbsolute(spec) ||
+      spec.split("/").includes("..")
+    ) {
       problems.push(
-        `${packLabel(pack)}: spec path "${spec}" contains unsafe shell characters.`
+        `${packLabel(pack)}: spec path "${spec}" must be a safe repository-relative path.`
       );
     } else if (root && !fs.existsSync(path.resolve(root, spec))) {
       problems.push(`${packLabel(pack)}: spec path "${spec}" does not exist.`);
