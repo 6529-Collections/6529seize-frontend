@@ -6,6 +6,9 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { getUserProfile } from "@/helpers/server.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIdentity } from "@/hooks/useIdentity";
+import { formatInteger, formatNumber } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,23 +20,38 @@ import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 const MIN_SEARCH_LENGTH = 3;
 
 function getSearchStatusText(
+  locale: SupportedLocale,
   isSearching: boolean,
   needsMoreSearchCharacters: boolean,
   remainingSearchCharacters: number,
   resultsLen: number,
   trimmedQuery: string
 ): string {
-  if (isSearching) return "Searching…";
+  if (isSearching) {
+    return translate(locale, "recipientSelector.search.searching");
+  }
   if (needsMoreSearchCharacters) {
-    const plural = remainingSearchCharacters === 1 ? "" : "s";
-    return `Type ${remainingSearchCharacters} more character${plural}`;
+    return translate(
+      locale,
+      remainingSearchCharacters === 1
+        ? "recipientSelector.search.charactersRemaining.one"
+        : "recipientSelector.search.charactersRemaining.many",
+      { count: formatInteger(locale, remainingSearchCharacters) }
+    );
   }
   if (resultsLen > 0) {
-    const plural = resultsLen === 1 ? "" : "s";
-    return `Found ${resultsLen} result${plural}`;
+    return translate(
+      locale,
+      resultsLen === 1
+        ? "recipientSelector.search.results.one"
+        : "recipientSelector.search.results.many",
+      { count: formatInteger(locale, resultsLen) }
+    );
   }
-  if (trimmedQuery) return "No results.";
-  return "Type to search.";
+  if (trimmedQuery) {
+    return translate(locale, "recipientSelector.search.noResults");
+  }
+  return translate(locale, "recipientSelector.search.prompt");
 }
 
 function RecipientSelectedDisplay({
@@ -49,6 +67,7 @@ function RecipientSelectedDisplay({
   selectedWallet,
   onWalletSelect,
   disableSingleWalletSelection,
+  locale,
 }: {
   readonly selectedProfile: CommunityMemberMinimal;
   readonly profile: ApiIdentity | null;
@@ -62,6 +81,7 @@ function RecipientSelectedDisplay({
   readonly selectedWallet: string | null;
   readonly onWalletSelect: (wallet: string) => void;
   readonly disableSingleWalletSelection: boolean;
+  readonly locale: SupportedLocale;
 }) {
   const getWallets = () => {
     if (profile?.wallets && profile.wallets.length > 0) {
@@ -85,13 +105,19 @@ function RecipientSelectedDisplay({
   let walletsContent;
   if (isIdentityLoading) {
     walletsContent = (
-      <div className="tw-text-xs tw-opacity-60">Loading wallets…</div>
+      <div className="tw-text-xs tw-opacity-60">
+        {translate(locale, "recipientSelector.wallets.loading")}
+      </div>
     );
   } else if (wallets.length === 0) {
     walletsContent = (
       <div className="tw-text-xs tw-opacity-60">
-        No wallets found for {selectedProfile.display || selectedProfile.handle}
-        .
+        {translate(locale, "recipientSelector.wallets.noneFound", {
+          profile:
+            selectedProfile.display ||
+            selectedProfile.handle ||
+            selectedProfile.wallet,
+        })}
       </div>
     );
   } else {
@@ -169,8 +195,10 @@ function RecipientSelectedDisplay({
                 {selectedProfile.handle || selectedProfile.display}
               </div>
               <div className="tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-500">
-                TDH: {selectedProfile.tdh.toLocaleString()} — Level:{" "}
-                {selectedProfile.level}
+                {translate(locale, "recipientSelector.profileStats", {
+                  tdh: formatNumber(locale, selectedProfile.tdh),
+                  level: formatInteger(locale, selectedProfile.level),
+                })}
               </div>
             </div>
           </div>
@@ -180,7 +208,7 @@ function RecipientSelectedDisplay({
               className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-xs tw-font-bold tw-text-iron-200 tw-transition-colors hover:tw-bg-iron-700"
               onClick={onClear}
             >
-              Change
+              {translate(locale, "recipientSelector.change")}
             </button>
           )}
         </div>
@@ -193,7 +221,7 @@ function RecipientSelectedDisplay({
           ? wallets.length > 1
           : wallets.length > 0) && (
           <div className="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
-            Choose destination wallet
+            {translate(locale, "recipientSelector.wallets.chooseDestination")}
           </div>
         )}
         <div
@@ -205,7 +233,7 @@ function RecipientSelectedDisplay({
         {walletsHasOverflow && (
           <div className="tw-text-center tw-text-xs tw-text-iron-500">
             <FontAwesomeIcon icon={walletsAtEnd ? faAnglesUp : faAnglesDown} />{" "}
-            Scroll for more
+            {translate(locale, "recipientSelector.scrollForMore")}
           </div>
         )}
       </div>
@@ -224,6 +252,7 @@ function RecipientSearchDisplay({
   resultsAtEnd,
   searchInputRef,
   placeholder,
+  locale,
 }: {
   readonly query: string;
   readonly setQuery: (v: string) => void;
@@ -235,6 +264,7 @@ function RecipientSearchDisplay({
   readonly resultsAtEnd: boolean;
   readonly searchInputRef: React.RefObject<HTMLInputElement | null>;
   readonly placeholder?: string;
+  readonly locale: SupportedLocale;
 }) {
   return (
     <>
@@ -244,7 +274,10 @@ function RecipientSearchDisplay({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder ?? "Search profile by handle, ens or wallet"}
+          placeholder={
+            placeholder ??
+            translate(locale, "recipientSelector.search.placeholder")
+          }
           className="tw-h-12 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-white tw-placeholder-iron-500 tw-transition-all focus:tw-border-primary-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-500"
           ref={searchInputRef}
         />
@@ -273,7 +306,10 @@ function RecipientSearchDisplay({
                 {r.handle || r.display}
               </div>
               <div className="tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-500">
-                TDH: {r.tdh.toLocaleString()} — Level: {r.level}
+                {translate(locale, "recipientSelector.profileStats", {
+                  tdh: formatNumber(locale, r.tdh),
+                  level: formatInteger(locale, r.level),
+                })}
               </div>
             </div>
           </button>
@@ -282,7 +318,7 @@ function RecipientSearchDisplay({
       {resultsHasOverflow && (
         <div className="tw-text-center tw-text-xs tw-text-iron-500">
           <FontAwesomeIcon icon={resultsAtEnd ? faAnglesUp : faAnglesDown} />{" "}
-          Scroll for more
+          {translate(locale, "recipientSelector.scrollForMore")}
         </div>
       )}
     </>
@@ -301,6 +337,7 @@ interface RecipientSelectorProps {
   readonly allowProfileChange?: boolean;
   readonly disableSingleWalletSelection?: boolean;
   readonly showSelectedProfileCard?: boolean;
+  readonly locale?: SupportedLocale | undefined;
 }
 
 export default function RecipientSelector({
@@ -311,10 +348,11 @@ export default function RecipientSelector({
   onWalletSelect,
   placeholder,
   showLabel = true,
-  label = "Recipient",
+  label,
   allowProfileChange = true,
   disableSingleWalletSelection = false,
   showSelectedProfileCard = true,
+  locale = DEFAULT_LOCALE,
 }: RecipientSelectorProps) {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -544,6 +582,7 @@ export default function RecipientSelector({
   }, [open, results, profile?.wallets, isIdentityLoading]);
 
   const searchStatusText = getSearchStatusText(
+    locale,
     isSearching,
     needsMoreSearchCharacters,
     remainingSearchCharacters,
@@ -560,6 +599,8 @@ export default function RecipientSelector({
     setQuery("");
     setTimeout(() => searchInputRef.current?.focus(), 0);
   };
+  const searchPlaceholderProps =
+    placeholder === undefined ? {} : { placeholder };
 
   return (
     <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-space-y-3">
@@ -567,7 +608,7 @@ export default function RecipientSelector({
         <div
           className={`tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400 ${selectedProfile ? "tw-mb-2" : "tw-mb-0"}`}
         >
-          {label}
+          {label ?? translate(locale, "recipientSelector.label")}
         </div>
       )}
       {selectedProfile ? (
@@ -584,6 +625,7 @@ export default function RecipientSelector({
           selectedWallet={selectedWallet}
           onWalletSelect={onWalletSelect}
           disableSingleWalletSelection={disableSingleWalletSelection}
+          locale={locale}
         />
       ) : (
         <RecipientSearchDisplay
@@ -599,7 +641,8 @@ export default function RecipientSelector({
           resultsHasOverflow={resultsHasOverflow}
           resultsAtEnd={resultsAtEnd}
           searchInputRef={searchInputRef}
-          placeholder={placeholder ?? "Search profile by handle, ens or wallet"}
+          locale={locale}
+          {...searchPlaceholderProps}
         />
       )}
     </div>

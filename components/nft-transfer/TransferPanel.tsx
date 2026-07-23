@@ -120,13 +120,14 @@ export default function TransferPanel({
             .filter(Boolean)
             .join(" ")}
         >
-          <div className="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-4">
+          <div className="tw-relative tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-4">
             {items.length > 0 && (
               <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
                 disabled={isLoading}
-                className="tw-inline-flex tw-h-9 tw-w-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-100 tw-text-black tw-transition-colors hover:tw-bg-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                aria-expanded={isExpanded}
+                className="tw-group tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed"
                 aria-label={translate(
                   locale,
                   isExpanded
@@ -134,14 +135,28 @@ export default function TransferPanel({
                     : "transfer.panel.expand"
                 )}
               >
-                <FontAwesomeIcon
-                  icon={isExpanded ? faChevronDown : faChevronUp}
-                  className="tw-size-4"
-                />
+                <span
+                  className={[
+                    "tw-absolute tw-left-4 tw-top-1/2 tw-flex tw-h-9 tw-w-9 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-100 tw-text-black tw-transition-colors",
+                    isLoading ? "tw-opacity-50" : "group-hover:tw-bg-white",
+                  ].join(" ")}
+                  aria-hidden="true"
+                >
+                  <FontAwesomeIcon
+                    icon={isExpanded ? faChevronDown : faChevronUp}
+                    className="tw-size-4"
+                  />
+                </span>
               </button>
             )}
             {items.length > 0 && (
-              <div className="tw-flex tw-items-center tw-gap-1 tw-overflow-hidden">
+              <div
+                className="tw-pointer-events-none tw-relative tw-z-10 tw-h-9 tw-w-9 tw-shrink-0"
+                aria-hidden="true"
+              />
+            )}
+            {items.length > 0 && (
+              <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-items-center tw-gap-1 tw-overflow-hidden">
                 {items.map((it) => (
                   <div key={it.key} className="tw-relative tw-flex-shrink-0">
                     <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/15">
@@ -168,11 +183,12 @@ export default function TransferPanel({
               </div>
             ) : null}
             <div
-              className={
-                centerMessage
-                  ? "tw-flex tw-items-center tw-gap-3"
-                  : "tw-ml-auto tw-flex tw-items-center tw-gap-3"
-              }
+              className={[
+                "tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-items-center tw-gap-3",
+                centerMessage ? "" : "tw-ml-auto",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               {items.length > 0 && (
                 <div className="tw-whitespace-nowrap tw-rounded-full tw-bg-primary-500 tw-px-4 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white">
@@ -192,7 +208,7 @@ export default function TransferPanel({
                   t.clear();
                 }}
                 disabled={isLoading}
-                className="tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                className="tw-pointer-events-auto tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
                 aria-label={translate(locale, "transfer.modal.cancel")}
               >
                 {translate(locale, "transfer.modal.cancel")}
@@ -201,7 +217,7 @@ export default function TransferPanel({
                 <button
                   type="button"
                   onClick={() => setShowModal(true)}
-                  className="tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  className="tw-pointer-events-auto tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                   aria-label={translate(locale, "transfer.panel.continue")}
                 >
                   {translate(locale, "transfer.panel.continue")}

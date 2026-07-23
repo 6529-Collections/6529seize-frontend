@@ -473,6 +473,7 @@ export function BodyByFlow({
         selectedWallet={selectedWallet}
         onProfileSelect={setSelectedProfile}
         onWalletSelect={setSelectedWallet}
+        locale={locale}
       />
     </div>
   );

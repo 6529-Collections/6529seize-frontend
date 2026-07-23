@@ -89,7 +89,7 @@ export default function UserPageCollectedCard({
     if (card.collection === CollectedCollectionType.MEMELAB) {
       return "N/A";
     } else {
-      return card.tdh ? formatInteger(locale, card.rank ?? 0) : "-";
+      return card.tdh && card.rank ? formatInteger(locale, card.rank) : "-";
     }
   };
 

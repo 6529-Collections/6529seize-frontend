@@ -26,6 +26,7 @@ interface TransferSingleProps {
   readonly title: string;
   readonly max: number;
   readonly thumbUrl?: string | undefined;
+  readonly presentation?: "panel" | "inline" | undefined;
 }
 
 export default function TransferSingle(props: TransferSingleProps) {
@@ -49,6 +50,10 @@ function TransferSingleImpl(props: TransferSingleProps) {
 
   if (isMobileDevice) {
     return null;
+  }
+
+  if (props.presentation === "inline") {
+    return <TransferSingleActionsImpl {...props} layout="inline" />;
   }
 
   return (

@@ -8,6 +8,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 jest.mock("@/components/nft-transfer/TransferState", () => ({
   useTransfer: jest.fn(),
 }));
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: jest.fn(() => "en-US"),
+}));
 jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: jest.fn(),
 }));
@@ -49,6 +52,8 @@ jest.mock("next/image", () => ({
 
 const mockUseTransfer = require("@/components/nft-transfer/TransferState")
   .useTransfer as jest.Mock;
+const mockUseBrowserLocale = require("@/hooks/useBrowserLocale")
+  .useBrowserLocale as jest.Mock;
 const mockUseIdentity = require("@/hooks/useIdentity").useIdentity as jest.Mock;
 const mockCommonApiFetch = require("@/services/api/common-api")
   .commonApiFetch as jest.Mock;
@@ -110,6 +115,7 @@ describe("TransferModal", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseBrowserLocale.mockReturnValue("en-US");
 
     mockUseTransfer.mockReturnValue({
       selected: selectedItems,
@@ -201,6 +207,18 @@ describe("TransferModal", () => {
     openModal();
     const transferButton = screen.getByRole("button", { name: /^transfer$/i });
     expect(transferButton).toBeDisabled();
+  });
+
+  it("localizes the recipient selection surface", () => {
+    mockUseBrowserLocale.mockReturnValue("de-DE");
+
+    openModal();
+
+    expect(screen.getByText("Empfänger")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Profil nach Handle, ENS oder Wallet suchen")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Zum Suchen tippen.")).toBeInTheDocument();
   });
 
   it("submits ERC1155 (batch) and ERC721 transfers successfully and shows completion UI", async () => {

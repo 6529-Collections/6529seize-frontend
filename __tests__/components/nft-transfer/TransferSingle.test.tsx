@@ -142,6 +142,15 @@ describe("TransferSingle", () => {
     );
   });
 
+  test("renders inline presentation without the framed panel", () => {
+    render(<TransferSingle {...baseProps} presentation="inline" />);
+
+    expect(screen.queryByTestId("transfer-single")).not.toBeInTheDocument();
+    expect(screen.getByTestId("transfer-single-submit")).toHaveTextContent(
+      "Transfer"
+    );
+  });
+
   test("returns null when rendered on mobile device", () => {
     useDeviceInfoMock.mockReturnValue({ isMobileDevice: true } as any);
     const { container } = render(<TransferSingle {...baseProps} />);
