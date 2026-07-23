@@ -20,6 +20,7 @@ storageState.json
 
 # next.js
 /.next/
+/.next-playwright-*/
 /out/
 # standalone/standalone-memes-mint
 /standalone/standalone-memes-mint/src/.next/

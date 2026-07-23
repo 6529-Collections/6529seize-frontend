@@ -2,7 +2,9 @@
 
 /* istanbul ignore file */
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
@@ -40,6 +42,13 @@ export default function CreateWave({
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   useKeyboardFocusScroll(containerRef);
+
+  // Matches WavesLayout's native page-scroll exemption: on the native route the
+  // document scrolls, so CreateWaveFlow drops its internal overflow and the
+  // footer pins to the viewport. The web modal keeps its internal scroller.
+  const pathname = usePathname();
+  const { isApp } = useDeviceInfo();
+  const pageScroll = isApp && pathname === "/waves/create";
 
   // Each step renders fresh content, but the layout's scroll container keeps
   // the offset where the user tapped Next (the bottom of the previous step),
@@ -128,6 +137,7 @@ export default function CreateWave({
           config.overview.name ? `"${config.overview.name}"` : ""
         }`}
         onBack={onBack}
+        pageScroll={pageScroll}
       >
         <CreateWaveLayout
           config={config}

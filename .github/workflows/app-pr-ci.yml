@@ -426,12 +426,16 @@ jobs:
       - name: Run small Playwright smoke pack
         if: needs.plan.outputs.playwright_smoke_required == 'true'
         env:
+          # Do not reuse the production build output or another Playwright
+          # server's Turbopack route state.
+          NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
       - name: Run critical route-shell Playwright pack
         if: needs.plan.outputs.playwright_critical_shell_required == 'true'
         env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:critical-shell
 
