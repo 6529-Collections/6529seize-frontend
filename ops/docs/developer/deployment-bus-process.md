@@ -1,6 +1,8 @@
 # Staging and Production Deployment Bus
 
-Status: Release Bus v1 maintenance. V1 is being disabled while Release Bus v2
+Status: Release Bus v1 rollback reference. Use
+[`simple-release-bus-v2.md`](./simple-release-bus-v2.md) for current routing and
+operations. V1 is disabled while Release Bus v2
 is implemented and proven. The v1 material below is retained only as rollback
 reference. Removal is tracked by branch `agent/simple-release-bus-v2-plan` at
 commit `0d8fb5e726279b4a80592b3dc7d4ec3db75065e9` and occurs only after the v2

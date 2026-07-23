@@ -1,6 +1,8 @@
 # Deployment Bus Automation and Operations
 
-Status: v1 rollback reference during Release Bus v2 maintenance. V1 must not
+Status: v1 rollback reference. Use
+[`simple-release-bus-v2.md`](./simple-release-bus-v2.md) for current routing and
+operations. V1 must not
 accept new readiness or scheduler claims. The temporary manual-deployment
 protocol in `deployment-bus-process.md` is authoritative until v2 cutover.
 Removal is tracked by branch `agent/simple-release-bus-v2-plan` at commit
