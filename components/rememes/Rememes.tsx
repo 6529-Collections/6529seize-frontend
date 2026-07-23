@@ -6,6 +6,7 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import RememeImage from "@/components/nft-image/RememeImage";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
@@ -45,9 +46,6 @@ const TOKEN_TYPES = [
   TokenType.ERC721,
   TokenType.ERC1155,
 ] as const;
-const ADD_REMEME_LINK_CLASS =
-  "tw-flex tw-items-center tw-whitespace-nowrap tw-rounded-lg tw-bg-iron-200 tw-text-sm tw-font-semibold tw-px-3.5 tw-py-2.5 tw-justify-center tw-gap-x-1.5 tw-border-0 tw-text-iron-950 tw-ring-1 tw-ring-inset tw-ring-white tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-300 hover:tw-ring-iron-300 focus:tw-z-10 focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
-
 function getRememeCollectionName(rememe: Rememe) {
   return (
     rememe.contract_opensea_data?.collectionName?.trim() ||
@@ -350,14 +348,15 @@ export default function Rememes({
               </div>
               <div className="tw-flex tw-w-full tw-items-center sm:tw-w-auto sm:tw-justify-end">
                 <div className="tw-w-full sm:tw-w-auto [&>a]:tw-w-full sm:[&>a]:tw-w-auto">
-                  <Link
+                  <ButtonLink
                     href={getRememesAddHref({ locale })}
                     aria-label={t(locale, "rememes.actions.add")}
-                    className={ADD_REMEME_LINK_CLASS}
+                    variant="primary"
+                    size="md"
                   >
                     {t(locale, "rememes.actions.add")}
                     <PlusCircleIcon className="tw-size-4 tw-shrink-0 [stroke-width:2.25]" />
-                  </Link>
+                  </ButtonLink>
                 </div>
               </div>
             </div>

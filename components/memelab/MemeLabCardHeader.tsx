@@ -6,6 +6,7 @@ import { getMemeLabCollectionHref } from "@/components/memelab/memeLabRouteParam
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
 import { getSafeExternalUrl } from "@/components/the-memes/MemePageAdditionalDetails";
 import { MemeArtworkDetails } from "@/components/the-memes/MemePageLiveStats";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { addProtocol, numberWithCommas } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -156,16 +157,17 @@ function MemeLabDistributionPlanLink({
 
   return (
     <section className="tw-pt-6">
-      <Link
+      <ButtonLink
         href={getDistributionDetailHref({
           basePath: "/meme-lab",
           id: nft.id,
           locale,
         })}
-        className="tw-inline-flex tw-items-center tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white"
+        variant="tertiary"
+        size="xs"
       >
         {t(locale, "distribution.planLink")}
-      </Link>
+      </ButtonLink>
     </section>
   );
 }
