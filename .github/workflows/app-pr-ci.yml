@@ -454,6 +454,8 @@ jobs:
           EXPECTED_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
           set -euo pipefail
+          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           profile=release-bus-v2-pr-artifact/profiles/staging
           mkdir -p "$profile/target/_next" "$profile/bundle/.next"
           cp -r .next/standalone/. "$profile/bundle/"
