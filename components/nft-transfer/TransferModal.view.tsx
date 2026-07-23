@@ -10,12 +10,18 @@ import { t as translate } from "@/i18n/messages";
 import {
   faAnglesDown,
   faAnglesUp,
-  faXmarkCircle,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import type { PublicClient } from "viem";
 import type { FlowState, TxEntry, TxState } from "./TransferModal.types";
+
+const MODAL_ACTION_BASE_CLASSES =
+  "tw-inline-flex tw-h-10 tw-min-w-24 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-text-sm tw-font-medium tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950";
+const MODAL_SECONDARY_ACTION_CLASSES = `${MODAL_ACTION_BASE_CLASSES} tw-border-white/10 tw-bg-white/5 tw-text-iron-100 hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white`;
+const MODAL_PRIMARY_ACTION_CLASSES = `${MODAL_ACTION_BASE_CLASSES} tw-border-transparent tw-bg-white tw-text-iron-950 hover:tw-bg-iron-100 disabled:tw-cursor-not-allowed disabled:tw-border-white/5 disabled:tw-bg-white/5 disabled:tw-text-iron-500 disabled:tw-opacity-100`;
+const MODAL_DISABLED_ACTION_CLASSES = `${MODAL_ACTION_BASE_CLASSES} tw-cursor-not-allowed tw-border-white/5 tw-bg-white/5 tw-text-iron-500`;
 
 function computeFlowTitle(
   locale: SupportedLocale,
@@ -329,9 +335,9 @@ export function HeaderRight({
           type="button"
           onClick={onClose}
           aria-label={translate(locale, "transfer.modal.closeAriaLabel")}
-          className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0 tw-text-iron-300 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
         >
-          <FontAwesomeIcon icon={faXmarkCircle} className="tw-size-6" />
+          <FontAwesomeIcon icon={faXmark} className="tw-size-4" />
         </button>
       )}
     </div>
@@ -361,7 +367,7 @@ export function FooterActions({
         <button
           type="button"
           onClick={onCancel}
-          className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className={MODAL_SECONDARY_ACTION_CLASSES}
         >
           {translate(locale, "transfer.modal.cancel")}
         </button>
@@ -369,7 +375,7 @@ export function FooterActions({
           type="button"
           disabled={!canConfirm}
           onClick={onConfirm}
-          className="tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          className={MODAL_PRIMARY_ACTION_CLASSES}
         >
           {translate(locale, "transfer.modal.transfer")}
         </button>
@@ -380,11 +386,7 @@ export function FooterActions({
   const anyPending = anyTxsPending(txs);
   if (anyPending) {
     return (
-      <button
-        type="button"
-        disabled
-        className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium tw-opacity-60"
-      >
+      <button type="button" disabled className={MODAL_DISABLED_ACTION_CLASSES}>
         {translate(locale, "transfer.modal.processing")}
       </button>
     );
@@ -394,7 +396,7 @@ export function FooterActions({
     <button
       type="button"
       onClick={onClose}
-      className="tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-black hover:tw-bg-white/80 hover:tw-text-black"
+      className={MODAL_PRIMARY_ACTION_CLASSES}
     >
       {translate(locale, "common.close")}
     </button>

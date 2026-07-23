@@ -205,7 +205,7 @@ function RecipientSelectedDisplay({
           {allowProfileChange && (
             <button
               type="button"
-              className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-xs tw-font-bold tw-text-iron-200 tw-transition-colors hover:tw-bg-iron-700"
+              className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               onClick={onClear}
             >
               {translate(locale, "recipientSelector.change")}

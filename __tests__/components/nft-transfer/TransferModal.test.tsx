@@ -206,7 +206,26 @@ describe("TransferModal", () => {
   it("disables transfer confirmation until a wallet is selected", () => {
     openModal();
     const transferButton = screen.getByRole("button", { name: /^transfer$/i });
+    const cancelButton = screen.getByRole("button", { name: /^cancel$/i });
+    const closeButton = screen.getByRole("button", {
+      name: "Close transfer dialog",
+    });
+
     expect(transferButton).toBeDisabled();
+    expect(transferButton).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-font-medium",
+      "disabled:tw-bg-white/5"
+    );
+    expect(transferButton).not.toHaveClass("tw-font-semibold");
+    expect(cancelButton).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-font-medium",
+      "tw-bg-white/5"
+    );
+    expect(closeButton).toHaveClass("tw-size-10", "tw-bg-white/5");
   });
 
   it("localizes the recipient selection surface", () => {
@@ -377,7 +396,15 @@ describe("TransferModal", () => {
 
     await screen.findByText(/transfer failed/i);
     const errorBadges = await screen.findAllByText(/error/i);
+    const closeButton = screen.getByRole("button", { name: /^close$/i });
+
     expect(errorBadges.length).toBeGreaterThan(0);
+    expect(closeButton).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-font-medium",
+      "tw-border-transparent"
+    );
   });
 
   it("shows mixed results summary when one succeeds and one fails", async () => {
