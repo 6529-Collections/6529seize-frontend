@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import AboutMemes from "@/components/about/AboutMemes";
 
 jest.mock("next/image", () => {
@@ -21,7 +21,7 @@ jest.mock("next/link", () => ({
 }));
 
 describe("AboutMemes", () => {
-  it("renders the heading and selected Meme artwork", () => {
+  it("renders the heading and production preview artwork", () => {
     render(<AboutMemes />);
     expect(
       screen.getByRole("heading", {
@@ -29,20 +29,10 @@ describe("AboutMemes", () => {
       })
     ).toBeInTheDocument();
 
-    const artworkLink = screen.getByRole("link", {
-      name: "View Awakening OM, Meme Card #17",
-    });
-    expect(artworkLink).toHaveAttribute("href", "/the-memes/17");
-
     const artwork = screen.getByRole("img", {
-      name: "Awakening OM, Meme Card #17",
+      name: "The Memes",
     });
-    expect(artwork).toHaveAttribute("src", expect.stringContaining("/17.WEBP"));
-    expect(artwork).toHaveClass("tw-opacity-0");
-
-    fireEvent.load(artwork);
-
-    expect(artwork).toHaveClass("tw-opacity-100");
+    expect(artwork).toHaveAttribute("src", "/memes-preview.png");
   });
 
   it("preserves resource destinations and new-tab behavior", () => {
@@ -69,21 +59,5 @@ describe("AboutMemes", () => {
       "/waves/0849642f-1770-4de2-9cbc-70aae59c17ff"
     );
     expect(chat).not.toHaveAttribute("target");
-  });
-
-  it("shows a resilient fallback when artwork fails to load", () => {
-    render(<AboutMemes />);
-
-    fireEvent.error(
-      screen.getByRole("img", {
-        name: "Awakening OM, Meme Card #17",
-      })
-    );
-
-    expect(
-      screen.getByRole("img", {
-        name: "Awakening OM, Meme Card #17",
-      })
-    ).toHaveTextContent("Artwork unavailable");
   });
 });

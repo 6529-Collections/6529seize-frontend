@@ -3,26 +3,13 @@
 import {
   ArrowRightIcon,
   ArrowUpRightIcon,
-  PhotoIcon,
 } from "@heroicons/react/24/outline";
-import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useState } from "react";
 
-import { MEMES_CONTRACT } from "@/constants/constants";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
-
-type ImageStatus = "loading" | "loaded" | "error";
-
-type MemeArtwork = {
-  readonly id: number;
-  readonly name: string;
-  readonly src: string;
-  readonly eager?: boolean;
-};
 
 type Resource = {
   readonly titleKey: MessageKey;
@@ -30,38 +17,6 @@ type Resource = {
   readonly destination: string;
   readonly opensNewTab: boolean;
 };
-
-const MEMES_IMAGE_ROOT = `https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/${MEMES_CONTRACT}`;
-
-const ARTWORKS: readonly MemeArtwork[] = [
-  {
-    id: 17,
-    name: "Awakening OM",
-    src: `${MEMES_IMAGE_ROOT}/17.WEBP`,
-    eager: true,
-  },
-  {
-    id: 4,
-    name: "Freedom to Transact",
-    src: "/the-memes-4.jpeg",
-    eager: true,
-  },
-  {
-    id: 9,
-    name: "The Institutions Are Coming",
-    src: `${MEMES_IMAGE_ROOT}/9.WEBP`,
-  },
-  {
-    id: 514,
-    name: "Freedom Craig",
-    src: `${MEMES_IMAGE_ROOT}/514.WEBP`,
-  },
-  {
-    id: 512,
-    name: "6529 SVNDIAL",
-    src: `${MEMES_IMAGE_ROOT}/512.WEBP`,
-  },
-];
 
 const RESOURCES: readonly Resource[] = [
   {
@@ -95,137 +50,6 @@ const RESOURCES: readonly Resource[] = [
     opensNewTab: true,
   },
 ];
-
-function ResilientImage({
-  alt,
-  className,
-  eager = false,
-  sizes,
-  src,
-}: {
-  readonly alt: string;
-  readonly className?: string;
-  readonly eager?: boolean;
-  readonly sizes: string;
-  readonly src: string;
-}) {
-  const [status, setStatus] = useState<ImageStatus>("loading");
-  const handleImageRef = useCallback((image: HTMLImageElement | null) => {
-    if (image?.complete && image.naturalWidth > 0) {
-      setStatus("loaded");
-    }
-  }, []);
-
-  return (
-    <div
-      aria-busy={status === "loading"}
-      className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-bg-iron-900"
-    >
-      {status === "loading" && (
-        <div
-          aria-hidden="true"
-          className="tw-absolute tw-inset-0 tw-bg-iron-800 motion-safe:tw-animate-pulse"
-        />
-      )}
-      {status === "error" ? (
-        <div
-          aria-label={alt}
-          className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-bg-iron-900 tw-p-3 tw-text-center tw-text-iron-400"
-          role="img"
-        >
-          <PhotoIcon aria-hidden="true" className="tw-size-6" />
-          <span className="tw-text-xs tw-font-medium tw-leading-4">
-            {t(DEFAULT_LOCALE, "about.memes.artwork.unavailable")}
-          </span>
-        </div>
-      ) : (
-        <Image
-          alt={alt}
-          className={clsx(
-            "tw-h-full tw-w-full tw-object-cover tw-transition-opacity tw-duration-500 motion-reduce:tw-transition-none",
-            status === "loaded" ? "tw-opacity-100" : "tw-opacity-0",
-            className
-          )}
-          decoding="async"
-          fill
-          loading={eager ? "eager" : "lazy"}
-          onError={() => setStatus("error")}
-          onLoad={() => setStatus("loaded")}
-          ref={handleImageRef}
-          sizes={sizes}
-          src={src}
-        />
-      )}
-    </div>
-  );
-}
-
-function ArtworkCard({
-  artwork,
-  isLast,
-}: {
-  readonly artwork: MemeArtwork;
-  readonly isLast: boolean;
-}) {
-  const cardLabel = t(DEFAULT_LOCALE, "about.memes.artwork.cardAriaLabel", {
-    name: artwork.name,
-    number: artwork.id,
-  });
-
-  return (
-    <li
-      className={clsx(
-        "tw-min-w-0 tw-transform-gpu tw-list-none tw-transition-transform tw-duration-300 tw-ease-out desktop-hover:hover:-tw-translate-y-1 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
-        isLast && "tw-col-span-2 sm:tw-col-span-1"
-      )}
-    >
-      <Link
-        aria-label={cardLabel}
-        className="tw-group tw-block tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1.5 tw-text-iron-100 tw-no-underline tw-shadow-[0_18px_45px_rgba(0,0,0,0.55)] tw-transition-colors tw-duration-200 hover:tw-border-white/25 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]"
-        href={`/the-memes/${artwork.id}`}
-      >
-        <div className="tw-aspect-[3/4] tw-overflow-hidden tw-rounded-lg tw-bg-iron-900">
-          <ResilientImage
-            alt={t(DEFAULT_LOCALE, "about.memes.artwork.imageAlt", {
-              name: artwork.name,
-              number: artwork.id,
-            })}
-            eager={artwork.eager === true}
-            sizes="(max-width: 639px) 42vw, (max-width: 1023px) 28vw, 180px"
-            src={artwork.src}
-          />
-        </div>
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-px-1.5 tw-pb-1 tw-pt-2">
-          <span className="tw-min-w-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-300">
-            {artwork.name}
-          </span>
-          <span className="tw-shrink-0 tw-text-[10px] tw-font-semibold tw-text-primary-300">
-            #{artwork.id}
-          </span>
-        </div>
-      </Link>
-    </li>
-  );
-}
-
-function ArtworkComposition() {
-  return (
-    <div className="tw-relative tw-w-full">
-      <ul
-        aria-label={t(DEFAULT_LOCALE, "about.memes.artwork.galleryLabel")}
-        className="tw-relative tw-m-0 tw-grid tw-grid-cols-2 tw-items-start tw-gap-2 tw-p-0 sm:tw-grid-cols-3 sm:tw-gap-3 lg:tw-grid-cols-5 lg:tw-gap-4"
-      >
-        {ARTWORKS.map((artwork, index) => (
-          <ArtworkCard
-            artwork={artwork}
-            isLast={index === ARTWORKS.length - 1}
-            key={artwork.id}
-          />
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 function ResourceCard({ resource }: { readonly resource: Resource }) {
   const Icon = resource.opensNewTab ? ArrowUpRightIcon : ArrowRightIcon;
@@ -277,8 +101,22 @@ export default function AboutMemes() {
           >
             {t(DEFAULT_LOCALE, "about.memes.title")}
           </h1>
-          <div className="tw-mt-10 sm:tw-mt-14 lg:tw-mt-16">
-            <ArtworkComposition />
+          <div className="tw-mt-10 tw-text-center sm:tw-mt-14 lg:tw-mt-16">
+            <Image
+              unoptimized
+              loading="eager"
+              priority
+              width="0"
+              height="0"
+              style={{
+                height: "auto",
+                width: "auto",
+                maxHeight: "400px",
+                maxWidth: "100%",
+              }}
+              src="/memes-preview.png"
+              alt="The Memes"
+            />
           </div>
         </div>
       </header>
