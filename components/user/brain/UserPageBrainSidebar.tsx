@@ -28,7 +28,7 @@ export default function UserPageBrainSidebar({
   const { waves: mostActiveWaves, status: mostActiveStatus } =
     useFavouriteWavesOfIdentity({
       identityKey: identity,
-      limit: 3,
+      limit: 5,
       enabled: hasIdentity,
     });
   const { isModalOpen, handleBadgeClick, handleModalClose } =

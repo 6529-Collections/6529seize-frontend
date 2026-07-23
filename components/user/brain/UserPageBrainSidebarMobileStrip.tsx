@@ -154,14 +154,14 @@ export default function UserPageBrainSidebarMobileStrip({
               </span>
               <div className="tw-flex tw-items-center tw-gap-2">
                 {shouldShowMostActiveLoading
-                  ? [0, 1, 2].map((key) => (
+                  ? [0, 1, 2, 3, 4].map((key) => (
                       <MobileWavePillSkeleton
                         key={`most-active-${key}`}
                         keyId={`most-active-${key}`}
                       />
                     ))
                   : mostActiveWaves
-                      .slice(0, 3)
+                      .slice(0, 5)
                       .map((wave) => (
                         <UserPageBrainSidebarMobileWavePill
                           key={wave.id}
