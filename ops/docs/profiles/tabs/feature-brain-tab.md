@@ -10,6 +10,8 @@ Clicking a drop body or quote preview opens that thread in Waves or Messages.
 The companion `Created Waves` and `Most Active In` surfaces inside this tab are
 documented separately in
 [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md).
+On your own profile, the same sidebar also contains private `Quick Tags` for
+inserting several profile mentions at once in a Wave composer.
 
 ## Location in the Site
 
@@ -39,12 +41,15 @@ documented separately in
 6. Select a drop or quote preview to open its thread:
    - public wave drop: `/waves/{waveId}?serialNo={serialNo}`
    - direct-message drop: `/messages/{waveId}?serialNo={serialNo}`
-7. Scroll to load older drops.
+7. On your own profile, create or manage `Quick Tags` below the wave sidebar.
+8. Scroll to load older drops.
 
 ## Common Scenarios
 
 - Visit someone else's profile Brain tab to read latest drops.
 - Visit your own profile Brain tab to review recent drops.
+- Create a private Quick Tag on your own Brain tab for profiles you mention
+  together frequently.
 - Open a shared `/{user}/brain` link directly and stay on that route while the
   app decides whether Waves is available for the current viewer.
 - If Waves becomes available during that access check, the same
@@ -62,6 +67,8 @@ documented separately in
   navigation replaces the URL with `/{user}` and keeps the current query
   string.
 - Feed content renders only after profile resolution returns a handle.
+- Quick Tags are shown only to the owner of the viewed profile and are hidden
+  while acting through a proxy.
 
 ## Failure and Recovery
 
@@ -80,8 +87,9 @@ documented separately in
   scroll intersection.
 - Feed scope comes from the `/{user}` route path; unrelated query parameters do
   not switch the feed owner.
-- The activity card and wave sidebar are companion surfaces around the same
-  Brain feed; each has separate loading and empty states.
+- The activity card, wave sidebar, and owner-only Quick Tags are companion
+  surfaces around the same Brain feed; each has separate loading and empty
+  states.
 
 ## Related Pages
 
@@ -90,6 +98,7 @@ documented separately in
 - [Profiles Tabs Index](README.md)
 - [Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md)
 - [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md)
+- [Quick Tags](../../waves/composer/feature-personal-mention-shortcuts.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)

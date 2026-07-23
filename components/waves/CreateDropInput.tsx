@@ -366,7 +366,7 @@ const CreateDropInput = forwardRef<
         expandMentionAliases: async () => {
           const mentionsPlugin = mentionsPluginRef.current;
           if (!mentionsPlugin) {
-            throw new Error("Mention shortcuts are not ready yet.");
+            throw new Error("Quick Tags are not ready yet.");
           }
           return mentionsPlugin.expandMentionAliases();
         },

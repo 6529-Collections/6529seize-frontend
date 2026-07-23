@@ -384,11 +384,14 @@
         "brain tab",
         "profile brain",
         "brain activity",
-        "activity heatmap"
+        "activity heatmap",
+        "quick tags",
+        "quick tag settings"
       ],
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
+        "When viewing your own profile without an active proxy, the Brain sidebar includes private Quick Tags beneath the wave sections.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",

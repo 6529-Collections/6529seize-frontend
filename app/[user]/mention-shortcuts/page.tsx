@@ -1,21 +1,19 @@
-import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import UserPageMentionShortcuts from "@/components/user/mention-shortcuts/UserPageMentionShortcuts";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  USER_PAGE_TAB_IDS,
-  USER_PAGE_TAB_MAP,
-} from "@/components/user/layout/userTabs.config";
+import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 
-function MentionShortcutsTab({ profile }: { readonly profile: ApiIdentity }) {
-  return <UserPageMentionShortcuts profile={profile} />;
+export const metadata: Metadata = {
+  title: "Quick Tags",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
+export default async function Page({
+  params,
+}: {
+  readonly params: Promise<{ user: string }>;
+}) {
+  const { user } = await params;
+  permanentRedirect(`/${encodeURIComponent(user)}/brain`);
 }
-
-const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]];
-
-const { Page, generateMetadata } = createUserTabPage({
-  subroute: TAB_CONFIG.route,
-  Tab: MentionShortcutsTab,
-});
-
-export default Page;
-export { generateMetadata };
