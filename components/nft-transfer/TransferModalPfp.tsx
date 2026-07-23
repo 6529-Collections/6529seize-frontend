@@ -3,6 +3,13 @@
 import { useResolvedIpfsUrl } from "@/hooks/useResolvedIpfsUrl";
 import Image from "next/image";
 
+type TransferModalPfpSize = 40 | 56;
+
+const PFP_SIZE_CLASSES: Record<TransferModalPfpSize, string> = {
+  40: "tw-size-10",
+  56: "tw-size-14",
+};
+
 function getLevelBgColor(level: number) {
   if (level >= 80) return "tw-bg-[#55B075] tw-text-black";
   if (level >= 60) return "tw-bg-[#AABE68] tw-text-black";
@@ -18,12 +25,12 @@ export default function TransferModalPfp({
   readonly src?: string | null | undefined;
   readonly alt?: string | undefined;
   readonly level: number;
-  readonly size?: number | undefined;
+  readonly size?: TransferModalPfpSize | undefined;
 }) {
   const { data: resolved } = useResolvedIpfsUrl(src);
 
   const levelColor = getLevelBgColor(level);
-  const sizeClass = size === 56 ? "tw-size-14" : "tw-size-10";
+  const sizeClass = PFP_SIZE_CLASSES[size];
 
   if (!resolved) {
     return (

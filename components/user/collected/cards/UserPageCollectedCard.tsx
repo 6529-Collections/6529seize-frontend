@@ -4,6 +4,9 @@ import CircleLoader, {
 import type { CollectedCard } from "@/entities/IProfile";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import { ContractType } from "@/types/enums";
 import {
   faCheck,
@@ -31,6 +34,7 @@ export default function UserPageCollectedCard({
   qtySelected = 0,
   isTransferLoading = false,
   showZeroSeizedCount = false,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly card: CollectedCard;
   readonly contractType: ContractType;
@@ -44,6 +48,7 @@ export default function UserPageCollectedCard({
   readonly qtySelected?: number | undefined;
   readonly isTransferLoading?: boolean | undefined;
   readonly showZeroSeizedCount?: boolean | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const collectionMeta = COLLECTED_COLLECTIONS_META[card.collection];
   const path = `${collectionMeta.cardPath}/${card.token_id}`;
@@ -103,11 +108,11 @@ export default function UserPageCollectedCard({
           <div className="tw-rounded-md tw-bg-iron-900/95 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-opacity-75 tw-ring-1 tw-ring-white/20 tw-transition-opacity tw-duration-200 group-hover:tw-opacity-100">
             {isTransferLoading ? (
               <div className="tw-flex tw-items-center tw-gap-1">
-                <span>Loading</span>
+                <span>{translate(locale, "transfer.card.loading")}</span>
                 <CircleLoader size={CircleLoaderSize.SMALL} />
               </div>
             ) : (
-              "Not owned by your connected wallet"
+              translate(locale, "transfer.card.notOwned")
             )}
           </div>
         </div>
@@ -115,7 +120,7 @@ export default function UserPageCollectedCard({
       {isSelectable && (
         <button
           type="button"
-          aria-label="Select"
+          aria-label={translate(locale, "transfer.card.select")}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -126,7 +131,7 @@ export default function UserPageCollectedCard({
             "tw-items-center tw-justify-center",
             "tw-h-9 tw-w-9 tw-rounded-full",
             "tw-bg-iron-900/90 hover:tw-bg-primary-500/75",
-            "tw-text-white tw-ring-1 tw-ring-white/30",
+            "tw-text-white tw-ring-1 tw-ring-white/30 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
           ].join(" ")}
         >
           <FontAwesomeIcon icon={faPlus} className="tw-size-5" />
@@ -155,13 +160,14 @@ export default function UserPageCollectedCard({
                     onDecQty();
                   }
                 }}
-                aria-label="Decrease quantity"
-                className="tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
+                aria-label={translate(locale, "transfer.quantity.decrease")}
+                className="tw-flex tw-items-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
               >
                 <FontAwesomeIcon icon={faMinusCircle} className="tw-size-5" />
               </button>
               <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-text-white">
-                {qtySelected}/{copiesMax}
+                {formatInteger(locale, qtySelected)}/
+                {formatInteger(locale, copiesMax)}
               </div>
               <button
                 type="button"
@@ -171,8 +177,8 @@ export default function UserPageCollectedCard({
                   if (qtySelected < copiesMax) onIncQty();
                 }}
                 disabled={qtySelected >= copiesMax}
-                aria-label="Increase quantity"
-                className="tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none disabled:tw-opacity-50"
+                aria-label={translate(locale, "transfer.quantity.increase")}
+                className="tw-flex tw-items-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-opacity-50"
               >
                 <FontAwesomeIcon icon={faPlusCircle} className="tw-size-5" />
               </button>
@@ -180,7 +186,7 @@ export default function UserPageCollectedCard({
           ) : (
             <button
               type="button"
-              aria-label="Deselect"
+              aria-label={translate(locale, "transfer.card.deselect")}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -189,7 +195,7 @@ export default function UserPageCollectedCard({
               className={[
                 "tw-flex tw-items-center tw-justify-center",
                 "tw-h-9 tw-w-9 tw-rounded-full tw-bg-primary-500 hover:tw-bg-primary-600",
-                "tw-ring-1 tw-ring-white/30",
+                "tw-ring-1 tw-ring-white/30 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
               ].join(" ")}
             >
               <FontAwesomeIcon icon={faCheck} className="tw-size-5" />
@@ -246,7 +252,7 @@ export default function UserPageCollectedCard({
         ? {
             role: "button",
             tabIndex: 0,
-            "aria-label": "Select NFT for transfer",
+            "aria-label": translate(locale, "transfer.card.selectForTransfer"),
             onClick: handleCardClick,
             onKeyDown: handleCardKeyDown,
           }
@@ -256,6 +262,9 @@ export default function UserPageCollectedCard({
         "tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-xl tw-transition-all tw-duration-300 hover:tw-border-white/20",
         getRingClasses(),
         getCursorClasses(),
+        isSelectModeAndCanSelect &&
+          !selected &&
+          "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -270,7 +279,10 @@ export default function UserPageCollectedCard({
         <Image
           unoptimized
           src={card.img}
-          alt={card.token_name || collectionMeta.label}
+          alt={
+            card.token_name ||
+            translate(locale, "transfer.card.imageAltFallback")
+          }
           width={800}
           height={800}
           sizes="(max-width: 640px) 100vw, 33vw"
@@ -313,8 +325,7 @@ export default function UserPageCollectedCard({
                     variant="light"
                     className="tw-z-[9999] !tw-max-w-[85%] !tw-whitespace-normal !tw-px-2.5 !tw-py-1.5 !tw-text-xs [overflow-wrap:anywhere]"
                   >
-                    Only the balance of the connected wallet is available for
-                    transfer
+                    {translate(locale, "transfer.card.balanceTooltip")}
                   </Tooltip>
                 </>
               )}
@@ -329,11 +340,13 @@ export default function UserPageCollectedCard({
                 {getTdhDisplay()}
               </span>
               <span className="tw-text-[13px] tw-font-semibold tw-text-iron-600">
-                TDH
+                {translate(locale, "transfer.card.tdh")}
               </span>
             </div>
             <span className="tw-rounded-md tw-bg-white/[0.05] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-iron-400">
-              Rank {getRankDisplay()}
+              {translate(locale, "transfer.card.rank", {
+                rank: getRankDisplay(),
+              })}
             </span>
           </div>
         )}

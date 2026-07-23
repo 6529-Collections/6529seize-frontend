@@ -4,6 +4,9 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import {
   faAnglesDown,
   faAnglesUp,
@@ -15,6 +18,7 @@ import type { PublicClient } from "viem";
 import type { FlowState, TxEntry, TxState } from "./TransferModal.types";
 
 function computeFlowTitle(
+  locale: SupportedLocale,
   total: number,
   successCount: number,
   errorCount: number
@@ -24,30 +28,43 @@ function computeFlowTitle(
 
   if (total === 1 && allSuccess) {
     return {
-      label: "Transfer Successful",
+      label: translate(locale, "transfer.modal.result.singleSuccess"),
       icon: "/emojis/sgt_saluting_face.webp",
     };
   }
   if (total === 1 && allFail) {
-    return { label: "Transfer Failed", icon: "/emojis/sgt_sob.webp" };
+    return {
+      label: translate(locale, "transfer.modal.result.singleFailure"),
+      icon: "/emojis/sgt_sob.webp",
+    };
   }
   if (total === 1) {
-    return { label: "Transfer Complete", icon: "/emojis/sgt_grimacing.webp" };
+    return {
+      label: translate(locale, "transfer.modal.result.singleComplete"),
+      icon: "/emojis/sgt_grimacing.webp",
+    };
   }
   if (allSuccess) {
     return {
-      label: `All ${total} Transactions Successful`,
+      label: translate(locale, "transfer.modal.result.allSuccess", {
+        count: formatInteger(locale, total),
+      }),
       icon: "/emojis/sgt_saluting_face.webp",
     };
   }
   if (allFail) {
     return {
-      label: `All ${total} Transactions Failed`,
+      label: translate(locale, "transfer.modal.result.allFailure", {
+        count: formatInteger(locale, total),
+      }),
       icon: "/emojis/sgt_sob.webp",
     };
   }
   return {
-    label: `Transfer Complete: ${successCount} successful, ${errorCount} failed`,
+    label: translate(locale, "transfer.modal.result.mixed", {
+      successCount: formatInteger(locale, successCount),
+      errorCount: formatInteger(locale, errorCount),
+    }),
     icon: "/emojis/sgt_grimacing.webp",
   };
 }
@@ -55,12 +72,14 @@ function computeFlowTitle(
 export function FlowTitle({
   flow,
   txs,
+  locale,
 }: {
   readonly flow: FlowState;
   readonly txs: TxEntry[];
+  readonly locale: SupportedLocale;
 }) {
   if (flow === "review") {
-    return <span>Review transfer and select recipient</span>;
+    return <span>{translate(locale, "transfer.modal.reviewTitle")}</span>;
   }
 
   const anyPending = anyTxsPending(txs);
@@ -68,7 +87,13 @@ export function FlowTitle({
     return (
       <span className="tw-flex tw-items-center tw-gap-1.5">
         <span>
-          Executing {txs.length} Transaction{txs.length > 1 ? "s" : ""}
+          {translate(
+            locale,
+            txs.length === 1
+              ? "transfer.modal.executing.one"
+              : "transfer.modal.executing.many",
+            { count: formatInteger(locale, txs.length) }
+          )}
         </span>
         <CircleLoader size={CircleLoaderSize.MEDIUM} />
       </span>
@@ -79,12 +104,21 @@ export function FlowTitle({
   const successCount = txs.filter((t) => t.state === "success").length;
   const errorCount = txs.filter((t) => t.state === "error").length;
 
-  const { label, icon } = computeFlowTitle(total, successCount, errorCount);
+  const { label, icon } = computeFlowTitle(
+    locale,
+    total,
+    successCount,
+    errorCount
+  );
 
   return (
     <span className="tw-flex tw-items-center tw-gap-1.5">
       <span>{label}</span>
-      <img src={icon} alt="status" className="tw-h-6 tw-w-6" />
+      <img
+        src={icon}
+        alt={translate(locale, "transfer.modal.statusIconAlt")}
+        className="tw-h-6 tw-w-6"
+      />
     </span>
   );
 }
@@ -94,6 +128,7 @@ function SelectedSummaryList({
   leftListRef,
   leftHasOverflow,
   leftAtEnd,
+  locale,
 }: {
   readonly items: {
     key: string;
@@ -104,18 +139,25 @@ function SelectedSummaryList({
   readonly leftListRef: React.RefObject<HTMLUListElement | null>;
   readonly leftHasOverflow: boolean;
   readonly leftAtEnd: boolean;
+  readonly locale: SupportedLocale;
 }) {
+  const totalUnits = items.reduce((sum, it) => sum + (it.qty || 0), 0);
+  const summaryKey =
+    items.length === 1
+      ? totalUnits === 1
+        ? "transfer.modal.summary.oneNftOneItem"
+        : "transfer.modal.summary.oneNftManyItems"
+      : totalUnits === 1
+        ? "transfer.modal.summary.manyNftsOneItem"
+        : "transfer.modal.summary.manyNftsManyItems";
+
   return (
     <div className="tw-flex tw-max-h-full tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-hidden">
       <div className="tw-flex-shrink-0 tw-pb-1 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
-        You're transferring <span className="tw-font-bold">{items.length}</span>{" "}
-        {items.length === 1 ? "NFT" : "NFTs"} ·{" "}
-        <span className="tw-font-bold">
-          {items.reduce((sum, it) => sum + (it.qty || 0), 0)}
-        </span>{" "}
-        {items.reduce((sum, it) => sum + (it.qty || 0), 0) === 1
-          ? "item"
-          : "items"}
+        {translate(locale, summaryKey, {
+          nftCount: formatInteger(locale, items.length),
+          itemCount: formatInteger(locale, totalUnits),
+        })}
       </div>
       <ul
         ref={leftListRef}
@@ -150,7 +192,9 @@ function SelectedSummaryList({
                   {collection} #{tokenId}
                 </div>
               </div>
-              <div className="tw-text-xs tw-font-medium">x{it.qty}</div>
+              <div className="tw-text-xs tw-font-medium">
+                x{formatInteger(locale, it.qty)}
+              </div>
             </li>
           );
         })}
@@ -158,7 +202,7 @@ function SelectedSummaryList({
       {leftHasOverflow && (
         <div className="tw-flex-shrink-0 tw-text-center tw-text-xs tw-opacity-75">
           <FontAwesomeIcon icon={leftAtEnd ? faAnglesUp : faAnglesDown} />{" "}
-          Scroll for more
+          {translate(locale, "transfer.modal.scrollForMore")}
         </div>
       )}
     </div>
@@ -168,9 +212,11 @@ function SelectedSummaryList({
 function TxStatusList({
   txs,
   publicClient,
+  locale,
 }: {
   readonly txs: TxEntry[];
   readonly publicClient: PublicClient | undefined;
+  readonly locale: SupportedLocale;
 }) {
   const explorer = publicClient?.chain?.blockExplorers?.default.url;
 
@@ -181,7 +227,7 @@ function TxStatusList({
       case "submitted":
         return "tw-bg-primary-300 tw-text-black";
       case "error":
-        return "tw-bg-error tw-text-white";
+        return "tw-bg-error tw-text-black";
       case "success":
         return "tw-bg-success tw-text-black";
       default:
@@ -198,7 +244,7 @@ function TxStatusList({
         rel="noreferrer"
         className="tw-ml-2 tw-inline-block tw-rounded-md tw-border tw-border-solid tw-border-black tw-bg-white tw-px-2 tw-py-1 !tw-text-sm tw-text-black tw-no-underline hover:tw-bg-white/80 hover:tw-text-black"
       >
-        View Tx
+        {translate(locale, "transfer.modal.viewTransaction")}
       </Link>
     );
   };
@@ -211,31 +257,44 @@ function TxStatusList({
           className={`tw-rounded-lg tw-p-4 ${getStatusClasses(t.state)}`}
         >
           <div className="tw-font-medium">
-            {index + 1}/ {t.label}
+            {translate(locale, "transfer.modal.transactionPosition", {
+              position: formatInteger(locale, index + 1),
+              label: t.label,
+            })}
           </div>
           <div className="tw-text-xs tw-opacity-60">
-            Originator: {t.originKey}
+            {translate(locale, "transfer.modal.originator", {
+              originator: t.originKey,
+            })}
           </div>
           <div className="tw-mt-2 tw-text-sm">
-            {t.state === "pending" && <span>Pending</span>}
+            {t.state === "pending" && (
+              <span>{translate(locale, "transfer.modal.status.pending")}</span>
+            )}
             {t.state === "awaiting_approval" && (
-              <span>Approve in your wallet</span>
+              <span>
+                {translate(locale, "transfer.modal.status.awaitingApproval")}
+              </span>
             )}
             {t.state === "error" && (
               <span>
-                Error: {t.error || "Transaction failed"}
+                {translate(locale, "transfer.modal.status.error", {
+                  message:
+                    t.error ||
+                    translate(locale, "transfer.modal.status.failedFallback"),
+                })}
                 {t.hash && txLink(t.hash)}
               </span>
             )}
             {t.state === "submitted" && (
               <span>
-                Submitted — waiting for confirmation
+                {translate(locale, "transfer.modal.status.submitted")}
                 {t.hash && txLink(t.hash)}
               </span>
             )}
             {t.state === "success" && (
               <span>
-                Successful
+                {translate(locale, "transfer.modal.status.success")}
                 {t.hash && txLink(t.hash)}
               </span>
             )}
@@ -250,10 +309,12 @@ export function HeaderRight({
   flow,
   trxPending,
   onClose,
+  locale,
 }: {
   readonly flow: FlowState;
   readonly trxPending: boolean;
   readonly onClose: () => void;
+  readonly locale: SupportedLocale;
 }) {
   return (
     <div className="tw-flex tw-items-center tw-gap-3">
@@ -261,7 +322,7 @@ export function HeaderRight({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={translate(locale, "transfer.modal.closeAriaLabel")}
           className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           <FontAwesomeIcon icon={faXmarkCircle} className="tw-size-6" />
@@ -278,6 +339,7 @@ export function FooterActions({
   onConfirm,
   onClose,
   txs,
+  locale,
 }: {
   readonly flow: FlowState;
   readonly canConfirm: boolean;
@@ -285,6 +347,7 @@ export function FooterActions({
   readonly onConfirm: () => void;
   readonly onClose: () => void;
   readonly txs: TxEntry[];
+  readonly locale: SupportedLocale;
 }) {
   if (flow === "review") {
     return (
@@ -294,7 +357,7 @@ export function FooterActions({
           onClick={onCancel}
           className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
-          Cancel
+          {translate(locale, "transfer.modal.cancel")}
         </button>
         <button
           type="button"
@@ -302,7 +365,7 @@ export function FooterActions({
           onClick={onConfirm}
           className="tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
         >
-          Transfer
+          {translate(locale, "transfer.modal.transfer")}
         </button>
       </div>
     );
@@ -316,7 +379,7 @@ export function FooterActions({
         disabled
         className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium tw-opacity-60"
       >
-        Processing…
+        {translate(locale, "transfer.modal.processing")}
       </button>
     );
   }
@@ -327,7 +390,7 @@ export function FooterActions({
       onClick={onClose}
       className="tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-black hover:tw-bg-white/80 hover:tw-text-black"
     >
-      Close
+      {translate(locale, "common.close")}
     </button>
   );
 }
@@ -345,6 +408,7 @@ export function BodyByFlow({
   selectedWallet,
   publicClient,
   txs,
+  locale,
 }: {
   readonly flow: FlowState;
   readonly open: boolean;
@@ -363,6 +427,7 @@ export function BodyByFlow({
   readonly selectedWallet: string | null;
   readonly publicClient: PublicClient | undefined;
   readonly txs: TxEntry[];
+  readonly locale: SupportedLocale;
 }) {
   if (flow === "submission") {
     const anyPending = anyTxsPending(txs);
@@ -371,13 +436,16 @@ export function BodyByFlow({
       <div className="tw-flex-1 tw-space-y-4 tw-overflow-auto tw-p-4 sm:tw-p-6">
         <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-opacity-80 sm:tw-text-sm">
           <span>
-            {anyPending
-              ? "Follow the prompts in your wallet and keep this tab open."
-              : "All transactions have been completed. You can close this window now."}
+            {translate(
+              locale,
+              anyPending
+                ? "transfer.modal.submission.pending"
+                : "transfer.modal.submission.complete"
+            )}
           </span>
         </div>
 
-        <TxStatusList txs={txs} publicClient={publicClient} />
+        <TxStatusList txs={txs} publicClient={publicClient} locale={locale} />
       </div>
     );
   }
@@ -390,6 +458,7 @@ export function BodyByFlow({
           leftListRef={leftListRef}
           leftHasOverflow={leftHasOverflow}
           leftAtEnd={leftAtEnd}
+          locale={locale}
         />
       </div>
       <RecipientSelector

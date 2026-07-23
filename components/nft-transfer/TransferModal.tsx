@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTransfer } from "./TransferState";
 
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t as translate } from "@/i18n/messages";
 import { ContractType } from "@/types/enums";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -109,6 +111,7 @@ export default function TransferModal({
   readonly onClose: (opts?: { completed?: boolean | undefined }) => void;
 }) {
   const t = useTransfer();
+  const locale = useBrowserLocale();
   const [selectedProfile, setSelectedProfile] =
     useState<CommunityMemberMinimal | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
@@ -599,18 +602,22 @@ export default function TransferModal({
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-p-4 sm:tw-px-6 sm:tw-py-5">
           <div className="tw-min-w-0 tw-flex-1 tw-pr-2 tw-text-base tw-font-semibold sm:tw-text-lg">
-            <FlowTitle flow={flow} txs={txs} />
+            <FlowTitle flow={flow} txs={txs} locale={locale} />
           </div>
           <HeaderRight
             flow={flow}
             trxPending={trxPending}
             onClose={handleClose}
+            locale={locale}
           />
         </div>
         <p id="transfer-desc" className="tw-sr-only">
-          {flow === "review"
-            ? "Review selected NFTs and choose the destination recipient and wallet."
-            : "Follow wallet prompts. Each transaction will indicate its current status."}
+          {translate(
+            locale,
+            flow === "review"
+              ? "transfer.modal.description.review"
+              : "transfer.modal.description.submission"
+          )}
         </p>
 
         {/* body */}
@@ -627,6 +634,7 @@ export default function TransferModal({
           selectedWallet={selectedWallet}
           publicClient={publicClient}
           txs={txs}
+          locale={locale}
         />
 
         {/* footer */}
@@ -639,10 +647,9 @@ export default function TransferModal({
                   className="tw-size-8 tw-text-amber-300"
                 />
                 <span className="tw-text-sm tw-font-medium tw-text-amber-300">
-                  Double-check the recipient address and token details before
-                  signing.
+                  {translate(locale, "transfer.modal.warning.checkRecipient")}
                   <br />
-                  NFT transfers are irreversible once submitted on-chain.
+                  {translate(locale, "transfer.modal.warning.irreversible")}
                 </span>
               </>
             )}
@@ -654,6 +661,7 @@ export default function TransferModal({
             onConfirm={handleConfirm}
             onClose={handleClose}
             txs={txs}
+            locale={locale}
           />
         </div>
       </div>

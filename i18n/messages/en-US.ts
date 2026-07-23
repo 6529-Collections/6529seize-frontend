@@ -24,6 +24,7 @@ import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -2226,6 +2227,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_VOTE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
+  ...TRANSFER_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;
