@@ -179,7 +179,7 @@ export default function GradientsComponent() {
 
   function printNfts() {
     return (
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
         {nfts.map((nft) => printNft(nft))}
       </div>
     );
@@ -194,7 +194,7 @@ export default function GradientsComponent() {
               <div className="tw-min-w-0 min-[1200px]:tw-hidden">
                 <CollectionsDropdown activePage="gradient" variant="title" />
               </div>
-              <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+              <h1 className="tw-m-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
                 6529 Gradient
               </h1>
               <LFGButton contract={GRADIENT_CONTRACT} />

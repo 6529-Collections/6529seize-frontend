@@ -38,8 +38,8 @@ describe("WaveCompetitionBadges", () => {
       name: "View this winner’s competition entries in Cool Comp",
     });
 
-    expect(participant).toHaveClass("tw-rounded-full", "tw-size-6");
-    expect(winner).toHaveClass("tw-rounded-full", "tw-size-6");
+    expect(participant).toHaveClass("tw-rounded-full", "tw-size-5");
+    expect(winner).toHaveClass("tw-rounded-full", "tw-size-5");
 
     fireEvent.click(participant);
     fireEvent.click(winner);

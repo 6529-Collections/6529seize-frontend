@@ -6,20 +6,15 @@ The `Brain` tab can show a companion wave surface for the viewed profile:
 
 - `Created Waves` on desktop and `Created` in the mobile strip
 - `Most Active In` on desktop and `Active In` in the mobile strip
-- `Quick Tags` beneath the wave sections when viewing your own profile
 
 This surface lets users jump from a profile's Brain tab into waves the profile
-created, or into the waves where that profile is most active. The owner-only
-Quick Tags section manages private tags that expand into profile mentions in a
-Wave composer.
+created, or into the waves where that profile is most active.
 
 ## Location in the Site
 
 - Route: `/{user}/brain`
 - Desktop: right column beside the Brain feed
 - Small screens: horizontal strip above the Brain feed
-- Quick Tags: below the wave sections on desktop and below the mobile strip on
-  your own profile
 
 ## Entry Points
 
@@ -37,13 +32,12 @@ Wave composer.
      when more created waves exist
    - `Most Active In`: up to three waves
 4. Small screens show `Created` and `Active In` pill rows above the feed.
-5. On your own profile, `Quick Tags` appears after the wave sections.
-6. If more created waves exist on small screens, select the overflow chip to
+5. If more created waves exist on small screens, select the overflow chip to
    open `Waves by {profile}`.
-7. Select any wave row or pill to open that wave:
+6. Select any wave row or pill to open that wave:
    - standard wave: `/waves/{waveId}`
    - direct-message result: `/messages/{waveId}`
-8. In the created-waves modal, scroll to load more created waves.
+7. In the created-waves modal, scroll to load more created waves.
 
 ## Common Scenarios
 
@@ -60,8 +54,7 @@ Wave composer.
 
 ## Edge Cases
 
-- If both wave datasets resolve empty, the wave sections are hidden. The sidebar
-  remains available on your own profile when Quick Tags can be managed.
+- If both wave datasets resolve empty, the sidebar is hidden.
 - `Created Waves` excludes direct-message threads.
 - `Created Waves` resolves authored waves from the profile handle when
   available, then falls back to the resolved profile query or primary wallet.
@@ -87,14 +80,12 @@ Wave composer.
   three `Most Active In` items.
 - The full modal lists created waves only; it does not provide a full-screen
   `Most Active In` list.
-- Quick Tags are private, owner-only, and unavailable while acting as a proxy.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
 - [Profiles Tabs Index](README.md)
 - [Profile Brain Tab](feature-brain-tab.md)
-- [Quick Tags](../../waves/composer/feature-personal-mention-shortcuts.md)
 - [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Waves Index](../../waves/README.md)

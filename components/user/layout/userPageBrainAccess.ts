@@ -1,13 +1,6 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-export function shouldDelayUserPageBrainRedirect({
-  address,
-  connectedProfile,
-  connectionState,
-  fetchingProfile,
-  isClientHydrated,
-}: {
-  readonly address: string | undefined;
+type UserPageAccessState = {
   readonly connectedProfile: ApiIdentity | null;
   readonly connectionState:
     | "initializing"
@@ -17,14 +10,52 @@ export function shouldDelayUserPageBrainRedirect({
     | "error";
   readonly fetchingProfile: boolean;
   readonly isClientHydrated: boolean;
-}): boolean {
-  if (!isClientHydrated) {
-    return true;
-  }
+};
 
+const shouldDelayAccessRedirect = ({
+  connectionState,
+  isClientHydrated,
+  isProfileHydrating,
+}: Pick<UserPageAccessState, "connectionState" | "isClientHydrated"> & {
+  readonly isProfileHydrating: boolean;
+}): boolean => {
   const isWalletConnectingOrInitializing =
     connectionState === "initializing" || connectionState === "connecting";
+
+  return (
+    !isClientHydrated || isWalletConnectingOrInitializing || isProfileHydrating
+  );
+};
+
+export function shouldDelayUserPageBrainRedirect({
+  address,
+  connectedProfile,
+  connectionState,
+  fetchingProfile,
+  isClientHydrated,
+}: UserPageAccessState & {
+  readonly address: string | undefined;
+}): boolean {
   const isProfileHydrating = !!address && fetchingProfile && !connectedProfile;
 
-  return isWalletConnectingOrInitializing || isProfileHydrating;
+  return shouldDelayAccessRedirect({
+    connectionState,
+    isClientHydrated,
+    isProfileHydrating,
+  });
+}
+
+export function shouldDelayUserPageOwnerTabRedirect({
+  connectedProfile,
+  connectionState,
+  fetchingProfile,
+  isClientHydrated,
+}: UserPageAccessState): boolean {
+  const isProfileHydrating = fetchingProfile && !connectedProfile;
+
+  return shouldDelayAccessRedirect({
+    connectionState,
+    isClientHydrated,
+    isProfileHydrating,
+  });
 }
