@@ -114,9 +114,10 @@ into this bounded workstream.
 The ratchet uses the TypeScript compiler API rather than text matching.
 Production `any_casts` counts direct annotations/assertions plus every
 `AnyKeyword` parsed inside a generic type argument. `test_generic_any` applies
-the generic-argument rule to conventional test roots and nested test files.
-Nested, adjacent, multiline, tuple-contained, call-expression, type-reference,
-and JSX type arguments are covered. Comments, prose, strings, identifiers, and
+the generic-argument rule to TypeScript files under conventional test roots and
+to nested/co-located TypeScript test files. Nested, adjacent, multiline,
+tuple-contained, call-expression, type-reference, and JSX type arguments are
+covered. Comments, prose, strings, identifiers, generic parameter defaults, and
 non-generic test `any` do not count.
 
 Counts and per-file locations:

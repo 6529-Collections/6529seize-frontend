@@ -91,6 +91,11 @@ describe("debt-ratchet counting helpers", () => {
     expect(countGenericAnyTypeArguments(content, "Sample.tsx")).toBe(0);
   });
 
+  it("does not treat a generic parameter default as a type argument", () => {
+    const content = "function identity<T = any>(value: T): T { return value; }";
+    expect(countGenericAnyTypeArguments(content, "Sample.ts")).toBe(0);
+  });
+
   it("counts TypeScript angle-bracket any assertions", () => {
     expect(countAnyCasts("const value = <any>input;\n", "Sample.ts")).toBe(1);
   });
@@ -194,6 +199,7 @@ describe("debt-ratchet check mode", () => {
       "components/__tests__/Ignored.test.tsx",
       "const ignored: any = 1;\nconst generic = helper<any>();\n"
     );
+    writeFixture("__tests__/Root.test.ts", "const generic = helper<any>();\n");
   });
 
   afterEach(() => {
@@ -215,7 +221,7 @@ describe("debt-ratchet check mode", () => {
       )
     );
     expect(baseline.counts.any_casts).toBe(2);
-    expect(baseline.counts.test_generic_any).toBe(1);
+    expect(baseline.counts.test_generic_any).toBe(2);
     expect(baseline.counts.todo_comments).toBe(1);
     expect(baseline.counts.redux_imports).toBe(1);
 
@@ -255,7 +261,7 @@ describe("debt-ratchet check mode", () => {
 
     const check = runRatchet(root);
     expect(check.status).toBe(1);
-    expect(check.stderr).toContain("test_generic_any rose from 1 to 2");
+    expect(check.stderr).toContain("test_generic_any rose from 2 to 3");
   });
 
   it("fails on a new oversized file even when the total stays level", () => {
@@ -342,6 +348,7 @@ describe("debt-ratchet check mode", () => {
     expect(testResult.stdout).toMatch(
       /^\s*1\s+components\/__tests__\/Ignored\.test\.tsx/m
     );
+    expect(testResult.stdout).toMatch(/^\s*1\s+__tests__\/Root\.test\.ts/m);
 
     const unknown = runRatchet(root, ["--details", "nope"]);
     expect(unknown.status).toBe(1);

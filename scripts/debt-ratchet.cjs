@@ -196,6 +196,9 @@ function isNestedTestSource(relativePath) {
 }
 
 function listTestFiles() {
+  // Root test directories also contain support files without `.test`/`.spec`
+  // names. Source directories need a separate walk for co-located test files
+  // and nested test folders; the Set keeps the combined inventory unique.
   const files = new Set();
   const collect = (dir, filter) => {
     const candidates = [];
@@ -532,6 +535,8 @@ function computeActuals() {
   }
 
   for (const relativePath of listTestFiles()) {
+    // Parsed generic type arguments are TypeScript syntax. JavaScript test
+    // files remain outside this metric, just as they are outside `any_casts`.
     if (!TYPESCRIPT_EXTENSIONS.has(path.extname(relativePath))) continue;
     testGenericAnyInputs.push({
       filePath: relativePath,

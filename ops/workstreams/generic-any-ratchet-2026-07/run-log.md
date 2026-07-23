@@ -35,3 +35,16 @@
   - `seize run check:changed`: passed against the exact scanner commit and
     verified main base.
   - Prettier check and `codex-diff-check`: passed.
+- Opened review-ready PR #3444:
+  <https://github.com/6529-Collections/6529seize-frontend/pull/3444>.
+- Latest-head 6529 general review requested clearer scope and discovery
+  coverage. Addressed by:
+  - documenting why generic-argument parsing is TypeScript-only;
+  - documenting the root-test plus nested-test dual walk and Set deduplication;
+  - proving both root and nested test discovery in the check-mode fixture;
+  - pinning generic parameter defaults (`<T = any>`) as distinct from generic
+    arguments and outside this bounded metric.
+- Follow-up validation:
+  - focused scanner suite: 29 tests passed;
+  - debt ratchet: production 23/23 and tests 135/135;
+  - focused ESLint and `codex-diff-check`: passed.

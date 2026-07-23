@@ -2,8 +2,8 @@
 
 ## Current goal
 
-Implement the scanner-correctness slice directly from current `origin/main`.
-Use the TypeScript AST to count `AnyKeyword` occurrences inside generic type
+Finish latest-head review and CI iteration for scanner PR #3444. The scanner
+uses the TypeScript AST to count `AnyKeyword` occurrences inside generic type
 arguments without counting comments, prose, strings, or identifiers.
 
 ## Current branch
@@ -42,6 +42,6 @@ arguments without counting comments, prose, strings, or identifiers.
 
 ## Next actions
 
-1. Push the signed scanner slice and open its review-ready PR.
+1. Create and push a signed review-follow-up commit.
 2. Track every latest-head review bot and required check to terminal state.
-3. Fix or justify findings, obtain current-head maintainer approval, and merge.
+3. Obtain current-head maintainer approval and merge.
