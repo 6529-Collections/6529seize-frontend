@@ -7,6 +7,9 @@ import {
   startOfUtcDay,
 } from "./meme-calendar.helpers";
 
+const ICS_ESCAPED_SEMICOLON = String.raw`\;`;
+const ICS_ESCAPED_COMMA = String.raw`\,`;
+
 function ymdHmsUtc(d: Date): string {
   const y = d.getUTCFullYear();
   const m = String(d.getUTCMonth() + 1).padStart(2, "0");
@@ -34,8 +37,8 @@ function createGoogleCalendarUrl(
 function escapeIcsText(value: string): string {
   return value
     .replaceAll("\\", "\\\\")
-    .replaceAll(";", "\\;")
-    .replaceAll(",", "\\,")
+    .replaceAll(";", ICS_ESCAPED_SEMICOLON)
+    .replaceAll(",", ICS_ESCAPED_COMMA)
     .replaceAll("\r\n", "\n")
     .replaceAll("\r", "\n")
     .replaceAll("\n", String.raw`\n`);
