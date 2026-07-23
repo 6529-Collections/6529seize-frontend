@@ -11,15 +11,15 @@ import type { ReactNode } from "react";
 
 const EDITORIAL_GRID_CLASSES =
   "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
-const REFERENCE_SECTION_CLASSES = `${EDITORIAL_GRID_CLASSES} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12`;
+const REFERENCE_SECTION_CLASSES = `${EDITORIAL_GRID_CLASSES} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-12`;
 const REFERENCE_CONTENT_CLASSES =
   "tw-min-w-0 tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300";
 const INTRO_CONTENT_CLASSES =
   "tw-min-w-0 tw-max-w-3xl tw-space-y-5 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400";
 const SECTION_HEADING_CLASSES =
-  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-[-0.04em] tw-text-iron-100 sm:tw-text-xl";
 const FORMULA_CLASSES =
-  "tw-m-0 tw-w-full tw-overflow-x-auto tw-whitespace-pre tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-p-4 tw-font-mono tw-text-sm tw-font-medium tw-leading-6 tw-text-[#00f0ff]";
+  "tw-m-0 tw-w-full tw-overflow-x-auto tw-whitespace-pre tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-4 tw-font-mono tw-text-sm tw-font-medium tw-leading-6 tw-text-[#00f0ff]";
 const ORDERED_LIST_CLASSES =
   "tw-m-0 tw-list-decimal tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600";
 
@@ -28,7 +28,7 @@ export default function XTDHMainPage() {
 
   return (
     <main
-      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-text-iron-100`}
+      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
     >
       <div className="tw-w-full">
         <AboutContentsDropdown
@@ -45,7 +45,7 @@ export default function XTDHMainPage() {
             <div className="lg:tw-sticky lg:tw-top-28">
               <h1
                 id="xtdh-overview-heading"
-                className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]"
+                className={SECTION_HEADING_CLASSES}
               >
                 xTDH Overview
               </h1>
@@ -83,8 +83,8 @@ export default function XTDHMainPage() {
                 </ol>
               </div>
               <p className="tw-m-0">
-                Your total xTDH balance increases every day at midnight based
-                on these rules.
+                Your total xTDH balance increases every day at midnight based on
+                these rules.
               </p>
             </div>
           </section>
@@ -94,9 +94,9 @@ export default function XTDHMainPage() {
             title="Produced xTDH (from your Memes)"
           >
             <p className="tw-m-0">
-              Every meme you hold that produces TDH also produces xTDH. So
-              every midnight you produce TDH you also produce xTDH following
-              this formula:
+              Every meme you hold that produces TDH also produces xTDH. So every
+              midnight you produce TDH you also produce xTDH following this
+              formula:
             </p>
             <pre className={FORMULA_CLASSES}>
               <code>
@@ -115,9 +115,10 @@ export default function XTDHMainPage() {
           >
             <p className="tw-m-0">
               A grant lets someone “give away” a portion of their xTDH produced
-              in the future to <em className="tw-text-iron-200">all or some</em>{" "}
-              tokens in an ERC721 collection. If you own a token that has
-              active grants, you receive a portion of those grants every day.
+              in the future to{" "}
+              <em className="tw-text-iron-200">*all or some*</em> tokens in an
+              ERC721 collection. If you own a token that has active grants, you
+              receive a portion of those grants every day.
             </p>
 
             <div className="tw-space-y-3 tw-pt-2">
@@ -152,7 +153,7 @@ export default function XTDHMainPage() {
             <p className="tw-m-0">
               You receive this amount{" "}
               <strong className="tw-font-medium tw-text-iron-100">
-                only for the time you actually owned the token
+                **only for the time you actually owned the token**
               </strong>
               , and only while the grant was active.
             </p>
@@ -177,8 +178,8 @@ export default function XTDHMainPage() {
               <strong className="tw-font-medium tw-text-iron-100">do</strong>.
             </p>
             <p className="tw-m-0">
-              If you sell your token then the xTDH does not transfer with it.
-              It goes back to the grantor.
+              If you sell your token then the xTDH does not transfer with it. It
+              goes back to the grantor.
             </p>
           </XtdhReferenceSection>
 
@@ -237,10 +238,7 @@ export default function XTDHMainPage() {
             </pre>
           </XtdhReferenceSection>
 
-          <XtdhReferenceSection
-            id="lost-xtdh"
-            title="Can xTDH ever get lost?"
-          >
+          <XtdhReferenceSection id="lost-xtdh" title="Can xTDH ever get lost?">
             <p className="tw-m-0">
               No. All the produced xTDH always goes to someone. It never
               vanishes. If a grantee sells their token then the xTDH they had

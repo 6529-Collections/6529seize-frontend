@@ -15,9 +15,9 @@ import { t, type MessageKey } from "@/i18n/messages";
 type NetworkLevelsMessageKey = Extract<MessageKey, `network.levels.${string}`>;
 
 const SECTION_HEADING_CLASS =
-  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-[-0.04em] tw-text-iron-100 sm:tw-text-xl";
 const PANEL_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60";
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black";
 const EDITORIAL_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:tw-gap-12";
 
@@ -31,7 +31,7 @@ export default function LevelsClient() {
 
   return (
     <main
-      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-text-iron-100`}
+      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
     >
       <div className="tw-w-full">
         <AboutContentsDropdown
@@ -41,7 +41,7 @@ export default function LevelsClient() {
         />
 
         <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
-          <header className="tw-pb-8 sm:tw-pb-12">
+          <header className="tw-pb-8 sm:tw-pb-10">
             <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
               {m(locale, "network.levels.hero.title")}
             </h1>
@@ -56,7 +56,7 @@ export default function LevelsClient() {
 
           <section
             aria-labelledby="levels-thresholds-heading"
-            className={`${EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12`}
+            className={`${EDITORIAL_GRID_CLASS} tw-pb-8 tw-pt-8 sm:tw-pb-12 sm:tw-pt-10`}
           >
             <div className="lg:tw-sticky lg:tw-top-28">
               <h2

@@ -82,13 +82,15 @@ function SubscriptionHeader({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <header className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
       <div className="tw-max-w-4xl">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-          {m(locale, "about.subscriptions.hero.title")}
-        </h1>
-        <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-3">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+          <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+            {m(locale, "about.subscriptions.hero.title")}
+          </h1>
           <div className="tw-flex tw-justify-start empty:tw-hidden">
             <AboutSubscriptionsProfileButton variant="white" />
           </div>
+        </div>
+        <div className="tw-mt-3">
           <Link
             className="tw-group/report -tw-ml-1 tw-inline-flex tw-max-w-full tw-items-start tw-gap-2 tw-rounded-md tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-items-center lg:tw-whitespace-nowrap"
             href="/tools/subscriptions-report"

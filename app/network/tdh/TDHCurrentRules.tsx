@@ -15,7 +15,7 @@ interface AdditionalSetExample {
 const EDITORIAL_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
 const PANEL_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60";
+  "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55";
 
 const ADDITIONAL_SET_EXAMPLES: readonly AdditionalSetExample[] = [
   {
@@ -77,12 +77,12 @@ export default function TDHCurrentRules({
   return (
     <section
       aria-labelledby="tdh-current-heading"
-      className={`${EDITORIAL_GRID_CLASS} tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12`}
+      className={`${EDITORIAL_GRID_CLASS} tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-12`}
       id="tdh-1-4"
     >
       <div className="lg:tw-sticky lg:tw-top-28">
         <h2
-          className="tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 focus:tw-outline-none sm:tw-text-xl"
+          className="tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-[-0.04em] tw-text-iron-100 focus:tw-outline-none sm:tw-text-xl"
           id="tdh-current-heading"
           tabIndex={-1}
         >
@@ -135,7 +135,7 @@ function CategoryA({ locale }: { readonly locale: SupportedLocale }) {
         )<sup>(n-1)</sup>
       </p>
 
-      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/20 tw-p-4">
+      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/45 tw-p-4">
         <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
           {m(locale, "network.tdh.current.categoryA.examplesTitle")}
         </p>
@@ -204,7 +204,7 @@ function CategoryB({ locale }: { readonly locale: SupportedLocale }) {
         {m(locale, "network.tdh.current.categoryB.applies")}
       </p>
 
-      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/20 tw-p-4">
+      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/45 tw-p-4">
         <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pb-4">
           <h4 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
             {m(locale, "network.tdh.current.categoryB.szn1")}
