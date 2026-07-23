@@ -3,7 +3,9 @@
 ## Overview
 
 Old profile-tab URLs still resolve so existing links keep working.
-Each supported legacy alias redirects to profile root: `/{user}`.
+Most supported legacy aliases redirect to profile root. The removed
+`Mention shortcuts` tab redirects to the Brain tab, where `Quick Tags` now
+live.
 
 ## Location in the Site
 
@@ -12,7 +14,8 @@ Each supported legacy alias redirects to profile root: `/{user}`.
   - `/{user}/waves`
   - `/{user}/groups`
   - `/{user}/followers`
-- Destination: `/{user}`
+  - `/{user}/mention-shortcuts`
+- Destinations: `/{user}` or `/{user}/brain`
 
 ## Entry Points
 
@@ -22,7 +25,7 @@ Each supported legacy alias redirects to profile root: `/{user}`.
 ## User Journey
 
 1. Open a legacy profile route.
-2. The route redirects to `/{user}`.
+2. The route redirects to `/{user}` or `/{user}/brain`.
 3. If `{user}` is not the canonical handle, profile routing may redirect again
    to the canonical handle route.
 4. Profile loads on the Identity tab.
@@ -35,12 +38,15 @@ Each supported legacy alias redirects to profile root: `/{user}`.
 | `/{user}/waves` | Temporary | Dropped | Lands on `/{user}` |
 | `/{user}/groups` | Temporary | Dropped | Lands on `/{user}` |
 | `/{user}/followers` | Temporary | Dropped | Lands on `/{user}` (not a followers tab) |
+| `/{user}/mention-shortcuts` | Permanent | Dropped | Lands on `/{user}/brain` |
 
 ## Common Scenarios
 
 - `/{user}/identity?tab=a&tab=b` first redirects to `/{user}?tab=a&tab=b`.
 - `/{user}/waves?foo=bar`, `/{user}/groups?foo=bar`, and
   `/{user}/followers?foo=bar` redirect to `/{user}` without query parameters.
+- `/{user}/mention-shortcuts?foo=bar` redirects to `/{user}/brain` without
+  query parameters.
 - If `{user}` is a wallet or non-canonical handle, the destination route can
   apply a second redirect to canonical handle.
 

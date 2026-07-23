@@ -297,7 +297,7 @@ describe("MentionsPlugin", () => {
       expect.objectContaining({
         type: "alias",
         handle: "@frens",
-        display: "Mention shortcut · 2 profiles",
+        display: "Quick tag · 2 profiles",
       })
     );
   });

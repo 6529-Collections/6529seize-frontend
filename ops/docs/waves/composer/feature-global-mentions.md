@@ -53,8 +53,8 @@ specific profiles directly.
 
 ## Limitations / Notes
 
-Global names are reserved and cannot be used for personal mention shortcuts.
-Personal shortcuts expand inline into profile handles; global mentions do not.
+Global names are reserved and cannot be used for personal Quick Tags.
+Quick Tags expand inline into profile handles; global mentions do not.
 Editing a message updates which global tokens are stored with its content, but
 does not resend permission-group notifications.
 The stored `mentioned_groups` value describes the global tokens in the current
@@ -64,5 +64,5 @@ the message was first posted.
 ## Related Pages
 
 - [Wave Composer](README.md)
-- [Personal Mention Shortcuts](feature-personal-mention-shortcuts.md)
+- [Quick Tags](feature-personal-mention-shortcuts.md)
 - [Wave Mentions](feature-wave-mentions.md)

@@ -237,7 +237,7 @@ export default function CreateDropLayout({
       const expandMentionAliases =
         createDropInputRef.current?.expandMentionAliases;
       if (!expandMentionAliases) {
-        throw new Error("Mention shortcuts are not ready yet.");
+        throw new Error("Quick Tags are not ready yet.");
       }
       expansion = await expandMentionAliases();
     } catch {

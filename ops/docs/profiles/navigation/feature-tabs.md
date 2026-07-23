@@ -74,6 +74,8 @@ Profile tab routes live under `/{user}`.
 
 - `/{user}/identity` redirects to `/{user}` and preserves query params.
 - `/{user}/waves`, `/{user}/groups`, and `/{user}/followers` redirect to `/{user}` without query params.
+- `/{user}/mention-shortcuts` redirects permanently to `/{user}/brain`, where
+  the owner-only Quick Tags section now lives.
 - `/{user}/stats` is no longer a supported profile route and does not redirect.
 - `/{user}/rep` is unsupported and does not redirect.
 - `/{user}` values that end with probe-like suffixes (`.html`, `.htm`, `.php`, `.asp`, `.aspx`, `.jsp`) are treated as invalid profile slugs and show not-found.

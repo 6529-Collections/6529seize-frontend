@@ -623,16 +623,15 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   xtdh: "xTDH",
   subscriptions: "Subscriptions",
   proxy: "Proxy",
-  mentionShortcuts: "Mention shortcuts",
   "badges.beta": "Beta",
 } as const);
 
 const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
   "waves.composer.mentionShortcuts",
   {
-    optionOne: "Mention shortcut · 1 profile",
-    optionMany: "Mention shortcut · {count} profiles",
-    loadErrorTitle: "Mention shortcuts couldn't be loaded.",
+    optionOne: "Quick tag · 1 profile",
+    optionMany: "Quick tag · {count} profiles",
+    loadErrorTitle: "Quick Tags couldn't be loaded.",
     loadErrorMessage: "Try again before sending this message.",
   } as const
 );
@@ -640,30 +639,29 @@ const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
 const GROUP_MENTION_COMPOSER_MESSAGES = objectMessages(
   "waves.composer.groupMentions",
   {
-    all: "Global mention · everyone following this Wave",
-    contributors: "Global mention · profiles with Chat access",
-    admins: "Global mention · profiles with Admin access",
-    devs6529: "Global mention · 6529 developers",
+    all: "All Wave followers",
+    contributors: "Can post in this Wave",
+    admins: "Wave creator and admins",
+    devs6529: "6529 developers",
   } as const
 );
 
 const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
   "user.mentionShortcuts",
   {
-    title: "Mention shortcuts",
+    title: "Quick Tags",
     description:
-      "Create private shortcuts such as @frens. In a composer, the shortcut expands inline into the selected profile handles.",
-    private: "Mention shortcuts are private to their profile owner.",
-    new: "New shortcut",
-    create: "Create shortcut",
-    edit: "Edit shortcut",
+      "Create private tags such as @frens. In a Wave composer, each Quick Tag expands into the profile handles you choose.",
+    new: "New Quick Tag",
+    create: "Create Quick Tag",
+    edit: "Edit Quick Tag",
     editorDescription:
-      "It expands into ordinary profile mentions before a message is sent.",
+      "It expands into ordinary profile mentions before your message is sent.",
     cancel: "Cancel",
-    name: "Shortcut name",
+    name: "Quick Tag name",
     nameError: "Use 3–15 letters, numbers, or underscores.",
     reservedError:
-      "That shortcut is reserved. Try something a little more creative.",
+      "That tag name is reserved. Try something a little more creative.",
     addProfiles: "Add profiles ({count}/{max})",
     searchLabel: "Search profiles by handle",
     searchPlaceholder: "Search by handle",
@@ -671,22 +669,22 @@ const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
     searchResults: "{count} profiles available.",
     searchResult: "1 profile available.",
     removeProfile: "Remove @{handle}",
-    save: "Save shortcut",
+    save: "Save Quick Tag",
     saving: "Saving…",
-    created: "Mention shortcut created.",
-    updated: "Mention shortcut updated.",
-    saveErrorTitle: "Couldn't save mention shortcut.",
-    saveErrorDetails: "Unable to save mention shortcut",
+    created: "Quick Tag created.",
+    updated: "Quick Tag updated.",
+    saveErrorTitle: "Couldn't save Quick Tag.",
+    saveErrorDetails: "Unable to save Quick Tag",
     deleteTitle: "Delete @{alias}?",
     deleteWarning: "This cannot be undone.",
-    delete: "Delete shortcut",
-    deleting: "Deleting mention shortcut.",
-    deleted: "Mention shortcut deleted.",
-    deleteErrorTitle: "Couldn't delete mention shortcut.",
-    deleteErrorDetails: "Unable to delete mention shortcut",
+    delete: "Delete Quick Tag",
+    deleting: "Deleting Quick Tag.",
+    deleted: "Quick Tag deleted.",
+    deleteErrorTitle: "Couldn't delete Quick Tag.",
+    deleteErrorDetails: "Unable to delete Quick Tag",
     loading: "Loading…",
-    loadError: "Mention shortcuts could not be loaded.",
-    empty: "You have no mention shortcuts yet.",
+    loadError: "Quick Tags could not be loaded.",
+    empty: "You have no Quick Tags yet.",
     editAction: "Edit",
     deleteAction: "Delete",
   } as const

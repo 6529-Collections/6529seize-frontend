@@ -1,5 +1,6 @@
 import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { AuthContext } from "@/components/auth/Auth";
 import UserPageBrainSidebar from "@/components/user/brain/UserPageBrainSidebar";
 import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
 import { useWaves } from "@/hooks/useWaves";
@@ -32,6 +33,17 @@ jest.mock("@/components/waves/drops/WaveCreatorPreviewModal", () => ({
       />
     ) : null,
 }));
+jest.mock(
+  "@/components/user/mention-shortcuts/UserPageMentionShortcuts",
+  () => ({
+    __esModule: true,
+    default: ({ profile }: any) => (
+      <section data-testid="brain-quick-tags">
+        Quick Tags for {profile.handle}
+      </section>
+    ),
+  })
+);
 
 const mockedUseWaves = useWaves as jest.MockedFunction<typeof useWaves>;
 const mockedUseFavouriteWavesOfIdentity =
@@ -242,6 +254,81 @@ describe("UserPageBrainSidebar", () => {
       within(desktopSidebar).getByText("Created Waves")
     ).toBeInTheDocument();
     expect(within(desktopSidebar).queryByText("Most Active In")).toBeNull();
+  });
+
+  it("shows Quick Tags beneath the wave sections on the owner's profile", () => {
+    const ownedProfile = { ...baseProfile, id: "profile-1" };
+    mockedUseFavouriteWavesOfIdentity.mockReturnValue({
+      waves: [makeWave({ id: "wave-2", name: "Meme Card Curation" })],
+      status: "success",
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-1" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <UserPageBrainSidebar profile={ownedProfile} />
+      </AuthContext.Provider>
+    );
+
+    const sidebar = screen.getByTestId("brain-sidebar");
+    const mostActiveHeading = within(sidebar).getByText("Most Active In");
+    const quickTags = within(sidebar).getByTestId("brain-quick-tags");
+
+    expect(quickTags).toHaveTextContent("Quick Tags for kanetix");
+    expect(
+      mostActiveHeading.compareDocumentPosition(quickTags) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("keeps the sidebar available for owner Quick Tags without wave rows", () => {
+    const ownedProfile = { ...baseProfile, id: "profile-1" };
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-1" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <UserPageBrainSidebar profile={ownedProfile} />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByTestId("brain-sidebar")).toBeInTheDocument();
+    expect(screen.getByTestId("brain-quick-tags")).toBeInTheDocument();
+    expect(screen.queryByText("Most Active In")).toBeNull();
+  });
+
+  it("does not show Quick Tags on another profile", () => {
+    const viewedProfile = { ...baseProfile, id: "profile-1" };
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-2" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <UserPageBrainSidebar profile={viewedProfile} />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.queryByTestId("brain-sidebar")).toBeNull();
+    expect(screen.queryByTestId("brain-quick-tags")).toBeNull();
   });
 
   it("expands and collapses the created waves list", () => {

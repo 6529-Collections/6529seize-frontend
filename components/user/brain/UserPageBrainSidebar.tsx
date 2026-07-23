@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { AuthContext } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
 import { useWaves } from "@/hooks/useWaves";
 import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
 import { WaveCreatorPreviewModal } from "@/components/waves/drops/WaveCreatorPreviewModal";
+import { useContext, useMemo } from "react";
+import UserPageMentionShortcuts from "../mention-shortcuts/UserPageMentionShortcuts";
 import UserPageBrainSidebarCreated from "./UserPageBrainSidebarCreated";
 import UserPageBrainSidebarMobileStrip from "./UserPageBrainSidebarMobileStrip";
 import UserPageBrainSidebarMostActive from "./UserPageBrainSidebarMostActive";
@@ -16,6 +18,7 @@ export default function UserPageBrainSidebar({
 }: {
   readonly profile: ApiIdentity;
 }) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const identity = getProfileWaveIdentity(profile);
   const hasIdentity = identity.length > 0;
   const { waves: createdWaves, status: createdStatus } = useWaves({
@@ -44,8 +47,11 @@ export default function UserPageBrainSidebar({
     createdStatus === "pending" || createdWaves.length > 0;
   const shouldShowMostActive =
     mostActiveStatus === "pending" || mostActiveWaves.length > 0;
+  const shouldShowQuickTags =
+    !!profile.id && connectedProfile?.id === profile.id && !activeProfileProxy;
+  const shouldShowWaveSections = shouldShowCreated || shouldShowMostActive;
 
-  if (!shouldShowCreated && !shouldShowMostActive) {
+  if (!shouldShowWaveSections && !shouldShowQuickTags) {
     return null;
   }
 
@@ -76,6 +82,12 @@ export default function UserPageBrainSidebar({
           status={mostActiveStatus}
         />
       </div>
+
+      {shouldShowQuickTags && (
+        <div className={shouldShowWaveSections ? "lg:tw-mt-6" : undefined}>
+          <UserPageMentionShortcuts profile={profile} />
+        </div>
+      )}
 
       <WaveCreatorPreviewModal
         isOpen={isModalOpen}

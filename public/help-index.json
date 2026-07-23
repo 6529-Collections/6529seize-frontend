@@ -946,7 +946,9 @@
         "brain tab",
         "profile brain",
         "brain activity",
-        "activity heatmap"
+        "activity heatmap",
+        "quick tags",
+        "quick tag settings"
       ],
       "keywords": [
         "profile",
@@ -959,6 +961,7 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
+        "When viewing your own profile without an active proxy, the Brain sidebar includes private Quick Tags beneath the wave sections.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -966,7 +969,9 @@
       "tags": ["profiles", "brain", "glossary"],
       "source_refs": [
         "ops/docs/profiles/tabs/feature-brain-tab.md",
-        "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md"
+        "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md",
+        "ops/docs/profiles/tabs/feature-brain-wave-sidebar.md",
+        "ops/docs/waves/composer/feature-personal-mention-shortcuts.md"
       ]
     },
     {
@@ -4400,6 +4405,8 @@
         "mentioned waves",
         "mention shortcut",
         "personal mention alias",
+        "quick tag",
+        "quick tags",
         "@frens"
       ],
       "keywords": [
@@ -4419,14 +4426,14 @@
         "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
         "Any profile with Chat access can invoke @contributors, @admins, or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
         "Editing stored global-mention tokens does not resend permission-group notifications; mentioned_groups describes tokens in the current displayed content, not historical notification delivery.",
-        "Global mentions stay visible in posted content; personal mention shortcuts expand into individual profile mentions before submission.",
-        "Profiles can create private Mention shortcuts from their own profile; a shortcut such as @frens expands inline into ordinary profile mentions.",
-        "Personal mention shortcuts are case-insensitive, cannot use reserved global mention names, and are not stored in the posted drop after expansion.",
+        "Global mentions stay visible in posted content; personal Quick Tags expand into individual profile mentions before submission.",
+        "Profiles can create private Quick Tags beneath the wave sections on their own profile's Brain tab; a Quick Tag such as @frens expands inline into ordinary profile mentions.",
+        "Quick Tags are case-insensitive, cannot use reserved global mention names, and are not stored in the posted drop after expansion.",
         "Mention behavior depends on composer state, supported metadata, and the user's eligibility in the current wave.",
         "The @help6529 helper bot trigger also uses mention detection, but the bot runtime is implemented in the backend."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves"],
+      "related_paths": ["/waves", "/{user}/brain"],
       "tags": ["waves", "composer", "mentions"],
       "source_refs": [
         "ops/docs/waves/composer/feature-wave-mentions.md",

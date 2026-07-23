@@ -12,10 +12,29 @@ describe("GroupCreateIdentitySelectedItems", () => {
     const user = userEvent.setup();
     const onRemove = jest.fn();
     render(
-      <GroupCreateIdentitySelectedItems selectedIdentities={identities as any} onRemove={onRemove} />
+      <GroupCreateIdentitySelectedItems
+        selectedIdentities={identities as any}
+        onRemove={onRemove}
+      />
     );
     const buttons = screen.getAllByRole("button");
     await user.click(buttons[0]);
     expect(onRemove).toHaveBeenCalledWith("1");
+  });
+
+  it("supports the Quick Tag handle prefix and accessible remove label", () => {
+    render(
+      <GroupCreateIdentitySelectedItems
+        selectedIdentities={identities as any}
+        onRemove={jest.fn()}
+        handlePrefix="@"
+        getRemoveLabel={(identity) => `Remove @${identity.handle}`}
+      />
+    );
+
+    expect(screen.getByText("@alice")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Remove @alice" })
+    ).toBeInTheDocument();
   });
 });
