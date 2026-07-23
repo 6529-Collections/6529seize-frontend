@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import DotLoader from "../dotLoader/DotLoader";
 import AppWalletCard from "./AppWalletCard";
 import { CreateAppWalletModal } from "./AppWalletModal";
@@ -60,20 +61,22 @@ export default function AppWallets() {
               show={showCreateModal}
               onHide={() => setShowCreateModal(false)}
             />
-            <button
+            <Button
               type="button"
               onClick={() => setShowCreateModal(true)}
-              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+              variant="action"
+              size="md"
             >
               <FontAwesomeIcon icon={faPlusCircle} height={16} /> Create Wallet
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => router.push("/tools/app-wallets/import-wallet")}
-              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-[#198754] tw-bg-[#198754] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#146c43] enabled:hover:tw-bg-[#157347] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+              variant="success"
+              size="md"
             >
               <FontAwesomeIcon icon={faPlusCircle} height={16} /> Import Wallet
-            </button>
+            </Button>
           </div>
         </div>
       </>
