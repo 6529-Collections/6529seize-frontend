@@ -146,7 +146,6 @@ async function runWithResponse(
   }
 }
 
-// eslint-disable-next-line max-lines-per-function -- The helper's behavioral matrix belongs in one contract suite.
 describe("release-bus-status helper", () => {
   test.each(["OFF", "SHADOW", "STAGING", "PRODUCTION"])(
     "prints sanitized status for %s mode",
