@@ -18,13 +18,13 @@ description: Route and execute 6529 frontend, backend, or coupled staging and pr
 
 | Mode | Staging | Production |
 | --- | --- | --- |
-| `OFF` | Serialized manual fallback | Serialized manual fallback with explicit owner authorization and exact staging evidence |
+| `OFF` | Serialized manual fallback | Serialized manual fallback with explicit owner authorization; staging evidence is not required |
 | `STAGING` | Register the exact candidate with v2 | Manual fallback only; production automation is disabled |
 | `PRODUCTION` | Register the exact candidate with v2 | Explicitly mark an exact `STAGING_VALIDATED` candidate ready for v2 production |
 
-When mode is active, stop if `ALL` or the target lane is paused. A pause while
-mode is `OFF` intentionally disables v2 and does not prohibit the documented
-manual fallback.
+When mode is active, stop if `ALL` or the target lane is paused. In `OFF`, v2
+controls are non-authoritative and do not prohibit manual staging or production
+through the documented fallback.
 
 ## V2 readiness
 
@@ -64,9 +64,12 @@ and never publishes release notes.
    independent DAG-frontier units.
 5. Record exact deployed frontend/backend SHAs before E2E and freeze staging
    until E2E is terminal.
-6. Production requires explicit owner authorization and successful validation
-   of the intended exact release set. Re-fetch `main`, preserve dependency
-   order, and never publish a release note manually.
+6. In `OFF`, production requires explicit owner authorization but not prior
+   staging deployment or validation. Re-fetch `main` and preserve dependency
+   order. For backend services, pass the same merged PR number and full
+   canonical service set to every sequential production run, setting
+   `release_note_publish=true` only on the final service. Never author or post
+   the note—the autonomous bot owns it.
 
 ## Monitoring and recovery
 

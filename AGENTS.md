@@ -13,15 +13,18 @@
 - While `OFF`, dispatch backend `Deploy a service` workflows one at a time and
   wait for exact success before starting the next. Its shared concurrency can
   cancel sibling service runs, including independent DAG-frontier units.
-- Stop an active v2 lane when `ALL` or that lane is paused. Paused controls in
-  `OFF` intentionally disable v2 and do not block the documented manual route.
+- Stop an active v2 lane when `ALL` or that lane is paused. In `OFF`, v2
+  controls are non-authoritative and do not block manual staging or production.
+  Explicit owner production authorization is sufficient; prior staging
+  deployment or validation is not required.
 - For coupled work, declare backend dependencies and preserve backend-before-
   frontend ordering. Within v2, only independent backend DAG frontier units run
   together.
 - `STAGING_DEPLOYED` is not validation. Do not mutate staging during manifest-
   bound E2E, and never infer production readiness from staging validation.
-- Never cancel another actor's workflow, force-push a shared ref, bypass exact
-  SHA/artifact checks, or publish a release note manually.
+- Never cancel another actor's workflow, force-push a shared ref, or bypass exact
+  SHA/artifact checks. Never author or post release notes manually; preserve the
+  autonomous bot's complete grouping metadata and finalize signal.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
