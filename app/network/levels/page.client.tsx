@@ -17,7 +17,7 @@ type NetworkLevelsMessageKey = Extract<MessageKey, `network.levels.${string}`>;
 const SECTION_HEADING_CLASS =
   "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-[-0.04em] tw-text-iron-100 sm:tw-text-xl";
 const PANEL_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black";
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60";
 const EDITORIAL_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:tw-gap-12";
 
