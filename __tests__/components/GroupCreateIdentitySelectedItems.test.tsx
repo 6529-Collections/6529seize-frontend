@@ -12,7 +12,10 @@ describe("GroupCreateIdentitySelectedItems", () => {
     const user = userEvent.setup();
     const onRemove = jest.fn();
     render(
-      <GroupCreateIdentitySelectedItems selectedIdentities={identities as any} onRemove={onRemove} />
+      <GroupCreateIdentitySelectedItems
+        selectedIdentities={identities as any}
+        onRemove={onRemove}
+      />
     );
     const buttons = screen.getAllByRole("button");
     await user.click(buttons[0]);

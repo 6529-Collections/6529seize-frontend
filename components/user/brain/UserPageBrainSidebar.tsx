@@ -48,9 +48,7 @@ export default function UserPageBrainSidebar({
   const shouldShowMostActive =
     mostActiveStatus === "pending" || mostActiveWaves.length > 0;
   const shouldShowQuickTags =
-    !!profile.id &&
-    connectedProfile?.id === profile.id &&
-    !activeProfileProxy;
+    !!profile.id && connectedProfile?.id === profile.id && !activeProfileProxy;
   const shouldShowWaveSections = shouldShowCreated || shouldShowMostActive;
 
   if (!shouldShowWaveSections && !shouldShowQuickTags) {
