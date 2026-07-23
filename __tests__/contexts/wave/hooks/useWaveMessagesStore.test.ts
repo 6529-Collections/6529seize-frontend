@@ -71,6 +71,10 @@ describe("useWaveMessagesStore", () => {
 
     act(() => {
       result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(["wave2"]),
+        publicWaveIds: new Set(),
+      });
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
@@ -79,6 +83,30 @@ describe("useWaveMessagesStore", () => {
     });
 
     expect(result.current.getData("wave1")).toBeUndefined();
+  });
+
+  it("replaces loaded DM scopes when the DM list changes", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const listener = jest.fn();
+
+    act(() => {
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(["wave1"]),
+        publicWaveIds: new Set(),
+      });
+      result.current.subscribe("wave1", listener);
+    });
+    listener.mockClear();
+
+    act(() => {
+      result.current.setKnownWaveScopes({
+        profileScopedWaveIds: new Set(["wave2"]),
+        publicWaveIds: new Set(),
+      });
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    expect(listener).not.toHaveBeenCalled();
   });
 
   it("preserves public cached messages when the profile switches", () => {

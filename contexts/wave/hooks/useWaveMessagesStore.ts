@@ -189,7 +189,8 @@ function useWaveMessagesStore() {
     new Map()
   );
   const authoritativePaginationWaveIdsRef = useRef<Set<string>>(new Set());
-  const profileScopedWaveIdsRef = useRef<Set<string>>(new Set());
+  const knownProfileScopedWaveIdsRef = useRef<Set<string>>(new Set());
+  const inferredProfileScopedWaveIdsRef = useRef<Set<string>>(new Set());
   const publicWaveIdsRef = useRef<Set<string>>(new Set());
   const serverFeedSeedGenerationRef = useRef(0);
 
@@ -216,7 +217,8 @@ function useWaveMessagesStore() {
         ...pendingServerFeedSeedsRef.current.keys(),
         ...activeServerFeedSeedsRef.current,
         ...appliedServerFeedSeedWaveIdsRef.current,
-        ...profileScopedWaveIdsRef.current,
+        ...knownProfileScopedWaveIdsRef.current,
+        ...inferredProfileScopedWaveIdsRef.current,
       ]);
       serverFeedSeedGenerationRef.current += 1;
       pendingServerFeedSeedsRef.current.clear();
@@ -226,6 +228,8 @@ function useWaveMessagesStore() {
       completedInitialRegistrationsRef.current.clear();
       committedServerFeedSeedsRef.current.clear();
       serverFeedSeedReadyCallbacksRef.current.clear();
+      knownProfileScopedWaveIdsRef.current.clear();
+      inferredProfileScopedWaveIdsRef.current.clear();
       updateQueueRef.current = updateQueueRef.current.filter(
         ({ update }) => !resetWaveIds.has(update.key)
       );
@@ -276,17 +280,16 @@ function useWaveMessagesStore() {
 
   const setKnownWaveScopes = useCallback(
     ({ profileScopedWaveIds, publicWaveIds }: KnownWaveScopes): void => {
+      const nextProfileScopedWaveIds = new Set(profileScopedWaveIds);
       const nextPublicWaveIds = new Set(publicWaveIds);
-      for (const waveId of profileScopedWaveIds) {
+      for (const waveId of nextProfileScopedWaveIds) {
         nextPublicWaveIds.delete(waveId);
       }
+      knownProfileScopedWaveIdsRef.current = nextProfileScopedWaveIds;
       publicWaveIdsRef.current = nextPublicWaveIds;
 
       for (const waveId of nextPublicWaveIds) {
-        profileScopedWaveIdsRef.current.delete(waveId);
-      }
-      for (const waveId of profileScopedWaveIds) {
-        profileScopedWaveIdsRef.current.add(waveId);
+        inferredProfileScopedWaveIdsRef.current.delete(waveId);
       }
     },
     []
@@ -391,15 +394,16 @@ function useWaveMessagesStore() {
   // Function to add an update to the queue and trigger processing
   const updateData = useCallback(
     (update: WaveMessagesUpdate) => {
-      if (!publicWaveIdsRef.current.has(update.key)) {
-        profileScopedWaveIdsRef.current.add(update.key);
+      const isPublicWave = publicWaveIdsRef.current.has(update.key);
+      if (!isPublicWave) {
+        inferredProfileScopedWaveIdsRef.current.add(update.key);
       }
       updateQueueRef.current.push({
         update,
         mergePolicy: "standard",
-        seedGeneration: profileScopedWaveIdsRef.current.has(update.key)
-          ? serverFeedSeedGenerationRef.current
-          : undefined,
+        seedGeneration: isPublicWave
+          ? undefined
+          : serverFeedSeedGenerationRef.current,
       });
       // Start processing if not already running
       processQueue();
