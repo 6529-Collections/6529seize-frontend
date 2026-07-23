@@ -70,6 +70,29 @@ describe("expandPlainAliasTokens", () => {
     expect(onSelect).toHaveBeenCalledTimes(2);
   });
 
+  it("does not expand an alias embedded after a Unicode letter", async () => {
+    const editor = createTestEditor();
+    editor.update(
+      () => {
+        $getRoot().append(
+          $createParagraphNode().append($createTextNode("café@frens"))
+        );
+      },
+      { discrete: true }
+    );
+    const onSelect = jest.fn();
+
+    await expandPlainAliasTokens({ editor, aliases: [alias], onSelect });
+
+    editor.getEditorState().read(() => {
+      const textNodes = $getRoot().getAllTextNodes();
+      expect(textNodes).toHaveLength(1);
+      expect(textNodes[0]?.getTextContent()).toBe("café@frens");
+      expect(textNodes.filter($isMentionNode)).toEqual([]);
+    });
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it("does not insert a member whose handle is already mentioned", async () => {
     const editor = createTestEditor();
     editor.update(
