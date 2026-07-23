@@ -23,6 +23,7 @@ import {
 import { sharedConfig } from "@/config/nextConfig";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
+// Release Bus v2 acceptance: force full-build evidence for the frontend-only beta.
 
 // ───────
 // Helpers
