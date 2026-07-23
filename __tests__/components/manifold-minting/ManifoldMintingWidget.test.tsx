@@ -145,6 +145,21 @@ describe("ManifoldMintingWidget", () => {
     rerender(<ManifoldMintingWidget {...baseProps} />);
 
     await waitFor(() => expect(writeContract).toHaveBeenCalledTimes(1));
+    expect(writeContract).toHaveBeenCalledWith({
+      address: "0x26bbea7803dcac346d5f5f135b57cf2c752a02be",
+      abi: [],
+      chainId: 1,
+      value: 1n,
+      functionName: "mintProxy",
+      args: [
+        "0xC",
+        1,
+        1,
+        [],
+        [],
+        "0x0000000000000000000000000000000000000abc",
+      ],
+    });
     expect(await screen.findByRole("dialog")).toHaveTextContent(
       "Confirm in your wallet"
     );

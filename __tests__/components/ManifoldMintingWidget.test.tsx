@@ -19,6 +19,9 @@ jest.mock(
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: "0x0000000000000000000000000000000000000001",
+    canSignActiveWallet: true,
+    seizeConnect: jest.fn(),
+    seizeConnectOpen: false,
   }),
 }));
 

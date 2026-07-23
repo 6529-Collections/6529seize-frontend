@@ -89,4 +89,56 @@ describe("useConnectedAction", () => {
 
     expect(action).not.toHaveBeenCalled();
   });
+
+  it("does not run when signing becomes available before connect opens", () => {
+    let connectionState = {
+      canSignActiveWallet: false,
+      seizeConnect,
+      seizeConnectOpen: false,
+    } as ReturnType<typeof useSeizeConnectContext>;
+    useSeizeConnectContextMock.mockImplementation(() => connectionState);
+    const action = jest.fn();
+    const { result, rerender } = renderHook(() => useConnectedAction());
+
+    act(() => result.current(action));
+    connectionState = {
+      ...connectionState,
+      canSignActiveWallet: true,
+    };
+    rerender();
+
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it("keeps the first pending action and opens connect once", () => {
+    let connectionState = {
+      canSignActiveWallet: false,
+      seizeConnect,
+      seizeConnectOpen: false,
+    } as ReturnType<typeof useSeizeConnectContext>;
+    useSeizeConnectContextMock.mockImplementation(() => connectionState);
+    const firstAction = jest.fn();
+    const secondAction = jest.fn();
+    const { result, rerender } = renderHook(() => useConnectedAction());
+
+    act(() => {
+      result.current(firstAction);
+      result.current(secondAction);
+    });
+    connectionState = {
+      ...connectionState,
+      seizeConnectOpen: true,
+    };
+    rerender();
+    connectionState = {
+      ...connectionState,
+      canSignActiveWallet: true,
+      seizeConnectOpen: false,
+    };
+    rerender();
+
+    expect(seizeConnect).toHaveBeenCalledTimes(1);
+    expect(firstAction).toHaveBeenCalledTimes(1);
+    expect(secondAction).not.toHaveBeenCalled();
+  });
 });
