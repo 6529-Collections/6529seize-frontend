@@ -24,7 +24,8 @@ jest.mock(
           data-testid="connect"
           onClick={() =>
             props.onMintFor("0x0000000000000000000000000000000000000abc")
-          }>
+          }
+        >
           connect
         </button>
       );
@@ -33,14 +34,6 @@ jest.mock(
 
 const writeContract = jest.fn();
 const reset = jest.fn();
-(useWriteContract as jest.Mock).mockReturnValue({
-  writeContract,
-  reset,
-  isPending: false,
-});
-(useWaitForTransactionReceipt as jest.Mock).mockReturnValue({});
-(useReadContract as jest.Mock).mockReturnValue({ data: 0n });
-(useReadContracts as jest.Mock).mockReturnValue({ data: [{ result: false }] });
 
 const baseProps = {
   contract: "0xC",
@@ -62,7 +55,25 @@ const baseProps = {
 };
 
 describe("ManifoldMintingWidget", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useWriteContract as jest.Mock).mockReturnValue({
+      writeContract,
+      reset,
+      data: undefined,
+      error: null,
+      isPending: false,
+    });
+    (useWaitForTransactionReceipt as jest.Mock).mockReturnValue({
+      error: null,
+      isPending: false,
+      isSuccess: false,
+    });
+    (useReadContract as jest.Mock).mockReturnValue({ data: 0n });
+    (useReadContracts as jest.Mock).mockReturnValue({
+      data: [{ result: false }],
+    });
+  });
 
   it("shows mint button after address provided", async () => {
     const user = userEvent.setup();
@@ -91,5 +102,65 @@ describe("ManifoldMintingWidget", () => {
     expect(btn).toBeTruthy();
     await user.click(btn);
     expect(writeContract).toHaveBeenCalled();
+  });
+
+  it("shows a submitted transaction in the onchain modal", async () => {
+    (useWriteContract as jest.Mock).mockReturnValue({
+      writeContract,
+      reset,
+      data: `0x${"a".repeat(64)}`,
+      error: null,
+      isPending: false,
+    });
+    (useWaitForTransactionReceipt as jest.Mock).mockReturnValue({
+      error: null,
+      isPending: true,
+      isSuccess: false,
+    });
+
+    render(<ManifoldMintingWidget {...baseProps} />);
+
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toHaveTextContent("Transaction Submitted - SEIZING");
+    expect(screen.getByRole("link", { name: "View Tx" })).toBeInTheDocument();
+  });
+
+  it("shows a successful transaction in the onchain modal", async () => {
+    (useWriteContract as jest.Mock).mockReturnValue({
+      writeContract,
+      reset,
+      data: `0x${"b".repeat(64)}`,
+      error: null,
+      isPending: false,
+    });
+    (useWaitForTransactionReceipt as jest.Mock).mockReturnValue({
+      error: null,
+      isPending: false,
+      isSuccess: true,
+    });
+
+    render(<ManifoldMintingWidget {...baseProps} />);
+
+    expect(await screen.findByRole("dialog")).toHaveTextContent("SEIZED!");
+  });
+
+  it("shows a transaction error in the onchain modal", async () => {
+    (useWriteContract as jest.Mock).mockReturnValue({
+      writeContract,
+      reset,
+      data: undefined,
+      error: new Error("Wallet rejected. Request Arguments"),
+      isPending: false,
+    });
+
+    render(<ManifoldMintingWidget {...baseProps} />);
+
+    await screen.findByRole("dialog");
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Wallet rejected");
+    expect(
+      screen.queryByText("Wallet rejected", { selector: "div" })
+    ).toBeNull();
   });
 });
