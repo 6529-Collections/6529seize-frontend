@@ -37,7 +37,7 @@ function WebSidebarExpandableGroup({
       <button
         type="button"
         onClick={handleToggle}
-        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border-none tw-pl-3 tw-pr-3 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border-none tw-py-2 tw-pl-3 tw-pr-3 tw-text-left tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
           hasActiveItem
             ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
             : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
@@ -45,9 +45,9 @@ function WebSidebarExpandableGroup({
         aria-expanded={expanded}
         aria-controls={`group-${name}`}
       >
-        <span>{name}</span>
+        <span className="tw-min-w-0 tw-flex-1 tw-break-words">{name}</span>
         <ChevronRightIcon
-          className={`tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 ${
+          className={`tw-ml-3 tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 ${
             expanded ? "tw-rotate-90" : ""
           }`}
         />
