@@ -30,7 +30,7 @@ export default function TransferModalPfp({
   const { data: resolved } = useResolvedIpfsUrl(src);
 
   const levelColor = getLevelBgColor(level);
-  const sizeClass = PFP_SIZE_CLASSES[size];
+  const sizeClass = PFP_SIZE_CLASSES[size] ?? PFP_SIZE_CLASSES[40];
 
   if (!resolved) {
     return (

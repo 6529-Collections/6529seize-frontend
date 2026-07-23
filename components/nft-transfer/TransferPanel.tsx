@@ -106,17 +106,12 @@ export default function TransferPanel({
           />
         )}
       </AnimatePresence>
-      <div aria-hidden="true" className="tw-h-[72px]" />
       <div
-        className={[
-          "tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-[80]",
-          "tw-animate-slideUp",
-        ]
+        className={["tw-sticky tw-bottom-0 tw-z-[80]", "tw-animate-slideUp"]
           .filter(Boolean)
           .join(" ")}
       >
         <div
-          onClick={(e) => e.stopPropagation()}
           className={[
             "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10",
             "tw-bg-iron-950/95 tw-text-iron-50 tw-shadow-2xl tw-backdrop-blur-xl",

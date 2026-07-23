@@ -20,7 +20,7 @@ export const TRANSFER_MESSAGES = {
     "You're transferring {nftCount} NFTs · {itemCount} items",
   "transfer.modal.scrollForMore": "Scroll for more",
   "transfer.modal.viewTransaction": "View transaction",
-  "transfer.modal.transactionPosition": "{position}/ {label}",
+  "transfer.modal.transactionPosition": "{position} / {label}",
   "transfer.modal.originator": "Originator: {originator}",
   "transfer.modal.status.pending": "Pending",
   "transfer.modal.status.awaitingApproval": "Approve in your wallet",
@@ -66,8 +66,6 @@ export const TRANSFER_MESSAGES = {
   "transfer.card.rank": "Rank {rank}",
 } as const;
 
-export const EN_GB_TRANSFER_MESSAGES = TRANSFER_MESSAGES;
-
 export const FR_FR_TRANSFER_MESSAGES = {
   "transfer.modal.reviewTitle":
     "Vérifier le transfert et sélectionner le destinataire",
@@ -91,7 +89,7 @@ export const FR_FR_TRANSFER_MESSAGES = {
     "Vous transférez {nftCount} NFTs · {itemCount} éléments",
   "transfer.modal.scrollForMore": "Faire défiler pour en voir plus",
   "transfer.modal.viewTransaction": "Voir la transaction",
-  "transfer.modal.transactionPosition": "{position}/ {label}",
+  "transfer.modal.transactionPosition": "{position} / {label}",
   "transfer.modal.originator": "Origine : {originator}",
   "transfer.modal.status.pending": "En attente",
   "transfer.modal.status.awaitingApproval": "Approuvez dans votre portefeuille",
@@ -161,7 +159,7 @@ export const ES_ES_TRANSFER_MESSAGES = {
     "Estás transfiriendo {nftCount} NFTs · {itemCount} elementos",
   "transfer.modal.scrollForMore": "Desplázate para ver más",
   "transfer.modal.viewTransaction": "Ver transacción",
-  "transfer.modal.transactionPosition": "{position}/ {label}",
+  "transfer.modal.transactionPosition": "{position} / {label}",
   "transfer.modal.originator": "Origen: {originator}",
   "transfer.modal.status.pending": "Pendiente",
   "transfer.modal.status.awaitingApproval": "Aprueba en tu cartera",
@@ -231,7 +229,7 @@ export const DE_DE_TRANSFER_MESSAGES = {
     "Du überträgst {nftCount} NFTs · {itemCount} Elemente",
   "transfer.modal.scrollForMore": "Scrollen, um mehr zu sehen",
   "transfer.modal.viewTransaction": "Transaktion anzeigen",
-  "transfer.modal.transactionPosition": "{position}/ {label}",
+  "transfer.modal.transactionPosition": "{position} / {label}",
   "transfer.modal.originator": "Ursprung: {originator}",
   "transfer.modal.status.pending": "Ausstehend",
   "transfer.modal.status.awaitingApproval": "In deiner Wallet genehmigen",

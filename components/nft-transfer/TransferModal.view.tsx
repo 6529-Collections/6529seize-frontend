@@ -123,6 +123,19 @@ export function FlowTitle({
   );
 }
 
+function getSummaryMessageKey(nftCount: number, itemCount: number) {
+  if (nftCount === 1 && itemCount === 1) {
+    return "transfer.modal.summary.oneNftOneItem";
+  }
+  if (nftCount === 1) {
+    return "transfer.modal.summary.oneNftManyItems";
+  }
+  if (itemCount === 1) {
+    return "transfer.modal.summary.manyNftsOneItem";
+  }
+  return "transfer.modal.summary.manyNftsManyItems";
+}
+
 function SelectedSummaryList({
   items,
   leftListRef,
@@ -142,14 +155,7 @@ function SelectedSummaryList({
   readonly locale: SupportedLocale;
 }) {
   const totalUnits = items.reduce((sum, it) => sum + (it.qty || 0), 0);
-  const summaryKey =
-    items.length === 1
-      ? totalUnits === 1
-        ? "transfer.modal.summary.oneNftOneItem"
-        : "transfer.modal.summary.oneNftManyItems"
-      : totalUnits === 1
-        ? "transfer.modal.summary.manyNftsOneItem"
-        : "transfer.modal.summary.manyNftsManyItems";
+  const summaryKey = getSummaryMessageKey(items.length, totalUnits);
 
   return (
     <div className="tw-flex tw-max-h-full tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-hidden">
