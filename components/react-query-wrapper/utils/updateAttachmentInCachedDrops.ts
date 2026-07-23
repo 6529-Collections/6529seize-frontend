@@ -3,6 +3,15 @@ import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { QueryKey } from "../ReactQueryWrapper";
+import {
+  reconcileAttachmentStatusUpdate,
+  reconcileFinalizedDropAttachments,
+} from "./attachment-realtime-reconciliation";
+
+export {
+  reconcileAttachmentStatusUpdate,
+  reconcileFinalizedDropAttachments,
+} from "./attachment-realtime-reconciliation";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -11,7 +20,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isMatchingAttachment(
   value: Record<string, unknown>,
   attachmentId: string
-): boolean {
+): value is Record<string, unknown> & ApiAttachment {
   return (
     (value["attachment_id"] === attachmentId || value["id"] === attachmentId) &&
     typeof value["file_name"] === "string" &&
@@ -33,7 +42,7 @@ function replaceAttachment(value: unknown, attachment: ApiAttachment): unknown {
   }
 
   if (isMatchingAttachment(value, attachment.attachment_id)) {
-    return attachment;
+    return reconcileAttachmentStatusUpdate(value, attachment);
   }
 
   let changed = false;
@@ -66,9 +75,13 @@ function replaceMatchingDrop(
   drop: ApiDrop,
   options: DropReplacementOptions
 ): ApiDrop {
+  const dropWithFinalizedAttachments = reconcileFinalizedDropAttachments(
+    drop,
+    value
+  );
   const dropForReconciliation = options.mergeWithExisting
-    ? ({ ...value, ...drop } as ApiDrop)
-    : drop;
+    ? ({ ...value, ...dropWithFinalizedAttachments } as ApiDrop)
+    : dropWithFinalizedAttachments;
   const preferExistingPollVote = options.preferExistingPollVote;
   const reconciledDrop =
     preferExistingPollVote === undefined
