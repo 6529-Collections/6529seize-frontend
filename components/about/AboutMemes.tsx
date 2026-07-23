@@ -89,7 +89,7 @@ function ResourceCard({ resource }: { readonly resource: Resource }) {
 
 export default function AboutMemes() {
   return (
-    <article className="tw-overflow-hidden tw-bg-[#0D0D0F] tw-text-iron-100">
+    <article className="tw-overflow-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-text-iron-100">
       <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10">
         <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-14 tw-pt-12 sm:tw-px-6 sm:tw-pb-20 sm:tw-pt-16 lg:tw-px-8 lg:tw-pb-24 lg:tw-pt-20">
           <p className="tw-m-0 tw-mb-5 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-primary-300">
