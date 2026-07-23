@@ -113,7 +113,7 @@ function sandboxPack(scriptKey, description, specs, env, projects = [DESKTOP]) {
 
 function stagingPack(alias, suffix, description, specs, tweaks = {}) {
   return {
-    scriptKey: `test:e2e:staging${suffix ? `:${suffix}` : ""}`,
+    scriptKey: `test:e2e:staging${suffix ? ":" + suffix : ""}`,
     alias,
     description,
     safety: "readonly",

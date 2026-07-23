@@ -182,6 +182,24 @@ describe("manifest-driven E2E runner", () => {
         stderr: "",
       })
     ).toMatchObject({ failed: true, infrastructure: true });
+
+    const cleanTeardownTimeout = spawnSync(
+      process.execPath,
+      [
+        "-e",
+        'process.on("SIGTERM", () => process.exit(0)); setInterval(() => {}, 1000);',
+      ],
+      {
+        encoding: "utf8",
+        killSignal: "SIGTERM",
+        timeout: 100,
+      }
+    ) as SpawnResult;
+    expect(cleanTeardownTimeout.error?.code).toBe("ETIMEDOUT");
+    expect(runner.classifyResult(cleanTeardownTimeout)).toMatchObject({
+      failed: true,
+      infrastructure: true,
+    });
   });
 
   it("continues after failures and records preserved artifacts", () => {
@@ -230,6 +248,50 @@ describe("manifest-driven E2E runner", () => {
         "artifacts/social-readonly"
       );
     } finally {
+      if (previousSummary === undefined) {
+        delete process.env["GITHUB_STEP_SUMMARY"];
+      } else {
+        process.env["GITHUB_STEP_SUMMARY"] = previousSummary;
+      }
+      fs.rmSync(summaryDir, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps running when the optional GitHub summary cannot be written", () => {
+    const summaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-summary-"));
+    const previousSummary = process.env["GITHUB_STEP_SUMMARY"];
+    process.env["GITHUB_STEP_SUMMARY"] = summaryDir;
+    const warning = jest.spyOn(console, "warn").mockImplementation();
+    let call = 0;
+
+    try {
+      const result = runner.runPacks([samplePacks[0]], {
+        artifactRoot: path.join(summaryDir, "staging-e2e-artifacts"),
+        forward: [],
+        spawn: () => {
+          call += 1;
+          return {
+            status: 0,
+            signal: null,
+            stdout: "",
+            stderr: "",
+          };
+        },
+        cleanup: () => undefined,
+        preserve: () => "staging-e2e-artifacts/smoke",
+        prepare: () => undefined,
+      });
+
+      expect(result).toEqual({
+        failedCount: 0,
+        infrastructureFailureCount: 0,
+      });
+      expect(call).toBe(1);
+      expect(warning).toHaveBeenCalledWith(
+        expect.stringContaining("unable to update GITHUB_STEP_SUMMARY")
+      );
+    } finally {
+      warning.mockRestore();
       if (previousSummary === undefined) {
         delete process.env["GITHUB_STEP_SUMMARY"];
       } else {

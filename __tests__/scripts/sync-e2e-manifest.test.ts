@@ -132,6 +132,22 @@ describe("E2E pack manifest", () => {
     });
   });
 
+  it("requires every production cron alias to pass staging first", () => {
+    const withoutStagingSocial = packs.filter(
+      (pack) =>
+        !(
+          pack.environments[0] === "staging" && pack.alias === "social-readonly"
+        )
+    );
+    expect(manifestTools.validateManifest(withoutStagingSocial)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'production cron alias "social-readonly" requires a staging post-deploy counterpart'
+        ),
+      ])
+    );
+  });
+
   it("renders both generated targets without changing unrelated scripts", () => {
     const targets = manifestTools.buildTargets(ROOT);
     expect(targets.map((target) => path.basename(target.path))).toEqual([

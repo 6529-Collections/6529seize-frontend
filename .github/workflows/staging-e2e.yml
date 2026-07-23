@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       pack:
-        description: Manifest alias or script key; use all for the full post-deploy set
+        description: Post-deploy manifest alias or script key; use all for the full set
         type: string
         required: true
         default: all

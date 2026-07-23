@@ -109,8 +109,17 @@ function resolvePacks(packs, { env, trigger, pack }) {
 
 function appendSummary(lines) {
   const summaryPath = process.env["GITHUB_STEP_SUMMARY"];
-  if (summaryPath) {
+  if (!summaryPath) {
+    return;
+  }
+  try {
     fs.appendFileSync(summaryPath, `${lines.join("\n")}\n`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(
+      `e2e-packs: unable to update GITHUB_STEP_SUMMARY (${message}); ` +
+        "continuing with console and artifact output."
+    );
   }
 }
 

@@ -137,6 +137,11 @@ function validateRemoteContract(problems, pack, environment) {
       `${packLabel(pack)}: ${environment} packs must use safety "readonly".`
     );
   }
+  if (typeof pack.alias !== "string" || !pack.alias) {
+    problems.push(
+      `${packLabel(pack)}: ${environment} packs must declare an alias.`
+    );
+  }
   if (!Array.isArray(pack.specs) || pack.specs.length === 0) {
     problems.push(
       `${packLabel(pack)}: ${environment} packs must select at least one spec.`
@@ -321,6 +326,29 @@ function validateManifest(packs, { root } = {}) {
     }
     if (pack.triggers?.includes("pr-ci") && environment !== "local") {
       problems.push(`${packLabel(pack)}: pr-ci packs must target local.`);
+    }
+  }
+
+  const stagingPostDeployAliases = new Set(
+    packs
+      .filter(
+        (pack) =>
+          pack?.environments?.[0] === "staging" &&
+          pack.triggers?.includes("post-deploy") &&
+          typeof pack.alias === "string"
+      )
+      .map((pack) => pack.alias)
+  );
+  for (const pack of packs) {
+    if (
+      pack?.environments?.[0] === "production" &&
+      pack.triggers?.includes("cron") &&
+      typeof pack.alias === "string" &&
+      !stagingPostDeployAliases.has(pack.alias)
+    ) {
+      problems.push(
+        `${packLabel(pack)}: production cron alias "${pack.alias}" requires a staging post-deploy counterpart.`
+      );
     }
   }
 
