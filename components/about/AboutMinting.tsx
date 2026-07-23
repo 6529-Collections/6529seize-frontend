@@ -1,621 +1,419 @@
-import Link from "next/link";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
-  AboutCol as Col,
-  AboutContainer as Container,
-  AboutRow as Row,
-} from "./AboutLayout";
+  faBullhorn,
+  faCalendarDays,
+  faChartLine,
+  faCircleInfo,
+  faEarthAmericas,
+  faGlobe,
+  faListCheck,
+  faSliders,
+  faTag,
+  faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+
+import AboutMintingReference from "./AboutMintingReference";
+import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
+  SUBSCRIPTIONS_SECTION_HEADING_CLASS,
+} from "./aboutSubscriptionsStyles";
+
+type MintingMessageKey = Extract<MessageKey, `about.minting.${string}`>;
+
+type SummaryCard = {
+  readonly icon: IconDefinition;
+  readonly iconClassName: string;
+  readonly id: string;
+  readonly content: ReactNode;
+};
+
+type PhilosophyCard = {
+  readonly className?: string;
+  readonly icon: IconDefinition;
+  readonly iconClassName: string;
+  readonly iconWrapperClassName: string;
+  readonly title: string;
+  readonly content: ReactNode;
+};
+
+const locale = DEFAULT_LOCALE;
+
+const m = (key: MintingMessageKey, params: Parameters<typeof t>[2] = {}) =>
+  t(locale, key, params);
+
+const TOC_ITEMS = [
+  {
+    href: "#minting-overview",
+    labelKey: "about.minting.toc.overview",
+  },
+  {
+    href: "#minting-philosophy",
+    labelKey: "about.minting.toc.philosophy",
+  },
+  {
+    href: "#allowlist-background",
+    labelKey: "about.minting.toc.background",
+  },
+  {
+    href: "#allowlist-current-practices",
+    labelKey: "about.minting.toc.currentPractices",
+  },
+  {
+    href: "#minting-provability",
+    labelKey: "about.minting.toc.provability",
+  },
+  {
+    href: "#minting-improvements",
+    labelKey: "about.minting.toc.improvements",
+  },
+  {
+    href: "#minting-tools",
+    labelKey: "about.minting.toc.tools",
+  },
+  {
+    href: "#minting-technical-issues",
+    labelKey: "about.minting.toc.technicalIssues",
+  },
+] as const satisfies readonly {
+  readonly href: `#${string}`;
+  readonly labelKey: MintingMessageKey;
+}[];
 
 export default function AboutMinting() {
   return (
-    <Container>
-      <Row>
-        <Col>
-          <h1>
-            Minting Meme Cards
-          </h1>
-        </Col>
-      </Row>
-      <Row className="tw-pt-3 tw-pb-3">
-        <Col>
-          <p>
-            <b>Summary</b>
-          </p>
-          <ul>
-            <li>
+    <article
+      className={`tw-w-full tw-pb-12 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
+    >
+      <MintingHeader />
+      <MintingOverview />
+      <MintingPhilosophy />
+      <AboutMintingReference locale={locale} />
+    </article>
+  );
+}
+
+function MintingHeader() {
+  return (
+    <header className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
+      <div className="tw-max-w-3xl">
+        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+          {m("about.minting.hero.title")}
+        </h1>
+        <div className="tw-mt-8">
+          <h2
+            className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
+            id="minting-summary-heading"
+          >
+            {m("about.minting.summary.label")}
+          </h2>
+          <div className="tw-mt-2 tw-space-y-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+            <p className="tw-m-0">
               Meme Cards are minted (primary sale) when the art for the next
-              Meme Card is ready
-            </li>
-            <br />
-            <li>
+              Meme Card is ready.
+            </p>
+            <p className="tw-m-0">
               Currently, this is about 3 times per week, but the frequency has
-              varied in the past and will vary in the future
-            </li>
-            <br />
-            <li>
-              The minting website for The Memes is:{" "}
-              <Link href="/the-memes/mint">https://6529.io/the-memes/mint</Link>
-            </li>
-            <br />
-            <li>There is no other minting website for The Memes</li>
-            <br />
-            <li>The current minting price is 0.06529ETH + gas costs</li>
-            <br />
-            <li>
-              Minting time and dates are announced on{" "}
+              varied in the past and will vary in the future.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <nav
+        aria-label={m("about.minting.hero.title")}
+        className="tw-mt-8 tw-scroll-px-2 tw-overflow-x-auto tw-overscroll-x-contain tw-border-0 tw-border-y tw-border-solid tw-border-white/[0.07] tw-py-3 sm:tw-mt-10"
+      >
+        <ul className="tw-m-0 tw-flex tw-w-max tw-min-w-full tw-list-none tw-flex-nowrap tw-gap-x-1 tw-p-0">
+          {TOC_ITEMS.map((item) => (
+            <li key={item.href}>
               <a
-                href="https://x.com/6529collections"
-                target="_blank"
-                rel="noopener noreferrer">
-                https://x.com/6529collections
+                className="tw-flex tw-min-h-10 tw-items-center tw-whitespace-nowrap tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-iron-50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/60"
+                href={item.href}
+              >
+                {m(item.labelKey)}
               </a>
             </li>
-            <br />
-            <li>
-              Currently, the mints are happening Mon/Wed/Fri at 11am ET (4pm
-              UTC), but times may vary. Please follow &#64;
-              <a
-                href="https://x.com/6529collections"
-                target="_blank"
-                rel="noopener noreferrer">
-                6529collections
-              </a>{" "}
-              for details
-            </li>
-            <br />
-            <li>
-              The Memes generally mint using an allowlist model. The purpose of
-              the allowlist is to avoid gas wars / bot wars and to give as broad
-              a range of people as possible a chance to mint.
-            </li>
-            <br />
-            <li>
+          ))}
+        </ul>
+      </nav>
+    </header>
+  );
+}
+
+function MintingOverview() {
+  const summaryCards: readonly SummaryCard[] = [
+    {
+      icon: faGlobe,
+      iconClassName: "tw-text-[#00f0ff]",
+      id: "website",
+      content: (
+        <div className="tw-space-y-3">
+          <p className="tw-m-0">
+            The minting website for The Memes is:{" "}
+            <Link
+              className="tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
+              href="/the-memes/mint"
+            >
+              https://6529.io/the-memes/mint
+            </Link>
+          </p>
+          <p className="tw-m-0 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-3 tw-text-iron-500">
+            There is no other minting website for The Memes
+          </p>
+        </div>
+      ),
+    },
+    {
+      icon: faTag,
+      iconClassName: "tw-text-[#8f5cff]",
+      id: "price",
+      content: (
+        <p className="tw-m-0">
+          The current minting price is 0.06529ETH + gas costs
+        </p>
+      ),
+    },
+    {
+      icon: faBullhorn,
+      iconClassName: "tw-text-iron-300",
+      id: "announcements",
+      content: (
+        <p className="tw-m-0">
+          Minting time and dates are announced on{" "}
+          <a
+            className="tw-rounded-sm tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
+            href="https://x.com/6529collections"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            https://x.com/6529collections
+          </a>
+        </p>
+      ),
+    },
+    {
+      icon: faCalendarDays,
+      iconClassName: "tw-text-orange-400",
+      id: "schedule",
+      content: (
+        <div className="tw-space-y-3">
+          <p className="tw-m-0">
+            Currently, the mints are happening Mon/Wed/Fri at 11am ET (4pm UTC),
+            but times may vary.
+          </p>
+          <p className="tw-m-0 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-3 tw-text-iron-500">
+            Please follow{" "}
+            <a
+              className="tw-rounded-sm tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/60"
+              href="https://x.com/6529collections"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              @6529collections
+            </a>{" "}
+            for details
+          </p>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <section
+      aria-labelledby="minting-summary-heading"
+      className="tw-px-1 tw-pb-8 sm:tw-px-2 sm:tw-pb-12"
+      id="minting-overview"
+    >
+      <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-4 lg:tw-gap-4">
+        {summaryCards.map((card) => (
+          <li
+            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-4 sm:tw-p-5`}
+            key={card.id}
+          >
+            <FontAwesomeIcon
+              aria-hidden="true"
+              className={`tw-shrink-0 tw-text-sm ${card.iconClassName}`}
+              icon={card.icon}
+            />
+            <div className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {card.content}
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <p className="tw-mb-0 tw-mt-6 tw-max-w-4xl tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+        The Memes generally mint using an allowlist model. The purpose of the
+        allowlist is to avoid gas wars / bot wars and to give as broad a range
+        of people as possible a chance to mint.
+      </p>
+
+      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
+        <aside className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/[0.06] tw-p-4 sm:tw-p-6">
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute -tw-bottom-4 -tw-right-4 tw-text-6xl tw-text-[#00f0ff]/[0.05]"
+            icon={faCircleInfo}
+          />
+          <div className="tw-relative tw-z-10">
+            <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-[#00f0ff]">
               A collector of one or more The Memes NFT should not assume they
               receive an allowlist spot for multiple reasons:
-              <ul>
-                <br />
-                <li>
-                  There are many more collectors of The Memes NFTs than there
-                  are allowlist spots.
-                </li>
-                <br />
-                <li>
-                  The allowlist approach is constantly changing and may, in the
-                  future, move to a completely different model, if a better
-                  approach emerges.
-                </li>
-                <br />
-                <li>
-                  Buy The Memes that you like, because you like holding the art
-                  or feel a sense of identity with the mission. Do not buy them
-                  for an allowlist spot.
-                </li>
-              </ul>
-            </li>
-            <br />
-            <li>
-              There is quite a bit of thought that goes into the allowlist
-              process. Read below to learn more.
-            </li>
-          </ul>
-          <br />
-          <p>
-            <b>Philosophy of The Memes Minting</b>
+            </h3>
+            <ul className="tw-m-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-[#00f0ff]/60 sm:tw-space-y-3">
+              <li>
+                There are many more collectors of The Memes NFTs than there are
+                allowlist spots.
+              </li>
+              <li>
+                The allowlist approach is constantly changing and may, in the
+                future, move to a completely different model, if a better
+                approach emerges.
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <aside className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-orange-500/20 tw-bg-orange-500/10 tw-p-4 sm:tw-p-6">
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute -tw-bottom-4 -tw-right-4 tw-text-6xl tw-text-orange-500/[0.05]"
+            icon={faTriangleExclamation}
+          />
+          <p className="tw-relative tw-z-10 tw-m-0 tw-text-base tw-font-medium tw-leading-7 tw-text-orange-300/90">
+            Buy The Memes that you like, because you like holding the art or
+            feel a sense of identity with the mission. Do not buy them for an
+            allowlist spot.
           </p>
-          <ul>
-            <li>
-              Mints for well-known collections where demand may exceed supply
-              are very difficult to manage effectively. The main approaches and
-              our views on them are highlighted below.
-            </li>
-            <br />
-            <li>
-              Public Mints: Public unrestricted mints will be won by a small
-              number of parties using bots and paying high gas fees. We have
-              rejected this approach because it is obviously a terrible idea.
-            </li>
-            <br />
-            <li>
-              Raise Prices (either directly or through auctions): The benefit of
-              higher prices is that they help avoid gas wars and return much
-              more money to the artists and creators. The downside is that it
-              makes the project accessible only to wealthy collectors. We do not
-              want The Memes to be accessible only to wealthy collectors, so we
-              have rejected this approach too.
-            </li>
-            <br />
-            <li>
-              Allowlists: Allowlists work on a technical basis by restricting
-              which addresses can mint on primary. Gas wars can be avoided
-              (mostly) by correctly predicting how many addresses to allowlist
-              relative to the edition size. One can also maintain low primary
-              prices with this model. This is the model we feel is most suitable
-              for the project mission of The Memes.
-            </li>
-            <br />
-            <li>
-              Open Editions: Open editions absorb all demand by having unlimited
-              size editions. This is an intriguing and relevant model for The
-              Memes. Our current approach is to use this model approximately
-              once per SZN. The cultural factors in the NFT space generally
-              appear to preclude against ongoing use of Open Editions, and most
-              artists are not comfortable with open editions (they prefer to use
-              their &quot;one&quot; or &quot;occasional&quot; Open Edition for
-              themselves).
-            </li>
-          </ul>
-          <br />
-          <p>
-            <b>Allowlists At The Memes: Background</b>
-          </p>
-          <ul>
-            <li>
-              It might be useful to understand how we imagine the allowlist
-              process. The analogy below is imperfect, but still helpful.
-              <ul>
-                <br />
-                <li>
-                  Imagine The Memes are a gallery in a big warehouse somewhere
-                  in New York, that is the gathering point for a group of
-                  collectors and artists who share a common ideological interest
-                  in art and decentralization
-                </li>
-                <br />
-                <li>
-                  A few times a week, an artist in the collective produces an
-                  edition of hopefully attractive, definitely ideological, art
-                  that is put up for sale at a hopefully attractive price
-                </li>
-                <br />
-                <li>
-                  The purpose of the allowlist is &quot;
-                  <i>
-                    who should we invite that night to have an opportunity to
-                    buy the editions first?
-                  </i>
-                  &quot;
-                </li>
-                <br />
-                <li>
-                  The classic answer in the physical world is friends of the
-                  gallery, friends of the artists, repeat collectors of the
-                  gallery and maybe some random people to keep it interesting
-                  and introduce new people to the mix
-                </li>
-                <br />
-                <li>
-                  The answer here is broadly similar, but with two differences:
-                  the scale is sometimes larger and people can pretend to be
-                  more than 1 person by having different Ethereum addresses
-                </li>
-                <br />
-                <li>
-                  In technical terms, identity on Ethereum is vulnerable to
-                  Sybil attacks. As Wikipedia states: &quot;
-                  <i>
-                    A Sybil attack is a type of attack on a computer network
-                    service in which an attacker subverts the service&apos;s
-                    reputation by creating a large number of pseudonymous
-                    identities and uses them to gain a disproportionally large
-                    influence
-                  </i>
-                  &quot;
-                </li>
-                <br />
-                <li>
-                  The purpose of Bitcoin mining&apos;s proof of work algorithm
-                  is, in some ways, to prevent Sybil attacks vs other consensus
-                  mechanisms that do not protect against them
-                </li>
-              </ul>
-            </li>
-            <br />
-            <li>
-              With that as background, what did we do first?
-              <ul>
-                <br />
-                <li>
-                  For the initial The Memes mints, we allowlisted hundreds of
-                  people by hand
-                </li>
-                <br />
-                <li>
-                  We fought the &quot;Sybil attack&quot; by individually going
-                  to people we knew were real people and allowlisting them for
-                  the initial mints
-                </li>
-                <br />
-                <li>
-                  It was a tedious process, and I am not sure any other
-                  meaningful collection has started that way
-                </li>
-                <br />
-                <li>
-                  What we &quot;earned&quot; in return, however, is a base of
-                  &quot;real people&quot; and editions that are extraordinarily
-                  well distributed. On most Memes cards, unique ownership
-                  percentages are in the 70-80% range or 80% to 90% if you
-                  exclude our internal holdings
-                </li>
-              </ul>
-            </li>
-            <br />
-            <li>
-              Once we had manually established a base of real people, we
-              allowlisted them for future mints. In the beginning, this was
-              straightforward.
-              <ul>
-                <br />
-                <li>
-                  Demand was relatively low and the mints took time to mint out
-                </li>
-                <br />
-                <li>
-                  We were even able to sprinkle in a public mint here or there
-                </li>
-                <br />
-                <li>
-                  Over time, however, there was more demand for The Memes and
-                  the allowlists become more challenging to create
-                </li>
-              </ul>
-            </li>
-          </ul>
-          <br />
-          <p>
-            <b>Allowlists At The Memes: Current Practices</b>
-          </p>
-          <ul>
-            <li>
-              This is the current process for allowlists at The Memes as of
-              February 2023. It is certain that the process will change in the
-              future, as it has in the past, in response to new challenges.
-            </li>
-            <br />
-            <li>
-              The process begins with automatic airdrops to:
-              <ul>
-                <br />
-                <li>The 6529 Museum</li>
-                <br />
-                <li>
-                  Various individuals working on the project and the 6529 Fund
-                </li>
-                <br />
-                <li>The artist or artists who worked on that Meme</li>
-                <br />
-                <li>
-                  These are the parties that are &quot;
-                  <i>always on the guest list</i>&quot;
-                </li>
-              </ul>
-            </li>
-            <br />
-            <li>
-              The second part of the process is a few &quot;partial&quot;
-              airdrops to:
-              <ul>
-                <br />
-                <li>Collectors of Meme Card or Gradients</li>
-                <br />
-                <li>Collectors of the artist</li>
-                <br />
-                <li>
-                  The purpose of the partial airdrops is to give a chance to
-                  acquire a Meme Card to community members who are not always
-                  online and available to mint.
-                </li>
-              </ul>
-            </li>
-            <br />
-            <li>
-              The third part of the process is the Phase I mint.
-              <ul>
-                <br />
-                <li>
-                  In Phase I, we try to guess how many people to allowlist
-                  relative to the number of available cards for minting
-                </li>
-                <br />
-                <li>
-                  The perfect guess would mean that Phase I mints out, within
-                  its 30 minute window, without having a gas war
-                </li>
-                <br />
-                <li>
-                  If we overestimate the number of people to allowlist, there is
-                  a gas war
-                </li>
-                <br />
-                <li>
-                  If we underestimate, we go to Phase II which is a continuation
-                  of the Phase I logic, but to a broader set of participants.
-                  Phase III is the public mint
-                </li>
-                <br />
-                <li>
-                  It is impossible to get this precisely right because
-                  likelihood to mint varies by different groups, particularly
-                  the artist&apos;s collectors. We are happy if we are 80%
-                  correct, 80% of the time
-                </li>
-                <br />
-                <li>
-                  Our general approach is to allowlist:
-                  <ul>
-                    <br />
-                    <li>
-                      Some of the &quot;larger&quot; Meme Card collectors with a
-                      focus on &quot;large&quot; being &quot;number of different
-                      cards held&quot;, as opposed to &quot;total cards
-                      held&quot;
-                    </li>
-                    <ul>
-                      <br />
-                      <li>
-                        The limit case of &quot;number of different cards
-                        held&quot; is &quot;full set collectors&quot;
-                      </li>
-                      <br />
-                      <li>
-                        We prefer &quot;number of different cards held&quot; to
-                        &quot;total cards held&quot; because getting different
-                        cards in individual&apos;s wallets where they can be
-                        seen by others is more important than getting duplicates
-                        of the same card in wallets
-                      </li>
-                      <br />
-                      <li>
-                        Total cards held or total days held can be used as a
-                        tie-breaker though
-                      </li>
-                    </ul>
-                    <br />
-                    <li>Some or all of the Gradient collectors</li>
-                    <br />
-                    <li>Some or all of the artist&apos;s collectors</li>
-                    <br />
-                    <li>A few people not in the above categories</li>
-                  </ul>
-                </li>
-                <br />
-                <li>
-                  Why do we allowlist these categories?
-                  <ul>
-                    <br />
-                    <li>
-                      We often allowlist the larger collectors not only because
-                      they tend to be bigger supporters of the gallery, but also
-                      because, if we did not, they would split their cards into
-                      separate wallets and appear to be more numerous smaller
-                      collectors
-                    </li>
-                    <br />
-                    <li>
-                      We often allowlist the Gradient collectors because they
-                      were early supporters of the vision
-                    </li>
-                    <br />
-                    <li>
-                      We always allowlist the artist&apos;s collectors because,
-                      of course, the artist should allowlist their own
-                      collectors, and also because this is an important
-                      mechanism to introduce new collectors to The Memes
-                    </li>
-                    <br />
-                    <li>
-                      We have allowlisted collectors of over hundreds, possibly
-                      thousands, of collections so far. It is hugely important
-                      to the project mission and we intend to continue to do
-                      this
-                    </li>
-                    <br />
-                    <li>
-                      We allowlist some other random categories so that there is
-                      some diversity in the minters
-                    </li>
-                  </ul>
-                </li>
-                <br />
-                <li>
-                  Having said all that, we also sometimes deviate from this
-                  approach to improve the diversity of collectors. How often we
-                  can deviate from that before the large collectors split their
-                  wallets is a challenging question.
-                </li>
-              </ul>
-            </li>
-            <br />
-            <li>
-              It is important to emphasize that you see the allowlist in the
-              same light in which we see it, namely, that it is something like a
-              guest list for a gallery.
-              <ul>
-                <br />
-                <li>
-                  If you were a large collector of Andy Warhols from an
-                  important New York gallery, sure, it is normal to expect that
-                  you might be invited to their cocktail parties or to get an
-                  early look at new work in the gallery
-                </li>
-                <br />
-                <li>
-                  You would not, however, collect Andy Warhols primarily to
-                  receive cocktail party invites and you would understand that
-                  you did not always get an early look at all new pieces in the
-                  gallery
-                </li>
-              </ul>
-            </li>
-          </ul>
-          <br />
-          <p>
-            <b>Provability</b>
-          </p>
-          <ul>
-            <li>
-              We take a series of measures to prove that the allowlists are
-              created the way we say they are created.
-            </li>
-            <br />
-            <li>
-              This is a level of diligence and transparency that has no real
-              physical world equivalent. A gallery would not open up their
-              records to the guests at the event to explain how and who was
-              invited. One of the powers of public blockchains is that we can
-              offer this transparency, so we do so.
-            </li>
-            <br />
-            <li>
-              In particular, we do the following:
-              <ul>
-                <br />
-                <li>
-                  We announce in advance on which Ethereum block we will
-                  snapshot the collectors of The Memes, the Gradients and the
-                  artist&apos;s NFTs
-                </li>
-                <br />
-                <li>
-                  We announce a block from which we will draw pseudorandomness
-                </li>
-                <br />
-                <li>
-                  It is important for this to work that the blocks are announced
-                  publicly before they happen
-                </li>
-                <br />
-                <li>
-                  We post our allowlist formula and calculations on github
-                </li>
-                <br />
-                <li>
-                  Anyone with a bit of technical savvy can replicate how we
-                  created the allowlist
-                </li>
-                <br />
-                <li>
-                  This process does not mean the allowlist is predictable. It
-                  just confirms that the allowlist is what we say it is.
-                </li>
-              </ul>
-            </li>
-          </ul>
-          <br />
-          <p>
-            <b>Improvements</b>
-          </p>
-          <ul>
-            <li>
-              We think there are areas that can be improved in the allowlist
-              approach to make it richer at capturing different variables.
-            </li>
-            <br />
-            <li>
-              In February, we hope to roll out a metric called &quot;TDH&quot; -
-              Total Days Held, a metric that derives from the old Bitcoin metric
-              of Total Days Destroyed.
-            </li>
-            <br />
-            <li>
-              It is a metric of how long The Memes have been held by an address
-              and it adds another useful data point. There may be times when
-              someone may want to differentiate between a collector who has held
-              10 cards for 1 year vs a collector who has held 10 cards for 1
-              day. As with all metrics, TDH is not going to be used in a fixed
-              way. It is another tool in the toolkit and metrics we are making
-              available.
-            </li>
-            <br />
-            <li>
-              We would like to find a way to capture social factors in the
-              metrics. Who is contributing in Discord, who is creating ReMemes,
-              who is generally helpful to the mission? In the physical world
-              these factors would definitely be taken into account. The
-              challenge here is how to do this in a decentralized and
-              transparent way.
-            </li>
-            <br />
-            <li>
-              We would like to find a way to categorize the collectors based on
-              their actions. These might be useful factors in future allowlists.
-            </li>
-            <br />
-            <li>
-              For our full analysis of our Network Definitions, go here:{" "}
-              <Link
-                href="/network/definitions"
-                target="_blank"
-                rel="noopener noreferrer">
-                6529.io/network/definitions
-              </Link>
-            </li>
-          </ul>
-          <br />
-          <p>
-            <b>Tools</b>
-          </p>
-          <ul>
-            <li>
-              One of our mental models is that NFTs are publicly readable
-              databases of people with common interests.
-            </li>
-            <br />
-            <li>
-              Given this, we hope that the publicly readable database of The
-              Memes collectors will be used by many other people to make their
-              own guest lists - for Meme Labs, for ReMemes, for all types of
-              things we can and can&apos;t imagine.
-            </li>
-            <br />
-            <li>
-              In order to support this, we are going to progressively make our
-              tools for allowlists available to everyone (whether Meme Card
-              collectors or not).
-            </li>
-            <br />
-            <li>
-              On a daily basis, we publish to Arweave the statistics we use to
-              create our own allowlists. You can find them here:{" "}
-              <Link href="/open-data" target="_blank" rel="noopener noreferrer">
-                6529.io/open-data
-              </Link>
-            </li>
-            <br />
-            <li>
-              Over the next few months, we will also make available our tools
-              for taking snapshots and randomization
-            </li>
-          </ul>
-          <br />
-          <p>
-            <b>Technical Issues</b>
-          </p>
-          <ul>
-            <li>
-              Sometimes under heavy load the minting page will fail to load or
-              fail to load a transaction. You may have to refresh multiple times
-              to be successful in minting.
-            </li>
-            <br />
-            <li>
-              Some users have reported that hard-refreshing or clearing their
-              local browser cache between mints may be helpful.
-            </li>
-            <br />
-            <li>
-              In highly competitive mints, you may have to put a higher gas
-              price to mint in time. We cannot advise on the correct gas to use
-              as it differs every time.
-            </li>
-            <br />
-            <li>
-              In highly competitive mints, you may pay for a transaction that
-              does not mint in time and lose your gas fee. We do not refund gas
-              fees for failed transactions.
-            </li>
-          </ul>
-        </Col>
-      </Row>
-    </Container>
+        </aside>
+      </div>
+
+      <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-font-light tw-italic tw-leading-6 tw-text-iron-500">
+        There is quite a bit of thought that goes into the allowlist process.
+        Read below to learn more.
+      </p>
+    </section>
+  );
+}
+
+function MintingPhilosophy() {
+  const philosophyCards: readonly PhilosophyCard[] = [
+    {
+      icon: faEarthAmericas,
+      iconClassName: "tw-text-orange-400",
+      iconWrapperClassName: "tw-bg-orange-500/10",
+      title: "Public Mints:",
+      content: (
+        <p className="tw-m-0">
+          Public unrestricted mints will be won by a small number of parties
+          using bots and paying high gas fees. We have rejected this approach
+          because it is obviously a terrible idea.
+        </p>
+      ),
+    },
+    {
+      icon: faChartLine,
+      iconClassName: "tw-text-[#8f5cff]",
+      iconWrapperClassName: "tw-bg-[#7000ff]/20",
+      title: "Raise Prices (either directly or through auctions):",
+      content: (
+        <p className="tw-m-0">
+          The benefit of higher prices is that they help avoid gas wars and
+          return much more money to the artists and creators. The downside is
+          that it makes the project accessible only to wealthy collectors. We do
+          not want The Memes to be accessible only to wealthy collectors, so we
+          have rejected this approach too.
+        </p>
+      ),
+    },
+    {
+      className: "tw-border-l-2 tw-border-l-[#00f0ff]/50",
+      icon: faListCheck,
+      iconClassName: "tw-text-[#00f0ff]",
+      iconWrapperClassName: "tw-bg-[#00f0ff]/10",
+      title: "Allowlists:",
+      content: (
+        <p className="tw-m-0">
+          Allowlists work on a technical basis by restricting which addresses
+          can mint on primary. Gas wars can be avoided (mostly) by correctly
+          predicting how many addresses to allowlist relative to the edition
+          size. One can also maintain low primary prices with this model. This
+          is the model we feel is most suitable for the project mission of The
+          Memes.
+        </p>
+      ),
+    },
+    {
+      icon: faSliders,
+      iconClassName: "tw-text-iron-300",
+      iconWrapperClassName: "tw-bg-iron-900",
+      title: "Open Editions:",
+      content: (
+        <p className="tw-m-0">
+          Open editions absorb all demand by having unlimited size editions.
+          This is an intriguing and relevant model for The Memes. Our current
+          approach is to use this model approximately once per SZN. The cultural
+          factors in the NFT space generally appear to preclude against ongoing
+          use of Open Editions, and most artists are not comfortable with open
+          editions (they prefer to use their &quot;one&quot; or
+          &quot;occasional&quot; Open Edition for themselves).
+        </p>
+      ),
+    },
+  ];
+
+  return (
+    <section
+      aria-labelledby="minting-philosophy"
+      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12"
+    >
+      <div className="tw-max-w-3xl">
+        <h2
+          className={`${SUBSCRIPTIONS_SECTION_HEADING_CLASS} tw-scroll-mt-24`}
+          id="minting-philosophy"
+        >
+          {m("about.minting.philosophy.title")}
+        </h2>
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+          Mints for well-known collections where demand may exceed supply are
+          very difficult to manage effectively. The main approaches and our
+          views on them are highlighted below.
+        </p>
+      </div>
+
+      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 sm:tw-mt-6 md:tw-grid-cols-2 md:tw-gap-6">
+        {philosophyCards.map((card) => (
+          <li
+            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-4 sm:tw-p-6 ${card.className ?? ""}`}
+            key={card.title}
+          >
+            <div className="tw-flex tw-items-center tw-gap-3">
+              <span
+                className={`tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full ${card.iconWrapperClassName}`}
+              >
+                <FontAwesomeIcon
+                  aria-hidden="true"
+                  className={`tw-text-sm ${card.iconClassName}`}
+                  icon={card.icon}
+                />
+              </span>
+              <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
+                {card.title}
+              </h3>
+            </div>
+            <div className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {card.content}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
