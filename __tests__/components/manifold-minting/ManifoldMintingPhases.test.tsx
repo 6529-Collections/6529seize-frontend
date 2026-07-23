@@ -1,6 +1,12 @@
 import ManifoldMinting from "@/components/manifold-minting/ManifoldMinting";
 import { useManifoldClaim } from "@/hooks/useManifoldClaim";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("next/image", () => ({
@@ -33,7 +39,9 @@ jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
 
 jest.mock("@/components/manifold-minting/ManifoldMintingWidget", () => ({
   __esModule: true,
-  default: (props: { setMintForAddress?: (address: string | null) => void }) => (
+  default: (props: {
+    setMintForAddress?: (address: string | null) => void;
+  }) => (
     <button
       data-testid="mint-widget"
       onClick={() => props.setMintForAddress?.("0xabc")}
@@ -305,6 +313,53 @@ describe("ManifoldMinting phases", () => {
     await waitFor(() =>
       expect(screen.getAllByText("No eligible spots")).toHaveLength(3)
     );
-    expect(screen.queryByText("Loading eligibility...")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Loading eligibility...")
+    ).not.toBeInTheDocument();
+    expect(globalThis.fetch).toHaveBeenCalledWith(expect.any(String), {
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  test("shows an error when the distribution request times out", async () => {
+    jest.useFakeTimers();
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    (globalThis.fetch as jest.Mock).mockImplementation(
+      (_url: string, options: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          options.signal?.addEventListener("abort", () => {
+            reject(new DOMException("The operation was aborted", "AbortError"));
+          });
+        })
+    );
+
+    render(
+      <ManifoldMinting
+        title="Test Meme"
+        contract="0xmemes"
+        chain={{ id: 1 } as any}
+        abi={[]}
+        mint_date={{ toMillis: () => Date.UTC(2026, 2, 18, 17, 40) } as any}
+        mintMetadata={{
+          tokenId: 123,
+          metadata: {
+            name: "Test NFT",
+            description: "Test description",
+            attributes: [],
+            image_url: "test.jpg",
+          },
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("mint-widget"));
+    expect(screen.getAllByText("Loading eligibility...")).toHaveLength(3);
+
+    await act(async () => {
+      jest.advanceTimersByTime(30_000);
+      await Promise.resolve();
+    });
+
+    expect(screen.getAllByText("Eligibility unavailable")).toHaveLength(3);
   });
 });
