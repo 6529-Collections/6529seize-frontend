@@ -18,9 +18,21 @@ interface WaveCompetitionBadgesProps {
   readonly waveName: string;
   readonly onBadgeClick: (tab: WaveCompetitionPreviewTab) => void;
   readonly tooltipIdPrefix?: string | undefined;
+  readonly size?: "default" | "compact" | undefined;
 }
 
 type BadgeKind = "participant" | "winner";
+
+const BADGE_SIZE_CLASSES = {
+  default: {
+    button: "tw-size-5",
+    icon: "tw-size-2.5",
+  },
+  compact: {
+    button: "tw-size-[18px]",
+    icon: "tw-size-[9px]",
+  },
+} as const;
 
 const BADGE_CONFIG = {
   participant: {
@@ -33,7 +45,7 @@ const BADGE_CONFIG = {
     icon: faMedal,
     tab: "winners",
     className:
-      "tw-border-emerald-400/35 tw-bg-emerald-500/15 tw-text-emerald-300 focus-visible:tw-ring-emerald-400/50 desktop-hover:hover:tw-border-emerald-300/60 desktop-hover:hover:tw-bg-emerald-500/25 desktop-hover:hover:tw-text-emerald-200",
+      "tw-border-green/35 tw-bg-green/15 tw-text-green focus-visible:tw-ring-green/50 desktop-hover:hover:tw-border-green/60 desktop-hover:hover:tw-bg-green/25",
   },
 } as const;
 
@@ -51,12 +63,14 @@ const WaveCompetitionBadge = ({
   tooltipIdPrefix,
   showTooltip,
   onBadgeClick,
+  size,
 }: {
   readonly kind: BadgeKind;
   readonly waveName: string;
   readonly tooltipIdPrefix: string;
   readonly showTooltip: boolean;
   readonly onBadgeClick: (tab: WaveCompetitionPreviewTab) => void;
+  readonly size: "default" | "compact";
 }) => {
   const locale = useBrowserLocale();
   const id = useId();
@@ -66,6 +80,7 @@ const WaveCompetitionBadge = ({
   const label = t(locale, getTooltipKey(kind), {
     wave: waveName,
   });
+  const sizeClasses = BADGE_SIZE_CLASSES[size];
 
   return (
     <span className="tw-inline-flex">
@@ -82,11 +97,11 @@ const WaveCompetitionBadge = ({
         }}
         onMouseEnter={() => setIsTooltipOpen(true)}
         onMouseLeave={() => setIsTooltipOpen(false)}
-        className={`tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${config.className}`}
+        className={`tw-inline-flex ${sizeClasses.button} tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${config.className}`}
       >
         <FontAwesomeIcon
           icon={config.icon}
-          className="tw-size-3 tw-flex-shrink-0"
+          className={`${sizeClasses.icon} tw-flex-shrink-0`}
         />
       </button>
       {showTooltip && (
@@ -112,6 +127,7 @@ export const WaveCompetitionBadges = ({
   waveName,
   onBadgeClick,
   tooltipIdPrefix = "wave-competition-badge",
+  size = "default",
 }: WaveCompetitionBadgesProps) => {
   const isMobile = useIsMobileDevice();
   const { hasTouchScreen } = useDeviceInfo();
@@ -126,6 +142,7 @@ export const WaveCompetitionBadges = ({
           tooltipIdPrefix={tooltipIdPrefix}
           showTooltip={showTooltip}
           onBadgeClick={onBadgeClick}
+          size={size}
         />
       )}
       {isWinner && (
@@ -135,6 +152,7 @@ export const WaveCompetitionBadges = ({
           tooltipIdPrefix={tooltipIdPrefix}
           showTooltip={showTooltip}
           onBadgeClick={onBadgeClick}
+          size={size}
         />
       )}
     </>

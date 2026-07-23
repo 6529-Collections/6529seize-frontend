@@ -331,7 +331,7 @@ describe("DropPlaceholder", () => {
       render(<DropPlaceholder type="chat" />);
 
       const message = screen.getByText("Action not available");
-      expect(message).toHaveClass("tw-text-sm", "tw-font-medium", "tw-mb-0");
+      expect(message).toHaveClass("tw-text-sm", "tw-font-medium", "tw-m-0");
     });
   });
 
