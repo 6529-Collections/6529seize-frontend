@@ -39,14 +39,14 @@ describe("AboutMemes", () => {
     render(<AboutMemes />);
 
     const collection = screen.getByRole("link", {
-      name: "Open All The Memes in a new tab",
+      name: "Open All The Memes: in a new tab",
     });
     expect(collection).toHaveAttribute("href", "/the-memes");
     expect(collection).toHaveAttribute("target", "_blank");
     expect(collection).toHaveAttribute("rel", "noopener noreferrer");
 
     const network = screen.getByRole("link", {
-      name: "Open The Memes Network in a new tab",
+      name: "Open The Memes Network: in a new tab",
     });
     expect(network).toHaveAttribute("href", "/network");
     expect(network).toHaveAttribute("target", "_blank");

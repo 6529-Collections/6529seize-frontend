@@ -44,7 +44,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
 
   if (section === AboutSection.MEMES) {
     return (
-      <div className="tw-min-h-[calc(100vh-100px)] tw-bg-[#0D0D0F]">
+      <div className="tw-min-h-[calc(100vh-100px)] tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]">
         <AboutContentsDropdown
           className="!tw-mb-0 tw-mx-auto tw-w-full tw-max-w-[1400px] !tw-bg-[#0D0D0F] tw-px-4 sm:tw-px-6 lg:tw-px-8"
           currentSection={section}

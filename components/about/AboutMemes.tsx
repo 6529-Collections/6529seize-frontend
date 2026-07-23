@@ -69,7 +69,7 @@ function ResourceCard({ resource }: { readonly resource: Resource }) {
               })
             : undefined
         }
-        className="tw-group tw-grid tw-min-h-20 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-5 tw-text-iron-100 tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-white/25 hover:tw-text-white hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] sm:tw-grid-cols-[minmax(12rem,0.8fr)_minmax(0,1fr)_auto]"
+        className="tw-group tw-grid tw-min-h-20 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-5 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-5 tw-text-iron-100 tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-white/25 hover:tw-text-white hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] sm:tw-grid-cols-[minmax(12rem,0.8fr)_minmax(0,1fr)_auto]"
         href={resource.href}
       >
         <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
@@ -89,8 +89,8 @@ function ResourceCard({ resource }: { readonly resource: Resource }) {
 
 export default function AboutMemes() {
   return (
-    <article className="tw-overflow-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-text-iron-100">
-      <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10">
+    <article className="tw-overflow-hidden tw-bg-[#0D0D0F] tw-text-iron-100">
+      <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]">
         <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-14 tw-pt-12 sm:tw-px-6 sm:tw-pb-20 sm:tw-pt-16 lg:tw-px-8 lg:tw-pb-24 lg:tw-pt-20">
           <p className="tw-m-0 tw-mb-5 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-primary-300">
             {t(DEFAULT_LOCALE, "about.memes.eyebrow")}
@@ -101,19 +101,14 @@ export default function AboutMemes() {
           >
             {t(DEFAULT_LOCALE, "about.memes.title")}
           </h1>
-          <div className="tw-mt-10 tw-text-center sm:tw-mt-14 lg:tw-mt-16">
+          <div className="tw-mt-10 sm:tw-mt-14 lg:tw-mt-16">
             <Image
+              className="tw-h-auto tw-w-full"
               unoptimized
               loading="eager"
               priority
-              width="0"
-              height="0"
-              style={{
-                height: "auto",
-                width: "auto",
-                maxHeight: "400px",
-                maxWidth: "100%",
-              }}
+              width={2187}
+              height={801}
               src="/memes-preview.png"
               alt="The Memes"
             />
@@ -124,27 +119,24 @@ export default function AboutMemes() {
       <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 sm:tw-px-6 lg:tw-px-8">
         <section
           aria-labelledby="about-memes-shared-title"
-          className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-12 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
+          className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-10 sm:tw-gap-8 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
         >
           <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
-            <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-iron-500">
-              {t(DEFAULT_LOCALE, "about.memes.shared.eyebrow")}
-            </p>
             <h2
-              className="tw-m-0 tw-max-w-lg tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
+              className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-iron-500"
               id="about-memes-shared-title"
             >
-              {t(DEFAULT_LOCALE, "about.memes.shared.title")}
+              {t(DEFAULT_LOCALE, "about.memes.shared.eyebrow")}
             </h2>
           </header>
           <div className="tw-max-w-3xl">
-            <p className="tw-m-0 tw-text-pretty tw-text-xl tw-font-light tw-leading-8 tw-text-iron-100">
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-light tw-leading-7 tw-text-iron-100 sm:tw-text-xl sm:tw-leading-8">
               {t(DEFAULT_LOCALE, "about.memes.intro")}
             </p>
-            <p className="tw-m-0 tw-mt-6 tw-text-pretty tw-text-lg tw-leading-7 tw-text-iron-300">
+            <p className="tw-m-0 tw-mt-5 tw-text-pretty tw-text-base tw-leading-6 tw-text-iron-300 sm:tw-mt-6 sm:tw-text-lg sm:tw-leading-7">
               {t(DEFAULT_LOCALE, "about.memes.shared.lead")}
             </p>
-            <p className="tw-m-0 tw-mt-6 tw-text-pretty tw-text-lg tw-leading-7 tw-text-iron-300">
+            <p className="tw-m-0 tw-mt-5 tw-text-pretty tw-text-base tw-leading-6 tw-text-iron-300 sm:tw-mt-6 sm:tw-text-lg sm:tw-leading-7">
               {t(DEFAULT_LOCALE, "about.memes.shared.body")}
             </p>
           </div>
@@ -152,7 +144,7 @@ export default function AboutMemes() {
 
         <section
           aria-labelledby="about-memes-collection-title"
-          className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-12 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
+          className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-10 sm:tw-gap-8 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
         >
           <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
             <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-iron-500">
@@ -165,14 +157,14 @@ export default function AboutMemes() {
               {t(DEFAULT_LOCALE, "about.memes.collection.title")}
             </h2>
           </header>
-          <div className="tw-max-w-3xl tw-space-y-6">
-            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-7 tw-text-iron-300">
+          <div className="tw-max-w-3xl tw-space-y-5 sm:tw-space-y-6">
+            <p className="tw-m-0 tw-text-pretty tw-text-base tw-leading-6 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-7">
               {t(DEFAULT_LOCALE, "about.memes.collection.bodyOne")}
             </p>
-            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-7 tw-text-iron-300">
+            <p className="tw-m-0 tw-text-pretty tw-text-base tw-leading-6 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-7">
               {t(DEFAULT_LOCALE, "about.memes.collection.bodyTwo")}
             </p>
-            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-7 tw-text-iron-300">
+            <p className="tw-m-0 tw-text-pretty tw-text-base tw-leading-6 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-7">
               {t(DEFAULT_LOCALE, "about.memes.openMetaverse.body")}
             </p>
           </div>
@@ -180,7 +172,7 @@ export default function AboutMemes() {
 
         <section
           aria-labelledby="about-memes-resources-title"
-          className="tw-grid tw-gap-8 tw-py-12 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
+          className="tw-grid tw-gap-6 tw-py-10 sm:tw-gap-8 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
         >
           <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
             <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-primary-300">
