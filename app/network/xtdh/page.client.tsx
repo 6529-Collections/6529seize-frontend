@@ -9,14 +9,19 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-const REFERENCE_SECTION_CLASSES =
-  "tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-py-12 sm:tw-gap-8 lg:tw-grid-cols-3 lg:tw-gap-16 lg:tw-py-16";
+const EDITORIAL_GRID_CLASSES =
+  "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
+const REFERENCE_SECTION_CLASSES = `${EDITORIAL_GRID_CLASSES} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12`;
 const REFERENCE_CONTENT_CLASSES =
-  "tw-min-w-0 tw-space-y-5 tw-text-sm tw-leading-6 tw-text-iron-400 lg:tw-col-span-2";
+  "tw-min-w-0 tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300";
+const INTRO_CONTENT_CLASSES =
+  "tw-min-w-0 tw-max-w-3xl tw-space-y-5 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400";
+const SECTION_HEADING_CLASSES =
+  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
 const FORMULA_CLASSES =
-  "tw-m-0 tw-w-full tw-overflow-x-auto tw-whitespace-pre tw-rounded-xl tw-bg-iron-950 tw-p-5 tw-font-mono tw-text-sm tw-leading-6 tw-text-primary-300 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]";
+  "tw-m-0 tw-w-full tw-overflow-x-auto tw-whitespace-pre tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-p-4 tw-font-mono tw-text-sm tw-font-medium tw-leading-6 tw-text-[#00f0ff]";
 const ORDERED_LIST_CLASSES =
-  "tw-mb-0 tw-list-decimal tw-space-y-2 tw-pl-5 tw-text-iron-400 marker:tw-text-iron-500";
+  "tw-m-0 tw-list-decimal tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600";
 
 export default function XTDHMainPage() {
   useSetTitle("xTDH Overview | Network");
@@ -32,20 +37,20 @@ export default function XTDHMainPage() {
           withDivider
         />
 
-        <div className="tw-mx-auto tw-w-full tw-max-w-6xl tw-pt-4 sm:tw-pt-8">
+        <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
           <section
             aria-labelledby="xtdh-overview-heading"
-            className="tw-grid tw-gap-6 tw-pb-12 sm:tw-gap-8 lg:tw-grid-cols-3 lg:tw-gap-16 lg:tw-pb-16"
+            className={`${EDITORIAL_GRID_CLASSES} tw-pb-8 sm:tw-pb-12`}
           >
-            <div className="lg:tw-sticky lg:tw-top-28 lg:tw-self-start">
+            <div className="lg:tw-sticky lg:tw-top-28">
               <h1
                 id="xtdh-overview-heading"
-                className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-8 tw-tracking-tight tw-text-iron-100"
+                className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]"
               >
                 xTDH Overview
               </h1>
             </div>
-            <div className={REFERENCE_CONTENT_CLASSES}>
+            <div className={INTRO_CONTENT_CLASSES}>
               <p className="tw-m-0">
                 xTDH is an extension of{" "}
                 <Link
@@ -62,11 +67,18 @@ export default function XTDHMainPage() {
                 <ol className={ORDERED_LIST_CLASSES}>
                   <li>How much your memes produce</li>
                   <li>
-                    How much xTDH you <strong>receive</strong> from grants on
-                    tokens you own
+                    How much xTDH you{" "}
+                    <strong className="tw-font-medium tw-text-iron-100">
+                      receive
+                    </strong>{" "}
+                    from grants on tokens you own
                   </li>
                   <li>
-                    How much xTDH you’ve <strong>given</strong> away via grants
+                    How much xTDH you’ve{" "}
+                    <strong className="tw-font-medium tw-text-iron-100">
+                      given
+                    </strong>{" "}
+                    away via grants
                   </li>
                 </ol>
               </div>
@@ -109,7 +121,7 @@ export default function XTDHMainPage() {
             </p>
 
             <div className="tw-space-y-3 tw-pt-2">
-              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
+              <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 sm:tw-text-lg">
                 How much do you receive?
               </h3>
               <p className="tw-m-0">Each grant has:</p>
@@ -139,7 +151,7 @@ export default function XTDHMainPage() {
             </pre>
             <p className="tw-m-0">
               You receive this amount{" "}
-              <strong className="tw-font-semibold tw-text-iron-100">
+              <strong className="tw-font-medium tw-text-iron-100">
                 only for the time you actually owned the token
               </strong>
               , and only while the grant was active.
@@ -158,11 +170,11 @@ export default function XTDHMainPage() {
             <p className="tw-m-0">
               Just like with TDH, &quot;transfers&quot; inside the same
               consolidation group{" "}
-              <strong className="tw-font-semibold tw-text-iron-100">
+              <strong className="tw-font-medium tw-text-iron-100">
                 do not reset
               </strong>{" "}
               the ownership window. Sales or transfers across groups{" "}
-              <strong className="tw-font-semibold tw-text-iron-100">do</strong>.
+              <strong className="tw-font-medium tw-text-iron-100">do</strong>.
             </p>
             <p className="tw-m-0">
               If you sell your token then the xTDH does not transfer with it.
@@ -209,7 +221,7 @@ export default function XTDHMainPage() {
             </pre>
 
             <div className="tw-space-y-3 tw-pt-2">
-              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
+              <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 sm:tw-text-lg">
                 Example:
               </h3>
               <p className="tw-m-0">If today you:</p>
@@ -220,7 +232,7 @@ export default function XTDHMainPage() {
               </ol>
             </div>
             <p className="tw-m-0">Then:</p>
-            <pre className="tw-m-0 tw-w-fit tw-max-w-full tw-overflow-x-auto tw-whitespace-pre tw-rounded-lg tw-bg-iron-950 tw-p-4 tw-font-mono tw-text-sm tw-leading-6 tw-text-iron-100 tw-ring-1 tw-ring-white/[0.03]">
+            <pre className={FORMULA_CLASSES}>
               <code>xtdh_rate = 20 - 5 + 3 = 18 xTDH</code>
             </pre>
           </XtdhReferenceSection>
@@ -235,7 +247,7 @@ export default function XTDHMainPage() {
               gained goes back to the grantor.
             </p>
           </XtdhReferenceSection>
-        </div>
+        </article>
       </div>
     </main>
   );
@@ -254,11 +266,8 @@ function XtdhReferenceSection({
 
   return (
     <section aria-labelledby={headingId} className={REFERENCE_SECTION_CLASSES}>
-      <div className="lg:tw-sticky lg:tw-top-28 lg:tw-self-start">
-        <h2
-          id={headingId}
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-100"
-        >
+      <div className="lg:tw-sticky lg:tw-top-28">
+        <h2 id={headingId} className={SECTION_HEADING_CLASSES}>
           {title}
         </h2>
       </div>
