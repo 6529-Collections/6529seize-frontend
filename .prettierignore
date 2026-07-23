@@ -25,3 +25,8 @@ yarn.lock
 .husky
 *.min.js
 *.min.css
+
+# Generated E2E manifests: JSON.stringify output; prettier reflowing them
+# would fight the routes-manifest/a11y-baseline check scripts.
+tests/routes.manifest.json
+tests/a11y-baseline.json

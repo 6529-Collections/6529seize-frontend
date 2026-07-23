@@ -61,3 +61,6 @@ jobs:
 
       - name: Check debt counters against baseline
         run: node scripts/debt-ratchet.cjs
+
+      - name: Check routes manifest classification
+        run: node scripts/routes-manifest.cjs
