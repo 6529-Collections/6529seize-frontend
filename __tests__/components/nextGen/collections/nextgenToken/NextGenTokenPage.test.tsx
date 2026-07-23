@@ -169,11 +169,11 @@ describe("NextGenTokenPage", () => {
 
       const heading = screen.getByRole("heading", { name: "About" });
       const transfer = screen.getByTestId("transfer-single");
-      const informationCard = screen
-        .getByTestId("about")
-        .closest(".tw-rounded-xl");
+      const transferContainer = transfer.parentElement;
+      const informationCard = screen.getByTestId("nextgen-token-about-card");
 
-      expect(heading.parentElement).toContainElement(transfer);
+      expect(heading.nextElementSibling).toBe(transferContainer);
+      expect(transferContainer?.previousElementSibling).toBe(heading);
       expect(transfer).toHaveAttribute("data-presentation", "inline");
       expect(informationCard).not.toContainElement(transfer);
     });

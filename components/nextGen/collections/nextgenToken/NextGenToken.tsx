@@ -115,7 +115,10 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                 </h2>
                 {transferSingle}
               </div>
-              <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5">
+              <div
+                data-testid="nextgen-token-about-card"
+                className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5"
+              >
                 <div className="tw-grid tw-gap-5 lg:tw-grid-cols-2">
                   <NextGenTokenAbout
                     collection={props.collection}
