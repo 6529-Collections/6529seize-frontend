@@ -172,6 +172,7 @@ function evidenceIdentity(environment = process.env) {
     workflow_digest: environment.RELEASE_BUS_WORKFLOW_DIGEST,
     node_version: environment.RELEASE_BUS_NODE_VERSION,
     package_manager: environment.RELEASE_BUS_PACKAGE_MANAGER,
+    build_profile_digest: environment.RELEASE_BUS_BUILD_PROFILE_DIGEST,
   };
 }
 
