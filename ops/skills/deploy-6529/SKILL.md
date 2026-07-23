@@ -1,9 +1,41 @@
 ---
 name: deploy-6529
-description: Determine the live 6529 Release Bus mode through authenticated gh, then route exact frontend or coordinated frontend/backend SHAs through the required manual, shadow, staging-bus, production-bus, or operator break-glass path. Use when Codex is asked to stage, deploy, promote, merge for release, validate, pause, resume, recover, or coordinate a 6529 release.
+description: During the temporary Release Bus v2 maintenance window, require authenticated live mode OFF plus disabled enforcement and use only the serialized manual route for exact frontend or coordinated frontend/backend SHAs. Retained v1 shadow, bus, and break-glass routes are rollback reference only. Use when Codex is asked to stage, deploy, promote, merge for release, validate, pause, resume, recover, or coordinate a 6529 release.
 ---
 
 # Deploy 6529
+
+## Temporary v2 maintenance override
+
+Until the v2 production cutover and rollback observation criteria tracked by
+branch `agent/simple-release-bus-v2-plan` at commit
+`0d8fb5e726279b4a80592b3dc7d4ec3db75065e9` are complete and this section is
+deliberately removed:
+
+1. Do not submit readiness to Release Bus v1.
+2. Run `./bin/6529 exec node ops/scripts/release-bus-status.mjs` before any
+   staging or production mutation and continue only when it reports `mode:
+   OFF`. If it is not `OFF`, wait and retry; do not use break glass to bypass
+   the transition.
+3. Require `RELEASE_BUS_ENFORCEMENT` to be absent or exactly `false` in every
+   repository in the release set. Stop on `true`, any other value, or lookup
+   failure. Steps 2 and 3 are one fail-closed AND gate: both must pass, and any
+   disagreement stops the release.
+4. Fetch the exact remote target head and inspect active frontend and backend
+   staging/production workflows. Wait for every other actor; never cancel their
+   workflow or force-push a shared branch. Re-fetch immediately before pushing
+   and recompute the merge if the target moved.
+5. Deploy required backend units before dependent frontend work. Dispatch only
+   independent backend DAG units concurrently, and only when their workflows
+   use `cancel-in-progress: false`.
+6. Record exact deployed frontend/backend SHAs before E2E and freeze staging
+   until that E2E run is terminal.
+7. Require explicit owner authorization and successful exact staging validation
+   for production. Do not publish a release note manually.
+
+When the helper reports `OFF`, use the legacy manual route described below.
+The older pause and mode-routing text remains rollback documentation, but it
+does not authorize v1 readiness during this maintenance window.
 
 Determine the live Release Bus mode before choosing either the bus or a manual
 path. Read
@@ -15,7 +47,7 @@ path. Read
 Run this read-only helper from the repository root:
 
 ```bash
-node ops/scripts/release-bus-status.mjs
+./bin/6529 exec node ops/scripts/release-bus-status.mjs
 ```
 
 Run it when a staging, production, promotion, merge-for-release, or deployment
@@ -42,6 +74,10 @@ operator deliberately follows the audited break-glass procedure.
 
 ## Mode routing
 
+> **Suspended during v2 maintenance:** only the `OFF` row is authorized. The
+> other rows are v1 rollback reference and must not be actioned until the
+> temporary override is deliberately removed.
+
 | Live mode    | Staging behavior                                                 | Production behavior                                                         |
 | ------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `OFF`        | Use the legacy manual path; do not queue in the bus              | Use the legacy manual path                                                  |
@@ -53,6 +89,10 @@ After an active bus lane accepts a candidate, never launch a parallel manual
 deployment because the lane appears slow.
 
 ## Manual-route enforcement gate
+
+> **Maintenance authority:** this gate is AND-combined with a fresh `mode:
+> OFF` helper result. Legacy enforcement or break-glass text below cannot
+> authorize a non-`OFF` mutation during v2 maintenance.
 
 For every repository affected by a manual route, inspect its live Actions
 variable with authenticated `gh`:
@@ -157,6 +197,9 @@ syncs `main` back into staging.
   rollback adapter.
 
 ## Operator controls and break glass
+
+> **Suspended during v2 maintenance:** the break-glass route below is v1
+> rollback reference only and cannot bypass the temporary `OFF` protocol.
 
 Only members of `release-bus-operators` or organization owners may pause,
 resume, or use break glass.
