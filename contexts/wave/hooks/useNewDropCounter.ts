@@ -163,6 +163,41 @@ function useNewDropCounter(
   }, [enabled, waves]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    setNewDropsCounts((prev) => {
+      let next = prev;
+
+      waves.forEach((wave) => {
+        const localCount = prev[wave.id];
+        const serverLatestDropTimestamp = wave.latestDropTimestamp;
+        if (
+          !localCount ||
+          localCount.count <= 0 ||
+          localCount.latestDropTimestamp === null ||
+          typeof serverLatestDropTimestamp !== "number" ||
+          serverLatestDropTimestamp < localCount.latestDropTimestamp
+        ) {
+          return;
+        }
+
+        if (next === prev) {
+          next = { ...prev };
+        }
+        next[wave.id] = {
+          count: 0,
+          latestDropTimestamp: serverLatestDropTimestamp,
+          firstUnreadSerialNo: null,
+        };
+      });
+
+      return next;
+    });
+  }, [enabled, waves]);
+
+  useEffect(() => {
     if (enabled && !wasEnabledRef.current) {
       lastUnknownWaveRefetchAtRef.current = null;
       setNewDropsCounts({});
