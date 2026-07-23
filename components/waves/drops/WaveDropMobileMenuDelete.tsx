@@ -9,6 +9,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { AuthContext } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import Button from "@/components/utils/button/Button";
 
 interface WaveDropMobileMenuDeleteProps {
   readonly drop: ApiDrop;
@@ -104,49 +105,23 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
             transition={{ duration: 0.15 }}
             className="tw-mt-4 tw-flex tw-gap-x-2"
           >
-            <button
-              className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-red/100 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 active:tw-bg-red/90"
+            <Button
               onClick={onDelete}
-              disabled={mutating}
+              loading={mutating}
+              variant="destructive"
+              size="lg"
+              fullWidth
             >
-              <span className="tw-flex tw-items-center tw-gap-x-2 tw-text-base tw-font-semibold tw-text-white">
-                {mutating ? (
-                  <>
-                    <svg
-                      className="tw-size-4 tw-animate-spin"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="tw-opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="tw-opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Deleting...
-                  </>
-                ) : (
-                  "Are you sure?"
-                )}
-              </span>
-            </button>
-            <button
-              className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
+              {mutating ? "Deleting..." : "Are you sure?"}
+            </Button>
+            <Button
               onClick={() => setIsDeleteMode(false)}
+              variant="secondary"
+              size="lg"
+              fullWidth
             >
-              <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-                Cancel
-              </span>
-            </button>
+              Cancel
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>

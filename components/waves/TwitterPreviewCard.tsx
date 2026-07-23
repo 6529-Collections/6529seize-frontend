@@ -3,6 +3,8 @@
 import { LinkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useMemo, useState, type MouseEvent, type ReactNode } from "react";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import XIcon from "@/components/user/utils/icons/XIcon";
 import type { TweetPreview, TweetPreviewMedia } from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
@@ -32,9 +34,6 @@ interface TwitterPreviewCardProps {
 
 const TWITTER_CARD_CLASSES =
   "tw-relative tw-w-full tw-min-w-0 tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950/70 tw-text-iron-50 tw-shadow-sm tw-shadow-black/20 tw-transition tw-duration-200 hover:tw-border-iron-600";
-
-const ACTION_CLASSES =
-  "tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/70 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-sky-400/50 hover:tw-bg-sky-400/10 hover:tw-text-sky-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 const TWITTER_ACCENT_COLOR = "#1d9bf0";
 
@@ -230,23 +229,27 @@ function UnavailableCard({
           </div>
         </div>
         <div className="tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-2">
-          <Link
+          <ButtonLink
             href={href}
             target="_blank"
             rel="noopener noreferrer nofollow"
             onClick={stopCardEvent}
-            className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-sky-400/30 tw-bg-sky-400/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-sky-100 tw-no-underline tw-transition hover:tw-border-sky-300/60 hover:tw-bg-sky-400/15 hover:tw-text-white"
+            variant="action"
+            size="md"
+            fullWidth
           >
             Open on X
-          </Link>
-          <button
+          </ButtonLink>
+          <Button
             type="button"
             onClick={onCopy}
-            className={`${ACTION_CLASSES} tw-w-full tw-justify-center`}
+            variant="tertiary"
+            size="md"
+            fullWidth
           >
             <LinkIcon className="tw-h-5 tw-w-5" />
             <span>{copied ? "Copied" : "Copy"}</span>
-          </button>
+          </Button>
         </div>
       </div>
     </article>

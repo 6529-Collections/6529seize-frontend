@@ -1,6 +1,7 @@
 "use client";
 
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import Button from "@/components/utils/button/Button";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
 import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
@@ -122,17 +123,18 @@ export function PollOptionVoters({
       </div>
       {hasNextPage && (
         <div className="tw-mt-2">
-          <button
+          <Button
             type="button"
-            disabled={isFetchingNextPage}
+            loading={isFetchingNextPage}
             onClick={(event) => {
               event.stopPropagation();
               fetchNextPage().catch(() => undefined);
             }}
-            className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-text-iron-200"
+            variant="tertiary"
+            size="xs"
           >
             {isFetchingNextPage ? "Loading..." : "Load more"}
-          </button>
+          </Button>
         </div>
       )}
     </div>

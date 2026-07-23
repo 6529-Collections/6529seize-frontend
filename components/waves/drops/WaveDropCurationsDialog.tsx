@@ -88,22 +88,17 @@ function MembershipActionButton({
   const isAdd = action === "add";
 
   return (
-    <button
+    <Button
       type="button"
-      disabled={disabled || loading}
-      onClick={disabled || loading ? undefined : onClick}
-      className={clsx(
-        "tw-inline-flex tw-min-w-[5.5rem] tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-transition-all tw-duration-300 tw-ease-out",
-        isAdd
-          ? "tw-border-white tw-bg-iron-100 tw-text-iron-950 tw-shadow-[0_0_10px_rgba(255,255,255,0.2)] desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-bg-iron-50 desktop-hover:hover:tw-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-          : "tw-border-white/20 tw-bg-iron-900 tw-text-iron-100 tw-shadow-[0_2px_10px_rgba(0,0,0,0.2)] desktop-hover:hover:tw-border-white/40 desktop-hover:hover:tw-bg-iron-800",
-        (disabled || loading) &&
-          "tw-cursor-not-allowed tw-opacity-50 desktop-hover:hover:tw-translate-y-0 desktop-hover:hover:tw-shadow-none"
-      )}
+      disabled={disabled}
+      loading={loading}
+      onClick={onClick}
+      variant={isAdd ? "primary" : "secondary"}
+      size="xs"
+      className="tw-min-w-[5.5rem]"
     >
-      {loading && <Spinner dimension={14} />}
       <span>{isAdd ? "Add" : "Remove"}</span>
-    </button>
+    </Button>
   );
 }
 

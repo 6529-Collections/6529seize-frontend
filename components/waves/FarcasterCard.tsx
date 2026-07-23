@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, type ReactElement, type ReactNode } from "react";
 
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { fetchFarcasterPreview } from "@/services/api/farcaster";
 import type {
   FarcasterPreviewResponse,
@@ -109,14 +109,15 @@ const ExternalLink = ({
   readonly href: string;
   readonly children: ReactNode;
 }) => (
-  <Link
+  <ButtonLink
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className="tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900/60 tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-iron-400 hover:tw-text-white"
+    variant="tertiary"
+    size="sm"
   >
     {children}
-  </Link>
+  </ButtonLink>
 );
 
 const renderImageGrid = (
