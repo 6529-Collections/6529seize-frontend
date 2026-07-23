@@ -6073,7 +6073,7 @@
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",
         "Individual Gradient detail routes use /6529-gradient/{id}.",
-        "The /about/6529-gradient overview explains the grayscale design system, animated #50, museum-held pieces, and community purpose, and links to the collection.",
+        "The /about/6529-gradient overview explains the grayscale design system, animated #50, museum-held pieces, and community purpose.",
         "Use this route when users ask where to view the 6529 Gradient collection."
       ],
       "canonical_path": "/6529-gradient",

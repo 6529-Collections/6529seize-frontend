@@ -21,16 +21,22 @@ describe("AboutGradients", () => {
     expect(img).toHaveAttribute("data-src", "/gradients-preview.png");
   });
 
-  it("links to the collection, artist, and animated token", () => {
+  it("preserves the artist link and original purpose wording", () => {
     render(<AboutGradients />);
+    expect(screen.getByRole("link", { name: "@6529er" })).toHaveAttribute(
+      "href",
+      "https://x.com/6529er"
+    );
     expect(
-      screen.getByRole("link", { name: /explore 6529 gradient/i })
-    ).toHaveAttribute("href", "/6529-gradient");
+      screen.getByRole("heading", {
+        name: "What Do The Gradients Do?",
+        level: 2,
+      })
+    ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /follow 6529er on x/i })
-    ).toHaveAttribute("href", "https://x.com/6529er");
-    expect(
-      screen.getByRole("link", { name: /view gradient #50/i })
-    ).toHaveAttribute("href", "/6529-gradient/50");
+      screen.getByText(
+        "The Gradients do not do anything. They are a graphic expression of the 6529 logo."
+      )
+    ).toBeInTheDocument();
   });
 });

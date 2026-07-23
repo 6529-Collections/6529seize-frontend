@@ -18,16 +18,28 @@ describe("AboutMemeLab", () => {
     expect(img).toHaveAttribute("data-src", "/memelab.png");
   });
 
-  it("preserves the contract overview and collection action", () => {
+  it("preserves the original contract wording and collection link", () => {
     render(<AboutMemeLab />);
     expect(
       screen.getByText(/^The Meme Lab is an experimental CC0 contract/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /explore meme lab/i })
+      screen.getByRole("link", { name: /open meme lab collection/i })
     ).toHaveAttribute("href", "/meme-lab");
     expect(
-      screen.getByRole("heading", { name: "How Artists Use the Lab" })
+      screen.getByText(
+        "We actively encourage the artists to experiment on any dimension they like on the Meme Lab's contract - artistic, community, edition size, price and so on."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "We will learn more in the next 6 months about how artists plan to use it and what happens."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "We hope to see some successes, and certainly expect there will be some failures too."
+      )
     ).toBeInTheDocument();
   });
 });
