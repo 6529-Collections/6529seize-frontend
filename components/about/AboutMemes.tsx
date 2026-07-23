@@ -72,10 +72,10 @@ function ResourceCard({ resource }: { readonly resource: Resource }) {
         className="tw-group tw-grid tw-min-h-20 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-5 tw-text-iron-100 tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-white/25 hover:tw-text-white hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] sm:tw-grid-cols-[minmax(12rem,0.8fr)_minmax(0,1fr)_auto]"
         href={resource.href}
       >
-        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
+        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 sm:tw-text-lg">
           {title}
         </h3>
-        <span className="tw-col-start-1 tw-row-start-2 tw-min-w-0 tw-truncate tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500 sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-text-sm sm:tw-text-iron-400">
+        <span className="tw-col-start-1 tw-row-start-2 tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500 sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-text-base sm:tw-text-iron-400">
           {resource.destination}
         </span>
         <Icon
@@ -124,7 +124,7 @@ export default function AboutMemes() {
       <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 sm:tw-px-6 lg:tw-px-8">
         <section
           aria-labelledby="about-memes-shared-title"
-          className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-16 sm:tw-py-20 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-20 lg:tw-py-28"
+          className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-12 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
         >
           <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
             <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-iron-500">
@@ -138,13 +138,13 @@ export default function AboutMemes() {
             </h2>
           </header>
           <div className="tw-max-w-3xl">
-            <p className="tw-m-0 tw-text-2xl tw-font-light tw-leading-9 tw-text-iron-100 sm:tw-text-3xl sm:tw-leading-[1.4]">
+            <p className="tw-m-0 tw-text-pretty tw-text-xl tw-font-light tw-leading-8 tw-text-iron-100 sm:tw-text-2xl sm:tw-leading-9">
               {t(DEFAULT_LOCALE, "about.memes.intro")}
             </p>
-            <p className="tw-m-0 tw-mt-8 tw-text-lg tw-leading-8 tw-text-iron-300">
+            <p className="tw-m-0 tw-mt-6 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-300 sm:tw-text-xl">
               {t(DEFAULT_LOCALE, "about.memes.shared.lead")}
             </p>
-            <p className="tw-m-0 tw-mt-6 tw-text-lg tw-leading-8 tw-text-iron-300">
+            <p className="tw-m-0 tw-mt-6 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-300 sm:tw-text-xl">
               {t(DEFAULT_LOCALE, "about.memes.shared.body")}
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function AboutMemes() {
 
         <section
           aria-labelledby="about-memes-collection-title"
-          className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-16 sm:tw-py-20 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-20 lg:tw-py-28"
+          className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-12 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
         >
           <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
             <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-iron-500">
@@ -166,13 +166,13 @@ export default function AboutMemes() {
             </h2>
           </header>
           <div className="tw-max-w-3xl tw-space-y-6">
-            <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-300">
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-300 sm:tw-text-xl">
               {t(DEFAULT_LOCALE, "about.memes.collection.bodyOne")}
             </p>
-            <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-300">
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-300 sm:tw-text-xl">
               {t(DEFAULT_LOCALE, "about.memes.collection.bodyTwo")}
             </p>
-            <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-300">
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-300 sm:tw-text-xl">
               {t(DEFAULT_LOCALE, "about.memes.openMetaverse.body")}
             </p>
           </div>
@@ -180,7 +180,7 @@ export default function AboutMemes() {
 
         <section
           aria-labelledby="about-memes-resources-title"
-          className="tw-grid tw-gap-8 tw-py-16 sm:tw-py-20 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-20 lg:tw-py-28"
+          className="tw-grid tw-gap-8 tw-py-12 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
         >
           <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
             <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-primary-300">
