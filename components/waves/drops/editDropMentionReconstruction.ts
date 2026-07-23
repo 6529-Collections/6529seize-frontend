@@ -2,6 +2,36 @@ import { $createMentionNode } from "@/components/drops/create/lexical/nodes/Ment
 import { $createWaveMentionNode } from "@/components/drops/create/lexical/nodes/WaveMentionNode";
 import type { TextNode } from "lexical";
 
+function replaceSplitTextWithMention(
+  currentNode: TextNode,
+  nextNode: TextNode,
+  mentionNode: TextNode,
+  mentionStartLength: number,
+  mentionEndLength: number
+): void {
+  const currentText = currentNode.getTextContent();
+  const nextText = nextNode.getTextContent();
+  const beforeMention = currentText.substring(
+    0,
+    currentText.length - mentionStartLength
+  );
+  const afterMention = nextText.substring(mentionEndLength);
+
+  if (beforeMention) {
+    currentNode.setTextContent(beforeMention);
+    currentNode.insertAfter(mentionNode);
+  } else {
+    currentNode.remove();
+    nextNode.insertBefore(mentionNode);
+  }
+
+  if (afterMention) {
+    nextNode.setTextContent(afterMention);
+  } else {
+    nextNode.remove();
+  }
+}
+
 function reconstructSplitMention(
   currentNode: TextNode,
   nextNode: TextNode,
@@ -21,27 +51,13 @@ function reconstructSplitMention(
     mentionedProfileIdsByHandle.get(handle.toLowerCase()) ?? null
   );
 
-  const currentText = currentNode.getTextContent();
-  const nextText = nextNode.getTextContent();
-  const beforeMention = currentText.substring(
-    0,
-    currentText.length - mentionStart[0].length
+  replaceSplitTextWithMention(
+    currentNode,
+    nextNode,
+    mentionNode,
+    mentionStart[0].length,
+    mentionEnd[0].length
   );
-  const afterMention = nextText.substring(mentionEnd[0].length);
-
-  if (beforeMention) {
-    currentNode.setTextContent(beforeMention);
-    currentNode.insertAfter(mentionNode);
-  } else {
-    currentNode.remove();
-    nextNode.insertBefore(mentionNode);
-  }
-
-  if (afterMention) {
-    nextNode.setTextContent(afterMention);
-  } else {
-    nextNode.remove();
-  }
 
   return true;
 }
@@ -61,27 +77,13 @@ function reconstructSplitWaveMention(
   if (!waveName) return false;
   const mentionNode = $createWaveMentionNode(`#${waveName}`);
 
-  const currentText = currentNode.getTextContent();
-  const nextText = nextNode.getTextContent();
-  const beforeMention = currentText.substring(
-    0,
-    currentText.length - mentionStart[0].length
+  replaceSplitTextWithMention(
+    currentNode,
+    nextNode,
+    mentionNode,
+    mentionStart[0].length,
+    mentionEnd[0].length
   );
-  const afterMention = nextText.substring(mentionEnd[0].length);
-
-  if (beforeMention) {
-    currentNode.setTextContent(beforeMention);
-    currentNode.insertAfter(mentionNode);
-  } else {
-    currentNode.remove();
-    nextNode.insertBefore(mentionNode);
-  }
-
-  if (afterMention) {
-    nextNode.setTextContent(afterMention);
-  } else {
-    nextNode.remove();
-  }
 
   return true;
 }
