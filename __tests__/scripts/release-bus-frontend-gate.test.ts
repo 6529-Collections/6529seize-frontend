@@ -67,6 +67,9 @@ describe("Release Bus frontend gate contract", () => {
       appPrCi.match(/EXPECTED_MERGE_SHA: \$\{\{ github\.sha \}\}/g)
     ).toHaveLength(2);
     expect(appPrCi).toContain("name: release-bus-v2-pr-${{ github.sha }}");
+    expect(appPrCi).toContain(
+      "unset ANNOUNCED_VERSION_ENDPOINT\n          rm -rf .next"
+    );
   });
 
   it("keeps deployed worker dispatch and authorization backward compatible", () => {

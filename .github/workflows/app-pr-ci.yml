@@ -445,6 +445,7 @@ jobs:
           ASSETS_FROM_S3: "false"
           ANNOUNCED_VERSION_ENDPOINT: ""
         run: |
+          unset ANNOUNCED_VERSION_ENDPOINT
           rm -rf .next
           ./bin/6529 run base-build
 

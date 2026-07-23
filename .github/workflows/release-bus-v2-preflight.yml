@@ -256,6 +256,7 @@ jobs:
     permissions:
       contents: read
     env:
+      BUILD_ENVIRONMENT: ${{ matrix.environment }}
       NODE_ENV: production
       API_ENDPOINT: ${{ matrix.environment == 'production' && 'https://api.6529.io' || vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
       WS_ENDPOINT: ${{ matrix.environment == 'production' && 'wss://ws.6529.io' || vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
@@ -294,7 +295,11 @@ jobs:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
       - name: Build exact environment profile once
-        run: ./bin/6529 run base-build
+        run: |
+          if [ "$BUILD_ENVIRONMENT" = staging ]; then
+            unset ANNOUNCED_VERSION_ENDPOINT
+          fi
+          ./bin/6529 run base-build
       - name: Package immutable environment profile
         run: |
           set -euo pipefail

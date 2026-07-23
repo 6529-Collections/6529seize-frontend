@@ -285,6 +285,19 @@ describe("release bus v2 combined preflight", () => {
     ).toHaveLength(2);
   });
 
+  it("omits the production-only announcement URL from staging builds", () => {
+    const build = workflow.jobs.build;
+    const buildStep = build.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Build exact environment profile once"
+    );
+    expect(build.env.BUILD_ENVIRONMENT).toBe("${{ matrix.environment }}");
+    expect(buildStep.run).toContain(
+      'if [ "$BUILD_ENVIRONMENT" = staging ]'
+    );
+    expect(buildStep.run).toContain("unset ANNOUNCED_VERSION_ENDPOINT");
+  });
+
   it("shards Jest and proves exact inventory before artifact publication", () => {
     expect(workflow.jobs.quality.strategy.matrix.shard).toEqual([
       "lint",
