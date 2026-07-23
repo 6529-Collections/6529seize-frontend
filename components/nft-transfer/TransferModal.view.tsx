@@ -4,6 +4,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import {
   faAnglesDown,
@@ -11,7 +12,6 @@ import {
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import type { PublicClient } from "viem";
 import type { FlowState, TxEntry, TxState } from "./TransferModal.types";
 
@@ -197,14 +197,16 @@ function TxStatusList({
   const txLink = (hash: string) => {
     if (!explorer) return null;
     return (
-      <Link
+      <ButtonLink
         href={`${explorer}/tx/${hash}`}
         target="_blank"
         rel="noreferrer"
-        className="tw-ml-2 tw-inline-block tw-rounded-md tw-border tw-border-solid tw-border-black tw-bg-white tw-px-2 tw-py-1 !tw-text-sm tw-text-black tw-no-underline hover:tw-bg-white/80 hover:tw-text-black"
+        variant="primary"
+        size="xs"
+        className="tw-ml-2"
       >
         View Tx
-      </Link>
+      </ButtonLink>
     );
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { CREATE_WAVE_HREF } from "./userPageProfileWave.helpers";
 import type { resolveWavePickerViewState } from "./userPageProfileWave.helpers";
 import {
@@ -19,12 +19,13 @@ const MOBILE_SHEET_VARIANT = "mobile-sheet";
 
 function CreateWaveLink() {
   return (
-    <Link
+    <ButtonLink
       href={CREATE_WAVE_HREF}
-      className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-100 desktop-hover:hover:tw-text-iron-950 desktop-hover:hover:tw-no-underline"
+      variant="primary"
+      size="sm"
     >
       Create wave
-    </Link>
+    </ButtonLink>
   );
 }
 

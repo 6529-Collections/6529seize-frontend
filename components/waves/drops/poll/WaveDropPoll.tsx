@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import Button from "@/components/utils/button/Button";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
@@ -509,17 +510,19 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                 className="tw-overflow-hidden"
               >
                 <div className="tw-flex tw-gap-2">
-                  <button
+                  <Button
                     type="button"
                     disabled={multichoiceSubmitDisabled}
                     onClick={(event) => {
                       event.stopPropagation();
                       handleSubmitVote().catch(() => undefined);
                     }}
-                    className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-black tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/[0.06] disabled:tw-bg-white/[0.025] disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-100"
+                    variant="primary"
+                    size="sm"
+                    className="tw-flex-1"
                   >
                     {submitButtonLabel}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -590,17 +593,18 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       {showVoteResultsFooterAction && (
         <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
           <div className="tw-flex tw-justify-start">
-            <button
+            <Button
               type="button"
               disabled={voteMutation.isPending}
               onClick={(event) => {
                 event.stopPropagation();
                 showResultsView();
               }}
-              className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+              variant="secondary"
+              size="xs"
             >
               {t(locale, "waves.poll.actions.viewResults")}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -609,42 +613,47 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
           {poll.multichoice ? (
             <div className="tw-flex tw-gap-2">
-              <button
+              <Button
                 type="button"
                 disabled={voteMutation.isPending}
                 onClick={(event) => {
                   event.stopPropagation();
                   cancelVoteChange();
                 }}
-                className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-medium tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+                variant="secondary"
+                size="sm"
+                className="tw-flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 disabled={multichoiceSubmitDisabled}
                 onClick={(event) => {
                   event.stopPropagation();
                   handleSubmitVote().catch(() => undefined);
                 }}
-                className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-black tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/[0.06] disabled:tw-bg-white/[0.025] disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-100"
+                variant="primary"
+                size="sm"
+                className="tw-flex-1"
               >
                 {submitButtonLabel}
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="tw-flex tw-justify-start">
-              <button
+              <Button
                 type="button"
                 disabled={voteMutation.isPending}
                 onClick={(event) => {
                   event.stopPropagation();
                   cancelVoteChange();
                 }}
-                className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+                variant="secondary"
+                size="xs"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -653,17 +662,18 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       {showResultsFooterAction && (
         <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-            <button
+            <Button
               type="button"
               disabled={voteMutation.isPending}
               onClick={(event) => {
                 event.stopPropagation();
                 showVoteView();
               }}
-              className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+              variant="secondary"
+              size="xs"
             >
               {resultsFooterActionLabel}
-            </button>
+            </Button>
             {hasVoted && (
               <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
                 <span

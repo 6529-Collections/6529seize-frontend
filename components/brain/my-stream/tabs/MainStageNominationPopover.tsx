@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, type ReactElement, type ReactNode } from "react";
-import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import PermissionIcon from "@/components/utils/icons/PermissionIcon";
 import CircleLoader, {
@@ -208,13 +208,15 @@ function MainStageNominationPopoverContent() {
         />
       </div>
 
-      <Link
+      <ButtonLink
         href={SEEKING_NOMINATION_ROUTE}
-        className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-white tw-no-underline tw-shadow-sm tw-ring-1 tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 desktop-hover:hover:tw-border-primary-600 desktop-hover:hover:tw-bg-primary-600 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-primary-600"
+        variant="action"
+        size="sm"
+        fullWidth
       >
         Get nominated
         <ArrowRightIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-opacity-70" />
-      </Link>
+      </ButtonLink>
     </div>
   );
 }

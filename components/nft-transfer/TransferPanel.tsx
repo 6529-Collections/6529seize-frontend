@@ -1,6 +1,7 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import Button from "@/components/utils/button/Button";
 import {
   faChevronDown,
   faChevronUp,
@@ -214,27 +215,31 @@ export default function TransferPanel({
                   {t.totalQty} {t.totalQty === 1 ? "item" : "items"}
                 </div>
               )}
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   t.setEnabled(false);
                   t.clear();
                 }}
                 disabled={isLoading}
-                className="tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-transition-colors hover:tw-bg-white/20 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                variant="secondary"
+                size="md"
+                className="tw-min-w-[100px]"
                 aria-label="Cancel"
               >
                 Cancel
-              </button>
+              </Button>
               {items.length > 0 && (
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowModal(true)}
-                  className="tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-black tw-transition-colors hover:tw-bg-white/90"
+                  variant="primary"
+                  size="md"
+                  className="tw-min-w-[100px]"
                   aria-label="Continue"
                 >
                   Continue
-                </button>
+                </Button>
               )}
             </div>
           </div>

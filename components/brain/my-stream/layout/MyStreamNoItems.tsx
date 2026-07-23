@@ -1,6 +1,6 @@
-import Link from "next/link";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 export default function MyStreamNoItems() {
   const { isApp } = useDeviceInfo();
@@ -86,13 +86,15 @@ export default function MyStreamNoItems() {
       </p>
 
       <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center">
-        <Link
+        <ButtonLink
           href={exploreHref}
-          className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400 tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-400 hover:tw-bg-iron-950 hover:tw-text-primary-400"
+          variant="tertiary"
+          size="md"
+          className="tw-group"
         >
           <span>Explore Waves</span>
           <svg
-            className="tw-ml-2 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transform tw-transition-transform group-hover:tw-translate-x-1"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transform tw-transition-transform group-hover:tw-translate-x-1"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -105,18 +107,19 @@ export default function MyStreamNoItems() {
               d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
             />
           </svg>
-        </Link>
+        </ButtonLink>
 
         <span className="tw-hidden tw-text-sm tw-font-normal tw-text-iron-500 sm:tw-block">
           or
         </span>
 
-        <Link
+        <ButtonLink
           href={createHref}
-          className="tw-group tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 hover:tw-text-white"
+          variant="action"
+          size="md"
         >
           <svg
-            className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -130,7 +133,7 @@ export default function MyStreamNoItems() {
             />
           </svg>
           <span>Create a Wave</span>
-        </Link>
+        </ButtonLink>
       </div>
     </div>
   );

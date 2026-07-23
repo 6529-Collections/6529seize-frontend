@@ -1,7 +1,6 @@
 "use client";
 
 import { BoltIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { parseEther } from "viem";
@@ -13,6 +12,7 @@ import OnchainTransactionModal, {
 } from "@/components/common/OnchainTransactionModal";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import {
   displayedEonNumberFromIndex,
   displayedEpochNumberFromIndex,
@@ -266,14 +266,16 @@ export default function UserPageSubscriptionsTopUp() {
       (!memeCount || Number.isNaN(parsedMemeCount) || parsedMemeCount < 1));
 
   const iOsContent = mounted ? (
-    <Link
+    <ButtonLink
       href={window.location.href}
-      className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-2 tw-font-semibold tw-text-iron-950 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      variant="primary"
+      size="lg"
+      fullWidth
       target="_blank"
       rel="noopener noreferrer"
     >
       Top-up on 6529.io
-    </Link>
+    </ButtonLink>
   ) : null;
 
   const printRemainingMints = (

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import {
   fetchWikimediaCard,
   type WikimediaArticleCard,
@@ -380,14 +381,15 @@ const renderUnavailableCard = (
         <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
           This page is unavailable.
         </p>
-        <Link
+        <ButtonLink
           href={data.pageUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition hover:tw-border-primary-300/60 hover:tw-text-white"
+          variant="tertiary"
+          size="sm"
         >
           {actionLabel}
-        </Link>
+        </ButtonLink>
       </div>
     </div>
   );

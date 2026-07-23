@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 
+import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
 import { HEADER_SHARE_LOCALE, Mode, squareStyle, SubMode } from "./constants";
 import { ModalMenu } from "./HeaderShareMenu";
@@ -254,16 +255,20 @@ export function HeaderShareModalView({
         </div>
         {isLegacyAuth && (
           <div className="tw-flex tw-w-full tw-gap-3">
-            <button
+            <Button
               type="button"
-              className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800"
+              variant="secondary"
+              size="md"
+              className="tw-flex-1"
               onClick={onClose}
             >
               {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.cancel")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="tw-h-10 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-950 hover:tw-bg-white"
+              variant="primary"
+              size="md"
+              className="tw-flex-1"
               onClick={() => {
                 onClose();
                 terminalConnectionShareFailuresRef.current.clear();
@@ -273,7 +278,7 @@ export function HeaderShareModalView({
               }}
             >
               {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.update")}
-            </button>
+            </Button>
           </div>
         )}
       </div>
