@@ -12,7 +12,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import type { PublicClient } from "viem";
-import type { FlowState, TxEntry, TxState } from "./TransferModal";
+import type { FlowState, TxEntry, TxState } from "./TransferModal.types";
 
 function computeFlowTitle(
   total: number,

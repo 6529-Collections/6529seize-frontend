@@ -30,6 +30,17 @@ function createGoogleCalendarUrl(
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
+
+function escapeIcsText(value: string): string {
+  return value
+    .replaceAll("\\", "\\\\")
+    .replaceAll(";", "\\;")
+    .replaceAll(",", "\\,")
+    .replaceAll("\r\n", "\n")
+    .replaceAll("\r", "\n")
+    .replaceAll("\n", String.raw`\n`);
+}
+
 function createIcsDataUrl(
   startInstantUtc: Date,
   endInstantUtc: Date,
@@ -39,7 +50,8 @@ function createIcsDataUrl(
   const dtStart = ymdHmsUtc(startInstantUtc);
   const dtEnd = ymdHmsUtc(endInstantUtc);
   const uid = `meme-${dtStart}@6529.io`;
-  const escapedDescription = description.replaceAll("\n", String.raw`\n`);
+  const summary = escapeIcsText(`${title} Minting`);
+  const escapedDescription = escapeIcsText(description);
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -49,7 +61,7 @@ function createIcsDataUrl(
     `DTSTAMP:${ymdHmsUtc(new Date())}`,
     `DTSTART:${dtStart}`,
     `DTEND:${dtEnd}`,
-    `SUMMARY:${title} Minting`,
+    `SUMMARY:${summary}`,
     `DESCRIPTION:${escapedDescription}`,
     "END:VEVENT",
     "END:VCALENDAR",
