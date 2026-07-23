@@ -15,16 +15,14 @@ on:
       reuse_artifact_name: { type: string, required: false, default: "" }
       reuse_artifact_digest: { type: string, required: false, default: "" }
 
-permissions:
-  actions: read
-  contents: read
-
 run-name: Preflight frontend v2 train ${{ inputs.release_train_id }} [${{ inputs.operation_key }}]
 
 jobs:
   authorize:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Check out exact composed SHA
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -81,6 +79,8 @@ jobs:
     needs: authorize
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      actions: read
     steps:
       - name: Bind exact green PR artifact identity
         id: identity
@@ -182,6 +182,8 @@ jobs:
         shard: [lint, typecheck, inventory, tests-1, tests-2, tests-3, tests-4]
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: read
     steps:
       - name: Check out exact composed SHA
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -248,6 +250,8 @@ jobs:
         environment: [staging, production]
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: read
     env:
       NODE_ENV: production
       API_ENDPOINT: ${{ matrix.environment == 'production' && 'https://api.6529.io' || vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
@@ -321,6 +325,8 @@ jobs:
     needs: [authorize, quality, build]
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      actions: read
     steps:
       - name: Download exact Jest inventory evidence
         id: inventory_download

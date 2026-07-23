@@ -14,7 +14,7 @@
 import { HttpFile } from '../http/http';
 
 export class ReleaseBusV2DeployPlan {
-    'units': Set<string>;
+    'units': Array<string>;
     'edges': Array<Array<string>>;
 
     static readonly discriminator: string | undefined = undefined;
@@ -25,7 +25,7 @@ export class ReleaseBusV2DeployPlan {
         {
             "name": "units",
             "baseName": "units",
-            "type": "Set<string>",
+            "type": "Array<string>",
             "format": ""
         },
         {
