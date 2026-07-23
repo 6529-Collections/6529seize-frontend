@@ -10,10 +10,14 @@
   `false`. `STAGING` routes staging readiness through v2. `PRODUCTION` routes
   staging through v2 and requires a separate explicit exact-SHA production
   action after `STAGING_VALIDATED`.
+- While `OFF`, dispatch backend `Deploy a service` workflows one at a time and
+  wait for exact success before starting the next. Its shared concurrency can
+  cancel sibling service runs, including independent DAG-frontier units.
 - Stop an active v2 lane when `ALL` or that lane is paused. Paused controls in
   `OFF` intentionally disable v2 and do not block the documented manual route.
 - For coupled work, declare backend dependencies and preserve backend-before-
-  frontend ordering. Only independent backend DAG frontier units run together.
+  frontend ordering. Within v2, only independent backend DAG frontier units run
+  together.
 - `STAGING_DEPLOYED` is not validation. Do not mutate staging during manifest-
   bound E2E, and never infer production readiness from staging validation.
 - Never cancel another actor's workflow, force-push a shared ref, bypass exact

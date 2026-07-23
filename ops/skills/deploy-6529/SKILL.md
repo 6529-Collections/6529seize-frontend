@@ -58,7 +58,10 @@ and never publishes release notes.
 3. Re-fetch immediately before pushing. If a shared ref moved, recompute from
    the new head. Never force-push.
 4. Deploy required backend units in DAG order before merging/deploying dependent
-   frontend work to `1a-staging`.
+   frontend work to `1a-staging`. Dispatch exactly one backend `Deploy a
+   service` workflow at a time and wait for exact success before starting the
+   next; shared workflow concurrency can cancel sibling runs, even for
+   independent DAG-frontier units.
 5. Record exact deployed frontend/backend SHAs before E2E and freeze staging
    until E2E is terminal.
 6. Production requires explicit owner authorization and successful validation
