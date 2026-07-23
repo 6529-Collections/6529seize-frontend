@@ -172,10 +172,7 @@ function TDHHeader({ locale }: { readonly locale: SupportedLocale }) {
       className={`${EDITORIAL_GRID_CLASS} tw-pb-8 sm:tw-pb-12`}
     >
       <div className="lg:tw-sticky lg:tw-top-28">
-        <h1
-          className={SECTION_HEADING_CLASS}
-          id="tdh-page-heading"
-        >
+        <h1 className={SECTION_HEADING_CLASS} id="tdh-page-heading">
           {m(locale, "network.tdh.hero.title")}
         </h1>
       </div>

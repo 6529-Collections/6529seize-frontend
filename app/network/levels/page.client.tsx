@@ -31,7 +31,7 @@ export default function LevelsClient() {
 
   return (
     <main
-      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
+      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-text-iron-100`}
     >
       <div className="tw-w-full">
         <AboutContentsDropdown

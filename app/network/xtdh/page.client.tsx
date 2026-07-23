@@ -115,10 +115,9 @@ export default function XTDHMainPage() {
           >
             <p className="tw-m-0">
               A grant lets someone “give away” a portion of their xTDH produced
-              in the future to{" "}
-              <em className="tw-text-iron-200">*all or some*</em> tokens in an
-              ERC721 collection. If you own a token that has active grants, you
-              receive a portion of those grants every day.
+              in the future to <em className="tw-text-iron-200">all or some</em>{" "}
+              tokens in an ERC721 collection. If you own a token that has active
+              grants, you receive a portion of those grants every day.
             </p>
 
             <div className="tw-space-y-3 tw-pt-2">
@@ -153,7 +152,7 @@ export default function XTDHMainPage() {
             <p className="tw-m-0">
               You receive this amount{" "}
               <strong className="tw-font-medium tw-text-iron-100">
-                **only for the time you actually owned the token**
+                only for the time you actually owned the token
               </strong>
               , and only while the grant was active.
             </p>
