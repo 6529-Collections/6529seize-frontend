@@ -1,8 +1,55 @@
 # Staging and Production Deployment Bus
 
-Status: implemented behind rollout controls. The live API mode selects the
-release route; repository enforcement separately controls whether a manual
-route requires audited break glass.
+Status: Release Bus v1 rollback reference. Use
+[`simple-release-bus-v2.md`](./simple-release-bus-v2.md) for current routing and
+operations. V1 is disabled while Release Bus v2
+is implemented and proven. The v1 material below is retained only as rollback
+reference. Removal is tracked by branch `agent/simple-release-bus-v2-plan` at
+commit `0d8fb5e726279b4a80592b3dc7d4ec3db75065e9` and occurs only after the v2
+production cutover and rollback observation criteria pass.
+
+## Temporary manual-deployment protocol
+
+Do not register new candidates with Release Bus v1. Before any staging or
+production mutation, run:
+
+```bash
+./bin/6529 exec node ops/scripts/release-bus-status.mjs
+```
+
+Continue only when the helper reports `mode: OFF`. If it reports any other mode
+or cannot validate the response, wait and retry. Do not queue in v1 and do not
+use break glass merely to bypass the cutover.
+
+For every repository in the release set, require the
+`RELEASE_BUS_ENFORCEMENT` Actions variable to be absent or exactly `false`.
+The fresh `mode: OFF` result and enforcement result are one AND gate: both must
+pass. Stop on disagreement, `true`, any other value, or lookup failure.
+
+For each manual release:
+
+1. Fetch the exact remote target head and inspect active frontend and backend
+   staging/production workflows. Wait if another actor is mutating a shared
+   environment; never cancel another actor's workflow.
+2. Merge from the current remote target without force-pushing. Re-fetch
+   immediately before the push and recompute the merge if the target moved.
+3. For backend work, merge the development branch into current `1a-staging`,
+   then dispatch only the required units in dependency-DAG order. Independent
+   units may run concurrently only when their workflows use
+   `cancel-in-progress: false`.
+4. For frontend work, merge the development branch into current `1a-staging`;
+   the existing workflow deploys staging automatically. Coupled releases deploy
+   and verify the required backend units before changing frontend staging.
+5. Record the exact deployed frontend and backend SHAs before E2E. Freeze all
+   staging mutations until that E2E run is terminal.
+6. Require explicit owner authorization and successful staging validation of
+   the intended exact release set before production. Preserve dependency order,
+   re-fetch `main`, never cancel another production workflow, and do not publish
+   a release note manually.
+
+The v2 bus will replace this manual route only after its live acceptance
+criteria pass. Staging validation will not automatically schedule production;
+production readiness remains an explicit action for an exact validated SHA.
 
 ## What changes for developers
 
@@ -10,7 +57,7 @@ The live rollout mode is authoritative. The canonical agent preflight in both
 repositories is:
 
 ```bash
-node ops/scripts/release-bus-status.mjs
+./bin/6529 exec node ops/scripts/release-bus-status.mjs
 ```
 
 The helper requires an installed, authenticated `gh`, obtains its token
@@ -42,6 +89,9 @@ controls all stop the release before mutation. Failure never means `OFF` and
 never means “bus enabled.” Agents must not fall back to AWS CLI, queue a
 candidate, merge, or deploy while status is unknown.
 
+> **Suspended during v2 maintenance:** only the `OFF` row below is authorized.
+> The other rows and all v1 readiness behavior are rollback reference only.
+
 | Live mode    | Staging behavior                                                 | Production behavior                                                         |
 | ------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `OFF`        | Use the legacy manual path; do not queue in the bus              | Use the legacy manual path                                                  |
@@ -58,7 +108,9 @@ repository with authenticated `gh`. `OFF` or `SHADOW` combined with enabled
 enforcement is a configuration mismatch and requires an operator. If the
 manual route is enforced, only an organization owner or active
 `release-bus-operators` member may continue, with a non-empty audited
-break-glass reason. Never bypass a blocked workflow.
+break-glass reason. This paragraph is v1 rollback reference only during the v2
+maintenance window; it cannot bypass the authoritative `OFF` AND enforcement
+gate above. Never bypass a blocked workflow.
 
 Developers and agents no longer need to merge feature branches into
 `1a-staging`, dispatch staging deployments, merge source PRs to `main`, or
@@ -71,7 +123,8 @@ When the table selects a bus route, use the Release Bus panel at
 2. Resolve and review its exact 40-character head SHA.
 3. Declare cross-repository candidate dependencies. Backend candidates also
    declare allowlisted deploy units and ordering edges.
-4. Mark that exact SHA ready for staging.
+4. If this frontend candidate must not reuse an exact-base success, select
+   **Fresh base canary required**, then mark the exact SHA ready for staging.
 5. Wait for the bus to compose, deploy, and validate the staging train.
 6. After the same candidate shows `STAGING_VALIDATED`, separately mark it ready
    for production.
@@ -92,6 +145,56 @@ Submitting live readiness creates a pending `Release Bus` commit status. A
 successful validation completes it, and cancelling a candidate with an
 existing live status completes it as `release readiness cancelled` so source
 PRs are not left with a permanent pending status.
+
+## Reading an active train
+
+The active-train card on `/deploy/ui/bus` is authoritative for train progress.
+It shows the current phase, elapsed time, exact operation, expected SHA,
+included candidates, worker heartbeat, last meaningful event, and the durable
+event timeline. When the operation is a GitHub Actions run, it also shows the
+run ID, a direct allowlisted link, and the active or failed job and step.
+
+The train phases are explicit: `COLLECTING`, `FROZEN`,
+`BASE_CANARY_RUNNING`, `COMPOSING`, `PREFLIGHTING`, `ISOLATING_FAILURE`,
+`DEPLOYING_BACKEND`, `DEPLOYING_FRONTEND`, `E2E_RUNNING`,
+`VALIDATING_STAGING`, `MERGING_PRODUCTION`, `VALIDATING_PRODUCTION`,
+`SYNCING_STAGING`, and the terminal or control states `PAUSED`, `COMPLETED`,
+`FAILED`, `ROLLED_BACK`, and `CANCELLED`. `FROZEN` means only that the
+candidate set and base SHAs are immutable. It must never be used as a generic
+label for an active canary, workflow, deployment, or lease wait.
+
+Every worker `WAIT` includes both `wait_reason` and `current_operation` (which
+is explicitly `null` during a bounded transition with no operation yet). The
+reason states exactly what is awaited, for example a GitHub workflow, a
+non-workflow operation, an external deployment, a paused control, or a
+specific lease. Lease owner, heartbeat, and expiry appear only after an actual
+lease acquisition guard fails; an active workflow is never diagnosed as a
+lease failure.
+
+Long-running and stalled are different states. Recent workflow/job/step
+progress remains `RUNNING`. A base canary, preflight, or isolation workflow is
+`STALLED` only after 60 minutes without progress; frontend deployment after 45
+minutes; backend deployment or E2E after 30 minutes; and composition, merge,
+or staging synchronization after 15 minutes. A stalled card names the
+deterministic reason, such as workflow reconciliation stale, workflow not
+discovered, or no recent workflow progress. Do not retry while GitHub still
+shows a healthy active run.
+
+During a base canary, the incident card says: “Frontend base canary running
+for staging SHA … Candidates have not been tested yet.” A verified transient
+dependency-infrastructure failure instead says that the same immutable
+operation will retry automatically. The candidates remain attached and
+STAGING remains running; initial retries are prompt and a continued outage uses
+bounded 5/10-minute backoff. After five failed workflow attempts, the failed
+train becomes terminal and its immutable candidates are automatically returned
+to the still-running lane for a later fresh train. A deterministic source
+failure still says:
+“Existing staging base failed … No candidate was blamed. STAGING was paused.”
+It also lists the failed gate/job/step, exact failing Jest suite/test when
+reported, candidates returned or quarantined, and the recommended recovery.
+For a deterministic base failure, repair and validate the existing staging
+base, deploy that isolated repair, verify it, and only then resume the lane. Do
+not change, cancel, or blame queued candidates to work around a base failure.
 
 ## How a train departs
 
@@ -128,13 +231,32 @@ It then:
 - runs the shared frontend validation/build gate against the exact fresh
   `1a-staging` base before composing any frontend candidate, so a broken base or
   control-plane command cannot be blamed on candidate code;
-- runs immutable preflight builds;
+- runs parallel fail-closed frontend preflight lint, typecheck, complete Jest
+  inventory/shards, and exactly one immutable staging build, with an independently reversible
+  `1|2|4` shard count and bounded Jest workers;
 - deploys backend units in service-DAG order;
 - deploys frontend after backend succeeds;
 - runs the existing staging E2E packs against the exact train, including for a
   backend-only train by using the currently deployed staging frontend;
 - records workflow, SHA, artifact, service, and E2E evidence;
 - fast-forwards `1a-staging` only after all required validation passes.
+
+A reused base-canary result is visible as reused evidence, with a link to the
+original train and Actions run. It proves only the unchanged pre-existing base
+under the same gate fingerprint. Candidate composition, preflight, deployment,
+and E2E still run fresh. The operator force-fresh choice is immutable after
+readiness; cancel and resubmit the candidate to change it.
+
+After a successful frontend staging train, the bus promotes the exact final
+`1a-staging` SHA into reusable base evidence only when that train's fresh
+preflight is gate-equivalent to the base canary and the immutable staging
+deployment plus staging E2E both succeeded. The next serial staging train may
+therefore skip a redundant base-canary workflow for that exact SHA and exact
+current gate contract. The dashboard labels this as **CARRIED_FORWARD_REUSED**
+and shows the source train, workflow run, artifact digest, and proof digest;
+fresh execution remains separately labelled. Any ref, workflow, tooling,
+runtime, package-manager, mode, shard, inventory, build, deployment, E2E, age,
+or provenance mismatch falls back to a fresh base canary.
 
 Backend units declared `production-only` in the deploy registry are built and
 tested during preflight but are not runtime-deployed to staging. Their staging
@@ -150,8 +272,8 @@ candidates are requeued against the new base instead of overwriting it.
 
 Only an exact SHA with durable staging validation can be marked ready for
 production. A production train starts from fresh `main` in each represented
-repository and produces both staging-configured and production-configured
-immutable artifacts.
+repository and compiles exactly one production-configured immutable artifact,
+which is the artifact deployed after the production gates pass.
 
 The bus restages and revalidates the exact combined production release set. It
 does not treat older candidate-level staging evidence as proof for a newly
@@ -186,8 +308,8 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   bus publishes the conflict-free candidate prefix (which can be empty when
   the first candidate conflicts), verifies candidate ancestry, quarantines the
   first omitted immutable candidate, and returns the others to the queue.
-  Deterministic isolation still works and its raw log remains the diagnostic
-  source of truth.
+  Deterministic isolation and failure attribution still work; structured gate
+  evidence remains the operator source of truth.
 - Isolation uses non-secret placeholder analytics and Sentry values. It helps
   diagnose deterministic candidate failures but does not replace the real
   preflight build or prove behavior that depends on credential value formats.
@@ -201,8 +323,13 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   Release Bus gate. Pull-request CI executes the gate's regression contract
   whenever that gate or a Release Bus workflow changes. Before candidate
   composition, the bus also runs the full gate against the exact recorded
-  frontend base SHA. A base-canary failure requeues every candidate and pauses
-  the lane without quarantining a developer branch.
+  frontend base SHA. A deterministic or unknown base-canary failure requeues
+  every candidate and pauses the lane without quarantining a developer branch.
+  Authenticated transient dependency-infrastructure evidence retries the exact
+  operation without pausing or detaching candidates. Retries are capped at five
+  workflow attempts; exhaustion terminates only that train, requeues its
+  candidates, and leaves the lane running. The same behavior applies to
+  frontend preflight infrastructure failures before candidate isolation.
 - Ambiguous external calls are reconciled by exact operation key before any
   retry. A timeout is not treated as proof that an operation did not happen.
 - Before production mutation, an unexpected target-branch move safely cancels
@@ -213,6 +340,9 @@ publishes release notes nor invokes the legacy GelatoBot skill.
   deploy registry explicitly declares and implements a safe rollback adapter.
 
 ## Pause and break glass
+
+> **Suspended during v2 maintenance:** the break-glass path in this section is
+> v1 rollback reference only and cannot bypass the temporary manual protocol.
 
 The operator controls are on `/deploy/ui/bus`. Members of the configured
 `release-bus-operators` GitHub team, plus organization owners, may pause or

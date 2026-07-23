@@ -241,9 +241,25 @@ jobs:
         run: |
           set -euo pipefail
           if git diff --quiet "origin/${BASE_REF}...HEAD" -- \
+            bin/6529 \
+            jest.config.js \
+            jest.setup.js \
+            package.json \
+            pnpm-lock.yaml \
             .github/workflows/release-bus-*.yml \
+            scripts/release-bus-authorize-operation.sh \
             scripts/release-bus-frontend-gate.sh \
-            __tests__/scripts/release-bus-frontend-gate.test.ts; then
+            scripts/release-bus-gate-evidence.cjs \
+            scripts/release-bus-install-dependencies.cjs \
+            scripts/release-bus-preflight-evidence.cjs \
+            scripts/release-bus-summarize-jest.mjs \
+            scripts/release-bus-report-progress.mjs \
+            __tests__/scripts/release-bus-frontend-gate.test.ts \
+            __tests__/scripts/release-bus-gate-evidence.test.ts \
+            __tests__/scripts/release-bus-install-dependencies.test.ts \
+            __tests__/scripts/release-bus-jest-reporting.test.ts \
+            __tests__/scripts/release-bus-preflight-evidence.test.ts \
+            __tests__/scripts/release-bus-shard-injection.test.ts; then
             echo "Release Bus gate files are unchanged."
             exit 0
           fi
@@ -390,11 +406,85 @@ jobs:
             ${{ runner.os }}-node22-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-
             ${{ runner.os }}-node22-nextjs-
 
-      - name: Build app
+      - name: Build production profile
         if: needs.plan.outputs.build_required == 'true'
         env:
           NODE_ENV: "production"
         run: ./bin/6529 run build
+
+      - name: Package exact PR merge-tree production profile
+        if: needs.plan.outputs.build_required == 'true'
+        env:
+          EXPECTED_MERGE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
+          profile=release-bus-v2-pr-artifact/profiles/production
+          mkdir -p "$profile/target/_next" "$profile/bundle/.next"
+          cp -r .next/standalone/. "$profile/bundle/"
+          cp -r .next/static "$profile/target/_next/"
+          cp -r .next/static "$profile/bundle/.next/"
+          cp -r public Procfile .ebextensions "$profile/bundle/"
+          if [ -d .platform ]; then cp -r .platform "$profile/bundle/"; fi
+          find "$profile/bundle" -xtype l -delete
+          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
+            if [ -f ".next/$file" ]; then cp ".next/$file" "$profile/bundle/.next/$file"; fi
+          done
+          (cd "$profile/bundle" && zip -yr ../target/package.zip .)
+
+      - name: Build staging profile for exact artifact reuse
+        if: needs.plan.outputs.build_required == 'true'
+        env:
+          NODE_ENV: production
+          API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
+          WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
+          ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
+          BASE_ENDPOINT: https://staging.6529.io
+          NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
+          ASSETS_FROM_S3: "false"
+          ANNOUNCED_VERSION_ENDPOINT: ""
+        run: |
+          unset ANNOUNCED_VERSION_ENDPOINT
+          rm -rf .next
+          ./bin/6529 run base-build
+
+      - name: Package exact PR merge-tree staging profile
+        if: needs.plan.outputs.build_required == 'true'
+        env:
+          EXPECTED_MERGE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
+          profile=release-bus-v2-pr-artifact/profiles/staging
+          mkdir -p "$profile/target/_next" "$profile/bundle/.next"
+          cp -r .next/standalone/. "$profile/bundle/"
+          cp -r .next/static "$profile/target/_next/"
+          cp -r .next/static "$profile/bundle/.next/"
+          cp -r public Procfile .ebextensions "$profile/bundle/"
+          if [ -d .platform ]; then cp -r .platform "$profile/bundle/"; fi
+          find "$profile/bundle" -xtype l -delete
+          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
+            if [ -f ".next/$file" ]; then cp ".next/$file" "$profile/bundle/.next/$file"; fi
+          done
+          (cd "$profile/bundle" && zip -yr ../target/package.zip .)
+          staging_digest="$(sha256sum release-bus-v2-pr-artifact/profiles/staging/target/package.zip | cut -d' ' -f1)"
+          production_digest="$(sha256sum release-bus-v2-pr-artifact/profiles/production/target/package.zip | cut -d' ' -f1)"
+          jq -n --arg source_sha "$EXPECTED_MERGE_SHA" --arg staging_digest "$staging_digest" --arg production_digest "$production_digest" \
+            '{schema_version:2,repository:"frontend",source_sha:$source_sha,environment:"dual",profiles:{staging:{package_sha256:$staging_digest},production:{package_sha256:$production_digest}}}' \
+            > release-bus-v2-pr-artifact/manifest.json
+          (cd release-bus-v2-pr-artifact && find . -type f ! -path ./SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+
+      - name: Upload exact PR merge-tree dual-profile artifact
+        if: needs.plan.outputs.build_required == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-bus-v2-pr-${{ github.sha }}
+          path: release-bus-v2-pr-artifact
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Save Next.js build cache
         if: needs.plan.outputs.build_required == 'true' && steps.nextjs_build_cache.outputs.cache-hit != 'true'
@@ -410,12 +500,16 @@ jobs:
       - name: Run small Playwright smoke pack
         if: needs.plan.outputs.playwright_smoke_required == 'true'
         env:
+          # Do not reuse the production build output or another Playwright
+          # server's Turbopack route state.
+          NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
       - name: Run critical route-shell Playwright pack
         if: needs.plan.outputs.playwright_critical_shell_required == 'true'
         env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:critical-shell
 

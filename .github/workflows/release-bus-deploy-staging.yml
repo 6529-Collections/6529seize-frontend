@@ -9,6 +9,15 @@ on:
       source_ref: { type: string, required: true }
       expected_sha: { type: string, required: true }
       artifact_run_id: { type: string, required: true }
+      artifact_train_id: { type: string, required: false, default: "" }
+      artifact_digest: { type: string, required: true }
+      artifact_environment:
+        {
+          type: choice,
+          required: false,
+          default: staging,
+          options: [staging, production],
+        }
 
 permissions:
   actions: read
@@ -23,6 +32,7 @@ concurrency:
 env:
   AWS_REGION: ${{ vars.STAGING_AWS_REGION || 'eu-west-1' }}
   ARTIFACT_BUCKET: ${{ vars.RELEASE_BUS_ARTIFACT_BUCKET || 'seize-web' }}
+  ARTIFACT_BUCKET_REGION: ${{ vars.RELEASE_BUS_ARTIFACT_BUCKET_REGION || 'us-east-1' }}
   STAGING_REPO_DIR: ${{ vars.STAGING_REPO_DIR || '/home/ubuntu/6529seize-frontend' }}
   STAGING_RUN_AS: ${{ vars.STAGING_RUN_AS || 'ubuntu' }}
 
@@ -33,6 +43,9 @@ jobs:
     environment: staging
     env:
       ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+      ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
+      ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+      EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
       EXPECTED_SHA: ${{ inputs.expected_sha }}
       OPERATION_KEY: ${{ inputs.operation_key }}
       SOURCE_REF: ${{ inputs.source_ref }}
@@ -42,6 +55,9 @@ jobs:
       - name: Validate dispatch inputs before using credentials
         env:
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
+          ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+          EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           SOURCE_REF: ${{ inputs.source_ref }}
@@ -51,11 +67,27 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$ARTIFACT_TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$EXPECTED_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          test "$ARTIFACT_ENVIRONMENT" = staging
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
+      - name: Authorize immutable Release Bus operation
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg artifact_run_id "$ARTIFACT_RUN_ID" --arg expected_sha "$EXPECTED_SHA" --arg artifact_digest "$EXPECTED_ARTIFACT_DIGEST" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:$artifact_run_id,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
       - name: Check out exact train source
+        id: source
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.expected_sha }}
@@ -66,17 +98,15 @@ jobs:
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Download immutable preflight artifact
+        id: artifact-download
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           github-token: ${{ github.token }}
           run-id: ${{ inputs.artifact_run_id }}
-          name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-staging
+          name: release-bus-frontend-${{ inputs.artifact_train_id || inputs.release_train_id }}-r${{ inputs.release_train_revision }}
           path: release-bus-artifact
       - name: Verify and bind immutable artifact
         id: artifact
-        env:
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
         run: |
           set -euo pipefail
           cd release-bus-artifact
@@ -85,27 +115,19 @@ jobs:
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           jq -e \
-            --arg train_id "$TRAIN_ID" \
+            --arg train_id "$ARTIFACT_TRAIN_ID" \
             --arg source_sha "$EXPECTED_SHA" \
-            '.train_id == $train_id and .source_sha == $source_sha and .environment == "staging"' \
+            '.train_id == $train_id and .source_sha == $source_sha and .environment == "dual" and (.profiles.staging.package_sha256 | test("^[a-f0-9]{64}$"))' \
             manifest.json >/dev/null
           sha256sum -c SHA256SUMS
-          package_digest="$(sha256sum target/package.zip | cut -d' ' -f1)"
+          artifact_digest="$(sha256sum SHA256SUMS | cut -d' ' -f1)"
+          test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"
+          package_digest="$(sha256sum profiles/staging/target/package.zip | cut -d' ' -f1)"
+          test "$package_digest" = "$(jq -r '.profiles.staging.package_sha256' manifest.json)"
+          echo "artifact_digest=$artifact_digest" >> "$GITHUB_OUTPUT"
           echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
-          payload="$(jq -n \
-            --arg train_id "$TRAIN_ID" \
-            --arg operation_key "$OPERATION_KEY" \
-            --arg workflow_run_id "$GITHUB_RUN_ID" \
-            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
-            --arg expected_sha "$EXPECTED_SHA" \
-            --arg artifact_digest "$package_digest" \
-            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:$artifact_run_id,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
       - name: Configure AWS credentials
+        id: aws-credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -121,10 +143,14 @@ jobs:
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$PACKAGE_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$ARTIFACT_BUCKET_REGION" =~ ^[a-z]{2}(-gov)?-[a-z]+-[1-9][0-9]*$ ]]
           object_key="release-bus/${TRAIN_ID}/r${TRAIN_REVISION}/staging/frontend/${EXPECTED_SHA}.zip"
-          aws s3 cp release-bus-artifact/target/package.zip "s3://${ARTIFACT_BUCKET}/${object_key}" \
+          aws s3 cp release-bus-artifact/profiles/staging/target/package.zip "s3://${ARTIFACT_BUCKET}/${object_key}" \
+            --region "$ARTIFACT_BUCKET_REGION" \
             --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
-          url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" --expires-in 7200)"
+          url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" \
+            --region "$ARTIFACT_BUCKET_REGION" \
+            --expires-in 7200)"
           echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Deploy immutable bundle through SSM
         id: send-command
@@ -149,9 +175,120 @@ jobs:
           release_root="$REPO_DIR/.release-bus"
           release_dir="$release_root/releases/$EXPECTED_SHA"
           current_link="$release_root/current"
-          previous_target="$(readlink "$current_link" 2>/dev/null || true)"
+          previous_target="$(readlink -f "$current_link" 2>/dev/null || true)"
+          pm2_json="$(sudo -H -u "$RUN_AS" pm2 jlist)"
+          process_count="$(jq '[.[] | select(.name == "6529seize")] | length' <<<"$pm2_json")"
+          process_kind=''
+          if [ "$process_count" -eq 0 ]; then
+            process_kind='absent'
+          elif [ "$process_count" -eq 1 ]; then
+            process_shape="$(jq -c '[.[] | select(.name == "6529seize")][0] | {
+              exec_mode: .pm2_env.exec_mode,
+              pm_exec_path: .pm2_env.pm_exec_path,
+              pm_cwd: .pm2_env.pm_cwd,
+              args: .pm2_env.args
+            }' <<<"$pm2_json")"
+            if jq -e --arg repo_dir "$REPO_DIR" '
+              .exec_mode == "fork_mode" and
+              .pm_exec_path == "/usr/bin/bash" and
+              .pm_cwd == $repo_dir and
+              .args == ["-lc", ("cd \"" + $repo_dir + "\" && ./bin/6529 run start:standalone")]
+            ' <<<"$process_shape" >/dev/null; then
+              # One historical staging process predates the immutable release layout.
+              # Only this exact tuple may take the one-time replacement path below.
+              process_kind='legacy'
+            elif [ -n "$previous_target" ] && jq -e \
+              --arg release_root "$release_root" \
+              --arg previous_target "$previous_target" '
+              .exec_mode == "cluster_mode" and
+              (.args == null or .args == []) and
+              (.pm_cwd == ($release_root + "/current") or .pm_cwd == $previous_target) and
+              (.pm_exec_path == ($release_root + "/current/server.js") or
+                .pm_exec_path == ($previous_target + "/server.js"))
+            ' <<<"$process_shape" >/dev/null; then
+              process_kind='managed'
+            else
+              echo 'Refusing to replace an unrecognized 6529seize PM2 process.' >&2
+              exit 1
+            fi
+          else
+            echo 'Refusing to deploy with duplicate 6529seize PM2 processes.' >&2
+            exit 1
+          fi
+
+          restore_previous_link() {
+            if [ -n "$previous_target" ]; then
+              ln -sfn "$previous_target" "$current_link" || return 1
+            else
+              rm -f "$current_link" || return 1
+            fi
+          }
+
+          read_local_version() {
+            response="$(curl --fail --silent --show-error --max-time 10 \
+              http://127.0.0.1:3001/api/version 2>/dev/null || true)"
+            jq -r '
+              select(.stale == false) |
+              .version | select(type == "string" and test("^[a-f0-9]{40}$"))
+            ' <<<"$response" 2>/dev/null || true
+          }
+
+          wait_for_local_version() {
+            target_version="$1"
+            for attempt in {1..24}; do
+              actual_version="$(read_local_version)"
+              if [ "$actual_version" = "$target_version" ]; then
+                return 0
+              fi
+              sleep 5 || return 1
+            done
+            return 1
+          }
+
+          delete_6529_process() {
+            sudo -H -u "$RUN_AS" pm2 delete 6529seize >/dev/null 2>&1 || true
+            remaining_count="$(sudo -H -u "$RUN_AS" pm2 jlist | \
+              jq '[.[] | select(.name == "6529seize")] | length')" || return 1
+            [ "$remaining_count" -eq 0 ] || return 1
+          }
+
+          previous_local_version=''
+          if [ "$process_kind" != absent ]; then
+            previous_local_version="$(read_local_version)"
+            [[ "$previous_local_version" =~ ^[a-f0-9]{40}$ ]] || {
+              echo 'Refusing to deploy without an exact healthy pre-mutation local version.' >&2
+              exit 1
+            }
+          fi
+
+          restore_legacy_process() {
+            delete_6529_process || return 1
+            restore_previous_link || return 1
+            sudo -H -u "$RUN_AS" pm2 start bash --name=6529seize -- \
+              -lc "cd \"$REPO_DIR\" && ./bin/6529 run start:standalone" || return 1
+            wait_for_local_version "$previous_local_version" || return 1
+            sudo -H -u "$RUN_AS" pm2 save || return 1
+          }
+
+          rollback_managed_process() {
+            restore_previous_link || return 1
+            if [ -n "$previous_target" ]; then
+              sudo -H -u "$RUN_AS" pm2 startOrReload \
+                "$release_root/ecosystem.config.cjs" \
+                --only 6529seize --update-env || return 1
+              wait_for_local_version "$previous_local_version" || return 1
+            else
+              delete_6529_process || return 1
+            fi
+            sudo -H -u "$RUN_AS" pm2 save || return 1
+          }
+
           install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"
-          curl --fail --silent --show-error --location "$ARTIFACT_URL" -o "$release_dir/package.zip"
+          http_status="$(curl --silent --show-error --proto '=https' \
+            --output "$release_dir/package.zip" \
+            --write-out '%{http_code}' \
+            "$ARTIFACT_URL")"
+          test "$http_status" = 200
           echo "$EXPECTED_DIGEST  $release_dir/package.zip" | sha256sum -c -
           rm -rf "$release_dir/app"
           install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir/app"
@@ -172,18 +309,46 @@ jobs:
           };
           PM2_CONFIG
           chown "$RUN_AS:$RUN_AS" "$release_root/ecosystem.config.cjs"
-          if ! sudo -H -u "$RUN_AS" pm2 startOrReload "$release_root/ecosystem.config.cjs" --only 6529seize --update-env; then
-            if [ -n "$previous_target" ]; then
-              ln -sfn "$previous_target" "$current_link"
-              if ! sudo -H -u "$RUN_AS" pm2 startOrReload "$release_root/ecosystem.config.cjs" --only 6529seize --update-env; then
+
+          if [ "$process_kind" = legacy ]; then
+            # Future managed releases stay on startOrReload. This bounded replacement
+            # is reserved for migrating the exact legacy fork detected above.
+            if ! delete_6529_process; then
+              echo 'Refusing to migrate because the legacy process could not be removed.' >&2
+              exit 1
+            fi
+            if ! sudo -H -u "$RUN_AS" pm2 start \
+              "$release_root/ecosystem.config.cjs" --only 6529seize; then
+              if ! restore_legacy_process; then
+                echo 'CRITICAL: staging migration and legacy rollback both failed.' >&2
+                exit 2
+              fi
+              echo 'Staging migration failed; the known legacy process was restored.' >&2
+              exit 1
+            fi
+          else
+            if ! sudo -H -u "$RUN_AS" pm2 startOrReload \
+              "$release_root/ecosystem.config.cjs" --only 6529seize --update-env; then
+              if ! rollback_managed_process; then
                 echo 'CRITICAL: staging deploy and rollback reload both failed.' >&2
                 exit 2
               fi
-            else
-              rm -f "$current_link"
-              sudo -H -u "$RUN_AS" pm2 delete 6529seize || true
-              echo 'Staging deploy failed and no prior release exists to restore.' >&2
+              echo 'Staging deploy failed; the prior managed release was restored.' >&2
+              exit 1
             fi
+          fi
+
+          if ! wait_for_local_version "$EXPECTED_SHA"; then
+            if [ "$process_kind" = legacy ]; then
+              if ! restore_legacy_process; then
+                echo 'CRITICAL: exact-version check and legacy rollback both failed.' >&2
+                exit 2
+              fi
+            elif ! rollback_managed_process; then
+              echo 'CRITICAL: exact-version check and managed rollback both failed.' >&2
+              exit 2
+            fi
+            echo 'Instance-local exact-version verification failed; the prior process was restored.' >&2
             exit 1
           fi
           sudo -H -u "$RUN_AS" pm2 save
@@ -204,6 +369,7 @@ jobs:
             --output text)"
           echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
       - name: Wait for SSM deployment
+        id: deployment
         env:
           COMMAND_ID: ${{ steps.send-command.outputs.command_id }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
@@ -222,6 +388,7 @@ jobs:
           aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" --query StandardErrorContent --output text || true
           test "$terminal" = Success
       - name: Verify exact staging version
+        id: version
         env:
           STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
         run: |
@@ -234,6 +401,7 @@ jobs:
             --timeout-ms 10000 \
             --output deployment-version-evidence.json
       - name: Upload deployment evidence
+        id: evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -241,3 +409,40 @@ jobs:
           path: deployment-version-evidence.json
           if-no-files-found: ignore
           retention-days: 90
+      - name: Report structured Release Bus deployment result
+        if: always()
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          JOB_STATUS: ${{ job.status }}
+          SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          DOWNLOAD_OUTCOME: ${{ steps.artifact-download.outcome }}
+          ARTIFACT_OUTCOME: ${{ steps.artifact.outcome }}
+          AWS_OUTCOME: ${{ steps.aws-credentials.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+        run: |
+          set -euo pipefail
+          status=SUCCEEDED
+          failure_class=null
+          failure_phase=null
+          retryable=false
+          if [ "$JOB_STATUS" != success ]; then
+            status=FAILED
+            failure_class=DEPLOYMENT
+            failure_phase=staging_deploy
+            retryable=true
+            if [ "$SOURCE_OUTCOME" = failure ] || [ "$DOWNLOAD_OUTCOME" = failure ] || [ "$EVIDENCE_OUTCOME" = failure ]; then
+              failure_class=INFRASTRUCTURE
+              failure_phase=artifact_transport
+              retryable=true
+            elif [ "$ARTIFACT_OUTCOME" = failure ] || [ "$AWS_OUTCOME" = failure ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=deployment_identity_or_credentials
+            fi
+          fi
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:null,stages:[],jest:null,backend_evidence:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"

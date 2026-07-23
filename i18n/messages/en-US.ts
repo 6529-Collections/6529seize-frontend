@@ -16,6 +16,8 @@ import {
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
+import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
+import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -183,6 +185,24 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
+  "grant.searchPlaceholder": "Category to grant REP for",
+  "grant.minimumCharacters": "Type at least {min} characters.",
+  "grant.maximumCharacters": "Type at most {max} characters.",
+  "grant.searching": "Finding existing categories...",
+  "grant.submissionBadge": "Counts for submissions",
+  "grant.submissionHint":
+    "Memes submissions require {amount} REP in {category}.",
+  "grant.submissionLookalikeInfo":
+    '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
+  "grant.availableRep": "Your available REP: {amount}",
+  "grant.assignedRep": "Your REP assigned to {name}: {amount}",
+  "grant.actions.grant": "Grant REP",
+  "grant.actions.cancel": "Cancel",
+  "grant.toast.updated": "REP updated.",
+  "grant.toast.updateFailed": "Couldn't update this REP rating.",
+  "grant.toast.tryAgain": "Please try again.",
+  "grant.toast.loginRequired": "Log in to continue.",
+  "grant.errors.generic": "Couldn't complete this request. Please try again.",
   "suggested.loading": "Loading active REP categories",
   "suggested.error": "Could not load active REP categories.",
   "suggested.empty": "No active REP categories found yet.",
@@ -350,6 +370,14 @@ const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   appSections: "App sections",
   loadingSections: "Loading wave sections",
   fallbackCuration: "Curation",
+} as const);
+
+const MY_STREAM_CURATION_MESSAGES = objectMessages("waves.myStream.curation", {
+  remove: "Remove",
+  removing: "Removing",
+  removeAriaLabel: "Remove drop from this curation",
+  removingAriaLabel: "Removing drop from this curation",
+  removeTitle: "Remove from curation",
 } as const);
 
 const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
@@ -2167,6 +2195,8 @@ export const EN_US_MESSAGES = {
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
+  ...networkMetricsMessages,
+  ...networkTdhMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
@@ -2182,6 +2212,7 @@ export const EN_US_MESSAGES = {
   ...NAVIGATION_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
+  ...MY_STREAM_CURATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,

@@ -13,7 +13,11 @@ import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 import { type QueryClient } from "@tanstack/react-query";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
-import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import {
+  reconcileAttachmentStatusUpdate,
+  reconcileFinalizedDropAttachments,
+  updateDropInCachedDrops,
+} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
 
 const HELP_BOT_HANDLE = "help6529";
@@ -56,21 +60,16 @@ function replaceAttachmentInPart(
   part: ApiDropPart,
   attachment: ApiAttachment
 ): ApiDropPart {
-  const attachments = part.attachments;
-  const hasAttachment = attachments.some(
-    (item) => item.attachment_id === attachment.attachment_id
+  const attachments = part.attachments.map((item) =>
+    item.attachment_id === attachment.attachment_id
+      ? reconcileAttachmentStatusUpdate(item, attachment)
+      : item
+  );
+  const changed = attachments.some(
+    (item, index) => item !== part.attachments[index]
   );
 
-  if (!hasAttachment) {
-    return part;
-  }
-
-  return {
-    ...part,
-    attachments: attachments.map((item) =>
-      item.attachment_id === attachment.attachment_id ? attachment : item
-    ),
-  };
+  return changed ? { ...part, attachments } : part;
 }
 
 const getIncomingWaveId = (drop: ApiDrop): string | null => {
@@ -268,14 +267,24 @@ const buildOptimisticDrop = ({
   readonly options: ProcessIncomingDropOptions;
 }): ExtendedDrop => {
   const preferExistingPollVote = options.preferExistingPollVote;
-  let reconciledDrop = drop;
+  let reconciledDrop =
+    existingDrop === null
+      ? drop
+      : reconcileFinalizedDropAttachments(drop, existingDrop);
   if (existingDrop !== null && preferExistingPollVote === undefined) {
-    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop);
+    reconciledDrop = reconcileDropAuthenticatedPollVote(
+      reconciledDrop,
+      existingDrop
+    );
   }
   if (existingDrop !== null && preferExistingPollVote !== undefined) {
-    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop, {
-      preferExistingVote: preferExistingPollVote,
-    });
+    reconciledDrop = reconcileDropAuthenticatedPollVote(
+      reconciledDrop,
+      existingDrop,
+      {
+        preferExistingVote: preferExistingPollVote,
+      }
+    );
   }
 
   return {

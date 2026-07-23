@@ -9,6 +9,15 @@ on:
       source_ref: { type: string, required: true }
       expected_sha: { type: string, required: true }
       artifact_run_id: { type: string, required: true }
+      artifact_train_id: { type: string, required: false, default: "" }
+      artifact_digest: { type: string, required: true }
+      artifact_environment:
+        {
+          type: choice,
+          required: false,
+          default: production,
+          options: [staging, production],
+        }
 
 permissions:
   actions: read
@@ -35,6 +44,9 @@ jobs:
     environment: production
     env:
       ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+      ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
+      ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+      EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
       EXPECTED_SHA: ${{ inputs.expected_sha }}
       OPERATION_KEY: ${{ inputs.operation_key }}
       SOURCE_REF: ${{ inputs.source_ref }}
@@ -44,6 +56,9 @@ jobs:
       - name: Validate dispatch inputs before using credentials
         env:
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
+          ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+          EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           SOURCE_REF: ${{ inputs.source_ref }}
@@ -53,11 +68,27 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$ARTIFACT_TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$EXPECTED_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          test "$ARTIFACT_ENVIRONMENT" = production
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
+      - name: Authorize immutable Release Bus operation
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg artifact_run_id "$ARTIFACT_RUN_ID" --arg expected_sha "$EXPECTED_SHA" --arg artifact_digest "$EXPECTED_ARTIFACT_DIGEST" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:$artifact_run_id,repository:"frontend",environment:"prod",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
       - name: Check out exact merged train SHA
+        id: source
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.expected_sha }}
@@ -71,17 +102,15 @@ jobs:
           git fetch --no-tags origin main
           test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
       - name: Download immutable preflight artifact
+        id: artifact-download
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           github-token: ${{ github.token }}
           run-id: ${{ inputs.artifact_run_id }}
-          name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-production
+          name: release-bus-frontend-${{ inputs.artifact_train_id || inputs.release_train_id }}-r${{ inputs.release_train_revision }}
           path: release-bus-artifact
       - name: Verify and bind immutable artifact
         id: artifact
-        env:
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
         run: |
           set -euo pipefail
           cd release-bus-artifact
@@ -90,34 +119,26 @@ jobs:
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           jq -e \
-            --arg train_id "$TRAIN_ID" \
+            --arg train_id "$ARTIFACT_TRAIN_ID" \
             --arg source_sha "$EXPECTED_SHA" \
-            '.train_id == $train_id and .source_sha == $source_sha and .environment == "production"' \
+            '.train_id == $train_id and .source_sha == $source_sha and .environment == "dual" and (.profiles.production.package_sha256 | test("^[a-f0-9]{64}$"))' \
             manifest.json >/dev/null
           sha256sum -c SHA256SUMS
-          package_digest="$(sha256sum target/package.zip | cut -d' ' -f1)"
+          artifact_digest="$(sha256sum SHA256SUMS | cut -d' ' -f1)"
+          test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"
+          package_digest="$(sha256sum profiles/production/target/package.zip | cut -d' ' -f1)"
+          test "$package_digest" = "$(jq -r '.profiles.production.package_sha256' manifest.json)"
+          echo "artifact_digest=$artifact_digest" >> "$GITHUB_OUTPUT"
           echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
-          payload="$(jq -n \
-            --arg train_id "$TRAIN_ID" \
-            --arg operation_key "$OPERATION_KEY" \
-            --arg workflow_run_id "$GITHUB_RUN_ID" \
-            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
-            --arg expected_sha "$EXPECTED_SHA" \
-            --arg artifact_digest "$package_digest" \
-            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:$artifact_run_id,repository:"frontend",environment:"prod",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
       - name: Configure AWS credentials
+        id: aws-credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Upload immutable application assets
-        run: aws s3 sync release-bus-artifact/target "s3://${AWS_BUCKET}/web_build/${EXPECTED_SHA}/"
+        run: aws s3 sync release-bus-artifact/profiles/production/target "s3://${AWS_BUCKET}/web_build/${EXPECTED_SHA}/"
       - name: Ensure Elastic Beanstalk application version
         run: |
           set -euo pipefail
@@ -179,6 +200,7 @@ jobs:
           echo 'Elastic Beanstalk did not reach the expected healthy version.' >&2
           exit 1
       - name: Verify exact production version
+        id: version
         run: |
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           node ops/scripts/verify-deployment-version.cjs \
@@ -215,6 +237,7 @@ jobs:
             echo "Warning: no CloudFront distribution matched $cdn_host; announced-version invalidation was skipped." >&2
           fi
       - name: Upload deployment evidence
+        id: evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -222,3 +245,40 @@ jobs:
           path: deployment-version-evidence.json
           if-no-files-found: ignore
           retention-days: 90
+      - name: Report structured Release Bus deployment result
+        if: always()
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          JOB_STATUS: ${{ job.status }}
+          SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          DOWNLOAD_OUTCOME: ${{ steps.artifact-download.outcome }}
+          ARTIFACT_OUTCOME: ${{ steps.artifact.outcome }}
+          AWS_OUTCOME: ${{ steps.aws-credentials.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+        run: |
+          set -euo pipefail
+          status=SUCCEEDED
+          failure_class=null
+          failure_phase=null
+          retryable=false
+          if [ "$JOB_STATUS" != success ]; then
+            status=FAILED
+            failure_class=DEPLOYMENT
+            failure_phase=production_deploy
+            retryable=true
+            if [ "$SOURCE_OUTCOME" = failure ] || [ "$DOWNLOAD_OUTCOME" = failure ] || [ "$EVIDENCE_OUTCOME" = failure ]; then
+              failure_class=INFRASTRUCTURE
+              failure_phase=artifact_transport
+              retryable=true
+            elif [ "$ARTIFACT_OUTCOME" = failure ] || [ "$AWS_OUTCOME" = failure ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=deployment_identity_or_credentials
+            fi
+          fi
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:null,stages:[],jest:null,backend_evidence:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
