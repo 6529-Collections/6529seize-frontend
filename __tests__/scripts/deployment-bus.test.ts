@@ -320,6 +320,25 @@ describe("release bus v2 combined preflight", () => {
     expect(verify.run).toContain("diff -u complete.sorted shards.sorted");
     expect(upload.if).toContain("steps.inventory_verify.outcome == 'success'");
   });
+
+  it("prepares generated runtime config and forwards Jest shard flags", () => {
+    for (const jobName of ["quality", "build"]) {
+      const generate = workflow.jobs[jobName].steps.find(
+        (step: { name?: string }) =>
+          step.name === "Generate runtime environment schema"
+      );
+      expect(generate.run).toBe("./bin/6529 run build:env-schema");
+    }
+
+    const quality = workflow.jobs.quality.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Run independent quality shard"
+    );
+    expect(quality.run).toContain(
+      './bin/6529 run test:no-coverage --runInBand --shard="$shard_index/4"'
+    );
+    expect(quality.run).not.toContain("test:no-coverage -- --runInBand");
+  });
 });
 
 function releaseArtifact(uri, metadata) {
