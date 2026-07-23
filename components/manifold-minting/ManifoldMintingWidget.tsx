@@ -15,8 +15,11 @@ import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import { areEqualAddresses, fromGWEI } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
@@ -43,6 +46,29 @@ function normalizeMintCount(value: number | string | null | undefined): number {
   }
 
   return Math.max(0, Math.trunc(parsed));
+}
+
+function getTransactionModalMessage(
+  locale: SupportedLocale,
+  status: OnchainTransactionModalStatus | null,
+  errorMessage: string
+): string | undefined {
+  switch (status) {
+    case "confirm_wallet":
+      return t(locale, "theMemes.mint.transaction.confirmWallet");
+    case "submitted":
+      return t(locale, "theMemes.mint.transaction.submitted");
+    case "success":
+      return t(locale, "theMemes.mint.transaction.success");
+    case "error":
+      return errorMessage
+        ? t(locale, "theMemes.mint.transaction.errorDetails", {
+            message: errorMessage,
+          })
+        : t(locale, "theMemes.mint.transaction.error");
+    default:
+      return undefined;
+  }
 }
 
 function MintSummaryRow({
@@ -87,6 +113,7 @@ export default function ManifoldMintingWidget(
   }>
 ) {
   const connectedAddress = useSeizeConnectContext();
+  const locale = useBrowserLocale();
   const searchParams = useSearchParams();
   const [mintForAddress, setMintForAddress] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<"" | "copied" | "failed">("");
@@ -350,6 +377,7 @@ export default function ManifoldMintingWidget(
   };
 
   const onMint = () => {
+    mintWrite.reset();
     setMintError("");
     setTransactionModalStatus(null);
 
@@ -661,14 +689,11 @@ export default function ManifoldMintingWidget(
     props.setMintForAddress(mintForAddress);
   }, [mintForAddress, props.setMintForAddress]);
 
-  const transactionModalMessage =
-    transactionModalStatus === "submitted"
-      ? "Transaction Submitted - SEIZING"
-      : transactionModalStatus === "success"
-        ? "SEIZED!"
-        : transactionModalStatus === "error"
-          ? mintError
-          : undefined;
+  const transactionModalMessage = getTransactionModalMessage(
+    locale,
+    transactionModalStatus,
+    mintError
+  );
 
   return (
     <>
@@ -688,7 +713,7 @@ export default function ManifoldMintingWidget(
       {transactionModalStatus ? (
         <OnchainTransactionModal
           status={transactionModalStatus}
-          title="Mint The Memes"
+          title={t(locale, "theMemes.mint.transaction.title")}
           message={transactionModalMessage}
           transactionHash={mintWrite.data}
           chain={props.chain}

@@ -101,6 +101,7 @@ describe("ManifoldMintingWidget", () => {
     const btn = await screen.findByRole("button", { name: /SEIZE x1/i });
     expect(btn).toBeTruthy();
     await user.click(btn);
+    expect(reset).toHaveBeenCalled();
     expect(writeContract).toHaveBeenCalled();
   });
 
@@ -162,5 +163,27 @@ describe("ManifoldMintingWidget", () => {
     expect(
       screen.queryByText("Wallet rejected", { selector: "div" })
     ).toBeNull();
+  });
+
+  it("shows a receipt error in the onchain modal", async () => {
+    (useWriteContract as jest.Mock).mockReturnValue({
+      writeContract,
+      reset,
+      data: `0x${"c".repeat(64)}`,
+      error: null,
+      isPending: false,
+    });
+    (useWaitForTransactionReceipt as jest.Mock).mockReturnValue({
+      error: new Error("Receipt polling failed. Request Arguments"),
+      isPending: false,
+      isSuccess: false,
+    });
+
+    render(<ManifoldMintingWidget {...baseProps} />);
+
+    await screen.findByRole("dialog");
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Receipt polling failed");
   });
 });

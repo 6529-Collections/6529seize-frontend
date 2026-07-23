@@ -45,11 +45,10 @@
    - Public phase: numeric input.
    - Allowlist phases: selectable up to available unminted spots.
 8. User selects `SEIZE xN` and confirms in wallet.
-9. While the transaction is in-flight, the page shows
-   `Confirm in your wallet ...`, then
-   `Transaction Submitted - SEIZING ...` with a `view trx` link.
-10. After confirmation, the status updates to `SEIZED!` with the same
-   transaction link.
+9. The on-chain transaction modal shows `Confirm in your wallet`, then
+   `Transaction Submitted - SEIZING` with a `View Tx` link.
+10. After confirmation, the modal updates to `SEIZED!` with the same
+    transaction link and can be closed.
 
 ## Common Scenarios
 
@@ -130,9 +129,10 @@
 - If claim/instance data cannot be resolved after loading, the page shows
   `No mint information found`.
 - If allowlist lookup fails, the panel shows `Error fetching allowlist data`.
-- If wallet signature/transaction submission fails, the mint error message is
-  shown inline under the action button.
-- If receipt polling fails after submission, the receipt error is shown inline.
+- If wallet signature/transaction submission fails, the on-chain transaction
+  modal shows the mint error and can be closed before retrying.
+- If receipt polling fails after submission, the modal shows the receipt error
+  and transaction link when a hash is available.
 - Users can retry by correcting recipient/count inputs, retrying wallet
   confirmation, or refreshing the page.
 
@@ -153,6 +153,25 @@
   wallet submission.
 - Debug diagnostics are only exposed when the `mintdebug=1` query parameter is
   set, and are intended for debugging support.
+
+### Localization fallback debt
+
+- Route or component: `/the-memes/mint`,
+  `components/manifold-minting/ManifoldMintingWidget.tsx`, and the shared
+  `components/common/OnchainTransactionModal.tsx` status surface.
+- Untranslated surface: the remaining mint controls, phase/eligibility copy,
+  inline validation, and shared modal controls and accessible names.
+- Current fallback behavior: mint transaction title and status messages resolve
+  through the canonical `en-US` message family. Supported non-source locales
+  fall back to `en-US`; the remaining widget and shared modal copy is still
+  English-only.
+- User impact: every supported locale retains a functional mint and recovery
+  flow, but untranslated controls and status details remain in English.
+- Owner or follow-up issue: frontend minting localization backlog.
+- Expected remediation path: extract the remaining mint widget and shared
+  on-chain modal copy into complete message families, add reviewed translations,
+  then verify wrapping, error recovery, and accessible names in every supported
+  locale.
 
 ## Related Pages
 

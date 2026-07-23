@@ -5252,6 +5252,7 @@
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
+        "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
       "canonical_path": "/the-memes/mint",
@@ -5259,6 +5260,7 @@
       "tags": ["memes", "minting"],
       "source_refs": [
         "app/the-memes/mint/page.tsx",
+        "components/manifold-minting/ManifoldMintingWidget.tsx",
         "ops/docs/media/memes/feature-mint-flow.md"
       ]
     },

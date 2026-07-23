@@ -85,6 +85,17 @@ describe("frontend i18n helpers", () => {
       })
     ).toBe("Voir Meme, carte n° 1");
     expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
+    expect(t("en-US", "theMemes.mint.transaction.confirmWallet")).toBe(
+      "Confirm in your wallet"
+    );
+    expect(t("fr-FR", "theMemes.mint.transaction.submitted")).toBe(
+      "Transaction Submitted - SEIZING"
+    );
+    expect(
+      t("de-DE", "theMemes.mint.transaction.errorDetails", {
+        message: "Wallet rejected",
+      })
+    ).toBe("Wallet rejected");
     expect(t("en-US", "media.video.playPreview")).toBe("Play video preview");
     expect(t("en-US", "media.video.player")).toBe("Video player");
     expect(t("en-US", "media.video.seek")).toBe("Seek video");
