@@ -132,7 +132,7 @@ function getToggleTooltipLabel({
 
 export default function LatestDropNextMintSubscribe(
   props: Readonly<{
-    appearance?: "default" | "quiet";
+    appearance?: "default" | "featured" | "quiet";
     tokenId?: number;
     statusSource?: SubscriptionStatusSource;
   }> = {}
