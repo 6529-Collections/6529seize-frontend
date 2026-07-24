@@ -11,7 +11,7 @@ import {
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { printAdminErrors } from "./NextGenAdmin";
+import { printAdminErrors } from "./NextGenAdminErrors";
 import {
   Button,
   Col,

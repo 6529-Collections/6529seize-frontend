@@ -26,10 +26,10 @@ import MemeLabNftCard from "./MemeLabNftCard";
 import MemeLabSortControls from "./MemeLabSortControls";
 
 const COLLECTION_GRID_CLASS =
-  "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5";
 const COLLECTION_GRID_LIST_CLASS = `${COLLECTION_GRID_CLASS} tw-m-0 tw-list-none tw-px-0 tw-pb-0`;
 const GROUP_GRID_LIST_CLASS =
-  "tw-grid tw-grid-cols-2 tw-gap-3 tw-m-0 tw-list-none tw-p-0 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-m-0 tw-list-none tw-p-0 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5";
 
 export function getInitialRouterValues(
   sortDir: string | null,
@@ -595,7 +595,7 @@ export default function MemeLabComponent({
                 <div className="tw-min-w-0 min-[1200px]:tw-hidden">
                   <CollectionsDropdown activePage="memelab" variant="title" />
                 </div>
-                <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                <h1 className="tw-m-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
                   {t(locale, "memeLab.title")}
                 </h1>
                 <LFGButton contract={MEMELAB_CONTRACT} />

@@ -183,6 +183,26 @@ describe("WaveDropPartContentMedias", () => {
     );
   });
 
+  it("lets audio controls use their natural height", () => {
+    render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [{ mime_type: "audio/mpeg", url: "track.mp3" }],
+        }}
+      />
+    );
+
+    const audio = screen.getByTestId("drop-media");
+
+    expect(audio.parentElement).toHaveClass(
+      "tw-w-full",
+      "tw-items-start",
+      "tw-justify-start"
+    );
+    expect(audio.parentElement).not.toHaveClass("tw-h-64");
+  });
+
   it("uses MediaDisplay when disabled", () => {
     const { container } = render(
       <WaveDropPartContentMedias

@@ -295,6 +295,51 @@
       "source_refs": ["components/about/AboutFAQ.tsx"]
     },
     {
+      "id": "about.the-memes",
+      "kind": "route",
+      "title": "About The Memes",
+      "aliases": [
+        "about the memes",
+        "what are the memes",
+        "the memes collection",
+        "why memes matter",
+        "memes are intersubjective myths",
+        "open metaverse memes",
+        "cc0 meme cards"
+      ],
+      "keywords": [
+        "memes",
+        "meme cards",
+        "collection",
+        "art",
+        "decentralization",
+        "cc0",
+        "public domain",
+        "open metaverse",
+        "remix",
+        "rememe"
+      ],
+      "facts": [
+        "The About The Memes page lives at /about/the-memes.",
+        "The page explains why memes coordinate societies and how The Memes uses art NFTs to spread the message of decentralization.",
+        "The Memes are large-edition CC0 public-domain NFTs intended to be shared, remixed, rememed, and reinterpreted.",
+        "The page presents The Memes collection artwork as a single combined image.",
+        "Its Learn More section links to the full collection at /the-memes, the network at /network, the FAQ at /about/faq, Memes-Chat, and minting information at /about/minting."
+      ],
+      "canonical_path": "/about/the-memes",
+      "related_paths": [
+        "/the-memes",
+        "/network",
+        "/about/faq",
+        "/about/minting"
+      ],
+      "tags": ["about", "memes", "collection", "cc0", "open-metaverse"],
+      "source_refs": [
+        "app/about/[section]/page.tsx",
+        "components/about/AboutMemes.tsx"
+      ]
+    },
+    {
       "id": "about.terms-of-service",
       "kind": "route",
       "title": "Terms of Service",
@@ -442,12 +487,16 @@
         "The Memes minting website is /the-memes/mint; there is no other official minting website for The Memes.",
         "The page says Meme Cards are minted when the art for the next Meme Card is ready, currently about three times per week, though frequency and timing can vary.",
         "The page says The Memes generally use an allowlist model to avoid gas wars and bot wars and to give a broad range of people a chance to mint.",
+        "The page has horizontal section navigation for its summary, minting philosophy, allowlist background and current practices, provability, improvements, tools, and technical issues.",
         "Users should follow @6529collections for current mint dates and times."
       ],
       "canonical_path": "/about/minting",
       "related_paths": ["/the-memes/mint", "/the-memes", "/about/the-memes"],
       "tags": ["about", "memes", "minting"],
-      "source_refs": ["components/about/AboutMinting.tsx"]
+      "source_refs": [
+        "components/about/AboutMinting.tsx",
+        "components/about/AboutMintingReference.tsx"
+      ]
     },
     {
       "id": "about.license",
@@ -3243,12 +3292,16 @@
       "facts": [
         "Meme Lab is a collection area separate from The Memes.",
         "Meme Lab has collection, individual card, and distribution routes.",
+        "The /about/meme-lab overview explains the experimental CC0 artist contract.",
         "Use /meme-lab when users ask where Meme Lab cards live."
       ],
       "canonical_path": "/meme-lab",
-      "related_paths": ["/the-memes"],
+      "related_paths": ["/the-memes", "/about/meme-lab"],
       "tags": ["collections", "meme-lab"],
-      "source_refs": ["ops/docs/media/README.md"]
+      "source_refs": [
+        "components/about/AboutMemeLab.tsx",
+        "ops/docs/media/README.md"
+      ]
     },
     {
       "id": "nextgen.overview",
@@ -6024,12 +6077,14 @@
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",
         "Individual Gradient detail routes use /6529-gradient/{id}.",
+        "The /about/6529-gradient overview explains the grayscale design system, animated #50, museum-held pieces, and community purpose.",
         "Use this route when users ask where to view the 6529 Gradient collection."
       ],
       "canonical_path": "/6529-gradient",
-      "related_paths": ["/6529-gradient/{id}"],
+      "related_paths": ["/6529-gradient/{id}", "/about/6529-gradient"],
       "tags": ["gradient", "collection"],
       "source_refs": [
+        "components/about/AboutGradients.tsx",
         "app/6529-gradient/page.tsx",
         "app/6529-gradient/[id]/page.tsx"
       ]

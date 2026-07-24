@@ -93,12 +93,13 @@
       "__tests__/**",
       "**/*.test.{ts,tsx,js,jsx}",
       "**/*.spec.{ts,tsx,js,jsx}",
-      "generated/**",        // don't list generated files as "Unused files"
       "tests/**",
       "stubs/empty.js"
     ],
     "ignoreBinaries": [
       "coderabbit",
+      // GitHub-hosted runner utility used by deployment workflows.
+      "jq",
       // Capacitor CLI, run via npx inside the 6529-core-mobile checkout in
       // .github/workflows/device-farm-qa.yml — not a dependency of this repo.
       "cap"

@@ -32,33 +32,47 @@ import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTech from "./tech/AboutTech";
 import AboutTermsOfService from "./AboutTermsOfService";
 import { AboutContentsDropdown } from "./AboutContentsDropdown";
-import { getAboutSectionDocumentTitle } from "./about.routes";
+import {
+  getAboutSectionDocumentTitle,
+  isAboutFeatureSection,
+} from "./about.routes";
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const locale = DEFAULT_LOCALE;
   const sectionTitle = getAboutSectionDocumentTitle(section, locale);
-  const isSubscriptions = section === AboutSection.SUBSCRIPTIONS;
+  const usesFeatureLayout = isAboutFeatureSection(section);
   useSetTitle(
     t(locale, "about.contents.documentTitle", { section: sectionTitle })
   );
 
+  if (section === AboutSection.MEMES) {
+    return (
+      <div className="tw-min-h-[calc(100vh-100px)] tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]">
+        <AboutContentsDropdown
+          className="tw-mx-auto !tw-mb-0 tw-w-full tw-max-w-[1400px] !tw-bg-[#0D0D0F] tw-px-4 sm:tw-px-6 lg:tw-px-8"
+          currentSection={section}
+          withDivider
+        />
+        <AboutMemes />
+      </div>
+    );
+  }
+
   return (
     <Container
-      fluid={
-        section === AboutSection.TECH || section === AboutSection.SUBSCRIPTIONS
-      }
+      fluid={section === AboutSection.TECH || usesFeatureLayout}
       className="tw-pt-2"
     >
       <Row>
         <Col>
           <AboutContentsDropdown
             className={
-              isSubscriptions
+              usesFeatureLayout
                 ? "-tw-mx-6 -tw-mt-6 tw-w-[calc(100%+3rem)] tw-px-6"
                 : undefined
             }
             currentSection={section}
-            withDivider={isSubscriptions}
+            withDivider={usesFeatureLayout}
           />
           <div className="tw-w-full">
             <AboutSectionContent section={section} />

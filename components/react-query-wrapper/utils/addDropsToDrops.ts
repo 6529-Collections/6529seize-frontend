@@ -2,6 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { reconcileFinalizedDropAttachments } from "@/components/react-query-wrapper/utils/attachment-realtime-reconciliation";
 
 type DropsQueryData = {
   pages?: ApiWaveDropsFeed[] | undefined;
@@ -162,7 +163,10 @@ function upsertDropInQueryData(
       existingDropIndex !== undefined &&
       existingDropIndex !== -1
     ) {
-      pageDrops[existingDropIndex] = drop;
+      pageDrops[existingDropIndex] = reconcileFinalizedDropAttachments(
+        drop,
+        pageDrops[existingDropIndex]
+      );
       return { ...oldData, pages };
     }
   }

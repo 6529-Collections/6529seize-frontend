@@ -285,7 +285,7 @@ export const baseRules = deepFreezeRuleConfig({
   // Removed styling systems - Bootstrap was fully migrated to Tailwind
   // (2026-07, repo-health campaign). The debt-ratchet bootstrap_imports
   // metric is the CI backstop; this rule is the fast in-editor feedback.
-  // See ops/workstreams/repo-health-2026-07/styling-migration-plan.md.
+  // See ops/standards/frontend-design-ui-ux.md.
   "no-restricted-imports": [
     "error",
     {
@@ -305,7 +305,7 @@ export const baseRules = deepFreezeRuleConfig({
         {
           group: ["bootstrap/*", "react-bootstrap/*"],
           message:
-            "Bootstrap is banned; style with Tailwind (tw-*). See ops/workstreams/repo-health-2026-07/styling-migration-plan.md.",
+            "Bootstrap is banned; style with Tailwind (tw-*). See ops/standards/frontend-design-ui-ux.md.",
         },
       ],
     },
