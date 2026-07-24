@@ -89,6 +89,7 @@ describe("test typecheck ratchet", () => {
     const result = compareDiagnosticCounts(
       {
         "__tests__/improved.test.ts": 1,
+        "__tests__/newly-affected.test.ts": 4,
         "__tests__/regressed.test.ts": 3,
       },
       {
@@ -98,6 +99,11 @@ describe("test typecheck ratchet", () => {
     );
 
     expect(result.increases).toEqual([
+      {
+        file: "__tests__/newly-affected.test.ts",
+        baseline: 0,
+        current: 4,
+      },
       {
         file: "__tests__/regressed.test.ts",
         baseline: 2,
@@ -132,6 +138,53 @@ describe("test typecheck ratchet", () => {
       },
     });
     expect(validateBaseline(baseline)).toBe(baseline);
+  });
+
+  it.each([
+    [
+      "schema version",
+      {
+        ...createBaseline({ typescript_version: "5.9.3" }, {}),
+        schema_version: "stale",
+      },
+    ],
+    [
+      "config",
+      {
+        ...createBaseline({ typescript_version: "5.9.3" }, {}),
+        config: "tsconfig.json",
+      },
+    ],
+    [
+      "toolchain",
+      {
+        ...createBaseline({ typescript_version: "5.9.3" }, {}),
+        toolchain: [],
+      },
+    ],
+    [
+      "files map",
+      {
+        ...createBaseline({ typescript_version: "5.9.3" }, {}),
+        files: [],
+      },
+    ],
+    [
+      "negative file count",
+      createBaseline(
+        { typescript_version: "5.9.3" },
+        { "__tests__/invalid.test.ts": -1 }
+      ),
+    ],
+    [
+      "fractional file count",
+      createBaseline(
+        { typescript_version: "5.9.3" },
+        { "__tests__/invalid.test.ts": 1.5 }
+      ),
+    ],
+  ])("rejects an invalid baseline %s", (_label, invalidBaseline) => {
+    expect(() => validateBaseline(invalidBaseline)).toThrow();
   });
 
   it("detects dependency or configuration fingerprint drift", () => {
