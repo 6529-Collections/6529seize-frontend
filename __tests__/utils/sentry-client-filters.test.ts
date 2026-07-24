@@ -35,7 +35,29 @@ import {
 
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
+type TestSentryBreadcrumb = Extract<
+  NonNullable<TestSentryClientEvent["breadcrumbs"]>,
+  unknown[]
+>[number];
 type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
+type DropReactionRequestMethod = "DELETE" | "POST";
+type DropReactionAction = "add" | "remove" | "replace";
+type DropReactionSource = "chip" | "picker" | "quick-react";
+type DropReactionHttpBreadcrumbOptions = {
+  readonly category?: string;
+  readonly firstParty?: boolean;
+  readonly firstPartyApi?: boolean;
+  readonly level?: string;
+  readonly method?: string;
+  readonly statusCode?: number;
+  readonly type?: string;
+  readonly url?: string;
+};
+type DropReactionLifecycleBreadcrumbOptions = {
+  readonly action?: DropReactionAction;
+  readonly mutationSequence?: number;
+  readonly source?: DropReactionSource;
+};
 type TwitterConfigRawEventOptions = {
   exceptionType?: string | undefined;
   exceptionValue?: string | undefined;
@@ -1681,6 +1703,100 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createDropReactionHttpBreadcrumb = (
+    options: DropReactionHttpBreadcrumbOptions = {}
+  ): TestSentryBreadcrumb => {
+    const data: Record<string, unknown> = {
+      method: options.method ?? "POST",
+      url: options.url ?? "/api/drops/drop-id/reaction",
+      "url.is_first_party": options.firstParty ?? true,
+      "url.is_first_party_api": options.firstPartyApi ?? true,
+    };
+    if (options.statusCode !== undefined) {
+      data["status_code"] = options.statusCode;
+    }
+
+    return {
+      type: options.type ?? "http",
+      category: options.category ?? "fetch",
+      level: options.level ?? "error",
+      data,
+    };
+  };
+
+  const createDropReactionLifecycleBreadcrumb = (
+    message:
+      | "reaction.request_failed"
+      | "reaction.request_sent"
+      | "reaction.request_succeeded",
+    method: DropReactionRequestMethod,
+    options: DropReactionLifecycleBreadcrumbOptions = {}
+  ): TestSentryBreadcrumb => {
+    const data: Record<string, unknown> = {
+      action: options.action ?? (method === "DELETE" ? "remove" : "add"),
+      endpoint_family: "drop_reaction",
+      method,
+      mutation_sequence: options.mutationSequence ?? 1,
+      source: options.source ?? "chip",
+    };
+    if (message === "reaction.request_failed") {
+      data["error_kind"] = "network";
+    }
+
+    return {
+      category: "reactions",
+      level: message === "reaction.request_failed" ? "warning" : "info",
+      message,
+      data,
+    };
+  };
+
+  const createDropReactionRequestBreadcrumbs = (
+    requestBreadcrumbs: TestSentryBreadcrumb[],
+    method: DropReactionRequestMethod = "POST",
+    options: DropReactionLifecycleBreadcrumbOptions = {}
+  ): TestSentryBreadcrumb[] => [
+    createDropReactionLifecycleBreadcrumb(
+      "reaction.request_sent",
+      method,
+      options
+    ),
+    ...requestBreadcrumbs,
+    createDropReactionLifecycleBreadcrumb(
+      "reaction.request_failed",
+      method,
+      options
+    ),
+  ];
+
+  const createDropReactionNetworkEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    event_id: "network-drop-event",
+    level: "warning",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "Drop reaction request failed",
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+        },
+      ],
+    },
+    tags: {
+      feature: "drop-reaction",
+      operation: "reaction-request",
+      error_kind: "network",
+    },
+    breadcrumbs: createDropReactionRequestBreadcrumbs([
+      createDropReactionHttpBreadcrumb(),
+    ]),
+    ...overrides,
+  });
+
   const setNavigatorUserAgent = (userAgent: string): void => {
     Object.defineProperty(globalThis.navigator, "userAgent", {
       value: userAgent,
@@ -2726,6 +2842,449 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe("drop");
+  });
+
+  it("samples the exact synthetic drop-reaction transport warning", () => {
+    const event = createDropReactionNetworkEvent();
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it.each([
+    {
+      name: "message",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Drop reaction request timed out",
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "event level",
+      overrides: { level: "error" },
+    },
+    {
+      name: "unhandled mechanism",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Drop reaction request failed",
+              mechanism: {
+                type: "generic",
+                handled: false,
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "additional exception after the synthetic warning",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Drop reaction request failed",
+            },
+            {
+              type: "Error",
+              value: "Additional application failure",
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "serious exception before the synthetic warning",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Additional application failure",
+            },
+            {
+              type: "Error",
+              value: "Drop reaction request failed",
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "feature",
+      overrides: {
+        tags: {
+          feature: "wave-reaction",
+          operation: "reaction-request",
+          error_kind: "network",
+        },
+      },
+    },
+    {
+      name: "operation",
+      overrides: {
+        tags: {
+          feature: "drop-reaction",
+          operation: "reaction-sync",
+          error_kind: "network",
+        },
+      },
+    },
+    {
+      name: "missing error kind",
+      overrides: {
+        tags: {
+          feature: "drop-reaction",
+          operation: "reaction-request",
+        },
+      },
+    },
+    ...["auth", "rate-limit", "endpoint-contract", "server"].map(
+      (errorKind) => ({
+        name: `${errorKind} error kind`,
+        overrides: {
+          tags: {
+            feature: "drop-reaction",
+            operation: "reaction-request",
+            error_kind: errorKind,
+          },
+        },
+      })
+    ),
+    {
+      name: "unrelated first-party API transport target",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({
+            method: "GET",
+            url: "/api/waves/wave-id",
+          }),
+        ]),
+      },
+    },
+    {
+      name: "reaction request method",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({ method: "GET" }),
+        ]),
+      },
+    },
+    {
+      name: "reaction request endpoint",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({
+            url: "/api/v2/drops/drop-id/reactions",
+          }),
+        ]),
+      },
+    },
+    {
+      name: "HTTP response status",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({ statusCode: 500 }),
+        ]),
+      },
+    },
+    {
+      name: "third-party target",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({
+            firstParty: false,
+            firstPartyApi: false,
+            url: "https://example.com/reaction",
+          }),
+        ]),
+      },
+    },
+    {
+      name: "failed transport breadcrumb",
+      overrides: { breadcrumbs: createDropReactionRequestBreadcrumbs([]) },
+    },
+    {
+      name: "HTTP breadcrumb type",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({ type: "default" }),
+        ]),
+      },
+    },
+    {
+      name: "HTTP breadcrumb category",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({ category: "navigation" }),
+        ]),
+      },
+    },
+  ])(
+    "keeps a synthetic drop-reaction near miss with different $name",
+    ({ overrides }) => {
+      expect(
+        getLowValueNetworkErrorDecision(
+          createDropReactionNetworkEvent(overrides),
+          0
+        )
+      ).toBe("not_applicable");
+    }
+  );
+
+  it("samples the exact synthetic warning with an explicit status code of zero", () => {
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: createDropReactionRequestBreadcrumbs(
+        [
+          createDropReactionHttpBreadcrumb({
+            method: "DELETE",
+            statusCode: 0,
+          }),
+        ],
+        "DELETE"
+      ),
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it.each([
+    {
+      name: "first-party API",
+      laterFailure: createDropReactionHttpBreadcrumb({
+        method: "GET",
+        url: "/api/waves/wave-id",
+      }),
+    },
+    {
+      name: "non-API",
+      laterFailure: createDropReactionHttpBreadcrumb({
+        firstPartyApi: false,
+        method: "GET",
+        url: "/profile",
+      }),
+    },
+  ])(
+    "samples the current reaction failure when a later unrelated $name request also fails",
+    ({ laterFailure }) => {
+      const event = createDropReactionNetworkEvent({
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb(),
+          laterFailure,
+        ]),
+      });
+
+      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+      expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+    }
+  );
+
+  it("samples a matching request across an interleaved opposite-method reaction", () => {
+    const currentRequest = { mutationSequence: 2 } as const;
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          currentRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "DELETE",
+          {
+            mutationSequence: 1,
+            source: "picker",
+          }
+        ),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          currentRequest
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it("keeps an ambiguous failure across concurrent same-tuple reactions", () => {
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST"
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("keeps an ambiguous failure across concurrent different-tuple same-method reactions", () => {
+    const currentRequest = { mutationSequence: 1 } as const;
+    const otherRequest = { mutationSequence: 2, source: "picker" } as const;
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          currentRequest
+        ),
+        createDropReactionHttpBreadcrumb({ statusCode: 500 }),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          otherRequest
+        ),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          currentRequest
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("samples after a different-tuple same-method reaction completed before the transport failure", () => {
+    const currentRequest = { mutationSequence: 1 } as const;
+    const completedRequest = {
+      mutationSequence: 2,
+      source: "picker",
+    } as const;
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          currentRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          completedRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_succeeded",
+          "POST",
+          completedRequest
+        ),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          currentRequest
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it("keeps a warning when a completed concurrent request owns the only transport failure", () => {
+    const currentRequest = { mutationSequence: 1 } as const;
+    const completedRequest = {
+      mutationSequence: 2,
+      source: "picker",
+    } as const;
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          currentRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          completedRequest
+        ),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          completedRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          currentRequest
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it.each([
+    {
+      name: "mutation sequence",
+      failedOptions: { mutationSequence: 2 },
+    },
+    {
+      name: "source",
+      failedOptions: { source: "picker" as const },
+    },
+    {
+      name: "action",
+      failedOptions: { action: "replace" as const },
+    },
+  ])(
+    "keeps a synthetic warning when lifecycle breadcrumbs have a different $name",
+    ({ failedOptions }) => {
+      const event = createDropReactionNetworkEvent({
+        breadcrumbs: [
+          createDropReactionLifecycleBreadcrumb(
+            "reaction.request_sent",
+            "POST"
+          ),
+          createDropReactionHttpBreadcrumb(),
+          createDropReactionLifecycleBreadcrumb(
+            "reaction.request_failed",
+            "POST",
+            failedOptions
+          ),
+        ],
+      });
+
+      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+    }
+  );
+
+  it("keeps a synthetic warning when the only reaction failure predates the current request", () => {
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionHttpBreadcrumb(),
+        ...createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({
+            method: "GET",
+            url: "/api/waves/wave-id",
+          }),
+        ]),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
   it("drops sampled-out status 0 network errors from API environment subdomains", () => {

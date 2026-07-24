@@ -14,6 +14,9 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const dropReactionRequestFailedMessage = "Drop reaction request failed";
+  const privateBareWaveId = "2c5e0761-6de2-4e1f-9c23-a8c93ff1158f";
+  const privateRelativeDropId = "5651cd9a-1852-42fc-b213-5f8d871f96bf";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
   const indexedDBUserDeleteMessage =
@@ -236,6 +239,14 @@ describe("instrumentation-client", () => {
     level?: string | undefined;
     tags?: Record<string, unknown> | undefined;
     fingerprint?: string[] | undefined;
+    request?: Record<string, unknown> | undefined;
+    breadcrumbs?:
+      | Array<{
+          category?: string | undefined;
+          message?: string | undefined;
+          data?: Record<string, unknown> | undefined;
+        }>
+      | undefined;
     exception?:
       | {
           values?: Array<
@@ -304,6 +315,123 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+  });
+
+  const createDropReactionNetworkEvent = (eventId: string) => ({
+    event_id: eventId,
+    level: "warning",
+    message: "",
+    fingerprint: ["drop-reaction", "network"],
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: dropReactionRequestFailedMessage,
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+        },
+      ],
+    },
+    tags: {
+      feature: "drop-reaction",
+      operation: "reaction-request",
+      error_kind: "network",
+      url: "/waves/private-wave-id",
+    },
+    request: {
+      url: "/waves/private-wave-id",
+      headers: {
+        Referer: "/waves/private-referrer-wave-id",
+      },
+    },
+    breadcrumbs: [
+      {
+        category: "navigation",
+        data: {
+          from: "/waves/private-navigation-from-wave-id",
+          to: "/private-navigation-to-profile-id",
+        },
+      },
+      {
+        category: "console",
+        level: "error",
+        message: `Retry failed for drops/${privateRelativeDropId}/reaction`,
+        data: {
+          arguments: [
+            "Retrying reaction",
+            `Retrying wave ${privateBareWaveId}`,
+            {
+              request: {
+                endpoint: `drops/${privateRelativeDropId}/reaction`,
+                state: "retrying",
+              },
+            },
+          ],
+        },
+      },
+      {
+        category: "reactions",
+        level: "info",
+        message: "reaction.request_sent",
+        data: {
+          action: "add",
+          endpoint_family: "drop_reaction",
+          method: "POST",
+          mutation_sequence: 1,
+          route_family: "/waves/[wave]",
+          source: "chip",
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "POST",
+          url: "/api/drops/private-drop-id/reaction",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "GET",
+          url: "/api/waves/private-api-wave-id",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "GET",
+          url: "/private-profile-id",
+          "url.is_first_party": true,
+          "url.is_first_party_api": false,
+        },
+      },
+      {
+        category: "reactions",
+        level: "warning",
+        message: "reaction.request_failed",
+        data: {
+          action: "add",
+          endpoint_family: "drop_reaction",
+          error_kind: "network",
+          method: "POST",
+          mutation_sequence: 1,
+          route_family: "/waves/[wave]",
+          source: "chip",
+        },
+      },
+    ],
   });
 
   const createPoperBlockerOrphanFetchRejectionEvent = (
@@ -2706,6 +2834,101 @@ describe("instrumentation-client", () => {
     expect(event.message).toBe(expectedMessage);
     expect(event.exception.values[0]?.value).not.toContain("token=");
     expect(event.message).not.toContain("#hash");
+  });
+
+  it("drops a sampled-out synthetic drop-reaction transport warning", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createDropReactionNetworkEvent("network-drop-event");
+
+    const result = beforeSend(event, {
+      originalException: new Error(dropReactionRequestFailedMessage),
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps and tags a sampled-in synthetic drop-reaction transport warning", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createDropReactionNetworkEvent("event-200");
+
+    const result = beforeSend(event, {
+      originalException: new Error(dropReactionRequestFailedMessage),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        feature: "drop-reaction",
+        operation: "reaction-request",
+        error_kind: "network",
+        network_failure_kind: "browser_transport",
+        network_noise_sampled: "true",
+      })
+    );
+    expect(result?.tags?.["errorType"]).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      dropReactionRequestFailedMessage
+    );
+    expect(result?.exception?.values?.[0]?.value).not.toContain("/");
+    expect(result?.fingerprint).toEqual(["drop-reaction", "network"]);
+    expect(result?.request).toBeUndefined();
+    expect(result?.tags?.["url"]).toBeUndefined();
+
+    const serializedResult = JSON.stringify(result);
+    for (const privateValue of [
+      "private-api-wave-id",
+      "private-drop-id",
+      "private-navigation-from-wave-id",
+      "private-navigation-to-profile-id",
+      "private-profile-id",
+      "private-referrer-wave-id",
+      "private-wave-id",
+      privateBareWaveId,
+      privateRelativeDropId,
+    ]) {
+      expect(serializedResult).not.toContain(privateValue);
+    }
+
+    const breadcrumbUrls = result?.breadcrumbs
+      ?.map((breadcrumb) => breadcrumb.data?.["url"])
+      .filter((url): url is string => typeof url === "string");
+    expect(breadcrumbUrls).toEqual(["[Filtered]", "[Filtered]", "[Filtered]"]);
+    expect(
+      result?.breadcrumbs?.find(
+        (breadcrumb) => breadcrumb.category === "navigation"
+      )?.data
+    ).toEqual(
+      expect.objectContaining({
+        from: "[Filtered]",
+        to: "[Filtered]",
+      })
+    );
+    expect(
+      result?.breadcrumbs?.find(
+        (breadcrumb) => breadcrumb.category === "console"
+      )
+    ).toEqual(
+      expect.objectContaining({
+        message: "[Filtered]",
+        data: expect.objectContaining({
+          arguments: [
+            "Retrying reaction",
+            "[Filtered]",
+            {
+              request: {
+                endpoint: "[Filtered]",
+                state: "retrying",
+              },
+            },
+          ],
+        }),
+      })
+    );
+    expect(
+      result?.breadcrumbs
+        ?.filter((breadcrumb) => breadcrumb.category === "reactions")
+        .map((breadcrumb) => breadcrumb.data?.["route_family"])
+    ).toEqual(["/waves/[wave]", "/waves/[wave]"]);
   });
 
   it("keeps and tags sampled-in app-wrapped absolute API network errors using the original target", () => {

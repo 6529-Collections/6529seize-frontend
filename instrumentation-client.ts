@@ -21,6 +21,7 @@ import {
   getLowValueNetworkErrorDecision,
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
+  redactDropReactionFailureIdentifiers,
   shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterByFilenameExceptions,
@@ -511,6 +512,7 @@ Sentry.init({
     }
     if (networkNoiseDecision === "keep_sampled") {
       tagSampledLowValueNetworkError(event);
+      redactDropReactionFailureIdentifiers(event);
     }
 
     return sanitizeSentryEvent(event);
