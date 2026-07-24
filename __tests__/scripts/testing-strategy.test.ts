@@ -320,6 +320,9 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.lint_changed.required).toBe(true);
     expect(plan.checks.typecheck_changed.required).toBe(true);
     expect(plan.checks.test_typecheck.required).toBe(true);
+    expect(plan.checks["test_typecheck"]?.reason).toContain(
+      "Jest diagnostic ratchet"
+    );
     expect(plan.checks.jest_changed.required).toBe(true);
     expect(plan.checks.playwright_smoke.required).toBe(true);
     expect(plan.checks.playwright_critical_shell.required).toBe(false);

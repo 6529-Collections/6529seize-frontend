@@ -700,7 +700,7 @@ function createCiPlan(files, options = {}) {
       test_typecheck: check(
         needsInstall,
         needsInstall
-          ? "Installed PR CI runs Playwright/helper typecheck as the test typecheck baseline."
+          ? "Installed PR CI runs the Jest diagnostic ratchet plus Playwright/helper typechecking."
           : "No installed test typecheck needed for docs-only changes."
       ),
       jest_changed: check(
