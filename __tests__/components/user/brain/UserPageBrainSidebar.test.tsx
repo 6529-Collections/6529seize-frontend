@@ -146,7 +146,7 @@ describe("UserPageBrainSidebar", () => {
     });
     expect(mockedUseFavouriteWavesOfIdentity).toHaveBeenCalledWith({
       identityKey: "kanetix",
-      limit: 3,
+      limit: 5,
       enabled: true,
     });
   });
@@ -199,7 +199,7 @@ describe("UserPageBrainSidebar", () => {
     });
     expect(mockedUseFavouriteWavesOfIdentity).toHaveBeenCalledWith({
       identityKey: "0xdef",
-      limit: 3,
+      limit: 5,
       enabled: true,
     });
   });

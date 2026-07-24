@@ -30,7 +30,7 @@ created, or into the waves where that profile is most active.
 3. Desktop shows:
    - `Created Waves`: up to three created waves plus a `Show N more` toggle
      when more created waves exist
-   - `Most Active In`: up to three waves
+   - `Most Active In`: up to five waves
 4. Small screens show `Created` and `Active In` pill rows above the feed.
 5. If more created waves exist on small screens, select the overflow chip to
    open `Waves by {profile}`.
@@ -58,7 +58,7 @@ created, or into the waves where that profile is most active.
 - `Created Waves` excludes direct-message threads.
 - `Created Waves` resolves authored waves from the profile handle when
   available, then falls back to the resolved profile query or primary wallet.
-- `Most Active In` is capped at three items in the inline surface.
+- `Most Active In` is capped at five items in the inline surface.
 - Desktop uses inline expansion for created waves; the mobile overflow chip is
   the Brain tab entry point into the full created-waves modal.
 
@@ -77,7 +77,7 @@ created, or into the waves where that profile is most active.
 - Desktop inline created-waves view shows up to three items until expanded,
   even when more authored waves exist.
 - The mobile strip surfaces only the first created wave inline, plus up to
-  three `Most Active In` items.
+  five `Most Active In` items.
 - The full modal lists created waves only; it does not provide a full-screen
   `Most Active In` list.
 

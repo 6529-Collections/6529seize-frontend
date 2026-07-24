@@ -33,7 +33,7 @@ export default function UserPageBrainSidebarMostActive({
             className="tw-space-y-2.5"
             aria-label="Loading most active waves"
           >
-            {[0, 1, 2].map((key) => (
+            {[0, 1, 2, 3, 4].map((key) => (
               <div
                 key={key}
                 className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-3 tw-shadow-inner"

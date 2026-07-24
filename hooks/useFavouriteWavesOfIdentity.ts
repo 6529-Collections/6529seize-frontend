@@ -15,7 +15,7 @@ interface UseFavouriteWavesOfIdentityProps {
 
 export function useFavouriteWavesOfIdentity({
   identityKey,
-  limit = 3,
+  limit = 5,
   enabled = true,
 }: UseFavouriteWavesOfIdentityProps) {
   const normalizedIdentityKey = identityKey?.trim() ?? null;
