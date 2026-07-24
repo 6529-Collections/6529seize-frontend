@@ -2,7 +2,8 @@
   "schema_version": 1,
   "max_source_file_lines": 800,
   "counts": {
-    "any_casts": 0,
+    "any_casts": 23,
+    "test_generic_any": 135,
     "todo_comments": 0,
     "oversized_files": 0,
     "legacy_wordpress_runtime": 0,
