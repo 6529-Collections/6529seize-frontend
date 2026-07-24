@@ -335,9 +335,11 @@ describe("urlGuard", () => {
     expect(await response.text()).toBe("pinned");
   });
 
-  it("does not let request option builders replace the pinned dispatcher", async () => {
+  it("does not let request options replace guard-controlled transport or abort settings", async () => {
     lookup.mockResolvedValue([{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }]);
     const unrestrictedDispatcher = { dispatch: jest.fn() };
+    const unrestrictedAgent = { addRequest: jest.fn() };
+    const unrestrictedController = new AbortController();
     const success = createResponse(200, {
       body: "pinned",
       url: "https://safe.example/article",
@@ -346,6 +348,9 @@ describe("urlGuard", () => {
       expect(
         (init as RequestInit & { dispatcher?: unknown }).dispatcher
       ).not.toBe(unrestrictedDispatcher);
+      expect((init as RequestInit & { agent?: unknown }).agent).toBeUndefined();
+      expect(init.redirect).toBe("manual");
+      expect(init.signal).not.toBe(unrestrictedController.signal);
       await expect(
         readPinnedLookupAddress("safe.example", init)
       ).resolves.toEqual({ address: SAFE_EXAMPLE_ADDRESS, family: 4 });
@@ -354,13 +359,21 @@ describe("urlGuard", () => {
 
     const response = await fetchPublicUrl(
       "https://safe.example/article",
-      {},
+      {
+        dispatcher: unrestrictedDispatcher,
+        agent: unrestrictedAgent,
+        redirect: "follow",
+        signal: unrestrictedController.signal,
+      } as RequestInit,
       {
         revalidateFinalUrl: false,
         buildRequestInit: (_url, init) =>
           ({
             ...init,
             dispatcher: unrestrictedDispatcher,
+            agent: unrestrictedAgent,
+            redirect: "follow",
+            signal: unrestrictedController.signal,
           }) as RequestInit,
       }
     );
