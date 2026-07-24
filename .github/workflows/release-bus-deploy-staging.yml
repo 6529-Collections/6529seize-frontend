@@ -261,6 +261,47 @@ jobs:
             }
           fi
 
+          prune_release_cache() {
+            current_release=''
+            if [[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}/app$ ]]; then
+              current_release="${previous_target%/app}"
+            fi
+            if [ "$process_kind" = managed ] && [ -z "$current_release" ]; then
+              echo 'Refusing to prune without the exact managed current release.' >&2
+              return 1
+            fi
+            retained_rollback=0
+            while IFS= read -r cached_release; do
+              [ -n "$cached_release" ] || continue
+              if [ "$cached_release" = "$release_dir" ] || \
+                [ "$cached_release" = "$current_release" ]; then
+                continue
+              fi
+              if [ "$retained_rollback" -eq 0 ]; then
+                retained_rollback=1
+                continue
+              fi
+              cached_sha="${cached_release##*/}"
+              if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] || \
+                [ "$cached_release" != "$release_root/releases/$cached_sha" ]; then
+                echo "Preserving unrecognized staging release cache entry $cached_sha"
+                continue
+              fi
+              rm -rf -- "$cached_release"
+              echo "Pruned rebuildable staging release cache $cached_sha"
+            done < <(
+              find "$release_root/releases" -mindepth 1 -maxdepth 1 \
+                -type d -printf '%T@ %p\n' 2>/dev/null | \
+                sort -nr | cut -d' ' -f2-
+            )
+          }
+
+          # A healthy exact current release is the rollback boundary. Keep it,
+          # an already-cached incoming release when present, and one newest
+          # additional rollback. Old bundles remain reproducible from durable
+          # workflow artifacts.
+          prune_release_cache
+
           restore_legacy_process() {
             delete_6529_process || return 1
             restore_previous_link || return 1
@@ -294,6 +335,7 @@ jobs:
           install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir/app"
           unzip -q "$release_dir/package.zip" -d "$release_dir/app"
           test -f "$release_dir/app/server.js"
+          rm -f "$release_dir/package.zip"
           chown -R "$RUN_AS:$RUN_AS" "$release_dir"
           ln -sfn "$release_dir/app" "$current_link"
           cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
