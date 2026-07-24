@@ -230,6 +230,22 @@ describe("CreateWaveOutcomesRepRank", () => {
     expect(screen.queryByTestId("category-error")).not.toBeInTheDocument();
   });
 
+  it("names the broken category rule live and blocks submit", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    const categoryInput = screen.getByTestId("category-input");
+    await user.type(categoryInput, "Bad@Category");
+
+    // The violation surfaces while typing, before any submit attempt.
+    expect(screen.getByRole("alert")).toHaveTextContent('"@"');
+
+    await user.click(screen.getByTestId("update-winners"));
+    await user.click(screen.getByTestId("primary-button"));
+
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
   it("keeps winners config when winners are updated", async () => {
     const user = userEvent.setup();
     renderComponent();

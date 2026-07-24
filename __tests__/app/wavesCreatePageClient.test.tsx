@@ -10,6 +10,7 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({
     replace: mockReplace,
   }),
+  usePathname: () => "/waves/create",
 }));
 
 jest.mock("@/components/auth/Auth", () => ({

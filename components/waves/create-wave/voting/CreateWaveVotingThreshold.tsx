@@ -40,6 +40,7 @@ export default function CreateWaveVotingThreshold({
       <input
         type="text"
         inputMode="numeric"
+        pattern="[0-9]*"
         autoComplete="off"
         value={hasThreshold ? threshold.toString() : ""}
         onChange={onThresholdChange}
