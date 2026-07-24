@@ -87,6 +87,59 @@ describe("useNewDropCounter", () => {
     expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
   });
 
+  it("reconciles websocket counts when the server snapshot covers the drop", () => {
+    const refetch = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ latestDropTimestamp, unreadDropsCount }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp,
+              unreadDropsCount,
+            },
+          ] as any,
+          refetch
+        ),
+      {
+        wrapper,
+        initialProps: {
+          latestDropTimestamp: 20,
+          unreadDropsCount: 0,
+        },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 30,
+      firstUnreadSerialNo: 5,
+    });
+
+    rerender({
+      latestDropTimestamp: 31,
+      unreadDropsCount: 0,
+    });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    emitDropUpdate({ createdAt: 32, serialNo: 6 });
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 32,
+      firstUnreadSerialNo: 6,
+    });
+  });
+
   it("does not increment counts for poll response updates", () => {
     const refetch = jest.fn();
     const { result } = renderHook(
