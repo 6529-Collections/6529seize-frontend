@@ -235,9 +235,7 @@ describe("release bus staging artifact transfer", () => {
     );
     expect(script).toContain('[ "$cached_release" = "$release_dir" ]');
     expect(script).toContain('[ "$cached_release" = "$current_release" ]');
-    expect(script).toContain(
-      'if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] ||'
-    );
+    expect(script).toContain('if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] ||');
     expect(script).toContain(
       '[ "$cached_release" != "$release_root/releases/$cached_sha" ]'
     );
@@ -262,6 +260,91 @@ describe("release bus staging artifact transfer", () => {
     expect(script.indexOf('rm -f "$release_dir/package.zip"')).toBeGreaterThan(
       script.indexOf('test -f "$release_dir/app/server.js"')
     );
+  });
+});
+
+describe("release bus contributor notifications", () => {
+  const workflows = ["staging", "production"].map(
+    (environment) =>
+      [
+        environment,
+        YAML.parse(
+          fs.readFileSync(
+            path.join(
+              process.cwd(),
+              `.github/workflows/release-bus-deploy-${environment}.yml`
+            ),
+            "utf8"
+          )
+        ),
+      ] as const
+  );
+  const notifier = fs.readFileSync(
+    path.join(process.cwd(), "scripts/notify-ci-wave.mjs"),
+    "utf8"
+  );
+
+  it.each(workflows)(
+    "validates and signs %s Release Train contributor metadata",
+    (environment, workflow) => {
+      const inputs = workflow.on.workflow_dispatch.inputs;
+      const steps = workflow.jobs.deploy.steps;
+      const validation = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Validate dispatch inputs before using credentials"
+      );
+      const checkout = steps.find(
+        (step: { name?: string }) => step.name === "Check out CI wave notifier"
+      );
+      const failure = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Notify CI wave about failure"
+      );
+      const success = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Notify CI wave about success"
+      );
+
+      expect(inputs.release_contributors).toMatchObject({
+        required: false,
+        default: "[]",
+      });
+      expect(validation.run).toContain(
+        'jq -e \'type == "array" and length <= 100'
+      );
+      expect(checkout).toMatchObject({
+        if: "always()",
+        with: {
+          ref: "${{ github.workflow_sha }}",
+          path: ".ci-wave-notifier",
+          "persist-credentials": false,
+        },
+      });
+      expect(failure).toMatchObject({
+        if: "failure()",
+        "continue-on-error": true,
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+      expect(success).toMatchObject({
+        if: "success()",
+        "continue-on-error": true,
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+      for (const notifyStep of [failure, success]) {
+        expect(notifyStep.env).toMatchObject({
+          CI_PIPELINES_SHA: "${{ inputs.expected_sha }}",
+          CI_RELEASE_TRAIN_ID: "${{ inputs.release_train_id }}",
+          CI_RELEASE_CONTRIBUTORS: "${{ inputs.release_contributors }}",
+        });
+      }
+    }
+  );
+
+  it("includes contributor fields in the signed payload", () => {
+    expect(notifier).toContain(
+      "contributor_github_logins: releaseContributors"
+    );
+    expect(notifier).toContain("sha: CI_PIPELINES_SHA || GITHUB_SHA || null");
   });
 });
 

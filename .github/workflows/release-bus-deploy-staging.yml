@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_train_id: { type: string, required: true }
+      release_contributors: { type: string, required: false, default: "[]" }
       release_train_revision: { type: string, required: true }
       operation_key: { type: string, required: true }
       source_ref: { type: string, required: true }
@@ -48,6 +49,7 @@ jobs:
       EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
       EXPECTED_SHA: ${{ inputs.expected_sha }}
       OPERATION_KEY: ${{ inputs.operation_key }}
+      RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
       SOURCE_REF: ${{ inputs.source_ref }}
       TRAIN_ID: ${{ inputs.release_train_id }}
       TRAIN_REVISION: ${{ inputs.release_train_revision }}
@@ -60,6 +62,7 @@ jobs:
           EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
           SOURCE_REF: ${{ inputs.source_ref }}
           TRAIN_ID: ${{ inputs.release_train_id }}
           TRAIN_REVISION: ${{ inputs.release_train_revision }}
@@ -73,6 +76,7 @@ jobs:
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          jq -e 'type == "array" and length <= 100 and all(.[]; type == "string" and test("^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})(?:\\[bot\\])?$"))' <<< "$RELEASE_CONTRIBUTORS" > /dev/null
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
       - name: Authorize immutable Release Bus operation
         env:
@@ -488,3 +492,42 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
+      - name: Check out CI wave notifier
+        if: always()
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+      - name: Notify CI wave about failure
+        if: failure()
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: Seize-Frontend staging DEPLOY CI pipeline is broken!!!
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
+          CI_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
+          CI_RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+      - name: Notify CI wave about success
+        if: success()
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: success
+          CI_PIPELINES_TITLE: Seize-Frontend staging DEPLOY CI pipeline complete
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
+          CI_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
+          CI_RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
