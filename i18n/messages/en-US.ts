@@ -866,8 +866,10 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   "type.manual.description": "Custom reward or result you fulfill.",
   "type.rep.label": "Rep",
   "type.rep.description": "REP credit distributed automatically.",
+  "type.rep.creditError": "Rep must be a positive number",
   "type.nic.label": "NIC",
   "type.nic.description": "NIC credit distributed automatically.",
+  "type.nic.creditError": "NIC must be a positive number",
   showOutcomes: "Show outcomes",
   showOutcomesDescription:
     "Turn on to show outcome details in the wave’s Outcome tab and winner views. Turn off to keep them hidden from participants.",
