@@ -153,7 +153,7 @@ function artifactPointer(overrides: Record<string, unknown> = {}) {
 describe("testing strategy risk floor", () => {
   it("keeps docs and tests in the fast lane", () => {
     const result = classifyChangedFiles([
-      "ops/workstreams/frontend-a11y-i18n/testing-improvement-plan.md",
+      "ops/workstreams/README.md",
       "__tests__/components/example.test.tsx",
     ]);
 
@@ -293,7 +293,7 @@ describe("testing strategy risk floor", () => {
 describe("testing strategy CI plan", () => {
   it("keeps docs-only PRs in the no-install fast lane", () => {
     const plan = createCiPlan([
-      "ops/workstreams/frontend-a11y-i18n/testing-improvement-plan.md",
+      "ops/workstreams/README.md",
     ]);
 
     expect(plan.schema_version).toBe(CI_PLAN_SCHEMA_VERSION);
