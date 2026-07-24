@@ -266,6 +266,10 @@ jobs:
             if [[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}/app$ ]]; then
               current_release="${previous_target%/app}"
             fi
+            if [ "$process_kind" = managed ] && [ -z "$current_release" ]; then
+              echo 'Refusing to prune without the exact managed current release.' >&2
+              return 1
+            fi
             retained_rollback=0
             while IFS= read -r cached_release; do
               [ -n "$cached_release" ] || continue
@@ -278,8 +282,11 @@ jobs:
                 continue
               fi
               cached_sha="${cached_release##*/}"
-              [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]]
-              [ "$cached_release" = "$release_root/releases/$cached_sha" ]
+              if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] || \
+                [ "$cached_release" != "$release_root/releases/$cached_sha" ]; then
+                echo "Preserving unrecognized staging release cache entry $cached_sha"
+                continue
+              fi
               rm -rf -- "$cached_release"
               echo "Pruned rebuildable staging release cache $cached_sha"
             done < <(
@@ -290,8 +297,9 @@ jobs:
           }
 
           # A healthy exact current release is the rollback boundary. Keep it,
-          # the incoming immutable release, and one newest additional rollback;
-          # old bundles remain reproducible from durable workflow artifacts.
+          # an already-cached incoming release when present, and one newest
+          # additional rollback. Old bundles remain reproducible from durable
+          # workflow artifacts.
           prune_release_cache
 
           restore_legacy_process() {
