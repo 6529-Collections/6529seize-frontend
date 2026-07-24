@@ -1,0 +1,2 @@
+Simple Release Bus v2 frontend-only acceptance marker.
+This inert public asset exercises the real frontend build and artifact path.
