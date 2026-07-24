@@ -1,43 +1,20 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import CreateWaveOutcomesRowManualRank from "@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualRank";
-import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import CreateWaveOutcomesRowManualRank from '@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualRank';
 
-const outcome = {
-  title: "Winner",
-  winnersConfig: {
-    winners: [
-      { value: 1 },
-      { value: 1 },
-      { value: 1 },
-      { value: 0 },
-      { value: 1 },
-    ],
-  },
-} as CreateWaveOutcomeConfig;
+const outcome = { title: 'Winner' } as any;
 
-describe("CreateWaveOutcomesRowManualRank", () => {
-  it("shows outcome title and compressed winning ranks", () => {
-    render(
-      <CreateWaveOutcomesRowManualRank
-        outcome={outcome}
-        removeOutcome={jest.fn()}
-      />
-    );
-    expect(screen.getByText("Winner")).toBeInTheDocument();
-    expect(screen.getByText("Winning ranks: 1-3, 5")).toBeInTheDocument();
+describe('CreateWaveOutcomesRowManualRank', () => {
+  it('shows outcome title', () => {
+    render(<CreateWaveOutcomesRowManualRank outcome={outcome} removeOutcome={jest.fn()} />);
+    expect(screen.getByText('Winner')).toBeInTheDocument();
   });
 
-  it("calls removeOutcome on click", async () => {
+  it('calls removeOutcome on click', async () => {
     const user = userEvent.setup();
     const removeOutcome = jest.fn();
-    render(
-      <CreateWaveOutcomesRowManualRank
-        outcome={outcome}
-        removeOutcome={removeOutcome}
-      />
-    );
-    await user.click(screen.getByLabelText("Remove outcome"));
+    render(<CreateWaveOutcomesRowManualRank outcome={outcome} removeOutcome={removeOutcome} />);
+    await user.click(screen.getByLabelText('Remove'));
     expect(removeOutcome).toHaveBeenCalled();
   });
 });

@@ -32,6 +32,7 @@ Set the wave name, optional image, and wave type before moving to later steps.
   - `Chat`
   - `Rank`
   - `Approve`
+- `Show outcomes` for `Rank` and `Approve` waves.
 - Approve tab labels for `Approve` waves:
   - proposals tab defaults to `Proposals`
   - approved tab defaults to `Approved`
@@ -57,8 +58,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
 - Changing wave type resets all non-overview settings to that type's defaults
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
-- Outcome visibility for `Rank` and `Approve` waves is configured on the
-  [Outcomes step](feature-outcomes-step.md).
+- `Show outcomes` defaults to on. Turning it off hides outcome displays after
+  the wave is created.
 
 ## Failure and Recovery
 

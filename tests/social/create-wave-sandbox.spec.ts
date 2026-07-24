@@ -322,28 +322,20 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     // Voting keeps its defaults; a scheduled rank wave then configures an
-    // outcome. The compact modal intentionally hides the desktop stepper.
+    // outcome on the Outcomes step (present in the stepper, unlike perpetual).
+    await expect(
+      page.getByRole("navigation", { name: "Progress" }).getByText("Outcomes")
+    ).toBeVisible();
     await nextStepButton(page).click();
 
     await page.getByRole("button", { name: "Manual" }).click();
-    await expect(
-      page.getByText("Custom reward or result you fulfill.")
-    ).toBeVisible();
-    await expect(
-      page.getByText(/this text appears in the wave’s Outcome tab/i)
-    ).toBeVisible();
     await page
-      .getByLabel("What winners receive")
+      .getByLabel("Manual action")
       .fill(SANDBOX_SCHEDULED_OUTCOME_TITLE);
-    await page.getByLabel("Winning ranks").fill("1");
-    await expectNoHorizontalOverflow(page);
-    await page.getByRole("button", { name: "Add outcome" }).click();
+    await page.getByLabel(/Winning Positions/).fill("1");
+    await page.getByRole("button", { name: "Save" }).click();
     await expect(
       page.getByText(SANDBOX_SCHEDULED_OUTCOME_TITLE).first()
-    ).toBeVisible();
-    await expect(page.getByText("Winning ranks: 1")).toBeVisible();
-    await expect(
-      page.getByText(/Turn on to show outcome details/i)
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -414,7 +406,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("explains manual outcomes in the approve flow", async ({ page }) => {
+  test("keeps the ranking mode choice out of approve wave dates", async ({
+    page,
+  }) => {
     await gotoCreateWave(page);
 
     await page.getByLabel(/Wave Name/).fill("Sandbox Approve Wave");
@@ -437,60 +431,14 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
     ).toBeHidden();
-
-    await nextStepButton(page).click();
-    await expect(
-      page.locator("#no-of-applications-allowed-per-participant")
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await nextStepButton(page).click();
-
-    await expect(
-      page.getByRole("heading", { name: "Rules", level: 2, exact: true })
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await nextStepButton(page).click();
-    await page.getByLabel("Approval threshold").fill("1");
-    await nextStepButton(page).click();
-
-    await expect(
-      page.getByRole("heading", { name: "Outcomes", level: 2 })
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await expect(
-      page.getByRole("button", {
-        name: /REP REP credit distributed automatically/i,
-      })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", {
-        name: /NIC NIC credit distributed automatically/i,
-      })
-    ).toBeVisible();
-
-    await page.getByRole("button", { name: /Manual Custom reward/ }).click();
-    await expect(
-      page.getByText(
-        "Add a custom reward or result you will fulfill for approved winners."
-      )
-    ).toBeVisible();
-    await expect(page.getByLabel("Winning ranks")).toBeHidden();
-    await page
-      .getByLabel("What winners receive")
-      .fill("Creator feedback session");
-    await page.getByRole("button", { name: "Add outcome" }).click();
-    await expect(page.getByText("Creator feedback session")).toBeVisible();
-    await expectNoHorizontalOverflow(page);
   });
 });
 
 async function gotoCreateWave(page: Page) {
-  const useResponsiveModal = (page.viewportSize()?.width ?? 1280) < 1024;
-  const path = useResponsiveModal ? "/waves?create=wave" : "/waves/create";
-
   await installExternalDataFixtures(page);
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await page.goto("/waves/create", { waitUntil: "domcontentloaded" });
   await waitForRouteReady(page);
-  await expect(page).toHaveURL(
-    useResponsiveModal ? /\/waves\?create=wave$/ : /\/waves\/create$/
-  );
+  await expect(page).toHaveURL(/\/waves\/create$/);
   await expect(page.getByLabel(/Wave Name/)).toBeVisible({
     timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   });

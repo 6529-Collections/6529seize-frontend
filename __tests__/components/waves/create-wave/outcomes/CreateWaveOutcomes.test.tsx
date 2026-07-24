@@ -75,15 +75,6 @@ describe("CreateWaveOutcomes", () => {
 
   it("shows rows list when no outcome type selected", () => {
     render(<CreateWaveOutcomes {...baseProps} />);
-    expect(
-      screen.getByRole("heading", { name: "Outcomes" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Choose how winners are rewarded. You can add more than one outcome."
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByText("Choose outcome type")).toBeInTheDocument();
     expect(screen.getByTestId("rows")).toBeInTheDocument();
   });
 
@@ -146,9 +137,6 @@ describe("CreateWaveOutcomes", () => {
     const toggle = screen.getByRole("checkbox");
     expect(toggle).toBeEnabled();
     expect(toggle).toBeChecked();
-    expect(toggle).toHaveAccessibleDescription(
-      "Turn on to show outcome details in the wave’s Outcome tab and winner views. Turn off to keep them hidden from participants."
-    );
 
     fireEvent.click(toggle);
 

@@ -859,41 +859,7 @@ const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
 
 const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   title: "Outcomes",
-  description:
-    "Choose how winners are rewarded. You can add more than one outcome.",
-  chooseType: "Choose outcome type",
-  "type.manual.label": "Manual",
-  "type.manual.description": "Custom reward or result you fulfill.",
-  "type.rep.label": "Rep",
-  "type.rep.description": "REP credit distributed automatically.",
-  "type.rep.creditError": "Rep must be a positive number",
-  "type.nic.label": "NIC",
-  "type.nic.description": "NIC credit distributed automatically.",
-  "type.nic.creditError": "NIC must be a positive number",
   showOutcomes: "Show outcomes",
-  showOutcomesDescription:
-    "Turn on to show outcome details in the wave’s Outcome tab and winner views. Turn off to keep them hidden from participants.",
-  cancel: "Cancel",
-  addOutcome: "Add outcome",
-  removeOutcome: "Remove outcome",
-  "manual.title": "Manual outcome",
-  "manual.description.rank":
-    "Add a custom reward or result you will fulfill for the winning ranks you choose.",
-  "manual.description.approve":
-    "Add a custom reward or result you will fulfill for approved winners.",
-  "manual.rewardLabel": "What winners receive",
-  "manual.rewardHelper":
-    "When outcomes are shown, this text appears in the wave’s Outcome tab and winner views. Example: “Signed print shipped by the creator.”",
-  "manual.rewardPlaceholder": "Signed print shipped by the creator",
-  "manual.rewardError": "Describe what winners receive.",
-  "manual.ranksLabel": "Winning ranks",
-  "manual.ranksHelper":
-    "Enter ranks from 1 to 10,000 as single ranks or ranges separated by commas. Every listed rank receives this same outcome.",
-  "manual.ranksPlaceholder": "1-3, 5, 7-9",
-  "manual.ranksRequiredError": "Enter at least one winning rank.",
-  "manual.ranksFormatError":
-    "Use ranks from 1 to 10,000 and ranges separated by commas, such as 1-3, 5, 7-9.",
-  "manual.savedRanks": "Winning ranks: {ranks}",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { CreateWaveConfig, CreateWaveStep } from "@/types/waves.types";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
@@ -27,9 +27,21 @@ export default function CreateWaveLayout({
 }) {
   const { isIos } = useCapacitor();
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
+  const layoutTopRef = useRef<HTMLDivElement>(null);
+  const previousStepRef = useRef(step);
+
+  useEffect(() => {
+    if (previousStepRef.current !== step) {
+      layoutTopRef.current?.scrollIntoView({
+        block: "start",
+        inline: "nearest",
+      });
+      previousStepRef.current = step;
+    }
+  }, [step]);
 
   return (
-    <div className="tw-h-full tw-w-full lg:tw-flex">
+    <div ref={layoutTopRef} className="tw-h-full tw-w-full lg:tw-flex">
       <div className="tw-hidden lg:tw-flex lg:tw-w-52 lg:tw-shrink-0 lg:tw-border-r lg:tw-border-solid lg:tw-border-white/[0.06] lg:tw-bg-[#09090B] lg:tw-py-8 lg:tw-pl-3 lg:tw-pr-5">
         <CreateWavesMainSteps
           activeStep={step}

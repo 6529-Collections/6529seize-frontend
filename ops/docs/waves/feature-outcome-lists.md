@@ -59,8 +59,6 @@ This page owns both so users can map configured outcomes to per-rank results.
 
 - `Rep` cards show `Category` when `rep_category` exists.
 - `Rep` and `NIC` cards keep total-pool values visible while winner rows load.
-- Manual outcomes show the creator-authored custom reward or result description
-  that was entered during wave creation.
 - Manual winner rows show `-` when the returned winner amount is `0`.
 - Outcome cards continue loading while scrolling and show `Loading more outcomes...`.
 - Ranked rows/cards with rewards show outcome details; rows/cards with no rewards

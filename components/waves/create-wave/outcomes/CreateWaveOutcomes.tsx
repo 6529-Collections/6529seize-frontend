@@ -28,33 +28,17 @@ function ShowOutcomesToggle({
   readonly disabled: boolean;
   readonly onChange: (display: CreateWaveDisplayConfig) => void;
 }) {
-  const labelId = "create-wave-show-outcomes-label";
-  const descriptionId = "create-wave-show-outcomes-description";
-
   return (
     <label
-      className={`tw-flex tw-items-start tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-px-4 tw-py-3 ${
+      className={`tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-px-4 tw-py-3 ${
         disabled ? "tw-opacity-60" : ""
       }`}
     >
-      <span className="tw-min-w-0">
-        <span
-          id={labelId}
-          className="tw-block tw-text-sm tw-font-medium tw-text-iron-200"
-        >
-          {t(DEFAULT_LOCALE, "waves.create.outcomes.showOutcomes")}
-        </span>
-        <span
-          id={descriptionId}
-          className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400"
-        >
-          {t(DEFAULT_LOCALE, "waves.create.outcomes.showOutcomesDescription")}
-        </span>
+      <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+        {t(DEFAULT_LOCALE, "waves.create.outcomes.showOutcomes")}
       </span>
       <input
         type="checkbox"
-        aria-labelledby={labelId}
-        aria-describedby={descriptionId}
         checked={display.outcomesVisible}
         disabled={disabled}
         onChange={(event) =>
@@ -63,7 +47,7 @@ function ShowOutcomesToggle({
             outcomesVisible: event.target.checked,
           })
         }
-        className="tw-form-checkbox tw-mt-0.5 tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed"
+        className="tw-form-checkbox tw-size-5 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed"
       />
     </label>
   );
@@ -155,11 +139,8 @@ export default function WavesOutcome({
 
   return (
     <div className="tw-mx-auto tw-w-full">
-      <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
-        {t(DEFAULT_LOCALE, "waves.create.outcomes.title")}
-      </h2>
-      <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
-        {t(DEFAULT_LOCALE, "waves.create.outcomes.description")}
+      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
+        Choose outcome type
       </p>
       <div className="tw-mt-3 tw-space-y-6">
         {isApproveWave && (
@@ -175,19 +156,14 @@ export default function WavesOutcome({
             />
           </div>
         )}
-        <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
-          <legend className="tw-mb-2 tw-text-sm tw-font-semibold tw-text-iron-200">
-            {t(DEFAULT_LOCALE, "waves.create.outcomes.chooseType")}
-          </legend>
-          <CreateWaveOutcomeTypes
-            outcomeType={outcomeType}
-            setOutcomeType={setOutcomeType}
-          />
-        </fieldset>
+        <CreateWaveOutcomeTypes
+          outcomeType={outcomeType}
+          setOutcomeType={setOutcomeType}
+        />
         <div>
           {/* <h3 className="tw-mb-2 tw-text-base tw-font-semibold tw-text-white">Title for created outcome cards</h3> */}
           <CommonAnimationHeight>
-            {outcomeType !== null ? (
+            {outcomeType ? (
               components[outcomeType]
             ) : (
               <CreateWaveOutcomesRows

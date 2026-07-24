@@ -1,19 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import { CreateWaveOutcomeType } from "@/types/waves.types";
 import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
-import CreateWaveOutcomeFormActions from "../CreateWaveOutcomeFormActions";
-import { isMissingOutcomeAmount } from "../outcomeValidation";
-
-const CREDIT_LABEL = t(DEFAULT_LOCALE, "waves.create.outcomes.type.rep.label");
-const CREDIT_ERROR = t(
-  DEFAULT_LOCALE,
-  "waves.create.outcomes.type.rep.creditError"
-);
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesRepApprove({
   onOutcome,
@@ -48,7 +39,7 @@ export default function CreateWaveOutcomesRepApprove({
 
   const onSubmit = () => {
     const dontHaveCategorySet = !outcome.category;
-    const dontHaveCreditSet = isMissingOutcomeAmount(outcome.credit);
+    const dontHaveCreditSet = !outcome.credit;
     setCategoryError(dontHaveCategorySet);
     setCreditError(dontHaveCreditSet);
 
@@ -83,7 +74,7 @@ export default function CreateWaveOutcomesRepApprove({
                     ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
                     : "tw-caret-primary-400 tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
                 } ${
-                  !isMissingOutcomeAmount(outcome.credit)
+                  outcome.credit
                     ? "tw-text-primary-400 focus:tw-text-white"
                     : "tw-text-white"
                 } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm`}
@@ -97,7 +88,7 @@ export default function CreateWaveOutcomesRepApprove({
                     : "peer-focus:tw-text-primary-400"
                 } tw-absolute tw-start-1 tw-top-2 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-base tw-font-normal tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
               >
-                {CREDIT_LABEL}
+                Rep
               </label>
             </div>
             {creditError && (
@@ -118,14 +109,30 @@ export default function CreateWaveOutcomesRepApprove({
                   />
                 </svg>
                 <div className="tw-text-xs tw-font-medium tw-text-error">
-                  {CREDIT_ERROR}
+                  Rep must be a positive number
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        <CreateWaveOutcomeFormActions onCancel={onCancel} onSubmit={onSubmit} />
+        <div className="tw-flex tw-justify-end tw-gap-x-3">
+          <button
+            onClick={onCancel}
+            type="button"
+            className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700"
+          >
+            Cancel
+          </button>
+          <PrimaryButton
+            onClicked={onSubmit}
+            disabled={false}
+            loading={false}
+            padding="tw-px-4 tw-py-3"
+          >
+            Save
+          </PrimaryButton>
+        </div>
       </div>
     </div>
   );

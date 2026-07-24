@@ -10,8 +10,7 @@ import {
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
-import CreateWaveOutcomeFormActions from "../CreateWaveOutcomeFormActions";
-import { isMissingOutcomeAmount } from "../outcomeValidation";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesCICRank({
   onOutcome,
@@ -55,21 +54,20 @@ export default function CreateWaveOutcomesCICRank({
     ) ?? null;
 
   const getTotalValueError = (): boolean => {
-    const winnersConfig = outcome.winnersConfig;
     if (
-      winnersConfig?.creditValueType ===
+      outcome.winnersConfig?.creditValueType ===
       CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE
     ) {
       const totalValue = getWinnersTotal();
 
-      if (isMissingOutcomeAmount(totalValue)) {
+      if (!totalValue) {
         return true;
       }
-      if (totalValue !== winnersConfig.totalAmount) {
+      if (totalValue !== outcome.winnersConfig?.totalAmount) {
         return true;
       }
     } else {
-      return isMissingOutcomeAmount(winnersConfig?.totalAmount);
+      return !outcome.winnersConfig?.totalAmount;
     }
 
     return false;
@@ -86,11 +84,11 @@ export default function CreateWaveOutcomesCICRank({
   };
 
   const onSubmit = () => {
-    const nextTotalValueError = getTotalValueError();
-    const nextPercentageError = getPercentageError();
-    setTotalValueError(nextTotalValueError);
-    setPercentageError(nextPercentageError);
-    if (nextTotalValueError || nextPercentageError) {
+    const totalValueError = getTotalValueError();
+    const percentageError = getPercentageError();
+    setTotalValueError(totalValueError);
+    setPercentageError(percentageError);
+    if (totalValueError || percentageError) {
       return;
     }
     onOutcome(outcome);
@@ -107,7 +105,23 @@ export default function CreateWaveOutcomesCICRank({
             setWinnersConfig={setWinnersConfig}
           />
         )}
-        <CreateWaveOutcomeFormActions onCancel={onCancel} onSubmit={onSubmit} />
+        <div className="tw-flex tw-justify-end tw-gap-x-3">
+          <button
+            onClick={onCancel}
+            type="button"
+            className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700"
+          >
+            Cancel
+          </button>
+          <PrimaryButton
+            onClicked={onSubmit}
+            disabled={false}
+            loading={false}
+            padding="tw-px-4 tw-py-3"
+          >
+            Save
+          </PrimaryButton>
+        </div>
       </div>
     </div>
   );
