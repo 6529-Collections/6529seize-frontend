@@ -1,15 +1,22 @@
 "use client";
 
 /* istanbul ignore file */
-import { useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { usePathname } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import type { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
+import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
+import { useCreateWaveDrafts } from "./hooks/useCreateWaveDrafts";
 import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
+import useKeyboardFocusScroll from "./hooks/useKeyboardFocusScroll";
 import { useWaveConfig } from "./hooks/useWaveConfig";
+import CreateWaveDraftsSection from "./overview/CreateWaveDraftsSection";
 
 export default function CreateWave({
   profile,
@@ -23,8 +30,84 @@ export default function CreateWave({
   readonly parentWaveId?: string | null | undefined;
 }) {
   const waveConfig = useWaveConfig();
-  const { config, step, selectedOutcomeType, onStep } = waveConfig;
+  const {
+    config,
+    step,
+    selectedOutcomeType,
+    onStep,
+    errorFocusRequest,
+    setConfig,
+    endDateConfig,
+    setEndDateConfig,
+  } = waveConfig;
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useKeyboardFocusScroll(containerRef);
+
+  // On the native /waves/create route the create flow has no height-bounding
+  // ancestor, so we hand CreateWaveFlow the layout system's measured content
+  // height (viewport minus header/nav/safe-area). That makes its scroll region
+  // a real bounded scrollport the sticky footer can pin to — inside the app
+  // shell's transformed wrappers, where document-level sticky fails. The web
+  // modal bounds its own height, so it passes no style. `100dvh` is a safety
+  // fallback for the brief window before the layout system reports a measured
+  // height (keeps the footer reachable, never clipped).
+  const pathname = usePathname();
+  const { isApp } = useDeviceInfo();
+  const { contentContainerStyle } = useLayout();
+  const isNativeRoute = isApp && pathname === "/waves/create";
+  const nativeBoundedStyle: CSSProperties | undefined = isNativeRoute
+    ? contentContainerStyle.height
+      ? contentContainerStyle
+      : { height: "100dvh", maxHeight: "100dvh" }
+    : undefined;
+
+  // Each step renders fresh content, but the layout's scroll container keeps
+  // the offset where the user tapped Next (the bottom of the previous step),
+  // landing them mid-page on taller steps like the announce-wave Dates step.
+  // That scroller is the shared layout content container — the very element
+  // holding the stale offset — so anchoring the create flow to its top is
+  // exactly the fix, and is a no-op when the user is already at the top
+  // (so it never yanks an unscrolled desktop page).
+  const previousStepRef = useRef(step);
+  useEffect(() => {
+    if (previousStepRef.current === step) {
+      return;
+    }
+    previousStepRef.current = step;
+    const frame = requestAnimationFrame(() => {
+      containerRef.current?.scrollIntoView({ block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [step]);
+
+  // The Next button can sit a full screen below the offending field on
+  // phones, where a validation failure with no visible reaction reads as a
+  // dead button. Effects run after the error state commits, so the invalid
+  // field is in the DOM by now — and scoping to the container keeps stray
+  // aria-invalid fields elsewhere on the page from stealing the focus.
+  useEffect(() => {
+    if (!errorFocusRequest) {
+      return;
+    }
+    const invalidField = containerRef.current?.querySelector(
+      '[aria-invalid="true"]'
+    );
+    if (!(invalidField instanceof HTMLElement)) {
+      return;
+    }
+    invalidField.focus({ preventScroll: true });
+    invalidField.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [errorFocusRequest]);
+  const { drafts, loadDraft, deleteDraft, clearActiveDraft } =
+    useCreateWaveDrafts({ config, endDateConfig, step });
+
+  const onLoadDraft = (draft: CreateWaveDraft) => {
+    setConfig(draft.config);
+    setEndDateConfig(draft.endDateConfig);
+    loadDraft(draft);
+  };
+
   const {
     submitting,
     showDropError,
@@ -34,7 +117,12 @@ export default function CreateWave({
   } = useCreateWaveSubmission({
     config,
     descriptionRef,
-    onSuccess,
+    // The draft is discarded only once the server has confirmed the wave —
+    // a failed submit keeps the work recoverable.
+    onSuccess: () => {
+      clearActiveDraft();
+      onSuccess?.();
+    },
     parentWaveId,
   });
 
@@ -46,30 +134,49 @@ export default function CreateWave({
   };
 
   return (
-    <CreateWaveFlow
-      title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
-        config.overview.name ? `"${config.overview.name}"` : ""
-      }`}
-      onBack={onBack}
+    // The bottom safe-area region is inside the viewport (viewport-fit=cover)
+    // and iOS Safari's floating bottom chrome overlays it; without this
+    // padding the last row (Previous/Next) renders half-hidden behind it.
+    // The native-keyboard inset extends the scrollable area by the software
+    // keyboard's height so the page can scroll the footer (and a focused
+    // field) up above the keyboard instead of trapping it underneath.
+    <div
+      ref={containerRef}
+      className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-[calc(env(safe-area-inset-bottom,0px)+var(--native-keyboard-inset-bottom,0px))]"
     >
-      <CreateWaveLayout
-        config={config}
-        step={step}
-        showActions={selectedOutcomeType === null}
-        submitting={submitting}
-        setStep={setStep}
-        onComplete={onComplete}
+      <CreateWaveFlow
+        title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
+          config.overview.name ? `"${config.overview.name}"` : ""
+        }`}
+        onBack={onBack}
+        nativeBoundedStyle={nativeBoundedStyle}
       >
-        <CreateWaveStepContent
-          controller={waveConfig}
-          profile={profile}
-          descriptionRef={descriptionRef}
+        <CreateWaveLayout
+          config={config}
+          step={step}
+          showActions={selectedOutcomeType === null}
           submitting={submitting}
-          showDropError={showDropError}
-          onHaveDropToSubmitChange={onHaveDropToSubmitChange}
-          onInlineGroupCreate={onInlineGroupCreate}
-        />
-      </CreateWaveLayout>
-    </CreateWaveFlow>
+          setStep={setStep}
+          onComplete={onComplete}
+        >
+          <CreateWaveStepContent
+            controller={waveConfig}
+            profile={profile}
+            descriptionRef={descriptionRef}
+            submitting={submitting}
+            showDropError={showDropError}
+            overviewLeading={
+              <CreateWaveDraftsSection
+                drafts={drafts}
+                onLoad={onLoadDraft}
+                onDelete={deleteDraft}
+              />
+            }
+            onHaveDropToSubmitChange={onHaveDropToSubmitChange}
+            onInlineGroupCreate={onInlineGroupCreate}
+          />
+        </CreateWaveLayout>
+      </CreateWaveFlow>
+    </div>
   );
 }

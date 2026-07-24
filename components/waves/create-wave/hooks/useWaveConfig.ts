@@ -38,6 +38,7 @@ export function useWaveConfig() {
     return {
       overview: {
         type,
+        typeSelected: false,
         name: "",
         image: null,
       },
@@ -120,6 +121,9 @@ export function useWaveConfig() {
     useState<CreateWaveOutcomeType | null>(null);
 
   const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
+  // Bumped on every failed forward navigation; CreateWave watches it to
+  // focus the first invalid field after the error state has committed.
+  const [errorFocusRequest, setErrorFocusRequest] = useState(0);
 
   const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
     {}
@@ -154,10 +158,26 @@ export function useWaveConfig() {
     }
   }, [config.dates.endDate]);
 
-  // Clear errors when config changes
+  // Re-validate visible errors when config changes: drop the ones the user
+  // has fixed but keep the rest on screen. Wiping all of them on any change
+  // meant fixing one field hid every other pending error message. New errors
+  // are still only introduced on a forward-step attempt, never mid-typing.
   useEffect(() => {
-    setErrors([]);
-  }, [config]);
+    setErrors((previousErrors) => {
+      if (previousErrors.length === 0) {
+        return previousErrors;
+      }
+      const currentErrors = new Set(
+        getCreateWaveValidationErrors({ config: effectiveConfig, step })
+      );
+      const remainingErrors = previousErrors.filter((error) =>
+        currentErrors.has(error)
+      );
+      return remainingErrors.length === previousErrors.length
+        ? previousErrors
+        : remainingErrors;
+    });
+  }, [effectiveConfig, step]);
 
   // Section state updates
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
@@ -233,6 +253,7 @@ export function useWaveConfig() {
       });
       if (newErrors.length) {
         setErrors(newErrors);
+        setErrorFocusRequest((count) => count + 1);
         return;
       }
     }
@@ -463,6 +484,7 @@ export function useWaveConfig() {
     step,
     selectedOutcomeType,
     errors,
+    errorFocusRequest,
     groupsCache,
     isMemeCountLoading: shouldLoadMemeCount && memeCountQuery.isLoading,
     isMemeCountError: shouldLoadMemeCount && memeCountQuery.isError,

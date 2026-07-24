@@ -255,16 +255,27 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
   "rep.categories.validation",
   {
     errorTitle: "That category name won't work",
+    required: "Rep category is required.",
     tooShort: "Use at least {min} characters.",
     tooLong: "It's {length} characters long — the maximum is {max}.",
-    leadingDash: "A category can't start with a dash.",
     disallowedChars:
-      "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces and , . ? ! ' ( )",
     aiFilterDetails:
       "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
     closeErrorLabel: "Dismiss error",
   } as const
 );
+
+const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
+  heading: "Saved Drafts",
+  description:
+    "Saved on this device as you work. Tap one to pick up where you left off — the wave picture and description aren't kept, everything else is.",
+  savedAt: "Saved {timeAgo}",
+  untitled: "Untitled wave",
+  deleteLabel: 'Delete draft "{name}"',
+  newWave: "New Wave",
+  count: "{count} saved drafts",
+} as const);
 
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
@@ -863,7 +874,22 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
+  "empty.title": "No outcomes yet — add at least one to continue",
+  "empty.description":
+    "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
 } as const);
+
+const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
+  step: "Step {current} of {total}",
+  label: "Wave setup progress",
+} as const);
+
+const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
+  "waves.create.description",
+  {
+    placeholder: "Describe your wave",
+  } as const
+);
 
 const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
   "waves.leaderboard.phase",
@@ -2183,6 +2209,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_CREATE_PROGRESS_MESSAGES,
+  ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,
   ...GROUP_NFT_OWNERSHIP_MESSAGES,
@@ -2202,6 +2230,7 @@ export const EN_US_MESSAGES = {
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
   ...REP_CATEGORY_VALIDATION_MESSAGES,
+  ...CREATE_WAVE_DRAFTS_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,

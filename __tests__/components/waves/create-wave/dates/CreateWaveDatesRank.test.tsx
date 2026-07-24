@@ -46,9 +46,6 @@ jest.mock(
             "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE"
           )
         )}
-        onClick={() => {
-          props.onInteraction();
-        }}
       >
         decisions
       </button>
@@ -352,7 +349,7 @@ describe("CreateWaveDatesRank", () => {
     );
   });
 
-  it("auto collapses start section after decisions interaction", async () => {
+  it("keeps the start section expanded during decisions interaction", async () => {
     const user = userEvent.setup();
     render(
       <CreateWaveDatesRank
@@ -367,10 +364,13 @@ describe("CreateWaveDatesRank", () => {
       "data-expanded",
       "true"
     );
+    // Auto-collapsing the section above the one being edited shifts the
+    // whole page mid-tap (reported as the calendar "jumping around" on
+    // mobile) — interacting with decisions must not touch the start section.
     await user.click(screen.getByTestId("decisions"));
     expect(screen.getByTestId("start")).toHaveAttribute(
       "data-expanded",
-      "false"
+      "true"
     );
   });
 

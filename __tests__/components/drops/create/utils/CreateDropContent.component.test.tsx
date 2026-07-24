@@ -246,7 +246,8 @@ describe("CreateDropContent basic", () => {
         onUploadEditorStateChange={jest.fn()}
       />
     );
-    expect(getByText("Drop a post")).toBeInTheDocument();
+    // This legacy editor's only consumer is the create-wave Description step.
+    expect(getByText("Describe your wave")).toBeInTheDocument();
     ref.current.clearEditorState();
     expect(mockClear).toHaveBeenCalled();
     expect(linkProps.validateUrl("https://example.com")).toBe(true);

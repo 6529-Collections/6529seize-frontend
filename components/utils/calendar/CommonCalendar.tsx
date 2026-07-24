@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { generateCalendar } from "@/helpers/calendar/calendar.helpers";
 import CommonCalendarDay from "./CommonCalendarDay";
 
@@ -59,6 +59,30 @@ function CommonCalendarView({
       selectedTimestamp,
     })
   );
+
+  // Follow selection changes in place instead of remounting via a key:
+  // remounting destroys the tapped day button mid-gesture, which breaks
+  // scroll anchoring on mobile Safari and yanks the page. Only snap the
+  // view when the selection lands in a different month — time-of-day
+  // changes and month browsing must not move it.
+  const selectedMonthKey =
+    selectedTimestamp !== null
+      ? `${new Date(selectedTimestamp).getFullYear()}-${new Date(
+          selectedTimestamp
+        ).getMonth()}`
+      : `initial-${initialYear}-${initialMonth}`;
+  const lastSelectedMonthKeyRef = useRef(selectedMonthKey);
+  useEffect(() => {
+    if (lastSelectedMonthKeyRef.current === selectedMonthKey) {
+      return;
+    }
+    lastSelectedMonthKeyRef.current = selectedMonthKey;
+    const target =
+      selectedTimestamp !== null
+        ? new Date(selectedTimestamp)
+        : new Date(initialYear, initialMonth, 1);
+    setVisibleDate(new Date(target.getFullYear(), target.getMonth(), 1));
+  }, [selectedMonthKey, selectedTimestamp, initialMonth, initialYear]);
   const month = visibleDate.getMonth();
   const year = visibleDate.getFullYear();
   const days = generateCalendar({ month, year });
@@ -153,29 +177,6 @@ function CommonCalendarView({
   );
 }
 
-const getResetKey = ({
-  initialMonth,
-  initialYear,
-  selectedTimestamp,
-}: Pick<
-  CommonCalendarProps,
-  "initialMonth" | "initialYear" | "selectedTimestamp"
->) => {
-  if (selectedTimestamp === null) {
-    return `initial-${initialYear}-${initialMonth}`;
-  }
-
-  const selectedDate = new Date(selectedTimestamp);
-  return [
-    "selected",
-    selectedDate.getFullYear(),
-    selectedDate.getMonth(),
-    selectedDate.getDate(),
-  ].join("-");
-};
-
 export default function CommonCalendar(props: CommonCalendarProps) {
-  const resetKey = getResetKey(props);
-
-  return <CommonCalendarView key={resetKey} {...props} />;
+  return <CommonCalendarView {...props} />;
 }

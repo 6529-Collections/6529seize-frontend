@@ -34,6 +34,12 @@ jest.mock("@/components/waves/create-wave/CreateWaveFlow", () => {
 // Mock all dependencies
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(() => "/waves/create"),
+}));
+
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ isApp: false })),
 }));
 
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -189,6 +195,7 @@ describe("CreateWave", () => {
     config: {
       overview: {
         type: "CHAT",
+        typeSelected: true,
         name: "Test Wave",
         image: null,
       },
@@ -1189,26 +1196,20 @@ describe("CreateWave", () => {
     expect(descriptionComponent).toBeInTheDocument();
   });
 
-  it("applies iOS specific styling when on iOS with keyboard not visible", () => {
+  it("renders a sticky glass action footer instead of the legacy iOS bottom margin", () => {
     const useCapacitor = require("@/hooks/useCapacitor").default;
     useCapacitor.mockReturnValue({ isIos: true });
     (useNativeKeyboard as jest.Mock).mockReturnValue({ isVisible: false });
 
     renderCreateWave();
 
-    // Look for the flex-1 div that gets the iOS styling
-    const flexDiv = document.querySelector(".tw-flex-1");
-    expect(flexDiv).toHaveClass("tw-mb-10");
-  });
+    // The old iOS-only tw-mb-10 dock spacer is gone (it read as a chunky
+    // footer); Prev/Next now live in a sticky, translucent-blur footer.
+    const mainColumn = document.querySelector(".tw-flex-1.tw-bg-iron-950");
+    expect(mainColumn).not.toHaveClass("tw-mb-10");
 
-  it("does not apply iOS styling when keyboard is visible", () => {
-    const useCapacitor = require("@/hooks/useCapacitor").default;
-    useCapacitor.mockReturnValue({ isIos: true });
-    (useNativeKeyboard as jest.Mock).mockReturnValue({ isVisible: true });
-
-    renderCreateWave();
-
-    const flexDiv = document.querySelector(".tw-flex-1");
-    expect(flexDiv).not.toHaveClass("tw-mb-10");
+    const footer = screen.getByTestId("create-wave-actions").parentElement;
+    expect(footer?.className).toContain("tw-sticky");
+    expect(footer?.className).toContain("tw-backdrop-blur-md");
   });
 });

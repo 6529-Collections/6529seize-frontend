@@ -9,13 +9,11 @@ export default function CreateWaveOutcomesRowManualApprove({
   readonly removeOutcome: () => void;
 }) {
   return (
-    <div className="tw-grid tw-w-full tw-grid-cols-10 tw-items-center tw-justify-between tw-gap-x-6 tw-rounded-lg tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-px-5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-primary-400/10">
-      <div className="tw-col-span-1">
-        <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-white">
-          Manual
-        </h3>
-      </div>
-      <div className="tw-col-span-8">
+    <div className="tw-flex tw-w-full tw-items-center tw-gap-x-4 tw-rounded-lg tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-px-5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-primary-400/10">
+      <h3 className="tw-mb-0 tw-shrink-0 tw-text-sm tw-font-semibold tw-text-white">
+        Manual
+      </h3>
+      <div className="tw-min-w-0 tw-flex-1">
         <>
           <p
             className="tw-mb-0 tw-truncate tw-text-sm tw-font-normal tw-text-white"
@@ -35,7 +33,7 @@ export default function CreateWaveOutcomesRowManualApprove({
           </Tooltip>
         </>
       </div>
-      <div className="tw-col-span-1 tw-flex tw-justify-end">
+      <div className="tw-flex tw-shrink-0 tw-justify-end">
         <button
           onClick={removeOutcome}
           aria-label="Remove"

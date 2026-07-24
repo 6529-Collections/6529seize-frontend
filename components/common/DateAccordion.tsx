@@ -45,7 +45,10 @@ export default function DateAccordion({
                 className="tw-flex tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 <m.span
-                  animate={isExpanded ? { rotate: 0 } : { rotate: 180 }}
+                  // Match the app-wide chevron convention: points down when
+                  // collapsed, rotates up when expanded (as in
+                  // GrantTokensDisclosure, TimelineToggleHeader, the dropdowns).
+                  animate={isExpanded ? { rotate: 180 } : { rotate: 0 }}
                   transition={{ duration: 0.3 }}
                   className="tw-shrink-0 tw-rounded-full tw-p-1.5 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-700/30"
                 >
@@ -72,7 +75,11 @@ export default function DateAccordion({
             {!isExpanded &&
               collapsedContent !== undefined &&
               collapsedContent !== null && (
-                <div className="tw-opacity-80 tw-transition-opacity tw-duration-200 hover:tw-opacity-100">
+                // The summary mini-cards need more room than the fixed-height
+                // header offers on small screens, where they overflow and
+                // paint over the title; the collapsed title alone carries the
+                // state there.
+                <div className="tw-hidden tw-opacity-80 tw-transition-opacity tw-duration-200 hover:tw-opacity-100 lg:tw-block">
                   {collapsedContent}
                 </div>
               )}

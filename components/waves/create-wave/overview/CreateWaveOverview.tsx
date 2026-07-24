@@ -73,12 +73,12 @@ export default function CreateWaveOverview({
         />
       </div>
       <CreateWaveType
-        selected={overview.type}
+        selected={overview.typeSelected ? overview.type : null}
+        errors={errors}
         onChange={(type) =>
-          onChange({
-            key: "type",
-            value: type,
-          })
+          // Record the explicit pick so the selector highlights it and the
+          // Overview "type required" gate clears.
+          setOverview({ ...overview, type, typeSelected: true })
         }
       />
       {overview.type === ApiWaveType.Rank && (
