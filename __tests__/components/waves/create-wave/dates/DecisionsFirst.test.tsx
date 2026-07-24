@@ -41,7 +41,7 @@ describe("DecisionsFirst", () => {
     expect(setFirstDecisionTime).toHaveBeenCalledWith(expect.any(Number));
   });
 
-  it("initializes to end of day one week out when minTimestamp provided", async () => {
+  it("does not seed a default on mount (the config/date layer owns that)", async () => {
     const setFirstDecisionTime = jest.fn();
     const minTs = new Date("2023-01-01T12:00:00Z").getTime();
     render(
@@ -51,12 +51,10 @@ describe("DecisionsFirst", () => {
         minTimestamp={minTs}
       />
     );
-    // Defaulting to the SAME day would end the whole wave within hours, so
-    // the default first announcement is a week out at 23:59.
-    const expected = new Date(minTs);
-    expected.setDate(expected.getDate() + 7);
-    expected.setHours(23, 59, 0, 0);
+    // The safe one-week-out default now lives in getDefaultFirstDecisionTime,
+    // applied at config init and in the date-commit path — this step no longer
+    // pushes a default back up to its parent via an effect.
     await screen.findByText("calendar"); // wait for render
-    expect(setFirstDecisionTime).toHaveBeenCalledWith(expected.getTime());
+    expect(setFirstDecisionTime).not.toHaveBeenCalled();
   });
 });

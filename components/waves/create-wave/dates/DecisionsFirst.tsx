@@ -18,48 +18,23 @@ export default function DecisionsFirst({
   minTimestamp,
 }: DecisionsFirstProps) {
   const [selectedTimestamp, setSelectedTimestamp] = useState(firstDecisionTime);
-  const [minTimeObj, setMinTimeObj] = useState<{
-    hours: number;
-    minutes: number;
-  } | null>(null);
+
+  // The min time-of-day is derived straight from minTimestamp (voting start);
+  // no need to mirror it into state. The safe default for firstDecisionTime is
+  // owned by the config/date layer (getDefaultFirstDecisionTime), so this step
+  // never seeds it back up to its parent.
+  const minTimeObj =
+    minTimestamp !== null
+      ? {
+          hours: new Date(minTimestamp).getHours(),
+          minutes: new Date(minTimestamp).getMinutes(),
+        }
+      : null;
 
   // Update local state if the prop changes
   useEffect(() => {
     setSelectedTimestamp(firstDecisionTime);
   }, [firstDecisionTime]);
-
-  // Calculate min time object and handle initial/default date setting
-  useEffect(() => {
-    if (minTimestamp) {
-      // Create a date from minTimestamp to get hours and minutes
-      const minDate = new Date(minTimestamp);
-      setMinTimeObj({
-        hours: minDate.getHours(),
-        minutes: minDate.getMinutes(),
-      });
-
-      // Only adjust times on initial load or when min timestamp changes
-      // We don't want to reset on every render or prop change
-      const isInitialOrChange =
-        !firstDecisionTime || // Initial load
-        firstDecisionTime < minTimestamp || // Current time is before min time
-        firstDecisionTime === minTimestamp; // Exact match (likely coming from a prop update)
-
-      if (isInitialOrChange) {
-        // Default to one week out at 11:59 PM. Defaulting to the SAME day
-        // made the whole wave end within hours for creators who accepted the
-        // defaults (the last announcement is the wave's end date).
-        const defaultDate = new Date(minTimestamp);
-        defaultDate.setDate(defaultDate.getDate() + 7);
-        defaultDate.setHours(23, 59, 0, 0);
-
-        setSelectedTimestamp(defaultDate.getTime());
-        setFirstDecisionTime(defaultDate.getTime());
-      }
-    } else {
-      setMinTimeObj(null);
-    }
-  }, [minTimestamp, setFirstDecisionTime, firstDecisionTime]);
 
   const getHours = useCallback(() => {
     return new Date(selectedTimestamp).getHours();

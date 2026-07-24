@@ -1,6 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import type { CreateWaveConfig, CreateWaveStep } from "@/types/waves.types";
 import { CreateWaveStep as CreateWaveStepEnum } from "@/types/waves.types";
 import type {
@@ -9,7 +14,9 @@ import type {
 } from "@/helpers/waves/create-wave-draft.helpers";
 import {
   deleteCreateWaveDraft,
-  readCreateWaveDrafts,
+  getCreateWaveDraftsSnapshot,
+  getServerCreateWaveDraftsSnapshot,
+  subscribeToCreateWaveDrafts,
   upsertCreateWaveDraft,
 } from "@/helpers/waves/create-wave-draft.helpers";
 // Not crypto.randomUUID: that needs a secure context, and the create flow
@@ -39,7 +46,15 @@ export const useCreateWaveDrafts = ({
   readonly endDateConfig: CreateWaveDraftEndDateConfig;
   readonly step: CreateWaveStep;
 }) => {
-  const [drafts, setDrafts] = useState<CreateWaveDraft[]>([]);
+  // Drafts live in localStorage; reading them through an external store keeps
+  // the SSR/first-client render empty (no localStorage on the server) and
+  // repopulates after hydration, without an init-in-effect. Every write path
+  // (upsert/delete) notifies the store, so this stays current automatically.
+  const drafts = useSyncExternalStore(
+    subscribeToCreateWaveDrafts,
+    getCreateWaveDraftsSnapshot,
+    getServerCreateWaveDraftsSnapshot
+  );
   // The active draft id never renders, and load/save/clear must read and
   // write it synchronously within a single event — a ref avoids any
   // cross-render timing where a debounce could fork a duplicate before a
@@ -53,10 +68,6 @@ export const useCreateWaveDrafts = ({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   );
-
-  useEffect(() => {
-    setDrafts(readCreateWaveDrafts());
-  }, []);
 
   useEffect(() => {
     const leftOverview =
@@ -81,7 +92,6 @@ export const useCreateWaveDrafts = ({
         config,
         endDateConfig,
       });
-      setDrafts(readCreateWaveDrafts());
     }, AUTOSAVE_DEBOUNCE_MS);
     return () => {
       if (debounceRef.current) {
@@ -99,7 +109,6 @@ export const useCreateWaveDrafts = ({
 
   const deleteDraft = useCallback((id: string) => {
     deleteCreateWaveDraft(id);
-    setDrafts(readCreateWaveDrafts());
     if (activeDraftIdRef.current === id) {
       // Do not immediately re-save what the user just discarded.
       activeDraftIdRef.current = null;
@@ -116,7 +125,6 @@ export const useCreateWaveDrafts = ({
     if (activeDraftIdRef.current !== null) {
       deleteCreateWaveDraft(activeDraftIdRef.current);
       activeDraftIdRef.current = null;
-      setDrafts(readCreateWaveDrafts());
     }
   }, []);
 

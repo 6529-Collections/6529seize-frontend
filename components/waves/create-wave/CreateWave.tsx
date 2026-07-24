@@ -56,10 +56,12 @@ export default function CreateWave({
   const { isApp } = useDeviceInfo();
   const { contentContainerStyle } = useLayout();
   const isNativeRoute = isApp && pathname === "/waves/create";
-  const nativeBoundedStyle: CSSProperties | undefined = isNativeRoute
-    ? contentContainerStyle.height
+  const measuredOrFallbackStyle: CSSProperties =
+    contentContainerStyle.height !== undefined
       ? contentContainerStyle
-      : { height: "100dvh", maxHeight: "100dvh" }
+      : { height: "100dvh", maxHeight: "100dvh" };
+  const nativeBoundedStyle: CSSProperties | undefined = isNativeRoute
+    ? measuredOrFallbackStyle
     : undefined;
 
   // Each step renders fresh content, but the layout's scroll container keeps

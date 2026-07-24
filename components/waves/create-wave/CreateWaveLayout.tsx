@@ -41,7 +41,7 @@ export default function CreateWaveLayout({
         <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">
           <CreateWaveMobileProgress
             activeStep={step}
-            ongoingRanking={config.dates?.ongoingRanking ?? false}
+            ongoingRanking={config.dates.ongoingRanking ?? false}
             waveType={config.overview.type}
           />
           <div className="tw-w-full tw-flex-1 tw-p-4 lg:tw-p-8">{children}</div>

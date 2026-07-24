@@ -18,6 +18,11 @@ import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.v
 import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.validation";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { useMemeCardCount } from "./useMemeCardCount";
+import { getDefaultFirstDecisionTime } from "../services/waveDecisionService";
+
+// Stable empty reference so the derived `errors` keeps identity while there
+// is nothing to show (no surfaced errors), avoiding needless re-renders.
+const EMPTY_VALIDATION_ERRORS: CREATE_WAVE_VALIDATION_ERROR[] = [];
 
 interface EndDateConfig {
   time: number | null;
@@ -56,7 +61,7 @@ export function useWaveConfig() {
         submissionStartDate: now,
         votingStartDate: now,
         endDate: type === ApiWaveType.Rank ? now : null,
-        firstDecisionTime: now,
+        firstDecisionTime: getDefaultFirstDecisionTime(now),
         subsequentDecisions: [],
         isRolling: false,
         ongoingRanking: false,
@@ -120,7 +125,13 @@ export function useWaveConfig() {
   const [selectedOutcomeType, setSelectedOutcomeType] =
     useState<CreateWaveOutcomeType | null>(null);
 
-  const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
+  // Errors surfaced by the last failed forward-navigation attempt. Visible
+  // errors are derived from these during render (below): a surfaced error
+  // stays on screen only while it still fails, so fixing one field clears its
+  // message without wiping the others, and none appear mid-typing.
+  const [surfacedErrors, setSurfacedErrors] = useState<
+    CREATE_WAVE_VALIDATION_ERROR[]
+  >([]);
   // Bumped on every failed forward navigation; CreateWave watches it to
   // focus the first invalid field after the error state has committed.
   const [errorFocusRequest, setErrorFocusRequest] = useState(0);
@@ -158,26 +169,18 @@ export function useWaveConfig() {
     }
   }, [config.dates.endDate]);
 
-  // Re-validate visible errors when config changes: drop the ones the user
-  // has fixed but keep the rest on screen. Wiping all of them on any change
-  // meant fixing one field hid every other pending error message. New errors
-  // are still only introduced on a forward-step attempt, never mid-typing.
-  useEffect(() => {
-    setErrors((previousErrors) => {
-      if (previousErrors.length === 0) {
-        return previousErrors;
-      }
-      const currentErrors = new Set(
-        getCreateWaveValidationErrors({ config: effectiveConfig, step })
-      );
-      const remainingErrors = previousErrors.filter((error) =>
-        currentErrors.has(error)
-      );
-      return remainingErrors.length === previousErrors.length
-        ? previousErrors
-        : remainingErrors;
-    });
-  }, [effectiveConfig, step]);
+  // Visible errors: the surfaced ones that still fail against the current
+  // config/step. Derived during render (not stored) so fixing a field drops
+  // just that message and the rest stay until they resolve too.
+  const errors = useMemo<CREATE_WAVE_VALIDATION_ERROR[]>(() => {
+    if (surfacedErrors.length === 0) {
+      return EMPTY_VALIDATION_ERRORS;
+    }
+    const currentErrors = new Set(
+      getCreateWaveValidationErrors({ config: effectiveConfig, step })
+    );
+    return surfacedErrors.filter((error) => currentErrors.has(error));
+  }, [surfacedErrors, effectiveConfig, step]);
 
   // Section state updates
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
@@ -252,12 +255,12 @@ export function useWaveConfig() {
         step,
       });
       if (newErrors.length) {
-        setErrors(newErrors);
+        setSurfacedErrors(newErrors);
         setErrorFocusRequest((count) => count + 1);
         return;
       }
     }
-    setErrors([]);
+    setSurfacedErrors([]);
     setSelectedOutcomeType(null);
     setStep(newStep);
   };
@@ -265,7 +268,7 @@ export function useWaveConfig() {
   // Outcome type management
   const onOutcomeTypeChange = (outcomeType: CreateWaveOutcomeType | null) => {
     setSelectedOutcomeType(outcomeType);
-    setErrors([]);
+    setSurfacedErrors([]);
   };
 
   // Group selection

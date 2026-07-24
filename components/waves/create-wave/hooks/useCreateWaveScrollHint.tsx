@@ -37,10 +37,10 @@ export function useCanScrollDown(
   const [canScrollDown, setCanScrollDown] = useState(false);
 
   useEffect(() => {
-    const browserWindow = globalThis.window;
-    if (!browserWindow) {
+    if (typeof window === "undefined") {
       return;
     }
+    const browserWindow = window;
     const region = regionRef.current;
     const scroller: HTMLElement | null = pageScroll
       ? ((document.scrollingElement as HTMLElement | null) ??

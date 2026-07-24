@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { generateCalendar } from "@/helpers/calendar/calendar.helpers";
 import CommonCalendarDay from "./CommonCalendarDay";
 
@@ -71,18 +71,20 @@ function CommonCalendarView({
           selectedTimestamp
         ).getMonth()}`
       : `initial-${initialYear}-${initialMonth}`;
-  const lastSelectedMonthKeyRef = useRef(selectedMonthKey);
-  useEffect(() => {
-    if (lastSelectedMonthKeyRef.current === selectedMonthKey) {
-      return;
-    }
-    lastSelectedMonthKeyRef.current = selectedMonthKey;
+  // Snap the view to the selected month when (and only when) the selection
+  // lands in a different month — computed during render via the "adjust state
+  // on prop change" pattern, so month browsing and time-of-day edits (which
+  // leave the month key unchanged) never move the view.
+  const [lastSelectedMonthKey, setLastSelectedMonthKey] =
+    useState(selectedMonthKey);
+  if (lastSelectedMonthKey !== selectedMonthKey) {
+    setLastSelectedMonthKey(selectedMonthKey);
     const target =
       selectedTimestamp !== null
         ? new Date(selectedTimestamp)
         : new Date(initialYear, initialMonth, 1);
     setVisibleDate(new Date(target.getFullYear(), target.getMonth(), 1));
-  }, [selectedMonthKey, selectedTimestamp, initialMonth, initialYear]);
+  }
   const month = visibleDate.getMonth();
   const year = visibleDate.getFullYear();
   const days = generateCalendar({ month, year });

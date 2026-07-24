@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDatesRank from "@/components/waves/create-wave/dates/CreateWaveDatesRank";
-import { adjustDatesAfterSubmissionChange } from "@/components/waves/create-wave/services/waveDecisionService";
+import {
+  adjustDatesAfterSubmissionChange,
+  getDefaultFirstDecisionTime,
+} from "@/components/waves/create-wave/services/waveDecisionService";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
@@ -145,7 +148,9 @@ describe("CreateWaveDatesRank", () => {
       ...baseDates,
       submissionStartDate: 50,
       votingStartDate: 50,
-      firstDecisionTime: 50,
+      // Voting start caught up to the first decision (both 50), so it is
+      // reseeded to the safe one-week-out default rather than left flush.
+      firstDecisionTime: getDefaultFirstDecisionTime(50),
       endDate: 123,
     });
   });

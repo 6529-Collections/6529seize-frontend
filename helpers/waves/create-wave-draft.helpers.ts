@@ -51,16 +51,18 @@ const getLocalStorage = (): Storage | null => {
 };
 
 const isDraftShaped = (candidate: unknown): candidate is CreateWaveDraft => {
-  if (!candidate || typeof candidate !== "object") {
+  if (candidate === null || typeof candidate !== "object") {
     return false;
   }
-  const draft = candidate as Partial<CreateWaveDraft>;
+  const draft = candidate as {
+    readonly id?: unknown;
+    readonly updatedAt?: unknown;
+    readonly config?: { readonly overview?: { readonly name?: unknown } };
+  };
   return (
     typeof draft.id === "string" &&
     typeof draft.updatedAt === "number" &&
-    !!draft.config &&
-    typeof draft.config === "object" &&
-    typeof draft.config.overview?.name === "string"
+    typeof draft.config?.overview?.name === "string"
   );
 };
 
@@ -91,6 +93,40 @@ export const readCreateWaveDrafts = (): CreateWaveDraft[] => {
   }
 };
 
+// External-store plumbing so components can read drafts via
+// useSyncExternalStore instead of an init-in-effect. The snapshot is cached
+// (and returned by reference) so a re-render never sees a fresh array unless
+// the store actually changed — required, or useSyncExternalStore loops.
+const draftsListeners = new Set<() => void>();
+let draftsSnapshot: CreateWaveDraft[] | null = null;
+// Stable reference for SSR/hydration: the server has no localStorage, so the
+// first client render must match this empty snapshot and only populate after.
+const EMPTY_DRAFTS: CreateWaveDraft[] = [];
+
+const emitDraftsChanged = (): void => {
+  draftsSnapshot = null;
+  for (const listener of draftsListeners) {
+    listener();
+  }
+};
+
+export const subscribeToCreateWaveDrafts = (
+  listener: () => void
+): (() => void) => {
+  draftsListeners.add(listener);
+  return () => {
+    draftsListeners.delete(listener);
+  };
+};
+
+export const getCreateWaveDraftsSnapshot = (): CreateWaveDraft[] => {
+  draftsSnapshot ??= readCreateWaveDrafts();
+  return draftsSnapshot;
+};
+
+export const getServerCreateWaveDraftsSnapshot = (): CreateWaveDraft[] =>
+  EMPTY_DRAFTS;
+
 const writeAll = (drafts: CreateWaveDraft[]): void => {
   const storage = getLocalStorage();
   if (!storage) {
@@ -109,6 +145,9 @@ const writeAll = (drafts: CreateWaveDraft[]): void => {
   } catch {
     // Quota or serialization failure must never break wave creation.
   }
+  // Notify subscribers regardless of the storage write outcome so an in-memory
+  // reader stays consistent with what the next read would return.
+  emitDraftsChanged();
 };
 
 /**

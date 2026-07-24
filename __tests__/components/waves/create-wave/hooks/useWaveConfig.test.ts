@@ -11,6 +11,7 @@ import {
 } from "@/types/waves.types";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import * as createWaveValidation from "@/helpers/waves/create-wave.validation";
+import { getDefaultFirstDecisionTime } from "@/components/waves/create-wave/services/waveDecisionService";
 
 // Mock dependencies
 jest.mock("@/helpers/waves/create-wave.validation");
@@ -58,7 +59,11 @@ describe("useWaveConfig", () => {
 
       expect(result.current.config.dates.submissionStartDate).toBe(1000000);
       expect(result.current.config.dates.votingStartDate).toBe(1000000);
-      expect(result.current.config.dates.firstDecisionTime).toBe(1000000);
+      // First decision is seeded to the safe one-week-out default, not flush
+      // against voting start (which would end the wave within hours).
+      expect(result.current.config.dates.firstDecisionTime).toBe(
+        getDefaultFirstDecisionTime(1000000)
+      );
       expect(result.current.config.dates.endDate).toBeNull();
       expect(result.current.config.dates.subsequentDecisions).toEqual([]);
       expect(result.current.config.dates.isRolling).toBe(false);
@@ -168,6 +173,7 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.setOverview({
           type: ApiWaveType.Rank,
+          typeSelected: true,
           name: "Test Wave",
           image: new File([""], "test-image.jpg", { type: "image/jpeg" }),
         });
@@ -197,6 +203,7 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.setOverview({
           type: ApiWaveType.Approve,
+          typeSelected: true,
           name: "Approve Wave",
           image: null,
         });
@@ -235,6 +242,7 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.setOverview({
           type: ApiWaveType.Approve,
+          typeSelected: true,
           name: "Approve Wave",
           image: null,
         });
@@ -704,6 +712,7 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.setOverview({
           type: ApiWaveType.Approve,
+          typeSelected: true,
           name: "Approve",
           image: null,
         });
@@ -732,6 +741,7 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.setOverview({
           type: ApiWaveType.Approve,
+          typeSelected: true,
           name: "Approve",
           image: null,
         });
@@ -997,6 +1007,7 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.setOverview({
           type: ApiWaveType.Rank,
+          typeSelected: true,
           name: "Rank wave",
           image: null,
         });
@@ -1081,6 +1092,7 @@ describe("useWaveConfig", () => {
         ...result.current.config,
         overview: {
           type: ApiWaveType.Rank,
+          typeSelected: true,
           name: "Direct Update",
           image: new File([""], "direct.jpg", { type: "image/jpeg" }),
         },

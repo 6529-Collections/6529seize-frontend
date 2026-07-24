@@ -10,6 +10,7 @@ import {
   adjustDatesAfterSubmissionChange,
   calculateEndDate,
   clampRollingEndDate,
+  ensureSafeFirstDecisionTime,
   validateDateSequence,
 } from "../services/waveDecisionService";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
@@ -108,6 +109,13 @@ export default function CreateWaveDatesRank({
         votingStartDate: normalizedTimeline.votingStartDate,
         firstDecisionTime: normalizedTimeline.firstDecisionTime,
       };
+    }
+
+    // Reseed the first decision to the safe one-week default whenever voting
+    // start has caught up to (or past) it, before any end-date math reads it.
+    // Perpetual ranking has no decision schedule, so it is left untouched.
+    if (!normalizedDates.ongoingRanking) {
+      normalizedDates = ensureSafeFirstDecisionTime(normalizedDates);
     }
 
     if (normalizedDates.ongoingRanking) {

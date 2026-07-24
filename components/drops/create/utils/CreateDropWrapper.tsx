@@ -176,23 +176,16 @@ const CreateDropWrapper = forwardRef<
         );
       }
     }, [hasValidWalletAuth, address]);
-    const [screenType, setScreenType] = useState<CreateDropScreenType>(
-      forceScreenType ?? CreateDropScreenType.DESKTOP
-    );
-    useEffect(() => {
-      // Embedded usages (the create-wave Description step) pin the inline
-      // rendering: the MOBILE branch wraps the editor in a modal sheet, which
-      // cannot host a page-flow step (dismissing it would kill the step).
-      if (forceScreenType) {
-        setScreenType(forceScreenType);
-        return;
-      }
-      if (breakpoint === "LG") {
-        setScreenType(CreateDropScreenType.DESKTOP);
-      } else {
-        setScreenType(CreateDropScreenType.MOBILE);
-      }
-    }, [breakpoint, forceScreenType]);
+    // Derived straight from the breakpoint (and the optional pin), so compute
+    // it during render rather than mirroring it into state via an effect.
+    // Embedded usages (the create-wave Description step) pin the inline
+    // rendering: the MOBILE branch wraps the editor in a modal sheet, which
+    // cannot host a page-flow step (dismissing it would kill the step).
+    const screenType: CreateDropScreenType =
+      forceScreenType ??
+      (breakpoint === "LG"
+        ? CreateDropScreenType.DESKTOP
+        : CreateDropScreenType.MOBILE);
 
     const prevWaveIdRef = useRef<string | null>(waveProps?.id ?? null);
     const isWaveSwitch = prevWaveIdRef.current !== (waveProps?.id ?? null);

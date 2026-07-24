@@ -48,11 +48,14 @@ export default function CreateWaveOutcomesRepRank({
   const categoryViolation = outcome.category
     ? getRepCategoryViolation(outcome.category)
     : null;
-  const categoryErrorMessage = categoryViolation
-    ? t(locale, categoryViolation.key, { ...categoryViolation.params })
-    : showCategoryRequired
-      ? t(locale, "rep.categories.validation.required")
-      : null;
+  let categoryErrorMessage: string | null = null;
+  if (categoryViolation) {
+    categoryErrorMessage = t(locale, categoryViolation.key, {
+      ...categoryViolation.params,
+    });
+  } else if (showCategoryRequired) {
+    categoryErrorMessage = t(locale, "rep.categories.validation.required");
+  }
 
   const setCategory = (category: string | null) => {
     setShowCategoryRequired(false);
