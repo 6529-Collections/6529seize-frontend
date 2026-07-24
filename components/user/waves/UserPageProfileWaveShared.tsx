@@ -184,7 +184,7 @@ export function OfficialWaveSummary({
     <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-2 lg:tw-gap-y-0">
       <div className="tw-col-start-1 tw-row-start-1 tw-min-w-0 tw-max-w-2xl">
         <div className="tw-flex tw-items-center">
-          <h2 className="tw-mb-0 tw-min-w-0 tw-max-w-full tw-text-xl tw-font-semibold tw-text-iron-100">
+          <h2 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-xl tw-font-semibold tw-text-iron-100">
             {waveName}
           </h2>
           <button

@@ -37,7 +37,7 @@ import { RememeSort, TokenType } from "./rememesTypes";
 const PAGE_SIZE = 40;
 
 const REMEMES_GRID_CLASS =
-  "tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-3 tw-p-0 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
+  "tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-3 tw-p-0 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5";
 const REMEMES_TOTAL_COUNT_CLASS =
   "tw-shrink-0 tw-text-sm tw-font-medium tw-leading-none tw-text-iron-500 sm:tw-text-base";
 const REMEME_SORTING = [RememeSort.RANDOM, RememeSort.CREATED_ASC] as const;
