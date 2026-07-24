@@ -67,6 +67,7 @@ const createWave = (index: number): MinimalWave => ({
   followedSubwavesCount: 0,
   latestFollowedSubwaveDropTimestamp: null,
   unreadSubwaveDrops: 0,
+  apiUnreadDropsCount: 0,
   unreadDropsCount: 0,
   latestReadTimestamp: 0,
   firstUnreadDropSerialNo: null,

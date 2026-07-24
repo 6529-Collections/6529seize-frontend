@@ -109,7 +109,9 @@ API returns enough parent-container metadata to do so.
   Muting the parent or an individual subwave suppresses the applicable unread
   presentation.
 - Before child rows are loaded, the parent uses the server aggregate. After
-  loading, newer child-row unread activity can increase the displayed count.
+  loading, child read state can reduce the displayed count and newer child-row
+  activity can increase it. Any server-reported remainder for unloaded children
+  stays in the aggregate.
 - Subwaves are sorted by latest activity within an expanded parent.
 - Pinned and following root sections are activity-first; discovery sections are quality-first.
 - If a parent row is present only because a followed subwave needs a container,
