@@ -124,7 +124,7 @@ describe("release bus staging artifact transfer", () => {
     )
   );
 
-  it("deploys the one target-profile artifact without rebuilding it", () => {
+  it("selects staging from one immutable dual-profile artifact without rebuilding", () => {
     const inputs = deployWorkflow.on.workflow_dispatch.inputs;
     const downloadStep = deployWorkflow.jobs.deploy.steps.find(
       (step: { name?: string }) =>
@@ -140,10 +140,15 @@ describe("release bus staging artifact transfer", () => {
       default: "staging",
       options: ["staging", "production"],
     });
-    expect(downloadStep.with.name).toContain(
-      "${{ inputs.artifact_environment }}"
+    expect(inputs.artifact_digest).toMatchObject({ required: true });
+    expect(downloadStep.with.name).toBe(
+      "release-bus-frontend-${{ inputs.artifact_train_id || inputs.release_train_id }}-r${{ inputs.release_train_revision }}"
     );
-    expect(verifyStep.run).toContain(".environment == $artifact_environment");
+    expect(verifyStep.run).toContain('.environment == "dual"');
+    expect(verifyStep.run).toContain("profiles/staging/target/package.zip");
+    expect(verifyStep.run).toContain(
+      'test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"'
+    );
     expect(
       deployWorkflow.jobs.deploy.steps.filter((step: { name?: string }) =>
         /build/i.test(step.name ?? "")
@@ -215,6 +220,259 @@ describe("release bus staging artifact transfer", () => {
     expect(
       script.lastIndexOf('wait_for_local_version "$EXPECTED_SHA"')
     ).toBeLessThan(script.lastIndexOf("pm2 save"));
+  });
+
+  it("bounds rebuildable staging releases without deleting the active rollback", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+    const script = deployStep.run;
+
+    expect(script).toContain("prune_release_cache");
+    expect(script).toContain(
+      '[[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}/app$ ]]'
+    );
+    expect(script).toContain('[ "$cached_release" = "$release_dir" ]');
+    expect(script).toContain('[ "$cached_release" = "$current_release" ]');
+    expect(script).toContain('if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] ||');
+    expect(script).toContain(
+      '[ "$cached_release" != "$release_root/releases/$cached_sha" ]'
+    );
+    expect(script).toContain(
+      "Preserving unrecognized staging release cache entry"
+    );
+    expect(script).toContain(
+      "Refusing to prune without the exact managed current release."
+    );
+    expect(script.indexOf("continue\n")).toBeLessThan(
+      script.indexOf('rm -rf -- "$cached_release"')
+    );
+    expect(script).toContain('rm -rf -- "$cached_release"');
+    expect(script.indexOf("prune_release_cache\n")).toBeGreaterThan(
+      script.indexOf(
+        "Refusing to deploy without an exact healthy pre-mutation local version."
+      )
+    );
+    expect(script.indexOf("prune_release_cache\n")).toBeLessThan(
+      script.indexOf('http_status="$(curl')
+    );
+    expect(script.indexOf('rm -f "$release_dir/package.zip"')).toBeGreaterThan(
+      script.indexOf('test -f "$release_dir/app/server.js"')
+    );
+  });
+});
+
+describe("release bus contributor notifications", () => {
+  const workflows = ["staging", "production"].map(
+    (environment) =>
+      [
+        environment,
+        YAML.parse(
+          fs.readFileSync(
+            path.join(
+              process.cwd(),
+              `.github/workflows/release-bus-deploy-${environment}.yml`
+            ),
+            "utf8"
+          )
+        ),
+      ] as const
+  );
+  const notifier = fs.readFileSync(
+    path.join(process.cwd(), "scripts/notify-ci-wave.mjs"),
+    "utf8"
+  );
+
+  it.each(workflows)(
+    "validates and signs %s Release Train contributor metadata",
+    (environment, workflow) => {
+      const inputs = workflow.on.workflow_dispatch.inputs;
+      const steps = workflow.jobs.deploy.steps;
+      const validation = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Validate dispatch inputs before using credentials"
+      );
+      const checkout = steps.find(
+        (step: { name?: string }) => step.name === "Check out CI wave notifier"
+      );
+      const verifyCheckout = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Verify CI wave notifier checkout"
+      );
+      const failure = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Notify CI wave about failure"
+      );
+      const success = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Notify CI wave about success"
+      );
+
+      expect(inputs.release_contributors).toMatchObject({
+        required: false,
+        default: "[]",
+      });
+      expect(validation.run).toContain(
+        'jq -e \'type == "array" and length <= 100'
+      );
+      expect(validation.run).toContain(
+        "Semantic GitHub-login validation is centralized in notify-ci-wave.mjs"
+      );
+      expect(checkout).toMatchObject({
+        if: "always()",
+        with: {
+          ref: "${{ github.workflow_sha }}",
+          path: ".ci-wave-notifier",
+          "persist-credentials": false,
+        },
+      });
+      expect(verifyCheckout).toMatchObject({
+        if: "always()",
+        run: expect.stringContaining(
+          "test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs"
+        ),
+      });
+      expect(failure).toMatchObject({
+        if: "failure() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+        "continue-on-error": true,
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+      expect(success).toMatchObject({
+        if: "success() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+        "continue-on-error": true,
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+      for (const notifyStep of [failure, success]) {
+        expect(notifyStep.env).toMatchObject({
+          CI_PIPELINES_SHA: "${{ inputs.expected_sha }}",
+          CI_RELEASE_TRAIN_ID: "${{ inputs.release_train_id }}",
+          CI_RELEASE_CONTRIBUTORS: "${{ inputs.release_contributors }}",
+        });
+      }
+    }
+  );
+
+  it("includes contributor fields in the signed payload", () => {
+    expect(notifier).toContain(
+      "contributor_github_logins: releaseContributors"
+    );
+    expect(notifier).toContain("sha: CI_PIPELINES_SHA || GITHUB_SHA || null");
+  });
+});
+
+describe("release bus v2 E2E callbacks", () => {
+  const stagingE2E = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
+    "utf8"
+  );
+  const productionE2E = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/production-e2e.yml"),
+    "utf8"
+  );
+
+  it.each([
+    ["staging", stagingE2E],
+    ["production", productionE2E],
+  ])("binds %s E2E authorization and progress to v2", (_name, workflow) => {
+    expect(workflow).toContain("/deploy/release-bus-v2/authorize");
+    expect(workflow).toContain("/deploy/release-bus-v2/report-progress");
+    expect(workflow).not.toContain(
+      '"$RELEASE_BUS_API_URL/deploy/release-bus/authorize"'
+    );
+  });
+
+  it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain("id: socket-firewall");
+    expect(stagingE2E).toContain(
+      "SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}"
+    );
+    expect(stagingE2E).toContain("failure_class=INFRASTRUCTURE");
+    expect(stagingE2E).toContain("failure_phase=staging_e2e_setup");
+    expect(stagingE2E).toContain("failure_class=E2E");
+    expect(stagingE2E).toContain("failure_phase=staging_e2e");
+  });
+});
+
+describe("release bus v2 combined preflight", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
+    )
+  );
+
+  it("keeps candidate execution jobs secretless and read-only", () => {
+    for (const jobName of ["quality", "build"]) {
+      const job = workflow.jobs[jobName];
+      expect(job.permissions).toEqual({ contents: "read" });
+      expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
+    }
+    const source = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
+    );
+    expect(
+      source.match(/codeql\[actions\/untrusted-checkout\/medium\]/g)
+    ).toHaveLength(2);
+  });
+
+  it("omits the production-only announcement URL from staging builds", () => {
+    const build = workflow.jobs.build;
+    const buildStep = build.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Build exact environment profile once"
+    );
+    expect(build.env.BUILD_ENVIRONMENT).toBe("${{ matrix.environment }}");
+    expect(buildStep.run).toContain('if [ "$BUILD_ENVIRONMENT" = staging ]');
+    expect(buildStep.run).toContain("unset ANNOUNCED_VERSION_ENDPOINT");
+  });
+
+  it("shards Jest and proves exact inventory before artifact publication", () => {
+    expect(workflow.jobs.quality.strategy.matrix.shard).toEqual([
+      "lint",
+      "typecheck",
+      "inventory",
+      "tests-1",
+      "tests-2",
+      "tests-3",
+      "tests-4",
+    ]);
+    const verify = workflow.jobs.aggregate.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Prove sharded Jest inventory is exact"
+    );
+    const upload = workflow.jobs.aggregate.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Upload one exact frontend artifact"
+    );
+    expect(verify.run).toContain("uniq -d shards.sorted");
+    expect(verify.run).toContain("diff -u complete.sorted shards.sorted");
+    expect(upload.if).toContain("steps.inventory_verify.outcome == 'success'");
+  });
+
+  it("prepares generated runtime config and forwards Jest shard flags", () => {
+    for (const jobName of ["quality", "build"]) {
+      const generate = workflow.jobs[jobName].steps.find(
+        (step: { name?: string }) =>
+          step.name === "Generate runtime environment schema"
+      );
+      expect(generate.run).toBe("./bin/6529 run build:env-schema");
+    }
+
+    const quality = workflow.jobs.quality.steps.find(
+      (step: { name?: string }) => step.name === "Run independent quality shard"
+    );
+    expect(quality.run).toContain(
+      './bin/6529 run test:no-coverage --runInBand --shard="$shard_index/4"'
+    );
+    expect(quality.run).not.toContain("test:no-coverage -- --runInBand");
   });
 });
 

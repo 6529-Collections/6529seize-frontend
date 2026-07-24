@@ -3,24 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Col, Container, Row } from "./NextGenAdminShared";
-import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
-  isCollectionAdmin,
-  isCollectionArtist,
-  useCollectionArtist,
-  useParsedCollectionIndex,
-} from "../nextgen_helpers";
-import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenAdminSetData from "./NextGenAdminSetData";
 import NextGenAdminSetCosts from "./NextGenAdminSetCosts";
 import NextGenAdminSetPhases from "./NextGenAdminSetPhases";
 import NextGenAdminRegisterAdmin, {
   ADMIN_TYPE,
 } from "./NextGenAdminRegisterAdmin";
-import NextGenAdminArtistSignCollection from "./NextGenAdminArtistSignCollection";
 import NextGenAdminAirdropTokens from "./NextGenAdminAirdropTokens";
 import NextGenAdminProposeAddressesAndPercentages, {
   ProposalType,
@@ -43,165 +31,47 @@ import NextGenAdminUploadAL from "./NextGenAdminUploadAL";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { useNextGenAdminPermissions } from "./useNextGenAdminPermissions";
+import {
+  ArtistFocus,
+  CollectionFocus,
+  Focus,
+  GlobalFocus,
+  NextGenAdminArtistActions,
+  NextGenAdminMenu,
+  NextGenAdminRestrictionMessage,
+} from "./NextGenAdmin.view";
 
-enum Focus {
-  GLOBAL = "global",
-  COLLECTION = "collection",
-  ARTIST = "artist",
-}
+export { printAdminErrors } from "./NextGenAdminErrors";
 
-enum GlobalFocus {
-  CREATE_COLLECTION = "create_collection",
-  AIRDROP_TOKENS = "airdrop_tokens",
-  UPDATE_IMAGES_ATTRIBUTES = "update_images_attributes",
-  SET_FINAL_SUPPLY = "set_final_supply",
-  ADD_RANDOMIZER = "add_randomizer",
-  SET_PRIMARY_AND_SECONDARY_SPLITS = "set_primary_and_secondary_splits",
-  INITIALIZE_BURN = "initialize_burn",
-  PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES = "propose_primary_addresses_and_percentages",
-  PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES = "propose_secondary_addresses_and_percentages",
-  ACCEPT_ADDRESSES_AND_PERCENTAGES = "accept_addresses_and_percentages",
-  PAY_ARTIST = "pay_artist",
-  REGISTER_GLOBAL_ADMIN = "register_global_admin",
-  REGISTER_FUNCTION_ADMIN = "register_function_admin",
-  REGISTER_COLLECTION_ADMIN = "register_collection_admin",
-  MINT_AND_AUCTION = "mint_and_auction",
-  INITIALIZE_EXTERNAL_BURN_SWAP = "initialize_external_burn_swap",
-}
-
-enum CollectionFocus {
-  SET_DATA = "set_data",
-  SET_COSTS = "set_costs",
-  UPLOAD_AL = "upload_al",
-  SET_PHASES = "set_phases",
-  UPDATE_INFO = "update_info",
-  UPDATE_BASE_URI = "update_base_uri",
-  UPDATE_SCRIPT_BY_INDEX = "update_script_by_index",
-  CHANGE_METADATA_VIEW = "change_metadata_view",
-}
-
-enum ArtistFocus {
-  SIGN_COLLECTION = "sign_collection",
-  PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES = "propose_primary_addresses_and_percentages",
-  PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES = "propose_secondary_addresses_and_percentages",
-}
-
-function getAdminTabClassName(active: boolean): string {
-  return active
-    ? "tw-cursor-pointer tw-scale-[1.01] tw-text-white"
-    : "tw-cursor-pointer tw-text-iron-400 hover:tw-scale-[1.01] hover:tw-text-white";
-}
-
-export function printAdminErrors(errors: string[]) {
-  return (
-    <div className="tw-mb-4">
-      <ul>
-        {errors.map((error) => (
-          <li
-            key={`error-${error.replaceAll("", " ")}`}
-            className="tw-text-error"
-          >
-            {error}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 export default function NextGenAdmin() {
   const router = useRouter();
   const account = useSeizeConnectContext();
   useSetTitle("NextGen Admin");
 
-  const globalAdmin = useGlobalAdmin(account.address as string);
-  const createCollectionFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.CREATE_COLLECTION
-  );
-  const airdropTokensFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.AIRDROP_TOKENS
-  );
-  const setDataFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.SET_COLLECTION_DATA
-  );
-  const setCostsFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.SET_COLLECTION_COSTS
-  );
-  const setPhasesFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.SET_COLLECTION_PHASES
-  );
-  const updateInfoFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.UPDATE_COLLECTION_INFO
-  );
-  const changeMetadataViewFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.CHANGE_METADATA_VIEW
-  );
-  const setFinalSupplyFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.SET_FINAL_SUPPLY
-  );
-  const initializeBurnFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.INITIALIZE_BURN
-  );
-  const updateImagesAttributesFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.UPDATE_IMAGES_AND_ATTRIBUTES
-  );
-  const addRandomizerFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.ADD_RANDOMIZER
-  );
-  const setSplitsFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.SET_PRIMARY_AND_SECONDARY_SPLITS
-  );
-  const proposePrimaryAddressesAndPercentagesFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES
-  );
-  const proposeSecondaryAddressesAndPercentagesFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES
-  );
-  const acceptAddressesAndPercentagesFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.ACCEPT_ADDRESSES_AND_PERCENTAGES
-  );
-  const payArtistFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.PAY_ARTIST
-  );
-  const mintAndAuctionFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.MINT_AND_AUCTION
-  );
-  const initializeExternalBurnSwapFunctionAdmin = useFunctionAdmin(
-    account.address as string,
-    FunctionSelectors.INITIALIZE_EXTERNAL_BURN_SWAP
-  );
-  const collectionIndex = useCollectionIndex();
-  const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);
-
-  const collectionAdmin = useCollectionAdmin(
-    account.address as string,
-    parsedCollectionIndex
-  );
-
-  const isWalletCollectionAdmin = isCollectionAdmin(collectionAdmin);
-
-  const collectionArtists = useCollectionArtist(parsedCollectionIndex);
-
-  const isArtist = isCollectionArtist(
-    account.address as string,
-    collectionArtists
-  );
+  const {
+    globalAdmin,
+    createCollectionFunctionAdmin,
+    airdropTokensFunctionAdmin,
+    setDataFunctionAdmin,
+    setCostsFunctionAdmin,
+    setPhasesFunctionAdmin,
+    updateInfoFunctionAdmin,
+    changeMetadataViewFunctionAdmin,
+    setFinalSupplyFunctionAdmin,
+    initializeBurnFunctionAdmin,
+    updateImagesAttributesFunctionAdmin,
+    addRandomizerFunctionAdmin,
+    setSplitsFunctionAdmin,
+    proposePrimaryAddressesAndPercentagesFunctionAdmin,
+    proposeSecondaryAddressesAndPercentagesFunctionAdmin,
+    acceptAddressesAndPercentagesFunctionAdmin,
+    payArtistFunctionAdmin,
+    mintAndAuctionFunctionAdmin,
+    initializeExternalBurnSwapFunctionAdmin,
+    isWalletCollectionAdmin,
+    isArtist,
+  } = useNextGenAdminPermissions(account.address as string);
 
   const searchParams = useSearchParams()!;
   const [focus, setFocus] = useState<Focus>(
@@ -225,54 +95,6 @@ export default function NextGenAdmin() {
     setGlobalFocus(undefined);
     setCollectionFocus(undefined);
     setArtistFocus(undefined);
-  }
-
-  function printLeftMenu() {
-    return (
-      <Container className="!tw-p-0">
-        <Row className="tw-pb-2 tw-pt-2">
-          <Col
-            className={getAdminTabClassName(focus === Focus.GLOBAL)}
-            onClick={() => setFocus(Focus.GLOBAL)}
-          >
-            <b>Global</b>
-          </Col>
-        </Row>
-        <Row className="tw-pb-2 tw-pt-2">
-          <Col
-            className={getAdminTabClassName(focus === Focus.COLLECTION)}
-            onClick={() => setFocus(Focus.COLLECTION)}
-          >
-            <b>Collection</b>
-          </Col>
-        </Row>
-        <Row className="tw-pb-2 tw-pt-2">
-          <Col
-            className={getAdminTabClassName(focus === Focus.ARTIST)}
-            onClick={() => setFocus(Focus.ARTIST)}
-          >
-            <b>Artist</b>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-
-  function printAdminRestrictionMessage() {
-    return (
-      <Container className="!tw-p-0">
-        <Row className="tw-pt-2">
-          <Col className="tw-flex tw-flex-col tw-items-center tw-gap-4">
-            <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
-              ONLY ADMIN WALLETS CAN USE THIS dAPP.
-            </h4>
-            <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
-              PLEASE USE AN ADMIN WALLET TO CONTINUE.
-            </h4>
-          </Col>
-        </Row>
-      </Container>
-    );
   }
 
   function printCreateCollection() {
@@ -591,7 +413,7 @@ export default function NextGenAdmin() {
       mintAndAuctionFunctionAdmin.data === false &&
       initializeExternalBurnSwapFunctionAdmin.data === false
     ) {
-      return printAdminRestrictionMessage();
+      return <NextGenAdminRestrictionMessage />;
     }
 
     return (
@@ -886,95 +708,13 @@ export default function NextGenAdmin() {
       updateInfoFunctionAdmin.data === false &&
       changeMetadataViewFunctionAdmin.data === false
     ) {
-      return printAdminRestrictionMessage();
+      return <NextGenAdminRestrictionMessage />;
     }
 
     return (
       <Container>
         {printSetData()}
         {printUpdateCollection()}
-      </Container>
-    );
-  }
-
-  function printArtist() {
-    if (!isArtist) {
-      return (
-        <Container>
-          <Row className="tw-pt-2">
-            <Col className="tw-flex tw-flex-col tw-items-center tw-gap-4">
-              <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
-                ONLY COLLECTION ARTISTS CAN USE THIS SECTION.
-              </h4>
-            </Col>
-          </Row>
-        </Container>
-      );
-    }
-    return (
-      <Container>
-        <Row>
-          <Col xs={12}>
-            <h4 className="tw-text-base tw-font-bold tw-text-white md:tw-text-lg">
-              SELECT ACTION
-            </h4>
-          </Col>
-        </Row>
-        <Row className="tw-pt-2">
-          <Col className="tw-flex tw-items-center tw-gap-4">
-            <Button
-              className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-              onClick={() => setArtistFocus(ArtistFocus.SIGN_COLLECTION)}
-            >
-              Sign Collection
-            </Button>
-          </Col>
-        </Row>
-        <Row className="tw-pt-4">
-          <Col className="tw-flex tw-items-center tw-gap-4">
-            <Button
-              className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-              onClick={() =>
-                setArtistFocus(
-                  ArtistFocus.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES
-                )
-              }
-            >
-              Propose Primary Addresses and Percentages
-            </Button>
-            <Button
-              className="tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-1.5 tw-font-bold tw-text-black hover:tw-bg-[rgb(215,215,215)] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-              onClick={() =>
-                setArtistFocus(
-                  ArtistFocus.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES
-                )
-              }
-            >
-              Propose Secondary Addresses and Percentages
-            </Button>
-          </Col>
-        </Row>
-        <Row className="tw-pt-4">
-          <Col>
-            {artistFocus === ArtistFocus.SIGN_COLLECTION && (
-              <NextGenAdminArtistSignCollection close={() => close()} />
-            )}
-            {artistFocus ===
-              ArtistFocus.PROPOSE_PRIMARY_ADDRESSES_AND_PERCENTAGES && (
-              <NextGenAdminProposeAddressesAndPercentages
-                type={ProposalType.PRIMARY}
-                close={() => close()}
-              />
-            )}
-            {artistFocus ===
-              ArtistFocus.PROPOSE_SECONDARY_ADDRESSES_AND_PERCENTAGES && (
-              <NextGenAdminProposeAddressesAndPercentages
-                type={ProposalType.SECONDARY}
-                close={() => close()}
-              />
-            )}
-          </Col>
-        </Row>
       </Container>
     );
   }
@@ -990,7 +730,14 @@ export default function NextGenAdmin() {
       case Focus.COLLECTION:
         return printCollection();
       case Focus.ARTIST:
-        return printArtist();
+        return (
+          <NextGenAdminArtistActions
+            artistFocus={artistFocus}
+            close={close}
+            isArtist={isArtist}
+            setArtistFocus={setArtistFocus}
+          />
+        );
     }
   }
 
@@ -1007,7 +754,7 @@ export default function NextGenAdmin() {
       </Row>
       <Row className="tw-pt-4">
         <Col xs={12} sm={3} md={2}>
-          {printLeftMenu()}
+          <NextGenAdminMenu focus={focus} setFocus={setFocus} />
         </Col>
         <Col xs={12} sm={9} md={10}>
           {printContent()}

@@ -35,9 +35,9 @@ ChartJS.register(
 type NetworkStatsMessageKey = Extract<MessageKey, `network.stats.${string}`>;
 
 const SECTION_HEADING_CLASS =
-  "tw-m-0 tw-text-lg tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
 const SUMMARY_PANEL_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-p-3 sm:tw-p-4";
+  "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-3 sm:tw-p-4";
 
 const m = (
   locale: SupportedLocale,
@@ -320,7 +320,7 @@ export default function CommunityStats() {
   return (
     <section className="tw-w-full">
       <header className="tw-pb-6 sm:tw-pb-8">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
           {m(locale, "network.stats.hero.title")}
         </h1>
       </header>

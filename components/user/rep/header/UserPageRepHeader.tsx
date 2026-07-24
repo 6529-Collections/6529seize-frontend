@@ -187,7 +187,7 @@ export default function UserPageRepHeader({
                     </div>
                   )}
               </div>
-              <div className="tw-flex tw-flex-wrap tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
                 {canEditRep && repDirection === "received" && (
                   <button
                     type="button"

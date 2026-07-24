@@ -4,11 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       release_train_id: { type: string, required: true }
+      release_contributors: { type: string, required: false, default: "[]" }
       release_train_revision: { type: string, required: true }
       operation_key: { type: string, required: true }
       source_ref: { type: string, required: true }
       expected_sha: { type: string, required: true }
       artifact_run_id: { type: string, required: true }
+      artifact_train_id: { type: string, required: false, default: "" }
+      artifact_digest: { type: string, required: true }
       artifact_environment:
         {
           type: choice,
@@ -41,9 +44,12 @@ jobs:
     environment: staging
     env:
       ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+      ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
       ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+      EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
       EXPECTED_SHA: ${{ inputs.expected_sha }}
       OPERATION_KEY: ${{ inputs.operation_key }}
+      RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
       SOURCE_REF: ${{ inputs.source_ref }}
       TRAIN_ID: ${{ inputs.release_train_id }}
       TRAIN_REVISION: ${{ inputs.release_train_revision }}
@@ -51,9 +57,12 @@ jobs:
       - name: Validate dispatch inputs before using credentials
         env:
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
           ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+          EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
           SOURCE_REF: ${{ inputs.source_ref }}
           TRAIN_ID: ${{ inputs.release_train_id }}
           TRAIN_REVISION: ${{ inputs.release_train_revision }}
@@ -61,12 +70,29 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          [[ "$ARTIFACT_ENVIRONMENT" =~ ^(staging|production)$ ]]
+          [[ "$ARTIFACT_TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$EXPECTED_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          test "$ARTIFACT_ENVIRONMENT" = staging
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
+          # Semantic GitHub-login validation is centralized in notify-ci-wave.mjs.
+          jq -e 'type == "array" and length <= 100 and all(.[]; type == "string" and length >= 1 and length <= 39)' <<< "$RELEASE_CONTRIBUTORS" > /dev/null
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
+      - name: Authorize immutable Release Bus operation
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg artifact_run_id "$ARTIFACT_RUN_ID" --arg expected_sha "$EXPECTED_SHA" --arg artifact_digest "$EXPECTED_ARTIFACT_DIGEST" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:$artifact_run_id,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
       - name: Check out exact train source
+        id: source
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.expected_sha }}
@@ -77,17 +103,15 @@ jobs:
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Download immutable preflight artifact
+        id: artifact-download
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           github-token: ${{ github.token }}
           run-id: ${{ inputs.artifact_run_id }}
-          name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}-${{ inputs.artifact_environment }}
+          name: release-bus-frontend-${{ inputs.artifact_train_id || inputs.release_train_id }}-r${{ inputs.release_train_revision }}
           path: release-bus-artifact
       - name: Verify and bind immutable artifact
         id: artifact
-        env:
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
         run: |
           set -euo pipefail
           cd release-bus-artifact
@@ -96,28 +120,19 @@ jobs:
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           jq -e \
-            --arg train_id "$TRAIN_ID" \
+            --arg train_id "$ARTIFACT_TRAIN_ID" \
             --arg source_sha "$EXPECTED_SHA" \
-            --arg artifact_environment "$ARTIFACT_ENVIRONMENT" \
-            '.train_id == $train_id and .source_sha == $source_sha and .environment == $artifact_environment' \
+            '.train_id == $train_id and .source_sha == $source_sha and .environment == "dual" and (.profiles.staging.package_sha256 | test("^[a-f0-9]{64}$"))' \
             manifest.json >/dev/null
           sha256sum -c SHA256SUMS
-          package_digest="$(sha256sum target/package.zip | cut -d' ' -f1)"
+          artifact_digest="$(sha256sum SHA256SUMS | cut -d' ' -f1)"
+          test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"
+          package_digest="$(sha256sum profiles/staging/target/package.zip | cut -d' ' -f1)"
+          test "$package_digest" = "$(jq -r '.profiles.staging.package_sha256' manifest.json)"
+          echo "artifact_digest=$artifact_digest" >> "$GITHUB_OUTPUT"
           echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
-          payload="$(jq -n \
-            --arg train_id "$TRAIN_ID" \
-            --arg operation_key "$OPERATION_KEY" \
-            --arg workflow_run_id "$GITHUB_RUN_ID" \
-            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
-            --arg expected_sha "$EXPECTED_SHA" \
-            --arg artifact_digest "$package_digest" \
-            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:$artifact_run_id,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
       - name: Configure AWS credentials
+        id: aws-credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -135,7 +150,7 @@ jobs:
           [[ "$PACKAGE_DIGEST" =~ ^[a-f0-9]{64}$ ]]
           [[ "$ARTIFACT_BUCKET_REGION" =~ ^[a-z]{2}(-gov)?-[a-z]+-[1-9][0-9]*$ ]]
           object_key="release-bus/${TRAIN_ID}/r${TRAIN_REVISION}/staging/frontend/${EXPECTED_SHA}.zip"
-          aws s3 cp release-bus-artifact/target/package.zip "s3://${ARTIFACT_BUCKET}/${object_key}" \
+          aws s3 cp release-bus-artifact/profiles/staging/target/package.zip "s3://${ARTIFACT_BUCKET}/${object_key}" \
             --region "$ARTIFACT_BUCKET_REGION" \
             --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
           url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" \
@@ -251,6 +266,47 @@ jobs:
             }
           fi
 
+          prune_release_cache() {
+            current_release=''
+            if [[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}/app$ ]]; then
+              current_release="${previous_target%/app}"
+            fi
+            if [ "$process_kind" = managed ] && [ -z "$current_release" ]; then
+              echo 'Refusing to prune without the exact managed current release.' >&2
+              return 1
+            fi
+            retained_rollback=0
+            while IFS= read -r cached_release; do
+              [ -n "$cached_release" ] || continue
+              if [ "$cached_release" = "$release_dir" ] || \
+                [ "$cached_release" = "$current_release" ]; then
+                continue
+              fi
+              if [ "$retained_rollback" -eq 0 ]; then
+                retained_rollback=1
+                continue
+              fi
+              cached_sha="${cached_release##*/}"
+              if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] || \
+                [ "$cached_release" != "$release_root/releases/$cached_sha" ]; then
+                echo "Preserving unrecognized staging release cache entry $cached_sha"
+                continue
+              fi
+              rm -rf -- "$cached_release"
+              echo "Pruned rebuildable staging release cache $cached_sha"
+            done < <(
+              find "$release_root/releases" -mindepth 1 -maxdepth 1 \
+                -type d -printf '%T@ %p\n' 2>/dev/null | \
+                sort -nr | cut -d' ' -f2-
+            )
+          }
+
+          # A healthy exact current release is the rollback boundary. Keep it,
+          # an already-cached incoming release when present, and one newest
+          # additional rollback. Old bundles remain reproducible from durable
+          # workflow artifacts.
+          prune_release_cache
+
           restore_legacy_process() {
             delete_6529_process || return 1
             restore_previous_link || return 1
@@ -284,6 +340,7 @@ jobs:
           install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir/app"
           unzip -q "$release_dir/package.zip" -d "$release_dir/app"
           test -f "$release_dir/app/server.js"
+          rm -f "$release_dir/package.zip"
           chown -R "$RUN_AS:$RUN_AS" "$release_dir"
           ln -sfn "$release_dir/app" "$current_link"
           cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
@@ -359,6 +416,7 @@ jobs:
             --output text)"
           echo "command_id=$command_id" >> "$GITHUB_OUTPUT"
       - name: Wait for SSM deployment
+        id: deployment
         env:
           COMMAND_ID: ${{ steps.send-command.outputs.command_id }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
@@ -377,6 +435,7 @@ jobs:
           aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" --query StandardErrorContent --output text || true
           test "$terminal" = Success
       - name: Verify exact staging version
+        id: version
         env:
           STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
         run: |
@@ -389,6 +448,7 @@ jobs:
             --timeout-ms 10000 \
             --output deployment-version-evidence.json
       - name: Upload deployment evidence
+        id: evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -396,3 +456,86 @@ jobs:
           path: deployment-version-evidence.json
           if-no-files-found: ignore
           retention-days: 90
+      - name: Report structured Release Bus deployment result
+        if: always()
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          JOB_STATUS: ${{ job.status }}
+          SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          DOWNLOAD_OUTCOME: ${{ steps.artifact-download.outcome }}
+          ARTIFACT_OUTCOME: ${{ steps.artifact.outcome }}
+          AWS_OUTCOME: ${{ steps.aws-credentials.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+        run: |
+          set -euo pipefail
+          status=SUCCEEDED
+          failure_class=null
+          failure_phase=null
+          retryable=false
+          if [ "$JOB_STATUS" != success ]; then
+            status=FAILED
+            failure_class=DEPLOYMENT
+            failure_phase=staging_deploy
+            retryable=true
+            if [ "$SOURCE_OUTCOME" = failure ] || [ "$DOWNLOAD_OUTCOME" = failure ] || [ "$EVIDENCE_OUTCOME" = failure ]; then
+              failure_class=INFRASTRUCTURE
+              failure_phase=artifact_transport
+              retryable=true
+            elif [ "$ARTIFACT_OUTCOME" = failure ] || [ "$AWS_OUTCOME" = failure ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=deployment_identity_or_credentials
+            fi
+          fi
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:null,stages:[],jest:null,backend_evidence:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
+      - name: Check out CI wave notifier
+        if: always()
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+      - name: Verify CI wave notifier checkout
+        if: always()
+        run: |
+          test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs || {
+            echo 'CI wave notifier checkout is unavailable.' >&2
+            exit 1
+          }
+      - name: Notify CI wave about failure
+        if: failure() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: Seize-Frontend staging DEPLOY CI pipeline is broken!!!
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
+          CI_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
+          CI_RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+      - name: Notify CI wave about success
+        if: success() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: success
+          CI_PIPELINES_TITLE: Seize-Frontend staging DEPLOY CI pipeline complete
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
+          CI_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
+          CI_RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

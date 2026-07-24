@@ -48,6 +48,8 @@ March 19, 2026.
 - Use direct utility routes under `/tools/*`, including the secondary `/tools`
   index and private 6529bot operator tools: [API Tool](api-tool/README.md)
 - Debug shared cross-route behavior: [Shared](shared/README.md)
+- Stage, promote, or recover an exact release:
+  [Developer Operations](developer/README.md)
 
 ## Area Index
 
@@ -78,6 +80,8 @@ March 19, 2026.
 - [Navigation](navigation/README.md): app shell controls, `/open-mobile`, and
   `/about/6529-apps`
 - [Shared](shared/README.md): behavior reused by multiple areas
+- [Developer Operations](developer/README.md): release, QA, and repository
+  operations
 
 ## Route Coverage
 
