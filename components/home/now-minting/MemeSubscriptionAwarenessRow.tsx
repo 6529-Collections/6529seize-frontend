@@ -14,8 +14,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ABOUT_SUBSCRIPTIONS_HREF } from "../../user/subscriptions/subscriptionNavigation";
 
-const SUBSCRIPTION_ROW_CLASS_NAME =
-  "tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-3 md:tw-px-4";
+const SUBSCRIPTION_ROW_CLASS_NAME = "tw-border tw-border-solid";
 
 function ReadonlySubscriptionToggle({
   checked,
@@ -185,7 +184,7 @@ export default function MemeSubscriptionAwarenessRow({
   subscribersCountLoading,
   tooltipLabel,
 }: Readonly<{
-  appearance?: "default" | "quiet" | undefined;
+  appearance?: "default" | "featured" | "quiet" | undefined;
   onProfileSubscriptionsAction?: (() => void | Promise<void>) | undefined;
   profileSubscriptionsActionPending?: boolean | undefined;
   profileSubscriptionsHref?: string | undefined;
@@ -215,9 +214,12 @@ export default function MemeSubscriptionAwarenessRow({
     <div
       className={clsx(
         SUBSCRIPTION_ROW_CLASS_NAME,
-        appearance === "quiet"
-          ? "tw-border-white/5 tw-bg-iron-900/60"
-          : "tw-border-primary-400/45 tw-bg-primary-500/10"
+        appearance === "featured"
+          ? "tw-rounded-xl tw-border-primary-400/25 tw-bg-primary-500/[0.07] tw-p-4 tw-shadow-[0_16px_36px_rgba(0,0,0,0.28)] md:tw-p-5"
+          : "tw-rounded-lg tw-px-3 tw-py-3 md:tw-px-4",
+        appearance === "quiet" && "tw-border-white/5 tw-bg-iron-900/60",
+        appearance === "default" &&
+          "tw-border-primary-400/45 tw-bg-primary-500/10"
       )}
     >
       <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-4 tw-gap-y-3">

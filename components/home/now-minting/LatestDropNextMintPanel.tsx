@@ -65,20 +65,20 @@ const subscribeToMinuteClock = (onStoreChange: () => void) => {
 
 export function LatestDropNextMintPanelSkeleton() {
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950">
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
+      <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
           <div className="tw-relative tw-h-[clamp(360px,65vw,640px)] tw-w-full tw-animate-pulse tw-bg-iron-800/50" />
         </div>
-        <div className="tw-p-5 md:tw-p-6 lg:tw-col-span-6 xl:tw-col-span-4">
-          <div className="tw-flex tw-flex-col tw-gap-5">
+        <div className="tw-flex tw-items-center tw-bg-gradient-to-b tw-from-iron-950 tw-via-iron-950 tw-to-black/40 tw-p-5 md:tw-p-7 lg:tw-col-span-6 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/[0.03] lg:tw-p-8 xl:tw-col-span-4 xl:tw-p-10 2xl:tw-p-12">
+          <div className="tw-flex tw-w-full tw-flex-col tw-gap-7 lg:tw-gap-8">
             <div className="tw-space-y-2">
               <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
-              <div className="tw-h-7 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
+              <div className="tw-h-9 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
               <div className="tw-h-4 tw-w-32 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
             </div>
-            <div className="tw-h-32 tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-800/50" />
-            <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+            <div className="tw-h-28 tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-primary-500/[0.06]" />
+            <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
               {["wave", "mint-date", "submitted", "rating"].map((stat) => (
                 <div key={stat} className="tw-space-y-2">
                   <div className="tw-h-4 tw-w-16 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
@@ -144,8 +144,8 @@ export default function LatestDropNextMintPanel({
       })
     : "—";
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950">
-      <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-6 tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
+      <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
           <div className="tw-relative tw-flex tw-h-[clamp(360px,65vw,640px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50">
             <div className="tw-[&>div]:tw-mx-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
@@ -171,10 +171,10 @@ export default function LatestDropNextMintPanel({
           </div>
         </div>
 
-        <div className="tw-p-5 md:tw-p-6 lg:tw-col-span-6 xl:tw-col-span-4">
-          <div className="tw-flex tw-flex-col tw-gap-5">
+        <div className="tw-relative tw-flex tw-items-center tw-bg-gradient-to-b tw-from-iron-950 tw-via-iron-950 tw-to-black/40 tw-p-5 md:tw-p-7 lg:tw-col-span-6 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/[0.03] lg:tw-p-8 xl:tw-col-span-4 xl:tw-p-10 2xl:tw-p-12">
+          <div className="tw-flex tw-w-full tw-flex-col tw-gap-7 lg:tw-gap-8">
             <div className="tw-flex tw-flex-col">
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+              <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-2.5">
                 <div className="tw-flex tw-items-center tw-gap-2">
                   <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
                   <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-emerald-400">
@@ -192,18 +192,18 @@ export default function LatestDropNextMintPanel({
               </div>
               <Link
                 href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
-                className="tw-mt-3 tw-text-xl tw-font-semibold tw-leading-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl"
+                className="tw-mt-4 tw-text-2xl tw-font-medium tw-leading-[1.12] tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200 sm:tw-text-3xl md:tw-text-4xl lg:tw-text-3xl xl:tw-text-4xl"
               >
                 {title}
               </Link>
 
               {description && (
-                <p className="tw-mt-3 tw-line-clamp-2 tw-text-sm tw-leading-relaxed tw-text-iron-300">
+                <p className="tw-mt-4 tw-line-clamp-3 tw-text-sm tw-leading-6 tw-text-iron-400">
                   {description}
                 </p>
               )}
 
-              <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+              <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2.5">
                 {media?.mime_type && (
                   <MediaTypeBadge
                     mimeType={media.mime_type}
@@ -221,13 +221,16 @@ export default function LatestDropNextMintPanel({
               </div>
 
               {nextMintCardId && (
-                <div className="tw-mt-4">
-                  <LatestDropNextMintSubscribe tokenId={nextMintCardId} />
+                <div className="tw-mt-7">
+                  <LatestDropNextMintSubscribe
+                    appearance="featured"
+                    tokenId={nextMintCardId}
+                  />
                 </div>
               )}
             </div>
 
-            <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4">
+            <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
               <div className="tw-col-span-2">
                 <NowMintingStatsItem
                   label={t(locale, "home.nextMint.stats.wave")}
