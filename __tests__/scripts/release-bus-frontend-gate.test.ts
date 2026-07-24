@@ -605,6 +605,9 @@ describe("Release Bus frontend gate contract", () => {
     const aggregate = steps.find(
       (step) => step.name === "Aggregate fail-closed preflight evidence"
     );
+    const aggregateTooling = preflightWorkflow.jobs?.aggregate?.steps?.find(
+      (step) => step.name === "Stage immutable preflight tooling"
+    );
     const aggregateResult = steps.find(
       (step) => step.name === "Return aggregate result"
     );
@@ -628,8 +631,17 @@ describe("Release Bus frontend gate contract", () => {
     expect(aggregate?.run).toContain(
       'test "$PASSED_BEHAVIOR_DIGEST" = "$behavior_digest"'
     );
-    expect(aggregate?.run).toContain('"$RELEASE_BUS_GATE_TOOL" fingerprint');
+    expect(aggregate?.run).toContain(
+      'node "$RELEASE_BUS_EVIDENCE_TOOL" fingerprint'
+    );
+    expect(aggregate?.run).toContain('--base-sha "$SOURCE_SHA"');
+    expect(aggregate?.run).not.toContain(
+      '"$RELEASE_BUS_GATE_TOOL" fingerprint'
+    );
     expect(aggregate?.run).not.toContain('node "$RELEASE_BUS_GATE_TOOL"');
+    expect(aggregateTooling?.run).toContain(
+      'echo "RELEASE_BUS_EVIDENCE_TOOL=$tooling/release-bus-gate-evidence.cjs"'
+    );
     expect(gate.startsWith("#!/usr/bin/env bash\n")).toBe(true);
     expect(preflight).toContain(
       'chmod +x "$tooling/release-bus-frontend-gate.sh"'
