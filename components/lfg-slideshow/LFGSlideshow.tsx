@@ -228,7 +228,7 @@ export const LFGButton: React.FC<{
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/60 tw-bg-primary-500/10 tw-px-3.5 tw-text-sm tw-font-semibold tw-text-primary-300 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 tw-ease-out enabled:tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-primary-400 desktop-hover:hover:tw-bg-primary-500/15 desktop-hover:hover:tw-text-primary-200 active:tw-border-primary-400 active:tw-bg-primary-500/20 active:tw-text-primary-100"
+        className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/60 tw-bg-primary-500/10 tw-px-3.5 tw-text-xs tw-font-semibold tw-text-primary-300 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 tw-ease-out enabled:tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-primary-400 desktop-hover:hover:tw-bg-primary-500/15 desktop-hover:hover:tw-text-primary-200 active:tw-border-primary-400 active:tw-bg-primary-500/20 active:tw-text-primary-100"
       >
         LFG: Start the Show!
       </button>
