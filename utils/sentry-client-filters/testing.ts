@@ -13,11 +13,11 @@ import {
   hasOnlyAppUriFrames,
   isFirstPartyFramePath,
 } from "./app-frame-utils";
+import { isTwitterBrowser } from "./errors";
 import {
   hasMetaMaskMobileWebViewContext,
   hasRouteParameterizationRouteEvidence,
-  isTwitterBrowser,
-} from "./errors";
+} from "./metamask-mobile";
 import { shouldFilterThirdPartyTelemetrySpan } from "./network";
 import {
   hasCoinbaseWalletLinkWebSocketCloseFunction,

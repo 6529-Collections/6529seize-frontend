@@ -31,6 +31,7 @@ import {
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -200,10 +201,9 @@ function shouldFilterEvent(
     return true;
   }
 
-  // Intentionally do not call shouldFilterSentryRouteParameterizationError.
-  // Keep all cyclic JSON timer failures while origin diagnostics are active.
-  // Generic Sentry/WKWebView frames do not prove third-party ownership, so
-  // retaining only the sampled diagnostic subset would hide genuine app errors.
+  if (shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event)) {
+    return true;
+  }
 
   if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
     return true;
@@ -467,11 +467,11 @@ Sentry.init({
   },
 
   beforeSend(event, hint) {
+    enrichCyclicJsonTimerEvent(event, hint);
+
     if (shouldFilterEvent(event, hint)) {
       return null;
     }
-
-    enrichCyclicJsonTimerEvent(event, hint);
 
     const error = hint?.originalException ?? hint?.syntheticException;
     const value = event.exception?.values?.[0];

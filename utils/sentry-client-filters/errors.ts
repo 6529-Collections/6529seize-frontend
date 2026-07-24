@@ -4,18 +4,11 @@ import {
   filenameExceptions,
   gifPickerTenorFailureMessage,
   gifPickerTenorUndefinedTagsMessage,
-  metaMaskMobileContextTokens,
-  mobileSafariWebViewContextTokens,
   REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
   REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE,
-  sentryRouteParameterizationMechanismType,
-  sentryRouteParameterizationMessage,
   tenorCategoriesPath,
   twitterCurrentInsetReferenceErrorMessage,
   twitterInjectedWaveDocumentPathPattern,
-  webViewUserAgentTokens,
-  routeParameterizationContextKeys,
-  routeParameterizationTagKeys,
 } from "./constants";
 import type {
   SentryClientEvent,
@@ -30,15 +23,9 @@ import {
   getHintExceptionMessage,
   getRequestHeaderString,
   getRequestPathname,
-  getRoutePathFromString,
   getRuntimeUserAgentString,
-  getStringValue,
   hasReactDomRemoveChildRoute,
-  hasRouteParameterizationRoute,
   hasWavesRoute,
-  isRecord,
-  isRouteParameterizationRoutePath,
-  uniqueStrings,
 } from "./value-utils";
 import {
   getBreadcrumbFailureKind,
@@ -54,10 +41,7 @@ import {
   hasAppOwnedFrame,
   hasGifPickerTenorManagerFrame,
   hasInjectedWasmCspFrameSignature,
-  hasLikelyAppOwnedFrame,
-  hasNativeJsonStringifyFrame,
   hasReactDomNotFoundErrorSignature,
-  hasSentryRouteParameterizationFrame,
   isSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
 
@@ -143,116 +127,6 @@ function hasGifPickerTenorBreadcrumbSignature(
   return (
     hasGifPickerTenorFailureBreadcrumb(event) &&
     hasTenorCategoriesRequestBreadcrumb(event)
-  );
-}
-
-function hasRouteParameterizationNavigationBreadcrumb(
-  event: SentryClientEvent
-): boolean {
-  return getBreadcrumbValues(event).some((breadcrumb) => {
-    const data = breadcrumb.data;
-    if (breadcrumb.category !== "navigation" || !data) {
-      return false;
-    }
-
-    if (typeof data["from"] !== "string" || typeof data["to"] !== "string") {
-      return false;
-    }
-
-    return [data["from"], data["to"]].some((candidate) =>
-      isRouteParameterizationRoutePath(getRoutePathFromString(candidate))
-    );
-  });
-}
-
-export function hasRouteParameterizationRouteEvidence(
-  event: SentryClientEvent
-): boolean {
-  return (
-    hasRouteParameterizationRoute(event) ||
-    hasRouteParameterizationNavigationBreadcrumb(event)
-  );
-}
-
-function getRouteParameterizationContextValues(
-  event: SentryClientEvent
-): string[] {
-  const contextValues = routeParameterizationContextKeys.flatMap((key) => {
-    const context = event.contexts?.[key];
-    return isRecord(context) ? Object.values(context) : [];
-  });
-  const tagValues = routeParameterizationTagKeys.map(
-    (key) => event.tags?.[key]
-  );
-
-  return uniqueStrings(
-    [...contextValues, ...tagValues].filter(
-      (value): value is string => typeof value === "string" && value.length > 0
-    )
-  );
-}
-
-function getRouteParameterizationUserAgentValues(
-  event: SentryClientEvent
-): string[] {
-  const candidates = [
-    getRequestHeaderString(event, "user-agent"),
-    getStringValue(event.tags?.["user_agent"]),
-    getStringValue(event.tags?.["userAgent"]),
-    getRuntimeUserAgentString(),
-  ];
-
-  return candidates.filter(
-    (value): value is string => typeof value === "string" && value.length > 0
-  );
-}
-
-function matchesContextToken(value: string, tokens: string[]): boolean {
-  const normalized = value.toLowerCase();
-  return tokens.some((token) => normalized.includes(token));
-}
-
-function isIosWebViewUserAgent(value: string): boolean {
-  const normalized = value.toLowerCase();
-  return (
-    /\b(?:iphone|ipad|ipod)\b/.test(normalized) &&
-    normalized.includes("applewebkit/") &&
-    normalized.includes("mobile/") &&
-    !normalized.includes("safari/")
-  );
-}
-
-export function hasMetaMaskMobileWebViewContext(
-  event: SentryClientEvent
-): boolean {
-  const contextValues = getRouteParameterizationContextValues(event);
-  const userAgentValues = getRouteParameterizationUserAgentValues(event);
-  const values = [...contextValues, ...userAgentValues];
-
-  return (
-    values.some((value) =>
-      matchesContextToken(value, metaMaskMobileContextTokens)
-    ) &&
-    values.some(
-      (value) =>
-        matchesContextToken(value, mobileSafariWebViewContextTokens) ||
-        matchesContextToken(value, webViewUserAgentTokens)
-    )
-  );
-}
-
-function hasMobileSafariWebViewContext(event: SentryClientEvent): boolean {
-  const contextValues = getRouteParameterizationContextValues(event);
-  const userAgentValues = getRouteParameterizationUserAgentValues(event);
-  return (
-    contextValues.some((value) =>
-      matchesContextToken(value, mobileSafariWebViewContextTokens)
-    ) ||
-    userAgentValues.some(
-      (value) =>
-        matchesContextToken(value, mobileSafariWebViewContextTokens) ||
-        isIosWebViewUserAgent(value)
-    )
   );
 }
 
@@ -668,46 +542,6 @@ export function shouldFilterGifPickerTenorCategoriesError(
   return (
     hasGifPickerTenorManagerFrame(frames) ||
     hasGifPickerTenorBreadcrumbSignature(event)
-  );
-}
-
-export function shouldFilterSentryRouteParameterizationError(
-  event: SentryClientEvent
-): boolean {
-  // Sentry SDK route parameterization noise observed in iOS WKWebView;
-  // keep app-owned and generic browser cyclic JSON errors.
-  const value = event.exception?.values?.[0];
-  if (
-    value?.type !== "TypeError" ||
-    value.value !== sentryRouteParameterizationMessage
-  ) {
-    return false;
-  }
-
-  const mechanism = value.mechanism;
-  if (
-    mechanism?.type !== sentryRouteParameterizationMechanismType ||
-    mechanism.handled !== false
-  ) {
-    return false;
-  }
-
-  const frames = value.stacktrace?.frames;
-  const framesWithoutSentryRouteParameterization = frames?.filter(
-    (frame) => !isSentryRouteParameterizationFrame(frame)
-  );
-  if (
-    hasLikelyAppOwnedFrame(framesWithoutSentryRouteParameterization) ||
-    !hasNativeJsonStringifyFrame(frames)
-  ) {
-    return false;
-  }
-
-  return (
-    (hasSentryRouteParameterizationFrame(frames) ||
-      hasRouteParameterizationRouteEvidence(event)) &&
-    (hasMetaMaskMobileWebViewContext(event) ||
-      hasMobileSafariWebViewContext(event))
   );
 }
 
