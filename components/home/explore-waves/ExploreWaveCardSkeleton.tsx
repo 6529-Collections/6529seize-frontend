@@ -11,6 +11,9 @@ export function ExploreWaveCardSkeleton() {
         {/* Wave Name Skeleton */}
         <div className="tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800 sm:tw-h-6" />
 
+        {/* Metrics Skeleton */}
+        <div className="tw-mt-2.5 tw-h-3 tw-w-1/3 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+
         {/* Message Preview Skeleton */}
         <div className="tw-mt-3 tw-space-y-2">
           <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
