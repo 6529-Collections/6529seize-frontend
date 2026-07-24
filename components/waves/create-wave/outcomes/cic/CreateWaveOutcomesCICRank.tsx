@@ -11,6 +11,7 @@ import {
 } from "@/types/waves.types";
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
 import CreateWaveOutcomeFormActions from "../CreateWaveOutcomeFormActions";
+import { isMissingOutcomeAmount } from "../outcomeValidation";
 
 export default function CreateWaveOutcomesCICRank({
   onOutcome,
@@ -61,19 +62,14 @@ export default function CreateWaveOutcomesCICRank({
     ) {
       const totalValue = getWinnersTotal();
 
-      if (totalValue === null || totalValue === 0 || Number.isNaN(totalValue)) {
+      if (isMissingOutcomeAmount(totalValue)) {
         return true;
       }
       if (totalValue !== winnersConfig.totalAmount) {
         return true;
       }
     } else {
-      const totalAmount = winnersConfig?.totalAmount;
-      return (
-        totalAmount === undefined ||
-        totalAmount === 0 ||
-        Number.isNaN(totalAmount)
-      );
+      return isMissingOutcomeAmount(winnersConfig?.totalAmount);
     }
 
     return false;
