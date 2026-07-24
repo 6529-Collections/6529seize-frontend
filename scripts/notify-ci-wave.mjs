@@ -59,8 +59,11 @@ function getFetchFailureMessage(error) {
 }
 
 function isContributorGithubLogin(value) {
-  return /^(?:[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38})(?:\[bot\])?$/.test(
-    value
+  return (
+    value.length <= 39 &&
+    /^(?:[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38})(?:\[bot\])?$/.test(
+      value
+    )
   );
 }
 
@@ -134,6 +137,10 @@ if (
 }
 if (releaseContributors.length > 0 && !CI_RELEASE_TRAIN_ID) {
   console.error("CI_RELEASE_TRAIN_ID is required with CI_RELEASE_CONTRIBUTORS");
+  process.exit(1);
+}
+if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/.test(CI_PIPELINES_SHA)) {
+  console.error("CI_PIPELINES_SHA must be a 40-character lowercase Git SHA");
   process.exit(1);
 }
 const isReleaseNotesEligible =

@@ -78,7 +78,7 @@ jobs:
           [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           # Semantic GitHub-login validation is centralized in notify-ci-wave.mjs.
-          jq -e 'type == "array" and length <= 100 and all(.[]; type == "string" and length >= 1 and length <= 44)' <<< "$RELEASE_CONTRIBUTORS" > /dev/null
+          jq -e 'type == "array" and length <= 100 and all(.[]; type == "string" and length >= 1 and length <= 39)' <<< "$RELEASE_CONTRIBUTORS" > /dev/null
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
       - name: Authorize immutable Release Bus operation
         env:
