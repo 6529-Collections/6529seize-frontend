@@ -273,9 +273,9 @@ jobs:
         if: needs.plan.outputs.typecheck_changed_required == 'true'
         run: ./bin/6529 run typecheck:changed
 
-      - name: Typecheck Playwright and test helpers
+      - name: Typecheck Jest, Playwright, and test helpers
         if: needs.plan.outputs.test_typecheck_required == 'true'
-        run: ./bin/6529 run typecheck:playwright
+        run: ./bin/6529 run typecheck:tests
 
       - name: Run related Jest tests
         if: needs.plan.outputs.jest_changed_required == 'true'
