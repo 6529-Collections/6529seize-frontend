@@ -8,7 +8,7 @@ changes the baseline or the per-file scanner output.
 Current interim floors:
 
 - Production `any_casts` = 23.
-- Test `test_generic_any` = 135.
+- Test `test_generic_any` = 127.
 
 Both nonzero floors are burn-down inventories, not accepted exceptions.
 
@@ -39,7 +39,7 @@ production files:
 
 ## Test generic-argument burn-down inventory
 
-The test-only counter finds 135 generic-argument `any` keywords in 46 files.
+The test-only counter finds 127 generic-argument `any` keywords in 43 files.
 It intentionally does not absorb unrelated direct test annotations or casts
 into this bounded workstream.
 
@@ -50,7 +50,6 @@ into this bounded workstream.
 | `__tests__/components/drops/create/utils/CreateDropWrapper.test.tsx`                                                                 |    10 |
 | `__tests__/components/waves/CreateDropInput.test.tsx`                                                                                |     7 |
 | `__tests__/components/react-query-wrapper/utils/updateAttachmentInCachedDrops.test.ts`                                               |     6 |
-| `__tests__/scripts/release-bus-gate-evidence.test.ts`                                                                                |     5 |
 | `__tests__/services/distribution-plan-api.test.ts`                                                                                   |     5 |
 | `__tests__/components/waves/memes/MemesArtSubmissionFile.test.tsx`                                                                   |     4 |
 | `__tests__/components/meme-calendar/meme-calendar.helpers.test.ts`                                                                   |     3 |
@@ -59,7 +58,6 @@ into this bounded workstream.
 | `__tests__/components/waves/discovery/DiscoverWaveExplorer.test.tsx`                                                                 |     2 |
 | `__tests__/contexts/wave/hooks/useWaveMessagesStore.test.ts`                                                                         |     2 |
 | `__tests__/scripts/release-bus-install-dependencies.test.ts`                                                                         |     2 |
-| `__tests__/scripts/release-bus-preflight-evidence.test.ts`                                                                           |     2 |
 | `__tests__/app/api/open-graph.ens.test.ts`                                                                                           |     1 |
 | `__tests__/components/CreateDropWrapper.test.tsx`                                                                                    |     1 |
 | `__tests__/components/about/AboutPrimaryAddress.test.tsx`                                                                            |     1 |
@@ -89,7 +87,6 @@ into this bounded workstream.
 | `__tests__/hooks/waves/invalidateWaveApprovalStatusQueries.test.ts`                                                                  |     1 |
 | `__tests__/integration/EditDropFlow.test.tsx`                                                                                        |     1 |
 | `__tests__/scenarios/EditDropErrorScenarios.test.tsx`                                                                                |     1 |
-| `__tests__/scripts/release-bus-build-profile.test.ts`                                                                                |     1 |
 | `__tests__/useWaveRealtimeUpdater.test.ts`                                                                                           |     1 |
 
 ## Scanner coverage
