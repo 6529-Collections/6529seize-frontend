@@ -1,10 +1,11 @@
 "use client";
 
 /* istanbul ignore file */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import type { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
@@ -43,12 +44,23 @@ export default function CreateWave({
   const containerRef = useRef<HTMLDivElement | null>(null);
   useKeyboardFocusScroll(containerRef);
 
-  // Matches WavesLayout's native page-scroll exemption: on the native route the
-  // document scrolls, so CreateWaveFlow drops its internal overflow and the
-  // footer pins to the viewport. The web modal keeps its internal scroller.
+  // On the native /waves/create route the create flow has no height-bounding
+  // ancestor, so we hand CreateWaveFlow the layout system's measured content
+  // height (viewport minus header/nav/safe-area). That makes its scroll region
+  // a real bounded scrollport the sticky footer can pin to — inside the app
+  // shell's transformed wrappers, where document-level sticky fails. The web
+  // modal bounds its own height, so it passes no style. `100dvh` is a safety
+  // fallback for the brief window before the layout system reports a measured
+  // height (keeps the footer reachable, never clipped).
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
-  const pageScroll = isApp && pathname === "/waves/create";
+  const { contentContainerStyle } = useLayout();
+  const isNativeRoute = isApp && pathname === "/waves/create";
+  const nativeBoundedStyle: CSSProperties | undefined = isNativeRoute
+    ? contentContainerStyle.height
+      ? contentContainerStyle
+      : { height: "100dvh", maxHeight: "100dvh" }
+    : undefined;
 
   // Each step renders fresh content, but the layout's scroll container keeps
   // the offset where the user tapped Next (the bottom of the previous step),
@@ -137,7 +149,7 @@ export default function CreateWave({
           config.overview.name ? `"${config.overview.name}"` : ""
         }`}
         onBack={onBack}
-        pageScroll={pageScroll}
+        nativeBoundedStyle={nativeBoundedStyle}
       >
         <CreateWaveLayout
           config={config}

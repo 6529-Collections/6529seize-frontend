@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import {
   CreateWaveScrollHintProvider,
   useCanScrollDown,
@@ -9,21 +15,29 @@ export default function CreateWaveFlow({
   onBack,
   children,
   isActive = true,
-  pageScroll = false,
+  nativeBoundedStyle,
 }: {
   readonly title: string;
   readonly onBack: () => void;
   readonly children: ReactNode;
   readonly isActive?: boolean | undefined;
-  // Native route lets the document scroll; the modal scrolls this region. When
-  // page-scrolling we drop this region's `overflow`, so the sticky footer's
-  // scroll context becomes the document and it pins to the viewport instead of
-  // the (inert) internal container.
-  readonly pageScroll?: boolean | undefined;
+  // Native app shell only. The web modal bounds this region's height itself, so
+  // its internal `overflow-y-auto` is already a real scrollport and the sticky
+  // footer pins to it. The native /waves/create route has no such bounding
+  // ancestor, and the app shell wraps the view in transformed elements
+  // (pull-to-refresh root + framer-motion) — a transform between the footer and
+  // its scroll container defeats sticky on WKWebView/Chromium alike. Applying
+  // the app's own measured content height here makes THIS region the scrollport
+  // (no transform between it and the footer), so the footer sticks on iOS and
+  // Android. Reserve-free: the height is measured by the layout system, not
+  // hardcoded.
+  readonly nativeBoundedStyle?: CSSProperties | undefined;
 }) {
   const onBackRef = useRef(onBack);
   const scrollRegionRef = useRef<HTMLDivElement | null>(null);
-  const canScrollDown = useCanScrollDown(scrollRegionRef, pageScroll);
+  // The region is always the scrollport now (the native route no longer defers
+  // to document scroll), so the "more below" hint always reads this element.
+  const canScrollDown = useCanScrollDown(scrollRegionRef, false);
 
   useEffect(() => {
     onBackRef.current = onBack;
@@ -70,20 +84,16 @@ export default function CreateWaveFlow({
       className="tailwind-scope tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-iron-950"
       data-flow-title={title}
     >
-      {/* Single scroll owner for the create-wave flow. The modal bounds its
-          height and scrolls this region internally. The native route sits in an
-          app shell that page-scrolls the document, so there we drop this
-          region's `overflow` (it would otherwise be an inert scroll container
-          that captures the footer's sticky context and hides it below the
-          fold). Either way the footer stays a sticky child of the live
-          scroller. */}
+      {/* Single scroll owner for the create-wave flow. It is always an
+          internal `overflow-y-auto` scrollport so the sticky footer pins to it.
+          The modal bounds the height via its own flex box; the native route
+          passes `nativeBoundedStyle` (the layout system's measured content
+          height) so this region gets a real bounded height inside the app
+          shell instead of overflowing it. */}
       <div
         ref={scrollRegionRef}
-        className={`tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col ${
-          pageScroll
-            ? ""
-            : "tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
-        }`}
+        style={nativeBoundedStyle}
+        className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
       >
         <CreateWaveScrollHintProvider value={{ canScrollDown }}>
           {children}
