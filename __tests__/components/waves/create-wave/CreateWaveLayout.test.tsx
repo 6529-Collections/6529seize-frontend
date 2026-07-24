@@ -31,8 +31,11 @@ const config = {
 } as any;
 
 describe("CreateWaveLayout", () => {
+  const scrollIntoView = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
     useCapacitor.mockReturnValue({ isIos: false });
     useNativeKeyboard.mockReturnValue({ isVisible: false });
   });
@@ -59,5 +62,34 @@ describe("CreateWaveLayout", () => {
     expect(footer?.className).toContain(
       "lg:tw-pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
     );
+  });
+
+  it("scrolls the shared flow to the top when the step changes", () => {
+    const props = {
+      config,
+      showActions: true,
+      submitting: false,
+      setStep: jest.fn(),
+      onComplete: async () => {},
+    };
+    const { rerender } = render(
+      <CreateWaveLayout {...props} step={CreateWaveStep.OVERVIEW}>
+        <div>overview</div>
+      </CreateWaveLayout>
+    );
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    rerender(
+      <CreateWaveLayout {...props} step={CreateWaveStep.GROUPS}>
+        <div>groups</div>
+      </CreateWaveLayout>
+    );
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      block: "start",
+      inline: "nearest",
+    });
   });
 });

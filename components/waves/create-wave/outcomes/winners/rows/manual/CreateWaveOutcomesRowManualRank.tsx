@@ -18,7 +18,7 @@ export default function CreateWaveOutcomesRowManualRank({
         </div>
         <div className="tw-col-span-8">
           <>
-            <p 
+            <p
               className="tw-mb-0 tw-text-sm tw-text-white tw-font-normal tw-truncate"
               data-tooltip-id={`manual-title-${outcome.title}`}
             >
