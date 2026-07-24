@@ -221,6 +221,48 @@ describe("release bus staging artifact transfer", () => {
       script.lastIndexOf('wait_for_local_version "$EXPECTED_SHA"')
     ).toBeLessThan(script.lastIndexOf("pm2 save"));
   });
+
+  it("bounds rebuildable staging releases without deleting the active rollback", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+    const script = deployStep.run;
+
+    expect(script).toContain("prune_release_cache");
+    expect(script).toContain(
+      '[[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}/app$ ]]'
+    );
+    expect(script).toContain('[ "$cached_release" = "$release_dir" ]');
+    expect(script).toContain('[ "$cached_release" = "$current_release" ]');
+    expect(script).toContain(
+      'if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] ||'
+    );
+    expect(script).toContain(
+      '[ "$cached_release" != "$release_root/releases/$cached_sha" ]'
+    );
+    expect(script).toContain(
+      "Preserving unrecognized staging release cache entry"
+    );
+    expect(script).toContain(
+      "Refusing to prune without the exact managed current release."
+    );
+    expect(script.indexOf("continue\n")).toBeLessThan(
+      script.indexOf('rm -rf -- "$cached_release"')
+    );
+    expect(script).toContain('rm -rf -- "$cached_release"');
+    expect(script.indexOf("prune_release_cache\n")).toBeGreaterThan(
+      script.indexOf(
+        "Refusing to deploy without an exact healthy pre-mutation local version."
+      )
+    );
+    expect(script.indexOf("prune_release_cache\n")).toBeLessThan(
+      script.indexOf('http_status="$(curl')
+    );
+    expect(script.indexOf('rm -f "$release_dir/package.zip"')).toBeGreaterThan(
+      script.indexOf('test -f "$release_dir/app/server.js"')
+    );
+  });
 });
 
 describe("release bus v2 E2E callbacks", () => {
@@ -292,9 +334,7 @@ describe("release bus v2 combined preflight", () => {
         step.name === "Build exact environment profile once"
     );
     expect(build.env.BUILD_ENVIRONMENT).toBe("${{ matrix.environment }}");
-    expect(buildStep.run).toContain(
-      'if [ "$BUILD_ENVIRONMENT" = staging ]'
-    );
+    expect(buildStep.run).toContain('if [ "$BUILD_ENVIRONMENT" = staging ]');
     expect(buildStep.run).toContain("unset ANNOUNCED_VERSION_ENDPOINT");
   });
 
@@ -331,8 +371,7 @@ describe("release bus v2 combined preflight", () => {
     }
 
     const quality = workflow.jobs.quality.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Run independent quality shard"
+      (step: { name?: string }) => step.name === "Run independent quality shard"
     );
     expect(quality.run).toContain(
       './bin/6529 run test:no-coverage --runInBand --shard="$shard_index/4"'
