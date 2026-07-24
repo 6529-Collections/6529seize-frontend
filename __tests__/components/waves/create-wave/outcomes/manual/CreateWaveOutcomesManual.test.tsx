@@ -155,37 +155,40 @@ describe("CreateWaveOutcomesManual", () => {
 
     expect(
       screen.getByText(
-        "Use ranks and ranges separated by commas, such as 1-3, 5, 7-9."
+        "Use ranks from 1 to 10,000 and ranges separated by commas, such as 1-3, 5, 7-9."
       )
     ).toBeInTheDocument();
     expect(positionsInput).toHaveFocus();
   });
 
-  it("rejects a rank that is too large to configure", async () => {
-    const mockOnOutcome = jest.fn();
-    render(
-      <CreateWaveOutcomesManual
-        {...defaultProps}
-        waveType={ApiWaveType.Rank}
-        onOutcome={mockOnOutcome}
-      />
-    );
+  it.each(["10001", "1-10001"])(
+    "rejects an individual rank or range above the safe limit: %s",
+    async (ranks) => {
+      const mockOnOutcome = jest.fn();
+      render(
+        <CreateWaveOutcomesManual
+          {...defaultProps}
+          waveType={ApiWaveType.Rank}
+          onOutcome={mockOnOutcome}
+        />
+      );
 
-    await userEvent.type(
-      screen.getByLabelText("What winners receive"),
-      "Test action"
-    );
-    const positionsInput = screen.getByLabelText("Winning ranks");
-    await userEvent.type(positionsInput, "99999999999999999999");
-    await userEvent.click(screen.getByTestId("primary-button"));
+      await userEvent.type(
+        screen.getByLabelText("What winners receive"),
+        "Test action"
+      );
+      const positionsInput = screen.getByLabelText("Winning ranks");
+      await userEvent.type(positionsInput, ranks);
+      await userEvent.click(screen.getByTestId("primary-button"));
 
-    expect(
-      screen.getByText(
-        "Use ranks and ranges separated by commas, such as 1-3, 5, 7-9."
-      )
-    ).toBeInTheDocument();
-    expect(mockOnOutcome).not.toHaveBeenCalled();
-  });
+      expect(
+        screen.getByText(
+          "Use ranks from 1 to 10,000 and ranges separated by commas, such as 1-3, 5, 7-9."
+        )
+      ).toBeInTheDocument();
+      expect(mockOnOutcome).not.toHaveBeenCalled();
+    }
+  );
 
   it("calls onCancel when cancel button is clicked", async () => {
     const mockOnCancel = jest.fn();

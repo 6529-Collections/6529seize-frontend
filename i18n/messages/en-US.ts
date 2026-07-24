@@ -888,11 +888,11 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   "manual.rewardError": "Describe what winners receive.",
   "manual.ranksLabel": "Winning ranks",
   "manual.ranksHelper":
-    "Enter single ranks or ranges separated by commas. Every listed rank receives this same outcome.",
+    "Enter ranks from 1 to 10,000 as single ranks or ranges separated by commas. Every listed rank receives this same outcome.",
   "manual.ranksPlaceholder": "1-3, 5, 7-9",
   "manual.ranksRequiredError": "Enter at least one winning rank.",
   "manual.ranksFormatError":
-    "Use ranks and ranges separated by commas, such as 1-3, 5, 7-9.",
+    "Use ranks from 1 to 10,000 and ranges separated by commas, such as 1-3, 5, 7-9.",
   "manual.savedRanks": "Winning ranks: {ranks}",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":

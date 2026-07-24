@@ -80,7 +80,7 @@ create-subwave.
 - Manual validation can show:
   - `Describe what winners receive.`
   - `Enter at least one winning rank.`
-  - `Use ranks and ranges separated by commas, such as 1-3, 5, 7-9.`
+  - `Use ranks from 1 to 10,000 and ranges separated by commas, such as 1-3, 5, 7-9.`
 - A saved manual `Rank` row summarizes the selected winning ranks.
 - Rep/NIC saves require totals greater than `0`.
 - Changing selected type while editing drops unsaved form values.

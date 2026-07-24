@@ -15,6 +15,7 @@ const REWARD_HELPER_ID = "outcome-manual-helper";
 const REWARD_ERROR_ID = "outcome-manual-error";
 const RANKS_HELPER_ID = "outcome-positions-helper";
 const RANKS_ERROR_ID = "outcome-positions-error";
+const MAX_RANK_POSITION = 10_000;
 
 const isDigitsOnly = (value: string): boolean =>
   value.length > 0 &&
@@ -26,7 +27,9 @@ const parseRange = (range: string): number[] | null => {
       return null;
     }
     const rank = Number.parseInt(range, 10);
-    return Number.isNaN(rank) || rank < 1 ? null : [rank];
+    return Number.isNaN(rank) || rank < 1 || rank > MAX_RANK_POSITION
+      ? null
+      : [rank];
   }
 
   const rangeParts = range.split("-");
@@ -46,7 +49,14 @@ const parseRange = (range: string): number[] | null => {
 
   const start = Number.parseInt(startValue, 10);
   const end = Number.parseInt(endValue, 10);
-  if (Number.isNaN(start) || Number.isNaN(end) || start < 1 || end < start) {
+  if (
+    Number.isNaN(start) ||
+    Number.isNaN(end) ||
+    start < 1 ||
+    start > MAX_RANK_POSITION ||
+    end < start ||
+    end > MAX_RANK_POSITION
+  ) {
     return null;
   }
 
