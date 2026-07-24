@@ -9,7 +9,7 @@ arguments without counting comments, prose, strings, or identifiers.
 ## Current branch
 
 `codex/generic-any-scanner`, based on `origin/main` at
-`d42c30336abe60fc76b6b4528ed8ca123e95f974`.
+`52192bf48da7cbd813324413f9eeae50fe0488ef`.
 
 ## Constraints
 
@@ -23,8 +23,9 @@ arguments without counting comments, prose, strings, or identifiers.
 
 - The starting `origin/main` `any_casts` baseline was zero despite the blind
   spot; this scanner slice refreshes it to the exact interim production count.
-- The current scanner is already TypeScript-AST-aware for direct annotations
-  and assertions but deliberately ignores generic type arguments.
+- Before this workstream, the scanner was already TypeScript-AST-aware for
+  direct annotations and assertions but deliberately ignored generic type
+  arguments. This scanner slice adds that generic-argument counting.
 - Historical PR #3110 used a delimiter regex. Its own review identified a
   delimiter-consumption weakness for adjacent generic arguments, so that
   matcher will not be reused.
@@ -42,6 +43,5 @@ arguments without counting comments, prose, strings, or identifiers.
 
 ## Next actions
 
-1. Create and push a signed review-follow-up commit.
-2. Track every latest-head review bot and required check to terminal state.
-3. Obtain current-head maintainer approval and merge.
+1. Track every latest-head review bot and required check to terminal state.
+2. Obtain current-head maintainer approval and merge.
