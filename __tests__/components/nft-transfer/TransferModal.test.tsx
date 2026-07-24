@@ -8,6 +8,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 jest.mock("@/components/nft-transfer/TransferState", () => ({
   useTransfer: jest.fn(),
 }));
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: jest.fn(() => "en-US"),
+}));
 jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: jest.fn(),
 }));
@@ -49,6 +52,8 @@ jest.mock("next/image", () => ({
 
 const mockUseTransfer = require("@/components/nft-transfer/TransferState")
   .useTransfer as jest.Mock;
+const mockUseBrowserLocale = require("@/hooks/useBrowserLocale")
+  .useBrowserLocale as jest.Mock;
 const mockUseIdentity = require("@/hooks/useIdentity").useIdentity as jest.Mock;
 const mockCommonApiFetch = require("@/services/api/common-api")
   .commonApiFetch as jest.Mock;
@@ -110,6 +115,7 @@ describe("TransferModal", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseBrowserLocale.mockReturnValue("en-US");
 
     mockUseTransfer.mockReturnValue({
       selected: selectedItems,
@@ -200,7 +206,38 @@ describe("TransferModal", () => {
   it("disables transfer confirmation until a wallet is selected", () => {
     openModal();
     const transferButton = screen.getByRole("button", { name: /^transfer$/i });
+    const cancelButton = screen.getByRole("button", { name: /^cancel$/i });
+    const closeButton = screen.getByRole("button", {
+      name: "Close transfer dialog",
+    });
+
     expect(transferButton).toBeDisabled();
+    expect(transferButton).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-font-medium",
+      "disabled:tw-bg-white/5"
+    );
+    expect(transferButton).not.toHaveClass("tw-font-semibold");
+    expect(cancelButton).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-font-medium",
+      "tw-bg-white/5"
+    );
+    expect(closeButton).toHaveClass("tw-size-10", "tw-bg-white/5");
+  });
+
+  it("localizes the recipient selection surface", () => {
+    mockUseBrowserLocale.mockReturnValue("de-DE");
+
+    openModal();
+
+    expect(screen.getByText("Empfänger")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Profil nach Handle, ENS oder Wallet suchen")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Zum Suchen tippen.")).toBeInTheDocument();
   });
 
   it("submits ERC1155 (batch) and ERC721 transfers successfully and shows completion UI", async () => {
@@ -359,7 +396,15 @@ describe("TransferModal", () => {
 
     await screen.findByText(/transfer failed/i);
     const errorBadges = await screen.findAllByText(/error/i);
+    const closeButton = screen.getByRole("button", { name: /^close$/i });
+
     expect(errorBadges.length).toBeGreaterThan(0);
+    expect(closeButton).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-font-medium",
+      "tw-border-transparent"
+    );
   });
 
   it("shows mixed results summary when one succeeds and one fails", async () => {

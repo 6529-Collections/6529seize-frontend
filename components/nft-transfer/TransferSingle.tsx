@@ -26,6 +26,7 @@ interface TransferSingleProps {
   readonly title: string;
   readonly max: number;
   readonly thumbUrl?: string | undefined;
+  readonly presentation?: "panel" | "inline" | undefined;
 }
 
 export default function TransferSingle(props: TransferSingleProps) {
@@ -49,6 +50,10 @@ function TransferSingleImpl(props: TransferSingleProps) {
 
   if (isMobileDevice) {
     return null;
+  }
+
+  if (props.presentation === "inline") {
+    return <TransferSingleActionsImpl {...props} layout="inline" />;
   }
 
   return (
@@ -156,10 +161,10 @@ function TransferSingleActionsImpl(
         onClick={() => decQty(key)}
         disabled={selectedQty <= 1}
         aria-label="Decrease quantity"
-        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
+        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
           selectedQty <= 1
             ? "tw-cursor-not-allowed tw-bg-transparent tw-text-iron-600"
-            : "tw-cursor-pointer tw-bg-iron-800 tw-text-iron-100 hover:tw-bg-iron-700 active:tw-scale-95"
+            : "tw-cursor-pointer tw-bg-iron-800 tw-text-iron-100 hover:tw-bg-iron-700"
         }`}
         data-testid="transfer-single-minus"
       >
@@ -173,10 +178,10 @@ function TransferSingleActionsImpl(
         onClick={() => incQty(key)}
         disabled={selectedQty >= max}
         aria-label="Increase quantity"
-        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
+        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
           selectedQty >= max
             ? "tw-cursor-not-allowed tw-bg-iron-800/50 tw-text-iron-600"
-            : "tw-cursor-pointer tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400 active:tw-scale-95"
+            : "tw-cursor-pointer tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400"
         }`}
         data-testid="transfer-single-plus"
       >
@@ -197,7 +202,7 @@ function TransferSingleActionsImpl(
         setShowModal(true);
       }}
       aria-label={transferButtonText}
-      className="tw-flex tw-h-10 tw-flex-1 tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-5 tw-text-sm tw-font-bold tw-text-black tw-transition-all tw-duration-200 hover:tw-bg-iron-100 active:tw-scale-[0.98] disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @lg:tw-flex-none"
+      className="tw-flex tw-h-10 tw-flex-1 tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-white tw-px-5 tw-text-sm tw-font-medium tw-text-iron-950 tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-bg-white/5 disabled:tw-text-iron-500 @lg:tw-flex-none"
       data-testid="transfer-single-submit"
     >
       <span>{transferButtonText}</span>

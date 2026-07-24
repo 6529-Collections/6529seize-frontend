@@ -55,7 +55,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     }
 
     return (
-      <div>
+      <div className="tw-ml-auto tw-shrink-0">
         <TransferSingle
           collectionType={CollectedCollectionType.NEXTGEN}
           contractType={ContractType.ERC721}
@@ -64,6 +64,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           max={1}
           title={props.token.name ?? `6529 NextGen #${props.token.id}`}
           thumbUrl={props.token.thumbnail_url}
+          presentation="inline"
         />
       </div>
     );
@@ -108,17 +109,22 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         <section className="tw-pb-6 tw-pt-6">
           {props.view === NextgenCollectionView.ABOUT && (
             <section>
-              <h2 className="tw-mb-5 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
-                About
-              </h2>
-              <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5">
+              <div className="tw-mb-5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+                <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+                  About
+                </h2>
+                {transferSingle}
+              </div>
+              <div
+                data-testid="nextgen-token-about-card"
+                className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5"
+              >
                 <div className="tw-grid tw-gap-5 lg:tw-grid-cols-2">
                   <NextGenTokenAbout
                     collection={props.collection}
                     token={props.token}
                   />
-                  <div className="tw-grid tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-pl-5 lg:tw-pt-0">
-                    {transferSingle}
+                  <div className="tw-grid tw-content-start tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5 lg:tw-border-0 lg:tw-border-l lg:tw-border-solid lg:tw-border-white/10 lg:tw-pl-5 lg:tw-pt-0">
                     <NextgenTokenTraits
                       collection={props.collection}
                       token={props.token}

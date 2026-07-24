@@ -56,8 +56,12 @@ describe("TransferPanel", () => {
 
     render(<TransferPanel />);
 
-    expect(screen.getByText(/select some nfts to transfer/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /continue/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/select some nfts to transfer/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /continue/i })
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
     expect(setEnabled).toHaveBeenCalledWith(false);
@@ -99,14 +103,20 @@ describe("TransferPanel", () => {
     render(<TransferPanel />);
 
     const expandButton = screen.getByLabelText("Expand panel");
+    expect(expandButton).toHaveClass("tw-absolute", "tw-inset-0");
     fireEvent.click(expandButton);
 
     expect(screen.getByText("Card 1")).toBeInTheDocument();
+    expect(screen.getByLabelText("Collapse panel")).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /remove/i }));
     expect(unselect).toHaveBeenCalledWith("MEMES:1");
 
     fireEvent.click(screen.getByRole("button", { name: /continue/i }));
     expect(mockTransferModal).toHaveBeenCalled();
+    expect(screen.getByLabelText("Collapse panel")).toBeInTheDocument();
   });
 });
