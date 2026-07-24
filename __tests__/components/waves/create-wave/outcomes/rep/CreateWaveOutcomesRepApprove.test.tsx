@@ -31,7 +31,7 @@ describe("CreateWaveOutcomesRepApprove", () => {
     );
     const categoryInput = screen.getByTestId("category");
     const creditInput = screen.getByLabelText("Rep");
-    const saveButton = screen.getByText("Save");
+    const saveButton = screen.getByText("Add outcome");
     return { user, categoryInput, creditInput, saveButton };
   };
 

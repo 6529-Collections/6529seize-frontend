@@ -33,10 +33,21 @@ describe("CreateWaveOutcomesManual", () => {
     jest.clearAllMocks();
   });
 
-  it("renders manual action input", () => {
+  it("explains what a manual outcome is and where its text appears", () => {
     render(<CreateWaveOutcomesManual {...defaultProps} />);
 
-    expect(screen.getByLabelText("Manual action")).toBeInTheDocument();
+    expect(screen.getByLabelText("What winners receive")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Add a custom reward or result you will fulfill for approved winners."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/this text appears in the wave’s Outcome tab/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Signed print shipped by the creator/i)
+    ).toBeInTheDocument();
   });
 
   it("shows positions input for rank wave type", () => {
@@ -44,7 +55,10 @@ describe("CreateWaveOutcomesManual", () => {
       <CreateWaveOutcomesManual {...defaultProps} waveType={ApiWaveType.Rank} />
     );
 
-    expect(screen.getByLabelText(/Winning Positions/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Winning ranks")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Every listed rank receives this same outcome/i)
+    ).toBeInTheDocument();
   });
 
   it("does not show max winners input", () => {
@@ -61,15 +75,13 @@ describe("CreateWaveOutcomesManual", () => {
       />
     );
 
-    expect(
-      screen.queryByLabelText(/Winning Positions/i)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Winning ranks")).not.toBeInTheDocument();
   });
 
   it("updates manual action value on input change", async () => {
     render(<CreateWaveOutcomesManual {...defaultProps} />);
 
-    const input = screen.getByLabelText("Manual action");
+    const input = screen.getByLabelText("What winners receive");
     await userEvent.type(input, "Test action");
 
     expect(input).toHaveValue("Test action");
@@ -82,8 +94,9 @@ describe("CreateWaveOutcomesManual", () => {
     await userEvent.click(saveButton);
 
     expect(
-      screen.getByText("Please enter your manual action")
+      screen.getByText("Describe what winners receive.")
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("What winners receive")).toHaveFocus();
   });
 
   it("shows error for rank wave without positions", async () => {
@@ -91,13 +104,16 @@ describe("CreateWaveOutcomesManual", () => {
       <CreateWaveOutcomesManual {...defaultProps} waveType={ApiWaveType.Rank} />
     );
 
-    const actionInput = screen.getByLabelText("Manual action");
+    const actionInput = screen.getByLabelText("What winners receive");
     await userEvent.type(actionInput, "Test action");
 
     const saveButton = screen.getByTestId("primary-button");
     await userEvent.click(saveButton);
 
-    expect(screen.getByText("Please enter positions")).toBeInTheDocument();
+    expect(
+      screen.getByText("Enter at least one winning rank.")
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Winning ranks")).toHaveFocus();
   });
 
   it("accepts valid position format for rank wave", async () => {
@@ -110,10 +126,10 @@ describe("CreateWaveOutcomesManual", () => {
       />
     );
 
-    const actionInput = screen.getByLabelText("Manual action");
+    const actionInput = screen.getByLabelText("What winners receive");
     await userEvent.type(actionInput, "Test action");
 
-    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    const positionsInput = screen.getByLabelText("Winning ranks");
     await userEvent.type(positionsInput, "1,3,5");
 
     const saveButton = screen.getByTestId("primary-button");
@@ -127,17 +143,48 @@ describe("CreateWaveOutcomesManual", () => {
       <CreateWaveOutcomesManual {...defaultProps} waveType={ApiWaveType.Rank} />
     );
 
-    const actionInput = screen.getByLabelText("Manual action");
+    const actionInput = screen.getByLabelText("What winners receive");
     await userEvent.type(actionInput, "Test action");
 
-    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    const positionsInput = screen.getByLabelText("Winning ranks");
     // Use a value that passes the input filter but fails format validation
     await userEvent.type(positionsInput, "1--3");
 
     const saveButton = screen.getByTestId("primary-button");
     await userEvent.click(saveButton);
 
-    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Use ranks and ranges separated by commas, such as 1-3, 5, 7-9."
+      )
+    ).toBeInTheDocument();
+    expect(positionsInput).toHaveFocus();
+  });
+
+  it("rejects a rank that is too large to configure", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    await userEvent.type(
+      screen.getByLabelText("What winners receive"),
+      "Test action"
+    );
+    const positionsInput = screen.getByLabelText("Winning ranks");
+    await userEvent.type(positionsInput, "99999999999999999999");
+    await userEvent.click(screen.getByTestId("primary-button"));
+
+    expect(
+      screen.getByText(
+        "Use ranks and ranges separated by commas, such as 1-3, 5, 7-9."
+      )
+    ).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
   });
 
   it("calls onCancel when cancel button is clicked", async () => {
@@ -162,7 +209,7 @@ describe("CreateWaveOutcomesManual", () => {
       />
     );
 
-    const actionInput = screen.getByLabelText("Manual action");
+    const actionInput = screen.getByLabelText("What winners receive");
     await userEvent.type(actionInput, "Approve action");
 
     const saveButton = screen.getByTestId("primary-button");
@@ -186,11 +233,11 @@ describe("CreateWaveOutcomesManual", () => {
       />
     );
 
-    const actionInput = screen.getByLabelText("Manual action");
+    const actionInput = screen.getByLabelText("What winners receive");
     await userEvent.type(actionInput, "Rank action");
 
-    const positionsInput = screen.getByLabelText(/Winning Positions/i);
-    await userEvent.type(positionsInput, "1-3,5");
+    const positionsInput = screen.getByLabelText("Winning ranks");
+    await userEvent.type(positionsInput, "1-3, 5");
 
     const saveButton = screen.getByTestId("primary-button");
     await userEvent.click(saveButton);
@@ -217,7 +264,7 @@ describe("CreateWaveOutcomesManual", () => {
       <CreateWaveOutcomesManual {...defaultProps} waveType={ApiWaveType.Rank} />
     );
 
-    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    const positionsInput = screen.getByLabelText("Winning ranks");
     await userEvent.type(positionsInput, "1,2abc,3");
 
     // Should only allow numbers, commas, and dashes
@@ -232,15 +279,15 @@ describe("CreateWaveOutcomesManual", () => {
     await userEvent.click(saveButton);
 
     expect(
-      screen.getByText("Please enter your manual action")
+      screen.getByText("Describe what winners receive.")
     ).toBeInTheDocument();
 
     // Then enter a value to clear the error
-    const actionInput = screen.getByLabelText("Manual action");
+    const actionInput = screen.getByLabelText("What winners receive");
     await userEvent.type(actionInput, "Action");
 
     expect(
-      screen.queryByText("Please enter your manual action")
+      screen.queryByText("Describe what winners receive.")
     ).not.toBeInTheDocument();
   });
 });

@@ -10,7 +10,7 @@ import {
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import CreateWaveOutcomeFormActions from "../CreateWaveOutcomeFormActions";
 
 export default function CreateWaveOutcomesCICRank({
   onOutcome,
@@ -54,20 +54,26 @@ export default function CreateWaveOutcomesCICRank({
     ) ?? null;
 
   const getTotalValueError = (): boolean => {
+    const winnersConfig = outcome.winnersConfig;
     if (
-      outcome.winnersConfig?.creditValueType ===
+      winnersConfig?.creditValueType ===
       CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE
     ) {
       const totalValue = getWinnersTotal();
 
-      if (!totalValue) {
+      if (totalValue === null || totalValue === 0 || Number.isNaN(totalValue)) {
         return true;
       }
-      if (totalValue !== outcome.winnersConfig?.totalAmount) {
+      if (totalValue !== winnersConfig.totalAmount) {
         return true;
       }
     } else {
-      return !outcome.winnersConfig?.totalAmount;
+      const totalAmount = winnersConfig?.totalAmount;
+      return (
+        totalAmount === undefined ||
+        totalAmount === 0 ||
+        Number.isNaN(totalAmount)
+      );
     }
 
     return false;
@@ -84,11 +90,11 @@ export default function CreateWaveOutcomesCICRank({
   };
 
   const onSubmit = () => {
-    const totalValueError = getTotalValueError();
-    const percentageError = getPercentageError();
-    setTotalValueError(totalValueError);
-    setPercentageError(percentageError);
-    if (totalValueError || percentageError) {
+    const nextTotalValueError = getTotalValueError();
+    const nextPercentageError = getPercentageError();
+    setTotalValueError(nextTotalValueError);
+    setPercentageError(nextPercentageError);
+    if (nextTotalValueError || nextPercentageError) {
       return;
     }
     onOutcome(outcome);
@@ -105,23 +111,7 @@ export default function CreateWaveOutcomesCICRank({
             setWinnersConfig={setWinnersConfig}
           />
         )}
-        <div className="tw-flex tw-justify-end tw-gap-x-3">
-          <button
-            onClick={onCancel}
-            type="button"
-            className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700"
-          >
-            Cancel
-          </button>
-          <PrimaryButton
-            onClicked={onSubmit}
-            disabled={false}
-            loading={false}
-            padding="tw-px-4 tw-py-3"
-          >
-            Save
-          </PrimaryButton>
-        </div>
+        <CreateWaveOutcomeFormActions onCancel={onCancel} onSubmit={onSubmit} />
       </div>
     </div>
   );

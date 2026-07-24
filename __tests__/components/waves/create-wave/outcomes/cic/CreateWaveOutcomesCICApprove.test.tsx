@@ -33,7 +33,9 @@ describe("CreateWaveOutcomesCICApprove", () => {
     expect(screen.getByLabelText("NIC")).toBeInTheDocument();
     expect(screen.queryByLabelText("Max Winners")).not.toBeInTheDocument();
     expect(screen.getByText("Cancel")).toBeInTheDocument();
-    expect(screen.getByTestId("primary-button")).toHaveTextContent("Save");
+    expect(screen.getByTestId("primary-button")).toHaveTextContent(
+      "Add outcome"
+    );
   });
 
   it("updates NIC value on numeric input", async () => {
