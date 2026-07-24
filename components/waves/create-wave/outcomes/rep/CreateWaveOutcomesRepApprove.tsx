@@ -9,6 +9,12 @@ import RepCategorySearch from "@/components/utils/input/rep-category/RepCategory
 import CreateWaveOutcomeFormActions from "../CreateWaveOutcomeFormActions";
 import { isMissingOutcomeAmount } from "../outcomeValidation";
 
+const CREDIT_LABEL = t(DEFAULT_LOCALE, "waves.create.outcomes.type.rep.label");
+const CREDIT_ERROR = t(
+  DEFAULT_LOCALE,
+  "waves.create.outcomes.type.rep.creditError"
+);
+
 export default function CreateWaveOutcomesRepApprove({
   onOutcome,
   onCancel,
@@ -91,7 +97,7 @@ export default function CreateWaveOutcomesRepApprove({
                     : "peer-focus:tw-text-primary-400"
                 } tw-absolute tw-start-1 tw-top-2 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-base tw-font-normal tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
               >
-                {t(DEFAULT_LOCALE, "waves.create.outcomes.type.rep.label")}
+                {CREDIT_LABEL}
               </label>
             </div>
             {creditError && (
@@ -112,10 +118,7 @@ export default function CreateWaveOutcomesRepApprove({
                   />
                 </svg>
                 <div className="tw-text-xs tw-font-medium tw-text-error">
-                  {t(
-                    DEFAULT_LOCALE,
-                    "waves.create.outcomes.type.rep.creditError"
-                  )}
+                  {CREDIT_ERROR}
                 </div>
               </div>
             )}

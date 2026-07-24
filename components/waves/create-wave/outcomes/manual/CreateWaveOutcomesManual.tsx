@@ -61,7 +61,7 @@ const parsePositions = (input: string): number[] | null => {
 
   try {
     const ranges = cleanInput.split(",").map(parseRange);
-    if (ranges.some((range) => range === null)) {
+    if (ranges.includes(null)) {
       return null;
     }
 

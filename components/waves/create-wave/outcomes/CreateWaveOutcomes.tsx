@@ -28,6 +28,7 @@ function ShowOutcomesToggle({
   readonly disabled: boolean;
   readonly onChange: (display: CreateWaveDisplayConfig) => void;
 }) {
+  const labelId = "create-wave-show-outcomes-label";
   const descriptionId = "create-wave-show-outcomes-description";
 
   return (
@@ -37,7 +38,10 @@ function ShowOutcomesToggle({
       }`}
     >
       <span className="tw-min-w-0">
-        <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
+        <span
+          id={labelId}
+          className="tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+        >
           {t(DEFAULT_LOCALE, "waves.create.outcomes.showOutcomes")}
         </span>
         <span
@@ -49,6 +53,7 @@ function ShowOutcomesToggle({
       </span>
       <input
         type="checkbox"
+        aria-labelledby={labelId}
         aria-describedby={descriptionId}
         checked={display.outcomesVisible}
         disabled={disabled}
