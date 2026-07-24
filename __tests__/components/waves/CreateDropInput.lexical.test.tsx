@@ -1,6 +1,11 @@
 import React, { createRef } from "react";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import CreateDropInput, {
   type CreateDropInputHandles,
 } from "@/components/waves/CreateDropInput";
@@ -37,10 +42,9 @@ jest.mock(
   "@/components/drops/create/lexical/plugins/waves/WaveMentionsPlugin",
   createNoopPluginMock
 );
-jest.mock(
-  "@/components/drops/create/lexical/plugins/MaxLengthPlugin",
-  () => ({ MaxLengthPlugin: () => null })
-);
+jest.mock("@/components/drops/create/lexical/plugins/MaxLengthPlugin", () => ({
+  MaxLengthPlugin: () => null,
+}));
 jest.mock(
   "@/components/drops/create/lexical/plugins/DragDropPastePlugin",
   createNoopPluginMock
@@ -94,4 +98,34 @@ it("keeps an empty-selection click inside a Lexical block", async () => {
     expect(anchorNode).not.toBe(editor);
     expect(editor.contains(anchorNode)).toBe(true);
   });
+});
+
+it("imports global mention tokens for ordinary chat authors", async () => {
+  const ref = createRef<CreateDropInputHandles>();
+  const onEditorState = jest.fn();
+  render(
+    <CreateDropInput
+      ref={ref}
+      waveId="wave"
+      editorState={null}
+      type={null}
+      canSubmit={false}
+      isStormMode={false}
+      isDropMode={false}
+      submitting={false}
+      canMentionAll={false}
+      onEditorState={onEditorState}
+      onReferencedNft={jest.fn()}
+      onMentionedUser={jest.fn()}
+      onMentionedWave={jest.fn()}
+    />
+  );
+
+  act(() => ref.current?.setMarkdown("@contributors"));
+
+  await waitFor(() =>
+    expect(screen.getByText("@contributors")).toHaveClass(
+      "editor-group-mention"
+    )
+  );
 });

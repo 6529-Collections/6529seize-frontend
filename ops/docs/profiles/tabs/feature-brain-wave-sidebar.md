@@ -54,7 +54,7 @@ created, or into the waves where that profile is most active.
 
 ## Edge Cases
 
-- If both datasets resolve empty, the sidebar or strip is hidden entirely.
+- If both wave datasets resolve empty, the sidebar is hidden.
 - `Created Waves` excludes direct-message threads.
 - `Created Waves` resolves authored waves from the profile handle when
   available, then falls back to the resolved profile query or primary wallet.

@@ -24,7 +24,6 @@ import {
   type EditorState,
   type LexicalNode,
   type RootNode,
-  type TextNode,
 } from "lexical";
 import React, {
   useCallback,
@@ -45,12 +44,9 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
+import { WaveMentionNode } from "@/components/drops/create/lexical/nodes/WaveMentionNode";
 import {
-  $createWaveMentionNode,
-  WaveMentionNode,
-} from "@/components/drops/create/lexical/nodes/WaveMentionNode";
-import {
-  $createMentionNode,
+  $isMentionNode,
   MentionNode,
 } from "@/components/drops/create/lexical/nodes/MentionNode";
 import { GroupMentionNode } from "@/components/drops/create/lexical/nodes/GroupMentionNode";
@@ -85,6 +81,7 @@ import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortc
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
+import { processSplitMentions } from "./editDropMentionReconstruction";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
@@ -106,12 +103,58 @@ interface EditDropLexicalProps {
 
 const MAX_MENTION_RECONSTRUCTION_PASSES = 20;
 
-const BASE_EDIT_MARKDOWN_TRANSFORMERS = [
+const EDIT_MARKDOWN_TRANSFORMERS = [
   ...SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE,
   MENTION_TRANSFORMER,
+  GROUP_MENTION_TRANSFORMER,
   HASHTAG_TRANSFORMER,
   WAVE_MENTION_TRANSFORMER,
 ];
+
+const areMentionedUsersEqual = (
+  left: ApiDropMentionedUser[],
+  right: ApiDropMentionedUser[]
+) => {
+  const toComparable = (mentions: ApiDropMentionedUser[]) =>
+    mentions
+      .map(
+        (mention) =>
+          `${mention.mentioned_profile_id}:${mention.handle_in_content.toLowerCase()}`
+      )
+      .sort();
+  return (
+    JSON.stringify(toComparable(left)) === JSON.stringify(toComparable(right))
+  );
+};
+
+const getMentionedUsersFromEditorState = (
+  editorState: EditorState,
+  candidates: ApiDropMentionedUser[]
+): ApiDropMentionedUser[] =>
+  editorState.read(() => {
+    const handlesByProfileId = new Map<string, string>();
+    const legacyHandles = new Set<string>();
+    for (const node of $getRoot().getAllTextNodes().filter($isMentionNode)) {
+      const handle = node.getTextContent().replace(/^@/, "");
+      const profileId = node.getMentionedProfileId();
+      if (profileId) {
+        handlesByProfileId.set(profileId, handle);
+      } else {
+        legacyHandles.add(handle.toLowerCase());
+      }
+    }
+    return candidates.flatMap((mention) => {
+      const currentHandle = handlesByProfileId.get(
+        mention.mentioned_profile_id
+      );
+      if (currentHandle) {
+        return [{ ...mention, handle_in_content: currentHandle }];
+      }
+      return legacyHandles.has(mention.handle_in_content.toLowerCase())
+        ? [mention]
+        : [];
+    });
+  });
 
 const convertCodeNodesToFences = (root: RootNode) => {
   const stack: LexicalNode[] = [...root.getChildren()];
@@ -149,148 +192,14 @@ const convertCodeNodesToFences = (root: RootNode) => {
   }
 };
 
-function reconstructSplitMention(
-  currentNode: TextNode,
-  nextNode: TextNode,
-  mentionStart: RegExpMatchArray,
-  mentionEnd: RegExpMatchArray
-) {
-  const fullMention = mentionStart[0] + mentionEnd[0];
-  const mentionRegex = /@\[(\w+)\]/;
-  const mentionMatch = mentionRegex.exec(fullMention);
-
-  if (!mentionMatch) return false;
-
-  const handle = mentionMatch[1];
-  if (!handle) return false;
-  const mentionNode = $createMentionNode(`@${handle}`);
-
-  const currentText = currentNode.getTextContent();
-  const nextText = nextNode.getTextContent();
-
-  const beforeMention = currentText.substring(
-    0,
-    currentText.length - mentionStart[0].length
-  );
-  const afterMention = nextText.substring(mentionEnd[0].length);
-
-  if (beforeMention) {
-    currentNode.setTextContent(beforeMention);
-    currentNode.insertAfter(mentionNode);
-  } else {
-    currentNode.remove();
-    nextNode.insertBefore(mentionNode);
-  }
-
-  if (afterMention) {
-    nextNode.setTextContent(afterMention);
-  } else {
-    nextNode.remove();
-  }
-
-  return true;
-}
-
-function reconstructSplitWaveMention(
-  currentNode: TextNode,
-  nextNode: TextNode,
-  mentionStart: RegExpMatchArray,
-  mentionEnd: RegExpMatchArray
-) {
-  const fullMention = mentionStart[0] + mentionEnd[0];
-  const mentionRegex = /#\[([^\]]+)\]/;
-  const mentionMatch = mentionRegex.exec(fullMention);
-
-  if (!mentionMatch) return false;
-
-  const waveName = mentionMatch[1];
-  const mentionNode = $createWaveMentionNode(`#${waveName}`);
-
-  const currentText = currentNode.getTextContent();
-  const nextText = nextNode.getTextContent();
-
-  const beforeMention = currentText.substring(
-    0,
-    currentText.length - mentionStart[0].length
-  );
-  const afterMention = nextText.substring(mentionEnd[0].length);
-
-  if (beforeMention) {
-    currentNode.setTextContent(beforeMention);
-    currentNode.insertAfter(mentionNode);
-  } else {
-    currentNode.remove();
-    nextNode.insertBefore(mentionNode);
-  }
-
-  if (afterMention) {
-    nextNode.setTextContent(afterMention);
-  } else {
-    nextNode.remove();
-  }
-
-  return true;
-}
-
-function processSplitMentions(textNodes: Array<TextNode>): boolean {
-  for (let i = 0; i < textNodes.length - 1; i++) {
-    const currentNode = textNodes[i];
-    const nextNode = textNodes[i + 1];
-    if (!currentNode || !nextNode) {
-      continue;
-    }
-
-    const currentText = currentNode.getTextContent();
-    const nextText = nextNode.getTextContent();
-
-    const mentionStart = currentText?.match(/@\[\w*$/);
-    const mentionEnd = nextText?.match(/^\w*\]/);
-    if (mentionStart && mentionEnd) {
-      try {
-        if (
-          reconstructSplitMention(
-            currentNode,
-            nextNode,
-            mentionStart,
-            mentionEnd
-          )
-        ) {
-          return true;
-        }
-      } catch (error) {
-        console.warn("Failed to reconstruct split mention", error);
-      }
-    }
-
-    const waveMentionStart = currentText?.match(/#\[[^\]]*$/);
-    const waveMentionEnd = nextText?.match(/^[^\]]*\]/);
-    if (waveMentionStart && waveMentionEnd) {
-      try {
-        if (
-          reconstructSplitWaveMention(
-            currentNode,
-            nextNode,
-            waveMentionStart,
-            waveMentionEnd
-          )
-        ) {
-          return true;
-        }
-      } catch (error) {
-        console.warn("Failed to reconstruct split wave mention", error);
-      }
-    }
-  }
-
-  return false;
-}
-
 function InitialContentPlugin({
   initialContent,
   transformers,
+  mentionedProfileIdsByHandle,
 }: {
   initialContent: string;
   transformers: Transformer[];
+  mentionedProfileIdsByHandle: ReadonlyMap<string, string>;
 }) {
   const [editor] = useLexicalComposerContext();
 
@@ -319,7 +228,10 @@ function InitialContentPlugin({
           break;
         }
 
-        needsAnotherPass = processSplitMentions(textNodes);
+        needsAnotherPass = processSplitMentions(
+          textNodes,
+          mentionedProfileIdsByHandle
+        );
         passCount += 1;
       }
 
@@ -331,7 +243,7 @@ function InitialContentPlugin({
 
       $selectEndOfRootBlock(root);
     });
-  }, [editor, initialContent, transformers]);
+  }, [editor, initialContent, mentionedProfileIdsByHandle, transformers]);
 
   return null;
 }
@@ -376,10 +288,6 @@ function KeyboardPlugin({
   isSaving,
   isSaveBlocked,
   isMobileOrApp,
-  initialContent,
-  initialGroupMentions,
-  canResolveAllGroupMention,
-  transformers,
   mentionsRef,
   waveMentionsRef,
 }: {
@@ -388,15 +296,10 @@ function KeyboardPlugin({
   isSaving: boolean;
   isSaveBlocked: boolean;
   isMobileOrApp: boolean;
-  initialContent: string;
-  initialGroupMentions: ApiDropGroupMention[];
-  canResolveAllGroupMention: boolean;
-  transformers: Transformer[];
   mentionsRef: React.RefObject<NewMentionsPluginHandles | null>;
   waveMentionsRef: React.RefObject<NewWaveMentionsPluginHandles | null>;
 }) {
   const [editor] = useLexicalComposerContext();
-  const sanitizedInitialContent = removeBlankLinePlaceholders(initialContent);
 
   useEffect(() => {
     const removeEscapeListener = editor.registerCommand(
@@ -427,28 +330,7 @@ function KeyboardPlugin({
         }
 
         if (!isSaving && !isSaveBlocked) {
-          const currentMarkdown = exportDropMarkdown(
-            editor.getEditorState(),
-            transformers
-          );
-          const sanitizedCurrentMarkdown =
-            removeBlankLinePlaceholders(currentMarkdown);
-          const currentMentionedGroups = getMentionedGroupsFromEditorState(
-            editor.getEditorState(),
-            canResolveAllGroupMention
-          );
-          if (
-            sanitizedCurrentMarkdown.trim() ===
-              sanitizedInitialContent.trim() &&
-            areMentionedGroupsEqual(
-              currentMentionedGroups,
-              initialGroupMentions
-            )
-          ) {
-            onCancel();
-          } else {
-            onSave();
-          }
+          onSave();
         }
         return true;
       },
@@ -466,13 +348,8 @@ function KeyboardPlugin({
     isSaving,
     isSaveBlocked,
     isMobileOrApp,
-    initialContent,
-    initialGroupMentions,
-    canResolveAllGroupMention,
-    transformers,
     mentionsRef,
     waveMentionsRef,
-    sanitizedInitialContent,
   ]);
 
   return null;
@@ -491,12 +368,13 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   onCancel,
 }) => {
   const [editorState, setEditorState] = useState<EditorState | null>(null);
-  const [mentionedUsers, setMentionedUsers] =
-    useState<ApiDropMentionedUser[]>(initialMentions);
+  const mentionedUsersRef = useRef<ApiDropMentionedUser[]>(initialMentions);
   const [mentionedWaves, setMentionedWaves] =
     useState<ApiMentionedWave[]>(initialWaveMentions);
   const editorRef = useRef<HTMLDivElement>(null);
+  const editorStateRef = useRef<EditorState | null>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
+  const saveInProgressRef = useRef(false);
   const waveMentionsRef = useRef<NewWaveMentionsPluginHandles>(null);
   const { isApp, isMobileDevice } = useDeviceInfo();
   const isMobileOrApp = isMobileDevice || isApp;
@@ -512,19 +390,15 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     ApiDropGroupMention.All
   );
   const canResolveAllGroupMention = canMentionAll || hasInitialAllGroupMention;
-  const importMarkdownTransformers = useMemo(
+  const initialMentionProfileIdsByHandle = useMemo(
     () =>
-      hasInitialAllGroupMention
-        ? [...BASE_EDIT_MARKDOWN_TRANSFORMERS, GROUP_MENTION_TRANSFORMER]
-        : BASE_EDIT_MARKDOWN_TRANSFORMERS,
-    [hasInitialAllGroupMention]
-  );
-  const exportMarkdownTransformers = useMemo(
-    () =>
-      canResolveAllGroupMention
-        ? [...BASE_EDIT_MARKDOWN_TRANSFORMERS, GROUP_MENTION_TRANSFORMER]
-        : BASE_EDIT_MARKDOWN_TRANSFORMERS,
-    [canResolveAllGroupMention]
+      new Map(
+        initialMentions.map((mention) => [
+          mention.handle_in_content.toLowerCase(),
+          mention.mentioned_profile_id,
+        ])
+      ),
+    [initialMentions]
   );
   const initialConfig: InitialConfigType = {
     namespace: "EditDropLexical",
@@ -551,6 +425,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   };
 
   const handleEditorChange = useCallback((editorState: EditorState) => {
+    editorStateRef.current = editorState;
     setEditorState(editorState);
   }, []);
 
@@ -560,9 +435,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     }
 
     return removeBlankLinePlaceholders(
-      exportDropMarkdown(editorState, exportMarkdownTransformers)
+      exportDropMarkdown(editorState, EDIT_MARKDOWN_TRANSFORMERS)
     );
-  }, [editorState, exportMarkdownTransformers, normalizedInitialContent]);
+  }, [editorState, normalizedInitialContent]);
   const isSaveBlockedByLinks =
     !!linkRestrictionMessage && containsDisallowedLink(currentMarkdown);
 
@@ -573,16 +448,16 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         handle_in_content: user.handle_in_content,
       };
 
-      setMentionedUsers((prev) => {
-        if (
-          prev.some(
-            (m) => m.mentioned_profile_id === newMention.mentioned_profile_id
-          )
-        ) {
-          return prev;
-        }
-        return [...prev, newMention];
-      });
+      if (
+        mentionedUsersRef.current.some(
+          (mention) =>
+            mention.mentioned_profile_id === newMention.mentioned_profile_id
+        )
+      ) {
+        return;
+      }
+      const next = [...mentionedUsersRef.current, newMention];
+      mentionedUsersRef.current = next;
     },
     []
   );
@@ -601,38 +476,57 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     });
   }, []);
 
-  const handleSave = useCallback(() => {
-    if (!editorState) return;
-    if (isSaveBlockedByLinks) return;
+  const handleSave = useCallback(async () => {
+    if (saveInProgressRef.current || isSaving || isSaveBlockedByLinks) return;
+    saveInProgressRef.current = true;
+    try {
+      const expansion = await mentionsRef.current?.expandMentionAliases();
+      if (expansion && !expansion.completed) return;
+      const latestEditorState =
+        expansion?.editorState ?? editorStateRef.current ?? editorState;
+      if (!latestEditorState) return;
 
-    const sanitizedMarkdown = currentMarkdown;
-    const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
-      editorState,
-      canResolveAllGroupMention
-    );
+      const sanitizedMarkdown = removeBlankLinePlaceholders(
+        exportDropMarkdown(latestEditorState, EDIT_MARKDOWN_TRANSFORMERS)
+      );
+      const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
+        latestEditorState,
+        canResolveAllGroupMention
+      );
+      const currentMentionedUsers = getMentionedUsersFromEditorState(
+        latestEditorState,
+        mentionedUsersRef.current
+      );
+      mentionedUsersRef.current = currentMentionedUsers;
 
-    if (
-      sanitizedMarkdown.trim() === normalizedInitialContent.trim() &&
-      areMentionedGroupsEqual(sanitizedMentionedGroups, initialGroupMentions)
-    ) {
-      onCancel();
-      return;
+      if (
+        sanitizedMarkdown.trim() === normalizedInitialContent.trim() &&
+        areMentionedGroupsEqual(
+          sanitizedMentionedGroups,
+          initialGroupMentions
+        ) &&
+        areMentionedUsersEqual(currentMentionedUsers, initialMentions)
+      ) {
+        onCancel();
+        return;
+      }
+
+      onSave(
+        normalizeTypedEmojiShortcuts(sanitizedMarkdown),
+        currentMentionedUsers,
+        sanitizedMentionedGroups,
+        mentionedWaves
+      );
+    } finally {
+      saveInProgressRef.current = false;
     }
-
-    onSave(
-      normalizeTypedEmojiShortcuts(sanitizedMarkdown),
-      mentionedUsers,
-      sanitizedMentionedGroups,
-      mentionedWaves
-    );
   }, [
     editorState,
-    exportMarkdownTransformers,
-    mentionedUsers,
     mentionedWaves,
     canResolveAllGroupMention,
     initialGroupMentions,
-    currentMarkdown,
+    initialMentions,
+    isSaving,
     isSaveBlockedByLinks,
     onSave,
     normalizedInitialContent,
@@ -666,9 +560,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <OnChangePlugin onChange={handleEditorChange} />
           <HistoryPlugin />
           <PlainTextPastePlugin />
-          <MarkdownShortcutPlugin
-            transformers={BASE_EDIT_MARKDOWN_TRANSFORMERS}
-          />
+          <MarkdownShortcutPlugin transformers={EDIT_MARKDOWN_TRANSFORMERS} />
           <ListPlugin />
           <LinkPlugin />
           <NewMentionsPlugin
@@ -685,7 +577,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <RootBlockGuardPlugin />
           <InitialContentPlugin
             initialContent={editorInitialContent}
-            transformers={importMarkdownTransformers}
+            transformers={EDIT_MARKDOWN_TRANSFORMERS}
+            mentionedProfileIdsByHandle={initialMentionProfileIdsByHandle}
           />
           <FocusPlugin isApp={isApp} />
           <KeyboardPlugin
@@ -694,10 +587,6 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             isSaving={isSaving}
             isSaveBlocked={isSaveBlockedByLinks}
             isMobileOrApp={isMobileOrApp}
-            initialContent={normalizedInitialContent}
-            initialGroupMentions={initialGroupMentions}
-            canResolveAllGroupMention={canResolveAllGroupMention}
-            transformers={exportMarkdownTransformers}
             mentionsRef={mentionsRef}
             waveMentionsRef={waveMentionsRef}
           />

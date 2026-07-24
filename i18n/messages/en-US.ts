@@ -622,8 +622,73 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   xtdh: "xTDH",
   subscriptions: "Subscriptions",
   proxy: "Proxy",
+  quickTags: "Quick Tags",
   "badges.beta": "Beta",
 } as const);
+
+const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.mentionShortcuts",
+  {
+    optionOne: "Quick tag · 1 profile",
+    optionMany: "Quick tag · {count} profiles",
+    loadErrorTitle: "Quick Tags couldn't be loaded.",
+    loadErrorMessage: "Try again before sending this message.",
+  } as const
+);
+
+const GROUP_MENTION_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.groupMentions",
+  {
+    all: "All Wave followers",
+    contributors: "Can post in this Wave",
+    admins: "Wave creator and admins",
+    devs6529: "6529 developers",
+  } as const
+);
+
+const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
+  "user.mentionShortcuts",
+  {
+    title: "Quick Tags",
+    description:
+      "Create private tags such as @frens. In a Wave composer, each Quick Tag expands into the profile handles you choose.",
+    new: "New Quick Tag",
+    create: "Create Quick Tag",
+    edit: "Edit Quick Tag",
+    editorDescription:
+      "It expands into ordinary profile mentions before your message is sent.",
+    cancel: "Cancel",
+    name: "Quick Tag name",
+    nameError: "Use 3–15 letters, numbers, or underscores.",
+    reservedError:
+      "That tag name is reserved. Try something a little more creative.",
+    addProfiles: "Add profiles ({count}/{max})",
+    searchLabel: "Search profiles by handle",
+    searchPlaceholder: "Search by handle",
+    searchPrompt: "Enter at least 3 characters to search profiles.",
+    searchResults: "{count} profiles available.",
+    searchResult: "1 profile available.",
+    removeProfile: "Remove @{handle}",
+    save: "Save Quick Tag",
+    saving: "Saving…",
+    created: "Quick Tag created.",
+    updated: "Quick Tag updated.",
+    saveErrorTitle: "Couldn't save Quick Tag.",
+    saveErrorDetails: "Unable to save Quick Tag",
+    deleteTitle: "Delete @{alias}?",
+    deleteWarning: "This cannot be undone.",
+    delete: "Delete Quick Tag",
+    deleting: "Deleting Quick Tag.",
+    deleted: "Quick Tag deleted.",
+    deleteErrorTitle: "Couldn't delete Quick Tag.",
+    deleteErrorDetails: "Unable to delete Quick Tag",
+    loading: "Loading…",
+    loadError: "Quick Tags could not be loaded.",
+    empty: "You have no Quick Tags yet.",
+    editAction: "Edit",
+    deleteAction: "Delete",
+  } as const
+);
 
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
@@ -2162,6 +2227,9 @@ export const EN_US_MESSAGES = {
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
+  ...GROUP_MENTION_COMPOSER_MESSAGES,
+  ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
   ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,

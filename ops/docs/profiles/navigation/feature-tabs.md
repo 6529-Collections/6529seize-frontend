@@ -26,6 +26,7 @@ Profile tab routes live under `/{user}`.
 - `/{user}/xtdh`: xTDH (Beta label in the tab UI)
 - `/{user}/subscriptions`: Subscriptions
 - `/{user}/proxy`: Proxy
+- `/{user}/mention-shortcuts`: Quick Tags
 
 ## Route Resolution (Supported Routes)
 
@@ -54,6 +55,11 @@ Profile tab routes live under `/{user}`.
 - `Subscriptions` is hidden on iOS unless consent country is `US`.
 - `Proxy` is shown only when you are on your own profile (matched by connected handle or connected wallet).
 - If you open `/{user}/proxy` while your signed-in profile session is still loading, the app keeps the `Proxy` tab selected until it can finish the ownership check.
+- `Quick Tags` is shown only on your own profile and is hidden while you are
+  acting through a proxy.
+- If you open or return to `/{user}/mention-shortcuts` while your signed-in
+  profile session is still loading, the app keeps `Quick Tags` selected until
+  it can finish the ownership check.
 - If the current tab route is hidden in the current context, the app replaces the URL with the first visible tab and keeps the current query string.
 
 ## Query-String Behavior
@@ -67,6 +73,8 @@ Profile tab routes live under `/{user}`.
   deciding whether Waves is available.
 - Opening your own profile can expose the `Proxy` tab after the app finishes
   the ownership check.
+- Moving from `Quick Tags` to another profile tab adds a browser-history entry;
+  using browser Back returns to `Quick Tags` when the profile is still yours.
 - Opening `/{user}/subscriptions` on supported devices keeps that tab visible
   while the rest of the profile shell stays unchanged.
 
@@ -82,8 +90,8 @@ Profile tab routes live under `/{user}`.
 
 ## Edge Cases
 
-- Hidden-tab fallback can be delayed while the app is still resolving Brain or
-  Proxy visibility for the current context.
+- Hidden-tab fallback can be delayed while the app is still resolving Brain,
+  Proxy, or Quick Tags visibility for the current context.
 - Unsupported profile subroutes do not downgrade into a supported tab route;
   they show not-found instead.
 - Canonical-handle redirects preserve supported tab paths while normalizing the
@@ -116,4 +124,5 @@ Profile tab routes live under `/{user}`.
 - [Profile xTDH Tab](../tabs/feature-xtdh-tab.md)
 - [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
 - [Profile Proxy Tab](../tabs/feature-proxy-tab.md)
+- [Quick Tags](../../waves/composer/feature-personal-mention-shortcuts.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

@@ -80,6 +80,10 @@ jest.mock("@/components/waves/CreateDropInput", () => {
     default: ReactLib.forwardRef((props: any, ref: any) => {
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: mockInputClear,
+        expandMentionAliases: async () => ({
+          completed: true,
+          editorState: undefined,
+        }),
         focus: mockInputFocus,
       }));
       return (
@@ -91,6 +95,12 @@ jest.mock("@/components/waves/CreateDropInput", () => {
     }),
   };
 });
+jest.mock(
+  "@/components/waves/create-drop-content/exportComposerMarkdown",
+  () => ({
+    exportComposerMarkdown: jest.fn(() => ""),
+  })
+);
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
   <div data-testid="requirements" />
 ));

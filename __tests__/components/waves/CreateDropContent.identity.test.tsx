@@ -124,6 +124,10 @@ jest.mock("@/components/waves/CreateDropInput", () => {
       const typedContentCountRef = ReactLib.useRef(0);
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: () => undefined,
+        expandMentionAliases: async () => ({
+          completed: true,
+          editorState: undefined,
+        }),
         focus: () => undefined,
       }));
 

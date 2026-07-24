@@ -257,6 +257,9 @@ export * from '../models/ApiMemesMintStat';
 export * from '../models/ApiMemesMintStatsPage';
 export * from '../models/ApiMemesMintStatsTotals';
 export * from '../models/ApiMemesMintStatsYearly';
+export * from '../models/ApiMentionAlias';
+export * from '../models/ApiMentionAliasMember';
+export * from '../models/ApiMentionAliasRequest';
 export * from '../models/ApiMentionedWave';
 export * from '../models/ApiMentionedWaveV2';
 export * from '../models/ApiMintMetrics';
@@ -829,6 +832,9 @@ import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
 import { ApiMemesMintStatsTotals } from '../models/ApiMemesMintStatsTotals';
 import { ApiMemesMintStatsYearly } from '../models/ApiMemesMintStatsYearly';
+import { ApiMentionAlias } from '../models/ApiMentionAlias';
+import { ApiMentionAliasMember } from '../models/ApiMentionAliasMember';
+import { ApiMentionAliasRequest } from '../models/ApiMentionAliasRequest';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiMentionedWaveV2 } from '../models/ApiMentionedWaveV2';
 import { ApiMintMetrics } from '../models/ApiMintMetrics';
@@ -1123,7 +1129,7 @@ import { ReleaseBusV2DeployPlan } from '../models/ReleaseBusV2DeployPlan';
 import { ReleaseBusV2Manifest  , ReleaseBusV2ManifestLaneEnum   , ReleaseBusV2ManifestStatusEnum             } from '../models/ReleaseBusV2Manifest';
 import { ReleaseBusV2ManifestListResponse } from '../models/ReleaseBusV2ManifestListResponse';
 import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
-import { ReleaseBusV2RegisterRequest, ReleaseBusV2RegisterRequestRepositoryEnum        } from '../models/ReleaseBusV2RegisterRequest';
+import { ReleaseBusV2RegisterRequest , ReleaseBusV2RegisterRequestRepositoryEnum        } from '../models/ReleaseBusV2RegisterRequest';
 import { ReleaseBusV2Train , ReleaseBusV2TrainLaneEnum  , ReleaseBusV2TrainStatusEnum                    } from '../models/ReleaseBusV2Train';
 import { ReleaseBusV2TrainDetailResponse } from '../models/ReleaseBusV2TrainDetailResponse';
 import { ReleaseBusV2TrainListResponse   } from '../models/ReleaseBusV2TrainListResponse';
@@ -1509,6 +1515,9 @@ let typeMap: {[index: string]: any} = {
     "ApiMemesMintStatsPage": ApiMemesMintStatsPage,
     "ApiMemesMintStatsTotals": ApiMemesMintStatsTotals,
     "ApiMemesMintStatsYearly": ApiMemesMintStatsYearly,
+    "ApiMentionAlias": ApiMentionAlias,
+    "ApiMentionAliasMember": ApiMentionAliasMember,
+    "ApiMentionAliasRequest": ApiMentionAliasRequest,
     "ApiMentionedWave": ApiMentionedWave,
     "ApiMentionedWaveV2": ApiMentionedWaveV2,
     "ApiMintMetrics": ApiMintMetrics,

@@ -36,7 +36,10 @@ import {
   getUserPageTabByRoute,
 } from "./userTabs.config";
 import { shouldHideSubscriptions } from "./userPageVisibility";
-import { shouldDelayUserPageBrainRedirect } from "./userPageBrainAccess";
+import {
+  shouldDelayUserPageBrainRedirect,
+  shouldDelayUserPageOwnerTabRedirect,
+} from "./userPageBrainAccess";
 import { getUserProfileTabsMessage } from "./user-tabs.messages";
 import { useUserPageTabIndicator } from "./useUserPageTabIndicator";
 
@@ -51,12 +54,14 @@ const getVisibilityContext = ({
   capacitorIsIos,
   country,
   isOwnProfile,
+  hasActiveProfileProxy,
 }: {
   readonly showWaves: boolean;
   readonly hasProfileWave: boolean;
   readonly capacitorIsIos: boolean;
   readonly country: string | null | undefined;
   readonly isOwnProfile: boolean;
+  readonly hasActiveProfileProxy: boolean;
 }): UserPageVisibilityContext => {
   return {
     showWaves,
@@ -66,6 +71,7 @@ const getVisibilityContext = ({
       country,
     }),
     isOwnProfile,
+    hasActiveProfileProxy,
   };
 };
 
@@ -89,7 +95,8 @@ export default function UserPageTabs({
   const searchString = searchParams.toString();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const { showWaves, connectedProfile, fetchingProfile } = useAuth();
+  const { showWaves, connectedProfile, fetchingProfile, activeProfileProxy } =
+    useAuth();
   const { address, connectionState } = useSeizeConnectContext();
   const { profile: viewedProfile } = useIdentity({
     handleOrWallet,
@@ -114,8 +121,16 @@ export default function UserPageTabs({
         capacitorIsIos: capacitor.isIos,
         country,
         isOwnProfile,
+        hasActiveProfileProxy: Boolean(activeProfileProxy),
       }),
-    [capacitor.isIos, country, hasProfileWave, isOwnProfile, showWaves]
+    [
+      activeProfileProxy,
+      capacitor.isIos,
+      country,
+      hasProfileWave,
+      isOwnProfile,
+      showWaves,
+    ]
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -135,11 +150,6 @@ export default function UserPageTabs({
     [pathname]
   );
 
-  const preserveProxyTabWhileOwnershipLoads =
-    fetchingProfile &&
-    !connectedProfile &&
-    resolvedTabFromPath === USER_PAGE_TAB_IDS.PROXY;
-
   const shouldSuppressBrainRedirect =
     resolvedTabFromPath === USER_PAGE_TAB_IDS.BRAIN &&
     shouldDelayUserPageBrainRedirect({
@@ -150,13 +160,25 @@ export default function UserPageTabs({
       isClientHydrated,
     });
   const preserveBrainTabWhileAccessLoads = shouldSuppressBrainRedirect;
+  const resolvedTabNeedsOwnership =
+    resolvedTabFromPath === USER_PAGE_TAB_IDS.PROXY ||
+    resolvedTabFromPath === USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"];
+  const shouldSuppressOwnerTabRedirect =
+    resolvedTabNeedsOwnership &&
+    shouldDelayUserPageOwnerTabRedirect({
+      connectedProfile,
+      connectionState,
+      fetchingProfile,
+      isClientHydrated,
+    });
+  const preserveOwnerTabWhileOwnershipLoads = shouldSuppressOwnerTabRedirect;
 
   const visibleTabs = useMemo(
     () =>
       USER_PAGE_TABS.filter((tab) => {
         if (
-          preserveProxyTabWhileOwnershipLoads &&
-          tab.id === USER_PAGE_TAB_IDS.PROXY
+          preserveOwnerTabWhileOwnershipLoads &&
+          tab.id === resolvedTabFromPath
         ) {
           return true;
         }
@@ -172,7 +194,8 @@ export default function UserPageTabs({
       }),
     [
       preserveBrainTabWhileAccessLoads,
-      preserveProxyTabWhileOwnershipLoads,
+      preserveOwnerTabWhileOwnershipLoads,
+      resolvedTabFromPath,
       visibilityContext,
     ]
   );
@@ -195,14 +218,15 @@ export default function UserPageTabs({
 
   // Redirect to the first visible tab whenever the resolved tab becomes
   // hidden because the visibility context changed (country, feature flags,
-  // etc.). When loading `/brain` directly, delay the redirect until the client
-  // has mounted and wallet/profile restoration has settled.
+  // etc.). For access-dependent tabs, delay the redirect until the client has
+  // mounted and wallet/profile restoration has settled.
   useEffect(() => {
     if (
       !visibleTabs.length ||
       resolvedTabIsVisible ||
       !handleOrWallet ||
-      shouldSuppressBrainRedirect
+      shouldSuppressBrainRedirect ||
+      shouldSuppressOwnerTabRedirect
     ) {
       return;
     }
@@ -231,6 +255,7 @@ export default function UserPageTabs({
     router,
     searchString,
     shouldSuppressBrainRedirect,
+    shouldSuppressOwnerTabRedirect,
     visibleTabs,
   ]);
 
@@ -311,7 +336,7 @@ export default function UserPageTabs({
       >
         <div
           ref={contentContainerRef}
-          className="-tw-mb-px tw-relative tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
+          className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
         >
           {visibleTabs.map((tabConfig) => (
             <UserPageTab

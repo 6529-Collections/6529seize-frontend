@@ -4,7 +4,7 @@
   "base_url": "https://6529.io",
   "description": "Glossary of 6529 terms projected from the site's curated help corpus. Each term links back to its help-index.json record via id.",
   "source": "/help-index.json",
-  "term_count": 27,
+  "term_count": 28,
   "terms": [
     {
       "id": "about.license",
@@ -468,6 +468,33 @@
       "tags": [
         "profiles",
         "proxy",
+        "glossary"
+      ]
+    },
+    {
+      "id": "profiles.quick-tags",
+      "term": "Profile Quick Tags",
+      "aliases": [
+        "quick tags",
+        "quick tag settings",
+        "mention shortcuts",
+        "personal mention aliases"
+      ],
+      "facts": [
+        "Quick Tags are managed from the owner-only Quick Tags profile tab.",
+        "The tab is hidden on other profiles and while acting through a proxy.",
+        "Browser Back and Forward restore the Quick Tags tab through its dedicated profile route.",
+        "Use /{user}/mention-shortcuts to manage Quick Tags on your own profile."
+      ],
+      "canonical_path": "/{user}/mention-shortcuts",
+      "related_paths": [
+        "/{user}/mention-shortcuts",
+        "/waves"
+      ],
+      "tags": [
+        "profiles",
+        "waves",
+        "mentions",
         "glossary"
       ]
     },

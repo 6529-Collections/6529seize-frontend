@@ -776,6 +776,27 @@ describe("DropPartMarkdown", () => {
     );
   });
 
+  it("renders permission-derived global mentions case-insensitively", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedGroups={[
+          ApiDropGroupMention.Contributors,
+          ApiDropGroupMention.Admins,
+          ApiDropGroupMention.Devs6529,
+        ]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"@Contributors @ADMINS @DeVs6529"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    for (const token of ["@Contributors", "@ADMINS", "@DeVs6529"]) {
+      expect(screen.getByText(token)).toHaveClass("tw-text-primary-400");
+    }
+  });
+
   it("renders bold markdown on the browser baseline without aligning plain text spans", () => {
     const { container } = render(
       <DropPartMarkdown

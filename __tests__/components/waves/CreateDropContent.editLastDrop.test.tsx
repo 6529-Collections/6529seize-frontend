@@ -120,6 +120,10 @@ jest.mock("@/components/waves/CreateDropInput", () => {
       const hasSentEditorStateRef = ReactLib.useRef(false);
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: jest.fn(),
+        expandMentionAliases: async () => ({
+          completed: true,
+          editorState: undefined,
+        }),
         focus: jest.fn(),
       }));
 
