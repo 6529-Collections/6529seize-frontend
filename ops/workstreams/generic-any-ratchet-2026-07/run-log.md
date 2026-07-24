@@ -1,5 +1,17 @@
 # Run Log
 
+## 2026-07-24 — Scanner merged and active cleanup state refreshed
+
+- PR #3444 merged to `main` as
+  `63fa7edafa699a509baae6a8344e92c66065e76e`.
+- The active phase is now the production and test inventory burn-down, not
+  scanner review.
+- Moved the live inventory contract into this active workstream as
+  `any-exceptions.md`; the copy under the archived repo-health workstream
+  remains a non-authoritative historical snapshot.
+- Added this workstream to the active index and removed reload references to the
+  archived path.
+
 ## 2026-07-23 — Workstream opened
 
 - Selected autonomous-manager modes: implementation manager, PR review

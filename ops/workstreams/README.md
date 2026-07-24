@@ -8,6 +8,7 @@ GitHub reality; completed manager memory belongs under [`archive/`](archive/).
 
 | Workstream | Current scope | Source of current status |
 | --- | --- | --- |
+| [Generic `any` ratchet](generic-any-ratchet-2026-07/README.md) | Burn down the scanner-visible production and test generic-argument `any` inventories after the parser-backed scanner merged | [`active-context.md`](generic-any-ratchet-2026-07/active-context.md), [`any-exceptions.md`](generic-any-ratchet-2026-07/any-exceptions.md), current source, and the debt-ratchet baseline |
 | [Frontend i18n fallback debt](i18n-fallbacks/README.md) | Six source-verified locale fallback records that still have implementation work remaining | The individual debt records and current source |
 | [Profile Native CMS](profile-native-cms-roadmap/README.md) | Feature-flagged runtime/builder foundation plus four open follow-up PRs | [`active-context.md`](profile-native-cms-roadmap/active-context.md), current source, and live GitHub state |
 
