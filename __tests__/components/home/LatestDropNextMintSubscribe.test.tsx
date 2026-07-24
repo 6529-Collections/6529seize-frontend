@@ -74,14 +74,16 @@ function expectReadonlySubscriptionToggle(
   expect(statusText.tagName).toBe("OUTPUT");
   expect(container).toContainElement(statusText);
   expect(screen.queryByRole("switch", { name: tooltipLabel })).toBeNull();
-  expect(screen.queryByRole("img", { name: tooltipLabel })).toBeNull();
 
   const triggerElement = screen.getByTestId(
     "readonly-subscription-toggle-trigger"
   );
+  expect(
+    screen.getByRole("img", { name: tooltipLabel })
+  ).toBe(triggerElement);
   expect(triggerElement).not.toHaveAttribute("aria-checked");
   expect(triggerElement).not.toHaveAttribute("aria-disabled");
-  expect(triggerElement).not.toHaveAttribute("tabindex");
+  expect(triggerElement).toHaveAttribute("tabindex", "0");
 
   const toggle = screen.getByTestId("readonly-subscription-toggle-visual");
   expect(triggerElement).toContainElement(toggle);

@@ -31,10 +31,13 @@ function ReadonlySubscriptionToggle({
   return (
     <>
       <span
+        aria-label={tooltipLabel}
         data-testid="readonly-subscription-toggle-trigger"
         data-tooltip-id={tooltipId}
         data-tooltip-content={tooltipLabel}
-        className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full"
+        role="img"
+        tabIndex={0}
+        className="tw-inline-flex tw-shrink-0 tw-cursor-help tw-rounded-full focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
       >
         <span
           aria-hidden="true"
