@@ -30,7 +30,3 @@ No developer-operation stubs are currently tracked.
 
 - [Documentation home](../README.md)
 - [Shared application behavior](../shared/README.md)
-
-The v1 [process](deployment-bus-process.md) and
-[automation](deployment-bus-automation.md) pages are retained only as rollback
-reference while v1 remains disabled.

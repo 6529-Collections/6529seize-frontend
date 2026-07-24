@@ -16,6 +16,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
    - `prod`: hand off to `ops/skills/deploy-6529/SKILL.md` for production
      deployment and production E2E or smoke validation. Never author or post a
      release note; the existing autonomous bot owns production release notes.
+
    If the user did not explicitly request merge or deployment, stop at `review-ready`.
 
 2. Inspect the change before writing:
@@ -28,24 +29,30 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 
    ```markdown
    ## Issue
+
    - What problem, user need, bug, or follow-up this PR addresses.
 
    ## Fix
+
    - The core solution and why it is appropriate.
 
    ## Changes
+
    - Notable code, docs, config, API, UX, or data-shape changes.
 
    ## Validation
+
    - Commands, checks, screenshots, E2E runs, or manual flows completed.
    - Anything intentionally not tested, with the reason and residual risk.
 
    ## Risk
+
    - Level: Low | Medium | High
    - Why: blast radius, reversibility, data/security/performance/deploy impact.
    - Rollback: expected rollback or mitigation path.
 
    ## Review Notes
+
    - Areas reviewers or bots should focus on, plus any trade-offs.
    ```
 
@@ -97,7 +104,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Use `6529 run build` for build-time, generated API model, Next.js config, route, or deployment-sensitive changes.
 - Use `6529 run test:e2e` for local Playwright E2E when relevant; this repo's default Playwright config starts the app locally on port `3001`.
 - For staging or production validation, inspect the repo's current deploy and E2E configuration before running. If no target-specific E2E command exists, run the strongest available smoke checks and report the gap clearly.
-- For merge, staging, production, or release-lane work, include a deployment-bus handoff when relevant: release set, candidate SHA, included PRs, backend dependencies, validation owners, and held or blocked changes. Use `ops/docs/developer/deployment-bus-process.md` for the current process.
+- For merge, staging, production, or release-lane work, include a deployment-bus handoff when relevant: release set, candidate SHA, included PRs, backend dependencies, validation owners, and held or blocked changes. Use `ops/docs/developer/simple-release-bus-v2.md` for the current process.
 
 ## Merge And Deploy Gates
 

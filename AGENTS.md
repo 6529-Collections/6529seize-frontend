@@ -2,7 +2,7 @@
 
 ## Simple Release Bus v2
 
-- Never register with Release Bus v1. It remains disabled rollback reference.
+- Simple Release Bus v2 is the only automated release bus.
 - Before staging, production, promotion, or release mutation, run
   `./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follow
   `deploy-6529`.
@@ -245,7 +245,7 @@ is available, use it; otherwise read the relevant files in
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
   - `ops/skills/write-skills/SKILL.md` for repo-local skill work.
 - For merge, staging, production, or release-lane work, read
-  `ops/docs/developer/deployment-bus-process.md` and
+  `ops/docs/developer/simple-release-bus-v2.md` and
   `ops/skills/deploy-6529/SKILL.md` before acting.
 - Operational plans, roadmaps, runbooks, workstream state, and agent process
   docs belong under `ops/`, not top-level `docs/`.

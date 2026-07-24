@@ -163,19 +163,6 @@ function classifyFailure(result, verification) {
   };
 }
 
-function evidenceIdentity(environment = process.env) {
-  return {
-    base_sha: environment.RELEASE_BUS_BASE_SHA,
-    environment: environment.RELEASE_BUS_EVIDENCE_ENVIRONMENT,
-    gate_fingerprint: environment.RELEASE_BUS_GATE_FINGERPRINT,
-    workflow_sha: environment.RELEASE_BUS_WORKFLOW_SHA,
-    workflow_digest: environment.RELEASE_BUS_WORKFLOW_DIGEST,
-    node_version: environment.RELEASE_BUS_NODE_VERSION,
-    package_manager: environment.RELEASE_BUS_PACKAGE_MANAGER,
-    build_profile_digest: environment.RELEASE_BUS_BUILD_PROFILE_DIGEST,
-  };
-}
-
 function writeEvidence(filename, value) {
   fs.mkdirSync(path.dirname(filename), { recursive: true });
   fs.writeFileSync(filename, `${JSON.stringify(value, null, 2)}\n`);
@@ -225,8 +212,7 @@ async function installWithRetries(options = {}) {
     const evidence = {
       schema_version: 1,
       kind: "dependency_install",
-      source: environment.GITHUB_JOB === "legacy" ? "legacy" : "parallel",
-      ...evidenceIdentity(environment),
+      source: "staging_e2e",
       status: "FAILED",
       failure_class: "INFRASTRUCTURE_TRANSIENT",
       failure_code: "SOCKET_FIREWALL_SETUP_FAILED",
@@ -265,8 +251,7 @@ async function installWithRetries(options = {}) {
       const evidence = {
         schema_version: 1,
         kind: "dependency_install",
-        source: environment.GITHUB_JOB === "legacy" ? "legacy" : "parallel",
-        ...evidenceIdentity(environment),
+        source: "staging_e2e",
         status: "SUCCEEDED",
         failure_class: null,
         failure_code: null,
@@ -294,8 +279,7 @@ async function installWithRetries(options = {}) {
       const evidence = {
         schema_version: 1,
         kind: "dependency_install",
-        source: environment.GITHUB_JOB === "legacy" ? "legacy" : "parallel",
-        ...evidenceIdentity(environment),
+        source: "staging_e2e",
         status: "FAILED",
         ...classification,
         recovered: false,
