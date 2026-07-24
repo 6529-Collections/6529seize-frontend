@@ -235,35 +235,25 @@ jobs:
         if: needs.plan.outputs.agent_files_sync_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
-      - name: Verify Release Bus gate command contract
+      - name: Verify Release Bus v2 workflow contract
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
           set -euo pipefail
           if git diff --quiet "origin/${BASE_REF}...HEAD" -- \
-            bin/6529 \
-            jest.config.js \
-            jest.setup.js \
-            package.json \
-            pnpm-lock.yaml \
+            .github/workflows/app-pr-ci.yml \
             .github/workflows/release-bus-*.yml \
-            scripts/release-bus-authorize-operation.sh \
-            scripts/release-bus-frontend-gate.sh \
-            scripts/release-bus-gate-evidence.cjs \
+            .github/workflows/staging-e2e.yml \
+            .github/workflows/production-e2e.yml \
             scripts/release-bus-install-dependencies.cjs \
-            scripts/release-bus-preflight-evidence.cjs \
-            scripts/release-bus-summarize-jest.mjs \
-            scripts/release-bus-report-progress.mjs \
-            __tests__/scripts/release-bus-frontend-gate.test.ts \
-            __tests__/scripts/release-bus-gate-evidence.test.ts \
             __tests__/scripts/release-bus-install-dependencies.test.ts \
-            __tests__/scripts/release-bus-jest-reporting.test.ts \
-            __tests__/scripts/release-bus-preflight-evidence.test.ts \
-            __tests__/scripts/release-bus-shard-injection.test.ts; then
-            echo "Release Bus gate files are unchanged."
+            __tests__/scripts/deployment-bus.test.ts; then
+            echo "Release Bus v2 workflow files are unchanged."
             exit 0
           fi
-          ./scripts/release-bus-frontend-gate.sh contract
+          ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
+            __tests__/scripts/deployment-bus.test.ts \
+            __tests__/scripts/release-bus-install-dependencies.test.ts
 
       - name: Lint changed source
         if: needs.plan.outputs.lint_changed_required == 'true'
