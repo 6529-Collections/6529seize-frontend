@@ -106,8 +106,8 @@ describe("E2E pack manifest", () => {
       ])
     );
 
-    const first = clonePack(packs[0]);
-    const second = clonePack(packs[1]);
+    const first = clonePack(packs[0]!);
+    const second = clonePack(packs[1]!);
     first.alias = "duplicate";
     second.alias = "duplicate";
     expect(manifestTools.validateManifest([first, second])).toEqual(
@@ -118,9 +118,9 @@ describe("E2E pack manifest", () => {
   });
 
   it("rejects spec paths outside the repository", () => {
-    const absolute = clonePack(packs[0]);
+    const absolute = clonePack(packs[0]!);
     absolute.specs = ["/etc/hosts"];
-    const traversing = clonePack(packs[0]);
+    const traversing = clonePack(packs[0]!);
     traversing.specs = ["tests/../package.json"];
 
     expect(manifestTools.validateManifest([absolute, traversing])).toEqual(
