@@ -2,6 +2,7 @@
 
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import type { ReactNode } from "react";
+import Button from "@/components/utils/button/Button";
 
 const QUICK_VOTE_RESTART_VISIBILITY_DELAY_MS = 200;
 
@@ -60,14 +61,15 @@ export function MemesQuickVoteDialogDoneState({
   return (
     <MemesQuickVoteDialogStatusState
       action={
-        <button
-          type="button"
+        <Button
           data-autofocus="true"
           onClick={onClose}
-          className="tw-inline-flex tw-h-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-px-6 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-all active:tw-scale-[0.98] desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/[0.08]"
+          variant="tertiary"
+          size="lg"
+          className="tw-px-6"
         >
           Close
-        </button>
+        </Button>
       }
       description={description}
       title={title}
@@ -123,13 +125,9 @@ export function MemesQuickVoteDialogErrorState({
         <p className="tw-mb-4 tw-text-sm tw-text-iron-400">
           Quick vote couldn&apos;t load the next meme. Try again.
         </p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-transition-colors desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10"
-        >
+        <Button onClick={onRetry} variant="tertiary" size="sm">
           Try again
-        </button>
+        </Button>
       </div>
     </div>
   );

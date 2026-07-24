@@ -5,6 +5,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import Button from "@/components/utils/button/Button";
 import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveRepCategoriesPage } from "@/generated/models/ApiWaveRepCategoriesPage";
@@ -418,16 +419,18 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 {detailText("waves.rep.details.categories.loadMoreError")}
               </p>
             )}
-            <button
+            <Button
               type="button"
               onClick={fetchNextCategoriesPage}
               disabled={categoriesQuery.isFetchingNextPage}
-              className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
+              variant="tertiary"
+              size="xs"
+              fullWidth
             >
               {categoriesQuery.isFetchingNextPage
                 ? detailText("waves.rep.details.categories.loadingMore")
                 : detailText(categoryLoadMoreMessageKey)}
-            </button>
+            </Button>
           </div>
         )}
       </section>
@@ -488,13 +491,15 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
                 {detailText("waves.rep.details.contributors.error")}
               </p>
-              <button
+              <Button
                 type="button"
                 onClick={retryContributors}
-                className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
+                variant="tertiary"
+                size="xs"
+                className="tw-mt-3"
               >
                 {detailText(RETRY_ACTION_MESSAGE_KEY)}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -551,16 +556,18 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
               {(contributorsQuery.hasNextPage ||
                 contributorsQuery.isFetchingNextPage) && (
-                <button
+                <Button
                   type="button"
                   onClick={fetchNextContributorsPage}
                   disabled={contributorsQuery.isFetchingNextPage}
-                  className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
+                  variant="tertiary"
+                  size="xs"
+                  fullWidth
                 >
                   {contributorsQuery.isFetchingNextPage
                     ? detailText("waves.rep.details.contributors.loadingMore")
                     : detailText("waves.rep.details.contributors.loadMore")}
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -591,13 +598,15 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
                 {detailText("waves.rep.details.activity.error")}
               </p>
-              <button
+              <Button
                 type="button"
                 onClick={retryLogs}
-                className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
+                variant="tertiary"
+                size="xs"
+                className="tw-mt-3"
               >
                 {detailText(RETRY_ACTION_MESSAGE_KEY)}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -635,16 +644,18 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               )}
 
               {(logsQuery.hasNextPage || logsQuery.isFetchingNextPage) && (
-                <button
+                <Button
                   type="button"
                   onClick={fetchNextLogsPage}
                   disabled={logsQuery.isFetchingNextPage}
-                  className="tw-w-full tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-border-white/20 hover:tw-bg-white/[0.05] disabled:tw-cursor-wait disabled:tw-opacity-60"
+                  variant="tertiary"
+                  size="xs"
+                  fullWidth
                 >
                   {logsQuery.isFetchingNextPage
                     ? detailText("waves.rep.details.activity.loadingMore")
                     : detailText("waves.rep.details.activity.loadMore")}
-                </button>
+                </Button>
               )}
             </div>
           )}

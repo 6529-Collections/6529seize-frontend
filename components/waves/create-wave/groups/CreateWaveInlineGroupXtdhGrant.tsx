@@ -12,6 +12,7 @@ import { useXtdhGrantQuery } from "@/hooks/useXtdhGrantQuery";
 import { useXtdhGrantsSearchQuery } from "@/hooks/useXtdhGrantsSearchQuery";
 import GroupCreateXtdhGrantSelection from "@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrantSelection";
 import GroupCreateXtdhGrantRow from "@/components/groups/page/create/config/xtdh-grant/subcomponents/GroupCreateXtdhGrantRow";
+import Button from "@/components/utils/button/Button";
 import {
   DEFAULT_BENEFICIARY_GRANT_MATCH_MODE,
   getGrantCompatibleMatchMode,
@@ -154,12 +155,13 @@ export default function CreateWaveInlineGroupXtdhGrant({
             Grant ID
           </label>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="tertiary"
+          size="md"
           onClick={() => setShowGrantFinder((current) => !current)}
           aria-expanded={showGrantFinder}
           aria-controls="create-wave-inline-xtdh-grant-finder"
-          className="tw-inline-flex tw-h-[42px] tw-items-center tw-justify-center tw-gap-2 tw-self-end tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+          className="tw-self-end"
         >
           {showGrantFinder ? "Hide finder" : "Find grant"}
           <ChevronDownIcon
@@ -168,7 +170,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
               showGrantFinder ? "tw-rotate-180" : ""
             }`}
           />
-        </button>
+        </Button>
       </div>
 
       <GroupCreateXtdhGrantSelection
@@ -233,13 +235,13 @@ export default function CreateWaveInlineGroupXtdhGrant({
                 })}
               </div>
             </div>
-            <button
-              type="button"
+            <Button
+              variant="tertiary"
+              size="md"
               onClick={onResetFilters}
-              className="tw-h-[42px] tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
             >
               Clear filters
-            </button>
+            </Button>
           </div>
 
           <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40">
@@ -264,17 +266,18 @@ export default function CreateWaveInlineGroupXtdhGrant({
                   <p className="tw-m-0 tw-text-sm tw-text-red">
                     {searchErrorMessage ?? "Unable to load grants."}
                   </p>
-                  <button
-                    type="button"
+                  <Button
+                    variant="tertiary"
+                    size="xs"
                     onClick={() => {
                       refetch().catch(() => {
                         // Query error state is already rendered.
                       });
                     }}
-                    className="tw-mt-3 tw-rounded-md tw-border tw-border-solid tw-border-red/40 tw-bg-red/20 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-red"
+                    className="tw-mt-3"
                   >
                     Retry
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -311,14 +314,15 @@ export default function CreateWaveInlineGroupXtdhGrant({
 
             {hasNextPage && (
               <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-3">
-                <button
-                  type="button"
+                <Button
+                  variant="tertiary"
+                  size="md"
+                  fullWidth
                   onClick={() => fetchNextPage()}
                   disabled={isFetchingNextPage}
-                  className="tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800"
                 >
                   {isFetchingNextPage ? "Loading..." : "Load more"}
-                </button>
+                </Button>
               </div>
             )}
           </div>

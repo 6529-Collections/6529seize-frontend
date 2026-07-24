@@ -3,6 +3,7 @@
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import Button from "@/components/utils/button/Button";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import isNumber from "lodash/isNumber";
 import React, { useMemo, useState } from "react";
@@ -549,20 +550,28 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
                   onMobileSelect={setSelectedTrait}
                 />
               ))}
-              <button
+              <Button
+                type="button"
                 onClick={handleShowLess}
-                className="hover:tw-text-iron-40 tw-flex tw-min-w-[100px] tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/30 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-300 tw-transition-colors"
+                variant="tertiary"
+                size="xs"
+                fullWidth
+                className="tw-min-w-[100px]"
               >
                 Show less
-              </button>
+              </Button>
             </>
           ) : (
-            <button
+            <Button
+              type="button"
               onClick={handleShowMore}
-              className="tw-flex tw-min-w-[100px] tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/30 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50"
+              variant="tertiary"
+              size="xs"
+              fullWidth
+              className="tw-min-w-[100px]"
             >
               Show all
-            </button>
+            </Button>
           ))}
       </div>
       {selectedTrait && (

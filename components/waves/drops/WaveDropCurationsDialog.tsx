@@ -5,8 +5,7 @@ import { useAuth } from "@/components/auth/Auth";
 import MyStreamWaveCurationCreateDialog from "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import clsx from "clsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -89,22 +88,17 @@ function MembershipActionButton({
   const isAdd = action === "add";
 
   return (
-    <button
+    <Button
       type="button"
-      disabled={disabled || loading}
-      onClick={disabled || loading ? undefined : onClick}
-      className={clsx(
-        "tw-inline-flex tw-min-w-[5.5rem] tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-transition-all tw-duration-300 tw-ease-out",
-        isAdd
-          ? "tw-border-white tw-bg-iron-100 tw-text-iron-950 tw-shadow-[0_0_10px_rgba(255,255,255,0.2)] desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-bg-iron-50 desktop-hover:hover:tw-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-          : "tw-border-white/20 tw-bg-iron-900 tw-text-iron-100 tw-shadow-[0_2px_10px_rgba(0,0,0,0.2)] desktop-hover:hover:tw-border-white/40 desktop-hover:hover:tw-bg-iron-800",
-        (disabled || loading) &&
-          "tw-cursor-not-allowed tw-opacity-50 desktop-hover:hover:tw-translate-y-0 desktop-hover:hover:tw-shadow-none"
-      )}
+      disabled={disabled}
+      loading={loading}
+      onClick={onClick}
+      variant={isAdd ? "primary" : "secondary"}
+      size="xs"
+      className="tw-min-w-[5.5rem]"
     >
-      {loading && <Spinner dimension={14} />}
       <span>{isAdd ? "Add" : "Remove"}</span>
-    </button>
+    </Button>
   );
 }
 
@@ -331,13 +325,13 @@ export default function WaveDropCurationsDialog({
                 </p>
                 {hasVisibleCurations && (
                   <div className="tw-flex tw-flex-shrink-0">
-                    <SecondaryButton
-                      onClicked={() => setIsCreateCurationOpen(true)}
-                      size="sm"
-                      className="!tw-text-xs"
+                    <Button
+                      onClick={() => setIsCreateCurationOpen(true)}
+                      variant="secondary"
+                      size="xs"
                     >
                       Create and add curation
-                    </SecondaryButton>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -358,13 +352,9 @@ export default function WaveDropCurationsDialog({
                   Unable to load curations for this drop.
                 </p>
                 <div className="tw-flex tw-justify-center">
-                  <SecondaryButton
-                    onClicked={handleRetry}
-                    size="sm"
-                    className="!tw-text-xs"
-                  >
+                  <Button onClick={handleRetry} variant="tertiary" size="xs">
                     Try again
-                  </SecondaryButton>
+                  </Button>
                 </div>
               </div>
             )}
@@ -378,14 +368,14 @@ export default function WaveDropCurationsDialog({
                   {emptyStateDescription}
                 </p>
                 <div className="tw-flex tw-justify-center">
-                  <PrimaryButton
-                    loading={false}
-                    disabled={false}
-                    onClicked={() => setIsCreateCurationOpen(true)}
-                    padding="tw-px-4 tw-py-2"
+                  <Button
+                    onClick={() => setIsCreateCurationOpen(true)}
+                    variant="primary"
+                    size="sm"
+                    className="tw-px-4"
                   >
                     Create first curation
-                  </PrimaryButton>
+                  </Button>
                 </div>
               </div>
             )}

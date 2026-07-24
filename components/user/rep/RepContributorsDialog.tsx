@@ -5,6 +5,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
+import Button from "@/components/utils/button/Button";
 import type { ApiRepContributor } from "@/generated/models/ApiRepContributor";
 import type { ApiRepContributorsPage } from "@/generated/models/ApiRepContributorsPage";
 import type { ApiRatingWithProfileInfoAndLevel } from "@/generated/models/ApiRatingWithProfileInfoAndLevel";
@@ -325,13 +326,14 @@ export default function RepContributorsDialog({
             <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
               {errorMessage}
             </p>
-            <button
-              type="button"
+            <Button
+              variant="tertiary"
+              size="sm"
               onClick={refetchContributors}
-              className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
+              className="tw-mt-3"
             >
               Retry
-            </button>
+            </Button>
           </div>
         )}
 

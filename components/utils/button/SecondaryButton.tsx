@@ -1,4 +1,4 @@
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "./Button";
 
 interface SecondaryButtonProps {
   readonly onClicked: () => void;
@@ -17,24 +17,17 @@ export default function SecondaryButton({
   className = "",
   loading = false,
 }: SecondaryButtonProps) {
-  const inactive = disabled || loading;
-  const sizeClasses =
-    size === "sm"
-      ? "tw-px-3 tw-py-2 tw-text-xs"
-      : "tw-px-3.5 tw-py-2.5 tw-text-sm";
-  const stateClasses = inactive
-    ? "tw-cursor-not-allowed tw-border-iron-800 tw-bg-iron-900 tw-text-iron-600"
-    : "tw-border-iron-600/25 tw-bg-iron-800 tw-text-iron-100 tw-shadow-sm tw-shadow-black/20 desktop-hover:hover:tw-border-iron-600/35 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 active:tw-bg-iron-900";
-
   return (
-    <button
+    <Button
       type="button"
-      disabled={inactive}
-      className={`tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-md tw-border tw-border-solid tw-ring-1 tw-ring-inset tw-ring-white/5 ${stateClasses} ${sizeClasses} tw-font-semibold tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${className}`}
-      onClick={inactive ? undefined : onClicked}
+      disabled={disabled}
+      loading={loading}
+      variant="secondary"
+      size={size === "sm" ? "xs" : "md"}
+      className={className}
+      onClick={onClicked}
     >
-      {loading && <CircleLoader />}
       {children}
-    </button>
+    </Button>
   );
 }

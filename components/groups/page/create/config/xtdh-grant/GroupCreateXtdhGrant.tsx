@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useDebounce } from "react-use";
+import Button from "@/components/utils/button/Button";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import { useXtdhGrantQuery } from "@/hooks/useXtdhGrantQuery";
 import GroupCreateXtdhGrantModal from "./GroupCreateXtdhGrantModal";
@@ -104,21 +105,23 @@ export default function GroupCreateXtdhGrant({
             className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400 sm:tw-text-sm"
           />
         </label>
-        <button
-          type="button"
+        <Button
           onClick={() => setIsModalOpen(true)}
-          className="tw-h-[42px] tw-self-end tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+          variant="tertiary"
+          size="md"
+          className="tw-self-end"
         >
           Find grant
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           onClick={onClearSelection}
           disabled={!normalizedGrantId.length}
-          className="tw-h-[42px] tw-self-end tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800"
+          variant="tertiary"
+          size="md"
+          className="tw-self-end"
         >
           Clear
-        </button>
+        </Button>
       </div>
 
       <GroupCreateXtdhGrantSelection

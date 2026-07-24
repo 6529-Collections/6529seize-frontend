@@ -8,7 +8,7 @@ import {
   NoSymbolIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MainStageNominationPopover from "./MainStageNominationPopover";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -306,14 +306,12 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
   // Active state - submissions are open
   return (
-    <PrimaryButton
-      loading={false}
-      disabled={false}
-      onClicked={handleMemesSubmit}
-      size="sm"
-      padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
+    <Button
+      onClick={handleMemesSubmit}
+      variant="primary"
+      size="xs"
       title={tooltipText}
-      className={HEADER_ACTION_BUTTON_CLASS}
+      className={`${HEADER_ACTION_BUTTON_CLASS} tw-px-0 sm:tw-px-2.5`}
     >
       {activeIcon}
       <div className="tw-sr-only tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap sm:tw-not-sr-only sm:tw-flex">
@@ -348,7 +346,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
           </span>
         )}
       </div>
-    </PrimaryButton>
+    </Button>
   );
 };
 

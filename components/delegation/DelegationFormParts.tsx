@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -497,36 +498,27 @@ export function DelegationSubmitGroups(
         <div className="tw-hidden sm:tw-col-span-4 sm:tw-block"></div>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3 sm:tw-col-span-8">
           {showCancel && (
-            <button
+            <Button
               type="button"
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-iron-400 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              variant="secondary"
+              size="lg"
               onClick={() => onHide()}
             >
               Cancel
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
-            disabled={isLoading()}
-            className={`tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 disabled:tw-cursor-not-allowed disabled:tw-border-iron-700 disabled:tw-bg-iron-700 disabled:tw-text-iron-400 ${
-              isDestructive
-                ? "tw-border-red tw-bg-red tw-text-white hover:tw-bg-[#e05f57] focus-visible:tw-ring-red"
-                : "tw-border-white tw-bg-white tw-text-black hover:tw-bg-iron-200 focus-visible:tw-ring-primary-400"
-            }`}
+            loading={isLoading()}
+            variant={isDestructive ? "destructive" : "primary"}
+            size="lg"
             onClick={(e) => {
               e.preventDefault();
               submitDelegation();
             }}
           >
-            {submitBtnLabel ?? "Submit"}{" "}
-            {isLoading() && (
-              <span className="tw-inline-block">
-                <output className="tw-border-current/30 tw-inline-block tw-h-5 tw-w-5 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-t-current">
-                  <span className="tw-sr-only">Transaction pending</span>
-                </output>
-              </span>
-            )}
-          </button>
+            {submitBtnLabel ?? "Submit"}
+          </Button>
         </div>
       </div>
       {(errors.length > 0 || gasError) && (

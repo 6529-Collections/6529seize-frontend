@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser } from "@/helpers/Helpers";
@@ -54,23 +55,26 @@ function IdentityGettingStartedPrimaryAction({
   readonly href: string;
 }) {
   return (
-    <Link
+    <ButtonLink
       href={href}
-      className="tw-group/main tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-iron-100 tw-px-4 tw-py-2.5 tw-text-left tw-text-black tw-no-underline tw-shadow-[0_0_24px_rgba(255,255,255,0.08)] tw-transition-all tw-duration-300 hover:-tw-translate-y-0.5 hover:tw-bg-iron-300 hover:tw-text-black hover:tw-no-underline hover:tw-shadow-[0_0_26px_rgba(255,255,255,0.1)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-fit sm:tw-min-w-60"
+      variant="primary"
+      size="md"
+      fullWidth
+      className="tw-group/main tw-justify-between tw-text-left sm:tw-w-fit sm:tw-min-w-60"
     >
       <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5">
         <span className="tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-black md:tw-hidden lg:tw-flex">
           <SparklesIcon className="tw-size-4" />
         </span>
         <span className="tw-min-w-0">
-          <span className="tw-block tw-text-sm tw-font-bold tw-leading-5 tw-text-black">
+          <span className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-black">
             Explore the Main Stage
           </span>
         </span>
       </span>
 
       <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0 tw-text-black tw-transition-transform tw-duration-300 desktop-hover:group-hover/main:tw-translate-x-1" />
-    </Link>
+    </ButtonLink>
   );
 }
 

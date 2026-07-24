@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -294,18 +295,20 @@ function RuleActions({ locale }: { readonly locale: SupportedLocale }) {
       aria-label={m(locale, "network.tdh.related.ruleActionsAria")}
       className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-6"
     >
-      <Link
-        className="tw-rounded-md tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-black tw-no-underline tw-transition-colors hover:tw-bg-iron-200 hover:tw-text-black hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 motion-reduce:tw-transition-none"
+      <ButtonLink
+        variant="primary"
+        size="sm"
         href="/network/tdh/historic-boosts"
       >
         {m(locale, "network.tdh.related.historic.title")}
-      </Link>
-      <Link
-        className="tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-white/[0.12] hover:tw-bg-iron-800 hover:tw-text-iron-50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 motion-reduce:tw-transition-none"
+      </ButtonLink>
+      <ButtonLink
+        variant="tertiary"
+        size="sm"
         href="/network/definitions"
       >
         {m(locale, "network.tdh.related.definitions.title")}
-      </Link>
+      </ButtonLink>
     </nav>
   );
 }

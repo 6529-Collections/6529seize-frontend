@@ -1,6 +1,7 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import Button from "@/components/utils/button/Button";
 import type { CollectedCollectionType } from "@/entities/IProfile";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { ContractType } from "@/types/enums";
@@ -186,7 +187,7 @@ function TransferSingleActionsImpl(
   );
 
   const transferButton = (
-    <button
+    <Button
       type="button"
       onClick={() => {
         if (!isConnected) {
@@ -197,7 +198,9 @@ function TransferSingleActionsImpl(
         setShowModal(true);
       }}
       aria-label={transferButtonText}
-      className="tw-flex tw-h-10 tw-flex-1 tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-5 tw-text-sm tw-font-bold tw-text-black tw-transition-all tw-duration-200 hover:tw-bg-iron-100 active:tw-scale-[0.98] disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @lg:tw-flex-none"
+      variant="primary"
+      size="md"
+      className="tw-flex-1 @lg:tw-flex-none"
       data-testid="transfer-single-submit"
     >
       <span>{transferButtonText}</span>
@@ -206,7 +209,7 @@ function TransferSingleActionsImpl(
         icon={faRightLeft}
         className="tw-size-3"
       />
-    </button>
+    </Button>
   );
 
   if (props.layout === "inline") {

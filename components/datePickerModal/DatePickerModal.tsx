@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useId, useRef, useState } from "react";
@@ -263,23 +264,25 @@ export default function DatePickerModal(props: Readonly<Props>) {
                 {error}
               </span>
               <span className="tw-flex tw-justify-end tw-gap-2">
-                <button
-                  className="tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                <Button
                   onClick={() => props.onHide()}
                   type="button"
+                  variant="secondary"
+                  size="md"
                 >
                   Cancel
-                </button>
-                <button
-                  className="tw-rounded-none tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black tw-transition hover:tw-bg-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                </Button>
+                <Button
                   onClick={() => {
                     setError(undefined);
                     apply();
                   }}
                   type="button"
+                  variant="primary"
+                  size="md"
                 >
                   Apply
-                </button>
+                </Button>
               </span>
             </div>
           </div>

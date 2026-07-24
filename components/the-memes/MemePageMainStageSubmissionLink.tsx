@@ -10,6 +10,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowUpRightIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 
 interface MemePageMainStageSubmissionLinkProps {
   readonly memeCardId: number;
@@ -91,15 +92,16 @@ export default function MemePageMainStageSubmissionLink({
   }
 
   return (
-    <Link
+    <ButtonLink
       href={href}
-      className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+      variant="tertiary"
+      size="xs"
     >
       <span>{label}</span>
       <ArrowUpRightIcon
         aria-hidden="true"
         className="-tw-mr-1 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
       />
-    </Link>
+    </ButtonLink>
   );
 }

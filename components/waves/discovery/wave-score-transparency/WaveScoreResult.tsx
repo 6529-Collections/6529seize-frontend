@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
   ArrowLongRightIcon,
@@ -14,7 +16,6 @@ import {
   ShieldCheckIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 
 import {
   buildWaveScoreMarkdown,
@@ -250,32 +251,35 @@ export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
             data-wave-score-screenshot-exclude="true"
             className="tw-flex tw-flex-col tw-items-stretch tw-gap-2 sm:tw-flex-row lg:tw-items-start"
           >
-            <button
+            <Button
               type="button"
               onClick={() => void handleCopyMarkdown()}
-              className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-white/5 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10"
+              variant="secondary"
+              size="md"
               aria-label="Copy wave score analysis as Markdown"
             >
               <ClipboardDocumentIcon className="tw-size-4" aria-hidden="true" />
               Copy
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => void handleDownloadScreenshot()}
               disabled={shareStatus === SHARE_STATUS.SCREENSHOT_LOADING}
-              className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-white/5 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60 desktop-hover:hover:tw-bg-white/10"
+              variant="secondary"
+              size="md"
               aria-label="Download wave score analysis screenshot"
             >
               <CameraIcon className="tw-size-4" aria-hidden="true" />
               Screenshot
-            </button>
-            <Link
+            </Button>
+            <ButtonLink
               href={waveHref}
-              className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-white/5 tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10"
+              variant="tertiary"
+              size="md"
             >
               Open wave
               <ArrowLongRightIcon className="tw-size-4" aria-hidden="true" />
-            </Link>
+            </ButtonLink>
           </div>
         </div>
         <output

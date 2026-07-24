@@ -16,6 +16,7 @@ import IdentitySearch, {
 import { useDebounce } from "react-use";
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import Button from "@/components/utils/button/Button";
 import type { GroupSelectVariant } from "./groupSelect.types";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
@@ -246,13 +247,13 @@ export default function GroupSelect({
         </p>
         <div className="tw-space-y-3">
           {!!connectedProfile?.handle && (
-            <button
+            <Button
               onClick={onShowMyGroups}
-              type="button"
-              className="tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-2 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset"
+              variant="tertiary"
+              size="xs"
             >
               My groups
-            </button>
+            </Button>
           )}
           <IdentitySearch
             identity={filters.author_identity}

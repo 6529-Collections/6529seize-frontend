@@ -30,6 +30,7 @@ import {
   fromGWEI,
   getAddressEtherscanLink,
 } from "@/helpers/Helpers";
+import Button from "@/components/utils/button/Button";
 import { useAuth } from "../auth/Auth";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import { UnlockAppWalletModal } from "./AppWalletModal";
@@ -670,13 +671,14 @@ export default function AppWalletComponent(
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-5">
         <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-gap-2 tw-px-3">
-          <button
+          <Button
             type="button"
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#dc3545] tw-bg-[#dc3545] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#b02a37] enabled:hover:tw-bg-[#bb2d3b] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             onClick={() => doDelete(appWallet.name, appWallet.address)}
+            variant="destructive"
+            size="md"
           >
             Delete
-          </button>
+          </Button>
           <button
             type="button"
             className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#dc3545] tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-[#dc3545] tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-[#dc3545] enabled:hover:tw-text-white disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"

@@ -3,6 +3,7 @@
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DateCountdown from "@/components/date-countdown/DateCountdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import type { CollectionWithMerkle } from "@/components/nextGen/nextgen_entities";
 import { AllowlistType, Status } from "@/components/nextGen/nextgen_entities";
@@ -26,9 +27,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DistributionLink } from "../NextGen";
-
-const ACTION_LINK_CLASSES =
-  "tw-inline-flex tw-min-h-11 tw-w-full tw-min-w-fit tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-bg-white tw-px-5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-950 tw-no-underline tw-transition tw-duration-200 hover:tw-bg-iron-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
 const PHASE_TAG_BASE_CLASSES =
   "tw-inline-flex tw-min-h-7 tw-items-center tw-rounded-full tw-border tw-border-solid tw-bg-black/40 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-tracking-wide";
@@ -131,15 +129,17 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/90 tw-px-5 tw-py-4 tw-text-white tw-shadow-lg">
         <DateCountdown title={`${title} in`} date={new Date(date * 1000)} />
         {!hideMintBtn && (
-          <Link
+          <ButtonLink
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
             )}/mint`}
-            className={ACTION_LINK_CLASSES}
+            variant="primary"
+            size="lg"
+            fullWidth
             aria-label={collectionLoaded ? undefined : "Loading mint details"}
           >
             {getButtonLabel()}
-          </Link>
+          </ButtonLink>
         )}
         <DistributionLink collection={props.collection} />
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -161,14 +161,15 @@ function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content="Create wave"
     >
-      <PrimaryButton
-        onClicked={onClick}
-        loading={false}
-        disabled={false}
-        padding="tw-p-2.5"
+      <Button
+        onClick={onClick}
+        aria-label="Create wave"
+        variant="primary"
+        size="sm"
+        className="tw-w-9 tw-px-0"
       >
         <FontAwesomeIcon icon={faPlus} className="tw-size-4 tw-flex-shrink-0" />
-      </PrimaryButton>
+      </Button>
     </div>
   );
 }

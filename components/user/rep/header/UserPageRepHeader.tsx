@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -189,17 +190,16 @@ export default function UserPageRepHeader({
               </div>
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
                 {canEditRep && repDirection === "received" && (
-                  <button
-                    type="button"
+                  <Button
+                    size="lg"
                     onClick={() => setIsGrantRepOpen(true)}
-                    className="hover:tw-text-primary-200/90 tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-primary-400/45 tw-bg-primary-500/5 tw-px-4 tw-text-sm tw-font-medium tw-text-primary-300/85 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-primary-300/70 hover:tw-bg-primary-500/10"
                   >
                     <PlusIcon
                       aria-hidden="true"
                       className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
                     />
                     <span>Add new</span>
-                  </button>
+                  </Button>
                 )}
                 {visibleCategories.map((cat) => (
                   <RepCategoryPill
@@ -213,14 +213,13 @@ export default function UserPageRepHeader({
                   />
                 ))}
                 {hasMore && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
                     onClick={onShowMore}
                     disabled={isLoadMoreDisabled}
-                    className="tw-inline-flex tw-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white disabled:tw-cursor-default disabled:tw-opacity-70"
                   >
                     {loadMoreLabel}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

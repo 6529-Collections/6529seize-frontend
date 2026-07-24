@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -11,6 +10,7 @@ import RecipientSelector from "../common/RecipientSelector";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
+import ButtonLink from "../utils/button/ButtonLink";
 
 const noopProfileSelection = (_: CommunityMemberMinimal | null) => undefined;
 
@@ -182,14 +182,16 @@ export default function ManifoldMintingConnect(
   if (isIos) {
     if (country === "US") {
       return (
-        <Link
+        <ButtonLink
           href={mintOn6529Href}
-          className="tw-block tw-w-full tw-rounded-xl tw-border tw-border-white/15 tw-bg-white tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-950 tw-no-underline tw-transition hover:tw-bg-iron-100"
+          variant="primary"
+          size="lg"
+          fullWidth
           target="_blank"
           rel="noopener noreferrer"
         >
           Mint on 6529.io
-        </Link>
+        </ButtonLink>
       );
     } else {
       return <></>;

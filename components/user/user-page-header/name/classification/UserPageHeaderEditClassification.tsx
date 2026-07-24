@@ -3,8 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsClassification from "@/components/user/settings/UserSettingsClassification";
-import ActionButton from "@/components/utils/button/ActionButton";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -128,21 +127,27 @@ export default function UserPageHeaderEditClassification({
             />
 
             <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row-reverse sm:tw-justify-start">
-              <ActionButton
+              <Button
                 type="submit"
+                variant="action"
+                size="lg"
                 loading={mutating}
                 disabled={!haveChanges}
-                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+                fullWidth
+                className="sm:tw-w-auto"
               >
                 Save
-              </ActionButton>
-              <SecondaryButton
+              </Button>
+              <Button
+                variant="secondary"
+                size="lg"
                 disabled={mutating}
-                onClicked={onClose}
-                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+                onClick={onClose}
+                fullWidth
+                className="sm:tw-w-auto"
               >
                 Cancel
-              </SecondaryButton>
+              </Button>
             </div>
           </form>
         </div>

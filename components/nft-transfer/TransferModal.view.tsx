@@ -3,6 +3,8 @@ import RecipientSelector from "@/components/common/RecipientSelector";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import {
   faAnglesDown,
@@ -10,7 +12,6 @@ import {
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import type { PublicClient } from "viem";
 import type { FlowState, TxEntry, TxState } from "./TransferModal.types";
 
@@ -196,14 +197,16 @@ function TxStatusList({
   const txLink = (hash: string) => {
     if (!explorer) return null;
     return (
-      <Link
+      <ButtonLink
         href={`${explorer}/tx/${hash}`}
         target="_blank"
         rel="noreferrer"
-        className="tw-ml-2 tw-inline-block tw-rounded-md tw-border tw-border-solid tw-border-black tw-bg-white tw-px-2 tw-py-1 !tw-text-sm tw-text-black tw-no-underline hover:tw-bg-white/80 hover:tw-text-black"
+        variant="primary"
+        size="xs"
+        className="tw-ml-2"
       >
         View Tx
-      </Link>
+      </ButtonLink>
     );
   };
 
@@ -297,21 +300,23 @@ export function FooterActions({
   if (flow === "review") {
     return (
       <div className="tw-flex tw-items-center tw-gap-2">
-        <button
+        <Button
           type="button"
           onClick={onCancel}
-          className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium hover:tw-bg-white/15"
+          variant="secondary"
+          size="md"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           disabled={!canConfirm}
           onClick={onConfirm}
-          className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white tw-px-4 tw-py-2 tw-font-medium tw-text-black disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          variant="primary"
+          size="md"
         >
           Transfer
-        </button>
+        </Button>
       </div>
     );
   }
@@ -319,24 +324,26 @@ export function FooterActions({
   const anyPending = anyTxsPending(txs);
   if (anyPending) {
     return (
-      <button
+      <Button
         type="button"
         disabled
-        className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium tw-opacity-60"
+        variant="secondary"
+        size="md"
       >
         Processing…
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={onClose}
-      className="tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-black hover:tw-bg-white/80 hover:tw-text-black"
+      variant="primary"
+      size="md"
     >
       Close
-    </button>
+    </Button>
   );
 }
 

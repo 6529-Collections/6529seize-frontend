@@ -12,6 +12,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import WaveHeaderNameEditInput from "./WaveHeaderNameEditInput";
+import Button from "@/components/utils/button/Button";
 
 export default function WaveHeaderNameEditModal({
   wave,
@@ -88,14 +89,13 @@ export default function WaveHeaderNameEditModal({
               <WaveHeaderNameEditInput name={name} setName={setName} />
 
               <div className="tw-mt-4 tw-flex tw-justify-end">
-                <button
+                <Button
                   disabled={isDisabled}
                   type="submit"
-                  className={`tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out sm:tw-w-auto ${
-                    isDisabled
-                      ? "tw-cursor-not-allowed tw-border-iron-800 tw-bg-iron-800 tw-text-iron-500"
-                      : "tw-cursor-pointer tw-border-primary-500 tw-bg-primary-500 tw-text-white hover:tw-border-primary-600 hover:tw-bg-primary-600"
-                  }`}
+                  variant="action"
+                  size="lg"
+                  fullWidth
+                  className="tw-relative sm:tw-w-auto"
                 >
                   <div style={{ visibility: mutating ? "hidden" : "visible" }}>
                     Save
@@ -120,7 +120,7 @@ export default function WaveHeaderNameEditModal({
                       ></path>
                     </svg>
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

@@ -45,7 +45,7 @@ export function Spinner() {
   return (
     <output
       aria-label="Processing"
-      className="tw-ml-2 tw-inline-block tw-h-4 tw-w-4 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-current tw-border-r-transparent tw-align-[-0.125em] motion-reduce:tw-animate-none"
+      className="tw-inline-block tw-h-4 tw-w-4 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-current tw-border-r-transparent tw-align-[-0.125em] motion-reduce:tw-animate-none"
     />
   );
 }

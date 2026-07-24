@@ -1,6 +1,7 @@
 "use client";
 
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import Button from "@/components/utils/button/Button";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -185,20 +186,17 @@ function MemesArtResubmitActionWithWave({
     return (
       <>
         <div className="tw-flex tw-flex-col tw-gap-y-2">
-          <button
+          <Button
             type="button"
             onClick={openModal}
-            aria-disabled={disabled}
+            disabled={disabled}
             title={title}
-            className={`tw-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3 tw-text-xs tw-transition-all tw-duration-300 tw-ease-out ${
-              disabled
-                ? "tw-cursor-not-allowed tw-border-iron-800 tw-bg-iron-900 tw-text-iron-600"
-                : "tw-text-primary-200 tw-border-primary-500/30 tw-bg-primary-500/10 desktop-hover:hover:tw-border-primary-400/40 desktop-hover:hover:tw-bg-primary-500/20"
-            }`}
+            variant="action"
+            size="md"
           >
             <ArrowPathIcon className="tw-size-4 tw-flex-shrink-0" />
             <span>Resubmit Drop</span>
-          </button>
+          </Button>
           {disabledReason && (
             <p className="tw-mb-0 tw-max-w-xs tw-text-xs tw-leading-5 tw-text-iron-500">
               {disabledReason}

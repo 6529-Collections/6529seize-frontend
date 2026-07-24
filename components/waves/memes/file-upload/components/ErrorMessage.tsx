@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import Button from '@/components/utils/button/Button';
 import type { ErrorMessageProps } from '../reducers/types';
 
 /**
@@ -27,16 +28,17 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
     <div className="tw-flex tw-flex-col tw-gap-2">
       <span>{error}</span>
       {showRetry && (
-        <button
+        <Button
           onClick={(e) => {
             e.stopPropagation();
             onRetry(e);
           }}
-          className="tw-px-3 tw-py-1 tw-bg-primary-500/20 tw-text-primary-300 tw-text-xs tw-rounded-md hover:tw-bg-primary-500/30 tw-transition-colors tw-duration-200"
           type="button"
+          variant="action"
+          size="xs"
         >
           Try Again
-        </button>
+        </Button>
       )}
     </div>
   </motion.div>

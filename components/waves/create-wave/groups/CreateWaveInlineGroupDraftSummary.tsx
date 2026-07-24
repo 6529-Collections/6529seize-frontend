@@ -1,3 +1,5 @@
+import Button from "@/components/utils/button/Button";
+
 export default function CreateWaveInlineGroupDraftSummary({
   draftSummary,
   isValid,
@@ -43,22 +45,23 @@ export default function CreateWaveInlineGroupDraftSummary({
           </p>
         </div>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="md"
             disabled={!canResetDraft}
             onClick={onClearAll}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-iron-100"
           >
             Discard draft
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="action"
+            size="md"
             disabled={!canCreateDraft}
+            loading={isCreating}
             onClick={onCreateAndUse}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-200 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-primary-400 desktop-hover:hover:tw-bg-primary-400"
           >
             {isCreating ? "Creating group..." : "Create and use new group"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

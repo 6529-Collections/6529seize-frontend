@@ -1,8 +1,8 @@
 "use client";
 
 import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useSetTitle } from "@/contexts/TitleContext";
-import Link from "next/link";
 import type { PropsWithChildren, ReactNode } from "react";
 
 function DetailsCard(props: Readonly<{ title: string; children: ReactNode }>) {
@@ -175,13 +175,16 @@ export default function TDHHistoricBoostsPage() {
 
       <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-3">
         {NAV_LINKS.map(({ href, label }) => (
-          <Link
+          <ButtonLink
             key={href}
             href={href}
-            className="tw-inline-block tw-w-full tw-min-w-[150px] tw-flex-1 tw-rounded-md tw-border-solid tw-border-[#222] tw-bg-[#eee] tw-px-4 tw-py-2 tw-text-center tw-font-medium tw-text-black tw-no-underline hover:tw-bg-[#ddd] hover:tw-text-black sm:tw-w-auto sm:tw-whitespace-nowrap"
+            variant="primary"
+            size="md"
+            fullWidth
+            className="tw-min-w-[150px] sm:tw-w-auto sm:tw-flex-1"
           >
             {label}
-          </Link>
+          </ButtonLink>
         ))}
       </div>
     </main>

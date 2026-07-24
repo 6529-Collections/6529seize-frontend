@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useEffect, useRef } from "react";
 
@@ -38,13 +39,14 @@ export function StateBlock({
       </p>
       <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-text-iron-400">{message}</p>
       {onRetry && (
-        <button
-          type="button"
+        <Button
+          variant="tertiary"
+          size="sm"
           onClick={onRetry}
-          className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07]"
+          className="tw-mt-4"
         >
           Retry
-        </button>
+        </Button>
       )}
     </div>
   );

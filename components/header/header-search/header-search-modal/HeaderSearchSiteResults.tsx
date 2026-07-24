@@ -16,6 +16,7 @@ import {
 } from "react";
 
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
+import Button from "@/components/utils/button/Button";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -489,13 +490,13 @@ export function HeaderSearchSiteResults({
                       }
                 )}
               </p>
-              <button
-                type="button"
+              <Button
                 onClick={() => onRetry(failedCategories)}
-                className="tw-text-primary-200 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                variant="tertiary"
+                size="xs"
               >
                 {t(locale, "headerSearch.retry")}
-              </button>
+              </Button>
             </div>
           )}
           <div
@@ -569,13 +570,13 @@ export function HeaderSearchSiteResults({
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
             {t(locale, "headerSearch.error")}
           </p>
-          <button
-            type="button"
+          <Button
             onClick={() => onRetry(failedCategories)}
-            className="tw-text-primary-100 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/15 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold hover:tw-bg-primary-500/25 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            variant="tertiary"
+            size="md"
           >
             {t(locale, "headerSearch.retry")}
-          </button>
+          </Button>
         </div>
       );
     }

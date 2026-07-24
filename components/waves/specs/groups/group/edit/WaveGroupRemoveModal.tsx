@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import Button from "@/components/utils/button/Button";
 
 export default function WaveGroupRemoveModal({
   closeModal,
@@ -56,18 +57,24 @@ export default function WaveGroupRemoveModal({
             <form>
               <div className="tw-mt-8">
                 <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
-                  <button
+                  <Button
                     onClick={removeGroup}
-                    type="button"
-                    className="tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative  tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-bg-[#F04438] tw-border-[#F04438] hover:tw-bg-[#D92D20] hover:tw-border-[#D92D20]">
-                    <div>Remove</div>
-                  </button>
-                  <button
+                    variant="destructive"
+                    size="lg"
+                    fullWidth
+                    className="sm:tw-w-auto"
+                  >
+                    Remove
+                  </Button>
+                  <Button
                     onClick={closeModal}
-                    type="button"
-                    className="tw-mt-3 sm:tw-mt-0 tw-w-full hover:tw-bg-iron-800 hover:tw-border-iron-700 sm:tw-w-auto tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out">
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                    className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
+                  >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             </form>

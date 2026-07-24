@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import { publicEnv } from "@/config/env";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
@@ -12,9 +13,6 @@ import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useDownloader from "@/hooks/useDownloader";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { SingleWaveDropVoter } from "./SingleWaveDropVoter";
 
 interface SingleWaveDropVotersProps {
@@ -124,24 +122,18 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
           </span>
         </button>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-3">
-          <button
+          <Button
             type="button"
             onClick={onDownloadAllVotes}
-            disabled={isInProgress}
-            className="tw-flex tw-h-8 tw-w-[9.25rem] tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+            loading={isInProgress}
+            variant="tertiary"
+            size="xs"
+            className="tw-w-[9.25rem]"
             aria-label="Download all top voters as CSV"
           >
-            <span className="tw-w-[5.5rem] tw-whitespace-nowrap tw-text-left">
-              {isInProgress ? "Downloading" : "Download All"}
-            </span>
-            <span className="tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center">
-              {isInProgress ? (
-                <CircleLoader size={CircleLoaderSize.SMALL} />
-              ) : (
-                <ArrowDownTrayIcon className="tw-size-4" />
-              )}
-            </span>
-          </button>
+            <span>{isInProgress ? "Downloading" : "Download All"}</span>
+            {!isInProgress && <ArrowDownTrayIcon className="tw-size-4" />}
+          </Button>
           <button
             type="button"
             onClick={toggleVoters}

@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { Chain } from "viem";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -43,8 +44,6 @@ const DEFAULT_STATUS_MESSAGE: Record<OnchainTransactionModalStatus, string> = {
   error: "Transaction failed",
 };
 
-const TRANSACTION_LINK_CLASS_NAME =
-  "tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black tw-no-underline tw-transition hover:tw-bg-[#d7d7d7] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 const ERROR_TEXTAREA_CHARS_PER_ROW = 48;
 const ERROR_TEXTAREA_MAX_ROWS = 6;
 
@@ -109,14 +108,15 @@ function TransactionLink({ href }: Readonly<{ href: string | null }>) {
   }
 
   return (
-    <a
-      className={TRANSACTION_LINK_CLASS_NAME}
+    <ButtonLink
       href={href}
+      variant="primary"
+      size="xs"
       target="_blank"
       rel="noopener noreferrer"
     >
       View Tx
-    </a>
+    </ButtonLink>
   );
 }
 

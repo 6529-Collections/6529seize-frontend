@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { getStableDeviceId } from "@/components/notifications/stable-device-id";
+import Button from "@/components/utils/button/Button";
 import type { ApiPushNotificationSettings } from "@/generated/models/ApiPushNotificationSettings";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
@@ -235,25 +236,21 @@ export default function PushNotificationSettings({
                   Tap below to save your changes
                 </p>
               )}
-              <button
+              <Button
                 type="button"
                 onClick={handleSave}
-                disabled={!hasChanges || isSaving}
-                className={`tw-w-full tw-rounded-lg tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-transition-colors ${
-                  hasChanges && !isSaving
-                    ? "tw-bg-primary-500 tw-text-white hover:tw-bg-primary-600"
-                    : "tw-cursor-not-allowed tw-bg-iron-800 tw-text-iron-500"
-                }`}
+                disabled={!hasChanges}
+                loading={isSaving}
+                variant="action"
+                size="md"
+                fullWidth
               >
-                {isSaving && (
-                  <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-                    <span className="tw-size-4 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-400 tw-border-t-white" />
-                    <span>Saving...</span>
-                  </span>
-                )}
-                {!isSaving && hasChanges && "Save Changes"}
-                {!isSaving && !hasChanges && "No Changes"}
-              </button>
+                {isSaving
+                  ? "Saving..."
+                  : hasChanges
+                    ? "Save Changes"
+                    : "No Changes"}
+              </Button>
             </div>
           </>
         )}

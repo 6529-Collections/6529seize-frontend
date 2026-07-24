@@ -10,9 +10,7 @@ import {
 } from "@/services/api/common-api";
 import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
@@ -21,19 +19,14 @@ export enum WaveFollowBtnSize {
   MEDIUM = "MEDIUM",
 }
 
-const BUTTON_CLASSES: Record<WaveFollowBtnSize, string> = {
-  [WaveFollowBtnSize.SMALL]: "tw-h-9 tw-gap-x-1.5 tw-px-4 tw-text-[13px]",
-  [WaveFollowBtnSize.MEDIUM]: "tw-h-10 tw-gap-x-2 tw-px-5 tw-text-[13px]",
-};
-
 const SVG_CLASSES: Record<WaveFollowBtnSize, string> = {
   [WaveFollowBtnSize.SMALL]: "tw-h-4 tw-w-4",
   [WaveFollowBtnSize.MEDIUM]: "tw-h-5 tw-w-5",
 };
 
-const LOADER_SIZES: Record<WaveFollowBtnSize, CircleLoaderSize> = {
-  [WaveFollowBtnSize.SMALL]: CircleLoaderSize.SMALL,
-  [WaveFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
+const BUTTON_SIZES: Record<WaveFollowBtnSize, "sm" | "md"> = {
+  [WaveFollowBtnSize.SMALL]: "sm",
+  [WaveFollowBtnSize.MEDIUM]: "md",
 };
 
 interface WaveHeaderFollowProps {
@@ -138,17 +131,10 @@ export default function WaveHeaderFollow({
   };
 
   const printIcon = () => {
-    if (mutating) {
-      return (
-        <span className="-tw-ml-1.5 tw-flex tw-flex-shrink-0 tw-items-center">
-          <CircleLoader size={LOADER_SIZES[size]} />
-        </span>
-      );
-    }
     if (following) {
       return (
         <svg
-          className="-tw-ml-1.5 tw-h-3 tw-w-3 tw-flex-shrink-0"
+          className="tw-h-3 tw-w-3 tw-flex-shrink-0"
           viewBox="0 0 17 15"
           fill="none"
           aria-hidden="true"
@@ -165,7 +151,7 @@ export default function WaveHeaderFollow({
     }
     return (
       <svg
-        className={`${SVG_CLASSES[size]} -tw-ml-1.5 tw-flex-shrink-0`}
+        className={`${SVG_CLASSES[size]} tw-flex-shrink-0`}
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
@@ -183,20 +169,15 @@ export default function WaveHeaderFollow({
   };
 
   return (
-    <div className={`tw-flex tw-items-center ${fullWidth ? "tw-w-full" : ""}`}>
-      <button
-        onClick={onFollow}
-        disabled={mutating}
-        type="button"
-        className={`${BUTTON_CLASSES[size]} ${
-          following
-            ? "tw-bg-iron-900/90 tw-text-iron-200 tw-shadow-[0_10px_24px_rgba(0,0,0,0.18)] tw-ring-white/10 hover:tw-bg-iron-800 hover:tw-text-white hover:tw-ring-white/15"
-            : "hover:tw-ring-primary-200/45 tw-bg-primary-500/95 tw-text-white tw-shadow-[0_10px_24px_rgba(59,130,246,0.22)] tw-ring-primary-300/35 hover:tw-bg-primary-400"
-        } ${fullWidth ? "tw-h-10 tw-w-full tw-justify-center lg:tw-h-9" : ""} tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-200 tw-ease-out active:tw-scale-[0.98] disabled:tw-cursor-not-allowed disabled:tw-opacity-70`}
-      >
-        {printIcon()}
-        <span>{label}</span>
-      </button>
-    </div>
+    <Button
+      onClick={onFollow}
+      loading={mutating}
+      variant={following ? "secondary" : "primary"}
+      size={BUTTON_SIZES[size]}
+      fullWidth={fullWidth}
+    >
+      {!mutating && printIcon()}
+      <span>{label}</span>
+    </Button>
   );
 }

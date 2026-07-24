@@ -22,18 +22,14 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
+import Button from "@/components/utils/button/Button";
+import type { ButtonSize } from "@/components/utils/button/buttonStyles";
 import UserMuteButton from "./UserMuteButton";
 
 export enum UserFollowBtnSize {
   SMALL = "SMALL",
   MEDIUM = "MEDIUM",
 }
-
-export const FOLLOW_BTN_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
-  [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-3 tw-py-2 tw-text-xs",
-  [UserFollowBtnSize.MEDIUM]:
-    "tw-gap-x-1 tw-px-3 md:tw-px-3.5 tw-py-2 md:tw-py-2.5 tw-text-sm",
-};
 
 export const FOLLOW_BTN_SVG_CLASSES: Record<UserFollowBtnSize, string> = {
   [UserFollowBtnSize.SMALL]: "tw-h-3 tw-w-3 md:tw-h-4 md:tw-w-4 -tw-ml-1",
@@ -46,6 +42,11 @@ export const FOLLOW_BTN_LOADER_SIZES: Record<
 > = {
   [UserFollowBtnSize.SMALL]: CircleLoaderSize.SMALL,
   [UserFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
+};
+
+export const FOLLOW_BUTTON_SIZES: Record<UserFollowBtnSize, ButtonSize> = {
+  [UserFollowBtnSize.SMALL]: "xs",
+  [UserFollowBtnSize.MEDIUM]: "md",
 };
 
 const DIRECT_MESSAGE_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
@@ -196,15 +197,6 @@ export default function UserFollowBtn({
     }
   };
 
-  let followButtonStateClass =
-    "tw-bg-iron-200 tw-text-iron-950 tw-ring-white hover:tw-bg-iron-300 hover:tw-ring-iron-300";
-  if (isInitialStatusLoading) {
-    followButtonStateClass = "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800";
-  } else if (following) {
-    followButtonStateClass =
-      "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800 hover:tw-bg-iron-700 hover:tw-ring-iron-700";
-  }
-
   const directMessageTooltipId = `dm-${handle}`;
 
   return (
@@ -248,12 +240,13 @@ export default function UserFollowBtn({
           iconClassName={DIRECT_MESSAGE_ICON_CLASSES[size]}
         />
       )}
-      <button
+      <Button
         onClick={onFollow}
         disabled={mutating || isInitialStatusLoading}
-        type="button"
+        aria-busy={mutating || isInitialStatusLoading || undefined}
         aria-label={following ? "Unfollow" : "Follow"}
-        className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${followButtonStateClass} tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+        variant={following || isInitialStatusLoading ? "secondary" : "primary"}
+        size={FOLLOW_BUTTON_SIZES[size]}
       >
         {mutating || isInitialStatusLoading ? (
           <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
@@ -291,8 +284,8 @@ export default function UserFollowBtn({
             />
           </svg>
         )}
-        <span className="tw-font-semibold">{label}</span>
-      </button>
+        <span>{label}</span>
+      </Button>
     </div>
   );
 }

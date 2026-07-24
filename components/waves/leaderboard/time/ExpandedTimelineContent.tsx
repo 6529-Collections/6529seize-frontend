@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -65,9 +66,6 @@ export const ExpandedTimelineContent: React.FC<
     return `Show ${count} ${noun}`;
   };
 
-  const loadMoreButtonClasses =
-    "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-900/60 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 tw-shadow-sm tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-iron-600/70 desktop-hover:hover:tw-bg-iron-700/60 desktop-hover:hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-500";
-
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
@@ -82,10 +80,11 @@ export const ExpandedTimelineContent: React.FC<
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-3 tw-text-xs tw-text-iron-300">
             <div className="tw-flex tw-items-center tw-gap-2">
               {hasMorePast && onLoadMorePast && (
-                <button
+                <Button
                   type="button"
                   onClick={onLoadMorePast}
-                  className={loadMoreButtonClasses}
+                  variant="tertiary"
+                  size="xs"
                 >
                   <FontAwesomeIcon
                     icon={faChevronLeft}
@@ -94,15 +93,16 @@ export const ExpandedTimelineContent: React.FC<
                   <span className="tw-whitespace-nowrap">
                     {formatLabel(pastCountToDisplay, "earlier")}
                   </span>
-                </button>
+                </Button>
               )}
             </div>
             <div className="tw-flex tw-items-center tw-gap-2">
               {hasMoreFuture && onLoadMoreFuture && (
-                <button
+                <Button
                   type="button"
                   onClick={onLoadMoreFuture}
-                  className={loadMoreButtonClasses}
+                  variant="tertiary"
+                  size="xs"
                 >
                   <span className="tw-whitespace-nowrap">
                     {formatLabel(remainingFutureCount, "later")}
@@ -111,7 +111,7 @@ export const ExpandedTimelineContent: React.FC<
                     icon={faChevronRight}
                     className="tw-size-4 tw-flex-shrink-0"
                   />
-                </button>
+                </Button>
               )}
             </div>
           </div>

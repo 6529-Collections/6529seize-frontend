@@ -21,6 +21,7 @@ import type { ApprovalWaveCloseStatus } from "@/helpers/waves/approve-wave.helpe
 import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import Button from "@/components/utils/button/Button";
 
 interface WaveApprovalStatusBarProps {
   readonly approvedCount: number | null;
@@ -639,13 +640,9 @@ export default function WaveApprovalStatusBar({
               {errorMessage}
             </p>
             {retryError && (
-              <button
-                type="button"
-                onClick={retryError}
-                className="tw-inline-flex tw-w-fit tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-border-iron-400 desktop-hover:hover:tw-bg-iron-800"
-              >
+              <Button onClick={retryError} variant="tertiary" size="xs">
                 Try again
-              </button>
+              </Button>
             )}
           </div>
         )}

@@ -1,6 +1,5 @@
 "use client";
 
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   CreateDropType,
   CreateDropViewType,
@@ -9,6 +8,7 @@ import type { CreateDropContentHandles } from "@/components/drops/create/utils/C
 import CreateDropContent from "@/components/drops/create/utils/CreateDropContent";
 import CreateDropSelectedFileIcon from "@/components/drops/create/utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "@/components/drops/create/utils/file/CreateDropSelectedFilePreview";
+import Button from "@/components/utils/button/Button";
 import type {
   CreateDropConfig,
   DropMetadata,
@@ -269,25 +269,18 @@ const CreateDropFullMobile = forwardRef<
           {showSubmit && (
             <div className="tw-px-4 tw-pt-4 sm:tw-px-6">
               <div className="tw-flex tw-gap-x-3">
-                <button
+                <Button
                   type="button"
-                  disabled={!canSubmit || loading}
+                  disabled={!canSubmit}
+                  loading={loading}
+                  hideChildrenWhenLoading
                   onClick={onDrop}
-                  className={`${
-                    !canSubmit
-                      ? "tw-text-iron-200 tw-opacity-50"
-                      : "tw-text-white hover:tw-bg-primary-600 hover:tw-ring-primary-600"
-                  } tw-relative tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset`}
+                  variant="action"
+                  size="lg"
+                  fullWidth
                 >
-                  <div className={loading ? "tw-opacity-0" : ""}>
-                    {getSubmitText()}
-                  </div>
-                  {loading && (
-                    <div className="tw-absolute">
-                      <CircleLoader />
-                    </div>
-                  )}
-                </button>
+                  {getSubmitText()}
+                </Button>
               </div>
             </div>
           )}

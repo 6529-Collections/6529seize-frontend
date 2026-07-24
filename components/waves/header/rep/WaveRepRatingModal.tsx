@@ -1,8 +1,8 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import Button from "@/components/utils/button/Button";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import type { ApiChangeWaveRepRating } from "@/generated/models/ApiChangeWaveRepRating";
@@ -365,46 +365,42 @@ export default function WaveRepRatingModal({
           </div>
 
           <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row-reverse">
-            <button
+            <Button
               type="submit"
               disabled={isSaveDisabled}
-              aria-busy={mutating}
+              loading={mutating}
               aria-label={mutating ? "Saving Wave REP" : "Save Wave REP"}
-              className={`${
-                isSaveDisabled
-                  ? "tw-cursor-not-allowed tw-opacity-50"
-                  : "tw-cursor-pointer hover:tw-border-primary-600 hover:tw-bg-primary-600"
-              } tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition sm:tw-w-auto`}
+              variant="action"
+              size="lg"
+              fullWidth
+              className="sm:tw-w-auto"
             >
-              {mutating ? (
-                <span className="tw-w-10">
-                  <CircleLoader />
-                  <span className="tw-sr-only">Saving Wave REP</span>
-                </span>
-              ) : (
-                "Save"
-              )}
-            </button>
+              Save
+            </Button>
             {canRemoveRating && (
-              <button
-                type="button"
+              <Button
                 onClick={onRemove}
                 aria-label={t(
                   WAVE_REP_MODAL_LOCALE,
                   "waves.rep.modal.removeAriaLabel"
                 )}
-                className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-red/10 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-red tw-transition hover:tw-border-red/70 hover:tw-bg-red/15 sm:tw-w-auto"
+                variant="destructive"
+                size="lg"
+                fullWidth
+                className="sm:tw-w-auto"
               >
                 {t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.remove")}
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
+            <Button
               onClick={onClose}
-              className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-iron-800 sm:tw-w-auto"
+              variant="secondary"
+              size="lg"
+              fullWidth
+              className="sm:tw-w-auto"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       </div>
