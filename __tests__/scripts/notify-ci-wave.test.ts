@@ -12,16 +12,24 @@ async function runNotifier(
   overrides: Record<string, string> = {}
 ): Promise<RunResult> {
   let payload: Record<string, unknown> | null = null;
+  let requestError: Error | null = null;
   const server = createServer((request, response) => {
     const chunks: Buffer[] = [];
     request.on("data", (chunk: Buffer) => chunks.push(chunk));
     request.on("end", () => {
-      payload = JSON.parse(Buffer.concat(chunks).toString("utf8")) as Record<
-        string,
-        unknown
-      >;
-      response.writeHead(204);
-      response.end();
+      try {
+        payload = JSON.parse(Buffer.concat(chunks).toString("utf8")) as Record<
+          string,
+          unknown
+        >;
+        response.writeHead(204);
+        response.end();
+      } catch (error) {
+        requestError =
+          error instanceof Error ? error : new Error("invalid request body");
+        response.writeHead(400);
+        response.end();
+      }
     });
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -61,6 +69,7 @@ async function runNotifier(
   await new Promise<void>((resolve, reject) =>
     server.close((error) => (error ? reject(error) : resolve()))
   );
+  if (requestError) throw requestError;
   return { code, stderr, payload };
 }
 
@@ -100,7 +109,7 @@ describe("notify-ci-wave Release Train metadata", () => {
     expect(result.payload).toBeNull();
   });
 
-  it("omits new fields until a dispatcher supplies contributors", async () => {
+  it("keeps new fields atomic until the updated dispatcher supplies contributors", async () => {
     const result = await runNotifier({
       CI_RELEASE_TRAIN_ID: "train-123",
       CI_RELEASE_CONTRIBUTORS: "[]",
@@ -123,4 +132,19 @@ describe("notify-ci-wave Release Train metadata", () => {
     );
     expect(result.payload).toBeNull();
   });
+
+  it.each(["trailing-", "double--hyphen"])(
+    "rejects impossible GitHub login %s",
+    async (login) => {
+      const result = await runNotifier({
+        CI_RELEASE_TRAIN_ID: "train-123",
+        CI_RELEASE_CONTRIBUTORS: JSON.stringify([login]),
+      });
+
+      expect(result.code).toBe(1);
+      expect(result.stderr).toContain(
+        "CI_RELEASE_CONTRIBUTORS contains an invalid GitHub login"
+      );
+    }
+  );
 });

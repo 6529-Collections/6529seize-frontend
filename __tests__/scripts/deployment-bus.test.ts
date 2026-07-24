@@ -296,6 +296,10 @@ describe("release bus contributor notifications", () => {
       const checkout = steps.find(
         (step: { name?: string }) => step.name === "Check out CI wave notifier"
       );
+      const verifyCheckout = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Verify CI wave notifier checkout"
+      );
       const failure = steps.find(
         (step: { name?: string }) =>
           step.name === "Notify CI wave about failure"
@@ -312,6 +316,9 @@ describe("release bus contributor notifications", () => {
       expect(validation.run).toContain(
         'jq -e \'type == "array" and length <= 100'
       );
+      expect(validation.run).toContain(
+        "Semantic GitHub-login validation is centralized in notify-ci-wave.mjs"
+      );
       expect(checkout).toMatchObject({
         if: "always()",
         with: {
@@ -320,13 +327,19 @@ describe("release bus contributor notifications", () => {
           "persist-credentials": false,
         },
       });
+      expect(verifyCheckout).toMatchObject({
+        if: "always()",
+        run: expect.stringContaining(
+          "test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs"
+        ),
+      });
       expect(failure).toMatchObject({
-        if: "failure()",
+        if: "failure() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
         "continue-on-error": true,
         run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
       });
       expect(success).toMatchObject({
-        if: "success()",
+        if: "success() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
         "continue-on-error": true,
         run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
       });

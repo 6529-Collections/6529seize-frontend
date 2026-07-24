@@ -58,6 +58,12 @@ function getFetchFailureMessage(error) {
   return "unknown request error";
 }
 
+function isContributorGithubLogin(value) {
+  return /^(?:[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38})(?:\[bot\])?$/.test(
+    value
+  );
+}
+
 function parseReleaseContributors(value) {
   if (!value) return [];
   const parsed = JSON.parse(value);
@@ -68,16 +74,13 @@ function parseReleaseContributors(value) {
   }
   const contributors = [];
   const seen = new Set();
-  for (const value of parsed) {
-    if (
-      typeof value !== "string" ||
-      !/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})(?:\[bot\])?$/.test(value.trim())
-    ) {
+  for (const entry of parsed) {
+    if (typeof entry !== "string" || !isContributorGithubLogin(entry.trim())) {
       throw new Error(
         "CI_RELEASE_CONTRIBUTORS contains an invalid GitHub login"
       );
     }
-    const login = value.trim();
+    const login = entry.trim();
     const key = login.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
@@ -153,6 +156,9 @@ const releaseNotesFields = isReleaseNotesEligible
       deployed_at: new Date().toISOString(),
     }
   : {};
+// Keep the two new fields atomic. During the ordered rollout, the old
+// dispatcher supplies an empty array and the old receiver rejects unknown
+// fields; the train id has no downstream use unless contributor credits exist.
 const releaseTrainFields =
   CI_RELEASE_TRAIN_ID && releaseContributors.length > 0
     ? {
