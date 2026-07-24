@@ -209,6 +209,8 @@ jobs:
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
+      - name: Generate runtime environment schema
+        run: ./bin/6529 run build:env-schema
       - name: Run independent quality shard
         env:
           SHARD: ${{ matrix.shard }}
@@ -231,7 +233,7 @@ jobs:
                 --shard="$shard_index/4" \
                 | sort -u > "release-bus-test-inventory/shard-$shard_index.txt"
               test -s "release-bus-test-inventory/shard-$shard_index.txt"
-              ./bin/6529 run test:no-coverage -- --runInBand --shard="$shard_index/4"
+              ./bin/6529 run test:no-coverage --runInBand --shard="$shard_index/4"
               ;;
           esac
           test -z "$(git status --porcelain --untracked-files=no)"
@@ -294,6 +296,8 @@ jobs:
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
+      - name: Generate runtime environment schema
+        run: ./bin/6529 run build:env-schema
       - name: Build exact environment profile once
         run: |
           if [ "$BUILD_ENVIRONMENT" = staging ]; then
