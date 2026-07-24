@@ -7,6 +7,7 @@ import type {
 } from "wagmi";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import type { useAuth } from "@/components/auth/Auth";
+import type { RunConnectedAction } from "@/components/auth/useConnectedAction";
 import {
   clampResearchTargetEditionSize,
   getErrorMessage,
@@ -64,6 +65,7 @@ interface UseLaunchClaimWritesParams {
   payArtistAmountWei: bigint | null;
   payArtistResolvedAddressTrimmed: string;
   payArtistAddressValid: boolean;
+  runConnectedAction: RunConnectedAction;
 }
 
 export function useLaunchClaimWrites({
@@ -86,6 +88,7 @@ export function useLaunchClaimWrites({
   payArtistAmountWei,
   payArtistResolvedAddressTrimmed,
   payArtistAddressValid,
+  runConnectedAction,
 }: Readonly<UseLaunchClaimWritesParams>) {
   const {
     claim,
@@ -181,31 +184,6 @@ export function useLaunchClaimWrites({
         return;
       }
 
-      const priceEth = (
-        phasePricesEth[phaseKey] ?? DEFAULT_PHASE_PRICE_ETH
-      ).trim();
-      let cost: bigint;
-      try {
-        cost = parseEther(priceEth);
-      } catch {
-        setToast({ message: "Enter a valid ETH cost.", type: "error" });
-        return;
-      }
-
-      const claimParameters = [
-        claim.edition_size,
-        0,
-        startDate,
-        endDate,
-        2,
-        merkleRoot,
-        claim.metadata_location,
-        cost,
-        MEMES_DEPLOYER,
-        NULL_ADDRESS,
-        NULL_ADDRESS,
-      ] as const;
-
       const action =
         forceAction ??
         (phaseKey === "phase0" && !isInitialized ? "initialize" : "update");
@@ -214,27 +192,54 @@ export function useLaunchClaimWrites({
       const functionName =
         action === "initialize" ? "initializeClaim" : "updateClaim";
 
-      setClaimTxModal({
-        status: "confirm_wallet",
-        actionLabel,
-      });
-      pendingMintingClaimActionRef.current = null;
-      try {
-        claimWrite.writeContract({
-          address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-          abi: MEMES_MANIFOLD_PROXY_ABI,
-          chainId: forgeMintingChain.id,
-          functionName,
-          args: [forgeMintingContract, BigInt(claimId), claimParameters],
-        });
-      } catch (error) {
-        pendingMintingClaimActionRef.current = null;
+      runConnectedAction(() => {
+        const priceEth = (
+          phasePricesEth[phaseKey] ?? DEFAULT_PHASE_PRICE_ETH
+        ).trim();
+        let cost: bigint;
+        try {
+          cost = parseEther(priceEth);
+        } catch {
+          setToast({ message: "Enter a valid ETH cost.", type: "error" });
+          return;
+        }
+
+        const claimParameters = [
+          claim.edition_size,
+          0,
+          startDate,
+          endDate,
+          2,
+          merkleRoot,
+          claim.metadata_location,
+          cost,
+          MEMES_DEPLOYER,
+          NULL_ADDRESS,
+          NULL_ADDRESS,
+        ] as const;
+
         setClaimTxModal({
-          status: "error",
-          message: getErrorMessage(error, "Failed to submit transaction"),
+          status: "confirm_wallet",
           actionLabel,
         });
-      }
+        pendingMintingClaimActionRef.current = null;
+        try {
+          claimWrite.writeContract({
+            address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+            abi: MEMES_MANIFOLD_PROXY_ABI,
+            chainId: forgeMintingChain.id,
+            functionName,
+            args: [forgeMintingContract, BigInt(claimId), claimParameters],
+          });
+        } catch (error) {
+          pendingMintingClaimActionRef.current = null;
+          setClaimTxModal({
+            status: "error",
+            message: getErrorMessage(error, "Failed to submit transaction"),
+            actionLabel,
+          });
+        }
+      });
     },
     [
       claim,
@@ -247,6 +252,7 @@ export function useLaunchClaimWrites({
       forgeMintingContract,
       claimId,
       setToast,
+      runConnectedAction,
     ]
   );
 
@@ -280,54 +286,56 @@ export function useLaunchClaimWrites({
         return;
       }
 
-      const parsedEntries = entries
-        .map((entry) => ({
-          wallet: (entry.wallet ?? "").trim(),
-          amount: Number(entry.amount ?? 0),
-        }))
-        .filter(
-          (entry) =>
-            isAddress(entry.wallet as `0x${string}`) &&
-            Number.isFinite(entry.amount) &&
-            Number.isInteger(entry.amount) &&
-            entry.amount > 0
+      runConnectedAction(() => {
+        const parsedEntries = entries
+          .map((entry) => ({
+            wallet: (entry.wallet ?? "").trim(),
+            amount: Number(entry.amount ?? 0),
+          }))
+          .filter(
+            (entry) =>
+              isAddress(entry.wallet as `0x${string}`) &&
+              Number.isFinite(entry.amount) &&
+              Number.isInteger(entry.amount) &&
+              entry.amount > 0
+          );
+
+        if (parsedEntries.length === 0) {
+          setToast({
+            message: `${actionLabel} has no valid recipients/amounts`,
+            type: "error",
+          });
+          return;
+        }
+
+        const recipients = parsedEntries.map(
+          (entry) => entry.wallet as `0x${string}`
         );
+        const amounts = parsedEntries.map((entry) => BigInt(entry.amount));
 
-      if (parsedEntries.length === 0) {
-        setToast({
-          message: `${actionLabel} has no valid recipients/amounts`,
-          type: "error",
-        });
-        return;
-      }
-
-      const recipients = parsedEntries.map(
-        (entry) => entry.wallet as `0x${string}`
-      );
-      const amounts = parsedEntries.map((entry) => BigInt(entry.amount));
-
-      setClaimTxModal({
-        status: "confirm_wallet",
-        actionLabel,
-      });
-      pendingMintingClaimActionRef.current = mintingClaimAction ?? null;
-
-      try {
-        claimWrite.writeContract({
-          address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-          abi: MEMES_MANIFOLD_PROXY_ABI,
-          chainId: forgeMintingChain.id,
-          functionName: "airdrop",
-          args: [forgeMintingContract, BigInt(claimId), recipients, amounts],
-        });
-      } catch (error) {
-        pendingMintingClaimActionRef.current = null;
         setClaimTxModal({
-          status: "error",
-          message: getErrorMessage(error, "Failed to submit transaction"),
+          status: "confirm_wallet",
           actionLabel,
         });
-      }
+        pendingMintingClaimActionRef.current = mintingClaimAction ?? null;
+
+        try {
+          claimWrite.writeContract({
+            address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+            abi: MEMES_MANIFOLD_PROXY_ABI,
+            chainId: forgeMintingChain.id,
+            functionName: "airdrop",
+            args: [forgeMintingContract, BigInt(claimId), recipients, amounts],
+          });
+        } catch (error) {
+          pendingMintingClaimActionRef.current = null;
+          setClaimTxModal({
+            status: "error",
+            message: getErrorMessage(error, "Failed to submit transaction"),
+            actionLabel,
+          });
+        }
+      });
     },
     [
       isInitialized,
@@ -336,6 +344,7 @@ export function useLaunchClaimWrites({
       forgeMintingChain.id,
       forgeMintingContract,
       claimId,
+      runConnectedAction,
     ]
   );
   const runResearchAirdropWrite = useCallback(
@@ -403,28 +412,53 @@ export function useLaunchClaimWrites({
         return;
       }
 
-      setPayArtistTxModal({
-        status: "confirm_wallet",
-        actionLabel: "Pay Artist",
-      });
-      pendingPayArtistMintingClaimActionRef.current =
-        mintingClaimAction ?? null;
-      payArtistWrite.reset();
+      runConnectedAction(() => {
+        const amountEth = payArtistAmountEth.trim();
+        let amountWei: bigint;
+        try {
+          amountWei = parseEther(amountEth);
+        } catch {
+          setToast({
+            message: "Enter a valid artist payment in ETH.",
+            type: "error",
+          });
+          return;
+        }
+        const resolvedAddress = payArtistResolvedAddressTrimmed.trim();
+        if (amountWei <= 0n || !isAddress(resolvedAddress)) {
+          setToast({
+            message:
+              amountWei <= 0n
+                ? "Enter a valid artist payment in ETH."
+                : "Enter a valid payment address.",
+            type: "error",
+          });
+          return;
+        }
 
-      try {
-        payArtistWrite.sendTransaction({
-          chainId: forgeMintingChain.id,
-          to: payArtistResolvedAddressTrimmed as `0x${string}`,
-          value: payArtistAmountWei,
-        });
-      } catch (error) {
-        pendingPayArtistMintingClaimActionRef.current = null;
         setPayArtistTxModal({
-          status: "error",
-          message: getErrorMessage(error, "Failed to submit transaction"),
+          status: "confirm_wallet",
           actionLabel: "Pay Artist",
         });
-      }
+        pendingPayArtistMintingClaimActionRef.current =
+          mintingClaimAction ?? null;
+        payArtistWrite.reset();
+
+        try {
+          payArtistWrite.sendTransaction({
+            chainId: forgeMintingChain.id,
+            to: resolvedAddress,
+            value: amountWei,
+          });
+        } catch (error) {
+          pendingPayArtistMintingClaimActionRef.current = null;
+          setPayArtistTxModal({
+            status: "error",
+            message: getErrorMessage(error, "Failed to submit transaction"),
+            actionLabel: "Pay Artist",
+          });
+        }
+      });
     },
     [
       payArtistAmountEth,
@@ -436,6 +470,7 @@ export function useLaunchClaimWrites({
       setToast,
       payArtistWrite,
       forgeMintingChain.id,
+      runConnectedAction,
     ]
   );
 

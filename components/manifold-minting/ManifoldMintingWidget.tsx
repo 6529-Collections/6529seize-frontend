@@ -1,25 +1,28 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { type JSX, type ReactNode, useEffect, useId, useState } from "react";
+import { type ReactNode, useEffect, useId, useState } from "react";
 import {
   useReadContract,
   useReadContracts,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
+import OnchainTransactionModal, {
+  type OnchainTransactionModalStatus,
+} from "@/components/common/OnchainTransactionModal";
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
-import {
-  areEqualAddresses,
-  fromGWEI,
-  getTransactionLink,
-} from "@/helpers/Helpers";
+import { areEqualAddresses, fromGWEI } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useConnectedAction } from "../auth/useConnectedAction";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import {
@@ -44,6 +47,38 @@ function normalizeMintCount(value: number | string | null | undefined): number {
   }
 
   return Math.max(0, Math.trunc(parsed));
+}
+
+function resolveMintErrorMessage(fullError: string): string {
+  const resolvedError = fullError
+    .split("Request Arguments")[0]
+    ?.split(".")[0]
+    ?.split("Contract Call")[0];
+
+  return !resolvedError || resolvedError.length < 5 ? fullError : resolvedError;
+}
+
+function getTransactionModalMessage(
+  locale: SupportedLocale,
+  status: OnchainTransactionModalStatus | null,
+  errorMessage: string
+): string | undefined {
+  switch (status) {
+    case "confirm_wallet":
+      return t(locale, "theMemes.mint.transaction.confirmWallet");
+    case "submitted":
+      return t(locale, "theMemes.mint.transaction.submitted");
+    case "success":
+      return t(locale, "theMemes.mint.transaction.success");
+    case "error":
+      return errorMessage
+        ? t(locale, "theMemes.mint.transaction.errorDetails", {
+            message: errorMessage,
+          })
+        : t(locale, "theMemes.mint.transaction.error");
+    default:
+      return undefined;
+  }
 }
 
 function MintSummaryRow({
@@ -88,6 +123,8 @@ export default function ManifoldMintingWidget(
   }>
 ) {
   const connectedAddress = useSeizeConnectContext();
+  const runConnectedAction = useConnectedAction();
+  const locale = useBrowserLocale();
   const searchParams = useSearchParams();
   const [mintForAddress, setMintForAddress] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<"" | "copied" | "failed">("");
@@ -103,7 +140,8 @@ export default function ManifoldMintingWidget(
   const [feeWei, setFeeWei] = useState<bigint>(0n);
   const mintCountControlId = useId();
 
-  const [mintStatus, setMintStatus] = useState<JSX.Element>(<></>);
+  const [transactionModalStatus, setTransactionModalStatus] =
+    useState<OnchainTransactionModalStatus | null>(null);
   const [mintError, setMintError] = useState<string>("");
   const mintWrite = useWriteContract();
   const waitMintWrite = useWaitForTransactionReceipt({
@@ -111,6 +149,9 @@ export default function ManifoldMintingWidget(
     confirmations: 1,
     hash: mintWrite.data,
   });
+  const hasOnchainTransactionError = Boolean(
+    mintWrite.error || waitMintWrite.error
+  );
   const hasValidMintForAddress = Boolean(
     mintForAddress && isAddress(mintForAddress)
   );
@@ -129,7 +170,7 @@ export default function ManifoldMintingWidget(
     }
 
     mintWrite.reset();
-    setMintStatus(<></>);
+    setTransactionModalStatus(null);
     setMintError("");
     setIsError(false);
     setFetchingMerkle(true);
@@ -347,8 +388,9 @@ export default function ManifoldMintingWidget(
   };
 
   const onMint = () => {
+    mintWrite.reset();
     setMintError("");
-    setMintStatus(<></>);
+    setTransactionModalStatus(null);
 
     if (safeMintCount <= 0) {
       setMintError("Enter a valid mint count");
@@ -374,56 +416,32 @@ export default function ManifoldMintingWidget(
       setMintError("Select a valid recipient wallet");
       return;
     }
-    mintWrite.writeContract({
-      address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-      abi: props.abi,
-      chainId: props.chain.id,
-      value,
-      functionName: args.functionName,
-      args: args.args,
+    runConnectedAction(() => {
+      setTransactionModalStatus("confirm_wallet");
+      mintWrite.writeContract({
+        address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+        abi: props.abi,
+        chainId: props.chain.id,
+        value,
+        functionName: args.functionName,
+        args: args.args,
+      });
     });
   };
 
   useEffect(() => {
     if (mintWrite.error) {
-      setMintStatus(<></>);
-      const fullError = mintWrite.error.message;
-      const resolvedError = fullError
-        .split("Request Arguments")[0]
-        ?.split(".")[0]
-        ?.split("Contract Call")[0];
-      if (!resolvedError || resolvedError.length < 5) {
-        setMintError(fullError);
-      } else {
-        setMintError(resolvedError);
-      }
+      setMintError(resolveMintErrorMessage(mintWrite.error.message));
+      setTransactionModalStatus("error");
     }
   }, [mintWrite.error]);
 
   useEffect(() => {
     if (waitMintWrite.error) {
-      setMintStatus(<></>);
-      const resolvedError =
-        waitMintWrite.error.message
-          ?.split("Request Arguments")[0]
-          ?.split(".")[0]
-          ?.split("Contract Call")[0] ?? waitMintWrite.error.message;
-      setMintError(resolvedError);
+      setMintError(resolveMintErrorMessage(waitMintWrite.error.message));
+      setTransactionModalStatus("error");
     }
   }, [waitMintWrite.error]);
-
-  const getViewLink = (hash: string) => {
-    return (
-      <a
-        href={getTransactionLink(props.chain.id, hash)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="tw-text-iron-200 hover:tw-text-white"
-      >
-        view trx
-      </a>
-    );
-  };
 
   const waitMintWritePending = waitMintWrite.isPending;
   const waitMintWriteSuccess = waitMintWrite.isSuccess;
@@ -434,26 +452,12 @@ export default function ManifoldMintingWidget(
     }
 
     if (waitMintWritePending) {
-      setMintStatus(
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          <span className="tw-text-lg tw-font-semibold tw-text-white">
-            Transaction Submitted - SEIZING <DotLoader />
-          </span>
-          <span>{getViewLink(mintWrite.data)}</span>
-        </div>
-      );
+      setTransactionModalStatus("submitted");
       return;
     }
 
     if (waitMintWriteSuccess) {
-      setMintStatus(
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          <span className="tw-text-lg tw-font-semibold tw-text-success">
-            SEIZED!
-          </span>
-          <span>{getViewLink(mintWrite.data)}</span>
-        </div>
-      );
+      setTransactionModalStatus("success");
     }
   }, [mintWrite.data, waitMintWritePending, waitMintWriteSuccess]);
 
@@ -552,17 +556,9 @@ export default function ManifoldMintingWidget(
             <b>{getButtonText()}</b>
           </button>
         </div>
-        {mintError && (
+        {mintError && !hasOnchainTransactionError && (
           <div className="tw-pt-3 tw-text-base tw-text-red">{mintError}</div>
         )}
-        {mintWrite.isPending && (
-          <div className="tw-pt-3">
-            <span className="tw-text-iron-100">
-              Confirm in your wallet <DotLoader />
-            </span>
-          </div>
-        )}
-        {mintStatus && <div className="tw-pt-3">{mintStatus}</div>}
       </div>
     );
   }
@@ -692,19 +688,37 @@ export default function ManifoldMintingWidget(
     props.setMintForAddress(mintForAddress);
   }, [mintForAddress, props.setMintForAddress]);
 
+  const transactionModalMessage = getTransactionModalMessage(
+    locale,
+    transactionModalStatus,
+    mintError
+  );
+
   return (
-    <div>
-      {props.claim.status !== ManifoldClaimStatus.ENDED &&
-        !props.claim.isFinalized && (
-          <div>
-            <ManifoldMintingConnect
-              onMintFor={setMintForAddress}
-              hideConnect={props.hideConnect ?? false}
-            />
-          </div>
-        )}
-      <div>{printContent()}</div>
-      {printMintDebug()}
-    </div>
+    <>
+      <div>
+        {props.claim.status !== ManifoldClaimStatus.ENDED &&
+          !props.claim.isFinalized && (
+            <div>
+              <ManifoldMintingConnect
+                onMintFor={setMintForAddress}
+                hideConnect={props.hideConnect ?? false}
+              />
+            </div>
+          )}
+        <div>{printContent()}</div>
+        {printMintDebug()}
+      </div>
+      {transactionModalStatus ? (
+        <OnchainTransactionModal
+          status={transactionModalStatus}
+          title={t(locale, "theMemes.mint.transaction.title")}
+          message={transactionModalMessage}
+          transactionHash={mintWrite.data}
+          chain={props.chain}
+          onClose={() => setTransactionModalStatus(null)}
+        />
+      ) : null}
+    </>
   );
 }

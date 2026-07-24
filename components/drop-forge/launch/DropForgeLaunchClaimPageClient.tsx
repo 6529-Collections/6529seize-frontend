@@ -7,6 +7,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { useAuth } from "@/components/auth/Auth";
+import { useConnectedAction } from "@/components/auth/useConnectedAction";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import ClaimTransactionModal from "@/components/drop-forge/launch/ClaimTransactionModal";
 import {
@@ -30,6 +31,7 @@ export default function DropForgeLaunchClaimPageClient({
 }: Readonly<DropForgeLaunchClaimPageClientProps>) {
   const pageTitle = `Launch Claim #${claimId}`;
   const { requestAuth, setToast } = useAuth();
+  const runConnectedAction = useConnectedAction();
   const { contract: forgeMintingContract, chain: forgeMintingChain } =
     useDropForgeMintingConfig();
   const { hasWallet, permissionsLoading, canAccessLaunchPage, isClaimsAdmin } =
@@ -175,6 +177,7 @@ export default function DropForgeLaunchClaimPageClient({
     onChainClaimSpinnerVisible,
     setOnChainClaimSpinnerVisible,
     showErrorToast,
+    runConnectedAction,
     state: launchClaimState,
   });
 
@@ -212,6 +215,7 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistAmountWei,
     payArtistResolvedAddressTrimmed,
     payArtistAddressValid,
+    runConnectedAction,
   });
 
   if (shouldShowPermissionFallback) {
