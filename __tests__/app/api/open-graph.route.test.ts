@@ -2048,9 +2048,9 @@ describe("open-graph API route", () => {
     );
     let activeFetches = 0;
     let maxActiveFetches = 0;
-    let releaseFetches = () => undefined;
+    let releaseFetches: () => void = () => undefined;
     const allFetchesStarted = new Promise<void>((resolve) => {
-      releaseFetches = resolve;
+      releaseFetches = () => resolve();
     });
 
     mockFetchPublicUrl.mockImplementation(
