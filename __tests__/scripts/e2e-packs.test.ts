@@ -265,7 +265,7 @@ describe("manifest-driven E2E runner", () => {
     let call = 0;
 
     try {
-      const result = runner.runPacks([samplePacks[0]], {
+      const result = runner.runPacks([samplePacks[0]!], {
         artifactRoot: path.join(summaryDir, "staging-e2e-artifacts"),
         forward: [],
         spawn: () => {
