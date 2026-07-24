@@ -1,4 +1,7 @@
 import {
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
+import {
   __testing,
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
@@ -125,6 +128,17 @@ describe("sentry-client-filters", () => {
     filename:
       "https://6529.io/_next/static/webpack/1234567890abcdef.webpack.js",
     function: functionName,
+  });
+  const reactDomRawChunkPath =
+    "app:///_next/static/chunks/0example-react-dom-runtime.js";
+  const reactDomRawStaticChunkFrame = (
+    functionName: string,
+    chunkPath: string = reactDomRawChunkPath
+  ): SentryStackFrame => ({
+    filename: chunkPath,
+    abs_path: chunkPath,
+    function: functionName,
+    in_app: true,
   });
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
@@ -1739,6 +1753,52 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createReactDomRawInsertBeforeEvent = (
+    options: {
+      exceptionType?: string;
+      exceptionValue?: string;
+      frames?: SentryStackFrame[];
+      transaction?: string;
+      includeAdditionalException?: boolean;
+    } = {}
+  ): SentryClientEvent => ({
+    transaction: options.transaction ?? "/waves",
+    exception: {
+      values: [
+        {
+          type: options.exceptionType ?? "NotFoundError",
+          value: options.exceptionValue ?? reactDomInsertBeforeMessage,
+          stacktrace: {
+            frames:
+              options.frames ??
+              createObservedReactDomRawInsertBeforeFrames(),
+          },
+        },
+        ...(options.includeAdditionalException
+          ? [
+              {
+                type: "Error",
+                value: "Independent application failure",
+                stacktrace: {
+                  frames: [
+                    {
+                      filename: "app:///components/waves/Wave.tsx",
+                      function: "Wave",
+                      in_app: true,
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+    tags: {
+      transaction: options.transaction ?? "/waves",
+      url: options.transaction ?? "/waves",
+    },
+  });
+
   const createGifPickerTenorCategoriesEvent = (
     overrides: Partial<SentryClientEvent> = {}
   ): SentryClientEvent => ({
@@ -1930,6 +1990,112 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe(true);
+  });
+
+  it.each(["sN", "sR"] as const)(
+    "filters the observed 50-frame raw React DOM stack ending in %s",
+    (terminalFunction) => {
+      const result = shouldFilterReactDomInsertBeforeNotFoundError(
+        createReactDomRawInsertBeforeEvent({
+          frames:
+            createObservedReactDomRawInsertBeforeFrames(terminalFunction),
+        })
+      );
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it.each([
+    {
+      name: "a changed frame count",
+      getFrames: () =>
+        createObservedReactDomRawInsertBeforeFrames().slice(1),
+    },
+    {
+      name: "an unknown function",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("WaveDrop"),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "multiple chunk files",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame(
+          "lr",
+          "app:///_next/static/chunks/0different-runtime.js"
+        ),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "a missing required function",
+      getFrames: () =>
+        createObservedReactDomRawInsertBeforeFrames().map((frame) =>
+          frame.function === "lr"
+            ? reactDomRawStaticChunkFrame("li")
+            : frame
+        ),
+    },
+    {
+      name: "mixed sN and sR function variants",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("sR"),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "an allowed non-placement frame after an sR placement frame",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("lr"),
+        reactDomRawStaticChunkFrame("sR"),
+        ...createObservedReactDomRawInsertBeforeFrames("sR").slice(2, -1),
+        reactDomRawStaticChunkFrame("li"),
+      ],
+    },
+    {
+      name: "the production frame order reversed",
+      getFrames: () =>
+        createObservedReactDomRawInsertBeforeFrames().reverse(),
+    },
+  ])("keeps raw insertBefore events with $name", ({ getFrames }) => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent({ frames: getFrames() })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      name: "a different exception type",
+      options: { exceptionType: "TypeError" },
+    },
+    {
+      name: "a different exception message",
+      options: { exceptionValue: "The requested node was not found." },
+    },
+    {
+      name: "a non-waves route",
+      options: { transaction: "/about" },
+    },
+  ])("keeps the observed raw stack with $name", ({ options }) => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent(options)
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps mixed-exception events containing the observed raw stack", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent({
+        includeAdditionalException: true,
+      })
+    );
+
+    expect(result).toBe(false);
   });
 
   it("filters React DOM insertBefore NotFoundError events from webpack static chunks", () => {

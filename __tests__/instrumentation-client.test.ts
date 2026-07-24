@@ -1,4 +1,7 @@
 import noiseFilterFixtures from "@/__tests__/fixtures/sentry-noise-filter-hardening.json";
+import {
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
 
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
@@ -645,6 +648,37 @@ describe("instrumentation-client", () => {
 
     expect(result).toBeNull();
   });
+
+  it.each(["sN", "sR"] as const)(
+    "drops the production-shaped raw React DOM stack ending in %s",
+    (terminalFunction) => {
+      const beforeSend = loadBeforeSend();
+      const event = {
+        event_id: "raw-react-dom-insert-before-event",
+        transaction: "/waves",
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              stacktrace: {
+                frames:
+                  createObservedReactDomRawInsertBeforeFrames(terminalFunction),
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction: "/waves",
+          url: "/waves",
+        },
+      };
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
 
   it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
     const beforeSend = loadBeforeSend();
