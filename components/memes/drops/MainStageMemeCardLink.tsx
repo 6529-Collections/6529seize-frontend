@@ -2,7 +2,7 @@ import Link from "next/link";
 
 interface MainStageMemeCardLinkProps {
   readonly memeCardId: number | null | undefined;
-  readonly variant?: "compact" | "prominent";
+  readonly variant?: "compact" | "prominent" | "subtle";
 }
 
 interface MainStageMemeCardPillProps extends MainStageMemeCardLinkProps {
@@ -28,11 +28,14 @@ export function MainStageMemeCardPill({
     return null;
   }
 
-  const className = `tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-font-semibold tw-text-primary-300 ${
-    variant === "prominent"
-      ? "tw-min-h-9 tw-px-4 tw-py-1.5 tw-text-base tw-leading-5"
-      : "tw-px-2.5 tw-py-0.5 tw-text-xs"
-  }`;
+  const className =
+    variant === "subtle"
+      ? "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.14em] tw-text-iron-500"
+      : `tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-font-semibold tw-text-primary-300 ${
+          variant === "prominent"
+            ? "tw-min-h-9 tw-px-4 tw-py-1.5 tw-text-base tw-leading-5"
+            : "tw-px-2.5 tw-py-0.5 tw-text-xs"
+        }`;
   const label = `The Memes #${memeCardId}`;
 
   if (!href) {
@@ -44,7 +47,11 @@ export function MainStageMemeCardPill({
       href={href}
       onClick={(event) => event.stopPropagation()}
       scroll={false}
-      className={`${className} tw-no-underline tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-primary-300/60 desktop-hover:hover:tw-text-white`}
+      className={`${className} tw-no-underline tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-white ${
+        variant === "subtle"
+          ? ""
+          : "desktop-hover:hover:tw-border-primary-300/60"
+      }`}
     >
       {label}
     </Link>
