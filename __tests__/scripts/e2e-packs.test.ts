@@ -148,7 +148,7 @@ describe("manifest-driven E2E runner", () => {
   });
 
   it("applies a bounded timeout and distinguishes failure classes", () => {
-    expect(runner.buildSpawnOptions(samplePacks[0])).toMatchObject({
+    expect(runner.buildSpawnOptions(samplePacks[0]!)).toMatchObject({
       killSignal: "SIGTERM",
       maxBuffer: 64 * 1024 * 1024,
       timeout: 10 * 60 * 1000,
@@ -194,7 +194,7 @@ describe("manifest-driven E2E runner", () => {
         killSignal: "SIGTERM",
         timeout: 100,
       }
-    ) as SpawnResult;
+    ) as unknown as SpawnResult;
     expect(cleanTeardownTimeout.error?.code).toBe("ETIMEDOUT");
     expect(runner.classifyResult(cleanTeardownTimeout)).toMatchObject({
       failed: true,
@@ -265,7 +265,7 @@ describe("manifest-driven E2E runner", () => {
     let call = 0;
 
     try {
-      const result = runner.runPacks([samplePacks[0]], {
+      const result = runner.runPacks([samplePacks[0]!], {
         artifactRoot: path.join(summaryDir, "staging-e2e-artifacts"),
         forward: [],
         spawn: () => {

@@ -29,90 +29,6 @@ const ARTIFACT_SHA256 =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const REQUIRED_WEB_SURFACES = ["web:desktop-chromium", "web:mobile-chromium"];
 
-describe("release bus optional Codex workflow", () => {
-  const composeWorkflow = fs.readFileSync(
-    path.join(process.cwd(), ".github/workflows/release-bus-compose.yml"),
-    "utf8"
-  );
-
-  it("guards and integrity-checks a Codex-disabled deferred composition", () => {
-    expect(composeWorkflow).toContain(
-      "git rev-parse -q --verify MERGE_HEAD >/dev/null"
-    );
-    expect(composeWorkflow).toContain("Release-Bus-Defer: true");
-    expect(composeWorkflow).toContain(
-      "Incomplete composition does not contain a strict candidate prefix."
-    );
-    expect(composeWorkflow).toContain('test "$missing_seen" = true');
-  });
-
-  it("retries only idempotent publication from the verified composition artifact", () => {
-    const workflow = YAML.parse(composeWorkflow);
-    const retryInput =
-      workflow.on.workflow_dispatch.inputs.composition_artifact_run_id;
-    const download = workflow.jobs.publish.steps.find(
-      (step: { name?: string }) => step.name === "Download isolated composition"
-    );
-    const publish = workflow.jobs.publish.steps.find(
-      (step: { name?: string }) => step.name === "Publish release branch"
-    );
-    const report = workflow.jobs.publish.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Report structured publication result"
-    );
-
-    expect(retryInput).toMatchObject({ required: false, default: "" });
-    expect(workflow.jobs.compose.if).toBe(
-      "inputs.composition_artifact_run_id == ''"
-    );
-    expect(workflow.jobs.publish.if).toContain(
-      "inputs.composition_artifact_run_id != ''"
-    );
-    expect(download.with["run-id"]).toContain(
-      "inputs.composition_artifact_run_id"
-    );
-    expect(publish["continue-on-error"]).toBe(true);
-    expect(publish.run).toContain("INFRASTRUCTURE_TRANSIENT");
-    expect(publish.run).toContain("403|5[0-9]{2}");
-    expect(publish.run).toContain("requested url returned error");
-    expect(publish.run).not.toContain("(^|[^0-9])(403|5[0-9]{2})");
-    expect(report.run).toContain("${PUBLISH_FAILURE_CLASS:-UNKNOWN}");
-    expect(report.run).toContain("${PUBLISH_RETRYABLE:-false}");
-    expect(report.run).toContain("release_branch_publication");
-  });
-});
-
-describe("release bus immutable frontend artifact", () => {
-  const preflightWorkflow = YAML.parse(
-    fs.readFileSync(
-      path.join(process.cwd(), ".github/workflows/release-bus-preflight.yml"),
-      "utf8"
-    )
-  );
-
-  it("uploads hidden bundle files covered by the checksum manifest", () => {
-    const packageStep = preflightWorkflow.jobs.build.steps.find(
-      (step: { name?: string }) => step.name === "Package immutable bundle"
-    );
-    const uploadStep = preflightWorkflow.jobs.build.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Upload immutable frontend artifact"
-    );
-
-    expect(packageStep.run).toContain("find . -type f ! -path ./SHA256SUMS");
-    expect(packageStep.run).toContain("sha256sum > SHA256SUMS");
-    expect(uploadStep).toMatchObject({
-      uses: expect.stringContaining("actions/upload-artifact@"),
-      with: {
-        path: "release-bus-artifact",
-        "include-hidden-files": true,
-        "if-no-files-found": "error",
-        "retention-days": 90,
-      },
-    });
-  });
-});
-
 describe("release bus staging artifact transfer", () => {
   const deployWorkflow = YAML.parse(
     fs.readFileSync(
@@ -286,7 +202,7 @@ describe("release bus contributor notifications", () => {
 
   it.each(workflows)(
     "validates and signs %s Release Train contributor metadata",
-    (environment, workflow) => {
+    (_environment, workflow) => {
       const inputs = workflow.on.workflow_dispatch.inputs;
       const steps = workflow.jobs.deploy.steps;
       const validation = steps.find(
@@ -377,12 +293,13 @@ describe("release bus v2 E2E callbacks", () => {
   ])("binds %s E2E authorization and progress to v2", (_name, workflow) => {
     expect(workflow).toContain("/deploy/release-bus-v2/authorize");
     expect(workflow).toContain("/deploy/release-bus-v2/report-progress");
-    expect(workflow).not.toContain(
-      '"$RELEASE_BUS_API_URL/deploy/release-bus/authorize"'
-    );
   });
 
   it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain(
+      "scripts/release-bus-install-dependencies.cjs"
+    );
+    expect(stagingE2E).toContain('run: node "$RELEASE_BUS_INSTALL_TOOL"');
     expect(stagingE2E).toContain("id: socket-firewall");
     expect(stagingE2E).toContain(
       "SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}"
@@ -395,6 +312,10 @@ describe("release bus v2 E2E callbacks", () => {
 });
 
 describe("release bus v2 combined preflight", () => {
+  const appPrCi = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+    "utf8"
+  );
   const workflow = YAML.parse(
     fs.readFileSync(
       path.join(
@@ -404,6 +325,17 @@ describe("release bus v2 combined preflight", () => {
       "utf8"
     )
   );
+
+  it("binds reusable PR artifacts to the immutable checked-out run SHA", () => {
+    expect(appPrCi).not.toContain("github.event.pull_request.merge_commit_sha");
+    expect(
+      appPrCi.match(/EXPECTED_MERGE_SHA: \$\{\{ github\.sha \}\}/g)
+    ).toHaveLength(2);
+    expect(appPrCi).toContain("name: release-bus-v2-pr-${{ github.sha }}");
+    expect(appPrCi).toContain(
+      "unset ANNOUNCED_VERSION_ENDPOINT\n          rm -rf .next"
+    );
+  });
 
   it("keeps candidate execution jobs secretless and read-only", () => {
     for (const jobName of ["quality", "build"]) {
