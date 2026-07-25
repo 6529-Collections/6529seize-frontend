@@ -83,37 +83,37 @@ export default function SubsequentDecisions({
   );
 
   return (
-    <div className="tw-bg-iron-900 tw-mt-5">
+    <div className="tw-mt-5 tw-bg-iron-900">
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h3 className="tw-text-iron-50 tw-text-lg tw-font-semibold tw-mb-2">
+        <h3 className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-iron-50">
           Additional Announcements
         </h3>
       </div>
 
       {/* Explanation about sequence */}
-      <div className="tw-border-b tw-border-iron-700/30 tw-pb-3 tw-mb-2">
-        <p className="tw-text-xs tw-text-iron-300 tw-mb-0">
-          <span className="tw-text-primary-400 tw-font-medium">Timeline:</span>{" "}
+      <div className="tw-mb-2 tw-border-b tw-border-iron-700/30 tw-pb-3">
+        <p className="tw-mb-0 tw-text-xs tw-text-iron-300">
+          <span className="tw-font-medium tw-text-primary-400">Timeline:</span>{" "}
           Define when winners will be selected throughout your wave.
         </p>
       </div>
 
-      <div className="tw-relative tw-pl-2 tw-ml-2 tw-mb-6">
+      <div className="tw-relative tw-mb-6 tw-ml-2 tw-pl-2">
         {/* First Decision Point */}
         <div className="tw-relative tw-mb-6">
           {/* Timeline dot */}
-          <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-w-6 tw-h-6 tw-rounded-full tw-bg-primary-500 tw-flex tw-items-center tw-justify-center tw-text-black tw-font-semibold tw-text-xs tw-ring-4 tw-ring-iron-800">
+          <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-text-xs tw-font-semibold tw-text-black tw-ring-4 tw-ring-iron-800">
             1
           </div>
 
           {/* Content */}
-          <div className="tw-bg-iron-700/40 tw-px-4 tw-py-3 tw-rounded-lg tw-shadow-md tw-border-l-4 tw-border-primary-500">
-            <div className="tw-text-xs tw-text-primary-300 tw-font-medium tw-mb-0.5">
+          <div className="tw-rounded-lg tw-border-l-4 tw-border-primary-500 tw-bg-iron-700/40 tw-px-4 tw-py-3 tw-shadow-md">
+            <div className="tw-mb-0.5 tw-text-xs tw-font-medium tw-text-primary-300">
               First Winners Announcement
             </div>
-            <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-flex tw-items-center">
+            <p className="tw-mb-0 tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-iron-50">
               {formatDate(firstDecisionTime)}
-              <span className="tw-text-xs tw-text-iron-400 tw-ml-1">
+              <span className="tw-ml-1 tw-text-xs tw-text-iron-400">
                 (
                 {new Date(firstDecisionTime).toLocaleDateString(undefined, {
                   weekday: "long",
@@ -128,32 +128,32 @@ export default function SubsequentDecisions({
         {subsequentDecisions.map((interval, index) => (
           <div key={index} className="tw-relative tw-mb-6">
             {/* Timeline dot */}
-            <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-w-6 tw-h-6 tw-rounded-full tw-bg-primary-400/80 tw-flex tw-items-center tw-justify-center tw-text-black tw-font-semibold tw-text-xs tw-ring-4 tw-ring-iron-800">
+            <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/80 tw-text-xs tw-font-semibold tw-text-black tw-ring-4 tw-ring-iron-800">
               {index + 2}
             </div>
 
             {/* Interval indicator on the timeline */}
             <div className="tw-absolute tw-left-[-22px] tw-top-[-8px] tw-flex tw-items-center tw-justify-center">
-              <span className="tw-px-1.5 tw-py-0.5 tw-bg-iron-900 tw-border tw-border-iron-700/70 tw-rounded tw-text-xs tw-text-primary-300 tw-font-medium tw-whitespace-nowrap">
+              <span className="tw-whitespace-nowrap tw-rounded tw-border tw-border-iron-700/70 tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-primary-300">
                 +
                 {interval >= periodToMs(1, Period.WEEKS)
                   ? `${Math.round(interval / periodToMs(1, Period.WEEKS))}w`
                   : interval >= periodToMs(1, Period.DAYS)
-                  ? `${Math.round(interval / periodToMs(1, Period.DAYS))}d`
-                  : `${Math.round(interval / periodToMs(1, Period.HOURS))}h`}
+                    ? `${Math.round(interval / periodToMs(1, Period.DAYS))}d`
+                    : `${Math.round(interval / periodToMs(1, Period.HOURS))}h`}
               </span>
             </div>
 
             {/* Content */}
-            <div className="tw-group tw-bg-[#24242B] tw-px-4 tw-py-3 tw-rounded-lg tw-shadow-sm tw-border-l-4 tw-border-primary-400/70 tw-transition-all tw-duration-200 hover:tw-shadow-md">
-              <div className="tw-flex tw-justify-between tw-items-start">
+            <div className="tw-group tw-rounded-lg tw-border-l-4 tw-border-primary-400/70 tw-bg-[#24242B] tw-px-4 tw-py-3 tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-shadow-md">
+              <div className="tw-flex tw-items-start tw-justify-between">
                 <div>
-                  <div className="tw-text-xs tw-text-primary-300/90 tw-font-medium tw-mb-0.5">
+                  <div className="tw-mb-0.5 tw-text-xs tw-font-medium tw-text-primary-300/90">
                     Winners Announcement #{index + 2}
                   </div>
-                  <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-flex tw-items-center">
+                  <p className="tw-mb-0 tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-iron-50">
                     {formatDate(decisionDates[index + 1]!)}
-                    <span className="tw-text-xs tw-text-iron-400 tw-ml-1">
+                    <span className="tw-ml-1 tw-text-xs tw-text-iron-400">
                       (
                       {new Date(decisionDates[index + 1]!).toLocaleDateString(
                         undefined,
@@ -166,7 +166,11 @@ export default function SubsequentDecisions({
 
                 <button
                   onClick={(e) => handleDeleteDecision(index, e)}
-                  className="tw-opacity-0 tw-border-0 group-hover:tw-opacity-100 tw-transition-all tw-duration-300 tw-bg-iron-700/30 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-size-7 hover:tw-bg-iron-700/60 desktop-hover:hover:tw-text-red">
+                  aria-label={`Remove announcement #${index + 2}`}
+                  // Hover-revealed on pointer devices; always visible where
+                  // there is no hover to reveal it (touch phones).
+                  className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/30 tw-transition-all tw-duration-300 hover:tw-bg-iron-700/60 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red touch-only:tw-opacity-100"
+                >
                   <FontAwesomeIcon icon={faTrashCan} className="tw-size-3.5" />
                 </button>
               </div>
@@ -176,9 +180,9 @@ export default function SubsequentDecisions({
       </div>
 
       {/* Add New Decision Point */}
-      <div className="tw-mt-6 tw-bg-iron-800/60 tw-rounded-lg tw-p-4">
-        <div className="tw-flex tw-items-center tw-mb-3">
-          <div className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
+      <div className="tw-mt-6 tw-rounded-lg tw-bg-iron-800/60 tw-p-4">
+        <div className="tw-mb-3 tw-flex tw-items-center">
+          <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/20 tw-text-xs tw-font-medium tw-text-primary-400">
             <FontAwesomeIcon
               icon={faCalendarPlus}
               className="tw-size-4 tw-flex-shrink-0"
@@ -188,15 +192,15 @@ export default function SubsequentDecisions({
             <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
               Schedule Next Winners Announcement
             </p>
-            <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
+            <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
               Set time between announcements
             </p>
           </div>
         </div>
 
-        <div className="tw-flex tw-items-center">
-          <div className="tw-flex tw-items-stretch tw-rounded-lg tw-flex-1 tw-w-full">
-            <div className="tw-w-24 tw-bg-iron-900 tw-rounded-l-lg tw-ring-1 tw-ring-iron-700 tw-ring-inset focus-within:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-basis-56 tw-items-stretch tw-rounded-lg">
+            <div className="tw-w-24 tw-rounded-l-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-primary-400">
               <input
                 type="number"
                 min="1"
@@ -206,7 +210,7 @@ export default function SubsequentDecisions({
                     e.target.value === "" ? 0 : parseInt(e.target.value, 10)
                   )
                 }
-                className="tw-w-full tw-h-full tw-px-4 tw-py-4 tw-bg-transparent tw-border-0 tw-text-primary-400 tw-font-medium tw-caret-primary-300 focus:tw-outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
+                className="tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-4 tw-font-medium tw-text-primary-400 tw-caret-primary-300 [appearance:textfield] focus:tw-outline-none [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
                 aria-label="Time value"
               />
             </div>
@@ -216,12 +220,13 @@ export default function SubsequentDecisions({
             />
           </div>
 
-          <div className="tw-ml-3 tw-flex-shrink-0">
+          <div className="tw-flex-shrink-0">
             <PrimaryButton
               onClicked={handleAddTimeframe}
               disabled={!additionalTime}
               loading={false}
-              padding="tw-px-4 tw-py-2.5">
+              padding="tw-px-4 tw-py-2.5"
+            >
               Add to Timeline
             </PrimaryButton>
           </div>
@@ -236,7 +241,7 @@ export default function SubsequentDecisions({
                 {subsequentDecisions.length > 0
                   ? `Next announcement #${subsequentDecisions.length + 2} on`
                   : "First additional announcement on"}
-                <span className="tw-text-iron-300 tw-ml-1 tw-font-medium">
+                <span className="tw-ml-1 tw-font-medium tw-text-iron-300">
                   {formatDate(
                     subsequentDecisions.length > 0
                       ? new Date(

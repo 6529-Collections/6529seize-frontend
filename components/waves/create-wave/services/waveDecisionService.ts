@@ -119,6 +119,38 @@ export const adjustDatesAfterSubmissionChange = (
 };
 
 /**
+ * The safe default first-decision time for a given voting start: one week out
+ * at 23:59. Defaulting to the same day made the whole wave end within hours
+ * for creators who accepted the defaults (the last announcement is the wave's
+ * end date), so the seed deliberately lands a week later.
+ */
+export const getDefaultFirstDecisionTime = (votingStartDate: number): number => {
+  const date = new Date(votingStartDate);
+  date.setDate(date.getDate() + 7);
+  date.setHours(23, 59, 0, 0);
+  return date.getTime();
+};
+
+/**
+ * Keeps the first decision a sensible distance after voting starts. When it is
+ * at or before voting start (an unset/initial value, or voting start moving
+ * up to meet it) it is reseeded to the safe one-week-out default rather than
+ * clamped flush against voting start. Owned here so no child has to push this
+ * back up to the config via an effect.
+ */
+export const ensureSafeFirstDecisionTime = (
+  dates: CreateWaveDatesConfig
+): CreateWaveDatesConfig => {
+  if (dates.firstDecisionTime > dates.votingStartDate) {
+    return dates;
+  }
+  return {
+    ...dates,
+    firstDecisionTime: getDefaultFirstDecisionTime(dates.votingStartDate),
+  };
+};
+
+/**
  * Formats a date for display
  */
 export const formatDate = (timestamp: number): string => {
