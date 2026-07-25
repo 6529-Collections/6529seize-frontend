@@ -249,6 +249,9 @@ The query-key aliases accepted by the parser must be enumerated in tests from
 observed current URLs. Do not accept arbitrary query values as entity
 identifiers. Addresses use `viem` validation/checksumming; hashes require
 exact byte length; numeric IDs are bounded decimal strings before conversion.
+The normalized host registry is the sole network authority. Path and query
+content can select an entity on that network but can never select, imply, or
+override the network.
 
 ### Transaction collection routes
 
@@ -1319,6 +1322,9 @@ For every route family in this document, test:
   link path;
 - `/search?q=` entity promotion remaining on the URL host's network for
   mainnet, Sepolia, Hoodi, and legacy hosts.
+- identical address/hash identifiers on mainnet, Sepolia, and Hoodi producing
+  distinct chain-qualified cache keys;
+- type-level exhaustive handling of every `EtherscanNetwork` variant.
 
 Reject:
 
@@ -1374,6 +1380,8 @@ For every card kind:
 - no nested interactive elements;
 - no color-only status;
 - localized numbers/dates/currency/plurals;
+- a focused lint/grep assertion that touched card files use
+  `i18n/format.ts` helpers rather than direct `Intl` or `toLocaleString()`;
 - untrusted strings render as text;
 - media alt/fallback;
 - keyboard focus order;
