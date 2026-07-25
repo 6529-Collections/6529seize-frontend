@@ -175,13 +175,26 @@ be exact after lowercasing and removing one terminal dot. A hostname merely
 ending in the string `etherscan.io`, such as
 `etherscan.io.attacker.example`, must not match.
 
+Implement this as an exact lookup in the normalized host registry. Do not use
+the existing suffix-capable `matchesDomainOrSubdomain()` helper for Etherscan
+ownership: `foo.etherscan.io` is not an approved host and must follow the
+ordinary external-link path.
+
 ### Legacy hosts
 
-Recognize `goerli.etherscan.io`, `holesky.etherscan.io`,
-`ropsten.etherscan.io`, `rinkeby.etherscan.io`, and
-`kovan.etherscan.io` as retired networks. Render a compact legacy-network card
-with the original route context and open action. If an archival provider is
-explicitly configured later, structured data may be added. Until then:
+Recognize these retired networks as distinct registry entries:
+
+| Host | Network key | Chain ID |
+| --- | --- | ---: |
+| `ropsten.etherscan.io` | `ropsten` | 3 |
+| `rinkeby.etherscan.io` | `rinkeby` | 4 |
+| `goerli.etherscan.io` | `goerli` | 5 |
+| `kovan.etherscan.io` | `kovan` | 42 |
+| `holesky.etherscan.io` | `holesky` | 17000 |
+
+Render a compact legacy-network card with the original route context and open
+action. If an archival provider is explicitly configured later, structured
+data may be added. Until then:
 
 - do not relabel the resource as mainnet;
 - do not fetch the entity using chain ID 1;
@@ -712,8 +725,32 @@ type EtherscanNetwork =
       status: "current";
     }
   | {
-      chainId: 3 | 4 | 5 | 42 | 17000;
-      key: "legacy";
+      chainId: 3;
+      key: "ropsten";
+      label: string;
+      status: "legacy";
+    }
+  | {
+      chainId: 4;
+      key: "rinkeby";
+      label: string;
+      status: "legacy";
+    }
+  | {
+      chainId: 5;
+      key: "goerli";
+      label: string;
+      status: "legacy";
+    }
+  | {
+      chainId: 42;
+      key: "kovan";
+      label: string;
+      status: "legacy";
+    }
+  | {
+      chainId: 17000;
+      key: "holesky";
       label: string;
       status: "legacy";
     };
@@ -1034,8 +1071,10 @@ testable.
 `services/api/link-preview-api.ts` adds `EtherscanPreview` to
 `LinkPreviewResponse`. `components/waves/LinkPreviewCard.tsx` adds a typed
 Etherscan state/render branch if the dedicated handler reuses the generic
-fetcher. Avoid `Record<string, unknown>` checks distributed across UI files;
-centralize the type guard.
+fetcher. It must evaluate the centralized `isEtherscanPreview()` guard before
+`isEnsPreview()`, so an `etherscan.address` response containing ENS enrichment
+cannot be demoted to an ENS card. Avoid `Record<string, unknown>` checks
+distributed across UI files; centralize the type guard.
 
 ## Responsive design
 
@@ -1276,6 +1315,10 @@ For every route family in this document, test:
 - route-only title/context;
 - unknown-route fallback;
 - legacy host behavior.
+- `foo.etherscan.io` and other unknown subdomains using the ordinary external
+  link path;
+- `/search?q=` entity promotion remaining on the URL host's network for
+  mainnet, Sepolia, Hoodi, and legacy hosts.
 
 Reject:
 
@@ -1353,13 +1396,13 @@ For every card kind:
 At minimum:
 
 ```text
-seize run lint:changed
-seize run typecheck:changed
-seize run react-doctor:diff
-seize run test:no-coverage -- <focused Etherscan/link-preview tests>
-seize run help-index:sync
-seize run build
-codex-diff-check
+./bin/6529 run lint:changed
+./bin/6529 run typecheck:changed
+./bin/6529 run react-doctor:diff
+./bin/6529 run test -- <focused Etherscan/link-preview tests>
+./bin/6529 run help-index:sync
+./bin/6529 run build
+./bin/6529 exec codex-diff-check
 ```
 
 Use the repository's exact Jest flag conventions when translating the focused
