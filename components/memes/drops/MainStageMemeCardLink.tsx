@@ -28,14 +28,14 @@ export function MainStageMemeCardPill({
     return null;
   }
 
+  const pillSizeClassName =
+    variant === "prominent"
+      ? "tw-min-h-9 tw-px-4 tw-py-1.5 tw-text-base tw-leading-5"
+      : "tw-px-2.5 tw-py-0.5 tw-text-xs";
   const className =
     variant === "subtle"
       ? "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.14em] tw-text-iron-500"
-      : `tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-font-semibold tw-text-primary-300 ${
-          variant === "prominent"
-            ? "tw-min-h-9 tw-px-4 tw-py-1.5 tw-text-base tw-leading-5"
-            : "tw-px-2.5 tw-py-0.5 tw-text-xs"
-        }`;
+      : `tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-font-semibold tw-text-primary-300 ${pillSizeClassName}`;
   const label = `The Memes #${memeCardId}`;
 
   if (!href) {
