@@ -22,10 +22,12 @@
 //
 // Counting semantics (deliberate trade-offs):
 //   - The `any_casts` metric is syntax-aware and counts direct `: any`-style
-//     annotations plus `as any` and valid TypeScript `<any>` assertions. Invalid
-//     TSX angle-bracket syntax fails parsing instead of silently undercounting.
-//     Generic type arguments such as `Record<string, any>` remain outside this
-//     metric for continuity with the original ratchet scope.
+//     annotations, `as any`, valid TypeScript `<any>` assertions, and each
+//     `any` keyword inside a generic type argument. Invalid TSX angle-bracket
+//     syntax fails parsing instead of silently undercounting.
+//   - The `test_generic_any` metric applies the same generic-argument rule to
+//     test source while leaving pre-existing direct test annotations and casts
+//     outside this workstream's scope.
 //   - Task-marker regexes match inside strings, comments, and JSDoc. Counts are
 //     symmetric between baseline and actuals, so the ratchet still moves in the
 //     right direction; do not read them as exact.
@@ -67,8 +69,10 @@ const SCAN_DIRS = [
   "utils",
   "wagmiConfig",
 ];
+const TEST_SCAN_DIRS = ["__tests__", "__mocks__", "tests", "e2e"];
 
 const EXCLUDED_DIR_NAMES = new Set(["__tests__", "__mocks__", "node_modules"]);
+const TEST_EXCLUDED_DIR_NAMES = new Set(["node_modules"]);
 const EXCLUDED_FILE_PATTERNS = [
   /\.test\.[cm]?[jt]sx?$/,
   /\.spec\.[cm]?[jt]sx?$/,
@@ -108,8 +112,12 @@ const LEGACY_WORDPRESS_RUNTIME_PATTERNS = [
 const METRIC_DEFINITIONS = {
   any_casts: {
     description:
-      "`: any` and `as any` occurrences in TypeScript source (tests excluded)",
+      "`: any`, `as any`, and generic-argument `any` occurrences in TypeScript source (tests excluded)",
     hint: "Replace `any` with a real type or `unknown` plus narrowing.",
+  },
+  test_generic_any: {
+    description: "generic-argument `any` occurrences in TypeScript test source",
+    hint: "Give the test helper, mock, or API call a truthful concrete type.",
   },
   todo_comments: {
     description: "TODO/FIXME/HACK markers in source and style files",
@@ -121,8 +129,7 @@ const METRIC_DEFINITIONS = {
   },
   legacy_wordpress_runtime: {
     description: "old live WordPress runtime markers in app source",
-    hint:
-      "Use extracted migrated WordPress content instead of WordPressLegacyAssets/postJsonHref.",
+    hint: "Use extracted migrated WordPress content instead of WordPressLegacyAssets/postJsonHref.",
   },
   bootstrap_imports: {
     description: "bootstrap / react-bootstrap import statements",
@@ -142,7 +149,9 @@ const METRIC_DEFINITIONS = {
 const isExcludedFile = (fileName) =>
   EXCLUDED_FILE_PATTERNS.some((pattern) => pattern.test(fileName));
 
-function walkFiles(absoluteDir, relativeDir, collected) {
+function walkFiles(absoluteDir, relativeDir, collected, options = {}) {
+  const excludedDirNames = options.excludedDirNames ?? EXCLUDED_DIR_NAMES;
+  const excludeTestFiles = options.excludeTestFiles ?? true;
   let entries;
   try {
     entries = fs.readdirSync(absoluteDir, { withFileTypes: true });
@@ -157,12 +166,14 @@ function walkFiles(absoluteDir, relativeDir, collected) {
       : entry.name;
 
     if (entry.isDirectory()) {
-      if (EXCLUDED_DIR_NAMES.has(entry.name)) continue;
-      walkFiles(absolutePath, relativePath, collected);
+      if (excludedDirNames.has(entry.name)) continue;
+      walkFiles(absolutePath, relativePath, collected, options);
       continue;
     }
 
-    if (!entry.isFile() || isExcludedFile(entry.name)) continue;
+    if (!entry.isFile() || (excludeTestFiles && isExcludedFile(entry.name))) {
+      continue;
+    }
     collected.push(relativePath);
   }
 }
@@ -173,6 +184,37 @@ function listSourceFiles() {
     walkFiles(path.join(REPO_ROOT, dir), dir, files);
   }
   return files.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
+function isNestedTestSource(relativePath) {
+  const segments = relativePath.split("/");
+  return (
+    segments.some(
+      (segment) => segment === "__tests__" || segment === "__mocks__"
+    ) || isExcludedFile(path.basename(relativePath))
+  );
+}
+
+function listTestFiles() {
+  // Root test directories also contain support files without `.test`/`.spec`
+  // names. Source directories need a separate walk for co-located test files
+  // and nested test folders; the Set keeps the combined inventory unique.
+  const files = new Set();
+  const collect = (dir, filter) => {
+    const candidates = [];
+    walkFiles(path.join(REPO_ROOT, dir), dir, candidates, {
+      excludedDirNames: TEST_EXCLUDED_DIR_NAMES,
+      excludeTestFiles: false,
+    });
+    for (const candidate of candidates) {
+      if (!filter || filter(candidate)) files.add(candidate);
+    }
+  };
+
+  for (const dir of TEST_SCAN_DIRS) collect(dir);
+  for (const dir of SCAN_DIRS) collect(dir, isNestedTestSource);
+
+  return [...files].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 function countMatches(content, pattern) {
@@ -350,20 +392,40 @@ function getCountedTypeNode(node) {
   return undefined;
 }
 
-function countAnyCastsInSourceFile(sourceFile) {
+function countGenericAnyTypeArgumentsInSourceFile(sourceFile) {
   let count = 0;
+
+  const visit = (node, insideTypeArgument) => {
+    if (insideTypeArgument && node.kind === ts.SyntaxKind.AnyKeyword) {
+      count += 1;
+    }
+
+    const typeArguments = node.typeArguments;
+    ts.forEachChild(node, (child) => {
+      const childIsTypeArgument =
+        typeArguments?.some((typeArgument) => typeArgument === child) ?? false;
+      visit(child, insideTypeArgument || childIsTypeArgument);
+    });
+  };
+
+  visit(sourceFile, false);
+  return count;
+}
+
+function countAnyCastsInSourceFile(sourceFile) {
+  let directCount = 0;
 
   const visit = (node) => {
     const typeNode = getCountedTypeNode(node);
     if (typeNode && hasDirectAnyType(typeNode)) {
-      count += 1;
+      directCount += 1;
     }
 
     ts.forEachChild(node, visit);
   };
 
   visit(sourceFile);
-  return count;
+  return directCount + countGenericAnyTypeArgumentsInSourceFile(sourceFile);
 }
 
 function countAnyCasts(content, filePath = "source.ts") {
@@ -373,6 +435,15 @@ function countAnyCasts(content, filePath = "source.ts") {
   const sourceFile = getAnyCastSourceFile(sourceFiles, filePath);
   throwOnSyntacticDiagnostics(program, sourceFile, filePath);
   return countAnyCastsInSourceFile(sourceFile);
+}
+
+function countGenericAnyTypeArguments(content, filePath = "source.ts") {
+  const { program, sourceFiles } = createAnyCastProgram([
+    { filePath, content },
+  ]);
+  const sourceFile = getAnyCastSourceFile(sourceFiles, filePath);
+  throwOnSyntacticDiagnostics(program, sourceFile, filePath);
+  return countGenericAnyTypeArgumentsInSourceFile(sourceFile);
 }
 
 function countLines(content) {
@@ -407,6 +478,7 @@ function countPagesRouterFiles() {
 function computeActuals() {
   const perFile = {
     any_casts: new Map(),
+    test_generic_any: new Map(),
     todo_comments: new Map(),
     legacy_wordpress_runtime: new Map(),
     bootstrap_imports: new Map(),
@@ -415,6 +487,7 @@ function computeActuals() {
   const oversizedFiles = [];
   const wordpressMigratedFiles = new Set();
   const anyCastInputs = [];
+  const testGenericAnyInputs = [];
 
   for (const relativePath of listSourceFiles()) {
     const extension = path.extname(relativePath);
@@ -461,7 +534,20 @@ function computeActuals() {
     }
   }
 
-  const anyCastProgram = createAnyCastProgram(anyCastInputs);
+  for (const relativePath of listTestFiles()) {
+    // Parsed generic type arguments are TypeScript syntax. JavaScript test
+    // files remain outside this metric, just as they are outside `any_casts`.
+    if (!TYPESCRIPT_EXTENSIONS.has(path.extname(relativePath))) continue;
+    testGenericAnyInputs.push({
+      filePath: relativePath,
+      content: fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8"),
+    });
+  }
+
+  const anyCastProgram = createAnyCastProgram([
+    ...anyCastInputs,
+    ...testGenericAnyInputs,
+  ]);
   for (const { filePath: relativePath } of anyCastInputs) {
     const sourceFile = getAnyCastSourceFile(
       anyCastProgram.sourceFiles,
@@ -475,12 +561,26 @@ function computeActuals() {
     const anyCount = countAnyCastsInSourceFile(sourceFile);
     if (anyCount > 0) perFile.any_casts.set(relativePath, anyCount);
   }
+  for (const { filePath: relativePath } of testGenericAnyInputs) {
+    const sourceFile = getAnyCastSourceFile(
+      anyCastProgram.sourceFiles,
+      relativePath
+    );
+    throwOnSyntacticDiagnostics(
+      anyCastProgram.program,
+      sourceFile,
+      relativePath
+    );
+    const anyCount = countGenericAnyTypeArgumentsInSourceFile(sourceFile);
+    if (anyCount > 0) perFile.test_generic_any.set(relativePath, anyCount);
+  }
 
   const sum = (map) => [...map.values()].reduce((total, n) => total + n, 0);
 
   return {
     counts: {
       any_casts: sum(perFile.any_casts),
+      test_generic_any: sum(perFile.test_generic_any),
       todo_comments: sum(perFile.todo_comments),
       oversized_files: oversizedFiles.length,
       legacy_wordpress_runtime: sum(perFile.legacy_wordpress_runtime),
@@ -751,6 +851,7 @@ module.exports = {
   SCAN_DIRS,
   countImportStatements,
   countAnyCasts,
+  countGenericAnyTypeArguments,
   countLines,
   countMatches,
   isLegacyWordPressRuntimeSource,
