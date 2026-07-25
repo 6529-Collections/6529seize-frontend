@@ -230,7 +230,7 @@ entity identity.
 | `/verifySig/{numericId}` | Etherscan verified-signature record | `verified-signature` |
 | `/contractdiffchecker?a1={contract}[&a2={contract}]` | Contract comparison | `tool` with one or two contract subjects; no automatic equivalence claim |
 | `/find-similar-contracts?a={contract}` | Similar-contract search | `tool` with contract subject; “similar” is not “same” or “safe” |
-| `/search?q={query}` | Site search | Promote an exact valid address, transaction hash, block height/hash, or ENS name to its entity card; otherwise `page` without echoing the free-form query |
+| `/search?q={query}` | Site search | Promote an exact valid address, transaction hash, block height/hash, or ENS name to its entity card on the URL host's network; otherwise `page` without echoing the free-form query |
 
 The query-key aliases accepted by the parser must be enumerated in tests from
 observed current URLs. Do not accept arbitrary query values as entity
@@ -455,7 +455,9 @@ colors require a design-system reason.
   - NFT: Copy collection address and token ID through one labeled menu;
   - verified signature: Copy signer or signature record link, never silently
     copy the signed message.
-- Every icon-only action has an accessible name and visible tooltip.
+- Every icon-only action has an accessible name and a tooltip that is
+  perceivable and dismissible with keyboard, pointer, and touch; the accessible
+  name does not depend on the tooltip.
 - Opening an external URL uses `noopener noreferrer`.
 
 ## Entity card specifications
@@ -690,12 +692,31 @@ Add a discriminated response union. Exact field names can adjust during
 implementation, but the semantics and provenance requirements are normative.
 
 ```ts
-type EtherscanNetwork = {
-  chainId: 1 | 11155111 | 560048 | number;
-  key: "ethereum" | "sepolia" | "hoodi" | "legacy";
-  label: string;
-  status: "current" | "legacy";
-};
+type EtherscanNetwork =
+  | {
+      chainId: 1;
+      key: "ethereum";
+      label: string;
+      status: "current";
+    }
+  | {
+      chainId: 11155111;
+      key: "sepolia";
+      label: string;
+      status: "current";
+    }
+  | {
+      chainId: 560048;
+      key: "hoodi";
+      label: string;
+      status: "current";
+    }
+  | {
+      chainId: 3 | 4 | 5 | 42 | 17000;
+      key: "legacy";
+      label: string;
+      status: "legacy";
+    };
 
 type DataSource =
   | "rpc"
@@ -1025,8 +1046,9 @@ centralize the type guard.
   area.
 - Home: may show one additional row, media, or explanation.
 - Long ENS/token/contract names clamp; full value remains available through an
-  accessible copy action or title/description pattern that also works for
-  keyboard and touch.
+  accessible copy action and is programmatically available to assistive
+  technology; any visible-on-demand disclosure also works with keyboard and
+  touch.
 - User-supplied strings must not determine arbitrary layout classes, colors, or
   URLs.
 
@@ -1070,9 +1092,10 @@ All new user-facing copy is added to the repository message catalog for:
 
 Requirements:
 
-- Use `Intl.NumberFormat` for counts, balances, percentages, compact values,
-  and currency.
-- Use `Intl.DateTimeFormat` plus the existing relative-time conventions.
+- Use the repository helpers in `i18n/format.ts` for counts, balances,
+  percentages, compact values, currency, dates, and relative time. Those
+  helpers provide the shared `Intl` behavior; touched UI must not introduce
+  direct `toLocaleString()` or ad hoc `Intl` formatters.
 - Keep addresses, hashes, selectors, symbols, token IDs, and chain IDs
   invariant.
 - Keep untrusted onchain/user text unchanged except for safety sanitization;
