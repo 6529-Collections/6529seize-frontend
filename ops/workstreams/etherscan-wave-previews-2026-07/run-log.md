@@ -63,3 +63,16 @@
   historical changes because the stacked branch's local `main` reference is
   stale. Its formatter-only edits were isolated and removed; the focused
   changed-file lint and build gates remain green.
+
+## 2026-07-26 — Implementation PR and first CI iteration
+
+- Published review-ready implementation PR #3464, requested the maintainers,
+  `GelatoGenesis`, and `prxt6529`, and armed rule-respecting merge auto-merge.
+- Refreshed the implementation branch from the latest `origin/main` before any
+  human approval and passed the exact full production build on the refreshed
+  head.
+- Diagnosed the first installed-app failure as Knip-only: module-internal
+  Etherscan and Compound symbols had unnecessarily remained public exports.
+- Removed those exports and the obsolete Compound transaction-target helper.
+  Knip, changed-file lint, changed-file TypeScript, and 148 focused provider
+  assertions pass for the follow-up.

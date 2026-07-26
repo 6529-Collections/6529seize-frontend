@@ -347,7 +347,7 @@ function decodeV3Event(log: {
   }
 }
 
-export type CompoundTransactionSummary = {
+type CompoundTransactionSummary = {
   readonly version: "v2" | "v3";
   readonly action: CompoundSummaryAction;
   readonly market: {

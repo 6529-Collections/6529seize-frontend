@@ -126,7 +126,7 @@ const PREFIX_ROUTES: readonly [prefix: string, definition: RouteDefinition][] =
     ["/api/", tool("linkPreview.etherscan.page.api")],
   ];
 
-export const UNKNOWN_ETHERSCAN_PAGE = page(
+const UNKNOWN_ETHERSCAN_PAGE = page(
   "linkPreview.etherscan.page.generic",
   "linkPreview.etherscan.description.unknown"
 );

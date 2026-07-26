@@ -7,7 +7,7 @@ const ETHEREUM = {
   status: "current",
 } as const satisfies EtherscanNetwork;
 
-export const ETHERSCAN_NETWORK_BY_HOST = {
+const ETHERSCAN_NETWORK_BY_HOST = {
   "etherscan.io": ETHEREUM,
   "www.etherscan.io": ETHEREUM,
   "sepolia.etherscan.io": {
@@ -54,9 +54,9 @@ export const ETHERSCAN_NETWORK_BY_HOST = {
   },
 } as const satisfies Readonly<Record<string, EtherscanNetwork>>;
 
-export type EtherscanHost = keyof typeof ETHERSCAN_NETWORK_BY_HOST;
+type EtherscanHost = keyof typeof ETHERSCAN_NETWORK_BY_HOST;
 
-export function normalizeEtherscanHost(hostname: string): string {
+function normalizeEtherscanHost(hostname: string): string {
   return hostname.toLowerCase().replace(/\.$/, "");
 }
 
@@ -67,10 +67,6 @@ export function getEtherscanNetwork(hostname: string): EtherscanNetwork | null {
   }
 
   return ETHERSCAN_NETWORK_BY_HOST[normalized as EtherscanHost];
-}
-
-export function isEtherscanHost(hostname: string): boolean {
-  return getEtherscanNetwork(hostname) !== null;
 }
 
 export function getCanonicalEtherscanHost(hostname: string): string {

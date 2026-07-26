@@ -94,7 +94,7 @@ export interface EtherscanTarget {
   readonly page?: EtherscanPageTarget | undefined;
 }
 
-export type EtherscanDataSource =
+type EtherscanDataSource =
   | "rpc"
   | "etherscan-api"
   | "ens"
