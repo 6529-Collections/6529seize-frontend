@@ -197609,8 +197609,8 @@
   "generator": {
     "configSha256": "sha256:944a3e62099df232f0d602a1d05f966b3acabddd782915c54569376237939c88",
     "name": "6529-public-review-solidity-reference",
-    "outputSha256": "sha256:8adb898e68066d84823dbeab766788229d08cd62d082fac1b66f9640158bcd4e",
-    "sourceSha256": "sha256:641a98a5eb818635d72d4282822334c37450c2ca250ff56467cd921f47509ada",
+    "outputSha256": "sha256:94add0d088e24d51ce561be2d0bc037d716b8d3b669b892c175d9019a6b09c4f",
+    "sourceSha256": "sha256:50005c40a9c676465b31495d6ca848e1b2859217d2373d94089063e6229a61d1",
     "version": "2"
   },
   "reviewId": "6529-stream",

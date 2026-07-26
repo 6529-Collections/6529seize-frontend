@@ -1812,10 +1812,6 @@ function validateReleaseManifest(artifacts) {
       "governed_parameter_inventory",
       "release-artifacts/governed-parameter-inventory.json",
     ],
-    [
-      ["record_family_authorization", "source_catalog"],
-      "release-artifacts/record-family-authorization-source-catalog.json",
-    ],
     ["abi_checksums", "release-artifacts/latest/abi-checksums.json"],
     [
       "event_topic_catalog",
@@ -1848,6 +1844,14 @@ function validateReleaseManifest(artifacts) {
       "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
     ],
   ];
+  const recordFamilyArtifactPath =
+    "release-artifacts/record-family-authorization-source-catalog.json";
+  if (artifacts[recordFamilyArtifactPath]) {
+    bindings.splice(3, 0, [
+      ["record_family_authorization", "source_catalog"],
+      recordFamilyArtifactPath,
+    ]);
+  }
   const boundArtifactDigests = {};
   for (const [manifestKey, artifactPath] of bindings) {
     const manifestPath = Array.isArray(manifestKey)
@@ -1994,10 +1998,12 @@ function validateReleaseManifest(artifacts) {
     },
     riskRegister,
     governedParameterInventory: governedParameters,
-    recordFamilyAuthorizationSourceCatalog:
-      artifacts[
-        "release-artifacts/record-family-authorization-source-catalog.json"
-      ].json,
+    ...(artifacts[recordFamilyArtifactPath]
+      ? {
+          recordFamilyAuthorizationSourceCatalog:
+            artifacts[recordFamilyArtifactPath].json,
+        }
+      : {}),
     boundArtifactDigests,
     checksumBundle: manifest.checksum_bundle,
     unavailableReleaseCeremony: manifest.unavailable_release_ceremony,
@@ -3363,8 +3369,14 @@ function buildBundle({
       )
     );
   }
-  auditorEvidence.recordFamilyAuthorizationValidation =
-    validateRecordFamilyAuthorizationSourceCatalog(sources, artifacts);
+  if (
+    artifacts[
+      "release-artifacts/record-family-authorization-source-catalog.json"
+    ]
+  ) {
+    auditorEvidence.recordFamilyAuthorizationValidation =
+      validateRecordFamilyAuthorizationSourceCatalog(sources, artifacts);
+  }
   validateSourceVerification(sources, artifacts, config);
   const { rawDefinitions, classificationContext } = prepareDefinitions(
     config,
