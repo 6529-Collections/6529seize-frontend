@@ -123,6 +123,23 @@ describe("release bus staging artifact transfer", () => {
     expect(deployStep.run).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:"
     );
+    expect(deployStep.run).toContain(
+      '> "$release_dir/public-review-discussion-destinations.json"'
+    );
+    expect(deployStep.run).not.toContain(
+      '> "$release_root/public-review-discussion-destinations.json"'
+    );
+    expect(deployStep.run).toContain(
+      "const currentApp = fs.realpathSync(path.join(__dirname, 'current'));"
+    );
+    expect(deployStep.run).toContain("if (error?.code !== 'ENOENT')");
+    expect(
+      deployStep.run.indexOf(
+        '> "$release_dir/public-review-discussion-destinations.json"'
+      )
+    ).toBeLessThan(
+      deployStep.run.indexOf('ln -sfn "$release_dir/app" "$current_link"')
+    );
     expect(deployStep.run).toContain('(has("production") | not)');
     expect(productionDeployWorkflowSource).not.toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"

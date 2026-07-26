@@ -352,7 +352,6 @@ jobs:
           test -f "$release_dir/app/server.js"
           rm -f "$release_dir/package.zip"
           chown -R "$RUN_AS:$RUN_AS" "$release_dir"
-          ln -sfn "$release_dir/app" "$current_link"
           review_destinations="$(
             printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" | base64 -d
           )"
@@ -363,18 +362,33 @@ jobs:
             (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
             (has("production") | not)
           ' <<<"$review_destinations" >/dev/null
-          printf '%s' "$review_destinations" \
-            > "$release_root/public-review-discussion-destinations.json"
+          printf '%s\n' "$review_destinations" \
+            > "$release_dir/public-review-discussion-destinations.json"
           chown "$RUN_AS:$RUN_AS" \
-            "$release_root/public-review-discussion-destinations.json"
-          chmod 600 "$release_root/public-review-discussion-destinations.json"
+            "$release_dir/public-review-discussion-destinations.json"
+          chmod 600 "$release_dir/public-review-discussion-destinations.json"
           unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
+          ln -sfn "$release_dir/app" "$current_link"
           cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
           const fs = require('node:fs');
-          const publicReviewDiscussionDestinations = fs.readFileSync(
-            __dirname + '/public-review-discussion-destinations.json',
-            'utf8'
-          ).trim();
+          const path = require('node:path');
+
+          const currentApp = fs.realpathSync(path.join(__dirname, 'current'));
+          const destinationsPath = path.join(
+            path.dirname(currentApp),
+            'public-review-discussion-destinations.json'
+          );
+          let publicReviewDiscussionDestinations;
+          try {
+            publicReviewDiscussionDestinations = fs.readFileSync(
+              destinationsPath,
+              'utf8'
+            ).trim();
+          } catch (error) {
+            if (error?.code !== 'ENOENT') {
+              throw error;
+            }
+          }
 
           module.exports = {
             apps: [{
@@ -387,8 +401,12 @@ jobs:
                 PORT: '3001',
                 HOSTNAME: '0.0.0.0',
                 NODE_ENV: 'production',
-                PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:
-                  publicReviewDiscussionDestinations
+                ...(publicReviewDiscussionDestinations
+                  ? {
+                      PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:
+                        publicReviewDiscussionDestinations
+                    }
+                  : {})
               }
             }]
           };
