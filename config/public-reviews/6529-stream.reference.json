@@ -8,6 +8,7 @@
     "tree": "3a8e3cb8102e891a73972282026d2811e7591852",
     "compilerVersion": "0.8.19+commit.7dd6d404",
     "evmVersion": "paris",
+    "viaIR": true,
     "optimizer": {
       "enabled": true,
       "runs": 200
@@ -100,6 +101,7 @@
   },
   "output": {
     "directory": "public/review-data/6529-stream/versions/2026-07-26.1",
+    "retainedVersions": ["2026-07-26.1"],
     "bundleFile": "reference-manifest.json",
     "definitionsDirectory": "definitions",
     "sourcesDirectory": "sources",

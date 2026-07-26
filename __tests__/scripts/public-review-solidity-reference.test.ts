@@ -1,7 +1,15 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
+  BUNDLE_SCHEMA_VERSION,
   DEFINITION_SHARD_SCHEMA_VERSION,
+  GENERATOR_NAME,
+  GENERATOR_VERSION,
+  assertCanonicalSurfaceEqual,
+  assertCompilerSourceSet,
+  assertEverySourceRootMatched,
   abiSurface,
+  bundleOutputSha256,
+  compareStrings,
   decodeUtf8,
   encodeSemanticKey,
   keccak256,
@@ -10,14 +18,39 @@ const {
   sha256Urn,
   stableJson,
   topicForSignature,
+  topLevelDeclarationRecord,
   validateDefinitionShards,
+  validateBundle,
+  validateConfig,
+  validateCustomErrorCatalog,
+  validateNatSpecBaseline,
+  validateReleaseArtifactManifest,
 } = require("../../scripts/public-reviews/solidity-reference-lib.cjs") as {
+  BUNDLE_SCHEMA_VERSION: string;
   DEFINITION_SHARD_SCHEMA_VERSION: string;
+  GENERATOR_NAME: string;
+  GENERATOR_VERSION: string;
+  assertCanonicalSurfaceEqual: (
+    expected: Array<Record<string, unknown>>,
+    actual: Array<Record<string, unknown>>,
+    kind: "function" | "event" | "error",
+    label: string
+  ) => void;
+  assertCompilerSourceSet: (
+    sources: Map<string, Buffer>,
+    compilerOutput: { sources?: Record<string, unknown> }
+  ) => void;
+  assertEverySourceRootMatched: (
+    roots: string[],
+    sourcePaths: string[]
+  ) => void;
   abiSurface: (
     definitions: Map<number, RawDefinition>,
     definition: RawDefinition,
     output: CompilerOutput
   ) => AbiSurface;
+  bundleOutputSha256: (bundle: Record<string, unknown>) => string;
+  compareStrings: (left: string, right: string) => number;
   decodeUtf8: (value: Buffer) => string;
   encodeSemanticKey: (value: string) => string;
   keccak256: (value: string) => string;
@@ -31,9 +64,30 @@ const {
   sha256Urn: (value: Buffer) => string;
   stableJson: (value: unknown) => string;
   topicForSignature: (value: string) => string;
+  topLevelDeclarationRecord: (
+    node: Record<string, unknown>,
+    sourceRecord: Record<string, unknown>,
+    source: Record<string, unknown>
+  ) => Record<string, unknown>;
   validateDefinitionShards: (
     bundle: unknown,
     shards: Map<string, unknown>
+  ) => void;
+  validateBundle: (bundle: Record<string, unknown>) => void;
+  validateConfig: (config: Record<string, unknown>) => void;
+  validateCustomErrorCatalog: (
+    surface: Record<string, unknown>,
+    catalog: Record<string, unknown>
+  ) => void;
+  validateNatSpecBaseline: (
+    sources: Map<string, Record<string, unknown>>,
+    artifacts: Record<string, { json: Record<string, unknown> }>
+  ) => void;
+  validateReleaseArtifactManifest: (
+    artifacts: Record<
+      string,
+      { json: Record<string, unknown>; sha256?: string }
+    >
   ) => void;
 };
 
@@ -109,6 +163,539 @@ function declaration(
 }
 
 describe("Solidity public-review reference generator", () => {
+  it("requires canonical immutable public review output paths", () => {
+    const config = {
+      schemaVersion: "public-review.solidity-source.v1",
+      reviewId: "stream",
+      reviewVersion: "v1",
+      source: {
+        repository: "6529-Collections/6529Stream",
+        commit: "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8",
+        tree: "3a8e3cb8102e891a73972282026d2811e7591852",
+        compilerVersion: "0.8.19+commit.7dd6d404",
+        evmVersion: "paris",
+        viaIR: true,
+        optimizer: { enabled: true, runs: 200 },
+        roots: [{ path: "smart-contracts", scope: "protocol" }],
+      },
+      releaseArtifacts: [
+        {
+          path: "release-artifacts/contracts.json",
+          schemaVersion: "contracts.v1",
+        },
+      ],
+      output: {
+        directory: "public/review-data/stream/versions/v1",
+        retainedVersions: ["v1"],
+        bundleFile: "reference-manifest.json",
+        definitionsDirectory: "definitions",
+        sourcesDirectory: "sources",
+        indexFile: "public/review-data/stream/index.json",
+      },
+    };
+    expect(() => validateConfig(config)).not.toThrow();
+
+    const drifted = JSON.parse(JSON.stringify(config));
+    drifted.output.directory = "public/custom/stream/v1";
+    expect(() => validateConfig(drifted)).toThrow(
+      "canonical public review version path"
+    );
+  });
+
+  it("uses code-unit sorting and rejects a source root with no Solidity files", () => {
+    expect(["ä", "z", "A"].sort(compareStrings)).toEqual(["A", "z", "ä"]);
+    expect(() =>
+      assertEverySourceRootMatched(
+        ["smart-contracts", "test"],
+        ["smart-contracts/StreamCore.sol"]
+      )
+    ).toThrow("Source root matched no Solidity files: test");
+  });
+
+  it("rejects a compiler output that omits any pinned Solidity source", () => {
+    const pinned = new Map([
+      ["smart-contracts/A.sol", Buffer.from("contract A {}")],
+      ["smart-contracts/B.sol", Buffer.from("contract B {}")],
+    ]);
+
+    expect(() =>
+      assertCompilerSourceSet(pinned, {
+        sources: { "smart-contracts/A.sol": {} },
+      })
+    ).toThrow("missing: smart-contracts/B.sol");
+  });
+
+  it("preserves full pinned governance/finality-style file-scope type details", () => {
+    const text = [
+      "struct GovernanceCall { address target; uint256 value; }",
+      "enum StreamTerminalFreezeStatus { NONE, SCHEDULED }",
+      "uint256 constant MODULE_VERSION = 42;",
+    ].join("\n");
+    const buffer = Buffer.from(text);
+    const lineStarts = [0];
+    for (let index = 0; index < buffer.length; index += 1) {
+      if (buffer[index] === 10) {
+        lineStarts.push(index + 1);
+      }
+    }
+    const sourceRecord = {
+      path: "smart-contracts/IStreamGovernanceExecutor.sol",
+      buffer,
+      lineStarts,
+      lineCount: 3,
+      sha256: sha256Urn(buffer),
+    };
+    const source = {
+      repository: "6529-Collections/6529Stream",
+      commit: "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8",
+    };
+    const structStart = text.indexOf("struct GovernanceCall");
+    const structText = text.slice(structStart, text.indexOf("\n", structStart));
+    const governanceCall = topLevelDeclarationRecord(
+      {
+        nodeType: "StructDefinition",
+        name: "GovernanceCall",
+        canonicalName: "GovernanceCall",
+        visibility: "public",
+        documentation: { text: "A governance call." },
+        src: `${structStart}:${Buffer.byteLength(structText)}:0`,
+        members: [
+          {
+            name: "target",
+            typeName: { nodeType: "ElementaryTypeName", name: "address" },
+          },
+          {
+            name: "value",
+            typeName: { nodeType: "ElementaryTypeName", name: "uint256" },
+          },
+        ],
+      },
+      sourceRecord,
+      source
+    );
+
+    expect(governanceCall).toMatchObject({
+      kind: "struct",
+      name: "GovernanceCall",
+      canonicalName: "GovernanceCall",
+      natspec: "A governance call.",
+      members: [
+        { index: 0, name: "target", type: "address" },
+        { index: 1, name: "value", type: "uint256" },
+      ],
+    });
+
+    const enumStart = text.indexOf("enum StreamTerminalFreezeStatus");
+    const enumText = text.slice(enumStart, text.indexOf("\n", enumStart));
+    const finalityStatus = topLevelDeclarationRecord(
+      {
+        nodeType: "EnumDefinition",
+        name: "StreamTerminalFreezeStatus",
+        canonicalName: "StreamTerminalFreezeStatus",
+        src: `${enumStart}:${Buffer.byteLength(enumText)}:0`,
+        members: [{ name: "NONE" }, { name: "SCHEDULED" }],
+      },
+      sourceRecord,
+      source
+    );
+    expect(finalityStatus).toMatchObject({
+      kind: "enum",
+      name: "StreamTerminalFreezeStatus",
+      members: ["NONE", "SCHEDULED"],
+    });
+
+    const variableStart = text.indexOf("uint256 constant MODULE_VERSION");
+    const variableText = text.slice(variableStart);
+    const valueStart = text.lastIndexOf("42");
+    const moduleVersion = topLevelDeclarationRecord(
+      {
+        nodeType: "VariableDeclaration",
+        name: "MODULE_VERSION",
+        constant: true,
+        visibility: "internal",
+        typeName: { nodeType: "ElementaryTypeName", name: "uint256" },
+        typeDescriptions: { typeString: "uint256" },
+        src: `${variableStart}:${Buffer.byteLength(variableText)}:0`,
+        value: { src: `${valueStart}:2:0` },
+      },
+      sourceRecord,
+      source
+    );
+    expect(moduleVersion).toMatchObject({
+      kind: "variable",
+      name: "MODULE_VERSION",
+      type: "uint256",
+      constant: true,
+      valueSource: "42",
+      valueRange: { byteStart: valueStart, byteLength: 2 },
+    });
+  });
+
+  it("compares full ABI outputs, mutability, and event indexing", () => {
+    const expectedFunction = {
+      name: "read",
+      signature: "read(uint256)",
+      selector: "0x01020304",
+      state_mutability: "view",
+      payable: false,
+      posture: "read",
+      inputs: [
+        {
+          index: 0,
+          name: "id",
+          type: "uint256",
+          internal_type: "uint256",
+        },
+      ],
+      outputs: [{ index: 0, name: "", type: "bool", internal_type: "bool" }],
+    };
+    const actualFunction = {
+      ...expectedFunction,
+      stateMutability: "view",
+      inputs: [
+        { index: 0, name: "id", type: "uint256", internalType: "uint256" },
+      ],
+      outputs: [{ index: 0, name: "", type: "bool", internalType: "bool" }],
+    };
+    delete (actualFunction as Record<string, unknown>)["state_mutability"];
+    expect(() =>
+      assertCanonicalSurfaceEqual(
+        [expectedFunction],
+        [actualFunction],
+        "function",
+        "read"
+      )
+    ).not.toThrow();
+    expect(() =>
+      assertCanonicalSurfaceEqual(
+        [expectedFunction],
+        [
+          {
+            ...actualFunction,
+            outputs: [
+              {
+                index: 0,
+                name: "",
+                type: "uint256",
+                internalType: "uint256",
+              },
+            ],
+          },
+        ],
+        "function",
+        "read"
+      )
+    ).toThrow("semantic ABI surface");
+    expect(() =>
+      assertCanonicalSurfaceEqual(
+        [expectedFunction],
+        [{ ...actualFunction, stateMutability: "payable", payable: true }],
+        "function",
+        "read"
+      )
+    ).toThrow("semantic ABI surface");
+
+    const event = {
+      name: "Changed",
+      signature: "Changed(address)",
+      topic0: topicForSignature("Changed(address)"),
+      anonymous: false,
+      inputs: [
+        {
+          index: 0,
+          name: "account",
+          type: "address",
+          internal_type: "address",
+          indexed: true,
+        },
+      ],
+    };
+    expect(() =>
+      assertCanonicalSurfaceEqual(
+        [event],
+        [
+          {
+            ...event,
+            inputs: [
+              {
+                index: 0,
+                name: "account",
+                type: "address",
+                internalType: "address",
+                indexed: false,
+              },
+            ],
+          },
+        ],
+        "event",
+        "Changed"
+      )
+    ).toThrow("semantic ABI surface");
+  });
+
+  it("rejects a release-manifest digest mutation", () => {
+    const artifacts = {
+      "release-artifacts/latest/release-artifact-manifest.json": {
+        json: {
+          artifacts: Object.fromEntries(
+            [
+              "abi-checksums.json",
+              "event-topic-catalog.json",
+              "interface-ids.json",
+            ].map((name) => [
+              name,
+              { path: name, sha256: `sha256:${name.padEnd(64, "0")}` },
+            ])
+          ),
+        },
+      },
+      "release-artifacts/latest/abi-checksums.json": {
+        json: {},
+        sha256: `sha256:${"abi-checksums.json".padEnd(64, "0")}`,
+      },
+      "release-artifacts/latest/event-topic-catalog.json": {
+        json: {},
+        sha256: `sha256:${"event-topic-catalog.json".padEnd(64, "0")}`,
+      },
+      "release-artifacts/latest/interface-ids.json": {
+        json: {},
+        sha256: `sha256:${"interface-ids.json".padEnd(64, "0")}`,
+      },
+    };
+    expect(() => validateReleaseArtifactManifest(artifacts)).not.toThrow();
+    artifacts["release-artifacts/latest/abi-checksums.json"].sha256 =
+      `sha256:${"drift".padEnd(64, "0")}`;
+    expect(() => validateReleaseArtifactManifest(artifacts)).toThrow(
+      "manifest digest drifted"
+    );
+  });
+
+  it("rejects a same-count custom-error catalog mutation", () => {
+    const error = {
+      name: "BadInput",
+      signature: "BadInput(uint256)",
+      selector: selectorForSignature("BadInput(uint256)"),
+      inputs: [
+        {
+          index: 0,
+          name: "value",
+          type: "uint256",
+          internal_type: "uint256",
+        },
+      ],
+    };
+    const surface = {
+      contracts: {
+        T: {
+          source: "smart-contracts/T.sol",
+          custom_errors: [error],
+        },
+      },
+    };
+    const catalog = {
+      entries: [
+        {
+          contract: "T",
+          source: "smart-contracts/T.sol",
+          category: "configuration",
+          severity: "high",
+          ...error,
+        },
+      ],
+      summary: {
+        custom_error_count: 1,
+        contract_count: 1,
+        category_counts: { configuration: 1 },
+        severity_counts: { high: 1 },
+        duplicate_selectors: {},
+      },
+    };
+    expect(() => validateCustomErrorCatalog(surface, catalog)).not.toThrow();
+    catalog.entries[0]!.selector = "0x00000000";
+    expect(() => validateCustomErrorCatalog(surface, catalog)).toThrow(
+      "semantic entries disagree"
+    );
+  });
+
+  it("reconciles the NatSpec baseline IDs, statuses, and lines", () => {
+    const source = "smart-contracts/T.sol";
+    const sources = new Map([
+      [
+        source,
+        {
+          text: "contract T {\n    function read(uint256 id) external view returns (bool);\n}\n",
+        },
+      ],
+    ]);
+    const artifacts = {
+      "release-artifacts/latest/protocol-surface-report.json": {
+        json: {
+          contracts: {
+            T: {
+              source,
+              functions: [
+                {
+                  name: "read",
+                  signature: "read(uint256)",
+                },
+              ],
+              events: [],
+              custom_errors: [],
+            },
+          },
+        },
+      },
+      "release-artifacts/baselines/v0.1.0/natspec-coverage.json": {
+        json: {
+          exclusions: [
+            {
+              id: "T:function:read(uint256)",
+              contract: "T",
+              source,
+              kind: "function",
+              signature: "read(uint256)",
+              status: "missing_natspec",
+              line: 2,
+              reason: "Document this function.",
+              follow_up: "Documentation review.",
+            },
+          ],
+        },
+      },
+    };
+    expect(() => validateNatSpecBaseline(sources, artifacts)).not.toThrow();
+    artifacts[
+      "release-artifacts/baselines/v0.1.0/natspec-coverage.json"
+    ].json.exclusions[0]!.status = "declaration_not_in_source";
+    expect(() => validateNatSpecBaseline(sources, artifacts)).toThrow(
+      "NatSpec baseline status drifted"
+    );
+  });
+
+  it("recomputes bundle kind/classification summaries and source checksums", () => {
+    const sourceSha256 = `sha256:${"a".repeat(64)}`;
+    const sourcePath = "smart-contracts/T.sol";
+    const sourcePublicPath =
+      "/review-data/stream/versions/v1/sources/smart-contracts/T.sol";
+    const repository = "6529-Collections/6529Stream";
+    const commit = "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8";
+    const sourceGithubUrl = `https://github.com/${repository}/blob/${commit}/${sourcePath}`;
+    const declarationId = `${sourcePath}#top-level:function:helper()`;
+    const declarationRange = {
+      byteStart: 0,
+      byteLength: 0,
+      lineStart: 1,
+      lineEnd: 1,
+      sourceSha256,
+      githubUrl: `${sourceGithubUrl}#L1`,
+    };
+    const topLevelDeclaration = {
+      id: declarationId,
+      key: encodeSemanticKey(declarationId),
+      kind: "function",
+      name: "helper",
+      displaySignature: "helper()",
+      canonicalSignature: null,
+      selector: null,
+      syntheticGetter: false,
+      range: declarationRange,
+    };
+    const bundle = {
+      bundleSchemaVersion: BUNDLE_SCHEMA_VERSION,
+      reviewId: "stream",
+      reviewVersion: "v1",
+      source: {
+        repository,
+        commit,
+        sourceChecksums: {
+          [sourcePath]: sourceSha256,
+        },
+      },
+      generator: {
+        name: GENERATOR_NAME,
+        version: GENERATOR_VERSION,
+        outputSha256: null as string | null,
+      },
+      summary: {
+        fileCount: 1,
+        topLevelDeclarationCount: 1,
+        declarationCount: 1,
+        definitionCount: 0,
+        contractCount: 0,
+        interfaceCount: 0,
+        libraryCount: 0,
+        classifications: {},
+        warningCount: 0,
+      },
+      declarationIndex: [
+        {
+          id: declarationId,
+          key: encodeSemanticKey(declarationId),
+          kind: "function",
+          name: "helper",
+          displaySignature: "helper()",
+          canonicalSignature: null,
+          selector: null,
+          topic0: null,
+          syntheticGetter: false,
+          definitionId: null,
+          definitionKey: null,
+          definitionShardPath: null,
+          sourcePath,
+          sourcePublicPath,
+          scope: "protocol",
+          range: declarationRange,
+          topLevel: true,
+        },
+      ],
+      definitionIndex: [],
+      files: [
+        {
+          path: sourcePath,
+          publicPath: sourcePublicPath,
+          githubUrl: sourceGithubUrl,
+          scope: "protocol",
+          sha256: sourceSha256,
+          byteLength: 0,
+          definitionIds: [],
+          topLevelDeclarations: [topLevelDeclaration],
+        },
+      ],
+      warningSummary: {
+        totalCount: 0,
+        byCategory: {},
+        byCode: {},
+      },
+    };
+    bundle.generator.outputSha256 = bundleOutputSha256(bundle);
+    expect(() => validateBundle(bundle)).not.toThrow();
+
+    const summaryDrift = JSON.parse(JSON.stringify(bundle));
+    summaryDrift.summary.contractCount = 1;
+    summaryDrift.generator.outputSha256 = bundleOutputSha256(summaryDrift);
+    expect(() => validateBundle(summaryDrift)).toThrow(
+      "contractCount summary is invalid"
+    );
+
+    const checksumDrift = JSON.parse(JSON.stringify(bundle));
+    checksumDrift.source.sourceChecksums["smart-contracts/T.sol"] =
+      `sha256:${"b".repeat(64)}`;
+    checksumDrift.generator.outputSha256 = bundleOutputSha256(checksumDrift);
+    expect(() => validateBundle(checksumDrift)).toThrow(
+      "source checksum map is invalid"
+    );
+
+    const declarationProjectionDrift = JSON.parse(JSON.stringify(bundle));
+    declarationProjectionDrift.declarationIndex[0].sourcePublicPath =
+      "/review-data/stream/versions/v1/sources/wrong.sol";
+    declarationProjectionDrift.generator.outputSha256 = bundleOutputSha256(
+      declarationProjectionDrift
+    );
+    expect(() => validateBundle(declarationProjectionDrift)).toThrow(
+      "source route or range drifted"
+    );
+  });
+
   it("uses Ethereum Keccak-256 and stable selectors", () => {
     expect(keccak256("")).toBe(
       "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
@@ -248,6 +835,8 @@ describe("Solidity public-review reference generator", () => {
     const definition = {
       id,
       key,
+      sourcePath: "contracts/T.sol",
+      scope: "protocol",
       declarations: {
         functions: [],
         events: [],
@@ -276,15 +865,44 @@ describe("Solidity public-review reference generator", () => {
       reviewId: "stream",
       reviewVersion: "v1",
       summary: { warningCount: 0 },
+      declarationIndex: [],
+      files: [
+        {
+          path: definition.sourcePath,
+          publicPath: "/review-data/stream/versions/v1/sources/contracts/T.sol",
+          scope: definition.scope,
+          topLevelDeclarations: [],
+        },
+      ],
+      warningSummary: {
+        totalCount: 0,
+        byCategory: {},
+        byCode: {},
+      },
       definitionIndex: [
         {
           id,
           key,
           name: undefined,
-          sourcePath: undefined,
-          scope: undefined,
+          sourcePath: definition.sourcePath,
+          scope: definition.scope,
           kind: undefined,
           classification: undefined,
+          declarationCounts: {
+            functions: 0,
+            events: 0,
+            errors: 0,
+            modifiers: 0,
+            structs: 0,
+            enums: 0,
+            stateVariables: 0,
+            userDefinedValueTypes: 0,
+          },
+          abiSurfaceCounts: {
+            functions: 0,
+            events: 0,
+            errors: 0,
+          },
           shardSha256: sha256Urn(buffer),
           warningSummary: shard.warningSummary,
         },
@@ -293,6 +911,21 @@ describe("Solidity public-review reference generator", () => {
     const validShards = new Map([[key, { buffer, shard }]]);
 
     expect(() => validateDefinitionShards(bundle, validShards)).not.toThrow();
+    const projectionDrift = {
+      ...bundle,
+      definitionIndex: [
+        {
+          ...bundle.definitionIndex[0],
+          declarationCounts: {
+            ...bundle.definitionIndex[0]!.declarationCounts,
+            functions: 1,
+          },
+        },
+      ],
+    };
+    expect(() =>
+      validateDefinitionShards(projectionDrift, validShards)
+    ).toThrow("index projection drifted");
     expect(() => validateDefinitionShards(bundle, new Map())).toThrow(
       "incomplete"
     );

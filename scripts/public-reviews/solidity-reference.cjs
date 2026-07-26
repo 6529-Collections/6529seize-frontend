@@ -7,7 +7,10 @@ const path = require("node:path");
 
 const {
   INDEX_SCHEMA_VERSION,
+  assertEverySourceRootMatched,
   buildBundle,
+  compareReviewVersions,
+  compareStrings,
   createIndexEntry,
   decodeUtf8,
   invariant,
@@ -22,8 +25,7 @@ const {
 } = require("./solidity-reference-lib.cjs");
 
 const REPOSITORY_ROOT = path.resolve(__dirname, "..", "..");
-const DEFAULT_CONFIG_PATH =
-  "config/public-reviews/6529-stream.reference.json";
+const DEFAULT_CONFIG_PATH = "config/public-reviews/6529-stream.reference.json";
 const MAX_PROCESS_BUFFER = 512 * 1024 * 1024;
 const COMPILER_TIMEOUT_MS = 180_000;
 
@@ -47,14 +49,75 @@ function parseArgs(argv) {
   return args;
 }
 
-function repositoryPath(relativePath) {
-  const resolved = path.resolve(REPOSITORY_ROOT, relativePath);
-  const rootWithSeparator = `${REPOSITORY_ROOT}${path.sep}`;
+function resolveContainedPath(root, relativePath) {
   invariant(
-    resolved === REPOSITORY_ROOT || resolved.startsWith(rootWithSeparator),
-    `Path escapes the frontend repository: ${relativePath}`
+    typeof relativePath === "string" &&
+      relativePath.length > 0 &&
+      !path.isAbsolute(relativePath),
+    `Path must be relative to its containment root: ${relativePath}`
   );
+  const rootResolved = path.resolve(root);
+  const rootReal = fs.realpathSync.native(rootResolved);
+  const resolved = path.resolve(rootResolved, relativePath);
+  const rootWithSeparator = `${rootResolved}${path.sep}`;
+  invariant(
+    resolved === rootResolved || resolved.startsWith(rootWithSeparator),
+    `Path escapes its containment root: ${relativePath}`
+  );
+  const segments = path.relative(rootResolved, resolved).split(path.sep);
+  let current = rootResolved;
+  const realRootWithSeparator = `${rootReal}${path.sep}`;
+  for (const segment of segments) {
+    if (!segment) {
+      continue;
+    }
+    current = path.join(current, segment);
+    if (!fs.existsSync(current)) {
+      break;
+    }
+    const stat = fs.lstatSync(current);
+    invariant(
+      !stat.isSymbolicLink(),
+      `Path traverses a symbolic link or junction: ${current}`
+    );
+    const realCurrent = fs.realpathSync.native(current);
+    invariant(
+      realCurrent === rootReal || realCurrent.startsWith(realRootWithSeparator),
+      `Path resolves outside its containment root: ${current}`
+    );
+  }
   return resolved;
+}
+
+function repositoryPath(relativePath) {
+  return resolveContainedPath(REPOSITORY_ROOT, relativePath);
+}
+
+function acquireGenerationLock(lockPath) {
+  fs.mkdirSync(path.dirname(lockPath), { recursive: true });
+  let descriptor;
+  try {
+    descriptor = fs.openSync(lockPath, "wx");
+    fs.writeFileSync(descriptor, `${process.pid}\n`);
+  } catch (error) {
+    if (descriptor !== undefined) {
+      fs.closeSync(descriptor);
+    }
+    throw new Error(
+      `Another public-review generation owns the lock ${lockPath}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+  let released = false;
+  return () => {
+    if (released) {
+      return;
+    }
+    released = true;
+    fs.closeSync(descriptor);
+    fs.unlinkSync(lockPath);
+  };
 }
 
 function readJsonFile(relativePath) {
@@ -104,11 +167,7 @@ function gitText(sourceRepo, args) {
 }
 
 function gitObjectBuffer(sourceRepo, commit, objectPath) {
-  return runGit(sourceRepo, [
-    "cat-file",
-    "blob",
-    `${commit}:${objectPath}`,
-  ]);
+  return runGit(sourceRepo, ["cat-file", "blob", `${commit}:${objectPath}`]);
 }
 
 function listSolidityPaths(sourceRepo, config) {
@@ -122,11 +181,13 @@ function listSolidityPaths(sourceRepo, config) {
     "--",
     ...roots,
   ]);
-  return output
+  const sourcePaths = output
     .toString("utf8")
     .split("\0")
     .filter((entry) => entry.endsWith(".sol"))
     .sort();
+  assertEverySourceRootMatched(roots, sourcePaths);
+  return sourcePaths;
 }
 
 function loadPinnedInputs(sourceRepo, config) {
@@ -237,6 +298,7 @@ function compilePinnedSources(solcCommand, config, sourceBuffers) {
     settings: {
       optimizer: config.source.optimizer,
       evmVersion: config.source.evmVersion,
+      viaIR: config.source.viaIR,
       outputSelection: {
         "*": {
           "": ["ast"],
@@ -254,6 +316,7 @@ function compilePinnedSources(solcCommand, config, sourceBuffers) {
       version: config.source.compilerVersion,
       evmVersion: config.source.evmVersion,
       optimizer: config.source.optimizer,
+      viaIR: config.source.viaIR,
     },
     output: parseCompilerOutput(output),
   };
@@ -280,13 +343,60 @@ function configSha256(configText) {
 function bundlePaths(config) {
   const directory = repositoryPath(config.output.directory);
   const bundle = path.join(directory, config.output.bundleFile);
-  const definitions = path.join(
-    directory,
-    config.output.definitionsDirectory
-  );
+  const definitions = path.join(directory, config.output.definitionsDirectory);
   const sources = path.join(directory, config.output.sourcesDirectory);
   const index = repositoryPath(config.output.indexFile);
   return { directory, bundle, definitions, sources, index };
+}
+
+function validateRetainedVersionRegistry(
+  retainedVersions,
+  indexVersions,
+  discoveredVersions
+) {
+  const normalize = (values, label) => {
+    invariant(Array.isArray(values), `${label} must be an array.`);
+    invariant(
+      values.every((value) => typeof value === "string" && value.length > 0),
+      `${label} contains an invalid review version.`
+    );
+    invariant(
+      new Set(values).size === values.length,
+      `${label} contains a duplicate review version.`
+    );
+    return [...values].sort(compareReviewVersions);
+  };
+  const retained = normalize(retainedVersions, "Retained version registry");
+  const indexed = normalize(indexVersions, "Public review index");
+  const discovered = normalize(discoveredVersions, "Snapshot directory set");
+  invariant(
+    stableJson(retained) === stableJson(indexed) &&
+      stableJson(retained) === stableJson(discovered),
+    `Retained review versions disagree (registry: ${retained.join(", ")}; index: ${indexed.join(", ")}; snapshots: ${discovered.join(", ")}).`
+  );
+}
+
+function configForVersion(config, version) {
+  const clone = JSON.parse(JSON.stringify(config));
+  clone.reviewVersion = version;
+  clone.output.directory = normalizePath(
+    path.posix.join(path.posix.dirname(config.output.directory), version)
+  );
+  return clone;
+}
+
+function discoveredSnapshotVersions(config) {
+  const versionsRoot = repositoryPath(
+    normalizePath(path.posix.dirname(config.output.directory))
+  );
+  if (!fs.existsSync(versionsRoot)) {
+    return [];
+  }
+  return fs
+    .readdirSync(versionsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() || entry.isSymbolicLink())
+    .map((entry) => entry.name)
+    .sort(compareReviewVersions);
 }
 
 function listFiles(directory) {
@@ -308,12 +418,7 @@ function listFiles(directory) {
   return files.sort();
 }
 
-function expectedSnapshotFiles(
-  config,
-  bundle,
-  definitionShards,
-  sources
-) {
+function expectedSnapshotFiles(config, bundle, definitionShards, sources) {
   const paths = bundlePaths(config);
   const expected = new Map([[paths.bundle, Buffer.from(stableJson(bundle))]]);
   for (const [relativePath, shard] of definitionShards) {
@@ -323,10 +428,7 @@ function expectedSnapshotFiles(
     );
   }
   for (const [sourcePath, source] of sources) {
-    const outputPath = path.join(
-      paths.sources,
-      ...sourcePath.split("/")
-    );
+    const outputPath = path.join(paths.sources, ...sourcePath.split("/"));
     expected.set(outputPath, source.buffer);
   }
   return expected;
@@ -335,7 +437,7 @@ function expectedSnapshotFiles(
 function ensureImmutableSnapshot(config, expected) {
   const { directory } = bundlePaths(config);
   if (!fs.existsSync(directory)) {
-    return;
+    return false;
   }
   const actualPaths = listFiles(directory);
   const expectedPaths = [...expected.keys()].sort();
@@ -352,12 +454,77 @@ function ensureImmutableSnapshot(config, expected) {
       )} would change; increment reviewVersion.`
     );
   }
+  return true;
 }
 
-function writeExpectedFiles(expected) {
-  for (const [filePath, buffer] of expected) {
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, buffer);
+function writeStagedSnapshot(config, expected) {
+  const { directory } = bundlePaths(config);
+  const versionsRoot = path.dirname(directory);
+  fs.mkdirSync(versionsRoot, { recursive: true });
+  const stageDirectory = fs.mkdtempSync(
+    path.join(versionsRoot, `.stage-${config.reviewVersion}-`)
+  );
+  let renamed = false;
+  try {
+    for (const [filePath, buffer] of expected) {
+      const relativePath = path.relative(directory, filePath);
+      invariant(
+        relativePath !== "" &&
+          !relativePath.startsWith(`..${path.sep}`) &&
+          relativePath !== ".." &&
+          !path.isAbsolute(relativePath),
+        `Staged snapshot file escapes its version root: ${filePath}`
+      );
+      const stagePath = resolveContainedPath(stageDirectory, relativePath);
+      fs.mkdirSync(path.dirname(stagePath), { recursive: true });
+      fs.writeFileSync(stagePath, buffer, { flag: "wx" });
+    }
+    invariant(
+      stableJson(
+        listFiles(stageDirectory).map((filePath) =>
+          normalizePath(path.relative(stageDirectory, filePath))
+        )
+      ) ===
+        stableJson(
+          [...expected.keys()]
+            .map((filePath) =>
+              normalizePath(path.relative(directory, filePath))
+            )
+            .sort(compareStrings)
+        ),
+      `${config.reviewVersion}: staged snapshot file set is incomplete.`
+    );
+    fs.renameSync(stageDirectory, directory);
+    renamed = true;
+  } finally {
+    if (!renamed && fs.existsSync(stageDirectory)) {
+      const resolvedStage = path.resolve(stageDirectory);
+      invariant(
+        path.dirname(resolvedStage) === path.resolve(versionsRoot) &&
+          path
+            .basename(resolvedStage)
+            .startsWith(`.stage-${config.reviewVersion}-`),
+        "Refusing to clean an unverified snapshot staging directory."
+      );
+      fs.rmSync(resolvedStage, { recursive: true, force: true });
+    }
+  }
+}
+
+function writeFileAtomic(filePath, buffer) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  const temporaryPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
+  const safeTemporaryPath = resolveContainedPath(
+    path.dirname(filePath),
+    path.basename(temporaryPath)
+  );
+  try {
+    fs.writeFileSync(safeTemporaryPath, buffer, { flag: "wx" });
+    fs.renameSync(safeTemporaryPath, filePath);
+  } finally {
+    if (fs.existsSync(safeTemporaryPath)) {
+      fs.unlinkSync(safeTemporaryPath);
+    }
   }
 }
 
@@ -394,7 +561,9 @@ function nextIndex(config, bundle) {
   } else {
     versions.push(entry);
   }
-  versions.sort((left, right) => left.version.localeCompare(right.version));
+  versions.sort((left, right) =>
+    compareReviewVersions(left.version, right.version)
+  );
   return {
     schemaVersion: INDEX_SCHEMA_VERSION,
     reviewId: config.reviewId,
@@ -404,6 +573,7 @@ function nextIndex(config, bundle) {
 }
 
 function generate(configRecord, args) {
+  validateConfig(configRecord.json);
   const sourceRepo =
     args["source-repo"] ?? process.env["STREAM_REVIEW_SOURCE_REPO"];
   invariant(
@@ -441,12 +611,61 @@ function generate(configRecord, args) {
     );
     return;
   }
-  ensureImmutableSnapshot(configRecord.json, expected);
-  writeExpectedFiles(expected);
-  const index = nextIndex(configRecord.json, bundle);
-  const { index: indexPath } = bundlePaths(configRecord.json);
+  const { directory, index: indexPath } = bundlePaths(configRecord.json);
   fs.mkdirSync(path.dirname(indexPath), { recursive: true });
-  fs.writeFileSync(indexPath, stableJson(index));
+  repositoryPath(configRecord.json.output.indexFile);
+  const lockPath = resolveContainedPath(
+    path.dirname(indexPath),
+    ".solidity-reference-generation.lock"
+  );
+  const releaseLock = acquireGenerationLock(lockPath);
+  let createdSnapshot = false;
+  const previousIndexBuffer = fs.existsSync(indexPath)
+    ? fs.readFileSync(indexPath)
+    : null;
+  let wroteIndex = false;
+  try {
+    const index = nextIndex(configRecord.json, bundle);
+    const discoveredVersions = discoveredSnapshotVersions(configRecord.json);
+    const plannedVersions = discoveredVersions.includes(
+      configRecord.json.reviewVersion
+    )
+      ? discoveredVersions
+      : [...discoveredVersions, configRecord.json.reviewVersion];
+    validateRetainedVersionRegistry(
+      configRecord.json.output.retainedVersions,
+      index.versions.map((entry) => entry.version),
+      plannedVersions
+    );
+    const existed = ensureImmutableSnapshot(configRecord.json, expected);
+    if (!existed) {
+      writeStagedSnapshot(configRecord.json, expected);
+      createdSnapshot = true;
+    }
+    writeFileAtomic(indexPath, Buffer.from(stableJson(index)));
+    wroteIndex = true;
+    check(configRecord);
+  } catch (error) {
+    if (createdSnapshot && fs.existsSync(directory)) {
+      const versionsRoot = path.dirname(directory);
+      invariant(
+        path.dirname(path.resolve(directory)) === path.resolve(versionsRoot) &&
+          path.basename(directory) === configRecord.json.reviewVersion,
+        "Refusing to roll back an unverified generated snapshot directory."
+      );
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+    if (wroteIndex) {
+      if (previousIndexBuffer) {
+        writeFileAtomic(indexPath, previousIndexBuffer);
+      } else if (fs.existsSync(indexPath)) {
+        fs.unlinkSync(indexPath);
+      }
+    }
+    throw error;
+  } finally {
+    releaseLock();
+  }
   process.stdout.write(
     `Generated ${bundle.summary.definitionCount} definitions from ${bundle.summary.fileCount} pinned Solidity files.\n`
   );
@@ -527,7 +746,27 @@ function validateCheckedDefinitionShards(config, bundle) {
   validateDefinitionShards(bundle, definitionShards);
 }
 
-function validateCheckedIndex(config, bundle) {
+function validateCheckedSnapshotFileSet(config, bundle) {
+  const { directory } = bundlePaths(config);
+  const expected = [
+    config.output.bundleFile,
+    ...bundle.definitionIndex.map(
+      (entry) => `${config.output.definitionsDirectory}/${entry.key}.json`
+    ),
+    ...bundle.files.map(
+      (file) => `${config.output.sourcesDirectory}/${file.path}`
+    ),
+  ].sort(compareStrings);
+  const actual = listFiles(directory)
+    .map((filePath) => normalizePath(path.relative(directory, filePath)))
+    .sort(compareStrings);
+  invariant(
+    stableJson(actual) === stableJson(expected),
+    `${config.reviewVersion}: checked immutable snapshot file set drifted.`
+  );
+}
+
+function readCheckedIndex(config) {
   const { index: indexPath } = bundlePaths(config);
   const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
   invariant(
@@ -539,45 +778,66 @@ function validateCheckedIndex(config, bundle) {
       index.activeVersion === config.reviewVersion,
     "Checked public review reference index active version drifted."
   );
-  const expectedEntry = createIndexEntry(bundle, bundlePublicPath(config));
-  const entry = index.versions?.find(
-    (candidate) => candidate.version === config.reviewVersion
-  );
-  invariant(entry, "Checked public review reference index entry is missing.");
   invariant(
-    stableJson(entry) === stableJson(expectedEntry),
-    "Checked public review reference index entry drifted."
+    Array.isArray(index.versions) && index.versions.length > 0,
+    "Checked public review reference index has no versions."
   );
+  const orderedVersions = index.versions.map((entry) => entry.version);
+  invariant(
+    stableJson(orderedVersions) ===
+      stableJson([...orderedVersions].sort(compareReviewVersions)),
+    "Checked public review reference index is not deterministically ordered."
+  );
+  validateRetainedVersionRegistry(
+    config.output.retainedVersions,
+    orderedVersions,
+    discoveredSnapshotVersions(config)
+  );
+  return index;
 }
 
 function check(configRecord) {
   validateConfig(configRecord.json);
-  const { bundle: bundlePath } = bundlePaths(configRecord.json);
-  const bundle = JSON.parse(fs.readFileSync(bundlePath, "utf8"));
-  validateBundle(bundle);
+  const index = readCheckedIndex(configRecord.json);
+  let activeBundle;
+  for (const entry of index.versions) {
+    const versionConfig = configForVersion(configRecord.json, entry.version);
+    const { bundle: bundlePath } = bundlePaths(versionConfig);
+    const bundle = JSON.parse(fs.readFileSync(bundlePath, "utf8"));
+    validateBundle(bundle);
+    invariant(
+      bundle.reviewId === configRecord.json.reviewId &&
+        bundle.reviewVersion === entry.version,
+      `${entry.version}: checked bundle review identity drifted.`
+    );
+    invariant(
+      stableJson(entry) ===
+        stableJson(createIndexEntry(bundle, bundlePublicPath(versionConfig))),
+      `${entry.version}: checked public review reference index entry drifted.`
+    );
+    validateCheckedDefinitionShards(versionConfig, bundle);
+    validateCheckedSources(versionConfig, bundle);
+    validateCheckedSnapshotFileSet(versionConfig, bundle);
+    if (entry.version === configRecord.json.reviewVersion) {
+      activeBundle = bundle;
+    }
+  }
+  invariant(activeBundle, "Checked active review bundle is missing.");
   invariant(
-    bundle.reviewId === configRecord.json.reviewId &&
-      bundle.reviewVersion === configRecord.json.reviewVersion,
-    "Checked bundle review identity drifted."
+    activeBundle.source.commit === configRecord.json.source.commit &&
+      activeBundle.source.tree === configRecord.json.source.tree,
+    "Checked active bundle source pin drifted."
   );
   invariant(
-    bundle.source.commit === configRecord.json.source.commit &&
-      bundle.source.tree === configRecord.json.source.tree,
-    "Checked bundle source pin drifted."
+    activeBundle.generator.configSha256 === configSha256(configRecord.text),
+    "Checked active bundle input manifest checksum drifted; regenerate a new review version."
   );
   invariant(
-    bundle.generator.configSha256 === configSha256(configRecord.text),
-    "Checked bundle input manifest checksum drifted; regenerate a new review version."
+    activeBundle.generator.sourceSha256 === generatorSourceSha256(),
+    "Checked active bundle generator checksum drifted; regenerate the active snapshot."
   );
-  invariant(
-    bundle.generator.sourceSha256 === generatorSourceSha256(),
-    "Checked bundle generator checksum drifted; regenerate the active snapshot."
-  );
-  validateCheckedDefinitionShards(configRecord.json, bundle);
-  validateCheckedSources(configRecord.json, bundle);
-  validateCheckedIndex(configRecord.json, bundle);
   process.stdout.write(
-    `Verified ${bundle.summary.definitionCount} definitions and ${bundle.summary.fileCount} source files offline.\n`
+    `Verified ${index.versions.length} retained review version(s), including ${activeBundle.summary.definitionCount} active definitions and ${activeBundle.summary.fileCount} active source files, offline.\n`
   );
 }
 
@@ -602,6 +862,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  acquireGenerationLock,
   bundlePublicPath,
   check,
   compilePinnedSources,
@@ -613,4 +874,6 @@ module.exports = {
   loadPinnedInputs,
   nextIndex,
   parseArgs,
+  resolveContainedPath,
+  validateRetainedVersionRegistry,
 };
