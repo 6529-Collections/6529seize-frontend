@@ -280,6 +280,10 @@ The current state controls:
 - which comparisons and deployment evidence are available
 
 Historical review versions remain addressable after the active version changes.
+Lifecycle policy is implemented as a validated state-to-capability mapping, not
+as scattered copy checks. Tests prove that public vulnerability submission is
+enabled only for configured pre-deployment states and changes to the configured
+post-deployment policy at the transition boundary.
 
 ## Environment Activation
 
@@ -297,6 +301,9 @@ In a disabled environment:
 
 Production activation is a later explicit configuration change with its own
 review and deployment authorization.
+
+An automated production-profile render/configuration test scans the review
+output and navigation for staging review IDs and fails if any are present.
 
 ## Page Content Contract
 
@@ -675,6 +682,10 @@ The initial staging release may display `NEW` plus official threaded responses
 if mutable/indexed disposition support is not yet available. It must not fake
 workflow states that cannot be persisted.
 
+When authoritative disposition persistence is unavailable, the projection
+derives `NEW` deterministically. It never reuses stale browser state or guesses a
+later disposition from reactions or ordinary replies.
+
 The drop API does not currently provide an idempotency key. The client UUID
 supports duplicate detection in projections, but the staging UI must not claim
 exactly-once submission or gapless sequential review identifiers.
@@ -747,6 +758,10 @@ source locale with normal fallback behavior for currently incomplete locales.
 Stream’s long-form contract explanation may launch in English for the first
 staging review. The content layer must identify its locale and must not embed UI
 controls inside untranslated prose.
+
+The implementation documentation records this fallback debt: affected review
+routes, English-only editorial surface, functional translated-shell fallback,
+reader impact, content owner, and the path to translated editorial versions.
 
 Dates, times, counts, percentages, currency values, and sorting use repository
 locale helpers.
@@ -898,10 +913,13 @@ The integrated candidate requires:
 - deterministic generator tests
 - generator `--check`
 - schema and configuration tests
+- review lifecycle capability-boundary tests
+- production-profile tests proving staging review IDs are absent
 - route and metadata tests
 - feedback payload and failure-recovery tests
 - technical reference completeness tests
 - ledger filter/export tests
+- deterministic `NEW` disposition fallback tests
 - `seize run lint:changed`
 - `seize run typecheck:changed`
 - `seize run react-doctor:diff`

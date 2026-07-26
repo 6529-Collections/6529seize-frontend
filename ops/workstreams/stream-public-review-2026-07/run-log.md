@@ -32,3 +32,8 @@
   - exact-commit exhaustive AST enumeration across protocol/test/script roots
     with release/genesis/candidate/support/vendor/deployment classifications
   - immutable prior snapshots and snippet-bound source references
+- 6529bot marked the initial specification good to merge with no security,
+  WCAG, or localization findings. Accepted its forward-looking hardening notes
+  by requiring tested lifecycle capability boundaries, production-profile
+  exclusion of staging Wave IDs, deterministic `NEW` disposition fallback, and
+  an explicit English-editorial localization debt record.
