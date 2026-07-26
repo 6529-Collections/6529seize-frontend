@@ -9,10 +9,10 @@ where a failed external service can stop progress.
 ### IMPLEMENTED
 
 An authorized caller creates a collection in
-[`StreamCore.createCollection`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamCore.sol#L336).
+[`StreamCore.createCollection`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L336).
 The Core assigns the collection identity and stores the artist address, supply
 information, and other collection state. Collection data is then set through
-[`setCollectionData`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamCore.sol#L379).
+[`setCollectionData`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L379).
 
 Creating the record does not mean minting has opened. Sale authorization, mint
 phases, executors, metadata, randomness, and economic configuration are separate
@@ -29,17 +29,26 @@ modules own different pieces.
 
 The existence of a field in the protocol does not tell a reviewer who should be
 allowed to set it. The Roles and Trust page therefore treats every mutation as a
-separate permission question. Some current metadata and preservation write
-surfaces are specifically recorded as open governance risks.
+separate permission question. Record-family checks are implemented in source,
+but the candidate's exact record-type admissions, live writer providers, grants,
+runtime code hashes, and rotation evidence remain unavailable.
 
 ## 3. The artist can approve a particular state
 
 ### IMPLEMENTED
 
-The current artist-approval mechanism hashes a particular collection state and
-supports signatures from ordinary accounts and ERC-1271 contract wallets. An
-approval is evidence that the artist approved that state. If a bound field later
-changes, the earlier approval no longer describes the current state.
+The current artist-approval mechanism supports signatures from ordinary
+accounts and ERC-1271 contract wallets. Its EIP-712 domain binds the chain and
+Core. The signed state binds the artist address, collection-freeze manifest
+hash, maximum collection purchases, total supply, and final-supply delay. It
+does not generically sign every satellite record or future finality action.
+
+An approval is evidence that the artist approved those exact fields. If a bound
+field later changes, the earlier approval no longer describes the current
+state. The typed fields are defined in
+[`StreamArtistApprovals`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L8-L21)
+and assembled from current Core state in
+[`_hashArtistApproval`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L1631-L1639).
 
 ### IMPORTANT DISTINCTION
 
@@ -48,18 +57,33 @@ Core freeze path is an authorized administrative call and does not itself demand
 a fresh artist signature. Whether that is the desired final rule is a review
 question.
 
-## 4. Mint policy is configured
+## 4. The source contains two mint lanes
 
-### IMPLEMENTED
+### CURRENTLY WIRED BASELINE
 
-[`StreamMintManager`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamMintManager.sol)
+The current signed Drop lane is:
+
+1. `StreamDrops` checks the signed authorization and calls `StreamMinter`;
+2. `StreamMinter` checks its own mint pause, collection time window, and supply;
+3. `StreamMinter` calls the legacy `StreamCore.mint` entry.
+
+[`StreamDrops._executeFixedPriceDrop`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L609-L632)
+shows that call. The legacy minter path is visible in
+[`StreamMinter.mint`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMinter.sol#L130-L175).
+
+### SEPARATELY DEPLOYED FOUNDATION
+
+[`StreamMintManager`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMintManager.sol)
 defines phases, executors, optional gates, time windows, supply constraints, and
 counter policies. The durable
-[`StreamMintLedger`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamMintLedger.sol)
+[`StreamMintLedger`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMintLedger.sol)
 tracks usage across wallets, recipients, tokens, and contexts.
 
-This allows one collection to use a different mint policy from another without
-putting every policy branch inside the permanent Core.
+The rehearsal connects this manager to Core and makes it a ledger writer, but it
+passes the legacy minter to `StreamDrops`. The two lanes are both present; they
+are not one end-to-end signed-sale path. The exact construction and wiring are
+visible in
+[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/script/RehearseDeployment.s.sol#L218-L269).
 
 ## 5. A sale is authorized
 
@@ -75,26 +99,31 @@ select the work.
 An authorization can drive a fixed-price execution or register an auction,
 depending on its sale mode.
 
-## 6. The mint is prepared
+## 6. The selected mint lane executes
 
-### IMPLEMENTED
+### SOURCE IMPLEMENTED
 
-The mint manager validates the active phase and counters, then prepares the
-operation. The Core has distinct prepare, complete, and abort paths:
+The manager lane validates the active phase, gate, policy hash, and counters,
+then performs a same-transaction prepared mint. Its current source calls:
 
-- [`prepareMint`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamCore.sol#L495)
-- [`completeMint`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamCore.sol#L521)
-- [`abortMint`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamCore.sol#L549)
+- [`prepareMintFromManager`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L492-L518)
+- [`completePreparedMintFromManager`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L520-L550)
 
-The separation exists so that a failed execution can unwind reserved state
-instead of leaving supply or counters half-consumed.
+[`StreamMintManager.mintPrepared`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMintManager.sol#L241-L299)
+consumes counters and calls those entries atomically. A revert unwinds the whole
+transaction. Core also exposes a manager-only
+[`abortPreparedMintFromManager`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L545-L569)
+hook that rolls back the last allocation. The current manager implementation
+does not call that hook in `mintPrepared`; its prepare and complete calls are
+made in the same transaction. The current signed Drop lane does not call these
+functions; it uses `StreamCore.mint`.
 
 ### TESTED
 
-State-machine and integration tests exercise success, revert, and rollback
-paths. Reviewers should still examine every external call between preparation
-and completion because reentrancy, unexpected token behavior, and incomplete
-rollback are high-value failure modes.
+Tests exercise each lane's success and failure behavior. They do not establish a
+signed-Drop-to-MintManager integration that the rehearsal does not contain.
+Reviewers should trace the exact caller and Core entry for every supported
+genesis sale profile.
 
 ## 7. The token receives a permanent identity
 
@@ -133,21 +162,35 @@ is unresolved. A later freeze can block mutations, but a frozen content hash
 still requires the corresponding bytes and execution environment to remain
 available.
 
-## 10. Money is credited and withdrawn
+## 10. Money follows one of several accounting lanes
 
-Paid sales use credit and pull-withdrawal patterns rather than assuming every
-recipient can safely receive ETH during the mint transaction. Auctions also
-credit outbid bidders and settle held funds according to their state.
+### CURRENTLY WIRED BASELINE
 
-Revenue resolution can select token-level, collection-level, or default
-profiles. Split wallets and curator roots add further accounting layers. Each
-credit must be backed, replay-protected, and excluded from emergency surplus.
+A paid fixed-price Drop keeps poster, protocol, and curator-reserve credits
+inside `StreamDrops`. It selects a token-level split first, then a
+collection-level split, then the contract default. The auction contract keeps a
+separate set of poster, protocol, curator, and bidder credits. These balances
+use pull withdrawals and must remain backed.
+
+The fixed-price accounting is in
+[`StreamDrops`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L542-L558)
+and
+[`_creditFixedPriceProceeds`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L635-L680).
+Auction proceeds are credited by
+[`AuctionContract._creditAuctionProceeds`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L471-L508).
+
+### SEPARATELY DEPLOYED FOUNDATION
+
+`StreamRevenueResolver`, `StreamSplitFactory`, `StreamSplitWallet`, and
+`StreamPrimarySaleSettlement` implement a different foundation that can resolve
+token, collection, and default revenue assignments. The rehearsal deploys those
+contracts, but the native Drop and Auction paths above do not call them.
 
 ## 11. A token may be burned
 
 ### IMPLEMENTED
 
-[`StreamCore.burn`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamCore.sol#L631)
+[`StreamCore.burn`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L631)
 destroys the live ERC-721 ownership record. Normal `tokenURI` behavior no longer
 applies, but the protocol retains audit information about the burned token.
 
@@ -167,7 +210,7 @@ actions; it is not the same operation as freezing all collection metadata.
 
 ### IMPLEMENTED
 
-[`freezeCollection`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamCore.sol#L827)
+[`freezeCollection`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L827)
 checks collection existence, required data, timing, supply, and pending metadata
 conditions. It records a freeze manifest commitment and permanently rejects the
 Core mutations covered by that freeze.
@@ -182,7 +225,7 @@ guardian powers live outside the Core freeze itself.
 
 ### IMPLEMENTED
 
-[`StreamArtworkFinalityRegistry`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityRegistry.sol)
+[`StreamArtworkFinalityRegistry`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol)
 supports a delayed finality process with scheduling, execution windows,
 cancellation or veto paths, component manifests, and terminal state.
 
@@ -230,4 +273,3 @@ collapsed into one “immutable” badge.
 4. Which burn records must remain readable forever?
 5. What evidence must be published before a terminal finality action can be
    scheduled?
-

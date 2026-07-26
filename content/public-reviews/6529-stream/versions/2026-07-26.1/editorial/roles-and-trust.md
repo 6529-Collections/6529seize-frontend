@@ -8,7 +8,7 @@ that remain outside Solidity.
 
 ### IMPLEMENTED
 
-[`StreamAdmins.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamAdmins.sol)
+[`StreamAdmins.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamAdmins.sol)
 supports:
 
 - an owner;
@@ -24,23 +24,23 @@ confirm that similar functions cannot bypass the intended boundary.
 
 ## Actor matrix
 
-| Actor | Typical power | Principal trust question |
-| --- | --- | --- |
-| Core owner | bootstrap and ownership duties | When is this power removed or constrained? |
-| Global admin | broad protocol administration | Is any global role necessary after launch? |
-| Target/function admin | call a specific selector on a specific target | Does the selector grant more power than its name suggests? |
-| Pause guardian | stop a configured domain | Can it limit damage without becoming a censorship key? |
-| Unpause admin | resume a paused domain | What evidence is required before restart? |
-| Signer manager | rotate authorization signers and epochs | Can a stolen or malicious signer be removed quickly and visibly? |
-| TDH authorization signer | authorize a drop action | Does the payload bind every sale fact? |
-| Mint manager/executor | configure or execute mint policy | Can policy exceed Core supply or bypass counters? |
-| Randomness controller/provider | configure or fulfill randomness | What can it bias, delay, retry, or abandon? |
-| Governance proposer | publish a proposed action | Who can propose value-bearing or permanent actions? |
-| Governance canceller/guardian | cancel or veto scheduled actions | Can it stop harm without silently changing policy? |
-| Governance executor | execute a matured action | What call targets, selectors, and ETH value are allowed? |
-| Artist | approve a particular collection state | Which actions still proceed without an artist signature? |
-| Collector | mint, bid, withdraw, transfer, burn | Which states or external services affect the collector's result? |
-| Permissionless caller | settle or trigger public maintenance paths | Can an arbitrary caller select harmful parameters? |
+| Actor                          | Typical power                                 | Principal trust question                                         |
+| ------------------------------ | --------------------------------------------- | ---------------------------------------------------------------- |
+| Core owner                     | bootstrap and ownership duties                | When is this power removed or constrained?                       |
+| Global admin                   | broad protocol administration                 | Is any global role necessary after launch?                       |
+| Target/function admin          | call a specific selector on a specific target | Does the selector grant more power than its name suggests?       |
+| Pause guardian                 | stop a configured domain                      | Can it limit damage without becoming a censorship key?           |
+| Unpause admin                  | resume a paused domain                        | What evidence is required before restart?                        |
+| Signer manager                 | rotate authorization signers and epochs       | Can a stolen or malicious signer be removed quickly and visibly? |
+| TDH authorization signer       | authorize a drop action                       | Does the payload bind every sale fact?                           |
+| Mint manager/executor          | configure or execute mint policy              | Can policy exceed Core supply or bypass counters?                |
+| Randomness controller/provider | configure or fulfill randomness               | What can it bias, delay, retry, or abandon?                      |
+| Governance proposer            | publish a proposed action                     | Who can propose value-bearing or permanent actions?              |
+| Governance canceller/guardian  | cancel or veto scheduled actions              | Can it stop harm without silently changing policy?               |
+| Governance executor            | execute a matured action                      | What call targets, selectors, and ETH value are allowed?         |
+| Artist                         | approve a particular collection state         | Which actions still proceed without an artist signature?         |
+| Collector                      | mint, bid, withdraw, transfer, burn           | Which states or external services affect the collector's result? |
+| Permissionless caller          | settle or trigger public maintenance paths    | Can an arbitrary caller select harmful parameters?               |
 
 ## Pause and unpause are different powers
 
@@ -99,8 +99,8 @@ identities.
 
 Relevant sources:
 
-- [`StreamRoleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamRoleRegistry.sol)
-- [`StreamGovernanceExecutor.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamGovernanceExecutor.sol)
+- [`StreamRoleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol)
+- [`StreamGovernanceExecutor.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernanceExecutor.sol)
 
 ### AUDIT PENDING
 
@@ -129,16 +129,43 @@ Reviewers should trace:
 
 ## Record-family authorization
 
-### KNOWN LIMITATION
+### SOURCE IMPLEMENTED - CANDIDATE UNBOUND
 
-The repository records five metadata or preservation mutation selectors that
-currently accept selector/global authority without the intended record-family
-proof (`RISK-GOV-002`). This matters because two calls to the same function may
-affect records with very different consequences.
+The source now replaces the historical whole-selector writer grants with a
+closed record-family registry. A selector-level permission asks whether an actor
+may call a function. The new check also asks whether that actor may write this
+exact admitted record type for this collection and subject.
 
-A selector-level permission answers “may this actor call this function?” A
-record-family rule also answers “which collection or record family may this
-actor change?” The second boundary must not exist only in operational policy.
+There are eight authorization classes:
+
+| Class                | Current source authority                    |
+| -------------------- | ------------------------------------------- |
+| Artist signer        | Live authority provider                     |
+| Owner signer         | Live authority provider                     |
+| Curator signer       | Family grant                                |
+| Institution signer   | Live authority provider                     |
+| Independent attestor | Direct, self-attributed write by any caller |
+| Preservation admin   | Family grant                                |
+| Metadata admin       | Family grant                                |
+| Global admin         | Family grant                                |
+
+There are fourteen closed family groups: artist, owner, independent, curator,
+institution, rights, archive, fixity, C2PA, IIIF, media relationship, identity
+display, snapshot, and agent. Artist, owner, independent, and institution
+families reject admin grants. An exact record type is admitted once and cannot
+be remapped.
+
+The implementation is in
+[`StreamRecordFamilyRegistry`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L285).
+Live providers are code-hash pinned and fail closed on a failed call, malformed
+return, or changed runtime code
+([`_providerAuthorizes`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRecordFamilyRegistry.sol#L298-L323)).
+
+`RISK-GOV-002` remains open for a different reason: the exact candidate,
+production record-type admission set, live providers, grant map, deployed
+runtime bindings, non-local rotation/revocation evidence, and independent
+review are unavailable. The source catalog names those blockers explicitly
+([`remaining_blockers`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/release-artifacts/record-family-authorization-source-catalog.json#L197-L205)).
 
 ## Module and successor authority
 

@@ -1,13 +1,27 @@
 # Revenue, splits, and royalties
 
-This page follows value from a primary sale into credits, revenue resolution,
-split wallets, curator claims, withdrawals, and royalty information.
+This repository contains several accounting systems. They must not be read as
+one end-to-end pipeline.
+
+## Which value path exists today?
+
+| Value path                                      | Evidence status                       | Current behavior                                                                                                                                        |
+| ----------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Signed fixed-price ETH                          | **CURRENTLY WIRED BASELINE**          | `StreamDrops` applies its own token, collection, or contract-default BPS split and creates poster, protocol, and curator-reserve credits.               |
+| English-auction ETH                             | **CURRENTLY WIRED BASELINE**          | The Auction contract applies its own token, collection, or contract-default BPS split and creates poster, protocol, curator, and bidder credits.        |
+| Resolver, split wallets, and primary settlement | **SEPARATELY DEPLOYED FOUNDATION**    | The rehearsal deploys these contracts, but the native Drop and Auction paths do not call them and the rehearsal does not configure a settlement caller. |
+| ERC-20 payer-bound sale orchestration           | **PROPOSED**                          | The current settlement foundation can pull approved ERC-20s, but the required PaymentIntent verifier and top-level sale adapter do not exist.           |
+| ERC-2981 royalty information                    | **CURRENTLY WIRED BASELINE**          | Core returns one fixed receiver and 690 basis points for every token. It does not call the current resolver.                                            |
+| Resolver-backed royalty architecture            | **ACCEPTED TARGET - NOT IMPLEMENTED** | The accepted target keeps royalty policy in a replaceable resolver with a bounded validation adapter.                                                   |
+
+The rehearsal construction and wiring are visible in
+[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/script/RehearseDeployment.s.sol#L218-L269).
 
 ## Primary-sale settlement
 
-### IMPLEMENTED
+### SEPARATELY DEPLOYED FOUNDATION
 
-[`StreamPrimarySaleSettlement.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamPrimarySaleSettlement.sol)
+[`StreamPrimarySaleSettlement.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamPrimarySaleSettlement.sol#L96-L145)
 records and settles primary-sale value. Settlement uses replay protection so one
 sale cannot be credited twice.
 
@@ -15,19 +29,26 @@ The settlement record should bind the sale, token or collection context,
 currency, amount, and chosen revenue profile. A typed, unique settlement key is
 an accounting invariant, not an implementation detail.
 
+This contract is not the current signed Drop or Auction settlement route. It
+accepts only owner-approved settlement callers, and the rehearsal does not
+approve one. Its presence and tests prove a foundation, not a supported
+collector-to-mint flow.
+
 ## Revenue resolution
 
-### IMPLEMENTED
+### SEPARATELY DEPLOYED FOUNDATION
 
-[`StreamRevenueResolver.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamRevenueResolver.sol)
+[`StreamRevenueResolver.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRevenueResolver.sol#L170-L279)
 can resolve configuration at several levels. A token-specific rule can take
 precedence over collection configuration, which can take precedence over
 defaults.
 
-The precedence order must be visible to artists before a sale. Two valid
-profiles are not helpful if the artist cannot tell which one will win.
+That precedence applies when a caller uses this resolver foundation. It is not
+the current native Drop/Auction split lookup. Before a resolver-backed sale is
+supported, the precedence, selected assignment, mutability, and freeze state
+must be visible to artists.
 
-### Accepted target and implementation status
+### ACCEPTED TARGET - NOT IMPLEMENTED
 
 The linked resolver is the implementation present at the reviewed commit. It
 is not the accepted target architecture. The accepted architecture keeps one
@@ -48,12 +69,14 @@ approved.
 ## Split profiles
 
 A split profile defines recipients and shares. The protocol can use a factory to
-create deterministic split wallets for a profile.
+create deterministic split wallets for a profile. These wallets belong to the
+separate resolver/settlement foundation; the current Drop and Auction contracts
+do not route their native proceeds through them.
 
 Relevant sources:
 
-- [`StreamSplitFactory.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamSplitFactory.sol)
-- [`StreamSplitWallet.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamSplitWallet.sol)
+- [`StreamSplitFactory.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamSplitFactory.sol)
+- [`StreamSplitWallet.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamSplitWallet.sol)
 
 ### REVIEW REQUIREMENTS
 
@@ -67,10 +90,13 @@ Relevant sources:
 
 ## Pull withdrawals
 
-### IMPLEMENTED
+### SOURCE IMPLEMENTED
 
-Recipients withdraw credited balances instead of requiring every sale to push
-funds through an arbitrary recipient fallback.
+Pull withdrawals exist in several contracts, but there is no single protocol
+credit ledger. Fixed-price recipients withdraw Drop-local credits. Auction
+recipients and displaced bidders withdraw Auction-local credits. Split-wallet
+recipients withdraw wallet-local allocations after a supported settlement has
+funded that wallet.
 
 Pull payments improve composability but do not remove risk. The contract must
 keep separate liabilities for every account and currency, update state safely
@@ -91,11 +117,11 @@ For native ETH, reviewers should check:
 
 ## ERC-20 accounting
 
-### IMPLEMENTED WITH CONSTRAINTS
+### SEPARATELY DEPLOYED FOUNDATION
 
-The current settlement path accepts only contract addresses whose
+The standalone settlement foundation accepts only contract addresses whose
 deployment-wide onchain
-[`StreamAssetPolicyRegistry`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamAssetPolicyRegistry.sol#L7-L83)
+[`StreamAssetPolicyRegistry`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamAssetPolicyRegistry.sol#L7-L83)
 status is `ACTIVE`. Unknown, inactive, deprecated, and unsupported assets fail
 closed. The registry stores an evidence hash and effective timestamp for each
 policy decision, and its owner controls status changes.
@@ -103,15 +129,32 @@ policy decision, and its owner controls status changes.
 Settlement then requires a successful boolean-returning transfer and verifies
 exact before-and-after balance changes for the payer, settlement adapter, and
 split wallet. The
-[`StreamPrimarySaleSettlement`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamPrimarySaleSettlement.sol#L124-L145)
+[`StreamPrimarySaleSettlement`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamPrimarySaleSettlement.sol#L124-L145)
 path rejects a missing or false return value, fee-on-transfer behavior, no-op
 transfers, failed balance reads, and wrong balance deltas. The pinned
-[`settlement tests`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamPrimarySaleSettlement.t.sol#L778-L1043)
+[`settlement tests`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPrimarySaleSettlement.t.sol#L778-L1043)
 exercise the active standard-token path and those rejection cases.
 
 The accepted token set is deployment configuration, not a hardcoded list.
 Reviewers must inspect the configured registry state before launch. A UI
 allowlist alone would not be an onchain accounting control.
+
+### PROPOSED - PAYER-BOUND ORCHESTRATION
+
+This ERC-20 function is not a conforming genesis sale path. It currently acts as
+both official revenue recorder and the contract that calls `transferFrom` on
+the payer. The target architecture assigns those powers to two contracts:
+
+1. contract 20 verifies a payer-bound `PaymentIntent` and is the only protocol
+   allowance-pull initiator;
+2. contract 9 resolves revenue, consumes the settlement key, routes value, and
+   records official settlement without pulling the payer.
+
+No contract 20 implementation exists. The foundation also lacks PaymentIntent
+signature verification, signer-scoped replay, revocation, revenue-escrow
+fallback, and top-level sale-adapter orchestration. This is a proposed design,
+not a supported token-denominated sale. See
+[`ADR 0019`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/docs/adr/0019-payment-intent-orchestration.md#L3-L82).
 
 ## Rounding and dust
 
@@ -129,10 +172,13 @@ should state:
 
 ## Curator rewards
 
-### IMPLEMENTED
+### CURRENTLY WIRED BASELINE
 
-The drop/revenue system includes curator accounting and Merkle-style claim
-roots. A root commits to a set of claims; a claimant supplies a proof.
+The current Drop and Auction contracts create curator-reserve credits for the
+configured `StreamCuratorsPool` address. An authorized release moves the reserve
+to that pool. The pool uses collection Merkle roots and pull credits for
+individual curator claims. This lane does not pass through the revenue resolver.
+A root commits to a set of claims; a claimant supplies a proof.
 
 Reviewers should verify:
 
@@ -151,7 +197,18 @@ allocation used to build the root was fair.
 
 ### IMPLEMENTED
 
-The Core exposes ERC-2981 royalty information through `royaltyInfo`.
+The Core exposes ERC-2981 royalty information through `royaltyInfo`. At this
+commit it ignores token-specific revenue profiles and returns:
+
+- fixed receiver `0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377`;
+- fixed rate `690` basis points out of `10,000`;
+- amount `salePrice * 690 / 10_000`;
+- the same answer for arbitrary token IDs;
+- no runtime royalty setter and no per-token override.
+
+The exact implementation is
+[`StreamCore.royaltyInfo`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L1013-L1027).
+The current Core does not call `StreamRevenueResolver` for this read.
 
 ### IMPORTANT LIMITATION
 

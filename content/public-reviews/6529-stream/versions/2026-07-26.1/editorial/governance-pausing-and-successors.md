@@ -6,11 +6,16 @@ defined domains, and record successors. This avoids silently replacing the
 Core's bytecode, but it does not remove governance risk.
 
 The main components are
-[`StreamModuleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleRegistry.sol),
-[`StreamGovernanceExecutor.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamGovernanceExecutor.sol),
-[`StreamRoleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamRoleRegistry.sol),
+[`StreamModuleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamModuleRegistry.sol),
+[`StreamGovernanceExecutor.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernanceExecutor.sol),
+[`StreamRoleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol),
 and
-[`StreamAdmins.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamAdmins.sol).
+[`StreamAdmins.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamAdmins.sol).
+
+`StreamAdmins` is in the current rehearsal. The Governance V2 executor, role
+registry, and module registry are **SOURCE IMPLEMENTED**, but they are not part
+of that rehearsal's deployed contract set. The sections below explain their
+source behavior and accepted target, not candidate wiring.
 
 ## Roles are capabilities
 
@@ -53,7 +58,7 @@ connected to the intended dependencies.
 
 ## Scheduled actions
 
-### IMPLEMENTED WITH CONSTRAINTS
+### SOURCE IMPLEMENTED - CANDIDATE UNBOUND
 
 The governance executor schedules sensitive calls, enforces a delay, permits
 cancellation or guardian intervention, and executes the bound action after its
@@ -78,6 +83,30 @@ calldata fragment that was not visible during the review delay. The current
 evidence does not yet establish this invariant for the complete governed
 surface; see the known limitation below.
 
+### Action classes and minimum delays
+
+| Class                 |  ID | Minimum delay |
+| --------------------- | --: | ------------: |
+| Immediate tightening  |   0 |             0 |
+| Delayed loosening     |   1 |      48 hours |
+| Terminal freeze       |   2 |      72 hours |
+| Pointer replacement   |   3 |      48 hours |
+| Funds recovery        |   4 |       14 days |
+| Successor declaration |   5 |       30 days |
+
+Numeric IDs are append-only; former class 6 is retired and cannot be reused.
+Delayed classes also require an open execution window. Scheduling binds target,
+native value, selector, calldata hash, scope, old-state hash, new-state hash,
+earliest execution, expiry, reason, and manifest. The calldata preimage is
+published onchain. Authorized actors schedule or cancel; execution is
+permissionless inside the committed window.
+
+See the
+[`action-class constants`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamGovernanceExecutor.sol#L69-L79),
+[`delay function`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernanceBootstrap.sol#L299-L311),
+and
+[`scheduled-call binding`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernanceExecutor.sol#L305-L403).
+
 ## Native-value authority
 
 ### KNOWN LIMITATION
@@ -101,7 +130,7 @@ This is a code and threat-model question, not merely an operational policy.
 
 ## Governed parameter binding
 
-### KNOWN LIMITATION
+### SOURCE IMPLEMENTED - CANDIDATE UNBOUND
 
 The current governance evidence does not yet prove that every governed action
 binds every security-sensitive parameter from proposal through execution.
@@ -117,6 +146,45 @@ For each governed selector, reviewers should compare:
 If a mutable registry, global default, or caller-supplied argument fills in a
 missing field at execution, the delayed action can mean something different
 from what reviewers saw.
+
+### Accepted one-way parameter policy
+
+The accepted policy for every launch gas and time parameter is deliberately
+one-way:
+
+- only a Governance V2 `DELAYED_LOOSENING` action may change it;
+- the minimum delay is 48 hours;
+- a new value must be strictly higher than the live value;
+- one action may raise a value by no more than 2x;
+- there is no lowering, emergency raise, probe repair, or permissionless
+  mutation path;
+- a zero governance authority makes the host immutable;
+- permanent governance loss leaves values readable but unchangeable;
+- tightening later requires a reviewed successor host or deployment line.
+
+This trades recovery flexibility for a smaller, auditable authority surface.
+The source hosts implement the rule, but complete candidate parameter bindings
+are not available. See
+[`ADR 0017`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/docs/adr/0017-raise-only-parameter-governance.md#L48-L71)
+and its
+[`governance-loss consequence`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/docs/adr/0017-raise-only-parameter-governance.md#L140-L153).
+
+## One-way system-manifest cutover
+
+### SOURCE IMPLEMENTED - CANDIDATE UNBOUND
+
+Governance begins with a temporary genesis bootstrap authority. The source can
+bind the expected role registry, Governance Root, Core, system-manifest
+satellite, code hashes, initial guardian set, trigger set, expected manifest,
+and inventory root. Sealing is one-way: it verifies the committed bootstrap
+state and transfers executor ownership to the Governance Root.
+
+After sealing, the temporary bootstrap authority is not an alternate governor.
+This ceremony is security-critical because a wrong address or code hash would be
+made authoritative at the cutover. The source lifecycle is in
+[`StreamGovernanceManifest`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernanceManifest.sol#L12-L54)
+and
+[`bindSystemManifestBootstrap` / `sealSystemManifestBootstrap`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernanceExecutor.sol#L807-L893).
 
 ## Guardian
 
@@ -135,24 +203,30 @@ the full governance path.
 
 ## Pause domains
 
-### EVIDENCE PENDING
+### CURRENTLY WIRED BASELINE
 
-The candidate exposes domain-specific pause machinery rather than treating the
-whole protocol as one switch. The selector-level coverage and real pause/resume
-authorities have not yet been published as accepted evidence.
+`StreamAdmins` defines six pause domains. The owner or a registered pause
+guardian can pause. The owner or a registered unpause admin can resume.
 
-The following is the required documentation shape, not a verified authority or
-selector inventory:
+| Domain             | Stops in current source                                                                                    | Does not stop                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Drop execution     | New signed Drop execution                                                                                  | Withdrawals and unrelated reads                                            |
+| Mint               | Legacy `StreamMinter.mint` and `mintAndAuction`                                                            | Existing ownership and the separate manager unless its phase is paused     |
+| Auction bid        | New bids                                                                                                   | Auction-credit withdrawals                                                 |
+| Auction settlement | Winner and no-bid settlement entries                                                                       | Bidder/seller credit withdrawals                                           |
+| Metadata mutation  | Core, contract-metadata, collection-metadata, and preservation mutation entries that call the shared check | Existing metadata reads                                                    |
+| Randomness request | New requests in the current randomizer adapters                                                            | Existing request reads and provider callbacks governed by their own checks |
 
-| Domain | Stops | Does not stop | Who pauses | Who resumes |
-| --- | --- | --- | --- | --- |
-| Minting | New token creation paths | Existing token ownership unless stated | To be verified | To be verified |
-| Sales | New sale execution or auction operations as specified | Unrelated metadata or transfers | To be verified | To be verified |
-| Metadata | Defined mutation paths | Reads of existing metadata | To be verified | To be verified |
-| Governance | Defined execution paths | Already permanent Core behavior | To be verified | To be verified |
+The exact domain identifiers are in
+[`StreamPauseDomains`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamPauseDomains.sol#L5-L12).
+Pause and resume authority are in
+[`StreamAdmins.setPaused`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamAdmins.sol#L137-L157)
+and its
+[`authority checks`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamAdmins.sol#L223-L229).
 
-The accepted matrix must come from selector-level code inspection and name the
-actual authorized roles.
+`StreamMintManager` has a separate per-phase pause. It does not consult the
+global `MINT` domain. A future cutover must decide whether that distinction is
+intentional and present it explicitly.
 
 Pausing should not strand refunds, withdrawals, or other user exits unless that
 tradeoff is explicit and justified.

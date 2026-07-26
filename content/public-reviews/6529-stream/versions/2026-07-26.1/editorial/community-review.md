@@ -4,7 +4,7 @@ This is community feedback week for Stream. The objective is to improve the
 contract before it is finalized, not to collect endorsements.
 
 The reviewed source is
-[`e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8`](https://github.com/6529-Collections/6529Stream/tree/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8).
+[`018c8788750980e143c38ace0666684bf641ec4f`](https://github.com/6529-Collections/6529Stream/tree/018c8788750980e143c38ace0666684bf641ec4f).
 The review version is `2026-07-26.1`. Check both values before commenting. A
 comment about another commit may still be useful, but it must say which code it
 examined.

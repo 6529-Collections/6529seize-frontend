@@ -4,7 +4,7 @@ Stream is pre-audit and is not production-ready. This page records the evidence
 that exists and the evidence that does not. It is not a security certification.
 
 The candidate under review is the exact Git commit
-[`e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8`](https://github.com/6529-Collections/6529Stream/tree/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8).
+[`018c8788750980e143c38ace0666684bf641ec4f`](https://github.com/6529-Collections/6529Stream/tree/018c8788750980e143c38ace0666684bf641ec4f).
 Claims about a later commit require a new review version.
 
 ## Threat model
@@ -30,7 +30,9 @@ damage without an attacker.
 
 ## Accepted revenue-adapter trust boundary
 
-The accepted revenue-resolver architecture adds one immutable, exact-code
+### ACCEPTED TARGET - NOT IMPLEMENTED
+
+The accepted revenue-resolver architecture would add one immutable, exact-code
 validation adapter to resolver write paths. The adapter owns no state,
 authority, roles, funds, or events. It may make only the approved
 caller-insensitive, read-only calls to exact pinned dependencies. The resolver
@@ -78,7 +80,7 @@ absence of:
 ### KNOWN LIMITATION
 
 The pinned
-[`SLITHER_BASELINE.json`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/ops/SLITHER_BASELINE.json)
+[`SLITHER_BASELINE.json`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/ops/SLITHER_BASELINE.json)
 contains 30 open High or Medium findings: 3 High and 27 Medium. A count alone
 does not establish severity or exploitability, and tools can produce false
 positives. It does establish that the release cannot honestly be described as
@@ -99,7 +101,7 @@ normalization rules, source commit, and disposition evidence.
 ### KNOWN LIMITATION
 
 The pinned
-[`bytecode release proof`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/release-artifacts/latest/bytecode-release-proof.json)
+[`bytecode release proof`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/release-artifacts/latest/bytecode-release-proof.json)
 records `StreamCore` deployed bytecode at 24,152 bytes. That is 424 bytes below
 the EIP-170 maximum of 24,576 bytes.
 
@@ -135,8 +137,10 @@ commit, so this review cannot claim that either one passes its gate.
 The current risk register includes three governance families that require
 resolution:
 
-- **RISK-GOV-002:** five selector/global metadata and preservation write paths
-  lack complete record-family authorization evidence;
+- **RISK-GOV-002:** record-family authorization is source implemented, but the
+  exact candidate, production admission set, live providers, grant map,
+  deployed runtime/code-hash bindings, non-local rotation/revocation evidence,
+  and independent review are unavailable;
 - **RISK-GOV-003:** governance executor native-value authority is too broad or
   insufficiently constrained;
 - **RISK-GOV-004:** end-to-end binding evidence for governed parameters is
@@ -144,6 +148,35 @@ resolution:
 
 These are architectural risks. A local allowlist or reassuring role name does
 not resolve them unless every effective path is covered.
+
+The current risk-register title for RISK-GOV-002 still describes the historical
+whole-module problem. Reviewers should use the
+[`record-family source catalog`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/release-artifacts/record-family-authorization-source-catalog.json)
+for current source behavior and the risk register for the still-open release
+gate.
+
+## End-to-end wiring blockers
+
+### KNOWN LIMITATION
+
+Several source-implemented components are not one supported end-to-end path:
+
+- signed Drops and the current auction use legacy `StreamMinter`;
+- `StreamMintManager` and `StreamMintLedger` form a separate mint lane;
+- native Drop and Auction proceeds remain in those contracts' local accounting;
+- revenue resolver, split wallets, asset policy, and primary settlement are
+  separate foundations;
+- ERC-20 payer-bound orchestration is proposed and its top-level verifier does
+  not exist;
+- current Core royalties are fixed at 690 basis points to one receiver, while
+  resolver-backed royalties are an accepted target;
+- Governance V2 and artwork finality source are not part of the current
+  rehearsal's deployed contract set.
+
+Compilation and unit tests for each component do not prove these boundaries have
+been reconciled. Before a candidate claim, the release needs a generated wiring
+manifest and end-to-end tests for every supported sale, mint, revenue, royalty,
+governance, and finality lane.
 
 ## External audit
 
@@ -259,6 +292,12 @@ At minimum, production should remain blocked until:
 - all High findings and every material Medium finding are fixed or formally
   resolved;
 - governance record-family authorization and action binding are proven;
+- the chosen signed-sale mint lane is explicit and its current Drop/Auction
+  callers, counters, replay state, and Core entry are tested end to end;
+- native Drop/Auction accounting is either deliberately retained or replaced by
+  resolver/settlement integration, with no ambiguous parallel path;
+- current fixed royalties are either deliberately retained or replaced by the
+  accepted resolver-backed target, with marketplace behavior verified;
 - native-value executor authority is constrained and tested;
 - the Core meets the adopted bytecode margin or the design is deliberately
   revised;
