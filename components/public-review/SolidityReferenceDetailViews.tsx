@@ -1,0 +1,339 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+import { SoliditySourceReview } from "@/components/public-review/SoliditySourceReview";
+import { SolidityDefinitionView } from "@/components/public-review/SolidityReferenceViews";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import {
+  getSolidityDefinitionHref,
+  getSolidityInterfaceHref,
+  type SolidityReferenceHrefContext,
+} from "@/lib/public-review/solidityReferenceRoutes";
+import type {
+  SolidityDefinitionIndexEntry,
+  SolidityDefinitionShard,
+  SolidityParameter,
+  SolidityReferenceManifest,
+  SolidityRoutedDeclaration,
+  SoliditySourceDocument,
+} from "@/lib/public-review/solidityReferenceTypes";
+
+const CARD_CLASSES =
+  "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5";
+
+function KeyValue({
+  children,
+  label,
+}: {
+  readonly children: ReactNode;
+  readonly label: string;
+}) {
+  return (
+    <div className="tw-min-w-0">
+      <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
+        {label}
+      </dt>
+      <dd className="tw-m-0 tw-mt-1.5 tw-break-all tw-text-sm tw-leading-6 tw-text-iron-200">
+        {children}
+      </dd>
+    </div>
+  );
+}
+
+function getIndexedLabel(indexed: boolean | undefined): string {
+  if (indexed === undefined) {
+    return "—";
+  }
+  return indexed
+    ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
+    : t(DEFAULT_LOCALE, "publicReview.reference.no");
+}
+
+function ParameterTable({
+  label,
+  parameters,
+}: {
+  readonly label: string;
+  readonly parameters: readonly SolidityParameter[];
+}) {
+  const headingId = `declaration-${label.toLowerCase().replaceAll(" ", "-")}`;
+  return (
+    <section aria-labelledby={headingId}>
+      <h2
+        id={headingId}
+        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
+      >
+        {label}
+      </h2>
+      {parameters.length === 0 ? (
+        <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
+          {t(DEFAULT_LOCALE, "publicReview.reference.noParameters")}
+        </p>
+      ) : (
+        <div className="tw-mt-4 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
+          <table className="tw-w-full tw-min-w-[34rem] tw-border-collapse tw-text-left tw-text-sm">
+            <thead className="tw-bg-iron-900 tw-text-iron-400">
+              <tr>
+                <th className="tw-p-3 tw-font-semibold">
+                  {t(DEFAULT_LOCALE, "publicReview.reference.name")}
+                </th>
+                <th className="tw-p-3 tw-font-semibold">
+                  {t(DEFAULT_LOCALE, "publicReview.reference.type")}
+                </th>
+                <th className="tw-p-3 tw-font-semibold">
+                  {t(DEFAULT_LOCALE, "publicReview.reference.indexed")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {parameters.map((parameter) => (
+                <tr
+                  key={`${parameter.index}:${parameter.name}:${parameter.type}`}
+                  className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800"
+                >
+                  <td className="tw-p-3 tw-font-mono tw-text-iron-100">
+                    {parameter.name || "—"}
+                  </td>
+                  <td className="tw-p-3 tw-font-mono tw-text-sky-200">
+                    {parameter.type}
+                  </td>
+                  <td className="tw-p-3 tw-text-iron-300">
+                    {getIndexedLabel(parameter.indexed)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function SolidityDeclarationView({
+  declaration,
+  definition,
+  feedbackSlot,
+  source,
+}: {
+  readonly declaration: SolidityRoutedDeclaration;
+  readonly definition: SolidityDefinitionIndexEntry;
+  readonly feedbackSlot?: ReactNode | undefined;
+  readonly source: SoliditySourceDocument;
+}) {
+  const selectorOrTopic =
+    "topic0" in declaration ? declaration.topic0 : declaration.selector;
+  const outputs = "outputs" in declaration ? declaration.outputs : [];
+  const signature =
+    declaration.canonicalSignature ?? declaration.displaySignature;
+
+  return (
+    <div className="tw-space-y-8">
+      <section className={CARD_CLASSES} aria-labelledby="declaration-signature">
+        <h2
+          id="declaration-signature"
+          className="tw-m-0 tw-break-all tw-font-mono tw-text-xl tw-font-semibold tw-text-white sm:tw-text-2xl"
+        >
+          {signature}
+        </h2>
+        <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-5 sm:tw-grid-cols-2">
+          <KeyValue
+            label={
+              "topic0" in declaration
+                ? t(DEFAULT_LOCALE, "publicReview.reference.topic")
+                : t(DEFAULT_LOCALE, "publicReview.reference.selector")
+            }
+          >
+            <code>{selectorOrTopic ?? "—"}</code>
+          </KeyValue>
+          {"stateMutability" in declaration ? (
+            <KeyValue
+              label={t(DEFAULT_LOCALE, "publicReview.reference.mutability")}
+            >
+              {declaration.stateMutability}
+            </KeyValue>
+          ) : null}
+          {"visibility" in declaration ? (
+            <KeyValue
+              label={t(DEFAULT_LOCALE, "publicReview.reference.visibility")}
+            >
+              {declaration.visibility}
+            </KeyValue>
+          ) : null}
+          <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.natspec")}>
+            {declaration.natspec ||
+              t(DEFAULT_LOCALE, "publicReview.reference.noNatspec")}
+          </KeyValue>
+        </dl>
+      </section>
+      <div className="tw-grid tw-gap-8 xl:tw-grid-cols-2">
+        <ParameterTable
+          label={t(DEFAULT_LOCALE, "publicReview.reference.parameters")}
+          parameters={declaration.inputs}
+        />
+        <ParameterTable
+          label={t(DEFAULT_LOCALE, "publicReview.reference.outputs")}
+          parameters={outputs}
+        />
+      </div>
+      <SoliditySourceReview
+        feedbackSlot={feedbackSlot}
+        source={{
+          contract: definition.name,
+          declaration: signature,
+          generatedSnippetSha256: declaration.range.snippetSha256,
+          githubUrl: declaration.range.githubUrl,
+          initialLineEnd: declaration.range.lineEnd,
+          initialLineStart: declaration.range.lineStart,
+          lines: source.lines,
+          path: source.file.path,
+          sourceSha256: source.file.sha256,
+        }}
+      />
+    </div>
+  );
+}
+
+export function SolidityInterfaceView({
+  hrefContext,
+  indexEntry,
+  manifest,
+  shard,
+}: {
+  readonly hrefContext: SolidityReferenceHrefContext;
+  readonly indexEntry: SolidityDefinitionIndexEntry;
+  readonly manifest: SolidityReferenceManifest;
+  readonly shard: SolidityDefinitionShard;
+}) {
+  return (
+    <div className="tw-space-y-8">
+      <section className={CARD_CLASSES} aria-labelledby="interface-identity">
+        <h2
+          id="interface-identity"
+          className="tw-m-0 tw-font-mono tw-text-2xl tw-font-semibold tw-text-white"
+        >
+          {indexEntry.name}
+        </h2>
+        <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-5 sm:tw-grid-cols-2">
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.interfaceId")}
+          >
+            <code>{indexEntry.interface.interfaceId ?? "—"}</code>
+          </KeyValue>
+          <KeyValue
+            label={t(
+              DEFAULT_LOCALE,
+              "publicReview.reference.interfaceIdSource"
+            )}
+          >
+            {indexEntry.interface.interfaceIdSource ?? "—"}
+          </KeyValue>
+          <KeyValue
+            label={t(
+              DEFAULT_LOCALE,
+              "publicReview.reference.interfaceAbiChecksum"
+            )}
+          >
+            <code>{indexEntry.interface.abiSha256 ?? "—"}</code>
+          </KeyValue>
+        </dl>
+      </section>
+      <SolidityDefinitionView
+        hrefContext={hrefContext}
+        indexEntry={indexEntry}
+        manifest={manifest}
+        shard={shard}
+      />
+    </div>
+  );
+}
+
+export function SoliditySourceView({
+  document,
+  feedbackSlot,
+  hrefContext,
+  manifest,
+}: {
+  readonly document: SoliditySourceDocument;
+  readonly feedbackSlot?: ReactNode | undefined;
+  readonly hrefContext: SolidityReferenceHrefContext;
+  readonly manifest: SolidityReferenceManifest;
+}) {
+  return (
+    <div className="tw-space-y-8">
+      <section className={CARD_CLASSES} aria-labelledby="source-file-identity">
+        <h2
+          id="source-file-identity"
+          className="tw-m-0 tw-break-all tw-font-mono tw-text-xl tw-font-semibold tw-text-white"
+        >
+          {document.file.path}
+        </h2>
+        <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-5 sm:tw-grid-cols-2">
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceChecksum")}
+          >
+            <code>{document.file.sha256}</code>
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceScope")}
+          >
+            {document.file.scope}
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceFiles")}
+          >
+            {formatInteger(DEFAULT_LOCALE, document.file.lineCount)}
+          </KeyValue>
+          <KeyValue
+            label={t(
+              DEFAULT_LOCALE,
+              "publicReview.reference.sourceDefinitions"
+            )}
+          >
+            <span className="tw-flex tw-flex-wrap tw-gap-2">
+              {document.file.definitionIds.map((definitionId) => {
+                const definition = manifest.definitionIndex.find(
+                  (candidate) => candidate.id === definitionId
+                );
+                if (!definition) {
+                  return null;
+                }
+                const href = definition.interface.published
+                  ? getSolidityInterfaceHref({
+                      ...hrefContext,
+                      definitionKey: definition.key,
+                    })
+                  : getSolidityDefinitionHref({
+                      ...hrefContext,
+                      definitionKey: definition.key,
+                    });
+                return (
+                  <Link
+                    key={definition.id}
+                    className="tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-font-mono tw-text-xs tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                    href={href}
+                  >
+                    {definition.name}
+                  </Link>
+                );
+              })}
+            </span>
+          </KeyValue>
+        </dl>
+      </section>
+      <SoliditySourceReview
+        feedbackSlot={feedbackSlot}
+        source={{
+          githubUrl: document.file.githubUrl,
+          initialLineEnd: 1,
+          initialLineStart: 1,
+          lines: document.lines,
+          path: document.file.path,
+          sourceSha256: document.file.sha256,
+        }}
+      />
+    </div>
+  );
+}

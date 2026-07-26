@@ -15,6 +15,7 @@ import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
+import { getSolidityReferenceRootHref } from "@/lib/public-review/solidityReferenceRoutes";
 import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinition";
 
 function PublicReviewPageStepper({
@@ -117,6 +118,14 @@ export function PublicReviewShell({
               <PublicReviewEvidenceBadge key={state} state={state} />
             ))}
           </div>
+          <Link
+            href={getSolidityReferenceRootHref({
+              reviewSlug: review.slug,
+              version: routeVersion,
+            })}
+            className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/40 tw-bg-sky-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-sky-100 tw-no-underline hover:tw-border-sky-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+            {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
+          </Link>
         </header>
 
         {page.id === "overview" && (

@@ -1,0 +1,390 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+
+export interface PublicReviewCodeSelection {
+  readonly kind: "code";
+  readonly path: string;
+  readonly sourceSha256: string;
+  readonly lineStart: number;
+  readonly lineEnd: number;
+  readonly contract?: string | undefined;
+  readonly declaration?: string | undefined;
+  readonly snippetSha256?: string | undefined;
+}
+
+interface SourceReviewInput {
+  readonly contract?: string | undefined;
+  readonly declaration?: string | undefined;
+  readonly generatedSnippetSha256?: string | undefined;
+  readonly githubUrl: string;
+  readonly initialLineEnd: number;
+  readonly initialLineStart: number;
+  readonly lines: readonly string[];
+  readonly path: string;
+  readonly sourceSha256: string;
+}
+
+interface PublicReviewCodeSelectionContextValue {
+  readonly selection: PublicReviewCodeSelection | undefined;
+}
+
+const PublicReviewCodeSelectionContext =
+  createContext<PublicReviewCodeSelectionContextValue | null>(null);
+
+export function usePublicReviewCodeSelection(): PublicReviewCodeSelectionContextValue {
+  const value = useContext(PublicReviewCodeSelectionContext);
+  if (!value) {
+    throw new Error(
+      "usePublicReviewCodeSelection must be used inside SoliditySourceReview."
+    );
+  }
+  return value;
+}
+
+function clampLine(line: number, lineCount: number): number {
+  return Math.min(Math.max(line, 1), lineCount);
+}
+
+function toGitHubSelectionUrl(
+  githubUrl: string,
+  lineStart: number,
+  lineEnd: number
+): string {
+  const baseUrl = githubUrl.split("#", 1)[0] ?? githubUrl;
+  const lineFragment =
+    lineStart === lineEnd ? `#L${lineStart}` : `#L${lineStart}-L${lineEnd}`;
+  return `${baseUrl}${lineFragment}`;
+}
+
+async function getSnippetSha256(source: string): Promise<string | undefined> {
+  try {
+    const digest = await globalThis.crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(source)
+    );
+    const hex = Array.from(new Uint8Array(digest), (byte) =>
+      byte.toString(16).padStart(2, "0")
+    ).join("");
+    return `sha256:${hex}`;
+  } catch {
+    return undefined;
+  }
+}
+
+function SourceSelectionControls({
+  lineCount,
+  lineEnd,
+  lineStart,
+  onLineEndChange,
+  onLineStartChange,
+  selectionUrl,
+  selectedSource,
+  showCommentAction,
+}: {
+  readonly lineCount: number;
+  readonly lineEnd: number;
+  readonly lineStart: number;
+  readonly onLineEndChange: (line: number) => void;
+  readonly onLineStartChange: (line: number) => void;
+  readonly selectionUrl: string;
+  readonly selectedSource: string;
+  readonly showCommentAction: boolean;
+}) {
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const selectionValid = lineStart <= lineEnd;
+
+  const copySelection = async (): Promise<void> => {
+    try {
+      await globalThis.navigator.clipboard.writeText(selectedSource);
+      setCopyStatus(
+        t(DEFAULT_LOCALE, "publicReview.reference.copiedSelection")
+      );
+    } catch {
+      setCopyStatus(t(DEFAULT_LOCALE, "publicReview.reference.copyFailed"));
+    }
+  };
+
+  const focusFeedback = (): void => {
+    const feedback = document.querySelector<HTMLElement>(
+      "[data-public-review-feedback]"
+    );
+    feedback?.scrollIntoView({ behavior: "smooth", block: "start" });
+    feedback
+      ?.querySelector<HTMLElement>("textarea, button, select, input, a")
+      ?.focus({ preventScroll: true });
+  };
+
+  return (
+    <section
+      aria-labelledby="solidity-source-selection-heading"
+      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 sm:tw-p-5"
+    >
+      <h2
+        id="solidity-source-selection-heading"
+        className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white"
+      >
+        {t(DEFAULT_LOCALE, "publicReview.reference.selectLines")}
+      </h2>
+      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(DEFAULT_LOCALE, "publicReview.reference.selectLinesDescription")}
+      </p>
+      <div className="tw-mt-4 tw-grid tw-gap-4 sm:tw-grid-cols-2">
+        <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
+          <span className="tw-mb-1.5 tw-block">
+            {t(DEFAULT_LOCALE, "publicReview.reference.startLine")}
+          </span>
+          <input
+            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+            max={lineCount}
+            min={1}
+            type="number"
+            value={lineStart}
+            onChange={(event) => {
+              const value = Number(event.target.value);
+              if (Number.isSafeInteger(value)) {
+                onLineStartChange(clampLine(value, lineCount));
+              }
+            }}
+          />
+        </label>
+        <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
+          <span className="tw-mb-1.5 tw-block">
+            {t(DEFAULT_LOCALE, "publicReview.reference.endLine")}
+          </span>
+          <input
+            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+            max={lineCount}
+            min={1}
+            type="number"
+            value={lineEnd}
+            onChange={(event) => {
+              const value = Number(event.target.value);
+              if (Number.isSafeInteger(value)) {
+                onLineEndChange(clampLine(value, lineCount));
+              }
+            }}
+          />
+        </label>
+      </div>
+      <p
+        className={`tw-mb-0 tw-mt-3 tw-text-sm ${
+          selectionValid ? "tw-text-sky-200" : "tw-text-red-200"
+        }`}
+        role="status"
+      >
+        {selectionValid
+          ? t(DEFAULT_LOCALE, "publicReview.reference.selectedRange", {
+              start: lineStart,
+              end: lineEnd,
+            })
+          : t(DEFAULT_LOCALE, "publicReview.reference.selectionInvalid")}
+      </p>
+      <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap">
+        <button
+          type="button"
+          disabled={!selectionValid}
+          onClick={() => void copySelection()}
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.reference.copySelection")}
+        </button>
+        <a
+          href={selectionUrl}
+          rel="noreferrer"
+          target="_blank"
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 tw-no-underline hover:tw-border-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.reference.openSelection")}
+        </a>
+        {showCommentAction ? (
+          <button
+            type="button"
+            disabled={!selectionValid}
+            onClick={focusFeedback}
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+          >
+            {t(DEFAULT_LOCALE, "publicReview.reference.commentSelection")}
+          </button>
+        ) : null}
+      </div>
+      <div aria-live="polite" aria-atomic="true">
+        {copyStatus ? (
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
+            {copyStatus}
+          </p>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function SourceLines({
+  lineEnd,
+  lines,
+  lineStart,
+  onSelectLine,
+}: {
+  readonly lineEnd: number;
+  readonly lines: readonly string[];
+  readonly lineStart: number;
+  readonly onSelectLine: (line: number) => void;
+}) {
+  return (
+    <div
+      aria-label={t(DEFAULT_LOCALE, "publicReview.reference.sourceCodeRegion")}
+      className="tw-mt-5 tw-max-h-[70vh] tw-overflow-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black"
+      role="region"
+      tabIndex={0}
+    >
+      <ol className="tw-m-0 tw-min-w-max tw-list-none tw-p-0 tw-py-3 tw-font-mono tw-text-xs tw-leading-6 sm:tw-text-sm">
+        {lines.map((line, index) => {
+          const lineNumber = index + 1;
+          const selected = lineNumber >= lineStart && lineNumber <= lineEnd;
+          return (
+            <li
+              key={lineNumber}
+              className={`tw-grid tw-grid-cols-[4.5rem_minmax(0,1fr)] ${
+                selected ? "tw-bg-primary-400/15" : ""
+              }`}
+            >
+              <button
+                type="button"
+                aria-pressed={
+                  lineStart === lineNumber && lineEnd === lineNumber
+                }
+                aria-label={t(
+                  DEFAULT_LOCALE,
+                  "publicReview.reference.selectSingleLine",
+                  { line: lineNumber }
+                )}
+                onClick={() => onSelectLine(lineNumber)}
+                className="tw-min-h-7 tw-border-0 tw-bg-transparent tw-px-3 tw-text-right tw-font-mono tw-text-xs tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-white"
+              >
+                {lineNumber}
+              </button>
+              <code className="tw-block tw-whitespace-pre tw-pr-5 tw-text-iron-200">
+                {line || " "}
+              </code>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+export function SoliditySourceReview({
+  feedbackSlot,
+  source,
+}: {
+  readonly feedbackSlot?: ReactNode | undefined;
+  readonly source: SourceReviewInput;
+}) {
+  const lineCount = source.lines.length;
+  const initialLineStart = clampLine(source.initialLineStart, lineCount);
+  const initialLineEnd = clampLine(source.initialLineEnd, lineCount);
+  const [lineStart, setLineStart] = useState(initialLineStart);
+  const [lineEnd, setLineEnd] = useState(initialLineEnd);
+  const [computedSnippet, setComputedSnippet] = useState<
+    | {
+        readonly checksum: string | undefined;
+        readonly selectionKey: string;
+      }
+    | undefined
+  >();
+  const selectionValid = lineStart <= lineEnd;
+  const selectedSource = selectionValid
+    ? source.lines.slice(lineStart - 1, lineEnd).join("\n")
+    : "";
+  const generatedRangeSelected =
+    lineStart === initialLineStart && lineEnd === initialLineEnd;
+  const selectionKey = `${lineStart}:${lineEnd}:${selectedSource}`;
+
+  useEffect(() => {
+    if (!selectionValid || generatedRangeSelected) {
+      return;
+    }
+    let cancelled = false;
+    void getSnippetSha256(selectedSource).then((checksum) => {
+      if (!cancelled) {
+        setComputedSnippet({ checksum, selectionKey });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [generatedRangeSelected, selectedSource, selectionKey, selectionValid]);
+
+  const selection = useMemo<PublicReviewCodeSelection | undefined>(() => {
+    if (!selectionValid) {
+      return undefined;
+    }
+    let snippetSha256: string | undefined;
+    if (generatedRangeSelected) {
+      snippetSha256 = source.generatedSnippetSha256;
+    } else if (computedSnippet?.selectionKey === selectionKey) {
+      snippetSha256 = computedSnippet.checksum;
+    }
+    return {
+      kind: "code",
+      path: source.path,
+      sourceSha256: source.sourceSha256,
+      lineStart,
+      lineEnd,
+      ...(source.contract ? { contract: source.contract } : {}),
+      ...(source.declaration ? { declaration: source.declaration } : {}),
+      ...(snippetSha256 ? { snippetSha256 } : {}),
+    };
+  }, [
+    computedSnippet,
+    generatedRangeSelected,
+    lineEnd,
+    lineStart,
+    selectionValid,
+    selectionKey,
+    source.contract,
+    source.declaration,
+    source.generatedSnippetSha256,
+    source.path,
+    source.sourceSha256,
+  ]);
+  const selectionUrl = toGitHubSelectionUrl(
+    source.githubUrl,
+    lineStart,
+    lineEnd
+  );
+
+  return (
+    <PublicReviewCodeSelectionContext.Provider value={{ selection }}>
+      <SourceSelectionControls
+        lineCount={lineCount}
+        lineEnd={lineEnd}
+        lineStart={lineStart}
+        onLineEndChange={setLineEnd}
+        onLineStartChange={setLineStart}
+        selectionUrl={selectionUrl}
+        selectedSource={selectedSource}
+        showCommentAction={feedbackSlot !== undefined}
+      />
+      <SourceLines
+        lineEnd={lineEnd}
+        lines={source.lines}
+        lineStart={lineStart}
+        onSelectLine={(line) => {
+          setLineStart(line);
+          setLineEnd(line);
+        }}
+      />
+      {feedbackSlot !== undefined && feedbackSlot !== null ? (
+        <div className="tw-mt-8" data-public-review-feedback>
+          {feedbackSlot}
+        </div>
+      ) : null}
+    </PublicReviewCodeSelectionContext.Provider>
+  );
+}
