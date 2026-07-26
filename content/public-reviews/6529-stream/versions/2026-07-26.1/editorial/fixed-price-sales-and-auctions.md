@@ -8,12 +8,18 @@ all current contract behavior.
 
 ### IMPLEMENTED
 
-Both sale paths begin with a signed authorization. Its EIP-712 domain binds the
-chain and verifying contract. Its payload binds the intended collection,
-participant values, currency or token address separately from price, pricing or
-auction mode, deadline, signer epoch, and replay identifier. Signature validity
-is only one condition. Mint policy, supply, pause state, payment, and
-sale-specific checks still apply.
+Both sale paths begin with a
+[`DropAuthorization`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamDrops.sol#L24-L61).
+Its EIP-712 domain binds the chain and verifying contract. Its payload binds the
+intended collection, participant values, price, pricing or auction mode,
+deadline, signer epoch, and replay identifier.
+
+The current authorization has no currency or token-address field. These paths
+are native-ETH paths, so the currency is fixed by the execution path rather than
+selected inside the signed payload. A future token-denominated sale path would
+need to bind the token address separately from price. Signature validity is only
+one condition. Mint policy, supply, pause state, payment, and sale-specific
+checks still apply.
 
 ## Fixed-price mint
 
@@ -21,8 +27,9 @@ A fixed-price authorization can describe a free or paid mint.
 
 ### PAID PATH
 
-The submitted value must match the authorized economics. The execution should
-not trust an unbound frontend price or infer currency from display text. The
+The submitted native-ETH value must match the authorized economics. The
+execution does not trust an unbound frontend price, and the UI must describe the
+currency as ETH rather than imply that the authorization selected a token. The
 resulting proceeds are credited according to the configured revenue path rather
 than blindly pushed to arbitrary recipients during mint.
 
@@ -197,7 +204,8 @@ should not absorb speculative sale mechanisms.
 
 ## Questions for reviewers
 
-1. Are payer, recipient, currency, amount, quantity, and mode bound completely?
+1. Are payer, recipient, native-ETH amount, quantity, and mode bound completely,
+   and would any future alternate asset add an explicit token-address field?
 2. Should auctions allow cancellation after any bid?
 3. Are extension rules simple enough to explain and reproduce?
 4. Is no-bid behavior fair to the artist and potential collector?

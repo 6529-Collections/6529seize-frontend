@@ -75,8 +75,9 @@ Choose the closest type:
 - **Accessibility or localization** — the review or intended product excludes
   a class of users.
 
-Possible vulnerabilities are welcome in the Wave because the reviewed contract
-is not deployed. Finding them now is the purpose of this process.
+Possible vulnerabilities are welcome in the Wave because this review is in its
+validated predeployment state and its configured disclosure policy explicitly
+permits public reporting. Finding them now is the purpose of this process.
 
 ## Severity
 
@@ -203,16 +204,12 @@ metadata keys, in this order: `review_schema`, `type`, `severity`, and
 `context`. `review_schema` is the literal schema version. `type` and `severity`
 must be values from the following allowlists:
 
-- `type`: `artist-experience-and-approvals`,
-  `curation-and-tdh-authorization`, `minting-and-supply`,
-  `fixed-price-sales-and-auctions`, `revenue-splits-and-royalties`,
-  `randomness`, `metadata-scripts-and-dependencies`,
-  `freezing-preservation-and-finality`,
-  `governance-roles-pausing-and-successors`,
-  `security-testing-and-release-evidence`,
-  `documentation-product-accessibility-and-localization`, or
-  `possible-exploitable-security-vulnerability`;
-- `severity`: `note`, `low`, `medium`, `high`, or `critical`.
+- `type`: `question`, `documentation`, `artist-workflow`, `product-or-ux`,
+  `protocol-design`, `implementation-bug`,
+  `possible-exploitable-security-vulnerability`,
+  `testing-or-evidence-gap`, or `accessibility-or-localization`;
+- `severity`: `critical`, `high`, `medium`, `low`, `informational`, or
+  `not-assessed`.
 
 `context` is canonical JSON containing the submission ID, review ID and
 version, page and section identifiers, and any exact documentation or code
