@@ -58,6 +58,12 @@ export function sharedConfig(
     logging: {
       incomingRequests: false,
     },
+    outputFileTracingIncludes: {
+      "/*": [
+        "./content/public-reviews/**/*.md",
+        "./content/public-reviews/**/manifest.json",
+      ],
+    },
     async headers() {
       return [
         {

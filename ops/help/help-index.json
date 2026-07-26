@@ -64,6 +64,7 @@
         "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
+        "On local development and shared staging, NFTs includes 6529 Stream — Review after ReMemes and before NFT Activity; the entry and its routes are absent on production.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
@@ -85,6 +86,96 @@
       "source_refs": [
         "ops/docs/navigation/feature-sidebar-navigation.md",
         "ops/docs/navigation/feature-app-sidebar-menu.md"
+      ]
+    },
+    {
+      "id": "public-reviews.stream",
+      "kind": "route",
+      "title": "6529 Stream contract review",
+      "aliases": [
+        "stream review",
+        "stream contract",
+        "6529 stream",
+        "contract review",
+        "public contract review"
+      ],
+      "keywords": [
+        "stream",
+        "contract",
+        "review",
+        "solidity",
+        "artist",
+        "audit",
+        "security",
+        "pre-audit",
+        "not deployed"
+      ],
+      "facts": [
+        "The 6529 Stream public review lives at /reviews/6529-stream on local development and shared staging only; it is disabled on production.",
+        "The review describes a proposed multi-collection ERC-721 protocol, not only a one-of-one mint contract.",
+        "Stream is not deployed, is pre-audit, and is not presented as final or production-ready.",
+        "Fourteen editorial pages explain artwork lifecycle, artist controls, roles, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, governance, security, and community review.",
+        "Every page shows the review version, exact source link, evidence labels, page navigation, and on-page contents.",
+        "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
+        "When enabled, NFTs > 6529 Stream — Review appears after ReMemes and before NFT Activity."
+      ],
+      "canonical_path": "/reviews/6529-stream",
+      "related_paths": [
+        "/stream",
+        "/reviews/6529-stream/artwork-lifecycle",
+        "/reviews/6529-stream/for-artists",
+        "/reviews/6529-stream/roles-and-trust",
+        "/reviews/6529-stream/curation-and-tdh-authorization",
+        "/reviews/6529-stream/tokens-collections-and-minting",
+        "/reviews/6529-stream/fixed-price-sales-and-auctions",
+        "/reviews/6529-stream/revenue-splits-and-royalties",
+        "/reviews/6529-stream/randomness",
+        "/reviews/6529-stream/metadata-scripts-and-dependencies",
+        "/reviews/6529-stream/freezing-preservation-and-artwork-finality",
+        "/reviews/6529-stream/governance-pausing-and-successors",
+        "/reviews/6529-stream/security-testing-and-known-limitations",
+        "/reviews/6529-stream/community-review"
+      ],
+      "tags": ["stream", "contract", "review", "security"],
+      "source_refs": [
+        "app/reviews/[review]/page.tsx",
+        "components/public-review/PublicReviewShell.tsx",
+        "ops/docs/public-reviews/README.md"
+      ]
+    },
+    {
+      "id": "public-reviews.stream.feedback-status",
+      "kind": "ui_affordance",
+      "title": "Stream review feedback status",
+      "aliases": [
+        "stream feedback",
+        "comment on stream",
+        "report stream issue",
+        "stream review wave"
+      ],
+      "keywords": [
+        "stream",
+        "feedback",
+        "comment",
+        "security",
+        "vulnerability",
+        "source"
+      ],
+      "facts": [
+        "The initial review shell does not submit feedback and contains no Wave or subwave destination identifier.",
+        "The page states that structured feedback is being connected as a separate reusable module.",
+        "Until submission is enabled, retain the page URL, displayed review version, exact source link, evidence label, and expected-versus-observed description with each note.",
+        "Because Stream is not deployed, possible exploitable vulnerabilities are in scope for this public pre-deployment review."
+      ],
+      "canonical_path": "/reviews/6529-stream/community-review",
+      "related_paths": [
+        "/reviews/6529-stream",
+        "/reviews/6529-stream/security-testing-and-known-limitations"
+      ],
+      "tags": ["stream", "review", "feedback", "security"],
+      "source_refs": [
+        "components/public-review/PublicReviewShell.tsx",
+        "ops/docs/public-reviews/README.md"
       ]
     },
     {

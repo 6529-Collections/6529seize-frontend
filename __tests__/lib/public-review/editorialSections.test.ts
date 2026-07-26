@@ -1,0 +1,33 @@
+import {
+  extractPublicReviewSections,
+  getPublicReviewHeadingId,
+} from "@/lib/public-review/editorialSections";
+
+describe("public review editorial sections", () => {
+  it("extracts stable level-two anchors and ignores deeper headings", () => {
+    expect(
+      extractPublicReviewSections(`
+# Page title
+## 1. A collection record is created
+### IMPLEMENTED
+## Questions for reviewers
+`)
+    ).toEqual([
+      {
+        id: "a-collection-record-is-created",
+        title: "1. A collection record is created",
+      },
+      {
+        id: "questions-for-reviewers",
+        title: "Questions for reviewers",
+      },
+    ]);
+  });
+
+  it("normalizes punctuation and Unicode without empty anchors", () => {
+    expect(getPublicReviewHeadingId("Metadata, scripts & dependencies")).toBe(
+      "metadata-scripts-dependencies"
+    );
+    expect(getPublicReviewHeadingId("  ")).toBe("");
+  });
+});

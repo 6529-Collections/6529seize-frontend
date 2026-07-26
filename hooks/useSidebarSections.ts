@@ -10,6 +10,8 @@ import {
 } from "@/components/about/about.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { publicEnv } from "@/config/env";
+import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useMemo, type ComponentType } from "react";
 
@@ -59,7 +61,17 @@ function getWavesSection(): SidebarSection {
   };
 }
 
-function getNftsSection(): SidebarSection {
+function getNftsSection(publicReviewsEnabled: boolean): SidebarSection {
+  const streamReviewItem: SidebarNavItem[] = publicReviewsEnabled
+    ? [
+        {
+          name: t(DEFAULT_LOCALE, "navigation.nfts.streamReview"),
+          href: "/reviews/6529-stream",
+          activePathPrefixes: ["/reviews/6529-stream/"],
+        },
+      ]
+    : [];
+
   return {
     key: "nfts",
     name: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
@@ -90,6 +102,7 @@ function getNftsSection(): SidebarSection {
         href: "/rememes",
         activePathPrefixes: ["/rememes/"],
       },
+      ...streamReviewItem,
       { name: "NFT Activity", href: "/nft-activity" },
       { name: "Memes Calendar", href: "/meme-calendar" },
     ],
@@ -123,10 +136,11 @@ function getAboutSection(
 
 function buildSidebarSections(
   appWalletsSupported: boolean,
-  hideSubscriptions: boolean
+  hideSubscriptions: boolean,
+  publicReviewsEnabled: boolean
 ): SidebarSection[] {
   return [
-    getNftsSection(),
+    getNftsSection(publicReviewsEnabled),
     getWavesSection(),
     getAboutSection(appWalletsSupported, hideSubscriptions),
   ];
@@ -135,7 +149,8 @@ function buildSidebarSections(
 export function useSidebarSections(
   appWalletsSupported: boolean,
   isIos: boolean,
-  country: string | null
+  country: string | null,
+  publicReviewsEnabled = isPublicReviewEnabled(publicEnv.BASE_ENDPOINT)
 ): SidebarSection[] {
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -143,8 +158,13 @@ export function useSidebarSections(
   });
 
   return useMemo(
-    () => buildSidebarSections(appWalletsSupported, hideSubscriptions),
-    [appWalletsSupported, hideSubscriptions]
+    () =>
+      buildSidebarSections(
+        appWalletsSupported,
+        hideSubscriptions,
+        publicReviewsEnabled
+      ),
+    [appWalletsSupported, hideSubscriptions, publicReviewsEnabled]
   );
 }
 
