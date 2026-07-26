@@ -3,6 +3,8 @@ import "next/dist/compiled/server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
   getStreamReviewVersion,
@@ -109,7 +111,7 @@ function assertStreamEditorialManifest(
   );
 
   if (
-    manifestPage?.title !== page.title ||
+    manifestPage?.title !== t(DEFAULT_LOCALE, page.titleKey) ||
     manifestPage.file !== page.editorialFile
   ) {
     throw new PublicReviewEditorialContentError(

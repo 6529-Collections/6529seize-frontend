@@ -46,7 +46,7 @@ function PublicReviewPageStepper({
             {t(DEFAULT_LOCALE, "publicReview.navigation.previous")}
           </span>
           <span className="tw-mt-1 tw-block tw-font-semibold tw-text-white">
-            {previousPage.title}
+            {t(DEFAULT_LOCALE, previousPage.titleKey)}
           </span>
         </Link>
       ) : (
@@ -61,7 +61,7 @@ function PublicReviewPageStepper({
             {t(DEFAULT_LOCALE, "publicReview.navigation.next")}
           </span>
           <span className="tw-mt-1 tw-block tw-font-semibold tw-text-white">
-            {nextPage.title}
+            {t(DEFAULT_LOCALE, nextPage.titleKey)}
           </span>
         </Link>
       )}

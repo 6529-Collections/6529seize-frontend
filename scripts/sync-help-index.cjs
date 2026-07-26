@@ -32,6 +32,7 @@ const LEGACY_WORDPRESS_MARKERS = [
 ];
 const ALLOWED_PUBLICATION_ENVIRONMENTS = new Set(["local", "staging"]);
 
+// Keep this build-time allowlist aligned with config/publicReviews.ts.
 function getPublicationEnvironment(baseEndpoint) {
   try {
     const hostname = new URL(baseEndpoint).hostname.toLowerCase();

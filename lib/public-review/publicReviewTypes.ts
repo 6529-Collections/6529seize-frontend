@@ -25,8 +25,6 @@ export type PublicReviewAudience = (typeof PUBLIC_REVIEW_AUDIENCES)[number];
 export interface PublicReviewPageDefinition {
   readonly id: string;
   readonly slug: string;
-  readonly title: string;
-  readonly summary: string;
   readonly titleKey: MessageKey;
   readonly summaryKey: MessageKey;
   readonly editorialFile: string;

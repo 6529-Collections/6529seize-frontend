@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_PAGES,
@@ -39,9 +41,9 @@ describe("6529 Stream public review definition", () => {
 
   it("defines fourteen stable, unique editorial pages in order", () => {
     expect(STREAM_REVIEW_PAGES).toHaveLength(14);
-    expect(STREAM_REVIEW_PAGES.map((page) => page.title)).toEqual(
-      EXPECTED_PAGE_TITLES
-    );
+    expect(
+      STREAM_REVIEW_PAGES.map((page) => t(DEFAULT_LOCALE, page.titleKey))
+    ).toEqual(EXPECTED_PAGE_TITLES);
     expect(new Set(STREAM_REVIEW_PAGES.map((page) => page.id)).size).toBe(14);
     expect(new Set(STREAM_REVIEW_PAGES.map((page) => page.slug)).size).toBe(14);
     expect(
