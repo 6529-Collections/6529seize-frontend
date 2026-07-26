@@ -723,34 +723,51 @@ function validateSolcDigest(buffer, expectedDigest = SOLC_SHA256) {
 
 function filesystemBlobMap(repositoryRoot, relativeRoot) {
   const absoluteRoot = path.join(repositoryRoot, ...relativeRoot.split("/"));
-  invariant(fs.existsSync(absoluteRoot), `${relativeRoot} was not regenerated.`);
   const blobs = new Map();
   const visit = (absoluteDirectory) => {
-    const entries = fs
-      .readdirSync(absoluteDirectory, { withFileTypes: true })
-      .sort((left, right) => left.name.localeCompare(right.name));
+    let entries;
+    try {
+      entries = fs
+        .readdirSync(absoluteDirectory, { withFileTypes: true })
+        .sort((left, right) => left.name.localeCompare(right.name));
+    } catch (error) {
+      throw new Error(
+        `Unable to read regenerated directory ${absoluteDirectory}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
     for (const entry of entries) {
       const absolutePath = path.join(absoluteDirectory, entry.name);
-      const stat = fs.lstatSync(absolutePath);
       const relativePath = path
         .relative(repositoryRoot, absolutePath)
         .split(path.sep)
         .join("/");
       validateCandidatePath(relativePath);
       invariant(
-        !stat.isSymbolicLink(),
+        !entry.isSymbolicLink(),
         `${relativePath} must not be a regenerated symlink.`
       );
-      if (stat.isDirectory()) {
+      if (entry.isDirectory()) {
         visit(absolutePath);
         continue;
       }
-      invariant(stat.isFile(), `${relativePath} must be a regular file.`);
-      invariant(
-        (stat.mode & 0o111) === 0,
-        `${relativePath} must not be executable.`
+      invariant(entry.isFile(), `${relativePath} must be a regular file.`);
+      const descriptor = fs.openSync(
+        absolutePath,
+        fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0)
       );
-      blobs.set(relativePath, fs.readFileSync(absolutePath));
+      try {
+        const stat = fs.fstatSync(descriptor);
+        invariant(stat.isFile(), `${relativePath} must be a regular file.`);
+        invariant(
+          (stat.mode & 0o111) === 0,
+          `${relativePath} must not be executable.`
+        );
+        blobs.set(relativePath, fs.readFileSync(descriptor));
+      } finally {
+        fs.closeSync(descriptor);
+      }
     }
   };
   visit(absoluteRoot);

@@ -43,6 +43,7 @@ const {
   compareCandidateToRegeneration,
   decodeUtf8,
   fetchAndBindCandidate,
+  filesystemBlobMap,
   immutableConfigProjection,
   parseArgs,
   parseLsTree,
@@ -78,6 +79,10 @@ const {
     mergeBase: string;
     changes: Array<{ status: string; paths: string[] }>;
   };
+  filesystemBlobMap: (
+    repositoryRoot: string,
+    relativeRoot: string
+  ) => Map<string, Buffer>;
   immutableConfigProjection: (config: Config) => Config;
   parseArgs: (argv: string[]) => {
     prNumber: string;
@@ -676,6 +681,42 @@ describe("public-review snapshot trust independent inputs and output", () => {
     expect(() =>
       compareCandidateToRegeneration(candidate, regenerated)
     ).toThrow("file sets differ");
+  });
+
+  it("reads regenerated files through no-follow descriptors", () => {
+    const repositoryRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "snapshot-trust-files-")
+    );
+    try {
+      const reviewRoot = path.join(
+        repositoryRoot,
+        ...REVIEW_ROOT.split("/")
+      );
+      fs.mkdirSync(reviewRoot, { recursive: true });
+      fs.writeFileSync(
+        path.join(reviewRoot, "index.json"),
+        '{"trusted":true}\n'
+      );
+      expect(filesystemBlobMap(repositoryRoot, REVIEW_ROOT)).toEqual(
+        new Map([
+          [
+            `${REVIEW_ROOT}/index.json`,
+            Buffer.from('{"trusted":true}\n'),
+          ],
+        ])
+      );
+
+      fs.symlinkSync(
+        path.join(reviewRoot, "index.json"),
+        path.join(reviewRoot, "linked.json"),
+        "file"
+      );
+      expect(() =>
+        filesystemBlobMap(repositoryRoot, REVIEW_ROOT)
+      ).toThrow("must not be a regenerated symlink");
+    } finally {
+      fs.rmSync(repositoryRoot, { recursive: true, force: true });
+    }
   });
 
   it("validates compiler bytes against an explicit SHA-256 digest", () => {
