@@ -153,6 +153,15 @@ the trust question to module governance:
 - which delays and vetoes apply;
 - whether a frozen or permanent surface can still be affected indirectly.
 
+The accepted revenue-resolver validation adapter is a deliberate
+implementation-private exception to the ordinary module inventory. It is a
+standalone immutable contract, but it is not a module, Registry V2 row, Core
+pointer target, or authority boundary. It has no owner, administrator, or other
+role. Only the resolver is registered. Replacing the adapter therefore
+requires deploying a new resolver, proving continuity, registering that
+resolver, and changing the Core pointer through governance; the old resolver
+and adapter remain immutable historical evidence.
+
 ## Permissionless callers
 
 Some operations can be safely callable by anyone when all sensitive values are
@@ -207,4 +216,3 @@ bootstrap-to-governance cutover are all still reviewable.
 6. Should the governance executor ever hold or send native value?
 7. What public evidence should be mandatory before a successor module becomes
    active?
-

@@ -27,6 +27,24 @@ defaults.
 The precedence order must be visible to artists before a sale. Two valid
 profiles are not helpful if the artist cannot tell which one will win.
 
+### Accepted target and implementation status
+
+The linked resolver is the implementation present at the reviewed commit. It
+is not the accepted target architecture. The accepted architecture keeps one
+registered, state-owning `StreamRevenueResolver` as the sole Core royalty
+pointer target and adds one immutable, stateless, unregistered,
+implementation-private validation adapter.
+
+The adapter owns no state, authority, roles, funds, or events. The resolver
+still authenticates every request, applies every state change, and emits every
+event. The Core-facing royalty read uses only resolver storage and pure
+computation; it never calls the adapter or any other external contract.
+
+That target is accepted for pre-genesis implementation, but it is not
+implemented here. Resolver and adapter source work remains blocked until the
+complete normative interface appendix and freeze commit are independently
+approved.
+
 ## Split profiles
 
 A split profile defines recipients and shares. The protocol can use a factory to

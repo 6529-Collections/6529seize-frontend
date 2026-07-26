@@ -28,6 +28,24 @@ The threat model also includes honest mistakes. An artist approving the wrong
 manifest or an operator selecting the wrong module address can create permanent
 damage without an attacker.
 
+## Accepted revenue-adapter trust boundary
+
+The accepted revenue-resolver architecture adds one immutable, exact-code
+validation adapter to resolver write paths. The adapter owns no state,
+authority, roles, funds, or events. It may make only the approved
+caller-insensitive, read-only calls to exact pinned dependencies. The resolver
+authenticates the request, checks the adapter and dependency identities, checks
+the complete returned result, and only then changes state or emits events. The
+Core-facing royalty read uses only resolver storage and pure computation; it
+never reaches the adapter.
+
+This boundary deliberately fails closed. If the adapter or one of its pinned
+dependencies reverts, runs out of gas, changes code, or returns a malformed or
+mismatched answer, the resolver write reverts before any lasting effect. There
+is no fallback validator and no bypass. Recovery requires a new resolver, a
+continuity proof, a new Registry V2 registration, and a governed Core-pointer
+replacement.
+
 ## Test evidence
 
 ### TESTED
@@ -76,7 +94,7 @@ Every item needs one of:
 The final register should preserve tool version, configuration, raw output,
 normalization rules, source commit, and disposition evidence.
 
-## Core bytecode size
+## Contract bytecode size
 
 ### KNOWN LIMITATION
 
@@ -97,6 +115,18 @@ This matters because:
 - deploying close to the limit reduces engineering flexibility.
 
 “It deploys today” is not the same as having a durable safety margin.
+
+The accepted revenue-resolver architecture also imposes independent size gates
+on its two future contracts. The resolver and validation adapter must each be
+no larger than 22,576 bytes of deployed runtime under EIP-170 and 47,152 bytes
+of full initcode, including encoded constructor arguments, under EIP-3860.
+Each limit preserves 2,000 bytes of margin under its applicable protocol
+maximum.
+
+Those measurements must come from the final canonical isolated build.
+Issue-worktree and aggregate-build measurements are diagnostic only, not
+release evidence. Neither future target is implemented at this reviewed
+commit, so this review cannot claim that either one passes its gate.
 
 ## Governance blockers
 
@@ -232,6 +262,10 @@ At minimum, production should remain blocked until:
 - native-value executor authority is constrained and tested;
 - the Core meets the adopted bytecode margin or the design is deliberately
   revised;
+- the accepted revenue-resolver adapter architecture has an independently
+  approved interface freeze, reconciled specification, conforming and
+  independently reviewed implementation, per-contract size and release proof,
+  and adapter-first deployment evidence;
 - external audit and remediation complete;
 - every production randomness provider has non-local evidence;
 - exact deployment and rollback/cutover ceremonies are rehearsed;

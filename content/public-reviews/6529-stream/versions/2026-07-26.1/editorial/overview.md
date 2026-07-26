@@ -39,10 +39,14 @@ registries and governance.
 
 ### IMPLEMENTED
 
-The pinned repository contains a complete Solidity implementation and a large
-local test suite. The generated technical reference for this review compiles all
-protocol, test, and deployment-script Solidity files and inventories their
-contracts, interfaces, libraries, functions, events, errors, and source ranges.
+The pinned repository contains a substantial Solidity implementation and a
+large local test suite, but it is not complete against every accepted
+architecture. In particular, the accepted revenue-resolver validation-adapter
+target is not implemented. Its source work remains blocked until the complete
+normative interface appendix and freeze commit are independently approved. The
+generated technical reference for this review compiles all protocol, test, and
+deployment-script Solidity files and inventories their contracts, interfaces,
+libraries, functions, events, errors, and source ranges.
 
 The current release artifacts describe a multi-contract protocol rather than a
 single mint contract. The permanent token surface is centered on
