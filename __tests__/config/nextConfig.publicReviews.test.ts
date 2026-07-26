@@ -2,7 +2,7 @@ import { sharedConfig } from "@/config/nextConfig";
 import type { PublicEnv } from "@/config/env.schema";
 
 describe("public review standalone packaging", () => {
-  it("traces all review Markdown and manifests into server output", () => {
+  it("keeps review inputs out of Next traces for every public host", () => {
     const config = sharedConfig(
       {
         API_ENDPOINT: "https://api.example.com",
@@ -14,11 +14,9 @@ describe("public review standalone packaging", () => {
       ""
     );
 
-    expect(config.outputFileTracingIncludes).toEqual({
-      "/*": [
-        "./content/public-reviews/**/*.md",
-        "./content/public-reviews/**/manifest.json",
-      ],
+    expect(config.outputFileTracingIncludes).toBeUndefined();
+    expect(config.outputFileTracingExcludes).toEqual({
+      "/*": ["content/public-reviews/**/*", "public/review-data/**/*"],
     });
   });
 });

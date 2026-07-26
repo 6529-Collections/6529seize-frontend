@@ -5,10 +5,13 @@ import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-g
 import { getMediaResolverHostname } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
 import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "../lib/media/static-image-hosts";
-import { isPublicReviewEnabled } from "./publicReviews";
 
 const HTML_LIMITED_METADATA_BOTS =
   /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
+const PUBLIC_REVIEW_TRACE_EXCLUDES = [
+  "content/public-reviews/**/*",
+  "public/review-data/**/*",
+];
 
 function getAllowedDevOrigins(): string[] {
   return (
@@ -59,16 +62,9 @@ export function sharedConfig(
     logging: {
       incomingRequests: false,
     },
-    ...(isPublicReviewEnabled(publicEnv.BASE_ENDPOINT)
-      ? {
-          outputFileTracingIncludes: {
-            "/*": [
-              "./content/public-reviews/**/*.md",
-              "./content/public-reviews/**/manifest.json",
-            ],
-          },
-        }
-      : {}),
+    outputFileTracingExcludes: {
+      "/*": PUBLIC_REVIEW_TRACE_EXCLUDES,
+    },
     async headers() {
       return [
         {
