@@ -1,0 +1,150 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapBadRoleRegistryMock#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapBadRoleRegistryMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapBadRoleRegistryMock#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBCYWRSb2xlUmVnaXN0cnlNb2NrI2Z1bmN0aW9uOjB4MDFmZmM5YTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 93,
+            "byteStart": 1340,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L40-L42",
+            "lineEnd": 42,
+            "lineStart": 40,
+            "snippetSha256": "sha256:714e7eaae819864fbf98a9b9a82ac97a63e5f3c305e17297aa1c9458dfd6468e",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapBadRoleRegistryMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBCYWRSb2xlUmVnaXN0cnlNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapBadRoleRegistryMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceBootstrapBadRoleRegistryMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 155,
+      "byteStart": 1280,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L39-L43",
+      "lineEnd": 43,
+      "lineStart": 39,
+      "snippetSha256": "sha256:bd2c0312a9790b287ade6f7cef70bc51073f8a6d0dee24f66f474e87ef016d73",
+      "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceBootstrap.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapBadRoleRegistryMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapBadRoleRegistryMock#function:0x01ffc9a7",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapBadRoleRegistryMock",
+      "severity": "advisory"
+    }
+  ]
+}

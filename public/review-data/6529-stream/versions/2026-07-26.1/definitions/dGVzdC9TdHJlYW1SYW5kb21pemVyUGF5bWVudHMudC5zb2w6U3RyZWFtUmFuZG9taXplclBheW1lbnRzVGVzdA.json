@@ -1,0 +1,853 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#event:Withdraw(address,bool,uint256)",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "status",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "name": "Withdraw",
+          "signature": "Withdraw(address,bool,uint256)",
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x1b6b6bb8",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testForcedEthDuringPendingRequestRemainsReserved",
+          "outputs": [],
+          "selector": "0x1b6b6bb8",
+          "signature": "testForcedEthDuringPendingRequestRemainsReserved()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0xc3c8863b",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFulfilledRequestClearsPendingWithoutMakingReserveWithdrawable",
+          "outputs": [],
+          "selector": "0xc3c8863b",
+          "signature": "testFulfilledRequestClearsPendingWithoutMakingReserveWithdrawable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0xaf035603",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMultipleRequestsSpendReserveAndKeepRemainingBalanceReserved",
+          "outputs": [],
+          "selector": "0xaf035603",
+          "signature": "testMultipleRequestsSpendReserveAndKeepRemainingBalanceReserved()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x18f1d9cd",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPostProcessingFailureAndRetryPreserveReserveBoundary",
+          "outputs": [],
+          "selector": "0x18f1d9cd",
+          "signature": "testPostProcessingFailureAndRetryPreserveReserveBoundary()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x445feb12",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testStaleRequestClearsPendingWithoutMakingReserveWithdrawable",
+          "outputs": [],
+          "selector": "0x445feb12",
+          "signature": "testStaleRequestClearsPendingWithoutMakingReserveWithdrawable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x016b0d89",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUnauthorizedEmergencyWithdrawPreservesRequestReserve",
+          "outputs": [],
+          "selector": "0x016b0d89",
+          "signature": "testUnauthorizedEmergencyWithdrawPreservesRequestReserve()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 274135,
+          "canonicalSignature": "Withdraw(address,bool,uint256)",
+          "displaySignature": "Withdraw(address,bool,uint256)",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#event:Withdraw(address,bool,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "status",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNldmVudDpXaXRoZHJhdyhhZGRyZXNzLGJvb2wsdWludDI1Nik",
+          "kind": "event",
+          "name": "Withdraw",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 542,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:4450f9689b3a6b7b9acb13445450f27c5d2c68244e08fae156c3952d6ff10688",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "testMultipleRequestsSpendReserveAndKeepRemainingBalanceReserved()",
+          "displaySignature": "testMultipleRequestsSpendReserveAndKeepRemainingBalanceReserved()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0xaf035603",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjoweGFmMDM1NjAz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMultipleRequestsSpendReserveAndKeepRemainingBalanceReserved",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1328,
+            "byteStart": 962,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L26-L46",
+            "lineEnd": 46,
+            "lineStart": 26,
+            "snippetSha256": "sha256:ab069f00b4073d2558dcd9b40bafc4e59fcf20716028061197e2e7177a82c61a",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0xaf035603",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFulfilledRequestClearsPendingWithoutMakingReserveWithdrawable()",
+          "displaySignature": "testFulfilledRequestClearsPendingWithoutMakingReserveWithdrawable()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0xc3c8863b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjoweGMzYzg4NjNi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFulfilledRequestClearsPendingWithoutMakingReserveWithdrawable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1091,
+            "byteStart": 2296,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L48-L67",
+            "lineEnd": 67,
+            "lineStart": 48,
+            "snippetSha256": "sha256:2783d19c1d1cd0b50f1886d8ded8f6e097f612733c6537dca7989958a5eb9104",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0xc3c8863b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testStaleRequestClearsPendingWithoutMakingReserveWithdrawable()",
+          "displaySignature": "testStaleRequestClearsPendingWithoutMakingReserveWithdrawable()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x445feb12",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjoweDQ0NWZlYjEy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testStaleRequestClearsPendingWithoutMakingReserveWithdrawable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 851,
+            "byteStart": 3393,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L69-L85",
+            "lineEnd": 85,
+            "lineStart": 69,
+            "snippetSha256": "sha256:d53acae94f911c6f19ca0ce60c9c1871b2ce8d5833eea1729de494ab73c44299",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x445feb12",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPostProcessingFailureAndRetryPreserveReserveBoundary()",
+          "displaySignature": "testPostProcessingFailureAndRetryPreserveReserveBoundary()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x18f1d9cd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjoweDE4ZjFkOWNk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPostProcessingFailureAndRetryPreserveReserveBoundary",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1640,
+            "byteStart": 4250,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L87-L118",
+            "lineEnd": 118,
+            "lineStart": 87,
+            "snippetSha256": "sha256:95714284ca25ff23e17fbd805e6d857634b81b2bcc90b5210dc2484ebaf4c2cb",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x18f1d9cd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testForcedEthDuringPendingRequestRemainsReserved()",
+          "displaySignature": "testForcedEthDuringPendingRequestRemainsReserved()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x1b6b6bb8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjoweDFiNmI2YmI4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testForcedEthDuringPendingRequestRemainsReserved",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 660,
+            "byteStart": 5896,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L120-L132",
+            "lineEnd": 132,
+            "lineStart": 120,
+            "snippetSha256": "sha256:601ff5b4aa4c454a3d78789ed5a53c6cc49896b0164adf4971e7ee83b7bfe7d2",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x1b6b6bb8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUnauthorizedEmergencyWithdrawPreservesRequestReserve()",
+          "displaySignature": "testUnauthorizedEmergencyWithdrawPreservesRequestReserve()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x016b0d89",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjoweDAxNmIwZDg5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUnauthorizedEmergencyWithdrawPreservesRequestReserve",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 987,
+            "byteStart": 6562,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L134-L151",
+            "lineEnd": 151,
+            "lineStart": 134,
+            "snippetSha256": "sha256:f28f86bf7b215baf1e3c3f997f0d9b7ee5029e291dedc286141dd26d9d775ee6",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x016b0d89",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployRandomizer(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:_deployRandomizer(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "cost",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjpfZGVwbG95UmFuZG9taXplcih1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployRandomizer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "RandomizerPaymentSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 1525,
+            "byteStart": 7555,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L153-L191",
+            "lineEnd": 191,
+            "lineStart": 153,
+            "snippetSha256": "sha256:8d1d8a39d90a3b1895897f211b80cbac3a54d1006e3a70694fe184593f3b226f",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_fundRandomizer(RandomizerPaymentSetup,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:_fundRandomizer(RandomizerPaymentSetup,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "RandomizerPaymentSetup"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjpfZnVuZFJhbmRvbWl6ZXIoUmFuZG9taXplclBheW1lbnRTZXR1cCx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_fundRandomizer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 297,
+            "byteStart": 9086,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L193-L198",
+            "lineEnd": 198,
+            "lineStart": 193,
+            "snippetSha256": "sha256:13f3fc73074b39e0ff4ed38d0048910794a04f344e2be874863dba85130f4d65",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requestRandomness(RandomizerPaymentSetup,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:_requestRandomness(RandomizerPaymentSetup,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "RandomizerPaymentSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjpfcmVxdWVzdFJhbmRvbW5lc3MoUmFuZG9taXplclBheW1lbnRTZXR1cCx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requestRandomness",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 470,
+            "byteStart": 9389,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L200-L209",
+            "lineEnd": 209,
+            "lineStart": 200,
+            "snippetSha256": "sha256:cecf999abe93377aebbcc1e1b636aa6e197c532fba17a3892a69cb9335afecee",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertEmergencyWithdrawDoesNotDrainReserve(RandomizerPaymentSetup,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:_assertEmergencyWithdrawDoesNotDrainReserve(RandomizerPaymentSetup,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "RandomizerPaymentSetup"
+            },
+            {
+              "index": 1,
+              "name": "expectedReserve",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjpfYXNzZXJ0RW1lcmdlbmN5V2l0aGRyYXdEb2VzTm90RHJhaW5SZXNlcnZlKFJhbmRvbWl6ZXJQYXltZW50U2V0dXAsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertEmergencyWithdrawDoesNotDrainReserve",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 509,
+            "byteStart": 9865,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L211-L221",
+            "lineEnd": 221,
+            "lineStart": 211,
+            "snippetSha256": "sha256:adb9a292033d18f6b97f417469c22dbbac82a38f80d8fba8a2b852556b75b4a9",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertReserve(RandomizerPaymentSetup,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:_assertReserve(RandomizerPaymentSetup,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "RandomizerPaymentSetup"
+            },
+            {
+              "index": 1,
+              "name": "expected",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjpfYXNzZXJ0UmVzZXJ2ZShSYW5kb21pemVyUGF5bWVudFNldHVwLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertReserve",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 574,
+            "byteStart": 10380,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L223-L230",
+            "lineEnd": 230,
+            "lineStart": 223,
+            "snippetSha256": "sha256:7b51e161829337f32fc1c18f41c0b4ebf4a7d948178ccbd1e3c789cead51a980",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_words(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:_words(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdCNmdW5jdGlvbjpfd29yZHModWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_words",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "range": {
+            "byteLength": 144,
+            "byteStart": 10960,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L232-L235",
+            "lineEnd": 235,
+            "lineStart": 232,
+            "snippetSha256": "sha256:27dee1962bec3d7d8bf194d559c6e7d2da305009e8cd1a78d1c5ef003c7b82f4",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "UNAUTHORIZED",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 621,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:3f79eed727fcca59b0cd8f66c3c45b70cf3f6f8a5d18d93a88bbe6a0e15e6f61",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 14,
+            "byteStart": 661,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:5fe29a76e2629947948415ecda7d1487fdc88957163265742345ce64f7515e5f",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "valueSource": "address(0xBAD)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EMERGENCY_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 681,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:4bf332d32db86270e22e0a5ebc8c644030b0b51adaed2f088ab1212173a3b76c",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 728,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:1e369b6d813bb37697341d2bab533dc72a24e58dde2e3df6afd17c5a909d99ee",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "valueSource": "address(0xE001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 749,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 790,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 797,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 833,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 840,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:6b92bf7948147a132b436e128c51d47ffabce6b40ed8627dae768f5e98e95d34",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 12,
+            "byteStart": 883,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:a4c8e8ee6e5dd48d570726ffe68075c06badd309c1fc9a70b7e9e8dfbe28c7bc",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "valueSource": "TOKEN_ID + 1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "THIRD_TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 901,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:fa86f8137be49cffe4da17ed01ef5fb83713a1724c8444374c74817734c68954",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 12,
+            "byteStart": 943,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:f7786acf7c41669adc381a716ba6c0c00e452bfca8ba9cabd2186bed56445412",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "valueSource": "TOKEN_ID + 2",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6U3RyZWFtUmFuZG9taXplclBheW1lbnRzVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRandomizerPaymentsTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 10770,
+      "byteStart": 336,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L11-L236",
+      "lineEnd": 236,
+      "lineStart": 11,
+      "snippetSha256": "sha256:072aeecc70b728f42e83b2c2112b5ba649cc83a3f3dfc5e27449b3b97a693bd3",
+      "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRandomizerPayments.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x016b0d89",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x18f1d9cd",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x1b6b6bb8",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0x445feb12",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0xaf035603",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest#function:0xc3c8863b",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:StreamRandomizerPaymentsTest",
+      "severity": "advisory"
+    }
+  ]
+}
