@@ -401,7 +401,10 @@ jobs:
         env:
           NODE_ENV: "production"
           BASE_ENDPOINT: "https://6529.io"
-        run: ./bin/6529 run build
+        # `build` runs prebuild, which regenerates both public agent artifacts.
+        run: |
+          set -euo pipefail
+          ./bin/6529 run build
 
       - name: Package exact PR merge-tree production profile
         if: needs.plan.outputs.build_required == 'true'
@@ -436,6 +439,7 @@ jobs:
           ASSETS_FROM_S3: "false"
           ANNOUNCED_VERSION_ENDPOINT: ""
         run: |
+          set -euo pipefail
           unset ANNOUNCED_VERSION_ENDPOINT
           rm -rf .next
           ./bin/6529 run help-index:sync
