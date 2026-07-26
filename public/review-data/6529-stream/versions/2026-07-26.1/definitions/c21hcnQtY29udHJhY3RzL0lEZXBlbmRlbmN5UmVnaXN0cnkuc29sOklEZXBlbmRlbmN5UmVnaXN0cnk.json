@@ -548,7 +548,7 @@
           "range": {
             "byteLength": 123,
             "byteStart": 105,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L6-L9",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L6-L9",
             "lineEnd": 9,
             "lineStart": 6,
             "snippetSha256": "sha256:534c616252846c374908965e55e7575ba08d2aa01590114e3f8dd5f8a859aa11",
@@ -633,7 +633,7 @@
           "range": {
             "byteLength": 218,
             "byteStart": 234,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L11-L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L11-L14",
             "lineEnd": 14,
             "lineStart": 11,
             "snippetSha256": "sha256:f22affa0caec1897c30237f4bf02b740b0cbb3df827aa0ce3282076a5a9ae347",
@@ -678,7 +678,7 @@
           "range": {
             "byteLength": 153,
             "byteStart": 458,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L16-L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L16-L19",
             "lineEnd": 19,
             "lineStart": 16,
             "snippetSha256": "sha256:a40c8a2b5ff7b39ef87cc1409b0489708d2ac399bdcbbc0f45698c6b3a5b4556",
@@ -722,7 +722,7 @@
           "range": {
             "byteLength": 144,
             "byteStart": 617,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L21-L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L21-L24",
             "lineEnd": 24,
             "lineStart": 21,
             "snippetSha256": "sha256:dc84fbfb7edab47a5c2e5d4bc555bdfcb31cd0a18c15dd40ff3a40199099a5f4",
@@ -766,7 +766,7 @@
           "range": {
             "byteLength": 149,
             "byteStart": 767,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L26-L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L26-L29",
             "lineEnd": 29,
             "lineStart": 26,
             "snippetSha256": "sha256:d7256e768451bd9a71893228a09cc2a5cc029da7608f47a115f3c05e0066ac17",
@@ -810,7 +810,7 @@
           "range": {
             "byteLength": 153,
             "byteStart": 922,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L31-L34",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L31-L34",
             "lineEnd": 34,
             "lineStart": 31,
             "snippetSha256": "sha256:1377da2cd75f8efcc4cb1c457af50598c7e82f2323cf2112c04e38909d2a5f4f",
@@ -854,7 +854,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 1081,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L36-L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L36-L39",
             "lineEnd": 39,
             "lineStart": 36,
             "snippetSha256": "sha256:3c11f47a72da226a0d1f868a6918423a0e45d6304cd261c2a3619e1bac985a33",
@@ -893,7 +893,7 @@
           "range": {
             "byteLength": 124,
             "byteStart": 1230,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L41-L44",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L41-L44",
             "lineEnd": 44,
             "lineStart": 41,
             "snippetSha256": "sha256:a3ad1d625eb449a13bb4f7c3ac822a718987f9295f293223234adf5f5ee36788",
@@ -937,7 +937,7 @@
           "range": {
             "byteLength": 150,
             "byteStart": 1360,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L46-L49",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L46-L49",
             "lineEnd": 49,
             "lineStart": 46,
             "snippetSha256": "sha256:cfc0eb58485a86ab3bc8d673c988cda1d8ec78ca2cb6380fbdd75e372fcfb01f",
@@ -982,7 +982,7 @@
           "range": {
             "byteLength": 140,
             "byteStart": 1516,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L51-L54",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L51-L54",
             "lineEnd": 54,
             "lineStart": 51,
             "snippetSha256": "sha256:42982a3157bf2d112a3dcc65b78d63a896d1a8b0f95b337a7ea19b1d48d105fc",
@@ -1032,7 +1032,7 @@
           "range": {
             "byteLength": 172,
             "byteStart": 1662,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L56-L60",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L56-L60",
             "lineEnd": 60,
             "lineStart": 56,
             "snippetSha256": "sha256:a31ebbd3c3c60b5c87437ce1470e8a64dec8c478d3569d236c33cca68568ac4d",
@@ -1076,7 +1076,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 1840,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L62-L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L62-L65",
             "lineEnd": 65,
             "lineStart": 62,
             "snippetSha256": "sha256:ecd3bc0d4c788dcf44de63b229aa849c93126d6976d1d3a61dcbc95c484bd91e",
@@ -1125,7 +1125,7 @@
           "range": {
             "byteLength": 175,
             "byteStart": 1989,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L67-L71",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L67-L71",
             "lineEnd": 71,
             "lineStart": 67,
             "snippetSha256": "sha256:c3f15ff0054e52b89f597328f7f1b91b39de9a33a93b6d23bb6b2be813985f98",
@@ -1164,7 +1164,7 @@
           "range": {
             "byteLength": 130,
             "byteStart": 2170,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L73-L76",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L73-L76",
             "lineEnd": 76,
             "lineStart": 73,
             "snippetSha256": "sha256:dc947ceaf7374a89395146c7423bf8a1043b2acdc0038fcc25a8ecb82a87593e",
@@ -1208,7 +1208,7 @@
           "range": {
             "byteLength": 154,
             "byteStart": 2306,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L78-L81",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L78-L81",
             "lineEnd": 81,
             "lineStart": 78,
             "snippetSha256": "sha256:a8d9745c26648b078fbe7ae1332f8fc485411d9acf08c9b39c326d979db66698",
@@ -1252,7 +1252,7 @@
     "range": {
       "byteLength": 2393,
       "byteStart": 69,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IDependencyRegistry.sol#L5-L82",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDependencyRegistry.sol#L5-L82",
       "lineEnd": 82,
       "lineStart": 5,
       "snippetSha256": "sha256:7fc67d6c947ec0cfc918c101cea0ad44c1ee47bf60d470eb074bd59901fa3bc9",

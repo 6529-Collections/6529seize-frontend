@@ -113,7 +113,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 690,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IERC2981.sol#L19-L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IERC2981.sol#L19-L22",
             "lineEnd": 22,
             "lineStart": 19,
             "snippetSha256": "sha256:94fd99d8a9cbe9c1dbcfaaaa898278ef75071686a250ab8e357255007181a283",
@@ -163,7 +163,7 @@
     "range": {
       "byteLength": 417,
       "byteStart": 418,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IERC2981.sol#L14-L23",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IERC2981.sol#L14-L23",
       "lineEnd": 23,
       "lineStart": 14,
       "snippetSha256": "sha256:7aaceee730aa047e1affa2bec29b65ba3251b1ed8bd9b57ff170293c3a9a6bdf",

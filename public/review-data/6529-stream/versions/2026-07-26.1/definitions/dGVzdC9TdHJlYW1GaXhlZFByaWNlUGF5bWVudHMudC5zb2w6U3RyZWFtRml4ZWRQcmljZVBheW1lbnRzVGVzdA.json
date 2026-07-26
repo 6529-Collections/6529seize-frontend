@@ -307,7 +307,7 @@
           "range": {
             "byteLength": 131,
             "byteStart": 486,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L16-L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L16-L18",
             "lineEnd": 18,
             "lineStart": 16,
             "snippetSha256": "sha256:10dc972a9ae621cc4749b6255a436f953c8b5cf9b6881abda3421819b42fc397",
@@ -354,7 +354,7 @@
           "range": {
             "byteLength": 137,
             "byteStart": 622,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L19-L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L19-L21",
             "lineEnd": 21,
             "lineStart": 19,
             "snippetSha256": "sha256:f020bc28a31f0b91cb6c834d24eb4e077b8e17f24394a78042bac460bac9957f",
@@ -379,7 +379,7 @@
           "range": {
             "byteLength": 2319,
             "byteStart": 1063,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L29-L63",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L29-L63",
             "lineEnd": 63,
             "lineStart": 29,
             "snippetSha256": "sha256:8caf62bb786b592a60ded01865e0e881efbb88bf044d1c7bb9185a62b64a8ffc",
@@ -406,7 +406,7 @@
           "range": {
             "byteLength": 2238,
             "byteStart": 3388,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L65-L103",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L65-L103",
             "lineEnd": 103,
             "lineStart": 65,
             "snippetSha256": "sha256:f33c59ce7d32d295e0524b932251a651c70d40c54651dd5357fe7f4166cc0996",
@@ -433,7 +433,7 @@
           "range": {
             "byteLength": 923,
             "byteStart": 5632,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L105-L121",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L105-L121",
             "lineEnd": 121,
             "lineStart": 105,
             "snippetSha256": "sha256:e4b8784b059f14bfbb1154ec1b9f1950198dcde585edf18074ba9d1944b052b3",
@@ -460,7 +460,7 @@
           "range": {
             "byteLength": 953,
             "byteStart": 6561,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L123-L141",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L123-L141",
             "lineEnd": 141,
             "lineStart": 123,
             "snippetSha256": "sha256:dfe8340cbb3d076c9b7fcd6e5cff8f8332411c399c31ba0669b2e74f420ef5c6",
@@ -487,7 +487,7 @@
           "range": {
             "byteLength": 1003,
             "byteStart": 7520,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L143-L159",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L143-L159",
             "lineEnd": 159,
             "lineStart": 143,
             "snippetSha256": "sha256:f3e56b5c0f1bbf173c211cb4451bef9edc1d411e3e4a73917563883586c5caa2",
@@ -514,7 +514,7 @@
           "range": {
             "byteLength": 716,
             "byteStart": 8529,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L161-L172",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L161-L172",
             "lineEnd": 172,
             "lineStart": 161,
             "snippetSha256": "sha256:5ce8a5a581059d812d7c221eb5ad4492b6623f1e41f6dffb07d4c5156b29616e",
@@ -541,7 +541,7 @@
           "range": {
             "byteLength": 797,
             "byteStart": 9251,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L174-L186",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L174-L186",
             "lineEnd": 186,
             "lineStart": 174,
             "snippetSha256": "sha256:2823ca91556ff86088b43beda9f6126044ebd143e1f2b4b92082f3796a06e121",
@@ -568,7 +568,7 @@
           "range": {
             "byteLength": 1599,
             "byteStart": 10054,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L188-L214",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L188-L214",
             "lineEnd": 214,
             "lineStart": 188,
             "snippetSha256": "sha256:cb65b3c8a4dbe2756e8e14374f9a9e80e0a3d0d2c730d507c4392f66190e982b",
@@ -595,7 +595,7 @@
           "range": {
             "byteLength": 470,
             "byteStart": 11659,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L216-L228",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L216-L228",
             "lineEnd": 228,
             "lineStart": 216,
             "snippetSha256": "sha256:746f31f2508dc1a3af811b26aacbb2758c5a4e2caf799fd9ddb754d9f9b1ecbd",
@@ -622,7 +622,7 @@
           "range": {
             "byteLength": 704,
             "byteStart": 12135,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L230-L241",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L230-L241",
             "lineEnd": 241,
             "lineStart": 230,
             "snippetSha256": "sha256:0124b9b15116bc5a65bc3c6ce3dc119839dc3a7aece46f83c74706a0b3b4451f",
@@ -649,7 +649,7 @@
           "range": {
             "byteLength": 825,
             "byteStart": 12845,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L243-L256",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L243-L256",
             "lineEnd": 256,
             "lineStart": 243,
             "snippetSha256": "sha256:85ba4190fee6fb062ae3605f167beeb8c2d0125a1c1fd8332016a7ba4459c41a",
@@ -676,7 +676,7 @@
           "range": {
             "byteLength": 773,
             "byteStart": 13676,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L258-L274",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L258-L274",
             "lineEnd": 274,
             "lineStart": 258,
             "snippetSha256": "sha256:57c3d4fc36206b6a968816f9575a811a5ac0bd0222df663bde0277e41baf0067",
@@ -703,7 +703,7 @@
           "range": {
             "byteLength": 1088,
             "byteStart": 14455,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L276-L295",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L276-L295",
             "lineEnd": 295,
             "lineStart": 276,
             "snippetSha256": "sha256:196069f80d73874c602f48ee7acee85ffaddfb00d1f6aa775e81035396a1e8b1",
@@ -730,7 +730,7 @@
           "range": {
             "byteLength": 772,
             "byteStart": 15549,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L297-L310",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L297-L310",
             "lineEnd": 310,
             "lineStart": 297,
             "snippetSha256": "sha256:dddaa79e91e651ea6167e89848c06b6a8ba04e8d212056a36a498f97d631469e",
@@ -757,7 +757,7 @@
           "range": {
             "byteLength": 1370,
             "byteStart": 16327,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L312-L335",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L312-L335",
             "lineEnd": 335,
             "lineStart": 312,
             "snippetSha256": "sha256:736e8ee39e30021e07a6a843aba6329be0edda11faddb3d78a6bdd9692f47694",
@@ -784,7 +784,7 @@
           "range": {
             "byteLength": 1053,
             "byteStart": 17703,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L337-L353",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L337-L353",
             "lineEnd": 353,
             "lineStart": 337,
             "snippetSha256": "sha256:af8ca886cd4ee2fd72be2f8fd8c52f81acee82e77159a0e890bac53b2ce240c6",
@@ -845,7 +845,7 @@
           "range": {
             "byteLength": 546,
             "byteStart": 18762,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L355-L366",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L355-L366",
             "lineEnd": 366,
             "lineStart": 355,
             "snippetSha256": "sha256:ec132511f6e0299fd88a5b04dfce386b3d893eef4437faa1166ae9dd500193c0",
@@ -905,7 +905,7 @@
           "range": {
             "byteLength": 579,
             "byteStart": 19314,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L368-L388",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L368-L388",
             "lineEnd": 388,
             "lineStart": 368,
             "snippetSha256": "sha256:8511a13a8c038bde3dc63b9ab594ead3fcd26060537ac1106241cb0befbb4043",
@@ -949,7 +949,7 @@
           "range": {
             "byteLength": 462,
             "byteStart": 19899,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L390-L402",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L390-L402",
             "lineEnd": 402,
             "lineStart": 390,
             "snippetSha256": "sha256:39f6d7c67ae32b5cf9acfcb25d86f8aef4197b3d43d8c2077ec8f10be7237f3e",
@@ -973,7 +973,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 765,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
@@ -985,7 +985,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 799,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
@@ -1003,7 +1003,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 820,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:3e651fdfebdcfe0dd0fdc57a7c7e95dcc88555bb618ed67eaaae88bb2f03bb11",
@@ -1015,7 +1015,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 857,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
@@ -1033,7 +1033,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 878,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
@@ -1045,7 +1045,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 912,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
@@ -1063,7 +1063,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 933,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
@@ -1075,7 +1075,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 974,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
@@ -1093,7 +1093,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 995,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:4f34bd08e7602115853ec232f408f7de91709d3e8885e0e2590da9ec4a5a1376",
@@ -1105,7 +1105,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 1041,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:2b313e967de5483796211fbd6b58e26c0e1d5832d8be24b0b4b1d2ad4809a902",
@@ -1153,7 +1153,7 @@
     "range": {
       "byteLength": 20058,
       "byteStart": 305,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamFixedPricePayments.t.sol#L11-L403",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamFixedPricePayments.t.sol#L11-L403",
       "lineEnd": 403,
       "lineStart": 11,
       "snippetSha256": "sha256:d3d842c082de625c94411e6e72985bfe411c2e58a45d1acccee29996d3332658",

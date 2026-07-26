@@ -1084,7 +1084,7 @@
           "range": {
             "byteLength": 27,
             "byteStart": 431,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L14",
             "lineEnd": 14,
             "lineStart": 14,
             "snippetSha256": "sha256:ad47e7a6c22c7b45f596c1e5a3bb3c0ea6fd9a9fedbd97087463b2f6417b3f97",
@@ -1105,7 +1105,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 546,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:696aa551ac34b3dc4ac46a8cdb84ca83993f9fd44b6ad193165eabda0e527cca",
@@ -1137,7 +1137,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 672,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:913ab8fad5f888b4378dd673fcfc7668ae53e7134f8f9d1140e42f326fd870c9",
@@ -1169,7 +1169,7 @@
           "range": {
             "byteLength": 50,
             "byteStart": 808,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:ba6dbfe53a6da63ee64ef1622b28593f5815601033a67d01aa8ed4b8d7f75676",
@@ -1201,7 +1201,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 926,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:01538e9e9447ee7959d4fd3de08fa5a4e85584fea67d0e8eeda2ccde1826850d",
@@ -1238,7 +1238,7 @@
           "range": {
             "byteLength": 76,
             "byteStart": 1064,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:98835f5d750ff94b3070ffe3ed4f5c402ca7e634508e7475f359a161bf8287d2",
@@ -1290,7 +1290,7 @@
           "range": {
             "byteLength": 249,
             "byteStart": 1236,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L26-L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L26-L33",
             "lineEnd": 33,
             "lineStart": 26,
             "snippetSha256": "sha256:40bdfee12897bff4e03d34db9b11d4128bfe2c8c31b2fc3132f51f2cba6695d2",
@@ -1327,7 +1327,7 @@
           "range": {
             "byteLength": 121,
             "byteStart": 1585,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L35-L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L35-L37",
             "lineEnd": 37,
             "lineStart": 35,
             "snippetSha256": "sha256:b9046b62a6f0f13288a49e2c2877e64af91a2e2a26709b19037d8709d17570d4",
@@ -1359,7 +1359,7 @@
           "range": {
             "byteLength": 115,
             "byteStart": 1810,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L39-L41",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L39-L41",
             "lineEnd": 41,
             "lineStart": 39,
             "snippetSha256": "sha256:f87065f2e7c5201c24071c7fff320eb8bf0e5ec0fa4ad6f5c1268fccb46b3dd3",
@@ -1391,7 +1391,7 @@
           "range": {
             "byteLength": 62,
             "byteStart": 1984,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L43",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L43",
             "lineEnd": 43,
             "lineStart": 43,
             "snippetSha256": "sha256:83f0fdc00b2e60aba9d9cf5d431781f7a27e4d876c70652ecbb2b90e7b1aeb52",
@@ -1423,7 +1423,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 2126,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L45",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L45",
             "lineEnd": 45,
             "lineStart": 45,
             "snippetSha256": "sha256:c851de4d226286a739800169aea2465dee69f693b6abba02e14304b4934656a3",
@@ -1450,7 +1450,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 2262,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L47",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L47",
             "lineEnd": 47,
             "lineStart": 47,
             "snippetSha256": "sha256:c26cad683b9c8fc33a7cc60338371e1699136af9b4e92ecfcd6a0fbbfbb34f75",
@@ -1487,7 +1487,7 @@
           "range": {
             "byteLength": 87,
             "byteStart": 2407,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L49",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L49",
             "lineEnd": 49,
             "lineStart": 49,
             "snippetSha256": "sha256:d07526a98648dd41029bff45e988a9348ac9fbbc29ea7042cbde64f0d00451a9",
@@ -1514,7 +1514,7 @@
           "range": {
             "byteLength": 38,
             "byteStart": 2578,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L51",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L51",
             "lineEnd": 51,
             "lineStart": 51,
             "snippetSha256": "sha256:8a3534b362cf512428d9b2ea4109f11c092507b520edc677cd22f19924ad97f0",
@@ -1535,7 +1535,7 @@
           "range": {
             "byteLength": 22,
             "byteStart": 2691,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L53",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L53",
             "lineEnd": 53,
             "lineStart": 53,
             "snippetSha256": "sha256:48b1f7ba24b7d4d169663280681bc5820760de70f19eadc9b6091b97fcf481dd",
@@ -1578,7 +1578,7 @@
           "range": {
             "byteLength": 124,
             "byteStart": 2791,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L56-L58",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L56-L58",
             "lineEnd": 58,
             "lineStart": 56,
             "snippetSha256": "sha256:adf33d80d1796b01430b41c1624eaeae085b7ed91eaa8deb6aaaaf75b22c8e2f",
@@ -1625,7 +1625,7 @@
           "range": {
             "byteLength": 166,
             "byteStart": 2989,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L60-L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L60-L65",
             "lineEnd": 65,
             "lineStart": 60,
             "snippetSha256": "sha256:6cfbfe41fdda5c572fc7ee9fac191eb9156637132dcf360418937831786e77a6",
@@ -1684,7 +1684,7 @@
           "range": {
             "byteLength": 219,
             "byteStart": 3244,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L67-L74",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L67-L74",
             "lineEnd": 74,
             "lineStart": 67,
             "snippetSha256": "sha256:f39d4599dd58ec5e417bc1acf1133c48295469bd026d31244d910ed352203899",
@@ -1749,7 +1749,7 @@
           "range": {
             "byteLength": 241,
             "byteStart": 3560,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L76-L84",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L76-L84",
             "lineEnd": 84,
             "lineStart": 76,
             "snippetSha256": "sha256:13dba26906f5299f9e9e8b054744e54931eeca72adcc2daf8956e6a6e2f0bf21",
@@ -1780,7 +1780,7 @@
           "range": {
             "byteLength": 64,
             "byteStart": 3860,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L87",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L87",
             "lineEnd": 87,
             "lineStart": 87,
             "snippetSha256": "sha256:8ed4cf670e2cb65cbcb598f433ae52c71f7181d70595759661e6008958302c6d",
@@ -1813,7 +1813,7 @@
           "range": {
             "byteLength": 51,
             "byteStart": 3996,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L89",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L89",
             "lineEnd": 89,
             "lineStart": 89,
             "snippetSha256": "sha256:97a0c9b0d0b8129817241d6b87dbecc55ac67a79882651d113a95d714842464b",
@@ -1846,7 +1846,7 @@
           "range": {
             "byteLength": 63,
             "byteStart": 4129,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L91",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L91",
             "lineEnd": 91,
             "lineStart": 91,
             "snippetSha256": "sha256:b60ed81f5765cf1d27dec8754b26b592a99c88ab79d75aae4553bbd94f46c44d",
@@ -1879,7 +1879,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 4254,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L93",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L93",
             "lineEnd": 93,
             "lineStart": 93,
             "snippetSha256": "sha256:6a2fda618ae52f3b371525c5748bb43e563b62b548bf6b02bf3ec96bb38c71c4",
@@ -1912,7 +1912,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 4374,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L95",
             "lineEnd": 95,
             "lineStart": 95,
             "snippetSha256": "sha256:1471a4bd046bd123121f770a564e035de4c58bbcfc78e808916cfc9d9e96f2a4",
@@ -1945,7 +1945,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 4476,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L97",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L97",
             "lineEnd": 97,
             "lineStart": 97,
             "snippetSha256": "sha256:04ba10426377b893c44fe72c3492acc8bc30c72e3010c924834bd5c648614860",
@@ -1978,7 +1978,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 4597,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L99",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L99",
             "lineEnd": 99,
             "lineStart": 99,
             "snippetSha256": "sha256:0c1f93fd7af6759874c2fdc4d2418f692e09c160b200e5ce8c33efc0f0c68c54",
@@ -2011,7 +2011,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 4718,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L101",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L101",
             "lineEnd": 101,
             "lineStart": 101,
             "snippetSha256": "sha256:cd1fa4fccb5885c9708af128ec3d208db55546bc837e5ef4c959df9cb040858c",
@@ -2060,7 +2060,7 @@
           "range": {
             "byteLength": 128,
             "byteStart": 4843,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L103-L106",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L103-L106",
             "lineEnd": 106,
             "lineStart": 103,
             "snippetSha256": "sha256:8cef254321bb86ecee8a73e098dff5490f7d9921a163c1b0f371ac13c91c3e28",
@@ -2093,7 +2093,7 @@
           "range": {
             "byteLength": 62,
             "byteStart": 5043,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L108",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L108",
             "lineEnd": 108,
             "lineStart": 108,
             "snippetSha256": "sha256:e8e2f9059ee8b9203553f9723cb357815d6547f1f4bccb226320ec791b5dd53b",
@@ -2137,7 +2137,7 @@
           "range": {
             "byteLength": 95,
             "byteStart": 5183,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L110",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L110",
             "lineEnd": 110,
             "lineStart": 110,
             "snippetSha256": "sha256:ebf433efe7af0207c3c83936ed26dbd96265eac29354ae8d8d87ba2def0c9b83",
@@ -2176,7 +2176,7 @@
           "range": {
             "byteLength": 75,
             "byteStart": 5349,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L112",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L112",
             "lineEnd": 112,
             "lineStart": 112,
             "snippetSha256": "sha256:9cd677c4243898e26ebbd0afb8dcb08114e046af15dc99523be789ac44b69983",
@@ -2220,7 +2220,7 @@
           "range": {
             "byteLength": 89,
             "byteStart": 5495,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L114",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L114",
             "lineEnd": 114,
             "lineStart": 114,
             "snippetSha256": "sha256:6366dd9cab8f632f2cfebbb1c33d5ae36396264d9f39cf5b4338234afe9e5a92",
@@ -2259,7 +2259,7 @@
           "range": {
             "byteLength": 70,
             "byteStart": 5649,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L116",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L116",
             "lineEnd": 116,
             "lineStart": 116,
             "snippetSha256": "sha256:d19ce5dc44f0bc193476bb4c0394005f4a5f5fb8347b8a0c5e423146d0b2983e",
@@ -2298,7 +2298,7 @@
           "range": {
             "byteLength": 81,
             "byteStart": 5807,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L118",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L118",
             "lineEnd": 118,
             "lineStart": 118,
             "snippetSha256": "sha256:5751977596fd7d26ccc9bb7fdbe60e14717115e6697aabffd0457a78f4505a84",
@@ -2337,7 +2337,7 @@
           "range": {
             "byteLength": 77,
             "byteStart": 6153,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L122",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L122",
             "lineEnd": 122,
             "lineStart": 122,
             "snippetSha256": "sha256:aa69910ef52084205958428d86412c7d15a63ef4c75aaeb5aaf5069449f0f996",
@@ -2376,7 +2376,7 @@
           "range": {
             "byteLength": 73,
             "byteStart": 6294,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L124",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L124",
             "lineEnd": 124,
             "lineStart": 124,
             "snippetSha256": "sha256:93b0eff80ba6a0f32f79c4c8aa4872cd42ca3539c33eaea30486467ac41fa2f9",
@@ -2420,7 +2420,7 @@
           "range": {
             "byteLength": 84,
             "byteStart": 6442,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L126",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L126",
             "lineEnd": 126,
             "lineStart": 126,
             "snippetSha256": "sha256:2fc6b396eb9fb6883030aeb94a4418ae8ebc5f605f2a4bed1566367ef5fdf0e4",
@@ -2459,7 +2459,7 @@
           "range": {
             "byteLength": 69,
             "byteStart": 6613,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L128",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L128",
             "lineEnd": 128,
             "lineStart": 128,
             "snippetSha256": "sha256:258c7707fd76c6df69bb7678aba6b79feb1809275d98e8e7f4da657a3c32af58",
@@ -2498,7 +2498,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 6759,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L130",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L130",
             "lineEnd": 130,
             "lineStart": 130,
             "snippetSha256": "sha256:b8b34b7ba58f40b2ce00cf7a3475b68cdbbcc02566c53641953d69804a379e1d",
@@ -2547,7 +2547,7 @@
           "range": {
             "byteLength": 119,
             "byteStart": 6899,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L132-L134",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L132-L134",
             "lineEnd": 134,
             "lineStart": 132,
             "snippetSha256": "sha256:5c948609eb7c1521e467f4b5650b6434006f2e2fc4944c7d5dfe33ce681c447b",
@@ -2608,7 +2608,7 @@
           "range": {
             "byteLength": 251,
             "byteStart": 7092,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L136-L143",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L136-L143",
             "lineEnd": 143,
             "lineStart": 136,
             "snippetSha256": "sha256:fa423fc563ad08deb74db7b5bdcdac54afc33fea6420f37a22c7d161c468d139",
@@ -2633,7 +2633,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 280,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L8",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L8",
                 "lineEnd": 8,
                 "lineStart": 8,
                 "snippetSha256": "sha256:9c56e572ed334c1174a1b7d94e306540c316e6a946d9098a1aac4a72d7b48991",
@@ -2649,7 +2649,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 305,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L9",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L9",
                 "lineEnd": 9,
                 "lineStart": 9,
                 "snippetSha256": "sha256:836c2bb111b7e74cc75795ed81035896ee4c1eaebb597686d7fc75f54193d7aa",
@@ -2665,7 +2665,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 330,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L10",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L10",
                 "lineEnd": 10,
                 "lineStart": 10,
                 "snippetSha256": "sha256:9e5f880870d9beb539d9a43eb481ba41317e487b52aa1b39d352ad8ecc7171e2",
@@ -2680,7 +2680,7 @@
           "range": {
             "byteLength": 100,
             "byteStart": 252,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L7-L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L7-L11",
             "lineEnd": 11,
             "lineStart": 7,
             "snippetSha256": "sha256:d55f65e969290431c70733acab0532e2d54daca6d50573649f9a5432111fee22",
@@ -2716,7 +2716,7 @@
     "range": {
       "byteLength": 7206,
       "byteStart": 139,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamSplitWallet.sol#L5-L144",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamSplitWallet.sol#L5-L144",
       "lineEnd": 144,
       "lineStart": 5,
       "snippetSha256": "sha256:69e3973744274a8fd9f266b727a7447061b363cd7d65ced61ef8690daf6f3ccb",

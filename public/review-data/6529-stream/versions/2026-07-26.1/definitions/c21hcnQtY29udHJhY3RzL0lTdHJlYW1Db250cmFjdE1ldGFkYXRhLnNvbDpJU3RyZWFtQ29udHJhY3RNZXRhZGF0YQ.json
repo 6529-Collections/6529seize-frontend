@@ -172,7 +172,7 @@
           "range": {
             "byteLength": 58,
             "byteStart": 137,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamContractMetadata.sol#L8",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamContractMetadata.sol#L8",
             "lineEnd": 8,
             "lineStart": 8,
             "snippetSha256": "sha256:9bf6e74d594fc93809b3900ac85db4f0ebc745a7f8272097b75a8c1c39c6cfca",
@@ -205,7 +205,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 201,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamContractMetadata.sol#L10",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamContractMetadata.sol#L10",
             "lineEnd": 10,
             "lineStart": 10,
             "snippetSha256": "sha256:fc7da76d403858072ebafb6376dfc4299f38b824c9a2f06d9636d20ede7992bd",
@@ -238,7 +238,7 @@
           "range": {
             "byteLength": 65,
             "byteStart": 266,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamContractMetadata.sol#L12",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamContractMetadata.sol#L12",
             "lineEnd": 12,
             "lineStart": 12,
             "snippetSha256": "sha256:7ca75a47af9f89d8d926509d1351b67079e2963da084f05eaad2cc42484f93aa",
@@ -271,7 +271,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 337,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamContractMetadata.sol#L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamContractMetadata.sol#L14",
             "lineEnd": 14,
             "lineStart": 14,
             "snippetSha256": "sha256:6f8eb9137f81e5fa1ba2ff487d62190bf005bbeb1e89ffb2d91116b3e3f49e95",
@@ -304,7 +304,7 @@
           "range": {
             "byteLength": 65,
             "byteStart": 397,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamContractMetadata.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamContractMetadata.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:8c2fc40605798905ff12d279b4258b4d2df1afcaa7e123f83c5b1e40deee50e0",
@@ -338,7 +338,7 @@
           "range": {
             "byteLength": 66,
             "byteStart": 468,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamContractMetadata.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamContractMetadata.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:ff896fb4aa1d4cdb614db7bf2224cb7ae6f198104f1fba8dc68cb34d9b424f08",
@@ -388,7 +388,7 @@
     "range": {
       "byteLength": 451,
       "byteStart": 85,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamContractMetadata.sol#L7-L19",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamContractMetadata.sol#L7-L19",
       "lineEnd": 19,
       "lineStart": 7,
       "snippetSha256": "sha256:13a6555943fc80636955f7aa7a90ecce03463cb648ba2286c2e3e4afee971ae1",

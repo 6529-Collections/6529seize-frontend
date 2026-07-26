@@ -133,7 +133,7 @@
           "range": {
             "byteLength": 32,
             "byteStart": 17583,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamCoreBurn.t.sol#L432",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCoreBurn.t.sol#L432",
             "lineEnd": 432,
             "lineStart": 432,
             "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
@@ -192,7 +192,7 @@
           "range": {
             "byteLength": 193,
             "byteStart": 17622,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamCoreBurn.t.sol#L434-L440",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCoreBurn.t.sol#L434-L440",
             "lineEnd": 440,
             "lineStart": 434,
             "snippetSha256": "sha256:6ce909b32968c31bddbbc978b71e5f2b4fc195af0f4372fd7c160500e198f26c",
@@ -236,7 +236,7 @@
           "range": {
             "byteLength": 181,
             "byteStart": 17821,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamCoreBurn.t.sol#L442-L446",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCoreBurn.t.sol#L442-L446",
             "lineEnd": 446,
             "lineStart": 442,
             "snippetSha256": "sha256:1d6fe3746cac47b651b9827e31a4813141df8de3f86852d2b70f4ac6c02f8bc8",
@@ -260,7 +260,7 @@
           "range": {
             "byteLength": 32,
             "byteStart": 17583,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamCoreBurn.t.sol#L432",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCoreBurn.t.sol#L432",
             "lineEnd": 432,
             "lineStart": 432,
             "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
@@ -272,7 +272,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 17614,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamCoreBurn.t.sol#L432",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCoreBurn.t.sol#L432",
             "lineEnd": 432,
             "lineStart": 432,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -308,7 +308,7 @@
     "range": {
       "byteLength": 459,
       "byteStart": 17545,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamCoreBurn.t.sol#L431-L447",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCoreBurn.t.sol#L431-L447",
       "lineEnd": 447,
       "lineStart": 431,
       "snippetSha256": "sha256:05944449dd85ac7cae852f15c3ea5cf92c1d8a2ed32482e4ff6d6e0bfd128ad9",

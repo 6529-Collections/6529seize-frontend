@@ -202,7 +202,7 @@
           "range": {
             "byteLength": 89,
             "byteStart": 1238,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityMetadataReads.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityMetadataReads.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:67e1e73f7f8ed52166f667167caef1e9a342691bc31c4b401426bb3530320fe7",
@@ -256,7 +256,7 @@
           "range": {
             "byteLength": 174,
             "byteStart": 1415,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityMetadataReads.sol#L22-L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityMetadataReads.sol#L22-L25",
             "lineEnd": 25,
             "lineStart": 22,
             "snippetSha256": "sha256:fffa74f016d2c9573c3a2c1df1e552813d973280e30e1e0c58b46cac8bdc6982",
@@ -295,7 +295,7 @@
           "range": {
             "byteLength": 92,
             "byteStart": 1689,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityMetadataReads.sol#L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityMetadataReads.sol#L28",
             "lineEnd": 28,
             "lineStart": 28,
             "snippetSha256": "sha256:76db2c3892e2a76900a849c823b22c4fab387e7d6350ac2bc774aa4aada92e8b",
@@ -339,7 +339,7 @@
           "range": {
             "byteLength": 131,
             "byteStart": 1862,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityMetadataReads.sol#L31-L34",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityMetadataReads.sol#L31-L34",
             "lineEnd": 34,
             "lineStart": 31,
             "snippetSha256": "sha256:b81c5e32e986b02177e59cba18b6932e8a48c9e5c081414e2b8864913d499708",
@@ -388,7 +388,7 @@
           "range": {
             "byteLength": 147,
             "byteStart": 2139,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityMetadataReads.sol#L38-L41",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityMetadataReads.sol#L38-L41",
             "lineEnd": 41,
             "lineStart": 38,
             "snippetSha256": "sha256:de18e2a664fbea5faecdce5c6092fde0553fa99ee08f447e04bd1d81f85d6afd",
@@ -429,7 +429,7 @@
     "range": {
       "byteLength": 1562,
       "byteStart": 726,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityMetadataReads.sol#L13-L42",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityMetadataReads.sol#L13-L42",
       "lineEnd": 42,
       "lineStart": 13,
       "snippetSha256": "sha256:945150f9e0bcfe5e821f234fd2029786102b5def4bd5b92c709396c1da2ab418",

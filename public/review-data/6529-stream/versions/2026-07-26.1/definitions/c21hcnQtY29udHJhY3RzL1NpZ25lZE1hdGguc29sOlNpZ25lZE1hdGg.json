@@ -45,7 +45,7 @@
           "range": {
             "byteLength": 101,
             "byteStart": 311,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L13-L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/SignedMath.sol#L13-L15",
             "lineEnd": 15,
             "lineStart": 13,
             "snippetSha256": "sha256:db6d46a053888e7e36f79d3a5b76c74e6b5244aeeb7d9bb9fa67b803122b7003",
@@ -89,7 +89,7 @@
           "range": {
             "byteLength": 101,
             "byteStart": 490,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L20-L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/SignedMath.sol#L20-L22",
             "lineEnd": 22,
             "lineStart": 20,
             "snippetSha256": "sha256:d72e821ddbbaf0e6b64fd4d549d8a16c547d8871bd31dc66af0b78b17d6cd918",
@@ -133,7 +133,7 @@
           "range": {
             "byteLength": 230,
             "byteStart": 728,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L28-L32",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/SignedMath.sol#L28-L32",
             "lineEnd": 32,
             "lineStart": 28,
             "snippetSha256": "sha256:3448ed57fec775247a86041cd5a819566fe9e52889e37382156bdc87cf21d8bd",
@@ -172,7 +172,7 @@
           "range": {
             "byteLength": 213,
             "byteStart": 1047,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L37-L42",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/SignedMath.sol#L37-L42",
             "lineEnd": 42,
             "lineStart": 37,
             "snippetSha256": "sha256:5270344a00cdc79629603a0764b4d4d106d1b1d5bd09c87bcd774c640bf43a14",
@@ -213,7 +213,7 @@
     "range": {
       "byteLength": 1047,
       "byteStart": 215,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L9-L43",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/SignedMath.sol#L9-L43",
       "lineEnd": 43,
       "lineStart": 9,
       "snippetSha256": "sha256:adcc06043c1381d95fec03d9dbb89fc64902246dc139229c5a54c44f1627e957",

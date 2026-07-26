@@ -354,7 +354,7 @@
           "range": {
             "byteLength": 204,
             "byteStart": 1224,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L29-L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L29-L36",
             "lineEnd": 36,
             "lineStart": 29,
             "snippetSha256": "sha256:a08b69fbb1a3a9eead6a33de79e3c2233b2474369ef85263d1f85c5010f894b3",
@@ -419,7 +419,7 @@
           "range": {
             "byteLength": 238,
             "byteStart": 1434,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L38-L46",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L38-L46",
             "lineEnd": 46,
             "lineStart": 38,
             "snippetSha256": "sha256:a95e03963c2ff3d11454a011bcc14750c15218a5b252ce8fc327e45ce6aad64a",
@@ -444,7 +444,7 @@
           "range": {
             "byteLength": 185,
             "byteStart": 1785,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L51-L54",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L51-L54",
             "lineEnd": 54,
             "lineStart": 51,
             "snippetSha256": "sha256:5601ee935da145ae058991b3a79aad6a139c9d87fae6fdb9a8114f365538b17d",
@@ -471,7 +471,7 @@
           "range": {
             "byteLength": 1176,
             "byteStart": 1976,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L56-L74",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L56-L74",
             "lineEnd": 74,
             "lineStart": 56,
             "snippetSha256": "sha256:404f3327752b5d8059d44bf10a9bc7105f9ac3c32cb600df38ef3c40a84a71e7",
@@ -498,7 +498,7 @@
           "range": {
             "byteLength": 315,
             "byteStart": 3158,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L76-L82",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L76-L82",
             "lineEnd": 82,
             "lineStart": 76,
             "snippetSha256": "sha256:610d43a06d75312fb32c055740354726fc2ed1c1a96dc6a5bb48b78d3b1c2bee",
@@ -525,7 +525,7 @@
           "range": {
             "byteLength": 622,
             "byteStart": 3479,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L84-L97",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L84-L97",
             "lineEnd": 97,
             "lineStart": 84,
             "snippetSha256": "sha256:1f721b351e76896723954c4a53ff61bed887c8ca77f2c68efb240da05fb86758",
@@ -552,7 +552,7 @@
           "range": {
             "byteLength": 672,
             "byteStart": 4107,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L99-L112",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L99-L112",
             "lineEnd": 112,
             "lineStart": 99,
             "snippetSha256": "sha256:6c79fd3cbe9562972d47bebb2c41cbb82f7910885d9f71ca5c382d2fc2abf0a6",
@@ -579,7 +579,7 @@
           "range": {
             "byteLength": 891,
             "byteStart": 4785,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L114-L133",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L114-L133",
             "lineEnd": 133,
             "lineStart": 114,
             "snippetSha256": "sha256:3092e79540a22a2004960e8012171d8984b950642f40242e046ba8559976fe13",
@@ -606,7 +606,7 @@
           "range": {
             "byteLength": 670,
             "byteStart": 5682,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L135-L151",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L135-L151",
             "lineEnd": 151,
             "lineStart": 135,
             "snippetSha256": "sha256:3cfdcd607d7b33c702dcad82cd0a16b9eb786a1b7d1f750644404271b486ae00",
@@ -633,7 +633,7 @@
           "range": {
             "byteLength": 1119,
             "byteStart": 6358,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L153-L186",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L153-L186",
             "lineEnd": 186,
             "lineStart": 153,
             "snippetSha256": "sha256:a7ec4a717e8d7ba52bb36a1e1970d4b012c6fee9ae4eb07634a4650bf5cc838a",
@@ -660,7 +660,7 @@
           "range": {
             "byteLength": 393,
             "byteStart": 7483,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L188-L197",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L188-L197",
             "lineEnd": 197,
             "lineStart": 188,
             "snippetSha256": "sha256:8c1b9e4851c77b4b5cb47d18dc6a2648e57c9b7fbd3e621922be3a473ecd720b",
@@ -687,7 +687,7 @@
           "range": {
             "byteLength": 2720,
             "byteStart": 7882,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L199-L261",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L199-L261",
             "lineEnd": 261,
             "lineStart": 199,
             "snippetSha256": "sha256:f33b23dd3af6129e335fa3752c40191f98372a1db198e7d4cd28f82bdd9cf6e5",
@@ -714,7 +714,7 @@
           "range": {
             "byteLength": 1274,
             "byteStart": 10608,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L263-L292",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L263-L292",
             "lineEnd": 292,
             "lineStart": 263,
             "snippetSha256": "sha256:2fe91b7be61f5ce7893489f5ca481e46a95616747ae8e9e9c06ac6350174a81b",
@@ -741,7 +741,7 @@
           "range": {
             "byteLength": 1262,
             "byteStart": 11888,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L294-L319",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L294-L319",
             "lineEnd": 319,
             "lineStart": 294,
             "snippetSha256": "sha256:40816166519f44f32fab476a23d033ace40becf0965e96c8d61308c6a49da286",
@@ -768,7 +768,7 @@
           "range": {
             "byteLength": 1120,
             "byteStart": 13156,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L321-L342",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L321-L342",
             "lineEnd": 342,
             "lineStart": 321,
             "snippetSha256": "sha256:bc04e9afb800b53581ebc523b93dbfab711c591c210c8884f25fb28dc2031d4e",
@@ -795,7 +795,7 @@
           "range": {
             "byteLength": 2514,
             "byteStart": 14282,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L344-L403",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L344-L403",
             "lineEnd": 403,
             "lineStart": 344,
             "snippetSha256": "sha256:a9ed755ebdbee1025a6268212685b4d2a8b45483e09c29d8fec1ad4e290e2b55",
@@ -822,7 +822,7 @@
           "range": {
             "byteLength": 1423,
             "byteStart": 16802,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L405-L437",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L405-L437",
             "lineEnd": 437,
             "lineStart": 405,
             "snippetSha256": "sha256:cafa4937fb35886e38a264052a71ff9344d228595476ec04e812d1939bcf91fa",
@@ -849,7 +849,7 @@
           "range": {
             "byteLength": 2043,
             "byteStart": 18231,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L439-L478",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L439-L478",
             "lineEnd": 478,
             "lineStart": 439,
             "snippetSha256": "sha256:ba6f4b7b7739ab817552965e5cfc8ba150555ff04244a3288b341d1429601ea2",
@@ -902,7 +902,7 @@
           "range": {
             "byteLength": 451,
             "byteStart": 20280,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L480-L492",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L480-L492",
             "lineEnd": 492,
             "lineStart": 480,
             "snippetSha256": "sha256:63b3bad66bb51b854d44856ccdfc15a7df8d39bea5c041bdf5ea038a0f44374b",
@@ -961,7 +961,7 @@
           "range": {
             "byteLength": 735,
             "byteStart": 20737,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L494-L509",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L494-L509",
             "lineEnd": 509,
             "lineStart": 494,
             "snippetSha256": "sha256:8ea4dcdb2a4e50ee6fb3129190a9545a8d0f047f5d3fb77742a66d79398fea00",
@@ -995,7 +995,7 @@
           "range": {
             "byteLength": 293,
             "byteStart": 21478,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L511-L518",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L511-L518",
             "lineEnd": 518,
             "lineStart": 511,
             "snippetSha256": "sha256:a79919ec89c29d745f3769fc803bfc6ced3b6d0c289a209921ab273ff932ae93",
@@ -1051,7 +1051,7 @@
           "range": {
             "byteLength": 367,
             "byteStart": 21777,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L520-L528",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L520-L528",
             "lineEnd": 528,
             "lineStart": 520,
             "snippetSha256": "sha256:6ecce034387041f24d98fd777a49a49330fc3ea2d01d937eea94d6a0196023e0",
@@ -1075,7 +1075,7 @@
           "range": {
             "byteLength": 117,
             "byteStart": 800,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L22-L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L22-L23",
             "lineEnd": 23,
             "lineStart": 22,
             "snippetSha256": "sha256:3e088587b0f4376af133b694a14ce0487b5923e26acbfd0060408f2e97be5f88",
@@ -1087,7 +1087,7 @@
           "valueRange": {
             "byteLength": 66,
             "byteStart": 851,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:54dbcffdf0605b50d194000cb97fa20055db2ec9138cfb86c6fddd9436604c39",
@@ -1105,7 +1105,7 @@
           "range": {
             "byteLength": 117,
             "byteStart": 923,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L24-L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L24-L25",
             "lineEnd": 25,
             "lineStart": 24,
             "snippetSha256": "sha256:83f88b420341c7a037c57175b5a53882d3ef5c6610241eb66a1b39ff6d800eed",
@@ -1117,7 +1117,7 @@
           "valueRange": {
             "byteLength": 66,
             "byteStart": 974,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:992665ffee98da588ba4fad23f5bfc2d9d4546486e47720e0dc0292e1dc8347d",
@@ -1135,7 +1135,7 @@
           "range": {
             "byteLength": 94,
             "byteStart": 1046,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:485ea192530130c849c833fdd9bfd6f9aa73801194096a3bcb314f2d6e5a97c5",
@@ -1147,7 +1147,7 @@
           "valueRange": {
             "byteLength": 54,
             "byteStart": 1086,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:a74d44fb53a141d37736b4eecc2cf8af93e784d32d003832e2a904f0483890dd",
@@ -1165,7 +1165,7 @@
           "range": {
             "byteLength": 71,
             "byteStart": 1146,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:40474d1f6db74d49ae64287a5fff162bce4e077a9f7b1b03d11a9709a45c267d",
@@ -1177,7 +1177,7 @@
           "valueRange": {
             "byteLength": 34,
             "byteStart": 1183,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:52582f8c6c1129727ea03a8ef7ec9a97d3c13971e20fbfc325e58528096d6768",
@@ -1195,7 +1195,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 1678,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L48",
             "lineEnd": 48,
             "lineStart": 48,
             "snippetSha256": "sha256:11b64c058f583a9703f5e73d3e8dc8e0f89ce54c83e619ae87fd77ba27a2f199",
@@ -1217,7 +1217,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 1733,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L49",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L49",
             "lineEnd": 49,
             "lineStart": 49,
             "snippetSha256": "sha256:c68b67d83c90ae39df73cb8e42343c0ebdd0a1d1c91a9492e1a2d89ab2a0a4df",
@@ -1263,7 +1263,7 @@
     "range": {
       "byteLength": 21417,
       "byteStart": 729,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamGasParameterStore.t.sol#L21-L529",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamGasParameterStore.t.sol#L21-L529",
       "lineEnd": 529,
       "lineStart": 21,
       "snippetSha256": "sha256:1c159b095e897f8406b9859340dbd62ece6cbf20d29839ea2498348a268d7656",

@@ -108,7 +108,7 @@
           "range": {
             "byteLength": 85,
             "byteStart": 705,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L12",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L12",
             "lineEnd": 12,
             "lineStart": 12,
             "snippetSha256": "sha256:13d7ddb4999e8742ffb49fab6c536968951cd001d20c50334560a7c8857674ec",
@@ -152,7 +152,7 @@
           "range": {
             "byteLength": 141,
             "byteStart": 1188,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L19-L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L19-L22",
             "lineEnd": 22,
             "lineStart": 19,
             "snippetSha256": "sha256:503c2cf0b83bee2bf275edc101195cbbec9aeffa882c10c33167ad606ae1096b",
@@ -193,7 +193,7 @@
     "range": {
       "byteLength": 760,
       "byteStart": 571,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L10-L23",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L10-L23",
       "lineEnd": 23,
       "lineStart": 10,
       "snippetSha256": "sha256:5d3c9afb99d5d01d6a81d3b1ed05e375a235f35c2461ef20639a63660445c48d",

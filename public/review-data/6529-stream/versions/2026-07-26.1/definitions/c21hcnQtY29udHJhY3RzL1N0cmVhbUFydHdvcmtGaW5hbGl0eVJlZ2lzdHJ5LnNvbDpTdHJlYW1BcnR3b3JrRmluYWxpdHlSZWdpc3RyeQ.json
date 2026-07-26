@@ -2658,7 +2658,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 1289,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:bf0480daf2ecc93895a94c64716906c74a206c9969ff704b8b9a61d7173c5c6b",
@@ -2685,7 +2685,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 1322,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:fc5e92f7dead47f6d2a6cf4b4ba0f4e21fdcd61b7608f3327b9263da85fd7b4d",
@@ -2712,7 +2712,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 1381,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L28",
             "lineEnd": 28,
             "lineStart": 28,
             "snippetSha256": "sha256:16456209cb73d31429438c06717be6a09100617d13bac7e94639ab2aaa5e5be4",
@@ -2754,7 +2754,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 1445,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L29-L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L29-L31",
             "lineEnd": 31,
             "lineStart": 29,
             "snippetSha256": "sha256:0afae9760dc805386c45444f500c0efcf35c662ff34e9c7dd85d1e5de801ef7e",
@@ -2786,7 +2786,7 @@
           "range": {
             "byteLength": 77,
             "byteStart": 1593,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L32",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L32",
             "lineEnd": 32,
             "lineStart": 32,
             "snippetSha256": "sha256:972b1570d2534c432ede1ef017d0f86f729e2de7e19f8ed39a4cf7f3f2d6f173",
@@ -2813,7 +2813,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 1675,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L33",
             "lineEnd": 33,
             "lineStart": 33,
             "snippetSha256": "sha256:686e96da8f8c25edf9f8a5fa59f1aa34d6b8a7c06409470a73111ada0371d0a6",
@@ -2846,7 +2846,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 1810,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:0b235a3309cc2b0567a6ccaa1fdc52e8f4d3270d39c772e0ebe259d12b91047b",
@@ -2880,7 +2880,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 1961,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L39",
             "lineEnd": 39,
             "lineStart": 39,
             "snippetSha256": "sha256:04fce7249c7630bc1621a525dbf5658d0fb5de981005e89c4bd93d43064ecee3",
@@ -2914,7 +2914,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 2114,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L42",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L42",
             "lineEnd": 42,
             "lineStart": 42,
             "snippetSha256": "sha256:823106ca98ce30e65fda42b94d093e5717d734288814bbfcfedb44daa7f31a47",
@@ -2948,7 +2948,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 2278,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L45",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L45",
             "lineEnd": 45,
             "lineStart": 45,
             "snippetSha256": "sha256:a1eb4ec93d41aa4b0a51d06189c6d5b6389ee1ae0b1dc0519063f7b73c20fa06",
@@ -2982,7 +2982,7 @@
           "range": {
             "byteLength": 70,
             "byteStart": 2434,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L48",
             "lineEnd": 48,
             "lineStart": 48,
             "snippetSha256": "sha256:ac4b4fa70311e9b3472633464ef34c90f090dd3fbfef4acf48a5aeb6ffc3863b",
@@ -3016,7 +3016,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 2782,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L53",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L53",
             "lineEnd": 53,
             "lineStart": 53,
             "snippetSha256": "sha256:fdd5d0d8e729e84cf02cfc9baa3aeabe0de5e817acab528d01d11232e8e61448",
@@ -3050,7 +3050,7 @@
           "range": {
             "byteLength": 123,
             "byteStart": 3250,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L61-L62",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L61-L62",
             "lineEnd": 62,
             "lineStart": 61,
             "snippetSha256": "sha256:b63e77e7d12e495c344e9af87dab3339121dbfe785612dafba28ad428d53c78f",
@@ -3084,7 +3084,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 3380,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L64",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L64",
             "lineEnd": 64,
             "lineStart": 64,
             "snippetSha256": "sha256:d36a95376b28f98323e066a09f2a7c9259007a9caffe9271c3197661c3973604",
@@ -3118,7 +3118,7 @@
           "range": {
             "byteLength": 63,
             "byteStart": 3438,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L65",
             "lineEnd": 65,
             "lineStart": 65,
             "snippetSha256": "sha256:696d54549d0df95a4febe6c02f6a108e4ca3f2e86bbefdff4acf0bf58fcbdbff",
@@ -3152,7 +3152,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 3507,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L66",
             "lineEnd": 66,
             "lineStart": 66,
             "snippetSha256": "sha256:f9224b4722aa117a50ede74d7bcbf32c93156bf9a66ebceb57b03021eea71738",
@@ -3186,7 +3186,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 3572,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L67",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L67",
             "lineEnd": 67,
             "lineStart": 67,
             "snippetSha256": "sha256:1b28e00386cdf175f424d636fccbd9b12f0e31ec6434d4a833a205f17cc9b019",
@@ -3220,7 +3220,7 @@
           "range": {
             "byteLength": 71,
             "byteStart": 3637,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L68",
             "lineEnd": 68,
             "lineStart": 68,
             "snippetSha256": "sha256:07e13814be71684124b699c2a4aa3afb364d21d2e39f48185538b7503ec3d989",
@@ -3254,7 +3254,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 3781,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L71",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L71",
             "lineEnd": 71,
             "lineStart": 71,
             "snippetSha256": "sha256:beccfc767d9c149818ae873e3cac0d0bbce66ff89cb7727d670c16856110250c",
@@ -3312,7 +3312,7 @@
           "range": {
             "byteLength": 1281,
             "byteStart": 4614,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L90-L118",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L90-L118",
             "lineEnd": 118,
             "lineStart": 90,
             "snippetSha256": "sha256:5ef9527d0751edcccb234cd3cbe7c6d492e2c14bbcff3c8f86c58cd2de85138a",
@@ -3345,7 +3345,7 @@
           "range": {
             "byteLength": 175,
             "byteStart": 5901,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L120-L124",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L120-L124",
             "lineEnd": 124,
             "lineStart": 120,
             "snippetSha256": "sha256:68f7d9489dc9cb186f7a224d40dc81bd82744358c3eeaae439579e0807aae0c9",
@@ -3388,7 +3388,7 @@
           "range": {
             "byteLength": 1908,
             "byteStart": 6082,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L126-L168",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L126-L168",
             "lineEnd": 168,
             "lineStart": 126,
             "snippetSha256": "sha256:78610fd60b61ea84b46cc5abd1c926fc5852025354e2d5b3af5864c0f521c2ac",
@@ -3432,7 +3432,7 @@
           "range": {
             "byteLength": 655,
             "byteStart": 7996,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L170-L189",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L170-L189",
             "lineEnd": 189,
             "lineStart": 170,
             "snippetSha256": "sha256:40e35e1e3861d46bc148bc9fe87748051722234ba512def254be28068f0c0335",
@@ -3476,7 +3476,7 @@
           "range": {
             "byteLength": 618,
             "byteStart": 8657,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L191-L206",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L191-L206",
             "lineEnd": 206,
             "lineStart": 191,
             "snippetSha256": "sha256:74298887c951d95fff7123ee0115cb62e2ae1d3b22420e8307ff42cf081f482a",
@@ -3532,7 +3532,7 @@
           "range": {
             "byteLength": 463,
             "byteStart": 9281,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L208-L220",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L208-L220",
             "lineEnd": 220,
             "lineStart": 208,
             "snippetSha256": "sha256:85d2efadce2058ce5edb838e9df961f9775216f710f27dcb3ab7327f07ce6325",
@@ -3593,7 +3593,7 @@
           "range": {
             "byteLength": 891,
             "byteStart": 9948,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L224-L247",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L224-L247",
             "lineEnd": 247,
             "lineStart": 224,
             "snippetSha256": "sha256:bdd7ca01491a6397a57ab21757294bdfef50f91264a4932b7475d7dc796eb527",
@@ -3632,7 +3632,7 @@
           "range": {
             "byteLength": 418,
             "byteStart": 10845,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L249-L257",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L249-L257",
             "lineEnd": 257,
             "lineStart": 249,
             "snippetSha256": "sha256:c96a1c133f4174808f5dc62f5b7ec8bf199712da5942508b4c36bc47183fb575",
@@ -3671,7 +3671,7 @@
           "range": {
             "byteLength": 479,
             "byteStart": 11269,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L259-L269",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L259-L269",
             "lineEnd": 269,
             "lineStart": 259,
             "snippetSha256": "sha256:9423205ec6c87fd4ea421ec6bb571cbe8c078e136ed64dd6a234d87916ee05cf",
@@ -3716,7 +3716,7 @@
           "range": {
             "byteLength": 248,
             "byteStart": 11754,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L271-L279",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L271-L279",
             "lineEnd": 279,
             "lineStart": 271,
             "snippetSha256": "sha256:1640da195e73ca8fd2c69a1c705973d21ddf1cfcf04472981af258fed1339b0e",
@@ -3749,7 +3749,7 @@
           "range": {
             "byteLength": 100,
             "byteStart": 12064,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L282-L284",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L282-L284",
             "lineEnd": 284,
             "lineStart": 282,
             "snippetSha256": "sha256:94fa5cafd7a08576712fa09b69aee23eda571a575ab4c120a01e5b55f94673ec",
@@ -3782,7 +3782,7 @@
           "range": {
             "byteLength": 88,
             "byteStart": 12245,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L287-L289",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L287-L289",
             "lineEnd": 289,
             "lineStart": 287,
             "snippetSha256": "sha256:844840d2e67ff801d1e122cfe498e931d86354364f56360ced7be9a821e223f1",
@@ -3831,7 +3831,7 @@
           "range": {
             "byteLength": 2416,
             "byteStart": 12730,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L297-L359",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L297-L359",
             "lineEnd": 359,
             "lineStart": 297,
             "snippetSha256": "sha256:16824a5002661e41b06f5b42435b1d04729c1d8158c65cadbe4195c34d54b488",
@@ -3870,7 +3870,7 @@
           "range": {
             "byteLength": 1032,
             "byteStart": 15430,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L364-L388",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L364-L388",
             "lineEnd": 388,
             "lineStart": 364,
             "snippetSha256": "sha256:28111a629c0f44b3e439533e0b2a63f8a85306da6d2d4099e0a43361c33f2dc3",
@@ -3909,7 +3909,7 @@
           "range": {
             "byteLength": 798,
             "byteStart": 16557,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L391-L412",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L391-L412",
             "lineEnd": 412,
             "lineStart": 391,
             "snippetSha256": "sha256:6dcc8b1c18f75c19647316b3edea21dc3795bc4070eb2ed4440a81fa60c9a4d1",
@@ -3943,7 +3943,7 @@
           "range": {
             "byteLength": 551,
             "byteStart": 17451,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L415-L428",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L415-L428",
             "lineEnd": 428,
             "lineStart": 415,
             "snippetSha256": "sha256:8aacec2ff10fd805efe0e1477647b3b374d3c42eef8cc37948413d5b924c3a7b",
@@ -3984,7 +3984,7 @@
           "range": {
             "byteLength": 234,
             "byteStart": 18176,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L432-L439",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L432-L439",
             "lineEnd": 439,
             "lineStart": 432,
             "snippetSha256": "sha256:a9efd8a93e8bef2230774b543f6aca3ddb918509d790e7af0dac2ac71547c0ac",
@@ -4024,7 +4024,7 @@
           "range": {
             "byteLength": 873,
             "byteStart": 18467,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L442-L465",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L442-L465",
             "lineEnd": 465,
             "lineStart": 442,
             "snippetSha256": "sha256:79d4efef0b9444c660e5efe29f8f3ddfd8582687ec5bf2186eab0c640d3d5146",
@@ -4064,7 +4064,7 @@
           "range": {
             "byteLength": 640,
             "byteStart": 19723,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L473-L489",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L473-L489",
             "lineEnd": 489,
             "lineStart": 473,
             "snippetSha256": "sha256:23844c34aeac60553e33f4690b4fc08c768d3dc5f00f1b0cdd063430f6f9a650",
@@ -4103,7 +4103,7 @@
           "range": {
             "byteLength": 154,
             "byteStart": 20420,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L492-L494",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L492-L494",
             "lineEnd": 494,
             "lineStart": 492,
             "snippetSha256": "sha256:4e7cc76014fb8985d691d840550364cb27499a0f214d8f9507aa89195832ac0a",
@@ -4143,7 +4143,7 @@
           "range": {
             "byteLength": 185,
             "byteStart": 20631,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L497-L504",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L497-L504",
             "lineEnd": 504,
             "lineStart": 497,
             "snippetSha256": "sha256:250b099dcdc63bacdb0ebd4216c7dc26376955011d286a6a0dcd2248b4f43d07",
@@ -4193,7 +4193,7 @@
           "range": {
             "byteLength": 360,
             "byteStart": 21048,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L511-L518",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L511-L518",
             "lineEnd": 518,
             "lineStart": 511,
             "snippetSha256": "sha256:a8bcd2a6b7b39ef58272648ee3cb64984143f8c117964009957476498bb40722",
@@ -4244,7 +4244,7 @@
           "range": {
             "byteLength": 478,
             "byteStart": 21465,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L521-L531",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L521-L531",
             "lineEnd": 531,
             "lineStart": 521,
             "snippetSha256": "sha256:da98410e927fbffc9314e4f8deb6dea55a6a6c5a4b88f3523e8e8d44c3689b76",
@@ -4295,7 +4295,7 @@
           "range": {
             "byteLength": 2264,
             "byteStart": 21949,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L533-L582",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L533-L582",
             "lineEnd": 582,
             "lineStart": 533,
             "snippetSha256": "sha256:d6f01a8f0c150cc072163eb342f404c02683d3e3e7dd30e2d7a53a3785e94a87",
@@ -4335,7 +4335,7 @@
           "range": {
             "byteLength": 217,
             "byteStart": 24492,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L589-L596",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L589-L596",
             "lineEnd": 596,
             "lineStart": 589,
             "snippetSha256": "sha256:c783b9d1eb0c37d13bb3957a2cacfbfa53db0d4256a4710ca31866f555c774b0",
@@ -4375,7 +4375,7 @@
           "range": {
             "byteLength": 239,
             "byteStart": 24766,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L599-L606",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L599-L606",
             "lineEnd": 606,
             "lineStart": 599,
             "snippetSha256": "sha256:8bb804acf8506d776fd0711b48b928dc4d77869f71e3616a3003eb07107a4327",
@@ -4414,7 +4414,7 @@
           "range": {
             "byteLength": 286,
             "byteStart": 25062,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L609-L618",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L609-L618",
             "lineEnd": 618,
             "lineStart": 609,
             "snippetSha256": "sha256:a3f52baf5590a2f81203e4bd5dce3ce17c34987bae4cfa730e436661776b8434",
@@ -4454,7 +4454,7 @@
           "range": {
             "byteLength": 289,
             "byteStart": 25405,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L621-L630",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L621-L630",
             "lineEnd": 630,
             "lineStart": 621,
             "snippetSha256": "sha256:c20e7bce79919626e9bd3fea29f269c7b62b3b4f447e327b3c7a22d4c9f6f22c",
@@ -4510,7 +4510,7 @@
           "range": {
             "byteLength": 333,
             "byteStart": 25751,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L633-L640",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L633-L640",
             "lineEnd": 640,
             "lineStart": 633,
             "snippetSha256": "sha256:68fe3c9fb2e598ce1c7174bea970912eab47311298348da03a0daed584e2492d",
@@ -4566,7 +4566,7 @@
           "range": {
             "byteLength": 357,
             "byteStart": 26141,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L643-L650",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L643-L650",
             "lineEnd": 650,
             "lineStart": 643,
             "snippetSha256": "sha256:5737e1c5f9b42fec63c807bc35395592746e24380248c3deff0a0d5a79e3afca",
@@ -4606,7 +4606,7 @@
           "range": {
             "byteLength": 196,
             "byteStart": 26555,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L653-L660",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L653-L660",
             "lineEnd": 660,
             "lineStart": 653,
             "snippetSha256": "sha256:5bff2bee25dea4e3c5222a4ce0270d15f3f2559e080ab76edf369c59d57a14b6",
@@ -4646,7 +4646,7 @@
           "range": {
             "byteLength": 219,
             "byteStart": 26995,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L667-L674",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L667-L674",
             "lineEnd": 674,
             "lineStart": 667,
             "snippetSha256": "sha256:a51097733edf58ad568a6a3fe8b0898a686179f17b3f670bb00104dc13762d2e",
@@ -4685,7 +4685,7 @@
           "range": {
             "byteLength": 161,
             "byteStart": 27271,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L677-L679",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L677-L679",
             "lineEnd": 679,
             "lineStart": 677,
             "snippetSha256": "sha256:586278f66c718f24c683c8295c9e768cfb4df1eed90cfd217d6448de66095613",
@@ -4735,7 +4735,7 @@
           "range": {
             "byteLength": 284,
             "byteStart": 27489,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L682-L689",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L682-L689",
             "lineEnd": 689,
             "lineStart": 682,
             "snippetSha256": "sha256:e229c62bb283bf2e1172debc42567d1dd605eea6536e7f8f35b203f897190575",
@@ -4774,7 +4774,7 @@
           "range": {
             "byteLength": 204,
             "byteStart": 27830,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L692-L695",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L692-L695",
             "lineEnd": 695,
             "lineStart": 692,
             "snippetSha256": "sha256:2d1d95c905fc296bd62e807db1dc129733ed7e1c01bc743b0c35df61f53a6031",
@@ -4823,7 +4823,7 @@
           "range": {
             "byteLength": 270,
             "byteStart": 28091,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L698-L705",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L698-L705",
             "lineEnd": 705,
             "lineStart": 698,
             "snippetSha256": "sha256:bdb34b5956c395c25e13c743a2182104b3c3d08c01f8b68697f67a8c9218c0cb",
@@ -4892,7 +4892,7 @@
           "range": {
             "byteLength": 426,
             "byteStart": 28418,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L708-L721",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L708-L721",
             "lineEnd": 721,
             "lineStart": 708,
             "snippetSha256": "sha256:668c39c18eb25bb36f8d3ec382a311d2bb5b3a37efecb515522735361b30a1a6",
@@ -4933,7 +4933,7 @@
           "range": {
             "byteLength": 1155,
             "byteStart": 28901,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L724-L752",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L724-L752",
             "lineEnd": 752,
             "lineStart": 724,
             "snippetSha256": "sha256:10fb45786a7a6414a4e1c76985d7bd0e5db2648c800a2baf60af9f3ed83c4f24",
@@ -4983,7 +4983,7 @@
           "range": {
             "byteLength": 271,
             "byteStart": 30113,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L755-L762",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L755-L762",
             "lineEnd": 762,
             "lineStart": 755,
             "snippetSha256": "sha256:f8903d38c6045e112c05449184f474dcb31df1d75f3293143faaa5c992673333",
@@ -5053,7 +5053,7 @@
           "range": {
             "byteLength": 457,
             "byteStart": 30441,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L765-L782",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L765-L782",
             "lineEnd": 782,
             "lineStart": 765,
             "snippetSha256": "sha256:6794a0852b784c189aa9bd679f6bcd7997da8b8ada7ea53c8a23496b117a700c",
@@ -5093,7 +5093,7 @@
           "range": {
             "byteLength": 283,
             "byteStart": 30955,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L785-L793",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L785-L793",
             "lineEnd": 793,
             "lineStart": 785,
             "snippetSha256": "sha256:21ee64ab71cc5ee7146a468260984c85ea395ee21d15a49a8ae7d026054a6adf",
@@ -5144,7 +5144,7 @@
           "range": {
             "byteLength": 364,
             "byteStart": 31295,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L796-L803",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L796-L803",
             "lineEnd": 803,
             "lineStart": 796,
             "snippetSha256": "sha256:0dbead5f5e31805a42d814164f39799c4bddafd274e6c46b9591663b6b33ba61",
@@ -5204,7 +5204,7 @@
           "range": {
             "byteLength": 874,
             "byteStart": 31725,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L806-L825",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L806-L825",
             "lineEnd": 825,
             "lineStart": 806,
             "snippetSha256": "sha256:12ca6dbe2fb2062af692b647d58980a1042b7c05821c7ccae3d5158168348987",
@@ -5243,7 +5243,7 @@
           "range": {
             "byteLength": 300,
             "byteStart": 32788,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L831-L836",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L831-L836",
             "lineEnd": 836,
             "lineStart": 831,
             "snippetSha256": "sha256:71c20eb9171230cf976379ad9327bcea7ab54640feb589c95fa9aab36414a28e",
@@ -5287,7 +5287,7 @@
           "range": {
             "byteLength": 1197,
             "byteStart": 33094,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L838-L861",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L838-L861",
             "lineEnd": 861,
             "lineStart": 838,
             "snippetSha256": "sha256:764cca86e1e45fdc2442a77b51fe9b86b51fde2a6a10b47e20fde618bfb21fd4",
@@ -5320,7 +5320,7 @@
           "range": {
             "byteLength": 281,
             "byteStart": 34297,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L863-L869",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L863-L869",
             "lineEnd": 869,
             "lineStart": 863,
             "snippetSha256": "sha256:e460ebd6832cd7c366902a23bbe675bc124fd864da8959075e94d658d8208ad7",
@@ -5360,7 +5360,7 @@
           "range": {
             "byteLength": 337,
             "byteStart": 34764,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L875-L886",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L875-L886",
             "lineEnd": 886,
             "lineStart": 875,
             "snippetSha256": "sha256:14da863856fc998c81cc5a442ba2b715c6f15612441b4ab437b19b9c4206d9c8",
@@ -5400,7 +5400,7 @@
           "range": {
             "byteLength": 225,
             "byteStart": 35107,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L888-L892",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L888-L892",
             "lineEnd": 892,
             "lineStart": 888,
             "snippetSha256": "sha256:ee8c62ff27a381fb6c7a7c341e74d86be331352c848a5e298b1a17d578b28e34",
@@ -5441,7 +5441,7 @@
           "range": {
             "byteLength": 373,
             "byteStart": 35338,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L894-L905",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L894-L905",
             "lineEnd": 905,
             "lineStart": 894,
             "snippetSha256": "sha256:04283b5599174ea035900989c241a5df0aca2e0ea74256d7426e102ce005f446",
@@ -5481,7 +5481,7 @@
           "range": {
             "byteLength": 535,
             "byteStart": 35717,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L907-L918",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L907-L918",
             "lineEnd": 918,
             "lineStart": 907,
             "snippetSha256": "sha256:15a358ed210cd78c2d2f5eff9beddff3daddaaa0e85577ede3758fa8f8d11fec",
@@ -5515,7 +5515,7 @@
           "range": {
             "byteLength": 195,
             "byteStart": 36258,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L920-L924",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L920-L924",
             "lineEnd": 924,
             "lineStart": 920,
             "snippetSha256": "sha256:ec63dd478ac6bfc30229659ecf09c4b689739b7750e087de0c56c0ab4a2a2a78",
@@ -5555,7 +5555,7 @@
           "range": {
             "byteLength": 301,
             "byteStart": 36459,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L926-L931",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L926-L931",
             "lineEnd": 931,
             "lineStart": 926,
             "snippetSha256": "sha256:3a3992787f45f338975df2eae960cab3031b9131e13b5842f41fe6a9685e645f",
@@ -5611,7 +5611,7 @@
           "range": {
             "byteLength": 1008,
             "byteStart": 36766,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L933-L961",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L933-L961",
             "lineEnd": 961,
             "lineStart": 933,
             "snippetSha256": "sha256:3bd843033a8e766bfceb20831728d17663e7a5a423ee58b1793f5f020682ce07",
@@ -5645,7 +5645,7 @@
           "range": {
             "byteLength": 532,
             "byteStart": 37986,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L967-L980",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L967-L980",
             "lineEnd": 980,
             "lineStart": 967,
             "snippetSha256": "sha256:965d836decb786d58c7b98d467f3cce3908d47ad09ddb0b5f6e95cf45a6f8119",
@@ -5691,7 +5691,7 @@
           "range": {
             "byteLength": 1081,
             "byteStart": 38779,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L985-L1011",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L985-L1011",
             "lineEnd": 1011,
             "lineStart": 985,
             "snippetSha256": "sha256:c891c97400a02f8aea44d21bb644cd1240df9eb754b0c700e4b90979d61a181f",
@@ -5725,7 +5725,7 @@
           "range": {
             "byteLength": 689,
             "byteStart": 39866,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1013-L1027",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1013-L1027",
             "lineEnd": 1027,
             "lineStart": 1013,
             "snippetSha256": "sha256:1729a922fbaeebef4660ac62d10b5e4a86c5a4bd11fd37c111cd03cddfd01778",
@@ -5775,7 +5775,7 @@
           "range": {
             "byteLength": 2513,
             "byteStart": 40783,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1032-L1082",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1032-L1082",
             "lineEnd": 1082,
             "lineStart": 1032,
             "snippetSha256": "sha256:a0035597714842cd8846521c6496feaa29678f1848af3c21f9c14a76061714ac",
@@ -5818,7 +5818,7 @@
           "range": {
             "byteLength": 555,
             "byteStart": 43302,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1084-L1096",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1084-L1096",
             "lineEnd": 1096,
             "lineStart": 1084,
             "snippetSha256": "sha256:659813dbda33c6bc1f24b0eb0dc86d8e3feb0f46010c7109d6e50d71ed8fdd87",
@@ -5862,7 +5862,7 @@
           "range": {
             "byteLength": 781,
             "byteStart": 44310,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1103-L1121",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1103-L1121",
             "lineEnd": 1121,
             "lineStart": 1103,
             "snippetSha256": "sha256:16222418f2933ff1db9e039d517d93dc2dc1586c16ba9d57cc21cdf34f8571ca",
@@ -5901,7 +5901,7 @@
           "range": {
             "byteLength": 484,
             "byteStart": 45492,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1128-L1138",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1128-L1138",
             "lineEnd": 1138,
             "lineStart": 1128,
             "snippetSha256": "sha256:4f26ad42530f12e40cf327a4b1edb840ccc942926bc585ae338f64df989d7e7b",
@@ -5939,7 +5939,7 @@
           "range": {
             "byteLength": 511,
             "byteStart": 46240,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1143-L1156",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1143-L1156",
             "lineEnd": 1156,
             "lineStart": 1143,
             "snippetSha256": "sha256:a60dd4ae1c047ddb2ba5ac669a3ab559eab9b5c59f6d29b606814520110f56dd",
@@ -5990,7 +5990,7 @@
           "range": {
             "byteLength": 1213,
             "byteStart": 47097,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1162-L1191",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1162-L1191",
             "lineEnd": 1191,
             "lineStart": 1162,
             "snippetSha256": "sha256:a0eb108ca339283b192cbc71d156d0554e98d4e7d3a7406e00b83de7d5f141b1",
@@ -6034,7 +6034,7 @@
           "range": {
             "byteLength": 532,
             "byteStart": 48316,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1193-L1205",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1193-L1205",
             "lineEnd": 1205,
             "lineStart": 1193,
             "snippetSha256": "sha256:51f9b8a6bb12c28734269db847d87ca04aea173e76fe0c5f64b64f4e8fc8f212",
@@ -6084,7 +6084,7 @@
           "range": {
             "byteLength": 436,
             "byteStart": 48854,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1207-L1219",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1207-L1219",
             "lineEnd": 1219,
             "lineStart": 1207,
             "snippetSha256": "sha256:ac5701446480f3604500722fa01eb418ec1606a62c51b83992e025d72c43aed3",
@@ -6124,7 +6124,7 @@
           "range": {
             "byteLength": 765,
             "byteStart": 49296,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1221-L1238",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1221-L1238",
             "lineEnd": 1238,
             "lineStart": 1221,
             "snippetSha256": "sha256:99220c3560b542bdd6483e34fba24d50060b34be1de20480557aa0ec6bc6b1e7",
@@ -6169,7 +6169,7 @@
           "range": {
             "byteLength": 1265,
             "byteStart": 50067,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1240-L1268",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1240-L1268",
             "lineEnd": 1268,
             "lineStart": 1240,
             "snippetSha256": "sha256:d2b5f8d0ffa56df515be6b1d911c45eabbac15531697286653f4dc97dd101f80",
@@ -6225,7 +6225,7 @@
           "range": {
             "byteLength": 810,
             "byteStart": 51338,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1270-L1290",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1270-L1290",
             "lineEnd": 1290,
             "lineStart": 1270,
             "snippetSha256": "sha256:67f3e48e579553bd39ec6199ca2480a1e7282a4f133f39b2a2e29a23eae35497",
@@ -6271,7 +6271,7 @@
           "range": {
             "byteLength": 628,
             "byteStart": 52154,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1292-L1303",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1292-L1303",
             "lineEnd": 1303,
             "lineStart": 1292,
             "snippetSha256": "sha256:88e2b2b7a93f0350b6d03b98237f08b853715fa5e7cefbecaee7539d919a3037",
@@ -6326,7 +6326,7 @@
           "range": {
             "byteLength": 1367,
             "byteStart": 52788,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1305-L1333",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1305-L1333",
             "lineEnd": 1333,
             "lineStart": 1305,
             "snippetSha256": "sha256:3c55e0c55de20973a362d57f0dbae72366e5768f9a32c9666c69df145ee07ac7",
@@ -6377,7 +6377,7 @@
           "range": {
             "byteLength": 2792,
             "byteStart": 54454,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1338-L1401",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1338-L1401",
             "lineEnd": 1401,
             "lineStart": 1338,
             "snippetSha256": "sha256:7803d26b0d1c56d1ba1134bcaa0f64600021d321f8861a7572a0738724f545f8",
@@ -6432,7 +6432,7 @@
           "range": {
             "byteLength": 1069,
             "byteStart": 57545,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1406-L1435",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1406-L1435",
             "lineEnd": 1435,
             "lineStart": 1406,
             "snippetSha256": "sha256:a4a381085cd146a32adf7bca51b4ba2f0634fc910b6919726876efc6bf5b1c96",
@@ -6488,7 +6488,7 @@
           "range": {
             "byteLength": 1631,
             "byteStart": 58620,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1437-L1479",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1437-L1479",
             "lineEnd": 1479,
             "lineStart": 1437,
             "snippetSha256": "sha256:7fd7f9e22bf19933fc628ef3272a76cdde564009040b71b01f18d6e1e073d53b",
@@ -6529,7 +6529,7 @@
           "range": {
             "byteLength": 499,
             "byteStart": 60481,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1485-L1498",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1485-L1498",
             "lineEnd": 1498,
             "lineStart": 1485,
             "snippetSha256": "sha256:9ec5ab6843ac88ab926764742a26457dc46c381af010f142274e3a843ca8c119",
@@ -6569,7 +6569,7 @@
           "range": {
             "byteLength": 274,
             "byteStart": 61174,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1504-L1512",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1504-L1512",
             "lineEnd": 1512,
             "lineStart": 1504,
             "snippetSha256": "sha256:5210158e7708106225c50d49bd2737fd8b421187f9655c140d205e8156a2f303",
@@ -6609,7 +6609,7 @@
           "range": {
             "byteLength": 278,
             "byteStart": 61454,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1514-L1522",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1514-L1522",
             "lineEnd": 1522,
             "lineStart": 1514,
             "snippetSha256": "sha256:3ac6d70b156288e8c1d1b67c2576d1f37d429a2455b0d196f708ffc04aa8c4bc",
@@ -6649,7 +6649,7 @@
           "range": {
             "byteLength": 864,
             "byteStart": 61892,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1526-L1548",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1526-L1548",
             "lineEnd": 1548,
             "lineStart": 1526,
             "snippetSha256": "sha256:c6676e9af564f625011f06086ab9aa06e4017caa1f28125e1ee92f3ac257574c",
@@ -6694,7 +6694,7 @@
           "range": {
             "byteLength": 875,
             "byteStart": 63111,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1554-L1579",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1554-L1579",
             "lineEnd": 1579,
             "lineStart": 1554,
             "snippetSha256": "sha256:a8c28e1c259828764572162b66b1b9059ec5ed6e6735323ff8d45cae197bab88",
@@ -6740,7 +6740,7 @@
           "range": {
             "byteLength": 1035,
             "byteStart": 63992,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1581-L1609",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1581-L1609",
             "lineEnd": 1609,
             "lineStart": 1581,
             "snippetSha256": "sha256:734e1f8ee311b90b6f1e3d8d880f8c4ed0c45ea383e23f08c9d1eab879362ab0",
@@ -6796,7 +6796,7 @@
           "range": {
             "byteLength": 1675,
             "byteStart": 65033,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1611-L1658",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1611-L1658",
             "lineEnd": 1658,
             "lineStart": 1611,
             "snippetSha256": "sha256:8b22d92717e6350cb34dd495ff487f02c0afcb78a101ef88749af42974b3112a",
@@ -6852,7 +6852,7 @@
           "range": {
             "byteLength": 994,
             "byteStart": 66864,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1662-L1690",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1662-L1690",
             "lineEnd": 1690,
             "lineStart": 1662,
             "snippetSha256": "sha256:e30fbf637e45be713bd146a7e2a3d61bba83494929a33de91cc7dc19af055088",
@@ -6892,7 +6892,7 @@
           "range": {
             "byteLength": 1109,
             "byteStart": 68031,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1694-L1725",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1694-L1725",
             "lineEnd": 1725,
             "lineStart": 1694,
             "snippetSha256": "sha256:20da97e9bb507dd8d7d5bf2c828104f7586d12f0a05559bdc8c09cc9289ffaf8",
@@ -6944,7 +6944,7 @@
           "range": {
             "byteLength": 2968,
             "byteStart": 69344,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1731-L1798",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1731-L1798",
             "lineEnd": 1798,
             "lineStart": 1731,
             "snippetSha256": "sha256:c75c74a95dde39f228090556d26e950237e867f6bf65b903be620d1c8b0bc191",
@@ -6995,7 +6995,7 @@
           "range": {
             "byteLength": 611,
             "byteStart": 72318,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1800-L1814",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1800-L1814",
             "lineEnd": 1814,
             "lineStart": 1800,
             "snippetSha256": "sha256:c4f97a660692b865c7700a51d68fcfbb8744c1e14aa83072865f5c405f758873",
@@ -7045,7 +7045,7 @@
           "range": {
             "byteLength": 735,
             "byteStart": 72935,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1816-L1835",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1816-L1835",
             "lineEnd": 1835,
             "lineStart": 1816,
             "snippetSha256": "sha256:8fefe931e3d1903979be5df77bece75462205c1a46b50433d793bd4a1fc610a7",
@@ -7115,7 +7115,7 @@
           "range": {
             "byteLength": 921,
             "byteStart": 73676,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1837-L1859",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1837-L1859",
             "lineEnd": 1859,
             "lineStart": 1837,
             "snippetSha256": "sha256:a12b3cb99b7c12437d5ee89135ecede84c25b0e0933612f972e3d75197c5ddd0",
@@ -7171,7 +7171,7 @@
           "range": {
             "byteLength": 449,
             "byteStart": 74603,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L1861-L1871",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L1861-L1871",
             "lineEnd": 1871,
             "lineStart": 1861,
             "snippetSha256": "sha256:2ca19d33b56a7a85e522bf902cb2b1cad60622099a2d6ea11edf7cd4008e18cd",
@@ -7195,7 +7195,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 1810,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:0b235a3309cc2b0567a6ccaa1fdc52e8f4d3270d39c772e0ebe259d12b91047b",
@@ -7207,7 +7207,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 1865,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -7225,7 +7225,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 1961,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L39",
             "lineEnd": 39,
             "lineStart": 39,
             "snippetSha256": "sha256:04fce7249c7630bc1621a525dbf5658d0fb5de981005e89c4bd93d43064ecee3",
@@ -7237,7 +7237,7 @@
           "valueRange": {
             "byteLength": 2,
             "byteStart": 2011,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L39",
             "lineEnd": 39,
             "lineStart": 39,
             "snippetSha256": "sha256:e29c9c180c6279b0b02abd6a1801c7c04082cf486ec027aa13515e4f3884bb6b",
@@ -7255,7 +7255,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 2114,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L42",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L42",
             "lineEnd": 42,
             "lineStart": 42,
             "snippetSha256": "sha256:823106ca98ce30e65fda42b94d093e5717d734288814bbfcfedb44daa7f31a47",
@@ -7267,7 +7267,7 @@
           "valueRange": {
             "byteLength": 6,
             "byteStart": 2168,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L42",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L42",
             "lineEnd": 42,
             "lineStart": 42,
             "snippetSha256": "sha256:ff5abed71a510140114f6fc522aa25ff9814801e521c4b520d1cce0e901f1a0a",
@@ -7285,7 +7285,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 2278,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L45",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L45",
             "lineEnd": 45,
             "lineStart": 45,
             "snippetSha256": "sha256:a1eb4ec93d41aa4b0a51d06189c6d5b6389ee1ae0b1dc0519063f7b73c20fa06",
@@ -7297,7 +7297,7 @@
           "valueRange": {
             "byteLength": 8,
             "byteStart": 2330,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L45",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L45",
             "lineEnd": 45,
             "lineStart": 45,
             "snippetSha256": "sha256:e82ea78e7a608a5fb6092418aca2a2c499e30da41f28c8723b0bf83859fb4825",
@@ -7315,7 +7315,7 @@
           "range": {
             "byteLength": 70,
             "byteStart": 2434,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L48",
             "lineEnd": 48,
             "lineStart": 48,
             "snippetSha256": "sha256:ac4b4fa70311e9b3472633464ef34c90f090dd3fbfef4acf48a5aeb6ffc3863b",
@@ -7327,7 +7327,7 @@
           "valueRange": {
             "byteLength": 6,
             "byteStart": 2498,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L48",
             "lineEnd": 48,
             "lineStart": 48,
             "snippetSha256": "sha256:7f920bb639c9307589b65e5f639391d65dcb86b0611ac47f58f7c769215326ee",
@@ -7345,7 +7345,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 2782,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L53",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L53",
             "lineEnd": 53,
             "lineStart": 53,
             "snippetSha256": "sha256:fdd5d0d8e729e84cf02cfc9baa3aeabe0de5e817acab528d01d11232e8e61448",
@@ -7357,7 +7357,7 @@
           "valueRange": {
             "byteLength": 6,
             "byteStart": 2836,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L53",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L53",
             "lineEnd": 53,
             "lineStart": 53,
             "snippetSha256": "sha256:b751cf85b709f0cc8c8771e4a5195f1284c3e9622a92fe5bafc1fd6a7942e098",
@@ -7375,7 +7375,7 @@
           "range": {
             "byteLength": 69,
             "byteStart": 3033,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L57",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L57",
             "lineEnd": 57,
             "lineStart": 57,
             "snippetSha256": "sha256:26e32261f40b765e4847f7e8972d1b60a1b1eca08bfd803e0da14f76d3bcc219",
@@ -7387,7 +7387,7 @@
           "valueRange": {
             "byteLength": 7,
             "byteStart": 3095,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L57",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L57",
             "lineEnd": 57,
             "lineStart": 57,
             "snippetSha256": "sha256:47507747ec7ca9fb2b8e3f08e77203a62a1c8ebd5e1aa2ece374053f1bd31f1e",
@@ -7405,7 +7405,7 @@
           "range": {
             "byteLength": 72,
             "byteStart": 3108,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L58",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L58",
             "lineEnd": 58,
             "lineStart": 58,
             "snippetSha256": "sha256:a8fdcae95d75b9193849e90c4bd80e506b73ef070c79092b51b560adead69ac3",
@@ -7417,7 +7417,7 @@
           "valueRange": {
             "byteLength": 6,
             "byteStart": 3174,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L58",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L58",
             "lineEnd": 58,
             "lineStart": 58,
             "snippetSha256": "sha256:391585291af5d1b10159ddc594f1247f88ac1302d06fc210b03f4792669eeeb2",
@@ -7435,7 +7435,7 @@
           "range": {
             "byteLength": 123,
             "byteStart": 3250,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L61-L62",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L61-L62",
             "lineEnd": 62,
             "lineStart": 61,
             "snippetSha256": "sha256:b63e77e7d12e495c344e9af87dab3339121dbfe785612dafba28ad428d53c78f",
@@ -7447,7 +7447,7 @@
           "valueRange": {
             "byteLength": 53,
             "byteStart": 3320,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L62",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L62",
             "lineEnd": 62,
             "lineStart": 62,
             "snippetSha256": "sha256:21077b594d04d7e9f8bcba5450c274c10a35668ebe43a7e9bb7018d0e3530459",
@@ -7465,7 +7465,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 3380,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L64",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L64",
             "lineEnd": 64,
             "lineStart": 64,
             "snippetSha256": "sha256:d36a95376b28f98323e066a09f2a7c9259007a9caffe9271c3197661c3973604",
@@ -7487,7 +7487,7 @@
           "range": {
             "byteLength": 63,
             "byteStart": 3438,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L65",
             "lineEnd": 65,
             "lineStart": 65,
             "snippetSha256": "sha256:696d54549d0df95a4febe6c02f6a108e4ca3f2e86bbefdff4acf0bf58fcbdbff",
@@ -7509,7 +7509,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 3507,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L66",
             "lineEnd": 66,
             "lineStart": 66,
             "snippetSha256": "sha256:f9224b4722aa117a50ede74d7bcbf32c93156bf9a66ebceb57b03021eea71738",
@@ -7531,7 +7531,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 3572,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L67",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L67",
             "lineEnd": 67,
             "lineStart": 67,
             "snippetSha256": "sha256:1b28e00386cdf175f424d636fccbd9b12f0e31ec6434d4a833a205f17cc9b019",
@@ -7553,7 +7553,7 @@
           "range": {
             "byteLength": 71,
             "byteStart": 3637,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L68",
             "lineEnd": 68,
             "lineStart": 68,
             "snippetSha256": "sha256:07e13814be71684124b699c2a4aa3afb364d21d2e39f48185538b7503ec3d989",
@@ -7575,7 +7575,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 3781,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L71",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L71",
             "lineEnd": 71,
             "lineStart": 71,
             "snippetSha256": "sha256:beccfc767d9c149818ae873e3cac0d0bbce66ff89cb7727d670c16856110250c",
@@ -7597,7 +7597,7 @@
           "range": {
             "byteLength": 77,
             "byteStart": 3830,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L73",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L73",
             "lineEnd": 73,
             "lineStart": 73,
             "snippetSha256": "sha256:08cc050b4cf00cb90385fe854a5c338954ee6eb2a8cdb9ca8382514beb937576",
@@ -7619,7 +7619,7 @@
           "range": {
             "byteLength": 86,
             "byteStart": 3913,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L74",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L74",
             "lineEnd": 74,
             "lineStart": 74,
             "snippetSha256": "sha256:692ee9cc8e573c5278754c8869a6fa33ebda1303c175d746ee025b50819df292",
@@ -7641,7 +7641,7 @@
           "range": {
             "byteLength": 69,
             "byteStart": 4005,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L75",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L75",
             "lineEnd": 75,
             "lineStart": 75,
             "snippetSha256": "sha256:c7b0362cfa91941ba03eda66e9f1d4cc2c59e52e9d53b1e502f02869a05d23b5",
@@ -7663,7 +7663,7 @@
           "range": {
             "byteLength": 82,
             "byteStart": 4080,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L76",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L76",
             "lineEnd": 76,
             "lineStart": 76,
             "snippetSha256": "sha256:ba209f58369b4601b285551ef073e9e6c3cfe7e9d41065da29d1c5f4e4dc38ff",
@@ -7685,7 +7685,7 @@
           "range": {
             "byteLength": 71,
             "byteStart": 4168,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L77",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L77",
             "lineEnd": 77,
             "lineStart": 77,
             "snippetSha256": "sha256:73dd91f76fa026a3ad20e52245f391072a6650ebc38d9d07000c9f293053eae3",
@@ -7707,7 +7707,7 @@
           "range": {
             "byteLength": 48,
             "byteStart": 4245,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L78",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L78",
             "lineEnd": 78,
             "lineStart": 78,
             "snippetSha256": "sha256:d7c0e2b7f4de345aa7035a0b0718b5031c4a88583a06c4ce6fc706693b3cbf31",
@@ -7731,7 +7731,7 @@
               "range": {
                 "byteLength": 16,
                 "byteStart": 4422,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L82",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L82",
                 "lineEnd": 82,
                 "lineStart": 82,
                 "snippetSha256": "sha256:924c6dbb4e439d0feaa879e2129b2b674888fbbcc4174eaecda6fd928d475602",
@@ -7747,7 +7747,7 @@
               "range": {
                 "byteLength": 21,
                 "byteStart": 4448,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L83",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L83",
                 "lineEnd": 83,
                 "lineStart": 83,
                 "snippetSha256": "sha256:d354ddcd0000faa1596f026fedc5ebc40700231ad118819a038851716684d349",
@@ -7763,7 +7763,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 4479,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L84",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L84",
                 "lineEnd": 84,
                 "lineStart": 84,
                 "snippetSha256": "sha256:b9f381d802aabd77c481a393a8ab01c08ae3b9131a106cfc18139ab66b819ff9",
@@ -7779,7 +7779,7 @@
               "range": {
                 "byteLength": 26,
                 "byteStart": 4511,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L85",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L85",
                 "lineEnd": 85,
                 "lineStart": 85,
                 "snippetSha256": "sha256:769dcc63f312744eeb7fa685ce61caae5c0219a053b73a319a9d2c686e5f4618",
@@ -7795,7 +7795,7 @@
               "range": {
                 "byteLength": 25,
                 "byteStart": 4547,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L86",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L86",
                 "lineEnd": 86,
                 "lineStart": 86,
                 "snippetSha256": "sha256:0a1bfa1530cd12fe2c761c75fb02fe28783813709891c9750aeca147d30a3622",
@@ -7811,7 +7811,7 @@
               "range": {
                 "byteLength": 19,
                 "byteStart": 4582,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L87",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L87",
                 "lineEnd": 87,
                 "lineStart": 87,
                 "snippetSha256": "sha256:768811dcac6740166e8ada5c26b0af64b73541f77e8f23f3ef275c139a4fbada",
@@ -7826,7 +7826,7 @@
           "range": {
             "byteLength": 221,
             "byteStart": 4387,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L81-L88",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L81-L88",
             "lineEnd": 88,
             "lineStart": 81,
             "snippetSha256": "sha256:40d505236e0245c454820cdaa9abda2dd458818d4bb1284f06d5c18d4b935d51",
@@ -7870,7 +7870,7 @@
     "range": {
       "byteLength": 73893,
       "byteStart": 1161,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtworkFinalityRegistry.sol#L22-L1872",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol#L22-L1872",
       "lineEnd": 1872,
       "lineStart": 22,
       "snippetSha256": "sha256:66c5ab1f9e3f2482b21b2ab8cf5ada1d69352b33f55714d2bdc99f95e819fff1",

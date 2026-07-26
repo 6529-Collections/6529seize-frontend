@@ -494,7 +494,7 @@
           "range": {
             "byteLength": 384,
             "byteStart": 734,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L19-L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L19-L31",
             "lineEnd": 31,
             "lineStart": 19,
             "snippetSha256": "sha256:39d725208379e2e66fc2f6fa429464327347f0320a87479379e17aee614cbf6e",
@@ -547,7 +547,7 @@
           "range": {
             "byteLength": 210,
             "byteStart": 1124,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L33-L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L33-L39",
             "lineEnd": 39,
             "lineStart": 33,
             "snippetSha256": "sha256:12e9237cae0bf6e95cc0960c8df03465a5c3ee69dfdd7c580247a7f0c4dc156c",
@@ -600,7 +600,7 @@
           "range": {
             "byteLength": 214,
             "byteStart": 1340,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L41-L47",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L41-L47",
             "lineEnd": 47,
             "lineStart": 41,
             "snippetSha256": "sha256:130a13cd68fdf14f2c5270b851f0ce762b870f3851c5fcce8f7205c0495c8aab",
@@ -641,7 +641,7 @@
           "range": {
             "byteLength": 133,
             "byteStart": 1560,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L49-L51",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L49-L51",
             "lineEnd": 51,
             "lineStart": 49,
             "snippetSha256": "sha256:d696e07cc40134248f473ae1c196110b3e22af6c7a707bdad1f47b9821500b4e",
@@ -677,7 +677,7 @@
           "range": {
             "byteLength": 265,
             "byteStart": 1699,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L53-L56",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L53-L56",
             "lineEnd": 56,
             "lineStart": 53,
             "snippetSha256": "sha256:21ec01f14bce047d9c2ff2e1e8a0783fa04938bb36c29ade7884f8e29e4ddade",
@@ -722,7 +722,7 @@
           "range": {
             "byteLength": 318,
             "byteStart": 1970,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L58-L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L58-L65",
             "lineEnd": 65,
             "lineStart": 58,
             "snippetSha256": "sha256:125a167d7812671d61b6e231b538f676722a8e93e423d938cfdf47b8de55bc10",
@@ -749,7 +749,7 @@
           "range": {
             "byteLength": 513,
             "byteStart": 2461,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L71-L81",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L71-L81",
             "lineEnd": 81,
             "lineStart": 71,
             "snippetSha256": "sha256:1d2f4fb439b35fd13a3b5bfbee2565fdf4272ca12cd0f156a246df54b7a825f9",
@@ -776,7 +776,7 @@
           "range": {
             "byteLength": 2142,
             "byteStart": 2980,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L83-L133",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L83-L133",
             "lineEnd": 133,
             "lineStart": 83,
             "snippetSha256": "sha256:18a2f245fc9b3a4822f6fbcb101b51a219ead800025952c7e1b5102e4393a431",
@@ -803,7 +803,7 @@
           "range": {
             "byteLength": 1465,
             "byteStart": 5128,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L135-L167",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L135-L167",
             "lineEnd": 167,
             "lineStart": 135,
             "snippetSha256": "sha256:5dbd8b6bb8d3862f3533d305c2226f62c4df4c4b562412544596947f52fb94b5",
@@ -830,7 +830,7 @@
           "range": {
             "byteLength": 577,
             "byteStart": 6599,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L169-L181",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L169-L181",
             "lineEnd": 181,
             "lineStart": 169,
             "snippetSha256": "sha256:1a98cd4a6a5c79f7fea693d2b1e739d73b217b6ac0731226bb46b954edc12d82",
@@ -857,7 +857,7 @@
           "range": {
             "byteLength": 1896,
             "byteStart": 7343,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L187-L229",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L187-L229",
             "lineEnd": 229,
             "lineStart": 187,
             "snippetSha256": "sha256:04af229a0a63eee4bf9aca3243b6de93a318a990ff7754a8f00a371b0e9d3329",
@@ -884,7 +884,7 @@
           "range": {
             "byteLength": 491,
             "byteStart": 9245,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L231-L242",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L231-L242",
             "lineEnd": 242,
             "lineStart": 231,
             "snippetSha256": "sha256:0c88fcc65b0cff03f0f6e95cafcf147546380f77d43ca528d267a0a2efbda83e",
@@ -911,7 +911,7 @@
           "range": {
             "byteLength": 813,
             "byteStart": 9742,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L244-L263",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L244-L263",
             "lineEnd": 263,
             "lineStart": 244,
             "snippetSha256": "sha256:7cf2a3b40312476de6765f309607962dad40e33113c898953cb5ee6bbdebb6d0",
@@ -938,7 +938,7 @@
           "range": {
             "byteLength": 1237,
             "byteStart": 10741,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L269-L299",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L269-L299",
             "lineEnd": 299,
             "lineStart": 269,
             "snippetSha256": "sha256:03b9157c8b8e4db73ee4d1600ff72790246d38714969bfab50177ab8539ee80e",
@@ -965,7 +965,7 @@
           "range": {
             "byteLength": 1549,
             "byteStart": 11984,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L301-L335",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L301-L335",
             "lineEnd": 335,
             "lineStart": 301,
             "snippetSha256": "sha256:5e8ef8d9cc0926fd2a23385347956f68131c2661ba3203f15db7beb421b6e194",
@@ -992,7 +992,7 @@
           "range": {
             "byteLength": 875,
             "byteStart": 13539,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L337-L352",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L337-L352",
             "lineEnd": 352,
             "lineStart": 337,
             "snippetSha256": "sha256:98163393ef74ef74cde334b918856bda114e6cdfa9d7263d4119b5c2d915af65",
@@ -1019,7 +1019,7 @@
           "range": {
             "byteLength": 1948,
             "byteStart": 14631,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L358-L404",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L358-L404",
             "lineEnd": 404,
             "lineStart": 358,
             "snippetSha256": "sha256:42707dee8e012ae8315ce9cb00446b167989362cab32f7a604766724aaf30cb9",
@@ -1046,7 +1046,7 @@
           "range": {
             "byteLength": 995,
             "byteStart": 16585,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L406-L426",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L406-L426",
             "lineEnd": 426,
             "lineStart": 406,
             "snippetSha256": "sha256:7b805fcc35c2d71ea2b6220e3d72d99de9dc701e8079d8f00ef17ceabd57a7b3",
@@ -1073,7 +1073,7 @@
           "range": {
             "byteLength": 1645,
             "byteStart": 17586,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L428-L460",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L428-L460",
             "lineEnd": 460,
             "lineStart": 428,
             "snippetSha256": "sha256:7cdf664a78693e1ba352347d873b71b13aaeb99faf4b83b09660823adfd990a7",
@@ -1100,7 +1100,7 @@
           "range": {
             "byteLength": 1024,
             "byteStart": 19237,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L462-L482",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L462-L482",
             "lineEnd": 482,
             "lineStart": 462,
             "snippetSha256": "sha256:6c07bbfbec9c431011ccd0760a3805bac813c0727a1c20bbe1936113456d378d",
@@ -1127,7 +1127,7 @@
           "range": {
             "byteLength": 2367,
             "byteStart": 20468,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L488-L524",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L488-L524",
             "lineEnd": 524,
             "lineStart": 488,
             "snippetSha256": "sha256:5ed92c36dc2237a434a7bed6da0cc07dd51240df9953c73d4f0cbfcb128ab601",
@@ -1154,7 +1154,7 @@
           "range": {
             "byteLength": 606,
             "byteStart": 22841,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L526-L539",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L526-L539",
             "lineEnd": 539,
             "lineStart": 526,
             "snippetSha256": "sha256:f391c7288bc5726255e14c0a471f0ae6835c0a0bd9add3828e2077a268c498c0",
@@ -1178,7 +1178,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 649,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:e5370774ec21298ce5bf64246d34d9947b3efdf3931f3c39e76fd0f0599b8509",
@@ -1190,7 +1190,7 @@
           "valueRange": {
             "byteLength": 37,
             "byteStart": 690,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:968d3f8f1d9594a0a866f3e39429dbf39b689c92ecae908d918d434e7061063d",
@@ -1233,7 +1233,7 @@
     "range": {
       "byteLength": 23001,
       "byteStart": 448,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamArtworkFinalityFreeze.t.sol#L11-L540",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtworkFinalityFreeze.t.sol#L11-L540",
       "lineEnd": 540,
       "lineStart": 11,
       "snippetSha256": "sha256:50e2a188af4100e781121da3de57ec5a70ceaea09dcf8b955326edb2c5ceab88",

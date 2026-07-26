@@ -2032,7 +2032,7 @@
               "range": {
                 "byteLength": 4,
                 "byteStart": 563,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L25",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L25",
                 "lineEnd": 25,
                 "lineStart": 25,
                 "snippetSha256": "sha256:dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
@@ -2045,7 +2045,7 @@
               "range": {
                 "byteLength": 7,
                 "byteStart": 577,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L26",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L26",
                 "lineEnd": 26,
                 "lineStart": 26,
                 "snippetSha256": "sha256:d70b9e24bca26b409b9458ceca6c9e5c2b5c3171c37ff050c6f6a0d7a4420d2a",
@@ -2058,7 +2058,7 @@
               "range": {
                 "byteLength": 6,
                 "byteStart": 594,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L27",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L27",
                 "lineEnd": 27,
                 "lineStart": 27,
                 "snippetSha256": "sha256:92340695899bd2d86223e4a007620e0d6502fc0e08809773634c7e0743764a9c",
@@ -2071,7 +2071,7 @@
               "range": {
                 "byteLength": 10,
                 "byteStart": 610,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L28",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L28",
                 "lineEnd": 28,
                 "lineStart": 28,
                 "snippetSha256": "sha256:458665eb3826ca46fb17fba5a2aaafb0e9d6ccabfb7b45739c4c77979f9fb1ec",
@@ -2084,7 +2084,7 @@
               "range": {
                 "byteLength": 12,
                 "byteStart": 630,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L29",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L29",
                 "lineEnd": 29,
                 "lineStart": 29,
                 "snippetSha256": "sha256:c501eee7379d1f1c0ae6b680cf3590186164f5a1e62531d531a0efab26b99ec2",
@@ -2097,7 +2097,7 @@
               "range": {
                 "byteLength": 12,
                 "byteStart": 652,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L30",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L30",
                 "lineEnd": 30,
                 "lineStart": 30,
                 "snippetSha256": "sha256:ee778c347e486b8316362c2612ef7658801fd49c0b6e8a6a3881943c7c1803ba",
@@ -2110,7 +2110,7 @@
               "range": {
                 "byteLength": 14,
                 "byteStart": 674,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L31",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L31",
                 "lineEnd": 31,
                 "lineStart": 31,
                 "snippetSha256": "sha256:e8017b0807ccfda9f2eec48811dc12969b2de4218e10268823d5cc30e2a14ced",
@@ -2123,7 +2123,7 @@
               "range": {
                 "byteLength": 9,
                 "byteStart": 698,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L32",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L32",
                 "lineEnd": 32,
                 "lineStart": 32,
                 "snippetSha256": "sha256:d353a99eb4556847ceeb3c306ac886cf6b4fa13043eb1864b9aeb0607fd5f2cc",
@@ -2146,7 +2146,7 @@
           "range": {
             "byteLength": 179,
             "byteStart": 534,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L24-L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L24-L33",
             "lineEnd": 33,
             "lineStart": 24,
             "snippetSha256": "sha256:c01f033b5f5f2fe7aab82a909fba307903bc6f7e10ee9465e36ae9bcdfb2484b",
@@ -2161,7 +2161,7 @@
               "range": {
                 "byteLength": 6,
                 "byteStart": 753,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L36",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L36",
                 "lineEnd": 36,
                 "lineStart": 36,
                 "snippetSha256": "sha256:1ba76ea7e3d93cee9e70650745106b06607f22cab22e63dc433eba5ee8b8119a",
@@ -2174,7 +2174,7 @@
               "range": {
                 "byteLength": 8,
                 "byteStart": 769,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L37",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L37",
                 "lineEnd": 37,
                 "lineStart": 37,
                 "snippetSha256": "sha256:cf0883343f4abef779b777c35764f86c9f1f4324e8b5490840245d02ad2f7c6f",
@@ -2187,7 +2187,7 @@
               "range": {
                 "byteLength": 7,
                 "byteStart": 787,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L38",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L38",
                 "lineEnd": 38,
                 "lineStart": 38,
                 "snippetSha256": "sha256:61c91d99533e1b870bc9e411397fe66887fbca03b9e722dcebc1533f9244ce4d",
@@ -2205,7 +2205,7 @@
           "range": {
             "byteLength": 81,
             "byteStart": 719,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L35-L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L35-L39",
             "lineEnd": 39,
             "lineStart": 35,
             "snippetSha256": "sha256:9c07c1a5d828caf95ca9d2b3b9115cf09c08465c8bf30c2bdd4c391b720c2bdc",
@@ -2272,7 +2272,7 @@
           "range": {
             "byteLength": 237,
             "byteStart": 2018,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L81-L89",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L81-L89",
             "lineEnd": 89,
             "lineStart": 81,
             "snippetSha256": "sha256:3b4010190261466e83ed76f5388e557e87adb7f91cf98604622323ecbc9749e3",
@@ -2307,7 +2307,7 @@
           "range": {
             "byteLength": 80,
             "byteStart": 2260,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L90",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L90",
             "lineEnd": 90,
             "lineStart": 90,
             "snippetSha256": "sha256:8a0abdaaac9dbff8e485c68c459f9bf0867d3d0bd8bd33005b37c60bb4844f7b",
@@ -2342,7 +2342,7 @@
           "range": {
             "byteLength": 74,
             "byteStart": 2345,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L91",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L91",
             "lineEnd": 91,
             "lineStart": 91,
             "snippetSha256": "sha256:06f8cbbbcf795af1d5262204fca9087a76c3bd72f0301ce60c231e4479ffc53d",
@@ -2383,7 +2383,7 @@
           "range": {
             "byteLength": 117,
             "byteStart": 2424,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L92-L94",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L92-L94",
             "lineEnd": 94,
             "lineStart": 92,
             "snippetSha256": "sha256:7571c48b10d45bebb9076ddcc4cf016c98b159ac944b681cc51982d9a3f9aba4",
@@ -2418,7 +2418,7 @@
           "range": {
             "byteLength": 72,
             "byteStart": 2546,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L95",
             "lineEnd": 95,
             "lineStart": 95,
             "snippetSha256": "sha256:7a4a219704524e6d9d26593ec0baa063344d640637aa6858ddb468cb89342a2a",
@@ -2453,7 +2453,7 @@
           "range": {
             "byteLength": 80,
             "byteStart": 2623,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L96",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L96",
             "lineEnd": 96,
             "lineStart": 96,
             "snippetSha256": "sha256:361d3051e058906eceaeda53f731b9b7baf8c9488bf73a6b54cf9f69cccc8a36",
@@ -2494,7 +2494,7 @@
           "range": {
             "byteLength": 116,
             "byteStart": 2708,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L97-L99",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L97-L99",
             "lineEnd": 99,
             "lineStart": 97,
             "snippetSha256": "sha256:9049e06d302dd382c3fc931829627d346b5e02f731d7fc8e85a37068d143b102",
@@ -2535,7 +2535,7 @@
           "range": {
             "byteLength": 86,
             "byteStart": 2829,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L100",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L100",
             "lineEnd": 100,
             "lineStart": 100,
             "snippetSha256": "sha256:7c05364c34f115f2b35f284b086a6bc8785ecc54188fa1e5c2f4ba76fc7be08a",
@@ -2576,7 +2576,7 @@
           "range": {
             "byteLength": 111,
             "byteStart": 2920,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L101-L103",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L101-L103",
             "lineEnd": 103,
             "lineStart": 101,
             "snippetSha256": "sha256:4fe67f2ad35879dbddead9670d1030f10ceac12cc89d36cd8f5bf799c0099152",
@@ -2617,7 +2617,7 @@
           "range": {
             "byteLength": 115,
             "byteStart": 3036,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L104-L106",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L104-L106",
             "lineEnd": 106,
             "lineStart": 104,
             "snippetSha256": "sha256:d45f3600db80cfcce94407dba647646681ebe6ea1fa2c20bb41c31666d56379a",
@@ -2664,7 +2664,7 @@
           "range": {
             "byteLength": 137,
             "byteStart": 3156,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L107-L109",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L107-L109",
             "lineEnd": 109,
             "lineStart": 107,
             "snippetSha256": "sha256:7992055d21f7c15d6b53ec34ecffc646af2e5e7bc04d9a214c440e7a6e4b9055",
@@ -2705,7 +2705,7 @@
           "range": {
             "byteLength": 117,
             "byteStart": 3298,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L110-L112",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L110-L112",
             "lineEnd": 112,
             "lineStart": 110,
             "snippetSha256": "sha256:308ec7b2fda52e18b75beb2a39d9d8deb708404d309be39686411f5ae04d2280",
@@ -2740,7 +2740,7 @@
           "range": {
             "byteLength": 65,
             "byteStart": 3420,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L113",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L113",
             "lineEnd": 113,
             "lineStart": 113,
             "snippetSha256": "sha256:5f54253a49de09f76cc1f5f1804bcacc9d3ace8e44022bef5b3685710aefbd86",
@@ -2781,7 +2781,7 @@
           "range": {
             "byteLength": 73,
             "byteStart": 3490,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L114",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L114",
             "lineEnd": 114,
             "lineStart": 114,
             "snippetSha256": "sha256:4450f9689b3a6b7b9acb13445450f27c5d2c68244e08fae156c3952d6ff10688",
@@ -2834,7 +2834,7 @@
           "range": {
             "byteLength": 190,
             "byteStart": 3568,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L115-L121",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L115-L121",
             "lineEnd": 121,
             "lineStart": 115,
             "snippetSha256": "sha256:8a1061fc437fbfbb80f57a7d9406a655990b736c47df200ce031b6292ca4b8b3",
@@ -2893,7 +2893,7 @@
           "range": {
             "byteLength": 207,
             "byteStart": 3763,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L122-L129",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L122-L129",
             "lineEnd": 129,
             "lineStart": 122,
             "snippetSha256": "sha256:3a880dd10ebdc756ceb20cf63661213c8e40c1db7b86a61f6287d132372de8b5",
@@ -2934,7 +2934,7 @@
           "range": {
             "byteLength": 96,
             "byteStart": 3975,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L130",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L130",
             "lineEnd": 130,
             "lineStart": 130,
             "snippetSha256": "sha256:7082b728190a0c4a20265cf192c29a4170abecb495d3743a548e9f1a000d707e",
@@ -2966,7 +2966,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 1302,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L62",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L62",
             "lineEnd": 62,
             "lineStart": 62,
             "snippetSha256": "sha256:2ce00abb1991240bd75be8318e93e3f188787a2759fab6bb26c126f8f23155d6",
@@ -3000,7 +3000,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 1343,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L63",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L63",
             "lineEnd": 63,
             "lineStart": 63,
             "snippetSha256": "sha256:2af41861488ba6b28dd271b10e9afdddccca3f4bf50e25bdd48bd11079ca86b1",
@@ -3034,7 +3034,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 1384,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L64",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L64",
             "lineEnd": 64,
             "lineStart": 64,
             "snippetSha256": "sha256:311a77f10a1dca854a312491ec7f4aa9c3393dd9a89184ed34f897f420b113b7",
@@ -3068,7 +3068,7 @@
           "range": {
             "byteLength": 22,
             "byteStart": 1423,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L65",
             "lineEnd": 65,
             "lineStart": 65,
             "snippetSha256": "sha256:032eb3c06a2051dfe0105b899fdaca681e73645849c0bbda5d98a2c87e40502c",
@@ -3102,7 +3102,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 1451,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L66",
             "lineEnd": 66,
             "lineStart": 66,
             "snippetSha256": "sha256:3bb832c3aca4167209203ebd683d1294a9548831efc143ab160825adf9b36dd1",
@@ -3136,7 +3136,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 1485,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L67",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L67",
             "lineEnd": 67,
             "lineStart": 67,
             "snippetSha256": "sha256:b59600cc93cde123b718d234dca6ba691763df3d58afbe62b2af708b9b949e9f",
@@ -3170,7 +3170,7 @@
           "range": {
             "byteLength": 25,
             "byteStart": 1525,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L68",
             "lineEnd": 68,
             "lineStart": 68,
             "snippetSha256": "sha256:cf8beb0bdd371894e857a34d1867e88c03d76eb69f76114ce727a6f1cf7b905d",
@@ -3204,7 +3204,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 1556,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L69",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L69",
             "lineEnd": 69,
             "lineStart": 69,
             "snippetSha256": "sha256:27ddd5a33b51c5065d5e0b3ddbd18d48f13d048f4c504d0d179d5daa3f9b3c70",
@@ -3256,7 +3256,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 1590,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L70",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L70",
             "lineEnd": 70,
             "lineStart": 70,
             "snippetSha256": "sha256:8f10ca860a44dc45efdffabdd5b8e2dd3bfadbaca89b7fd4fd6d32b0f487b2d3",
@@ -3315,7 +3315,7 @@
           "range": {
             "byteLength": 65,
             "byteStart": 1638,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L71",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L71",
             "lineEnd": 71,
             "lineStart": 71,
             "snippetSha256": "sha256:35debf2a410d29607084abb1bf41fe1a4d4b5432a3da685a7069974f710e7861",
@@ -3374,7 +3374,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 1709,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L72",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L72",
             "lineEnd": 72,
             "lineStart": 72,
             "snippetSha256": "sha256:458c9d85003466b55ed734cfa01211ecf65da99ee0ca8bad18f624682979f986",
@@ -3432,7 +3432,7 @@
           "range": {
             "byteLength": 762,
             "byteStart": 4096,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L133-L152",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L133-L152",
             "lineEnd": 152,
             "lineStart": 133,
             "snippetSha256": "sha256:0a04ec7074940b10565997bb2e284564ff35b8a99e944efe69bab2b0cce9534b",
@@ -3527,7 +3527,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 4864,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L154",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L154",
             "lineEnd": 154,
             "lineStart": 154,
             "snippetSha256": "sha256:b85a54e1a63df4a42d83939133336327eef76135fe96516761544d2d6987a836",
@@ -3568,7 +3568,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 4953,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L157",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L157",
             "lineEnd": 157,
             "lineStart": 157,
             "snippetSha256": "sha256:deeb459ffc5d357dbf402699a3a6ee7ba2a2058a23349abded9f6a318014e18b",
@@ -3609,7 +3609,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 5043,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L160",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L160",
             "lineEnd": 160,
             "lineStart": 160,
             "snippetSha256": "sha256:6957196c56a0606f9c4725f3a7ad5a49c9570eb554d34aec7b62d417cf865579",
@@ -3650,7 +3650,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 5126,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L163",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L163",
             "lineEnd": 163,
             "lineStart": 163,
             "snippetSha256": "sha256:1a492fa45a2792c501598e5b0f9de4ee7739a8b695960f65abfe7ecbd19f6283",
@@ -3691,7 +3691,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 5228,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L166",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L166",
             "lineEnd": 166,
             "lineStart": 166,
             "snippetSha256": "sha256:3ac7c4b67d59a75006bdc30c01c21538c53e03a23357181e8d654d5a782832d1",
@@ -3732,7 +3732,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 5333,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L169",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L169",
             "lineEnd": 169,
             "lineStart": 169,
             "snippetSha256": "sha256:33aa24ccc295490b8fc502bc36cc1867999bc8cece23b11836557a2c90623959",
@@ -3773,7 +3773,7 @@
           "range": {
             "byteLength": 57,
             "byteStart": 5394,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L170",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L170",
             "lineEnd": 170,
             "lineStart": 170,
             "snippetSha256": "sha256:7573fe5c56f3680bc459ff23af613d522b063671d5464f8617ed24997d627e69",
@@ -3814,7 +3814,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 5457,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L171",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L171",
             "lineEnd": 171,
             "lineStart": 171,
             "snippetSha256": "sha256:188ebb5c03c56530eb298e9a0006312066ceab430bfe2862860cecff23360b89",
@@ -3848,7 +3848,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 5561,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L174",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L174",
             "lineEnd": 174,
             "lineStart": 174,
             "snippetSha256": "sha256:49cf16adad359f3d701c16650d2b2cb72eafdebd4c1105e59849c7360ad5b26a",
@@ -3882,7 +3882,7 @@
           "range": {
             "byteLength": 36,
             "byteStart": 5665,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L177",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L177",
             "lineEnd": 177,
             "lineStart": 177,
             "snippetSha256": "sha256:7d342712fb2dd47e1aab11295e26dcb994e2f91a53bdf0b462cf6e5dfad7bf00",
@@ -3916,7 +3916,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 5769,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L180",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L180",
             "lineEnd": 180,
             "lineStart": 180,
             "snippetSha256": "sha256:e01d06faacfb27571bf48c9839fb4650d78821a87855692950d08a2183e7dd14",
@@ -3950,7 +3950,7 @@
           "range": {
             "byteLength": 32,
             "byteStart": 5805,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L181",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L181",
             "lineEnd": 181,
             "lineStart": 181,
             "snippetSha256": "sha256:8db98de1d69e932ed7f576ef2b94de29033a4a46759dad76de752fcb480550ed",
@@ -3984,7 +3984,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 5843,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L182",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L182",
             "lineEnd": 182,
             "lineStart": 182,
             "snippetSha256": "sha256:5afe23175ad0bf345555e4fbba0972e4c94ec657c6bcc29e18f8dfa3fb2e912e",
@@ -4017,7 +4017,7 @@
           "range": {
             "byteLength": 93,
             "byteStart": 5881,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L184-L186",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L184-L186",
             "lineEnd": 186,
             "lineStart": 184,
             "snippetSha256": "sha256:d60996e18af836043634c97d63629ff64bad6d12f7db7db7452a1390d4866fdf",
@@ -4075,7 +4075,7 @@
           "range": {
             "byteLength": 1367,
             "byteStart": 5980,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L188-L223",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L188-L223",
             "lineEnd": 223,
             "lineStart": 188,
             "snippetSha256": "sha256:7f7bd2cfb7b32f187ee51de711e3b866ca06b2d817a14fd7a2ac9c1b98d82c58",
@@ -4114,7 +4114,7 @@
           "range": {
             "byteLength": 878,
             "byteStart": 7353,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L225-L245",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L225-L245",
             "lineEnd": 245,
             "lineStart": 225,
             "snippetSha256": "sha256:7a168ad75273a06dd8c03d35efe320e54a2d6c00e7f841834317465c648fab34",
@@ -4153,7 +4153,7 @@
           "range": {
             "byteLength": 136,
             "byteStart": 8237,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L247-L249",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L247-L249",
             "lineEnd": 249,
             "lineStart": 247,
             "snippetSha256": "sha256:fd3df4603d926948229534be0b5b22128c3b0840028726be3c8c8489fec2315e",
@@ -4192,7 +4192,7 @@
           "range": {
             "byteLength": 497,
             "byteStart": 8675,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L255-L265",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L255-L265",
             "lineEnd": 265,
             "lineStart": 255,
             "snippetSha256": "sha256:db900e1dfee72d2a2522195c478b0481d18cab9e31de312f94b1909baddbe0e5",
@@ -4231,7 +4231,7 @@
           "range": {
             "byteLength": 153,
             "byteStart": 9178,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L267-L269",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L267-L269",
             "lineEnd": 269,
             "lineStart": 267,
             "snippetSha256": "sha256:bebf35d4cc1aebe844122702e23353367cc9d777507ec250f0750fe81d3a5f3a",
@@ -4270,7 +4270,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 9640,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L275-L277",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L275-L277",
             "lineEnd": 277,
             "lineStart": 275,
             "snippetSha256": "sha256:efa95e3aef4cbcc7a70f7c4e85e0c82517b304f2ac8834506adf06e111e9c28a",
@@ -4305,7 +4305,7 @@
           "range": {
             "byteLength": 1695,
             "byteStart": 9819,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L280-L313",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L280-L313",
             "lineEnd": 313,
             "lineStart": 280,
             "snippetSha256": "sha256:4662d168d8cff33eec714a6842be2b3443226a1176c741ad6476ac5fa243e41e",
@@ -4332,7 +4332,7 @@
           "range": {
             "byteLength": 101,
             "byteStart": 11520,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L315-L317",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L315-L317",
             "lineEnd": 317,
             "lineStart": 315,
             "snippetSha256": "sha256:b603743f5d123c061f249277732c8344b64553f844472dd8118939c8f1e505c1",
@@ -4367,7 +4367,7 @@
           "range": {
             "byteLength": 503,
             "byteStart": 11627,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L319-L328",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L319-L328",
             "lineEnd": 328,
             "lineStart": 319,
             "snippetSha256": "sha256:57bcc5a4bf1643f516f1ecb41f1304457dc903459f3ec81965035602c8336e08",
@@ -4394,7 +4394,7 @@
           "range": {
             "byteLength": 119,
             "byteStart": 12136,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L330-L332",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L330-L332",
             "lineEnd": 332,
             "lineStart": 330,
             "snippetSha256": "sha256:7f559fc769006ab018ba836cd045a85d7b7a28149df95df0d57a31a4d9756d45",
@@ -4429,7 +4429,7 @@
           "range": {
             "byteLength": 919,
             "byteStart": 12261,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L334-L352",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L334-L352",
             "lineEnd": 352,
             "lineStart": 334,
             "snippetSha256": "sha256:6141c20301a7def5846b9479602d25d314ac50e26416933294fe7a6434e5d420",
@@ -4459,7 +4459,7 @@
           "range": {
             "byteLength": 582,
             "byteStart": 13186,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L354-L369",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L354-L369",
             "lineEnd": 369,
             "lineStart": 354,
             "snippetSha256": "sha256:74e7d64bdff77514f84f15b13816db792585c7d5252fb582945ffdad4851a184",
@@ -4494,7 +4494,7 @@
           "range": {
             "byteLength": 621,
             "byteStart": 13811,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L372-L388",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L372-L388",
             "lineEnd": 388,
             "lineStart": 372,
             "snippetSha256": "sha256:47859e318b40000912235dccaf85590337a498934586bafa690576a12653a31b",
@@ -4534,7 +4534,7 @@
           "range": {
             "byteLength": 867,
             "byteStart": 14438,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L390-L407",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L390-L407",
             "lineEnd": 407,
             "lineStart": 390,
             "snippetSha256": "sha256:484f3e1bf2450b6aeddbe1b51d97aa43fe09772460721d1f80ea9551ff38035c",
@@ -4569,7 +4569,7 @@
           "range": {
             "byteLength": 835,
             "byteStart": 15311,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L409-L426",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L409-L426",
             "lineEnd": 426,
             "lineStart": 409,
             "snippetSha256": "sha256:059b3f3b47bb55f2232d09fbe1cca368afb0cf74516ae68c9d7a2981bce1c5eb",
@@ -4624,7 +4624,7 @@
           "range": {
             "byteLength": 263,
             "byteStart": 16152,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L428-L436",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L428-L436",
             "lineEnd": 436,
             "lineStart": 428,
             "snippetSha256": "sha256:f3c1bac55d9f9ad7a11862e96a4e075059a5acb1fc3cb8a6ff28366c3fdbe65e",
@@ -4657,7 +4657,7 @@
           "range": {
             "byteLength": 714,
             "byteStart": 16421,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L438-L454",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L438-L454",
             "lineEnd": 454,
             "lineStart": 438,
             "snippetSha256": "sha256:54ff1160a991be76804fb40302835eb7dd2effe6e85a1b57decc2785dd534bff",
@@ -4695,7 +4695,7 @@
           "range": {
             "byteLength": 728,
             "byteStart": 17141,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L456-L469",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L456-L469",
             "lineEnd": 469,
             "lineStart": 456,
             "snippetSha256": "sha256:f2c273bdfdf3c8b8304534318f40d8ddba7bd4597649197280a18c85eb6e2430",
@@ -4743,7 +4743,7 @@
           "range": {
             "byteLength": 1050,
             "byteStart": 17875,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L471-L497",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L471-L497",
             "lineEnd": 497,
             "lineStart": 471,
             "snippetSha256": "sha256:2bc7d09d9f1264e4c2851bf21ded584a52ea643d69a49188cf9a55d9ae4e0777",
@@ -4802,7 +4802,7 @@
           "range": {
             "byteLength": 588,
             "byteStart": 18931,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L499-L509",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L499-L509",
             "lineEnd": 509,
             "lineStart": 499,
             "snippetSha256": "sha256:968dd54bb1579896b0b879bfa6e0b0706d01809507b37ceeb16ce0e4302e0cdc",
@@ -4845,7 +4845,7 @@
           "range": {
             "byteLength": 284,
             "byteStart": 19525,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L511-L519",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L511-L519",
             "lineEnd": 519,
             "lineStart": 511,
             "snippetSha256": "sha256:da9959226d0b2968ddc04b013e457abc6e3c611a7bfbf1ae9071a3230f50ec65",
@@ -4880,7 +4880,7 @@
           "range": {
             "byteLength": 306,
             "byteStart": 19856,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L522-L528",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L522-L528",
             "lineEnd": 528,
             "lineStart": 522,
             "snippetSha256": "sha256:71fc0c3084a113da66196d30815c64dec88548c883e1ab6e33d46bd4b6b8062b",
@@ -4915,7 +4915,7 @@
           "range": {
             "byteLength": 333,
             "byteStart": 20209,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L531-L539",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L531-L539",
             "lineEnd": 539,
             "lineStart": 531,
             "snippetSha256": "sha256:3df385e4cdd01b789dfcc7e0d35643d54414c253472cf30d1a8ca2829852980e",
@@ -4950,7 +4950,7 @@
           "range": {
             "byteLength": 198,
             "byteStart": 20589,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L542-L547",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L542-L547",
             "lineEnd": 547,
             "lineStart": 542,
             "snippetSha256": "sha256:13b5dcd12e162fd69797daf900b3949bc92e31481fa71ad0fe21a2a26c4c330e",
@@ -4990,7 +4990,7 @@
           "range": {
             "byteLength": 291,
             "byteStart": 20863,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L550-L559",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L550-L559",
             "lineEnd": 559,
             "lineStart": 550,
             "snippetSha256": "sha256:903ffbf79e1530147b21726949c8ab5a395f48ed562ea66d82e7d69dc3078f6a",
@@ -5025,7 +5025,7 @@
           "range": {
             "byteLength": 246,
             "byteStart": 21189,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L562-L568",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L562-L568",
             "lineEnd": 568,
             "lineStart": 562,
             "snippetSha256": "sha256:c6861158f93a85f9151e08e8e5230adfc30b8e2999927c48561a14bcb27b5249",
@@ -5060,7 +5060,7 @@
           "range": {
             "byteLength": 283,
             "byteStart": 21477,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L571-L577",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L571-L577",
             "lineEnd": 577,
             "lineStart": 571,
             "snippetSha256": "sha256:82fe19285f4272d6ca8de19f574383a476c6466a7a330e5597bd02cf4f288ac6",
@@ -5105,7 +5105,7 @@
           "range": {
             "byteLength": 455,
             "byteStart": 21766,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L579-L586",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L579-L586",
             "lineEnd": 586,
             "lineStart": 579,
             "snippetSha256": "sha256:f7201659cde5f16875f13dca29aef7b0c6e6a0b5d230dadd08fbfc35b1349161",
@@ -5155,7 +5155,7 @@
           "range": {
             "byteLength": 564,
             "byteStart": 22227,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L588-L600",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L588-L600",
             "lineEnd": 600,
             "lineStart": 588,
             "snippetSha256": "sha256:a9a7d986d257cf0debb2bd62e6c0dc13110400323d33747c0b63a1a81d2339db",
@@ -5190,7 +5190,7 @@
           "range": {
             "byteLength": 282,
             "byteStart": 22797,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L602-L608",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L602-L608",
             "lineEnd": 608,
             "lineStart": 602,
             "snippetSha256": "sha256:2d14f85952c99df5a1b535f8e19b82443b65e48635c9d82dded1ae84630e1a26",
@@ -5240,7 +5240,7 @@
           "range": {
             "byteLength": 500,
             "byteStart": 23085,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L610-L619",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L610-L619",
             "lineEnd": 619,
             "lineStart": 610,
             "snippetSha256": "sha256:99f79f0657b4de1cbb65dec4225caf494bd35f489fc63a73ac74a6b37a09631f",
@@ -5275,7 +5275,7 @@
           "range": {
             "byteLength": 252,
             "byteStart": 23591,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L621-L627",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L621-L627",
             "lineEnd": 627,
             "lineStart": 621,
             "snippetSha256": "sha256:932d45d6d3e7f6e07d5d5550194adf4473bfe02c7a2f61bf499e51867524f16d",
@@ -5329,7 +5329,7 @@
           "range": {
             "byteLength": 651,
             "byteStart": 23849,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L629-L646",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L629-L646",
             "lineEnd": 646,
             "lineStart": 629,
             "snippetSha256": "sha256:a38af3066f0d368aec5208bfd4e9aa0536c7e6143fa0684f130e5289e45f1dae",
@@ -5362,7 +5362,7 @@
           "range": {
             "byteLength": 137,
             "byteStart": 24506,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L648-L650",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L648-L650",
             "lineEnd": 650,
             "lineStart": 648,
             "snippetSha256": "sha256:3f74f9fec52a3c5e9bec97aa7c180687c4165df2b07f7a74e66e4bec98b8669e",
@@ -5395,7 +5395,7 @@
           "range": {
             "byteLength": 136,
             "byteStart": 24649,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L652-L654",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L652-L654",
             "lineEnd": 654,
             "lineStart": 652,
             "snippetSha256": "sha256:a7313129dcca41fd5d677b55d0b6a23d72bd505d58a5029b703387dca31d1ec4",
@@ -5428,7 +5428,7 @@
           "range": {
             "byteLength": 87,
             "byteStart": 24791,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L656-L658",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L656-L658",
             "lineEnd": 658,
             "lineStart": 656,
             "snippetSha256": "sha256:9145287d5dfcae61259638d7d342d1203efb0382380ff00b577f22bd7186480a",
@@ -5461,7 +5461,7 @@
           "range": {
             "byteLength": 90,
             "byteStart": 24884,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L660-L662",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L660-L662",
             "lineEnd": 662,
             "lineStart": 660,
             "snippetSha256": "sha256:d69309f3eff42bce488dc3e5744a5cabba9ae5a1546a475cefdf461cbc098d4c",
@@ -5494,7 +5494,7 @@
           "range": {
             "byteLength": 100,
             "byteStart": 24980,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L664-L666",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L664-L666",
             "lineEnd": 666,
             "lineStart": 664,
             "snippetSha256": "sha256:128d6f49ef6eeb5824dd628c8400f02f714a5e692d6c5d939b80e7d6c5c0a4bb",
@@ -5527,7 +5527,7 @@
           "range": {
             "byteLength": 96,
             "byteStart": 25086,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L668-L670",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L668-L670",
             "lineEnd": 670,
             "lineStart": 668,
             "snippetSha256": "sha256:62737c3913fd437d5eeb4feeaf82ed8e731e85efb3a60b9cfdcbb712f89874a5",
@@ -5560,7 +5560,7 @@
           "range": {
             "byteLength": 235,
             "byteStart": 25188,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L672-L679",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L672-L679",
             "lineEnd": 679,
             "lineStart": 672,
             "snippetSha256": "sha256:8fdd52d0c8c354d98da06065c24c4e5b5ba85f9c69ca851b42d7cca59b01a776",
@@ -5589,7 +5589,7 @@
           "range": {
             "byteLength": 521,
             "byteStart": 25493,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L682-L691",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L682-L691",
             "lineEnd": 691,
             "lineStart": 682,
             "snippetSha256": "sha256:2b9b1333e4960893a13b6b3e53f1c64617ff7dc43d7df5e279d1fe02d34b70e6",
@@ -5633,7 +5633,7 @@
           "range": {
             "byteLength": 292,
             "byteStart": 26020,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L693-L700",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L693-L700",
             "lineEnd": 700,
             "lineStart": 693,
             "snippetSha256": "sha256:bfac468029aa09d982a9b6671ce5398eced148fc8d69b83803a7dbb4b1f788a6",
@@ -5661,7 +5661,7 @@
           "range": {
             "byteLength": 148,
             "byteStart": 1850,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L75-L78",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L75-L78",
             "lineEnd": 78,
             "lineStart": 75,
             "snippetSha256": "sha256:1472bb8def80b2af1a820352163f9dbbe16fdd87b32a550a340619ad94db4375",
@@ -5680,7 +5680,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 482,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:5cbc339d2992b680f014e8de5d59676a4dfb47079d5f1cdead24977e93a83a77",
@@ -5692,7 +5692,7 @@
           "valueRange": {
             "byteLength": 6,
             "byteStart": 521,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:391585291af5d1b10159ddc594f1247f88ac1302d06fc210b03f4792669eeeb2",
@@ -5710,7 +5710,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 1302,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L62",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L62",
             "lineEnd": 62,
             "lineStart": 62,
             "snippetSha256": "sha256:2ce00abb1991240bd75be8318e93e3f188787a2759fab6bb26c126f8f23155d6",
@@ -5732,7 +5732,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 1343,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L63",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L63",
             "lineEnd": 63,
             "lineStart": 63,
             "snippetSha256": "sha256:2af41861488ba6b28dd271b10e9afdddccca3f4bf50e25bdd48bd11079ca86b1",
@@ -5754,7 +5754,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 1384,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L64",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L64",
             "lineEnd": 64,
             "lineStart": 64,
             "snippetSha256": "sha256:311a77f10a1dca854a312491ec7f4aa9c3393dd9a89184ed34f897f420b113b7",
@@ -5776,7 +5776,7 @@
           "range": {
             "byteLength": 22,
             "byteStart": 1423,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L65",
             "lineEnd": 65,
             "lineStart": 65,
             "snippetSha256": "sha256:032eb3c06a2051dfe0105b899fdaca681e73645849c0bbda5d98a2c87e40502c",
@@ -5798,7 +5798,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 1451,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L66",
             "lineEnd": 66,
             "lineStart": 66,
             "snippetSha256": "sha256:3bb832c3aca4167209203ebd683d1294a9548831efc143ab160825adf9b36dd1",
@@ -5820,7 +5820,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 1485,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L67",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L67",
             "lineEnd": 67,
             "lineStart": 67,
             "snippetSha256": "sha256:b59600cc93cde123b718d234dca6ba691763df3d58afbe62b2af708b9b949e9f",
@@ -5842,7 +5842,7 @@
           "range": {
             "byteLength": 25,
             "byteStart": 1525,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L68",
             "lineEnd": 68,
             "lineStart": 68,
             "snippetSha256": "sha256:cf8beb0bdd371894e857a34d1867e88c03d76eb69f76114ce727a6f1cf7b905d",
@@ -5864,7 +5864,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 1556,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L69",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L69",
             "lineEnd": 69,
             "lineStart": 69,
             "snippetSha256": "sha256:27ddd5a33b51c5065d5e0b3ddbd18d48f13d048f4c504d0d179d5daa3f9b3c70",
@@ -5886,7 +5886,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 1590,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L70",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L70",
             "lineEnd": 70,
             "lineStart": 70,
             "snippetSha256": "sha256:8f10ca860a44dc45efdffabdd5b8e2dd3bfadbaca89b7fd4fd6d32b0f487b2d3",
@@ -5908,7 +5908,7 @@
           "range": {
             "byteLength": 65,
             "byteStart": 1638,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L71",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L71",
             "lineEnd": 71,
             "lineStart": 71,
             "snippetSha256": "sha256:35debf2a410d29607084abb1bf41fe1a4d4b5432a3da685a7069974f710e7861",
@@ -5930,7 +5930,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 1709,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L72",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L72",
             "lineEnd": 72,
             "lineStart": 72,
             "snippetSha256": "sha256:458c9d85003466b55ed734cfa01211ecf65da99ee0ca8bad18f624682979f986",
@@ -5952,7 +5952,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 4864,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L154",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L154",
             "lineEnd": 154,
             "lineStart": 154,
             "snippetSha256": "sha256:b85a54e1a63df4a42d83939133336327eef76135fe96516761544d2d6987a836",
@@ -5974,7 +5974,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 4953,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L157",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L157",
             "lineEnd": 157,
             "lineStart": 157,
             "snippetSha256": "sha256:deeb459ffc5d357dbf402699a3a6ee7ba2a2058a23349abded9f6a318014e18b",
@@ -5996,7 +5996,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 5043,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L160",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L160",
             "lineEnd": 160,
             "lineStart": 160,
             "snippetSha256": "sha256:6957196c56a0606f9c4725f3a7ad5a49c9570eb554d34aec7b62d417cf865579",
@@ -6018,7 +6018,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 5126,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L163",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L163",
             "lineEnd": 163,
             "lineStart": 163,
             "snippetSha256": "sha256:1a492fa45a2792c501598e5b0f9de4ee7739a8b695960f65abfe7ecbd19f6283",
@@ -6040,7 +6040,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 5228,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L166",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L166",
             "lineEnd": 166,
             "lineStart": 166,
             "snippetSha256": "sha256:3ac7c4b67d59a75006bdc30c01c21538c53e03a23357181e8d654d5a782832d1",
@@ -6062,7 +6062,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 5333,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L169",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L169",
             "lineEnd": 169,
             "lineStart": 169,
             "snippetSha256": "sha256:33aa24ccc295490b8fc502bc36cc1867999bc8cece23b11836557a2c90623959",
@@ -6084,7 +6084,7 @@
           "range": {
             "byteLength": 57,
             "byteStart": 5394,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L170",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L170",
             "lineEnd": 170,
             "lineStart": 170,
             "snippetSha256": "sha256:7573fe5c56f3680bc459ff23af613d522b063671d5464f8617ed24997d627e69",
@@ -6106,7 +6106,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 5457,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L171",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L171",
             "lineEnd": 171,
             "lineStart": 171,
             "snippetSha256": "sha256:188ebb5c03c56530eb298e9a0006312066ceab430bfe2862860cecff23360b89",
@@ -6128,7 +6128,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 5561,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L174",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L174",
             "lineEnd": 174,
             "lineStart": 174,
             "snippetSha256": "sha256:49cf16adad359f3d701c16650d2b2cb72eafdebd4c1105e59849c7360ad5b26a",
@@ -6150,7 +6150,7 @@
           "range": {
             "byteLength": 36,
             "byteStart": 5665,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L177",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L177",
             "lineEnd": 177,
             "lineStart": 177,
             "snippetSha256": "sha256:7d342712fb2dd47e1aab11295e26dcb994e2f91a53bdf0b462cf6e5dfad7bf00",
@@ -6172,7 +6172,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 5769,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L180",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L180",
             "lineEnd": 180,
             "lineStart": 180,
             "snippetSha256": "sha256:e01d06faacfb27571bf48c9839fb4650d78821a87855692950d08a2183e7dd14",
@@ -6194,7 +6194,7 @@
           "range": {
             "byteLength": 32,
             "byteStart": 5805,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L181",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L181",
             "lineEnd": 181,
             "lineStart": 181,
             "snippetSha256": "sha256:8db98de1d69e932ed7f576ef2b94de29033a4a46759dad76de752fcb480550ed",
@@ -6216,7 +6216,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 5843,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L182",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L182",
             "lineEnd": 182,
             "lineStart": 182,
             "snippetSha256": "sha256:5afe23175ad0bf345555e4fbba0972e4c94ec657c6bcc29e18f8dfa3fb2e912e",
@@ -6240,7 +6240,7 @@
               "range": {
                 "byteLength": 16,
                 "byteStart": 837,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L42",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L42",
                 "lineEnd": 42,
                 "lineStart": 42,
                 "snippetSha256": "sha256:53d1527d8908a4644f801eb7b9dbfd119e3a397f40e172b0605eb059c0a59286",
@@ -6256,7 +6256,7 @@
               "range": {
                 "byteLength": 18,
                 "byteStart": 863,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L43",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L43",
                 "lineEnd": 43,
                 "lineStart": 43,
                 "snippetSha256": "sha256:fb29fde9b429e61823262227ac29b2578de7ffa11c5bb056bbeffb115e7c1e1c",
@@ -6272,7 +6272,7 @@
               "range": {
                 "byteLength": 17,
                 "byteStart": 891,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L44",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L44",
                 "lineEnd": 44,
                 "lineStart": 44,
                 "snippetSha256": "sha256:e6e353abb53cc33dc18170282b1bcbc897c7af749bdc29b895cdeaea647292b6",
@@ -6288,7 +6288,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 918,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L45",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L45",
                 "lineEnd": 45,
                 "lineStart": 45,
                 "snippetSha256": "sha256:3985f56e32eb3b7daabd4a9c6607cc79914d5e1285a475262b8af50afa891ffb",
@@ -6303,7 +6303,7 @@
           "range": {
             "byteLength": 134,
             "byteStart": 806,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L41-L46",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L41-L46",
             "lineEnd": 46,
             "lineStart": 41,
             "snippetSha256": "sha256:2d61e1ae0b716497b2196e31e44f2e2dbe3d2b8a737b35dfc30f8b213b5b90c7",
@@ -6319,7 +6319,7 @@
               "range": {
                 "byteLength": 14,
                 "byteStart": 977,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L49",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L49",
                 "lineEnd": 49,
                 "lineStart": 49,
                 "snippetSha256": "sha256:b2ab11adaf1723425d1759f7ffda3faa78c5b7d67f66a9d2c80bad47b92df93c",
@@ -6335,7 +6335,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 1001,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L50",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L50",
                 "lineEnd": 50,
                 "lineStart": 50,
                 "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
@@ -6351,7 +6351,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 1026,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L51",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L51",
                 "lineEnd": 51,
                 "lineStart": 51,
                 "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
@@ -6367,7 +6367,7 @@
               "range": {
                 "byteLength": 14,
                 "byteStart": 1056,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L52",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L52",
                 "lineEnd": 52,
                 "lineStart": 52,
                 "snippetSha256": "sha256:ea265e109ef398a8fb1bde69b64da6d1474400c499e794c9d0b5d099de3c80a0",
@@ -6383,7 +6383,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 1080,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L53",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L53",
                 "lineEnd": 53,
                 "lineStart": 53,
                 "snippetSha256": "sha256:01e5ccf40435163c119bf67deb8b97bfde1fde59bbf96ca8c69668ac2037e315",
@@ -6399,7 +6399,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 1105,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L54",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L54",
                 "lineEnd": 54,
                 "lineStart": 54,
                 "snippetSha256": "sha256:d5af136a3ca4b4ff8b2045fd6ef8367eeed38c19ec50fe53b261263721b72db7",
@@ -6415,7 +6415,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 1135,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L55",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L55",
                 "lineEnd": 55,
                 "lineStart": 55,
                 "snippetSha256": "sha256:a9db8ef05fb39f34612c1fb27aa0749eac85205ab0d0372ff30fee492aac4abc",
@@ -6431,7 +6431,7 @@
               "range": {
                 "byteLength": 21,
                 "byteStart": 1160,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L56",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L56",
                 "lineEnd": 56,
                 "lineStart": 56,
                 "snippetSha256": "sha256:b8edef7a1d30875f1d7693c4d66ca7705057734e850daf428eef0f4f68199444",
@@ -6447,7 +6447,7 @@
               "range": {
                 "byteLength": 28,
                 "byteStart": 1191,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L57",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L57",
                 "lineEnd": 57,
                 "lineStart": 57,
                 "snippetSha256": "sha256:310b91bb6d935f39719fe20f58efc63947fe049fb778ed3a8f691ab60dd998f7",
@@ -6463,7 +6463,7 @@
               "range": {
                 "byteLength": 31,
                 "byteStart": 1229,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L58",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L58",
                 "lineEnd": 58,
                 "lineStart": 58,
                 "snippetSha256": "sha256:584574c1d5154ddc6ad1d6601005276bcc713a5bc7f06dffb848a905f04c563f",
@@ -6478,7 +6478,7 @@
           "range": {
             "byteLength": 321,
             "byteStart": 946,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L48-L59",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L48-L59",
             "lineEnd": 59,
             "lineStart": 48,
             "snippetSha256": "sha256:2fc0275053fbd2b3b2d5b6885c0f3bea409019c380a06d184c5b31ecb0dfb72b",
@@ -6522,7 +6522,7 @@
     "range": {
       "byteLength": 25898,
       "byteStart": 416,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L21-L701",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L21-L701",
       "lineEnd": 701,
       "lineStart": 21,
       "snippetSha256": "sha256:09b2123c38dba1078d3815f77f1ab572bb3e20909c9d2931a965fef4ea433519",

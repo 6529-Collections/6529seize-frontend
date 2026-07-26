@@ -210,7 +210,7 @@
           "range": {
             "byteLength": 25,
             "byteStart": 164,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L7",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L7",
             "lineEnd": 7,
             "lineStart": 7,
             "snippetSha256": "sha256:d3ee068deccf01ffddf453e0dd5ca0d251dc2edeeb7ed291bfe33488d46f47da",
@@ -244,7 +244,7 @@
           "range": {
             "byteLength": 26,
             "byteStart": 195,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L8",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L8",
             "lineEnd": 8,
             "lineStart": 8,
             "snippetSha256": "sha256:f2abfdb61b37e4be016ce39fbde59f61fde021a74db68200c9da589d92884c01",
@@ -278,7 +278,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 227,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L9",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L9",
             "lineEnd": 9,
             "lineStart": 9,
             "snippetSha256": "sha256:46fcc045e47acdb78e50990cd159ee39e78a4e3e66bb04d79036c8c5683e3466",
@@ -312,7 +312,7 @@
           "range": {
             "byteLength": 25,
             "byteStart": 264,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L10",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L10",
             "lineEnd": 10,
             "lineStart": 10,
             "snippetSha256": "sha256:c178908ae251141c492d33ff0ce1d655cda7026f8113bf47e966f3a873fbeca8",
@@ -346,7 +346,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 295,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L11",
             "lineEnd": 11,
             "lineStart": 11,
             "snippetSha256": "sha256:632a8ed5fe3407fdfed77d184131ffeb90bfaf776e42eb2a42b6bfd686b7a040",
@@ -380,7 +380,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 332,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L12",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L12",
             "lineEnd": 12,
             "lineStart": 12,
             "snippetSha256": "sha256:c1ba8f0c8a9d4c7965cbfefad75eb08c7e48dab56d3279e341bafe9fb900744a",
@@ -413,7 +413,7 @@
           "range": {
             "byteLength": 93,
             "byteStart": 372,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L14-L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L14-L16",
             "lineEnd": 16,
             "lineStart": 14,
             "snippetSha256": "sha256:d60996e18af836043634c97d63629ff64bad6d12f7db7db7452a1390d4866fdf",
@@ -471,7 +471,7 @@
           "range": {
             "byteLength": 440,
             "byteStart": 471,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L18-L32",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L18-L32",
             "lineEnd": 32,
             "lineStart": 18,
             "snippetSha256": "sha256:0399b7405b8efcfee6860f579349b93b4e95b5613e29960eca4d5d0cb7ed4b31",
@@ -495,7 +495,7 @@
           "range": {
             "byteLength": 25,
             "byteStart": 164,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L7",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L7",
             "lineEnd": 7,
             "lineStart": 7,
             "snippetSha256": "sha256:d3ee068deccf01ffddf453e0dd5ca0d251dc2edeeb7ed291bfe33488d46f47da",
@@ -517,7 +517,7 @@
           "range": {
             "byteLength": 26,
             "byteStart": 195,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L8",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L8",
             "lineEnd": 8,
             "lineStart": 8,
             "snippetSha256": "sha256:f2abfdb61b37e4be016ce39fbde59f61fde021a74db68200c9da589d92884c01",
@@ -539,7 +539,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 227,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L9",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L9",
             "lineEnd": 9,
             "lineStart": 9,
             "snippetSha256": "sha256:46fcc045e47acdb78e50990cd159ee39e78a4e3e66bb04d79036c8c5683e3466",
@@ -561,7 +561,7 @@
           "range": {
             "byteLength": 25,
             "byteStart": 264,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L10",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L10",
             "lineEnd": 10,
             "lineStart": 10,
             "snippetSha256": "sha256:c178908ae251141c492d33ff0ce1d655cda7026f8113bf47e966f3a873fbeca8",
@@ -583,7 +583,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 295,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L11",
             "lineEnd": 11,
             "lineStart": 11,
             "snippetSha256": "sha256:632a8ed5fe3407fdfed77d184131ffeb90bfaf776e42eb2a42b6bfd686b7a040",
@@ -605,7 +605,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 332,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L12",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L12",
             "lineEnd": 12,
             "lineStart": 12,
             "snippetSha256": "sha256:c1ba8f0c8a9d4c7965cbfefad75eb08c7e48dab56d3279e341bafe9fb900744a",
@@ -651,7 +651,7 @@
     "range": {
       "byteLength": 802,
       "byteStart": 111,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/mocks/MockStreamAuctions.sol#L6-L33",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamAuctions.sol#L6-L33",
       "lineEnd": 33,
       "lineStart": 6,
       "snippetSha256": "sha256:84a1abdcb8822a8bb275a8c3acb6117956e11259f57c54ee04634913159b18bb",

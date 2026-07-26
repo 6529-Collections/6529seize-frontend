@@ -220,7 +220,7 @@
           "range": {
             "byteLength": 115,
             "byteStart": 72662,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPrimarySaleSettlement.t.sol#L1572-L1574",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPrimarySaleSettlement.t.sol#L1572-L1574",
             "lineEnd": 1574,
             "lineStart": 1572,
             "snippetSha256": "sha256:b18178da11c38b26fd231ee11aa2a7c2cd10d3df096f95b3102d1fd1e018de98",
@@ -267,7 +267,7 @@
     "range": {
       "byteLength": 195,
       "byteStart": 72584,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPrimarySaleSettlement.t.sol#L1571-L1575",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPrimarySaleSettlement.t.sol#L1571-L1575",
       "lineEnd": 1575,
       "lineStart": 1571,
       "snippetSha256": "sha256:d8225ef5ecea37f035bc7d34e5747e9f0bc8f5d9634c97ce5cc1c91558396f9f",

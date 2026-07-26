@@ -70,7 +70,7 @@
           "range": {
             "byteLength": 106,
             "byteStart": 442,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionInvariant.t.sol#L15-L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionInvariant.t.sol#L15-L17",
             "lineEnd": 17,
             "lineStart": 15,
             "snippetSha256": "sha256:daa361e5be9f206adde572c77ce3cbd7e226ac5eb6dd1ff651d2f62904783b98",
@@ -116,7 +116,7 @@
           "range": {
             "byteLength": 637,
             "byteStart": 554,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionInvariant.t.sol#L19-L34",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionInvariant.t.sol#L19-L34",
             "lineEnd": 34,
             "lineStart": 19,
             "snippetSha256": "sha256:5a76adfbf89b0469bdc14a5928d28c45088a4f3b4990cdeadc181080e63d6f11",
@@ -140,7 +140,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 333,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionInvariant.t.sol#L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionInvariant.t.sol#L11",
             "lineEnd": 11,
             "lineStart": 11,
             "snippetSha256": "sha256:2e0ccb1ffca871f55f5c9c748f01b7c34e3623771ea1eae7e30c7025b3f0acbc",
@@ -152,7 +152,7 @@
           "valueRange": {
             "byteLength": 2,
             "byteStart": 376,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionInvariant.t.sol#L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionInvariant.t.sol#L11",
             "lineEnd": 11,
             "lineStart": 11,
             "snippetSha256": "sha256:c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db",
@@ -170,7 +170,7 @@
           "range": {
             "byteLength": 50,
             "byteStart": 385,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionInvariant.t.sol#L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionInvariant.t.sol#L13",
             "lineEnd": 13,
             "lineStart": 13,
             "snippetSha256": "sha256:70c76fd716954abf4b2136749406658c091ff6cb2efd4b37781006278b0f26c4",
@@ -217,7 +217,7 @@
     "range": {
       "byteLength": 924,
       "byteStart": 269,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionInvariant.t.sol#L10-L35",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionInvariant.t.sol#L10-L35",
       "lineEnd": 35,
       "lineStart": 10,
       "snippetSha256": "sha256:91dae7d16dc961e4b4f4ed6247a6d3fb0dbd67f67098d7668aa29cfc483e4a50",

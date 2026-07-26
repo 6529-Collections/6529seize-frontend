@@ -657,7 +657,7 @@
           "range": {
             "byteLength": 124,
             "byteStart": 2101,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L42-L44",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L42-L44",
             "lineEnd": 44,
             "lineStart": 42,
             "snippetSha256": "sha256:adf33d80d1796b01430b41c1624eaeae085b7ed91eaa8deb6aaaaf75b22c8e2f",
@@ -704,7 +704,7 @@
           "range": {
             "byteLength": 166,
             "byteStart": 2230,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L45-L50",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L45-L50",
             "lineEnd": 50,
             "lineStart": 45,
             "snippetSha256": "sha256:6cfbfe41fdda5c572fc7ee9fac191eb9156637132dcf360418937831786e77a6",
@@ -729,7 +729,7 @@
           "range": {
             "byteLength": 157,
             "byteStart": 2402,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L52-L55",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L52-L55",
             "lineEnd": 55,
             "lineStart": 52,
             "snippetSha256": "sha256:800ce74140c29a63f103f71cbf8c5d8f72cde2e94bf75df686bdb1937f7aa8a8",
@@ -756,7 +756,7 @@
           "range": {
             "byteLength": 2302,
             "byteStart": 2565,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L57-L100",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L57-L100",
             "lineEnd": 100,
             "lineStart": 57,
             "snippetSha256": "sha256:ba476199595ce1cffa60618dbc29d9fee872c2d75a1467caf2149442a69b63bb",
@@ -783,7 +783,7 @@
           "range": {
             "byteLength": 2427,
             "byteStart": 4873,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L102-L158",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L102-L158",
             "lineEnd": 158,
             "lineStart": 102,
             "snippetSha256": "sha256:6cf6dc5c48a01230899a90e1a508ed250254a3355cc93ca04454df1b461d6a4a",
@@ -810,7 +810,7 @@
           "range": {
             "byteLength": 1297,
             "byteStart": 7306,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L160-L191",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L160-L191",
             "lineEnd": 191,
             "lineStart": 160,
             "snippetSha256": "sha256:e916dac187fe31afa1fd2fb24a1ab34dc6e8e6c4ed6eca78bfeeb5cb3f16a3d4",
@@ -837,7 +837,7 @@
           "range": {
             "byteLength": 1387,
             "byteStart": 8609,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L193-L215",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L193-L215",
             "lineEnd": 215,
             "lineStart": 193,
             "snippetSha256": "sha256:276352a99f74377411d43d0acde4737986ec9fe2c4af313327871711c86f67ac",
@@ -864,7 +864,7 @@
           "range": {
             "byteLength": 2777,
             "byteStart": 10002,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L217-L262",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L217-L262",
             "lineEnd": 262,
             "lineStart": 217,
             "snippetSha256": "sha256:7f3ed268ac8c642fea8f59bbadf00e38902abbbdd87e9c84ebd3138544e901eb",
@@ -891,7 +891,7 @@
           "range": {
             "byteLength": 1241,
             "byteStart": 12785,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L264-L281",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L264-L281",
             "lineEnd": 281,
             "lineStart": 264,
             "snippetSha256": "sha256:ffdba90d7ea8fcca849a3e4d03d1a6937170ed9d4aece4a3944e2002b4f5c9c1",
@@ -918,7 +918,7 @@
           "range": {
             "byteLength": 2057,
             "byteStart": 14032,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L283-L326",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L283-L326",
             "lineEnd": 326,
             "lineStart": 283,
             "snippetSha256": "sha256:3b7c5c75c74ec27ecac13092c51740b4eea99d32f7a6db148625b97307efa6f3",
@@ -945,7 +945,7 @@
           "range": {
             "byteLength": 700,
             "byteStart": 16095,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L328-L340",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L328-L340",
             "lineEnd": 340,
             "lineStart": 328,
             "snippetSha256": "sha256:00f378316a90035618ee5c06b172e206bed4c0a026c7ce4caf5118a608195806",
@@ -972,7 +972,7 @@
           "range": {
             "byteLength": 2496,
             "byteStart": 16801,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L342-L383",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L342-L383",
             "lineEnd": 383,
             "lineStart": 342,
             "snippetSha256": "sha256:460e3daa159df89b0c3b818453ea4d60d432af9533a226080123baa79c5dd51e",
@@ -999,7 +999,7 @@
           "range": {
             "byteLength": 994,
             "byteStart": 19303,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L385-L402",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L385-L402",
             "lineEnd": 402,
             "lineStart": 385,
             "snippetSha256": "sha256:2d54306c183f343348cf37d536c553fb0aeab37f68fc4cedfd270d7f17ab075e",
@@ -1026,7 +1026,7 @@
           "range": {
             "byteLength": 1533,
             "byteStart": 20303,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L404-L432",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L404-L432",
             "lineEnd": 432,
             "lineStart": 404,
             "snippetSha256": "sha256:5c166e79d1239d4a99218f3e979e1b51ca6223d27c53ca8b888525cb9e9b0ef4",
@@ -1053,7 +1053,7 @@
           "range": {
             "byteLength": 605,
             "byteStart": 21842,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L434-L446",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L434-L446",
             "lineEnd": 446,
             "lineStart": 434,
             "snippetSha256": "sha256:d661ceaa0a13424633bd20b87d418be97253613ac9c386bc659e2e36380115fc",
@@ -1080,7 +1080,7 @@
           "range": {
             "byteLength": 687,
             "byteStart": 22453,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L448-L465",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L448-L465",
             "lineEnd": 465,
             "lineStart": 448,
             "snippetSha256": "sha256:7e6a16edd47f9bf470811d334433a962267e040ccf28c82a8429aea317c3fef3",
@@ -1107,7 +1107,7 @@
           "range": {
             "byteLength": 296,
             "byteStart": 23146,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L467-L473",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L467-L473",
             "lineEnd": 473,
             "lineStart": 467,
             "snippetSha256": "sha256:5b49dad3d945d5509ffa2065676ca9f7ad49461df2cce13a506ef92d4cd609ae",
@@ -1134,7 +1134,7 @@
           "range": {
             "byteLength": 659,
             "byteStart": 23448,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L475-L488",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L475-L488",
             "lineEnd": 488,
             "lineStart": 475,
             "snippetSha256": "sha256:4acbeb5ba2b52c86a2039767dcc493e19f7d427db6a06f7e646f32683202cf41",
@@ -1161,7 +1161,7 @@
           "range": {
             "byteLength": 628,
             "byteStart": 24113,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L490-L502",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L490-L502",
             "lineEnd": 502,
             "lineStart": 490,
             "snippetSha256": "sha256:c6ab221672f270757ef8a70f59ac2532acf6b09fe5f281373e7601563b63d206",
@@ -1188,7 +1188,7 @@
           "range": {
             "byteLength": 994,
             "byteStart": 24747,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L504-L521",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L504-L521",
             "lineEnd": 521,
             "lineStart": 504,
             "snippetSha256": "sha256:9db2da92108fad769064a89a075a143df66f697816d35e92b79bd410af8af909",
@@ -1215,7 +1215,7 @@
           "range": {
             "byteLength": 1285,
             "byteStart": 25747,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L523-L543",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L523-L543",
             "lineEnd": 543,
             "lineStart": 523,
             "snippetSha256": "sha256:89165a24b4355232b5adbbf1e47fc39b18e79ada922e29dfc63be62b98b1bccb",
@@ -1242,7 +1242,7 @@
           "range": {
             "byteLength": 1424,
             "byteStart": 27038,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L545-L567",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L545-L567",
             "lineEnd": 567,
             "lineStart": 545,
             "snippetSha256": "sha256:3fe5c6ffaf3aaf024ef848ce56128b7f6f5fcf631125b6918d70949c5e849983",
@@ -1269,7 +1269,7 @@
           "range": {
             "byteLength": 925,
             "byteStart": 28468,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L569-L584",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L569-L584",
             "lineEnd": 584,
             "lineStart": 569,
             "snippetSha256": "sha256:797b8a65509f634c14bc8eac3d92748c384e4816f3a8595e711c8e82fe79f0cf",
@@ -1296,7 +1296,7 @@
           "range": {
             "byteLength": 422,
             "byteStart": 29399,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L586-L593",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L586-L593",
             "lineEnd": 593,
             "lineStart": 586,
             "snippetSha256": "sha256:3f8a3bd930665bb9f02b38e36381cbd8d1b918e6a99965c62ca632deafccdae1",
@@ -1323,7 +1323,7 @@
           "range": {
             "byteLength": 1684,
             "byteStart": 29827,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L595-L625",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L595-L625",
             "lineEnd": 625,
             "lineStart": 595,
             "snippetSha256": "sha256:891c32b45c85f01315502cc5b4910caa8c2cda7aa17b9eb0fa0c7bab124c418e",
@@ -1350,7 +1350,7 @@
           "range": {
             "byteLength": 525,
             "byteStart": 31517,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L627-L639",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L627-L639",
             "lineEnd": 639,
             "lineStart": 627,
             "snippetSha256": "sha256:3615c9bd97c72d94bb7ac302d783659876aeec3f64276852a88523245c473073",
@@ -1377,7 +1377,7 @@
           "range": {
             "byteLength": 938,
             "byteStart": 32048,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L641-L656",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L641-L656",
             "lineEnd": 656,
             "lineStart": 641,
             "snippetSha256": "sha256:cdf3cfa0f11c4058fe57657113a48b1161cfd3c5ffe0125b191f26eb23b55e3e",
@@ -1404,7 +1404,7 @@
           "range": {
             "byteLength": 815,
             "byteStart": 32992,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L658-L673",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L658-L673",
             "lineEnd": 673,
             "lineStart": 658,
             "snippetSha256": "sha256:05c3b16065c7affaded475e5e9c5a192e40def948f7b8951706c15e7a96af39a",
@@ -1431,7 +1431,7 @@
           "range": {
             "byteLength": 796,
             "byteStart": 33813,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L675-L689",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L675-L689",
             "lineEnd": 689,
             "lineStart": 675,
             "snippetSha256": "sha256:7b55fb13d81f237854a62d960913990bdafc6fbfefa9b9bc9e147c1433513bd0",
@@ -1458,7 +1458,7 @@
           "range": {
             "byteLength": 822,
             "byteStart": 34615,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L691-L705",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L691-L705",
             "lineEnd": 705,
             "lineStart": 691,
             "snippetSha256": "sha256:c5357b106b08741dfb4990a69858cbcc2daa7ae3fb84ee89155c422917a6cbd6",
@@ -1485,7 +1485,7 @@
           "range": {
             "byteLength": 993,
             "byteStart": 35443,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L707-L725",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L707-L725",
             "lineEnd": 725,
             "lineStart": 707,
             "snippetSha256": "sha256:39f06511943dedff1fdc09bd034016acd98400690a952ecb582c0abc2b4f0c39",
@@ -1512,7 +1512,7 @@
           "range": {
             "byteLength": 1018,
             "byteStart": 36442,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L727-L745",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L727-L745",
             "lineEnd": 745,
             "lineStart": 727,
             "snippetSha256": "sha256:954686f5d41b7ff916c7130790a92d9a0a633d35937931df68ab09326de14d9f",
@@ -1539,7 +1539,7 @@
           "range": {
             "byteLength": 879,
             "byteStart": 37466,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L747-L764",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L747-L764",
             "lineEnd": 764,
             "lineStart": 747,
             "snippetSha256": "sha256:968b93eb89e283105990bf582ca767ca07e5d6804db586794a1d77b24ae824a1",
@@ -1566,7 +1566,7 @@
           "range": {
             "byteLength": 1082,
             "byteStart": 38351,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L766-L789",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L766-L789",
             "lineEnd": 789,
             "lineStart": 766,
             "snippetSha256": "sha256:d89eb935d41770375273ede53542e89a8427fdb7e28758e38f6831c1534f1445",
@@ -1593,7 +1593,7 @@
           "range": {
             "byteLength": 1191,
             "byteStart": 39439,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L791-L809",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L791-L809",
             "lineEnd": 809,
             "lineStart": 791,
             "snippetSha256": "sha256:219cabba32958edaf1d0280bfcc68f70f2a9f3849bf980fdfa0fed48158d69d4",
@@ -1620,7 +1620,7 @@
           "range": {
             "byteLength": 1718,
             "byteStart": 40636,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L811-L837",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L811-L837",
             "lineEnd": 837,
             "lineStart": 811,
             "snippetSha256": "sha256:bfb01c81b14932dc4fdf85db13bbf5679836a4ff35bc2e68870e6631ce7312ab",
@@ -1647,7 +1647,7 @@
           "range": {
             "byteLength": 1567,
             "byteStart": 42360,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L839-L871",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L839-L871",
             "lineEnd": 871,
             "lineStart": 839,
             "snippetSha256": "sha256:7cc8725da4777f55e8a1d87c5cd885d32c29bbbe0275a8b734c28981586580d8",
@@ -1674,7 +1674,7 @@
           "range": {
             "byteLength": 1521,
             "byteStart": 43933,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L873-L897",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L873-L897",
             "lineEnd": 897,
             "lineStart": 873,
             "snippetSha256": "sha256:387d0f1a737758751954e2f4aaf8044045997ca962d57a872d42413f8469c356",
@@ -1701,7 +1701,7 @@
           "range": {
             "byteLength": 1035,
             "byteStart": 45460,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L899-L921",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L899-L921",
             "lineEnd": 921,
             "lineStart": 899,
             "snippetSha256": "sha256:24b098a272d76b593ec32a65abecaaefa50274e12d5f5209edc7159e28b832a7",
@@ -1728,7 +1728,7 @@
           "range": {
             "byteLength": 1735,
             "byteStart": 46501,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L923-L950",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L923-L950",
             "lineEnd": 950,
             "lineStart": 923,
             "snippetSha256": "sha256:caaf18ff1d61285b00d4f5e1fc0d000d1af9ea15a17d82269ecaf9a788beb986",
@@ -1755,7 +1755,7 @@
           "range": {
             "byteLength": 1102,
             "byteStart": 48242,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L952-L978",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L952-L978",
             "lineEnd": 978,
             "lineStart": 952,
             "snippetSha256": "sha256:1edcbc57258cb756b5b1087baec62b2fd35806fad8fa42675e5a3a552fdaf59d",
@@ -1782,7 +1782,7 @@
           "range": {
             "byteLength": 1379,
             "byteStart": 49350,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L980-L1003",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L980-L1003",
             "lineEnd": 1003,
             "lineStart": 980,
             "snippetSha256": "sha256:6780bd553a8c7d9966f58a1f03a18c8df3c22807273cac5f7619d7232186eea1",
@@ -1809,7 +1809,7 @@
           "range": {
             "byteLength": 836,
             "byteStart": 50735,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1005-L1023",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1005-L1023",
             "lineEnd": 1023,
             "lineStart": 1005,
             "snippetSha256": "sha256:c8d8bf668b81e2e3015b6dc2cde979cb5ed42725f6ebe7a1a688fcc698eede04",
@@ -1836,7 +1836,7 @@
           "range": {
             "byteLength": 1840,
             "byteStart": 51577,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1025-L1053",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1025-L1053",
             "lineEnd": 1053,
             "lineStart": 1025,
             "snippetSha256": "sha256:5efa51401ce33b250578c5b53fa80b418b835ade66990c9f75dfd17fbf7372b1",
@@ -1863,7 +1863,7 @@
           "range": {
             "byteLength": 3506,
             "byteStart": 53423,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1055-L1127",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1055-L1127",
             "lineEnd": 1127,
             "lineStart": 1055,
             "snippetSha256": "sha256:7d5897ed8a97a92aa5695a8475686884b79120daa0ff8992d543acb640f75b23",
@@ -1890,7 +1890,7 @@
           "range": {
             "byteLength": 804,
             "byteStart": 56935,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1129-L1145",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1129-L1145",
             "lineEnd": 1145,
             "lineStart": 1129,
             "snippetSha256": "sha256:80e329830e0439f291d883a250e67a06ae2f05d613801c2fa7447503b582f2da",
@@ -1917,7 +1917,7 @@
           "range": {
             "byteLength": 3257,
             "byteStart": 57745,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1147-L1225",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1147-L1225",
             "lineEnd": 1225,
             "lineStart": 1147,
             "snippetSha256": "sha256:28d3588e5a43b8447aa317cab38a05533a004c9aa6cd51b0797d94de6a76d754",
@@ -1944,7 +1944,7 @@
           "range": {
             "byteLength": 727,
             "byteStart": 61008,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1227-L1244",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1227-L1244",
             "lineEnd": 1244,
             "lineStart": 1227,
             "snippetSha256": "sha256:6b680788dadbc1c41a901b862e8671b9bf7b629b14a81b76226f8d18d3f2edc2",
@@ -1971,7 +1971,7 @@
           "range": {
             "byteLength": 1744,
             "byteStart": 61741,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1246-L1282",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1246-L1282",
             "lineEnd": 1282,
             "lineStart": 1246,
             "snippetSha256": "sha256:e63e56f6fb068d42c343f3801d76ebcecfc13b74f15356f6e8ecbf26bd3558d0",
@@ -1998,7 +1998,7 @@
           "range": {
             "byteLength": 682,
             "byteStart": 63491,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1284-L1297",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1284-L1297",
             "lineEnd": 1297,
             "lineStart": 1284,
             "snippetSha256": "sha256:d0c1e9a41b45522e15adf22bffd3c6e24b05fd4259de75dfb7d2579311bc29b1",
@@ -2025,7 +2025,7 @@
           "range": {
             "byteLength": 799,
             "byteStart": 64179,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1299-L1313",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1299-L1313",
             "lineEnd": 1313,
             "lineStart": 1299,
             "snippetSha256": "sha256:c92223195e098d79cb71d6546af7c976d2d7c2cc14955d4524831ed8ddb0d348",
@@ -2058,7 +2058,7 @@
           "range": {
             "byteLength": 223,
             "byteStart": 64984,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1315-L1318",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1315-L1318",
             "lineEnd": 1318,
             "lineStart": 1315,
             "snippetSha256": "sha256:4fe2756358c765a92bdae66847597fd3628305776aa3729ad63c4963cd772399",
@@ -2097,7 +2097,7 @@
           "range": {
             "byteLength": 321,
             "byteStart": 65213,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1320-L1324",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1320-L1324",
             "lineEnd": 1324,
             "lineStart": 1320,
             "snippetSha256": "sha256:f610b3c13ed22990fec16c826de7601676d3c650dbd23c93ee57b2129d4f7e01",
@@ -2141,7 +2141,7 @@
           "range": {
             "byteLength": 381,
             "byteStart": 65540,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1326-L1333",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1326-L1333",
             "lineEnd": 1333,
             "lineStart": 1326,
             "snippetSha256": "sha256:1be48118faf2a0a1d6f5c3a7e67be13f2f5ab0ded77d054fcaf9792fb1adc7fa",
@@ -2174,7 +2174,7 @@
           "range": {
             "byteLength": 139,
             "byteStart": 65927,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1335-L1337",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1335-L1337",
             "lineEnd": 1337,
             "lineStart": 1335,
             "snippetSha256": "sha256:ff2a9543d961777449a63f7cd2d8ca2819b9cb95de804b370afe86fcfaf9fa75",
@@ -2218,7 +2218,7 @@
           "range": {
             "byteLength": 174,
             "byteStart": 66072,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1339-L1341",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1339-L1341",
             "lineEnd": 1341,
             "lineStart": 1339,
             "snippetSha256": "sha256:f377493a228ccd81ca3b570c2c15ececa8ae2e5618d243e9f1e2751b8509e8b5",
@@ -2256,7 +2256,7 @@
           "range": {
             "byteLength": 203,
             "byteStart": 66252,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1343-L1347",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1343-L1347",
             "lineEnd": 1347,
             "lineStart": 1343,
             "snippetSha256": "sha256:7a3b37f7271677c5df45f97db8b0efc998d0649f9e2c3b5e76f20842140fae0e",
@@ -2294,7 +2294,7 @@
           "range": {
             "byteLength": 250,
             "byteStart": 66461,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1349-L1355",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1349-L1355",
             "lineEnd": 1355,
             "lineStart": 1349,
             "snippetSha256": "sha256:bd5fd407e7c09e5e73954a0f177a951e606c1cebcd801d136b4ffccee8671504",
@@ -2332,7 +2332,7 @@
           "range": {
             "byteLength": 383,
             "byteStart": 66717,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1357-L1364",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1357-L1364",
             "lineEnd": 1364,
             "lineStart": 1357,
             "snippetSha256": "sha256:8a6990cd18ef2742757d617e5d859ba36edaf811157fff470ee9c141fa2c7cda",
@@ -2366,7 +2366,7 @@
           "range": {
             "byteLength": 365,
             "byteStart": 67106,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1366-L1374",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1366-L1374",
             "lineEnd": 1374,
             "lineStart": 1366,
             "snippetSha256": "sha256:61e41abc8f0a4433c5326857595c13ca7e809d41eadb96cc8146b2a026250374",
@@ -2411,7 +2411,7 @@
           "range": {
             "byteLength": 304,
             "byteStart": 67477,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1376-L1383",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1376-L1383",
             "lineEnd": 1383,
             "lineStart": 1376,
             "snippetSha256": "sha256:7d421914d515864fd4fe5104d531c3d01854cdf4c64fa60bd732da69d685717e",
@@ -2456,7 +2456,7 @@
           "range": {
             "byteLength": 230,
             "byteStart": 67787,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1385-L1393",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1385-L1393",
             "lineEnd": 1393,
             "lineStart": 1385,
             "snippetSha256": "sha256:b79b1a8fac45dc2a600df3432556cc8f2e4bc57c959de51d9b78bf0200c69ebb",
@@ -2506,7 +2506,7 @@
           "range": {
             "byteLength": 275,
             "byteStart": 68023,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1395-L1404",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1395-L1404",
             "lineEnd": 1404,
             "lineStart": 1395,
             "snippetSha256": "sha256:0e20649af2628267dcdafc06a36015507b85ba55daff843835d0f27090d5b906",
@@ -2551,7 +2551,7 @@
           "range": {
             "byteLength": 188,
             "byteStart": 68304,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1406-L1410",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1406-L1410",
             "lineEnd": 1410,
             "lineStart": 1406,
             "snippetSha256": "sha256:a15ae1049f0dd97a14b569395ca92e44f693c70d034039ef3d75780a46ca276e",
@@ -2601,7 +2601,7 @@
           "range": {
             "byteLength": 403,
             "byteStart": 68498,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1412-L1425",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1412-L1425",
             "lineEnd": 1425,
             "lineStart": 1412,
             "snippetSha256": "sha256:c4be96147a6af7438e7600a91415d903f28e788ebe88f17b7dbdac7f2144056b",
@@ -2646,7 +2646,7 @@
           "range": {
             "byteLength": 1104,
             "byteStart": 68907,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1427-L1449",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1427-L1449",
             "lineEnd": 1449,
             "lineStart": 1427,
             "snippetSha256": "sha256:69d708d3a2f66c23486211f3d9cc48aaed0a5a6340b97902e7781983bfbe38bc",
@@ -2696,7 +2696,7 @@
           "range": {
             "byteLength": 1183,
             "byteStart": 70017,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L1451-L1475",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L1451-L1475",
             "lineEnd": 1475,
             "lineStart": 1451,
             "snippetSha256": "sha256:3295a257e04b663391e9164b2e073abcec4e06abca76599df8eb35246653ea95",
@@ -2720,7 +2720,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 669,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:2200c47a3bc6819eefd84c943d3096077990cbd55f6b9c379bc7dfa71fbd129e",
@@ -2732,7 +2732,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 706,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
@@ -2750,7 +2750,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 727,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:d7392e81a22730419ac20ed22130857849fe84ce89c82ec5af65858179bea733",
@@ -2762,7 +2762,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 764,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
@@ -2780,7 +2780,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 785,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:afec460b200a5e1f5004f621f93222388bd0e6afac6be357338ee8ced0bb992f",
@@ -2792,7 +2792,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 822,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
@@ -2810,7 +2810,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 843,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:17ae73ed82a10cc8d1dfbac60f9c74fe8906f03fe3df06648a65507e37fe501d",
@@ -2822,7 +2822,7 @@
           "valueRange": {
             "byteLength": 24,
             "byteStart": 897,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:ecf054c6b647c3378e84536204982849ebdc3a89d33f79417169ffb8f5d1f15a",
@@ -2840,7 +2840,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 927,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:ca770c9d8ff773a5bdb9d9367272504fb51c9f1fb044a6f6a58819c26e06f189",
@@ -2852,7 +2852,7 @@
           "valueRange": {
             "byteLength": 19,
             "byteStart": 967,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:91f7c2ca15d3bdfcb5caf076de8d3db11a0e64712bf35302f5b8bce8baedbf06",
@@ -2870,7 +2870,7 @@
           "range": {
             "byteLength": 66,
             "byteStart": 992,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:3a31f5a5a60e8cf9fe80487988acb049aa202941fb694f5b2c478fa608071e6a",
@@ -2882,7 +2882,7 @@
           "valueRange": {
             "byteLength": 26,
             "byteStart": 1032,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:0c17ed1a8a656506d7d878bce04b334e52b764746c0589b0dc1879f971209809",
@@ -2900,7 +2900,7 @@
           "range": {
             "byteLength": 63,
             "byteStart": 1064,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:7f5b07202422fb128e25a0076ef0ddb7d4fac0d657883c7e2035a3180fcb86f6",
@@ -2912,7 +2912,7 @@
           "valueRange": {
             "byteLength": 21,
             "byteStart": 1106,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:48ed56dca0be6577c37f1ccf0d78e6a8c8a800370a06dd6f09bd6cddac12dca6",
@@ -2930,7 +2930,7 @@
           "range": {
             "byteLength": 74,
             "byteStart": 1133,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:6e5cb20bceba1c995af2a55625bce58b6af97c1f3593222ee8561f8bb3c80d51",
@@ -2942,7 +2942,7 @@
           "valueRange": {
             "byteLength": 33,
             "byteStart": 1174,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:9ce8b8f3397c7316f0d155973078ac345a584dc6a27e3d36ba40704bec32a90c",
@@ -2960,7 +2960,7 @@
           "range": {
             "byteLength": 88,
             "byteStart": 1213,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:ac61a718f55126d5e4dd7e607e243bd381dee2618e21705964b26ef6341af319",
@@ -2972,7 +2972,7 @@
           "valueRange": {
             "byteLength": 34,
             "byteStart": 1267,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:f63b08273893841ea8be7e00f9918820283e2e113109df38a8f38e493c465d4c",
@@ -2990,7 +2990,7 @@
           "range": {
             "byteLength": 142,
             "byteStart": 1307,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L28-L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L28-L29",
             "lineEnd": 29,
             "lineStart": 28,
             "snippetSha256": "sha256:0d11fc7e9a278666d49520ced80a1abf17cd26636139f51fb9fc234501b9987e",
@@ -3002,7 +3002,7 @@
           "valueRange": {
             "byteLength": 79,
             "byteStart": 1370,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L29",
             "lineEnd": 29,
             "lineStart": 29,
             "snippetSha256": "sha256:e00696097376fc8996744698aac83a73ddc4543a2fec250f49c3daeaa04e8226",
@@ -3020,7 +3020,7 @@
           "range": {
             "byteLength": 135,
             "byteStart": 1455,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L30-L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L30-L31",
             "lineEnd": 31,
             "lineStart": 30,
             "snippetSha256": "sha256:5fa181c4c6b14310a2dcc4c89d6419cb925b492272632a2797426895d6995e3c",
@@ -3032,7 +3032,7 @@
           "valueRange": {
             "byteLength": 72,
             "byteStart": 1518,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L31",
             "lineEnd": 31,
             "lineStart": 31,
             "snippetSha256": "sha256:a6fc571f17b696a2d6d91e581968cdb84b38011bcd86fe927244048c47017e1f",
@@ -3050,7 +3050,7 @@
           "range": {
             "byteLength": 139,
             "byteStart": 1596,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L32-L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L32-L33",
             "lineEnd": 33,
             "lineStart": 32,
             "snippetSha256": "sha256:87b4d9f4af263fa31349e3993a657bbcdb68376c52c250ba232031f98b5a3122",
@@ -3062,7 +3062,7 @@
           "valueRange": {
             "byteLength": 74,
             "byteStart": 1661,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L33",
             "lineEnd": 33,
             "lineStart": 33,
             "snippetSha256": "sha256:c81d739d533dff9b222f8132b4b14ec4948642ed59b046f053181f362fc5351d",
@@ -3080,7 +3080,7 @@
           "range": {
             "byteLength": 136,
             "byteStart": 1741,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L34-L35",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L34-L35",
             "lineEnd": 35,
             "lineStart": 34,
             "snippetSha256": "sha256:2e79c54293cf37513415619699b23d73ee09ebba197c2155b73864d0d89a8542",
@@ -3092,7 +3092,7 @@
           "valueRange": {
             "byteLength": 65,
             "byteStart": 1812,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L35",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L35",
             "lineEnd": 35,
             "lineStart": 35,
             "snippetSha256": "sha256:98476674be07de6a1a192a4fd12f359699d345b9f01fb49e294bd8aa38c4cbdb",
@@ -3110,7 +3110,7 @@
           "range": {
             "byteLength": 111,
             "byteStart": 1883,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L36-L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L36-L37",
             "lineEnd": 37,
             "lineStart": 36,
             "snippetSha256": "sha256:7369eb3b70c56f393ff4b26b9333f8b9ee9e64e702b163e364200f8ca60c56c9",
@@ -3122,7 +3122,7 @@
           "valueRange": {
             "byteLength": 57,
             "byteStart": 1937,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L37",
             "lineEnd": 37,
             "lineStart": 37,
             "snippetSha256": "sha256:cea0f072a613a623af195f8c511321d0600f279d329752d2e2f0f978461dad32",
@@ -3140,7 +3140,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 2001,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L39",
             "lineEnd": 39,
             "lineStart": 39,
             "snippetSha256": "sha256:4c48f4fa77afd60e97b66c4f5be4a2b522dedb55dfd91070d4d498c90db456bc",
@@ -3162,7 +3162,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 2060,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L40",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L40",
             "lineEnd": 40,
             "lineStart": 40,
             "snippetSha256": "sha256:eea0364b44022c983c933a210c31da3e5e3dc29203d00cdaf69fe76db7997e0c",
@@ -3208,7 +3208,7 @@
     "range": {
       "byteLength": 70732,
       "byteStart": 470,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSplitWallet.t.sol#L13-L1476",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamSplitWallet.t.sol#L13-L1476",
       "lineEnd": 1476,
       "lineStart": 13,
       "snippetSha256": "sha256:ef20a9a13b9adcd6d8a74a79e8f39e47e5d2a6bf43e687af05429a6db79596bc",

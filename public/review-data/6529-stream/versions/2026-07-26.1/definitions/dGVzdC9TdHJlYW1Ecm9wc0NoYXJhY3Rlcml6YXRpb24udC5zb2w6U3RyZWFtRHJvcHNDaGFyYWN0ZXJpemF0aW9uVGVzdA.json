@@ -161,7 +161,7 @@
           "range": {
             "byteLength": 324,
             "byteStart": 775,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L23-L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L23-L29",
             "lineEnd": 29,
             "lineStart": 23,
             "snippetSha256": "sha256:e45f8567bfbc2bfcc07988564bc49ec0e0af92bb3f10e498fefd07bec136b79b",
@@ -204,7 +204,7 @@
           "range": {
             "byteLength": 620,
             "byteStart": 1105,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L31-L45",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L31-L45",
             "lineEnd": 45,
             "lineStart": 31,
             "snippetSha256": "sha256:3f2bc39202a2650fac0ee43b4863add05cb1c475e50eaf92b31dba740b636b44",
@@ -231,7 +231,7 @@
           "range": {
             "byteLength": 529,
             "byteStart": 1731,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L47-L61",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L47-L61",
             "lineEnd": 61,
             "lineStart": 47,
             "snippetSha256": "sha256:252d5f9366d8254e756010fac22e7d2295d22664af70a20e10ac1445b1f8e172",
@@ -258,7 +258,7 @@
           "range": {
             "byteLength": 349,
             "byteStart": 2266,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L63-L70",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L63-L70",
             "lineEnd": 70,
             "lineStart": 63,
             "snippetSha256": "sha256:0b0e54d0c7b94ea77ec82ae426b804cb4e81886404b15b2cbd5d847739a339b6",
@@ -285,7 +285,7 @@
           "range": {
             "byteLength": 1816,
             "byteStart": 2621,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L72-L100",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L72-L100",
             "lineEnd": 100,
             "lineStart": 72,
             "snippetSha256": "sha256:6cbf01f8d835bc010e7b394f00057bf88e909253d8a2eea1069b5c5f797b150c",
@@ -312,7 +312,7 @@
           "range": {
             "byteLength": 776,
             "byteStart": 4443,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L102-L115",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L102-L115",
             "lineEnd": 115,
             "lineStart": 102,
             "snippetSha256": "sha256:e534a848bac84f227c412d515bd579ee1612cadb67ef109358eeb2607a2daaec",
@@ -339,7 +339,7 @@
           "range": {
             "byteLength": 779,
             "byteStart": 5225,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L117-L130",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L117-L130",
             "lineEnd": 130,
             "lineStart": 117,
             "snippetSha256": "sha256:193fa0ddc88033d662222e9f2311e6129f632d3e844f8f71b93419595a7b65b3",
@@ -366,7 +366,7 @@
           "range": {
             "byteLength": 724,
             "byteStart": 6010,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L132-L145",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L132-L145",
             "lineEnd": 145,
             "lineStart": 132,
             "snippetSha256": "sha256:42b797de2027207a8ca028571a8ef32b6cd771953593f1db660f24842df1bb42",
@@ -393,7 +393,7 @@
           "range": {
             "byteLength": 983,
             "byteStart": 6740,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L147-L173",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L147-L173",
             "lineEnd": 173,
             "lineStart": 147,
             "snippetSha256": "sha256:f42dfb41e95bdb3b4a453c7a93ef1382d5638da20079206d4f7e371cb553193f",
@@ -420,7 +420,7 @@
           "range": {
             "byteLength": 758,
             "byteStart": 7729,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L175-L190",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L175-L190",
             "lineEnd": 190,
             "lineStart": 175,
             "snippetSha256": "sha256:727bbaf65251c685f2a8d58178da01c67ade344531f432e3a8549be5eb03e64b",
@@ -447,7 +447,7 @@
           "range": {
             "byteLength": 2020,
             "byteStart": 8493,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L192-L227",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L192-L227",
             "lineEnd": 227,
             "lineStart": 192,
             "snippetSha256": "sha256:b9bcd697c4ec92fc9fabe44e9f02d8d95f590dbee369738d56972d5e77f22dcb",
@@ -474,7 +474,7 @@
           "range": {
             "byteLength": 946,
             "byteStart": 10519,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L229-L255",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L229-L255",
             "lineEnd": 255,
             "lineStart": 229,
             "snippetSha256": "sha256:187056071db1d6f4d56d6ada90aace2125b52d78fe466bf90fc1bca587cb1a5f",
@@ -501,7 +501,7 @@
           "range": {
             "byteLength": 936,
             "byteStart": 11471,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L257-L283",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L257-L283",
             "lineEnd": 283,
             "lineStart": 257,
             "snippetSha256": "sha256:8e0236cb2c4a7e00e09cd10cc433ecc0bcd04752199f78afd3f853e43b03b09e",
@@ -525,7 +525,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 544,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
@@ -537,7 +537,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 578,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
@@ -555,7 +555,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 599,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:3e651fdfebdcfe0dd0fdc57a7c7e95dcc88555bb618ed67eaaae88bb2f03bb11",
@@ -567,7 +567,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 636,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
@@ -585,7 +585,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 657,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
@@ -597,7 +597,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 691,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
@@ -615,7 +615,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 712,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
@@ -627,7 +627,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 753,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
@@ -670,7 +670,7 @@
     "range": {
       "byteLength": 12101,
       "byteStart": 308,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamDropsCharacterization.t.sol#L11-L284",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamDropsCharacterization.t.sol#L11-L284",
       "lineEnd": 284,
       "lineStart": 11,
       "snippetSha256": "sha256:2883e90dfe2acf49ba7b455c7ddcdc3dcc8c80ece1a20f445f9c0b83891a4b49",

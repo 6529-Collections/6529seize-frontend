@@ -53,7 +53,7 @@
           "range": {
             "byteLength": 73,
             "byteStart": 410,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L12-L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L12-L14",
             "lineEnd": 14,
             "lineStart": 12,
             "snippetSha256": "sha256:f956ba0c3497a0a0e41762661e80d3781947228a521d9204ef6621eebbbe69c3",
@@ -94,7 +94,7 @@
     "range": {
       "byteLength": 192,
       "byteStart": 293,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L10-L15",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L10-L15",
       "lineEnd": 15,
       "lineStart": 10,
       "snippetSha256": "sha256:f5aba96dd6ba69f35c59f782aa22a19a4b34470c16cd8c4f39b4e6facbe6e45c",

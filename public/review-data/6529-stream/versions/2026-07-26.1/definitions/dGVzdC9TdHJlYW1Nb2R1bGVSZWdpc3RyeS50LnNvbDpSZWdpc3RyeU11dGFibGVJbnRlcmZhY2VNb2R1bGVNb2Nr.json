@@ -78,7 +78,7 @@
           "range": {
             "byteLength": 90,
             "byteStart": 6699,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L218-L220",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L218-L220",
             "lineEnd": 220,
             "lineStart": 218,
             "snippetSha256": "sha256:e1cf7dc9655acb8b3053ce7ff71fa8f5aacf69b44e6700e26bf9bf9b56cd7fad",
@@ -111,7 +111,7 @@
           "range": {
             "byteLength": 87,
             "byteStart": 6795,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L222-L224",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L222-L224",
             "lineEnd": 224,
             "lineStart": 222,
             "snippetSha256": "sha256:bb0cc099be5596fcdc1651e15f4e74015428a50d45c7377cd1470bfd669281af",
@@ -150,7 +150,7 @@
           "range": {
             "byteLength": 205,
             "byteStart": 6888,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L226-L229",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L226-L229",
             "lineEnd": 229,
             "lineStart": 226,
             "snippetSha256": "sha256:0443381e18224658e61d5c5cffbbea4be21505acef262f355909f0111d5e3c10",
@@ -174,7 +174,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 6616,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L215",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L215",
             "lineEnd": 215,
             "lineStart": 215,
             "snippetSha256": "sha256:10ee0f6c0e887ace062b9d637f0796197ff7b8cb5ec84d2e51d65133fb254fe5",
@@ -196,7 +196,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 6664,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L216",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L216",
             "lineEnd": 216,
             "lineStart": 216,
             "snippetSha256": "sha256:713c3f02458d9aabbe25a47431bc3985fbb98fc61c8090d2f49ff0866833d703",
@@ -208,7 +208,7 @@
           "valueRange": {
             "byteLength": 4,
             "byteStart": 6688,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L216",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L216",
             "lineEnd": 216,
             "lineStart": 216,
             "snippetSha256": "sha256:b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
@@ -251,7 +251,7 @@
     "range": {
       "byteLength": 539,
       "byteStart": 6556,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L214-L230",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L214-L230",
       "lineEnd": 230,
       "lineStart": 214,
       "snippetSha256": "sha256:3ebf6049733009e84d0a40d1d09d3d3bdf4ba1296495e49a5d98dec5e53e176a",

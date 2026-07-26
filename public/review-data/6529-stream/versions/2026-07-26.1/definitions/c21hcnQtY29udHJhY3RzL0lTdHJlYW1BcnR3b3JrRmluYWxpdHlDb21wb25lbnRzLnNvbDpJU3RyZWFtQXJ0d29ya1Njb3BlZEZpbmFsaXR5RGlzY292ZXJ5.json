@@ -123,7 +123,7 @@
           "range": {
             "byteLength": 132,
             "byteStart": 1628,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamArtworkFinalityComponents.sol#L41-L44",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamArtworkFinalityComponents.sol#L41-L44",
             "lineEnd": 44,
             "lineStart": 41,
             "snippetSha256": "sha256:7837e84fbfc0db73d66157b917c332ff1e15cde6d03a998abf59c378bb9a1da3",
@@ -169,7 +169,7 @@
           "range": {
             "byteLength": 178,
             "byteStart": 1766,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamArtworkFinalityComponents.sol#L46-L49",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamArtworkFinalityComponents.sol#L46-L49",
             "lineEnd": 49,
             "lineStart": 46,
             "snippetSha256": "sha256:a8841c6cabdf5179f3c2ed35db374b359334031e4d10b14ec71afb17e566a4ab",
@@ -209,7 +209,7 @@
           "range": {
             "byteLength": 131,
             "byteStart": 1950,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamArtworkFinalityComponents.sol#L51-L54",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamArtworkFinalityComponents.sol#L51-L54",
             "lineEnd": 54,
             "lineStart": 51,
             "snippetSha256": "sha256:89582c9afe0c45db6f8704439e4c674ed0e7d71112e80ecae7648d10abd34db3",
@@ -250,7 +250,7 @@
     "range": {
       "byteLength": 509,
       "byteStart": 1574,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamArtworkFinalityComponents.sol#L40-L55",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamArtworkFinalityComponents.sol#L40-L55",
       "lineEnd": 55,
       "lineStart": 40,
       "snippetSha256": "sha256:8e6b49f978cb80fcbb26fdeb8ce1121a083c7610106e2f045583240f674dd044",

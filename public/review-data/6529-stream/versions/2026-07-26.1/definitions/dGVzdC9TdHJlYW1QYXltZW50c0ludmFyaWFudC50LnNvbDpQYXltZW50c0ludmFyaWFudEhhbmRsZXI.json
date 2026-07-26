@@ -446,7 +446,7 @@
           "range": {
             "byteLength": 1190,
             "byteStart": 5180,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L131-L156",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L131-L156",
             "lineEnd": 156,
             "lineStart": 131,
             "snippetSha256": "sha256:9592dabeecabfc821d04a4776bb16d8c9e2a9ca8b61e3cda1c5045cc442ac3c2",
@@ -484,7 +484,7 @@
           "range": {
             "byteLength": 1217,
             "byteStart": 6376,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L158-L189",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L158-L189",
             "lineEnd": 189,
             "lineStart": 158,
             "snippetSha256": "sha256:a8219b22485bb32b131d94cf1909b1ae12daa97513b1bd5ac0f6c1e3f71824d5",
@@ -517,7 +517,7 @@
           "range": {
             "byteLength": 437,
             "byteStart": 7599,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L191-L201",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L191-L201",
             "lineEnd": 201,
             "lineStart": 191,
             "snippetSha256": "sha256:7b845c75174a892fe23d437cf1d7fe25c685b0e5b09b94fb13378ed37a11ad62",
@@ -550,7 +550,7 @@
           "range": {
             "byteLength": 1773,
             "byteStart": 8042,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L203-L236",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L203-L236",
             "lineEnd": 236,
             "lineStart": 203,
             "snippetSha256": "sha256:439c3be2a386f804a7c96ec453d180bc7e9e9f41f6684d23390f4c5003eaa244",
@@ -583,7 +583,7 @@
           "range": {
             "byteLength": 121,
             "byteStart": 9821,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L238-L240",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L238-L240",
             "lineEnd": 240,
             "lineStart": 238,
             "snippetSha256": "sha256:0c06841aec5a260c248809b2933b980aed13d3b2929c221890518ed6bb91aaeb",
@@ -621,7 +621,7 @@
           "range": {
             "byteLength": 1516,
             "byteStart": 9948,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L242-L281",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L242-L281",
             "lineEnd": 281,
             "lineStart": 242,
             "snippetSha256": "sha256:b2abe084e0f68794114a736743348063c6bf1b91da21eaa2ce5e4901d07e5e91",
@@ -664,7 +664,7 @@
           "range": {
             "byteLength": 972,
             "byteStart": 11470,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L283-L308",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L283-L308",
             "lineEnd": 308,
             "lineStart": 283,
             "snippetSha256": "sha256:4345aaada05a661e0e6355cf15e28b2e31a8ac4a7e8d0b5bf1fc46d0fd032ba5",
@@ -697,7 +697,7 @@
           "range": {
             "byteLength": 410,
             "byteStart": 12448,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L310-L321",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L310-L321",
             "lineEnd": 321,
             "lineStart": 310,
             "snippetSha256": "sha256:4b41089a1fa4702a85851c5c80d244945abaa2656f8f1ec9b15d54ac9dc719c5",
@@ -730,7 +730,7 @@
           "range": {
             "byteLength": 681,
             "byteStart": 12864,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L323-L337",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L323-L337",
             "lineEnd": 337,
             "lineStart": 323,
             "snippetSha256": "sha256:e6f3e5a7c48fc1073a95f69bedee4297f91f6abddf7d127a042fe319adea02ab",
@@ -763,7 +763,7 @@
           "range": {
             "byteLength": 587,
             "byteStart": 13551,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L339-L352",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L339-L352",
             "lineEnd": 352,
             "lineStart": 339,
             "snippetSha256": "sha256:42ce972e725d58dfba1c2769a5bad4dbb25e9166815281170f1dd596d04b9a0f",
@@ -801,7 +801,7 @@
           "range": {
             "byteLength": 1008,
             "byteStart": 14144,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L354-L372",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L354-L372",
             "lineEnd": 372,
             "lineStart": 354,
             "snippetSha256": "sha256:a78ae891178540ee2126d8153ca57fa07f2407b7f6e7f207d944dd818c4d3736",
@@ -834,7 +834,7 @@
           "range": {
             "byteLength": 2116,
             "byteStart": 15158,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L374-L411",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L374-L411",
             "lineEnd": 411,
             "lineStart": 374,
             "snippetSha256": "sha256:f307f270ce58c60702dcb22d093dcef41a262da00592fa9ddcc0992176d89e7f",
@@ -867,7 +867,7 @@
           "range": {
             "byteLength": 117,
             "byteStart": 17280,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L413-L415",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L413-L415",
             "lineEnd": 415,
             "lineStart": 413,
             "snippetSha256": "sha256:3ac5f32c323b35daeef7db71ff506abf87c5f66fdceb5b29644cf93a3ea15594",
@@ -905,7 +905,7 @@
           "range": {
             "byteLength": 882,
             "byteStart": 17403,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L417-L437",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L417-L437",
             "lineEnd": 437,
             "lineStart": 417,
             "snippetSha256": "sha256:d861528ce82f4cfde4ead979e0fd04f0627544e669420ebc57fae1ef4fcda9d2",
@@ -938,7 +938,7 @@
           "range": {
             "byteLength": 306,
             "byteStart": 18291,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L439-L446",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L439-L446",
             "lineEnd": 446,
             "lineStart": 439,
             "snippetSha256": "sha256:8cb4dbad6b54ebca20b0edb116417d114eee1a0fe0f185c0d04bc0ea8bfa1c6d",
@@ -971,7 +971,7 @@
           "range": {
             "byteLength": 1030,
             "byteStart": 18603,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L448-L471",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L448-L471",
             "lineEnd": 471,
             "lineStart": 448,
             "snippetSha256": "sha256:d3a86c36f7a149486f4c42b3e5511cb1c420fcd9f01f26e6d231524e59bf4aee",
@@ -1004,7 +1004,7 @@
           "range": {
             "byteLength": 125,
             "byteStart": 19639,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L473-L475",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L473-L475",
             "lineEnd": 475,
             "lineStart": 473,
             "snippetSha256": "sha256:db1f158ef55815a2963678ae13a7c5a5e9279977fb6e731bc9e3d9d0a2fe29ae",
@@ -1037,7 +1037,7 @@
           "range": {
             "byteLength": 121,
             "byteStart": 19770,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L477-L479",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L477-L479",
             "lineEnd": 479,
             "lineStart": 477,
             "snippetSha256": "sha256:d107947c4f4acf4e165397091f97b627f003159a32baa767e3c88739b5ef9796",
@@ -1070,7 +1070,7 @@
           "range": {
             "byteLength": 594,
             "byteStart": 19897,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L481-L492",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L481-L492",
             "lineEnd": 492,
             "lineStart": 481,
             "snippetSha256": "sha256:5563bc0e78c33a9a94dfa1a1351ff94eaeba38a0a32cdb7a76f59cfbb0b3060e",
@@ -1103,7 +1103,7 @@
           "range": {
             "byteLength": 122,
             "byteStart": 20497,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L494-L496",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L494-L496",
             "lineEnd": 496,
             "lineStart": 494,
             "snippetSha256": "sha256:d0f91a5aa8fc51094c182ff5d193a75d02461ce38e772d2be48a7306587d0874",
@@ -1141,7 +1141,7 @@
           "range": {
             "byteLength": 688,
             "byteStart": 20625,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L498-L515",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L498-L515",
             "lineEnd": 515,
             "lineStart": 498,
             "snippetSha256": "sha256:b37c977f4a09b59fdb33e3748bfb89fe0d2cf62efd83ea54adc6d8c1e6359351",
@@ -1174,7 +1174,7 @@
           "range": {
             "byteLength": 412,
             "byteStart": 21319,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L517-L528",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L517-L528",
             "lineEnd": 528,
             "lineStart": 517,
             "snippetSha256": "sha256:284a6ec3336b4625fdde8cf6bf6c9f514ad263e8254b5e630be1ad3b2a9600dd",
@@ -1201,7 +1201,7 @@
           "range": {
             "byteLength": 748,
             "byteStart": 21737,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L530-L542",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L530-L542",
             "lineEnd": 542,
             "lineStart": 530,
             "snippetSha256": "sha256:9ddbaa36c63e56e95dd2810c02c5e1a17db619f67d8dea631495eb7287c10d8a",
@@ -1228,7 +1228,7 @@
           "range": {
             "byteLength": 544,
             "byteStart": 22491,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L544-L550",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L544-L550",
             "lineEnd": 550,
             "lineStart": 544,
             "snippetSha256": "sha256:e33773110d8ba0d087384c0a7c00937ae163d94a20d1d2659a77f7f2ddf33cd9",
@@ -1255,7 +1255,7 @@
           "range": {
             "byteLength": 1233,
             "byteStart": 23041,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L552-L569",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L552-L569",
             "lineEnd": 569,
             "lineStart": 552,
             "snippetSha256": "sha256:4d3afbe624161d3d2c3ab071d9a7862db336a3123435c08b8b45b69b56ea9283",
@@ -1282,7 +1282,7 @@
           "range": {
             "byteLength": 1413,
             "byteStart": 24280,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L571-L594",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L571-L594",
             "lineEnd": 594,
             "lineStart": 571,
             "snippetSha256": "sha256:98b350000e755a93515e1028317e58a00ab42cb16c0f85aee8c58c417baf9c41",
@@ -1309,7 +1309,7 @@
           "range": {
             "byteLength": 1364,
             "byteStart": 25699,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L596-L615",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L596-L615",
             "lineEnd": 615,
             "lineStart": 596,
             "snippetSha256": "sha256:0221efb5e92ee9507190682656245557b41885465cbcdbfb97a6c91c857990e4",
@@ -1336,7 +1336,7 @@
           "range": {
             "byteLength": 424,
             "byteStart": 27069,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L617-L623",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L617-L623",
             "lineEnd": 623,
             "lineStart": 617,
             "snippetSha256": "sha256:f71386cf3a2490a933fb4b3e713369362682c5b5d4dba33a1a66bd74a6400ee9",
@@ -1380,7 +1380,7 @@
           "range": {
             "byteLength": 177,
             "byteStart": 27499,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L625-L630",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L625-L630",
             "lineEnd": 630,
             "lineStart": 625,
             "snippetSha256": "sha256:c477f19486ddfa3afce889d21034cbf08b05ae95db44950c41e6aa0fce12c002",
@@ -1424,7 +1424,7 @@
           "range": {
             "byteLength": 194,
             "byteStart": 27682,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L632-L637",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L632-L637",
             "lineEnd": 637,
             "lineStart": 632,
             "snippetSha256": "sha256:efeab4853068cee68bac1b2304789bf1e9d2ed4318d596396cde2ab88cf0adb5",
@@ -1463,7 +1463,7 @@
           "range": {
             "byteLength": 127,
             "byteStart": 27882,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L639-L641",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L639-L641",
             "lineEnd": 641,
             "lineStart": 639,
             "snippetSha256": "sha256:5a4a65f0d65ec03d7f89143a20acf05f7879ba2f2e737251c9c618e5ead3bc38",
@@ -1502,7 +1502,7 @@
           "range": {
             "byteLength": 255,
             "byteStart": 28015,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L643-L647",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L643-L647",
             "lineEnd": 647,
             "lineStart": 643,
             "snippetSha256": "sha256:fd32627a805cf024da013a660d949260f2f4aaf8b35579d2f494d3513381b2c4",
@@ -1541,7 +1541,7 @@
           "range": {
             "byteLength": 318,
             "byteStart": 28276,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L649-L655",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L649-L655",
             "lineEnd": 655,
             "lineStart": 649,
             "snippetSha256": "sha256:9c9d94fbf80883a6e6eb9d19c5c690dee34c05621f9e2f531c3fde7e671c2a64",
@@ -1580,7 +1580,7 @@
           "range": {
             "byteLength": 124,
             "byteStart": 28600,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L657-L659",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L657-L659",
             "lineEnd": 659,
             "lineStart": 657,
             "snippetSha256": "sha256:6bf1c8a8122d1ed427ea2693bec3f272c9d68487b86ef6af3f1c76d8a9b73236",
@@ -1619,7 +1619,7 @@
           "range": {
             "byteLength": 130,
             "byteStart": 28730,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L661-L663",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L661-L663",
             "lineEnd": 663,
             "lineStart": 661,
             "snippetSha256": "sha256:955a8266f0ddd184e81cb9a3df23779e958aac9a60d12c90437990aa3cd1750d",
@@ -1658,7 +1658,7 @@
           "range": {
             "byteLength": 127,
             "byteStart": 28866,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L665-L667",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L665-L667",
             "lineEnd": 667,
             "lineStart": 665,
             "snippetSha256": "sha256:3db450bc3474a130ceafd124fc432673b5cce662d2198146397946ba3d92149f",
@@ -1697,7 +1697,7 @@
           "range": {
             "byteLength": 284,
             "byteStart": 28999,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L669-L678",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L669-L678",
             "lineEnd": 678,
             "lineStart": 669,
             "snippetSha256": "sha256:404ff7f8c59d34936a798289643f9529a0490068574c79418a5660b02656b311",
@@ -1736,7 +1736,7 @@
           "range": {
             "byteLength": 496,
             "byteStart": 29289,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L680-L698",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L680-L698",
             "lineEnd": 698,
             "lineStart": 680,
             "snippetSha256": "sha256:2e56cd5f474357d974245f63a104d368dd736bf0af09ff9937d93440e1d3b3c0",
@@ -1774,7 +1774,7 @@
           "range": {
             "byteLength": 391,
             "byteStart": 29791,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L700-L708",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L700-L708",
             "lineEnd": 708,
             "lineStart": 700,
             "snippetSha256": "sha256:0713e998c9fc4d0b50a695c2f58ed11887b72c93b8bb5321f4ac61db3d9a9f66",
@@ -1819,7 +1819,7 @@
           "range": {
             "byteLength": 423,
             "byteStart": 30188,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L710-L721",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L710-L721",
             "lineEnd": 721,
             "lineStart": 710,
             "snippetSha256": "sha256:dd6e5cccf3577bd14674840a28b0ae9ad7c4c8018fc59e7593548929f47eccfc",
@@ -1859,7 +1859,7 @@
           "range": {
             "byteLength": 229,
             "byteStart": 30617,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L723-L731",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L723-L731",
             "lineEnd": 731,
             "lineStart": 723,
             "snippetSha256": "sha256:eeed5993ac9d928155ff869422c450e49720d47d080815c97407ffa355eaaf51",
@@ -1883,7 +1883,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 3436,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L88",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L88",
             "lineEnd": 88,
             "lineStart": 88,
             "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
@@ -1895,7 +1895,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3470,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L88",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L88",
             "lineEnd": 88,
             "lineStart": 88,
             "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
@@ -1913,7 +1913,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 3491,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L89",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L89",
             "lineEnd": 89,
             "lineStart": 89,
             "snippetSha256": "sha256:72d05ef7c2866537171a202739f7ff5641ea041b73ddd7216189274c816fc3c4",
@@ -1925,7 +1925,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3532,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L89",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L89",
             "lineEnd": 89,
             "lineStart": 89,
             "snippetSha256": "sha256:1f2cb79664fd0b23766110866cbec46d6c3d130aaca46fc832555d827332103b",
@@ -1943,7 +1943,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 3553,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L90",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L90",
             "lineEnd": 90,
             "lineStart": 90,
             "snippetSha256": "sha256:fa049fbc12afb889795fcac88edcdabccee25d33e8dfc645a77f45394b8d1f6a",
@@ -1955,7 +1955,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3590,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L90",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L90",
             "lineEnd": 90,
             "lineStart": 90,
             "snippetSha256": "sha256:8c262acd027cd04362ad0bf925e100df0730a67a3bc00162d96b74c991167c42",
@@ -1973,7 +1973,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 3611,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L91",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L91",
             "lineEnd": 91,
             "lineStart": 91,
             "snippetSha256": "sha256:77c22c628830e9fb9bc0fa9cf8985e149cb3a6f780b38a5a02c6a97c3232a6ab",
@@ -1985,7 +1985,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3645,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L91",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L91",
             "lineEnd": 91,
             "lineStart": 91,
             "snippetSha256": "sha256:a41fc240d38b7cdcdce6a559175b4b6958a7128a899e99f41eca3bed02bf0f77",
@@ -2003,7 +2003,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 3666,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L92",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L92",
             "lineEnd": 92,
             "lineStart": 92,
             "snippetSha256": "sha256:ccf687fa72e0ef43e7c7139223177f91bd4fec1b0049948e3f79910488adacde",
@@ -2015,7 +2015,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3707,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L92",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L92",
             "lineEnd": 92,
             "lineStart": 92,
             "snippetSha256": "sha256:a9dac33b00de468df5e9b3ff103d11732592c79ac7f237c6e12b8bbd34148312",
@@ -2033,7 +2033,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 3728,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L93",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L93",
             "lineEnd": 93,
             "lineStart": 93,
             "snippetSha256": "sha256:59c94ef63869340204dc0acf1975fc2be140376a303f3c38f76f41ccd7c23076",
@@ -2045,7 +2045,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3768,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L93",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L93",
             "lineEnd": 93,
             "lineStart": 93,
             "snippetSha256": "sha256:07d94250e37a5d2ba7ad11906ccb75be32b87f6edb26a22bbe16e75ea92d1426",
@@ -2063,7 +2063,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 3789,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L94",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L94",
             "lineEnd": 94,
             "lineStart": 94,
             "snippetSha256": "sha256:0dd07d76442996b292c3b32c576e731808b592542a9b7994c3666f80fe5873f7",
@@ -2075,7 +2075,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3830,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L94",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L94",
             "lineEnd": 94,
             "lineStart": 94,
             "snippetSha256": "sha256:f6839ebb30e69c7ef583dd8662a60330885ec1f0d7fc8998e9988512504338d5",
@@ -2093,7 +2093,7 @@
           "range": {
             "byteLength": 50,
             "byteStart": 3851,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L95",
             "lineEnd": 95,
             "lineStart": 95,
             "snippetSha256": "sha256:3190189e026b8a3f9ecf85c2e2b869ec1feed709ace905ff9896d22802900e97",
@@ -2105,7 +2105,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3886,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L95",
             "lineEnd": 95,
             "lineStart": 95,
             "snippetSha256": "sha256:410a0ba944aa1eb7e5fd3043721656e53b589d86c442604655354ee5daad37f7",
@@ -2123,7 +2123,7 @@
           "range": {
             "byteLength": 57,
             "byteStart": 3907,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L96",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L96",
             "lineEnd": 96,
             "lineStart": 96,
             "snippetSha256": "sha256:85321d8a158d19b76df1764f2744cd2df9a41dcfd00403efab6bf7f8b2a08ecf",
@@ -2135,7 +2135,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 3949,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L96",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L96",
             "lineEnd": 96,
             "lineStart": 96,
             "snippetSha256": "sha256:b7ed836d753a8266ca584c9b198b68d7fc15b4b9db5ef795f4dd2455e9592169",
@@ -2153,7 +2153,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 3970,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L97",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L97",
             "lineEnd": 97,
             "lineStart": 97,
             "snippetSha256": "sha256:e2c6e18061ffe8547600ad28938b9f0099ba78c8f80ee196d7a01d7c815ea7d8",
@@ -2165,7 +2165,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 4016,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L97",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L97",
             "lineEnd": 97,
             "lineStart": 97,
             "snippetSha256": "sha256:12d218e83b9af2282f8892ca77b57de977a6ee278f59dcdac53ca68481e24aa2",
@@ -2183,7 +2183,7 @@
           "range": {
             "byteLength": 47,
             "byteStart": 4037,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L98",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L98",
             "lineEnd": 98,
             "lineStart": 98,
             "snippetSha256": "sha256:5fd6b0bf9036f2af39d8b7cce93e91e1495aab2f97f207da68e56445c2616f4f",
@@ -2195,7 +2195,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 4083,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L98",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L98",
             "lineEnd": 98,
             "lineStart": 98,
             "snippetSha256": "sha256:2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3",
@@ -2213,7 +2213,7 @@
           "range": {
             "byteLength": 41,
             "byteStart": 4090,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L99",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L99",
             "lineEnd": 99,
             "lineStart": 99,
             "snippetSha256": "sha256:daaf037eccab1a2bdfdaaf6e8ea89179f0505717541b1bd7355bdb601edc7c3a",
@@ -2225,7 +2225,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 4130,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L99",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L99",
             "lineEnd": 99,
             "lineStart": 99,
             "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
@@ -2243,7 +2243,7 @@
           "range": {
             "byteLength": 47,
             "byteStart": 4137,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L100",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L100",
             "lineEnd": 100,
             "lineStart": 100,
             "snippetSha256": "sha256:fc83fadf7917f4cc821d682ceec9e8272c3b8d6a3e113d3a7436181161fc871d",
@@ -2255,7 +2255,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 4183,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L100",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L100",
             "lineEnd": 100,
             "lineStart": 100,
             "snippetSha256": "sha256:2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3",
@@ -2273,7 +2273,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 4190,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L101",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L101",
             "lineEnd": 101,
             "lineStart": 101,
             "snippetSha256": "sha256:573f8557f8c36559ffeaecc31e4bd823cad26b76dffa0228489d11172879b21b",
@@ -2285,7 +2285,7 @@
           "valueRange": {
             "byteLength": 7,
             "byteStart": 4229,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L101",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L101",
             "lineEnd": 101,
             "lineStart": 101,
             "snippetSha256": "sha256:969c0411692bd624f54c93aad0da4aa596a6c754348d153d9c772b429c35c91e",
@@ -2303,7 +2303,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 4560,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L115",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L115",
             "lineEnd": 115,
             "lineStart": 115,
             "snippetSha256": "sha256:1fbd864525c1caa18890f5ea4381ead0726f966d82cf1fc738a9796f9c6b623d",
@@ -2325,7 +2325,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 4597,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L116",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L116",
             "lineEnd": 116,
             "lineStart": 116,
             "snippetSha256": "sha256:29ddcf0759bd08b9415e6cc5c3c366a20b423f8554251e795a7cd04643c88af8",
@@ -2347,7 +2347,7 @@
           "range": {
             "byteLength": 39,
             "byteStart": 4634,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L117",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L117",
             "lineEnd": 117,
             "lineStart": 117,
             "snippetSha256": "sha256:30f4815812acef98574ab1c0bb58a89797ee1bf164cb78969bfbcd842984ff05",
@@ -2369,7 +2369,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 4679,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L118",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L118",
             "lineEnd": 118,
             "lineStart": 118,
             "snippetSha256": "sha256:59f6712d663456df8e8033a0ee25b8e044724a9a6690d8655a1aaa2695126f55",
@@ -2391,7 +2391,7 @@
           "range": {
             "byteLength": 39,
             "byteStart": 4719,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L119",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L119",
             "lineEnd": 119,
             "lineStart": 119,
             "snippetSha256": "sha256:a8ebcde68abd9d403d5b2f991483440b998d70db776d50ed9343835c7505dbec",
@@ -2413,7 +2413,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 4764,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L120",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L120",
             "lineEnd": 120,
             "lineStart": 120,
             "snippetSha256": "sha256:d3f580e712164164947ede6e7de1ebb94329d4161d53f9bd1e6bedb8f408927a",
@@ -2435,7 +2435,7 @@
           "range": {
             "byteLength": 25,
             "byteStart": 4825,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L122",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L122",
             "lineEnd": 122,
             "lineStart": 122,
             "snippetSha256": "sha256:55a80205c363e6f7082d212566b202b1ab61af20a81a8c0a97f59420484003b8",
@@ -2447,7 +2447,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 4849,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L122",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L122",
             "lineEnd": 122,
             "lineStart": 122,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -2465,7 +2465,7 @@
           "range": {
             "byteLength": 27,
             "byteStart": 4856,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L123",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L123",
             "lineEnd": 123,
             "lineStart": 123,
             "snippetSha256": "sha256:996aa1c244c336e43f214c454371a172177c7fb58e6254ad410ceff8d5084546",
@@ -2487,7 +2487,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 4889,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L124",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L124",
             "lineEnd": 124,
             "lineStart": 124,
             "snippetSha256": "sha256:7266994e32e391a947fd68de29256a8289ac0054cd03f7bb0fcb5f15463c95db",
@@ -2509,7 +2509,7 @@
           "range": {
             "byteLength": 29,
             "byteStart": 4925,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L125",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L125",
             "lineEnd": 125,
             "lineStart": 125,
             "snippetSha256": "sha256:a8c4fe3aa29687a999bff212e6d7a34af8396003fa66d37cb208890c91992245",
@@ -2531,7 +2531,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 4960,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L126",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L126",
             "lineEnd": 126,
             "lineStart": 126,
             "snippetSha256": "sha256:b0c42b0937644b09ba96d2525409fa59f550ee19fcc4c5e44677fedaf81c1c1b",
@@ -2553,7 +2553,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 5000,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L127",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L127",
             "lineEnd": 127,
             "lineStart": 127,
             "snippetSha256": "sha256:873d17da81072089caa39ad21527d72ea831b3491dd84739b20d4c78ba7e45de",
@@ -2575,7 +2575,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 5051,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L128",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L128",
             "lineEnd": 128,
             "lineStart": 128,
             "snippetSha256": "sha256:6c59b8a96f163f2835813e20a531d44992601c6441d716525c7128f4450d4db8",
@@ -2597,7 +2597,7 @@
           "range": {
             "byteLength": 57,
             "byteStart": 5116,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L129",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L129",
             "lineEnd": 129,
             "lineStart": 129,
             "snippetSha256": "sha256:e9a568f7b991fd617c600abc741fad72aef4126dbd719dfe0d25a1b4d3ed2058",
@@ -2621,7 +2621,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 4291,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L104",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L104",
                 "lineEnd": 104,
                 "lineStart": 104,
                 "snippetSha256": "sha256:a20fd9584ef3d84f52012798896bb4f1d8d595fb573d96c061ff363337dc77f0",
@@ -2637,7 +2637,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 4321,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L105",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L105",
                 "lineEnd": 105,
                 "lineStart": 105,
                 "snippetSha256": "sha256:f3b49d5f863cf06dfec0e7e19359ef907605b2bb803de12ec125493d972e0cdb",
@@ -2653,7 +2653,7 @@
               "range": {
                 "byteLength": 21,
                 "byteStart": 4353,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L106",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L106",
                 "lineEnd": 106,
                 "lineStart": 106,
                 "snippetSha256": "sha256:a37f159cc50e2a2c0ced0d45ba31a7b1e43851c6862a9fc7e409dea50911d8a8",
@@ -2669,7 +2669,7 @@
               "range": {
                 "byteLength": 19,
                 "byteStart": 4384,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L107",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L107",
                 "lineEnd": 107,
                 "lineStart": 107,
                 "snippetSha256": "sha256:ecbce430dcb8940ca4a99420ba4fe8c616afb023af9acb5b4630a08a7aa1687e",
@@ -2685,7 +2685,7 @@
               "range": {
                 "byteLength": 21,
                 "byteStart": 4413,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L108",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L108",
                 "lineEnd": 108,
                 "lineStart": 108,
                 "snippetSha256": "sha256:c242cf7982524ded450a63f79874dd41c8455f5e5974a1322608d2189505dd60",
@@ -2701,7 +2701,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 4444,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L109",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L109",
                 "lineEnd": 109,
                 "lineStart": 109,
                 "snippetSha256": "sha256:80fda229376893831b64e2a7884967f2d09974edf6c669bf080ebf028c92c09b",
@@ -2717,7 +2717,7 @@
               "range": {
                 "byteLength": 21,
                 "byteStart": 4474,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L110",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L110",
                 "lineEnd": 110,
                 "lineStart": 110,
                 "snippetSha256": "sha256:5498ac49779d2ee88f15ffadb5ea19d0bb86ec85bc2e0be4d3a574bcb7b0f0ce",
@@ -2733,7 +2733,7 @@
               "range": {
                 "byteLength": 17,
                 "byteStart": 4505,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L111",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L111",
                 "lineEnd": 111,
                 "lineStart": 111,
                 "snippetSha256": "sha256:555146ae7deba284debcb5a2582367764509b11a57d1dba32541ae89740a1760",
@@ -2749,7 +2749,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 4532,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L112",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L112",
                 "lineEnd": 112,
                 "lineStart": 112,
                 "snippetSha256": "sha256:05b79612708198460920e1a79099cff33f47d24fd37cdcf16c6f11270f48c64f",
@@ -2764,7 +2764,7 @@
           "range": {
             "byteLength": 311,
             "byteStart": 4243,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L103-L113",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L103-L113",
             "lineEnd": 113,
             "lineStart": 103,
             "snippetSha256": "sha256:0276478404889e3618d6b9b40742bae17c5e28b6b0fa8e6c77293d2f6554a4e4",
@@ -2809,7 +2809,7 @@
     "range": {
       "byteLength": 27524,
       "byteStart": 3324,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPaymentsInvariant.t.sol#L85-L732",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPaymentsInvariant.t.sol#L85-L732",
       "lineEnd": 732,
       "lineStart": 85,
       "snippetSha256": "sha256:d137cbff652a43d86c02084327ba4aecfa9745d33080bbf6ec5c408bb907533c",

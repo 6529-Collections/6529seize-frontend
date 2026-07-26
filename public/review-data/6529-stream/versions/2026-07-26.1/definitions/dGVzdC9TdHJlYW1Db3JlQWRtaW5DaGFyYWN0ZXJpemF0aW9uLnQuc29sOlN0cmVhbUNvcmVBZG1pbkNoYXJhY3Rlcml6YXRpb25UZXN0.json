@@ -40,7 +40,7 @@
           "range": {
             "byteLength": 2191,
             "byteStart": 396,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamCoreAdminCharacterization.t.sol#L13-L73",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCoreAdminCharacterization.t.sol#L13-L73",
             "lineEnd": 73,
             "lineStart": 13,
             "snippetSha256": "sha256:bddf461bb00d891ed8747374ba704c303c548c9dda1c0f3fa5937ef4da45f9d8",
@@ -87,7 +87,7 @@
     "range": {
       "byteLength": 2304,
       "byteStart": 285,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamCoreAdminCharacterization.t.sol#L10-L74",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCoreAdminCharacterization.t.sol#L10-L74",
       "lineEnd": 74,
       "lineStart": 10,
       "snippetSha256": "sha256:89c0f87a66264aecc3569156dea1f0fb9c779c9e915e55ac6a3da5eac0b0c2c5",

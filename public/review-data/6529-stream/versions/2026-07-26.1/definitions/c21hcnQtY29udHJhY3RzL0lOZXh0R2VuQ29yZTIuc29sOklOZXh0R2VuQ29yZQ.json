@@ -65,7 +65,7 @@
           "range": {
             "byteLength": 75,
             "byteStart": 88,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/INextGenCore2.sol#L6",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/INextGenCore2.sol#L6",
             "lineEnd": 6,
             "lineStart": 6,
             "snippetSha256": "sha256:b00fcb9a6b605cc51bd4d6610f0528757a1a17d8e4c369ca88b06421b451471e",
@@ -106,7 +106,7 @@
     "range": {
       "byteLength": 106,
       "byteStart": 59,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/INextGenCore2.sol#L5-L7",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/INextGenCore2.sol#L5-L7",
       "lineEnd": 7,
       "lineStart": 5,
       "snippetSha256": "sha256:c2e77a78aab987e00a2b9ebead1f5734b4aae4ad9f2973e52623b881ebbfa76c",

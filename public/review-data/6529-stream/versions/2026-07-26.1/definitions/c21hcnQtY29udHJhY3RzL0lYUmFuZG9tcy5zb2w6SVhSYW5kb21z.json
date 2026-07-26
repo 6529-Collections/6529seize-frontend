@@ -71,7 +71,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 85,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IXRandoms.sol#L6",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IXRandoms.sol#L6",
             "lineEnd": 6,
             "lineStart": 6,
             "snippetSha256": "sha256:4e05d5e153f48021064c51bd70641e1e82b175e10249368f5c14c0bff319a5f5",
@@ -105,7 +105,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 147,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IXRandoms.sol#L8",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IXRandoms.sol#L8",
             "lineEnd": 8,
             "lineStart": 8,
             "snippetSha256": "sha256:4fef49ee824e0aac9662c0def881e47bdb096fc09c200f9240a3361eac0fe4c7",
@@ -146,7 +146,7 @@
     "range": {
       "byteLength": 150,
       "byteStart": 59,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IXRandoms.sol#L5-L9",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IXRandoms.sol#L5-L9",
       "lineEnd": 9,
       "lineStart": 5,
       "snippetSha256": "sha256:12d11dfad3d40cd28a744e89483195cb6a9f914a0db5ab82fc8e29b8ae04955b",

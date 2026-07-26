@@ -83,7 +83,7 @@
           "range": {
             "byteLength": 71,
             "byteStart": 2786,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L86-L88",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L86-L88",
             "lineEnd": 88,
             "lineStart": 86,
             "snippetSha256": "sha256:63e08d0d371d1c81b34e5ba4cdd5274d2ed310ad9fbfa59b6ec4b8b3abc0038b",
@@ -141,7 +141,7 @@
           "range": {
             "byteLength": 368,
             "byteStart": 2863,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L90-L102",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L90-L102",
             "lineEnd": 102,
             "lineStart": 90,
             "snippetSha256": "sha256:a66e7a73b535ef5cd672bde2e16ddfc61b67a392f0036a6479fa67ac6e477cec",
@@ -165,7 +165,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 2744,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L84",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L84",
             "lineEnd": 84,
             "lineStart": 84,
             "snippetSha256": "sha256:6e4ffeb8ea277dca2b342d6aeddc8db351a21902df293faf97b59d952bf29449",
@@ -205,7 +205,7 @@
     "range": {
       "byteLength": 549,
       "byteStart": 2684,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamModuleRegistry.t.sol#L83-L103",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L83-L103",
       "lineEnd": 103,
       "lineStart": 83,
       "snippetSha256": "sha256:00fc685d8bf8e93044b7f72fce346268158a1749db7366e947641eebbf38701a",

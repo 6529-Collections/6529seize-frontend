@@ -1462,7 +1462,7 @@
           "range": {
             "byteLength": 41,
             "byteStart": 938,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:33bbd96372e00045fc601885d5969bb85b61c470d41cbb3a180bdaab7acddcfd",
@@ -1495,7 +1495,7 @@
           "range": {
             "byteLength": 342,
             "byteStart": 2738,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L52-L60",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L52-L60",
             "lineEnd": 60,
             "lineStart": 52,
             "snippetSha256": "sha256:40cc772c7c3e745a2426d55fdd2e38f8c293b76af072d4bd2d70f5f18f21992f",
@@ -1528,7 +1528,7 @@
           "range": {
             "byteLength": 126,
             "byteStart": 3086,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L62-L64",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L62-L64",
             "lineEnd": 64,
             "lineStart": 62,
             "snippetSha256": "sha256:ac1355cde14413d6792efff663e573e1c7e7cad51a00399898b8c1e28ec5a162",
@@ -1555,7 +1555,7 @@
           "range": {
             "byteLength": 119,
             "byteStart": 3218,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L66-L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L66-L68",
             "lineEnd": 68,
             "lineStart": 66,
             "snippetSha256": "sha256:1373f8f7e254aed307a4cea77cce0ddba959bdb7e93aff8a4216252c65238dcd",
@@ -1594,7 +1594,7 @@
           "range": {
             "byteLength": 190,
             "byteStart": 3383,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L71-L73",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L71-L73",
             "lineEnd": 73,
             "lineStart": 71,
             "snippetSha256": "sha256:c8f2d7c1c845288007a10f6b73558b1803bbbf33b456831557ddd5f2afb086d9",
@@ -1632,7 +1632,7 @@
           "range": {
             "byteLength": 255,
             "byteStart": 3619,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L76-L80",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L76-L80",
             "lineEnd": 80,
             "lineStart": 76,
             "snippetSha256": "sha256:6696cb494c949f9c957e2da43568f720f32f0a05f51feec3d156f0fb6fcf9474",
@@ -1670,7 +1670,7 @@
           "range": {
             "byteLength": 257,
             "byteStart": 3920,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L83-L87",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L83-L87",
             "lineEnd": 87,
             "lineStart": 83,
             "snippetSha256": "sha256:7ad39d733e15d333b5656dc8f7ea2a36cdf44340343a66cb7c1a8e53f0e9dcd2",
@@ -1713,7 +1713,7 @@
           "range": {
             "byteLength": 406,
             "byteStart": 4223,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L90-L102",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L90-L102",
             "lineEnd": 102,
             "lineStart": 90,
             "snippetSha256": "sha256:aa7d0761154ce8798021dbaad644ac206270f872551480eeaecdec6f8c1ed3cf",
@@ -1756,7 +1756,7 @@
           "range": {
             "byteLength": 408,
             "byteStart": 4675,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L105-L117",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L105-L117",
             "lineEnd": 117,
             "lineStart": 105,
             "snippetSha256": "sha256:205850bea7b702e1605b14025a06f1ce6f6999a43787aa44ce834ad4f4772335",
@@ -1804,7 +1804,7 @@
           "range": {
             "byteLength": 2081,
             "byteStart": 5089,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L119-L160",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L119-L160",
             "lineEnd": 160,
             "lineStart": 119,
             "snippetSha256": "sha256:b4615c48902a2b43d88bf13883a7c541a8a0f8da3540074d91ffdaa4c3f7b4b3",
@@ -1852,7 +1852,7 @@
           "range": {
             "byteLength": 1390,
             "byteStart": 7176,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L162-L194",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L162-L194",
             "lineEnd": 194,
             "lineStart": 162,
             "snippetSha256": "sha256:7dc7eba456fb95df2f46c4b0f2d00486f0e1a3f19227c5e3f16724f9be08a779",
@@ -1892,7 +1892,7 @@
           "range": {
             "byteLength": 977,
             "byteStart": 8612,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L197-L219",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L197-L219",
             "lineEnd": 219,
             "lineStart": 197,
             "snippetSha256": "sha256:16e7bf9559bab49fbd7fb75a9dea2ca61179aef40cacdc4fb517c1c576cebad2",
@@ -1936,7 +1936,7 @@
           "range": {
             "byteLength": 144,
             "byteStart": 9635,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L222-L224",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L222-L224",
             "lineEnd": 224,
             "lineStart": 222,
             "snippetSha256": "sha256:29de96dcb02021c89111ff6632b398218443e72e29e79d401a4007fa4751648d",
@@ -1975,7 +1975,7 @@
           "range": {
             "byteLength": 159,
             "byteStart": 9825,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L227-L229",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L227-L229",
             "lineEnd": 229,
             "lineStart": 227,
             "snippetSha256": "sha256:ce377faebe908bef88a83a3f9723007b500c6a8846af5577d806ccdc22184746",
@@ -2014,7 +2014,7 @@
           "range": {
             "byteLength": 198,
             "byteStart": 10030,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L232-L239",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L232-L239",
             "lineEnd": 239,
             "lineStart": 232,
             "snippetSha256": "sha256:29e2becb1e4b6a5e94b67504839bd04a174e778214c8d490b78c37e688b7966b",
@@ -2053,7 +2053,7 @@
           "range": {
             "byteLength": 127,
             "byteStart": 10274,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L242-L244",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L242-L244",
             "lineEnd": 244,
             "lineStart": 242,
             "snippetSha256": "sha256:b06fd35429ee5d6329b90d8412788f711c20df251ed45d837219ad7906318a4d",
@@ -2097,7 +2097,7 @@
           "range": {
             "byteLength": 259,
             "byteStart": 10447,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L247-L252",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L247-L252",
             "lineEnd": 252,
             "lineStart": 247,
             "snippetSha256": "sha256:45ff61498856f7238ff3231426348a293fb104556471cd451ee183f8fabef60c",
@@ -2141,7 +2141,7 @@
           "range": {
             "byteLength": 224,
             "byteStart": 10752,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L255-L262",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L255-L262",
             "lineEnd": 262,
             "lineStart": 255,
             "snippetSha256": "sha256:b92464e8626aa9c32e928018e4b67f1baa5d58fc49fecd983cdaeb5eb1001cbd",
@@ -2195,7 +2195,7 @@
           "range": {
             "byteLength": 406,
             "byteStart": 11022,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L265-L275",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L265-L275",
             "lineEnd": 275,
             "lineStart": 265,
             "snippetSha256": "sha256:28306d33a5e15fa43df1b7de623d7a4e3919a9b79c2e6ab25e3ba6c9a8b43103",
@@ -2233,7 +2233,7 @@
           "range": {
             "byteLength": 218,
             "byteStart": 11474,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L278-L285",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L278-L285",
             "lineEnd": 285,
             "lineStart": 278,
             "snippetSha256": "sha256:f8ca6df63e2da31ffdbe3aa17aff7ebfcb03f01db52b704cef024cef0291d614",
@@ -2272,7 +2272,7 @@
           "range": {
             "byteLength": 346,
             "byteStart": 11738,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L288-L297",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L288-L297",
             "lineEnd": 297,
             "lineStart": 288,
             "snippetSha256": "sha256:1430e7854d39e98bbd9c1eeac5889a81861f2b97bdf3a47ecfe93d4c5fd5779e",
@@ -2305,7 +2305,7 @@
           "range": {
             "byteLength": 144,
             "byteStart": 12130,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L300-L302",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L300-L302",
             "lineEnd": 302,
             "lineStart": 300,
             "snippetSha256": "sha256:a90110e9dbd86f265edd0d26ce55b833189e05258a1d46b21536f293174a6f4a",
@@ -2344,7 +2344,7 @@
           "range": {
             "byteLength": 240,
             "byteStart": 12320,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L305-L311",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L305-L311",
             "lineEnd": 311,
             "lineStart": 305,
             "snippetSha256": "sha256:29623398b423b84cab0fe13912ca9dbec53eed55efee5b58427891cd8cc6523f",
@@ -2383,7 +2383,7 @@
           "range": {
             "byteLength": 123,
             "byteStart": 12606,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L314-L316",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L314-L316",
             "lineEnd": 316,
             "lineStart": 314,
             "snippetSha256": "sha256:fe9d9ef7ce60383fe128bacc117938870374ecb09b88e0cf8d39971e1cdbbc23",
@@ -2427,7 +2427,7 @@
           "range": {
             "byteLength": 455,
             "byteStart": 12775,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L319-L332",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L319-L332",
             "lineEnd": 332,
             "lineStart": 319,
             "snippetSha256": "sha256:2875f2dc3cd203408c2336ee7b7d397482234510af5b94675149658a5276972c",
@@ -2466,7 +2466,7 @@
           "range": {
             "byteLength": 238,
             "byteStart": 13276,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L335-L338",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L335-L338",
             "lineEnd": 338,
             "lineStart": 335,
             "snippetSha256": "sha256:47c60318b2065dd649dda19cac35f71b0a93b54d49351ea41082f2b894783308",
@@ -2505,7 +2505,7 @@
           "range": {
             "byteLength": 124,
             "byteStart": 13560,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L341-L343",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L341-L343",
             "lineEnd": 343,
             "lineStart": 341,
             "snippetSha256": "sha256:745778ff875cfe9ea5bc36d8f380e70a623c712b98ada7c474d05fa0498711fb",
@@ -2549,7 +2549,7 @@
           "range": {
             "byteLength": 256,
             "byteStart": 13962,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L349-L356",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L349-L356",
             "lineEnd": 356,
             "lineStart": 349,
             "snippetSha256": "sha256:1258d2fe47ef6e1e6cd8dd702b2cf9ffd9f7b4fa1120bd83b981f2b1980e235f",
@@ -2593,7 +2593,7 @@
           "range": {
             "byteLength": 198,
             "byteStart": 14264,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L359-L366",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L359-L366",
             "lineEnd": 366,
             "lineStart": 359,
             "snippetSha256": "sha256:cefeeab58ade1b7a738f5d44f84cd2baf60b29173214387a24a3ad0674029efb",
@@ -2632,7 +2632,7 @@
           "range": {
             "byteLength": 308,
             "byteStart": 14508,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L369-L373",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L369-L373",
             "lineEnd": 373,
             "lineStart": 369,
             "snippetSha256": "sha256:576186a86a401e37544a1b4416b09b034a39994cd1c463ef1d6b105d751e8411",
@@ -2671,7 +2671,7 @@
           "range": {
             "byteLength": 217,
             "byteStart": 14822,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L375-L380",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L375-L380",
             "lineEnd": 380,
             "lineStart": 375,
             "snippetSha256": "sha256:1e059e3465ce317909c58ebaa205557eefb534f46eebdb80b8d1437092f9604f",
@@ -2709,7 +2709,7 @@
           "range": {
             "byteLength": 325,
             "byteStart": 15045,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L382-L390",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L382-L390",
             "lineEnd": 390,
             "lineStart": 382,
             "snippetSha256": "sha256:6abbbfce80b9cae98b69cdd52b9f9a547987fbad25c720aafcc0c4e008b3e4bb",
@@ -2757,7 +2757,7 @@
           "range": {
             "byteLength": 1705,
             "byteStart": 15376,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L392-L446",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L392-L446",
             "lineEnd": 446,
             "lineStart": 392,
             "snippetSha256": "sha256:07e6d11ae3edc574f4d6fbaa78c55ea56ebb9442be373310a78832c8f7b04dec",
@@ -2806,7 +2806,7 @@
           "range": {
             "byteLength": 842,
             "byteStart": 17087,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L448-L472",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L448-L472",
             "lineEnd": 472,
             "lineStart": 448,
             "snippetSha256": "sha256:87578cff7d894585dd99e7c6b68ccac109d543b4014580f42deac9068328e8b9",
@@ -2860,7 +2860,7 @@
           "range": {
             "byteLength": 2315,
             "byteStart": 17935,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L474-L528",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L474-L528",
             "lineEnd": 528,
             "lineStart": 474,
             "snippetSha256": "sha256:b103a5b170285d0c3024bc1dda298825318c03e92354e2614f2e80783df753d6",
@@ -2924,7 +2924,7 @@
           "range": {
             "byteLength": 1916,
             "byteStart": 20256,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L530-L585",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L530-L585",
             "lineEnd": 585,
             "lineStart": 530,
             "snippetSha256": "sha256:08282068ae9b817ba59f190f584c9bf161eb504e1f3838391dae0ed22fd8729e",
@@ -2983,7 +2983,7 @@
           "range": {
             "byteLength": 1123,
             "byteStart": 22635,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L593-L622",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L593-L622",
             "lineEnd": 622,
             "lineStart": 593,
             "snippetSha256": "sha256:6c094b48fd84d4b69daa7340fcc9a16d685c606d783c788a672b16c529c4c7aa",
@@ -3037,7 +3037,7 @@
           "range": {
             "byteLength": 485,
             "byteStart": 23764,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L624-L641",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L624-L641",
             "lineEnd": 641,
             "lineStart": 624,
             "snippetSha256": "sha256:706c501caac3a5ecb660c106243548a1572245686ba6ea0bfdefdf8e5385e85b",
@@ -3101,7 +3101,7 @@
           "range": {
             "byteLength": 619,
             "byteStart": 24255,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L643-L664",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L643-L664",
             "lineEnd": 664,
             "lineStart": 643,
             "snippetSha256": "sha256:47566ee11a36e3aa4004742e2e853e5abd5fa715e4936ed921270f4d5c467139",
@@ -3134,7 +3134,7 @@
           "range": {
             "byteLength": 458,
             "byteStart": 25276,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L671-L678",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L671-L678",
             "lineEnd": 678,
             "lineStart": 671,
             "snippetSha256": "sha256:843e7c16155a6c316d8a9442ea89da99dffe447bbf919dc41b4f94523acc2d02",
@@ -3172,7 +3172,7 @@
           "range": {
             "byteLength": 467,
             "byteStart": 25897,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L682-L689",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L682-L689",
             "lineEnd": 689,
             "lineStart": 682,
             "snippetSha256": "sha256:29b0a9c43f2eb47c9ccff44bf4d6866897c4f15db52b907813aa237935be8081",
@@ -3211,7 +3211,7 @@
           "range": {
             "byteLength": 323,
             "byteStart": 26576,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L694-L702",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L694-L702",
             "lineEnd": 702,
             "lineStart": 694,
             "snippetSha256": "sha256:a3897352ef696c95936dcd86b60032d4d3bd60edf989dbcd01467010f185bb6e",
@@ -3250,7 +3250,7 @@
           "range": {
             "byteLength": 1226,
             "byteStart": 26905,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L704-L728",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L704-L728",
             "lineEnd": 728,
             "lineStart": 704,
             "snippetSha256": "sha256:8ea2f84c8d00935f790d04b04fe856532c9430b03dc544e3cf00ed4f6ef7f876",
@@ -3274,7 +3274,7 @@
           "range": {
             "byteLength": 41,
             "byteStart": 938,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:33bbd96372e00045fc601885d5969bb85b61c470d41cbb3a180bdaab7acddcfd",
@@ -3286,7 +3286,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 978,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -3304,7 +3304,7 @@
           "range": {
             "byteLength": 91,
             "byteStart": 986,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:f1a640bf6260290aaab50c3d0f5013a921a796a5a844c2337ede4695b82d50f1",
@@ -3316,7 +3316,7 @@
           "valueRange": {
             "byteLength": 40,
             "byteStart": 1037,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:3c4b9ad14e72055035c93e04aac68b383860f8a14f62b2d9327705b7cb0de74b",
@@ -3334,7 +3334,7 @@
           "range": {
             "byteLength": 113,
             "byteStart": 1083,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L23-L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L23-L24",
             "lineEnd": 24,
             "lineStart": 23,
             "snippetSha256": "sha256:adaca3b6588ec812ba6219b6162db928a20b8a4e49b09fa7aec24f97c9f0a3ec",
@@ -3346,7 +3346,7 @@
           "valueRange": {
             "byteLength": 47,
             "byteStart": 1149,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:edc353ccfaec5aaa190937fac7a1a7c1f244811e84f102b71efcf48dac902f19",
@@ -3364,7 +3364,7 @@
           "range": {
             "byteLength": 111,
             "byteStart": 1202,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L25-L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L25-L26",
             "lineEnd": 26,
             "lineStart": 25,
             "snippetSha256": "sha256:60ee9e90c7804fe2e25b53c146ca13d7b23bd13718baa0c657baaf2ababf2d1a",
@@ -3376,7 +3376,7 @@
           "valueRange": {
             "byteLength": 46,
             "byteStart": 1267,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:71a90a9061dda938a770ccf3f60f5ae315497cafa04f1dd575e585d87220100d",
@@ -3394,7 +3394,7 @@
           "range": {
             "byteLength": 111,
             "byteStart": 1319,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L27-L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L27-L28",
             "lineEnd": 28,
             "lineStart": 27,
             "snippetSha256": "sha256:b7f695980b4a1223fa6a873f28d76a34536730d0dbba0385c9715f3fcecfb787",
@@ -3406,7 +3406,7 @@
           "valueRange": {
             "byteLength": 46,
             "byteStart": 1384,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L28",
             "lineEnd": 28,
             "lineStart": 28,
             "snippetSha256": "sha256:d92336a8ad8a36709caacdd3127215ccdc67382f0f8c8a6f3a9291bf50e1cb06",
@@ -3424,7 +3424,7 @@
           "range": {
             "byteLength": 111,
             "byteStart": 1436,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L29-L30",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L29-L30",
             "lineEnd": 30,
             "lineStart": 29,
             "snippetSha256": "sha256:f1511f1378552eb7f09d62d7fd39a3e2cd90629a40a585f726b37ef2e5d8bb08",
@@ -3436,7 +3436,7 @@
           "valueRange": {
             "byteLength": 46,
             "byteStart": 1501,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L30",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L30",
             "lineEnd": 30,
             "lineStart": 30,
             "snippetSha256": "sha256:8879a833fda0f1e62c3fdddb6543a02d8578523543c8a58cb30f516a09812a85",
@@ -3454,7 +3454,7 @@
           "range": {
             "byteLength": 123,
             "byteStart": 1553,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L31-L32",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L31-L32",
             "lineEnd": 32,
             "lineStart": 31,
             "snippetSha256": "sha256:4ec884caa56110cf55ee8f45f2be3b4a9d1354c5506736dae4bbf0305f5b4a27",
@@ -3466,7 +3466,7 @@
           "valueRange": {
             "byteLength": 52,
             "byteStart": 1624,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L32",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L32",
             "lineEnd": 32,
             "lineStart": 32,
             "snippetSha256": "sha256:c1db0446143f5c925aa05b50f0219fb15ce11b219751bcd524d5b5af0fad5479",
@@ -3484,7 +3484,7 @@
           "range": {
             "byteLength": 129,
             "byteStart": 1682,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L33-L34",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L33-L34",
             "lineEnd": 34,
             "lineStart": 33,
             "snippetSha256": "sha256:23ae04ca3b08f411e1603ba2de92c2ed2e85884f201aa66d234c2f7882a1b83c",
@@ -3496,7 +3496,7 @@
           "valueRange": {
             "byteLength": 55,
             "byteStart": 1756,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L34",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L34",
             "lineEnd": 34,
             "lineStart": 34,
             "snippetSha256": "sha256:ab7894e2db1ca6013bfd62b935d265e2845036c5ca606d117f7dd109a0026f31",
@@ -3514,7 +3514,7 @@
           "range": {
             "byteLength": 47,
             "byteStart": 1817,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L35",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L35",
             "lineEnd": 35,
             "lineStart": 35,
             "snippetSha256": "sha256:1d1e6b3abda43690fe7b90df5f99aa45b9d4a11408bcdcf8eb4ece7e2d63a283",
@@ -3526,7 +3526,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 1863,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L35",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L35",
             "lineEnd": 35,
             "lineStart": 35,
             "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
@@ -3544,7 +3544,7 @@
           "range": {
             "byteLength": 77,
             "byteStart": 1870,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:61b039cfd8681d9afca11a2fc590cabe4738052166adc5f4728069d6a2f331a0",
@@ -3556,7 +3556,7 @@
           "valueRange": {
             "byteLength": 10,
             "byteStart": 1937,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:5652c596a9d501288c930f138bdec8c8abf43b08beffb7581f936974d4dbea0c",
@@ -3574,7 +3574,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 1953,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L37",
             "lineEnd": 37,
             "lineStart": 37,
             "snippetSha256": "sha256:b915559d8479ccade9684d6f80df22eb1420d1d35d1748b6201576aeb08248bf",
@@ -3586,7 +3586,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 1996,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L37",
             "lineEnd": 37,
             "lineStart": 37,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -3604,7 +3604,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 2004,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L39",
             "lineEnd": 39,
             "lineStart": 39,
             "snippetSha256": "sha256:312adf99277c554b81335be4aeb4551d2630579406449ffd7ae7766704436765",
@@ -3626,7 +3626,7 @@
           "range": {
             "byteLength": 59,
             "byteStart": 2056,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L40",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L40",
             "lineEnd": 40,
             "lineStart": 40,
             "snippetSha256": "sha256:449624859d15e66ab71ec92fee128f594a50b184c6a0bfeae6bad78b037087a5",
@@ -3648,7 +3648,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 2121,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L41",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L41",
             "lineEnd": 41,
             "lineStart": 41,
             "snippetSha256": "sha256:509bbd92403b544b788f65bb210f84504c693f24208a2b61030a2db9768ebd16",
@@ -3670,7 +3670,7 @@
           "range": {
             "byteLength": 50,
             "byteStart": 2188,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L42",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L42",
             "lineEnd": 42,
             "lineStart": 42,
             "snippetSha256": "sha256:b15c643af80706362ed8d5b3387e7cf970384fb56b4886f7a6ef40784991f437",
@@ -3692,7 +3692,7 @@
           "range": {
             "byteLength": 72,
             "byteStart": 2323,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L44",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L44",
             "lineEnd": 44,
             "lineStart": 44,
             "snippetSha256": "sha256:88e5f8a679b9faa846eab8e61e5c964ea81ad21719990f83d842efc5b631b905",
@@ -3714,7 +3714,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 2401,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L45",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L45",
             "lineEnd": 45,
             "lineStart": 45,
             "snippetSha256": "sha256:dab32c312f48d7c0f13d322f642d9685c4f12d5b4af5fc4e93c136c14ac93a0f",
@@ -3736,7 +3736,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 2461,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L46",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L46",
             "lineEnd": 46,
             "lineStart": 46,
             "snippetSha256": "sha256:9ff3693644cf0d431a97980ba6b0fa6872fc3f46939affa90563871dbc9b6fe8",
@@ -3758,7 +3758,7 @@
           "range": {
             "byteLength": 40,
             "byteStart": 2523,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L47",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L47",
             "lineEnd": 47,
             "lineStart": 47,
             "snippetSha256": "sha256:2877d2fd0cdee37f10f5e818a989ef57b53bb76f833e2b539654bd5711c89c5d",
@@ -3780,7 +3780,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 2569,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L48",
             "lineEnd": 48,
             "lineStart": 48,
             "snippetSha256": "sha256:005e59920c5ce5f3598427f799b2a7adfb659e4ac28c748eb7db3f9c2f3e8c23",
@@ -3802,7 +3802,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 2617,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L49",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L49",
             "lineEnd": 49,
             "lineStart": 49,
             "snippetSha256": "sha256:31bfcccf64265ed5d94bd0690f0df97a425a19d36a67ed5fe5eed3932372de2f",
@@ -3824,7 +3824,7 @@
           "range": {
             "byteLength": 64,
             "byteStart": 2667,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L50",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L50",
             "lineEnd": 50,
             "lineStart": 50,
             "snippetSha256": "sha256:67a027f8963abfbdf7098c2900b3cf546c1ac9ca7e631e2c148ceca1ef5141ab",
@@ -3876,7 +3876,7 @@
     "range": {
       "byteLength": 27326,
       "byteStart": 807,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol#L18-L729",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol#L18-L729",
       "lineEnd": 729,
       "lineStart": 18,
       "snippetSha256": "sha256:8837fb2fbb483122c2ee9ce94e0bf52dae87934e74f76bfc4748f14166f5c886",

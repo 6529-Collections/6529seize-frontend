@@ -342,7 +342,7 @@
           "range": {
             "byteLength": 111,
             "byteStart": 447,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L15-L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L15-L17",
             "lineEnd": 17,
             "lineStart": 15,
             "snippetSha256": "sha256:4fe67f2ad35879dbddead9670d1030f10ceac12cc89d36cd8f5bf799c0099152",
@@ -383,7 +383,7 @@
           "range": {
             "byteLength": 115,
             "byteStart": 563,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L18-L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L18-L20",
             "lineEnd": 20,
             "lineStart": 18,
             "snippetSha256": "sha256:d45f3600db80cfcce94407dba647646681ebe6ea1fa2c20bb41c31666d56379a",
@@ -408,7 +408,7 @@
           "range": {
             "byteLength": 1204,
             "byteStart": 1158,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L32-L58",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L32-L58",
             "lineEnd": 58,
             "lineStart": 32,
             "snippetSha256": "sha256:1c5a7e8f60a0abc1b10b23290b2beff8592039dbd40981f041a5a14ddbfc55d2",
@@ -435,7 +435,7 @@
           "range": {
             "byteLength": 1720,
             "byteStart": 2368,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L60-L97",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L60-L97",
             "lineEnd": 97,
             "lineStart": 60,
             "snippetSha256": "sha256:450fa599819d5fddb395900c0c7480826289d816fa4f83b2a564c27d2a04113f",
@@ -462,7 +462,7 @@
           "range": {
             "byteLength": 1304,
             "byteStart": 4094,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L99-L124",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L99-L124",
             "lineEnd": 124,
             "lineStart": 99,
             "snippetSha256": "sha256:93e73d7769f0978fd2f37ea83a27cfd21e8b8f18f5a6ce269ebfb8509e6e229d",
@@ -489,7 +489,7 @@
           "range": {
             "byteLength": 2366,
             "byteStart": 5404,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L126-L178",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L126-L178",
             "lineEnd": 178,
             "lineStart": 126,
             "snippetSha256": "sha256:81215588e088f9523492f636faa0383d294e1240b01b2d299591bb6dd1a06b4b",
@@ -516,7 +516,7 @@
           "range": {
             "byteLength": 1290,
             "byteStart": 7776,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L180-L201",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L180-L201",
             "lineEnd": 201,
             "lineStart": 180,
             "snippetSha256": "sha256:c8a5583ef132cef4b91e22c4abcffeb1555952416feef87c61142f7504154210",
@@ -543,7 +543,7 @@
           "range": {
             "byteLength": 1213,
             "byteStart": 9072,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L203-L224",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L203-L224",
             "lineEnd": 224,
             "lineStart": 203,
             "snippetSha256": "sha256:38698c6781cfa155784ddb656e2cb718e16983faa8de5c46591903ce6fb0ca25",
@@ -570,7 +570,7 @@
           "range": {
             "byteLength": 1070,
             "byteStart": 10291,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L226-L250",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L226-L250",
             "lineEnd": 250,
             "lineStart": 226,
             "snippetSha256": "sha256:30733cdfe77d5e33e314fdfa3a5fe74d1382791492a7a78a4180ce9ba7a9fe9a",
@@ -597,7 +597,7 @@
           "range": {
             "byteLength": 1138,
             "byteStart": 11367,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L252-L272",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L252-L272",
             "lineEnd": 272,
             "lineStart": 252,
             "snippetSha256": "sha256:778d50a38b6d38e5395654af370a59564d9c09394bb467c2fc47939f378b96fe",
@@ -624,7 +624,7 @@
           "range": {
             "byteLength": 1077,
             "byteStart": 12511,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L274-L293",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L274-L293",
             "lineEnd": 293,
             "lineStart": 274,
             "snippetSha256": "sha256:81a73b7f6f5ca88cf9ca4d4766379a6b6ebd804e86fb9e2303ecf7a1ad3b7f51",
@@ -651,7 +651,7 @@
           "range": {
             "byteLength": 765,
             "byteStart": 13594,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L295-L309",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L295-L309",
             "lineEnd": 309,
             "lineStart": 295,
             "snippetSha256": "sha256:81ad20711d942bbccaad95c68c12ac7fd5f53e5dad2e45aee9504a430c4eb1d5",
@@ -678,7 +678,7 @@
           "range": {
             "byteLength": 1560,
             "byteStart": 14365,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L311-L343",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L311-L343",
             "lineEnd": 343,
             "lineStart": 311,
             "snippetSha256": "sha256:7085cd5b207449f5372fbaa81ef2e21a342c3d57231bd49800331cfdc28098a5",
@@ -705,7 +705,7 @@
           "range": {
             "byteLength": 837,
             "byteStart": 15931,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L345-L361",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L345-L361",
             "lineEnd": 361,
             "lineStart": 345,
             "snippetSha256": "sha256:1ebac4e5edd16f8ea5501442008932aaea9557e0cc7f370d26cf94ac2ac9d229",
@@ -732,7 +732,7 @@
           "range": {
             "byteLength": 1247,
             "byteStart": 16774,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L363-L387",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L363-L387",
             "lineEnd": 387,
             "lineStart": 363,
             "snippetSha256": "sha256:47611454039e71f376059feebfcb8fc111dd8c9b60e0b150384fc448d6dfe0c4",
@@ -759,7 +759,7 @@
           "range": {
             "byteLength": 782,
             "byteStart": 18027,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L389-L404",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L389-L404",
             "lineEnd": 404,
             "lineStart": 389,
             "snippetSha256": "sha256:82382f4eca12507b63226786a19c21f88d6d103ce7ec4d426b3b11ba4a4eea63",
@@ -786,7 +786,7 @@
           "range": {
             "byteLength": 1288,
             "byteStart": 18815,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L406-L433",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L406-L433",
             "lineEnd": 433,
             "lineStart": 406,
             "snippetSha256": "sha256:f102e19346916b7cece44e4b5d8c9ed6e6dd36ce9672d5a9d4b88d38723b514a",
@@ -813,7 +813,7 @@
           "range": {
             "byteLength": 2591,
             "byteStart": 20109,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L435-L481",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L435-L481",
             "lineEnd": 481,
             "lineStart": 435,
             "snippetSha256": "sha256:7697babff35172763d8a93512c0717c71994f550dcc110ece7af683c568276d9",
@@ -840,7 +840,7 @@
           "range": {
             "byteLength": 815,
             "byteStart": 22706,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L483-L497",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L483-L497",
             "lineEnd": 497,
             "lineStart": 483,
             "snippetSha256": "sha256:84e99263fd2fc0f543ed9305ddc77b3ff136a42d9f90cb36186190bd9c9ab351",
@@ -867,7 +867,7 @@
           "range": {
             "byteLength": 886,
             "byteStart": 23527,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L499-L514",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L499-L514",
             "lineEnd": 514,
             "lineStart": 499,
             "snippetSha256": "sha256:a2eed0f2643793ac875154b42613fe425cf3b455f7c20eb00364a39ab4575ee9",
@@ -894,7 +894,7 @@
           "range": {
             "byteLength": 1326,
             "byteStart": 24419,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L516-L538",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L516-L538",
             "lineEnd": 538,
             "lineStart": 516,
             "snippetSha256": "sha256:94339446327a47ba494657104208701a938596ebb279c7bfebee10d0a54cea86",
@@ -921,7 +921,7 @@
           "range": {
             "byteLength": 1056,
             "byteStart": 25751,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L540-L559",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L540-L559",
             "lineEnd": 559,
             "lineStart": 540,
             "snippetSha256": "sha256:45f17532c47fdcaba6190880288b151b0bc63099c665ad5c28cad6fa63da6c97",
@@ -948,7 +948,7 @@
           "range": {
             "byteLength": 1110,
             "byteStart": 26813,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L561-L583",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L561-L583",
             "lineEnd": 583,
             "lineStart": 561,
             "snippetSha256": "sha256:3ad7081759d8a68add4e62c176db55d2434cea0213c7903ed4af203a8c47661b",
@@ -982,7 +982,7 @@
           "range": {
             "byteLength": 125,
             "byteStart": 28085,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L592-L594",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L592-L594",
             "lineEnd": 594,
             "lineStart": 592,
             "snippetSha256": "sha256:04defb7611d4ba27771a7db889a96e106af33462a2ad2ae8c8edc7d5386b1f11",
@@ -1022,7 +1022,7 @@
           "range": {
             "byteLength": 173,
             "byteStart": 28216,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L596-L598",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L596-L598",
             "lineEnd": 598,
             "lineStart": 596,
             "snippetSha256": "sha256:55cea808c5065244321c3f8d09ba9fd7edf44a461e48142b4d67569748cfc9f1",
@@ -1067,7 +1067,7 @@
           "range": {
             "byteLength": 247,
             "byteStart": 28395,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L600-L605",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L600-L605",
             "lineEnd": 605,
             "lineStart": 600,
             "snippetSha256": "sha256:626803cef7a41e854c97e255c67d6afd256d1a118760c4214de4a409b589db33",
@@ -1117,7 +1117,7 @@
           "range": {
             "byteLength": 1317,
             "byteStart": 28648,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L607-L639",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L607-L639",
             "lineEnd": 639,
             "lineStart": 607,
             "snippetSha256": "sha256:64be6dd2899d70856f7bab9ec6bce67d23996fab30b2e0a7aad75a44982dc29a",
@@ -1167,7 +1167,7 @@
           "range": {
             "byteLength": 522,
             "byteStart": 29971,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L641-L660",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L641-L660",
             "lineEnd": 660,
             "lineStart": 641,
             "snippetSha256": "sha256:dba2d4c7a1452a3e749e7c85df5ad540abc64ade5ccdd8600723cb3690c85534",
@@ -1191,7 +1191,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 684,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
@@ -1203,7 +1203,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 718,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
@@ -1221,7 +1221,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 739,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
@@ -1233,7 +1233,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 773,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
@@ -1251,7 +1251,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 794,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
@@ -1263,7 +1263,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 835,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
@@ -1281,7 +1281,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 856,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:3e584ae14d4f8113c43c8a90a2f6a3ae96faa28ee0ee3f8c369c04e7bfcb1488",
@@ -1293,7 +1293,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 896,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:1f4fd140ad2c560f9c39ca5e51b0dd8d00bd16cb2bb0afd99e8b005b7136d9d7",
@@ -1311,7 +1311,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 917,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:ea197a9fdd4761ad3e8409bac2b9912d3361c826be11a7c44042b605af8c987f",
@@ -1323,7 +1323,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 958,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L26",
             "lineEnd": 26,
             "lineStart": 26,
             "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
@@ -1341,7 +1341,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 979,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:4f34bd08e7602115853ec232f408f7de91709d3e8885e0e2590da9ec4a5a1376",
@@ -1353,7 +1353,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 1025,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:2b313e967de5483796211fbd6b58e26c0e1d5832d8be24b0b4b1d2ad4809a902",
@@ -1371,7 +1371,7 @@
           "range": {
             "byteLength": 48,
             "byteStart": 1047,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L29",
             "lineEnd": 29,
             "lineStart": 29,
             "snippetSha256": "sha256:5d220cdbd734b87afbb29e781ce1a0927c3f4a7259c1d16b10ddb926f6ededa1",
@@ -1383,7 +1383,7 @@
           "valueRange": {
             "byteLength": 7,
             "byteStart": 1088,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L29",
             "lineEnd": 29,
             "lineStart": 29,
             "snippetSha256": "sha256:89d2e8f6fbb5823cc4c82092cd5b652e6504bca12f3a7e4bf6dd158f7e1bd67a",
@@ -1401,7 +1401,7 @@
           "range": {
             "byteLength": 50,
             "byteStart": 1101,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L30",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L30",
             "lineEnd": 30,
             "lineStart": 30,
             "snippetSha256": "sha256:54326b4643c54d91f7e7f522f75bb5bece1fc160315a2841650adcde9bdc930e",
@@ -1413,7 +1413,7 @@
           "valueRange": {
             "byteLength": 12,
             "byteStart": 1139,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L30",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L30",
             "lineEnd": 30,
             "lineStart": 30,
             "snippetSha256": "sha256:b3d67cfedffd7b23f3003e1b432cd343edf268a221c1362ef9d325aa00e1176f",
@@ -1433,7 +1433,7 @@
               "range": {
                 "byteLength": 23,
                 "byteStart": 27959,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L586",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L586",
                 "lineEnd": 586,
                 "lineStart": 586,
                 "snippetSha256": "sha256:67cd5d2d923d960771e4de7c95f232699d5ce27f40fe1105c89e6a57535a802e",
@@ -1449,7 +1449,7 @@
               "range": {
                 "byteLength": 23,
                 "byteStart": 27992,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L587",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L587",
                 "lineEnd": 587,
                 "lineStart": 587,
                 "snippetSha256": "sha256:a3b7196e6549c4e665308750d1c91c4b213c8bb4ead75bdaf415a72abb8c6668",
@@ -1465,7 +1465,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 28025,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L588",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L588",
                 "lineEnd": 588,
                 "lineStart": 588,
                 "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
@@ -1481,7 +1481,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 28050,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L589",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L589",
                 "lineEnd": 589,
                 "lineStart": 589,
                 "snippetSha256": "sha256:26836db544badd824d9d43e4a4d94cfa624ba520242ffd2564fdefa634f79ba9",
@@ -1496,7 +1496,7 @@
           "range": {
             "byteLength": 150,
             "byteStart": 27929,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L585-L590",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L585-L590",
             "lineEnd": 590,
             "lineStart": 585,
             "snippetSha256": "sha256:c4bcb4287cf51d85cdf655b08adbd4f82ee50931a0929a9925b19811a90ce222",
@@ -1541,7 +1541,7 @@
     "range": {
       "byteLength": 30226,
       "byteStart": 269,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamAuctionPayments.t.sol#L10-L661",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamAuctionPayments.t.sol#L10-L661",
       "lineEnd": 661,
       "lineStart": 10,
       "snippetSha256": "sha256:2582ac70f642f452c2eb6497836240dcbcad6e98be1d846842e4846fd3b53306",

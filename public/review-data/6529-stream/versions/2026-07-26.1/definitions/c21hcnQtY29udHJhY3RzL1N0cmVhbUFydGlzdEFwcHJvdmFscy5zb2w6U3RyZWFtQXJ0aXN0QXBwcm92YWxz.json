@@ -292,7 +292,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 95,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L6",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L6",
             "lineEnd": 6,
             "lineStart": 6,
             "snippetSha256": "sha256:7b46e96b3672b348decc6f158cdb091358927229900f6c40b37ca10b27b8ee30",
@@ -335,7 +335,7 @@
           "range": {
             "byteLength": 678,
             "byteStart": 1046,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L23-L38",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L23-L38",
             "lineEnd": 38,
             "lineStart": 23,
             "snippetSha256": "sha256:a84787449a212143b76f24c178b01364c8d9a6a064158e9f2819e404905d2428",
@@ -384,7 +384,7 @@
           "range": {
             "byteLength": 904,
             "byteStart": 1730,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L40-L63",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L40-L63",
             "lineEnd": 63,
             "lineStart": 40,
             "snippetSha256": "sha256:6d9e847daa1882c38c45544285fedbd171f0b05326f265a9401ddc18ea1a97de",
@@ -443,7 +443,7 @@
           "range": {
             "byteLength": 639,
             "byteStart": 2640,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L65-L81",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L65-L81",
             "lineEnd": 81,
             "lineStart": 65,
             "snippetSha256": "sha256:97b22ed73c9014a9f6a1c70cad44702e2637dc12c59770a196b5031196037e8d",
@@ -512,7 +512,7 @@
           "range": {
             "byteLength": 1318,
             "byteStart": 3285,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L83-L112",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L83-L112",
             "lineEnd": 112,
             "lineStart": 83,
             "snippetSha256": "sha256:a5826707d2501e361a0833fbd3ef43709d93f6ce790e50aca7d4509d3338e687",
@@ -571,7 +571,7 @@
           "range": {
             "byteLength": 1301,
             "byteStart": 4609,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L114-L144",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L114-L144",
             "lineEnd": 144,
             "lineStart": 114,
             "snippetSha256": "sha256:6351153aa9891d9763ad9df9bddc4fef17528ebc83c6d475eab7aa6b6cc74b6b",
@@ -615,7 +615,7 @@
           "range": {
             "byteLength": 675,
             "byteStart": 5916,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L146-L165",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L146-L165",
             "lineEnd": 165,
             "lineStart": 146,
             "snippetSha256": "sha256:c784ecbf8567400fe033c6473d3a1c1eb7ef092ca22e882c650fc9639959df36",
@@ -660,7 +660,7 @@
           "range": {
             "byteLength": 1122,
             "byteStart": 6597,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L167-L201",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L167-L201",
             "lineEnd": 201,
             "lineStart": 167,
             "snippetSha256": "sha256:b899691fe5d754e897b3667e99b3f44656e1bebef9f9748d0372092b50c579a2",
@@ -684,7 +684,7 @@
           "range": {
             "byteLength": 106,
             "byteStart": 132,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L8-L9",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L8-L9",
             "lineEnd": 9,
             "lineStart": 8,
             "snippetSha256": "sha256:dcc28f1317f0d0f5481a2f53d3f4e1d0f822a3f00579f8a057a842cb9b10e5cc",
@@ -696,7 +696,7 @@
           "valueRange": {
             "byteLength": 37,
             "byteStart": 201,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L9",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L9",
             "lineEnd": 9,
             "lineStart": 9,
             "snippetSha256": "sha256:1e7d58bffb7c77b4f753e3fffee6a0d26089b43b8d0396a631463a80ee8e6718",
@@ -714,7 +714,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 244,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L10",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L10",
             "lineEnd": 10,
             "lineStart": 10,
             "snippetSha256": "sha256:0cce0937eb1aecef4c43e35a9755be5cae5e6a146ef1a3f253d18ae92ab7a3b7",
@@ -726,7 +726,7 @@
           "valueRange": {
             "byteLength": 14,
             "byteStart": 308,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L10",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L10",
             "lineEnd": 10,
             "lineStart": 10,
             "snippetSha256": "sha256:92707b3f4fce98a81f351d65ae90cdea1f4ef8945803392f25911a9c51f6ae09",
@@ -744,7 +744,7 @@
           "range": {
             "byteLength": 160,
             "byteStart": 328,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L11-L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L11-L13",
             "lineEnd": 13,
             "lineStart": 11,
             "snippetSha256": "sha256:c2d0479a62b92a121725546eeb2ed0e3f0bc9ba1ffafc64a6f67abd1405088a2",
@@ -756,7 +756,7 @@
           "valueRange": {
             "byteLength": 109,
             "byteStart": 379,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L11-L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L11-L13",
             "lineEnd": 13,
             "lineStart": 11,
             "snippetSha256": "sha256:af0455a269d04c74b48436998a032dbf989f40a81855853bd68ccc0ed6834bbf",
@@ -774,7 +774,7 @@
           "range": {
             "byteLength": 233,
             "byteStart": 494,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L14-L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L14-L16",
             "lineEnd": 16,
             "lineStart": 14,
             "snippetSha256": "sha256:4abb9708b88107830f709603cef52cd3f9edf989a169c0676870853a851658c9",
@@ -786,7 +786,7 @@
           "valueRange": {
             "byteLength": 180,
             "byteStart": 547,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L14-L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L14-L16",
             "lineEnd": 16,
             "lineStart": 14,
             "snippetSha256": "sha256:656b152521f0003cf9f874716aa3119137c1969e9e175084c8a7eb1584dd75f8",
@@ -804,7 +804,7 @@
           "range": {
             "byteLength": 117,
             "byteStart": 733,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L17-L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L17-L18",
             "lineEnd": 18,
             "lineStart": 17,
             "snippetSha256": "sha256:2628bbd7045041c4d52890e780570e37fae4e811339ecea7ddd204f5f215263b",
@@ -816,7 +816,7 @@
           "valueRange": {
             "byteLength": 66,
             "byteStart": 784,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:b6fe674d3ce7002a12b2a23515d1ec1a755c9fe16cca1ef2d255a6b041a34df0",
@@ -834,7 +834,7 @@
           "range": {
             "byteLength": 120,
             "byteStart": 856,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L19-L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L19-L20",
             "lineEnd": 20,
             "lineStart": 19,
             "snippetSha256": "sha256:f6c8560aafc31b5a2a46a173c99298495bf001fdabdeb3438e5846ed12e71e7a",
@@ -846,7 +846,7 @@
           "valueRange": {
             "byteLength": 66,
             "byteStart": 910,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:638c5f34fab55463ba325ec69c340ccd745ffd980bc26bff1bcc93c0d7aa0c8d",
@@ -864,7 +864,7 @@
           "range": {
             "byteLength": 57,
             "byteStart": 982,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:afc4fdb942bfb496f62607e02163e181cce6c47ba9821e4b90d8619fc908bb58",
@@ -876,7 +876,7 @@
           "valueRange": {
             "byteLength": 10,
             "byteStart": 1029,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:fb6e13219ed30abf119c1841ffe1905c566a0ef304a840cf5607d48f1c44df97",
@@ -912,7 +912,7 @@
     "range": {
       "byteLength": 7662,
       "byteStart": 59,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L5-L202",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L5-L202",
       "lineEnd": 202,
       "lineStart": 5,
       "snippetSha256": "sha256:78349967aa7d07babc86e3469c996f21b9d8cfb9bbb0013a3006520d3d66047c",

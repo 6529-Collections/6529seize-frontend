@@ -1041,7 +1041,7 @@
           "range": {
             "byteLength": 182,
             "byteStart": 2951,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L65-L71",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L65-L71",
             "lineEnd": 71,
             "lineStart": 65,
             "snippetSha256": "sha256:4a2f28088992f27294dde01aaefa5580d493f907357b63834776c68869867b0c",
@@ -1094,7 +1094,7 @@
           "range": {
             "byteLength": 183,
             "byteStart": 3138,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L72-L78",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L72-L78",
             "lineEnd": 78,
             "lineStart": 72,
             "snippetSha256": "sha256:9e7404e29bb53d56d0ee433518756bffbbe2524732f6926a1f4c93965cdbc998",
@@ -1147,7 +1147,7 @@
           "range": {
             "byteLength": 188,
             "byteStart": 3326,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L79-L85",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L79-L85",
             "lineEnd": 85,
             "lineStart": 79,
             "snippetSha256": "sha256:3ca0b9047468fcf3b551ffc19489191598b94a698a9a4cfbbf8f94190660bca6",
@@ -1212,7 +1212,7 @@
           "range": {
             "byteLength": 245,
             "byteStart": 3519,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L86-L94",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L86-L94",
             "lineEnd": 94,
             "lineStart": 86,
             "snippetSha256": "sha256:e76136d91093842a0f23683879fcb6b815de6943a7cb1606838ca4178d7d1e3b",
@@ -1277,7 +1277,7 @@
           "range": {
             "byteLength": 241,
             "byteStart": 3769,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L95-L103",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L95-L103",
             "lineEnd": 103,
             "lineStart": 95,
             "snippetSha256": "sha256:5be2e5612f3e63f8bf76829825273649201f08a5eaad3d3a283d699793ce0051",
@@ -1324,7 +1324,7 @@
           "range": {
             "byteLength": 315,
             "byteStart": 4016,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L105-L114",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L105-L114",
             "lineEnd": 114,
             "lineStart": 105,
             "snippetSha256": "sha256:8cb607569828fcdd85950ee7a154be427237e4bc1dd025433c3c46c34d44e052",
@@ -1368,7 +1368,7 @@
           "range": {
             "byteLength": 579,
             "byteStart": 4337,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L116-L130",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L116-L130",
             "lineEnd": 130,
             "lineStart": 116,
             "snippetSha256": "sha256:197d6cada2c7750ffc9272aaa9604affbf4b0add2927ba6e3966675d7a0a6186",
@@ -1423,7 +1423,7 @@
           "range": {
             "byteLength": 1514,
             "byteStart": 4922,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L132-L168",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L132-L168",
             "lineEnd": 168,
             "lineStart": 132,
             "snippetSha256": "sha256:3410b0fa32a436e2bc206860e2efbb99c533e243eb98aa800eea16151ede914c",
@@ -1473,7 +1473,7 @@
           "range": {
             "byteLength": 1240,
             "byteStart": 6442,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L170-L200",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L170-L200",
             "lineEnd": 200,
             "lineStart": 170,
             "snippetSha256": "sha256:abfb9180220dca158c1eb5be620d822a23658ff7ffb0faa2104398d2be18e679",
@@ -1529,7 +1529,7 @@
           "range": {
             "byteLength": 1406,
             "byteStart": 7688,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L202-L235",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L202-L235",
             "lineEnd": 235,
             "lineStart": 202,
             "snippetSha256": "sha256:4b415943cd591751bb5648b6c3946c9247b83f26f40be2e60424bbda4891a66a",
@@ -1590,7 +1590,7 @@
           "range": {
             "byteLength": 2140,
             "byteStart": 9100,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L237-L285",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L237-L285",
             "lineEnd": 285,
             "lineStart": 237,
             "snippetSha256": "sha256:8bff2f4d8e72334dd4fd4f01e12ee66f8051a5f95a8c2a9efafe15e38e635f61",
@@ -1661,7 +1661,7 @@
           "range": {
             "byteLength": 2644,
             "byteStart": 11246,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L287-L344",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L287-L344",
             "lineEnd": 344,
             "lineStart": 287,
             "snippetSha256": "sha256:52cd151a225d3a9d3473f2c112e11159e67414516a6d8a0e23d61ed6f352c175",
@@ -1705,7 +1705,7 @@
           "range": {
             "byteLength": 386,
             "byteStart": 13896,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L346-L353",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L346-L353",
             "lineEnd": 353,
             "lineStart": 346,
             "snippetSha256": "sha256:571ed0116c2332762d13697f258594e3b0047b28cee0ff7010e9722e1c67465c",
@@ -1744,7 +1744,7 @@
           "range": {
             "byteLength": 323,
             "byteStart": 14288,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L355-L363",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L355-L363",
             "lineEnd": 363,
             "lineStart": 355,
             "snippetSha256": "sha256:a3897352ef696c95936dcd86b60032d4d3bd60edf989dbcd01467010f185bb6e",
@@ -1783,7 +1783,7 @@
           "range": {
             "byteLength": 375,
             "byteStart": 14617,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L365-L370",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L365-L370",
             "lineEnd": 370,
             "lineStart": 365,
             "snippetSha256": "sha256:32acaf5084c73e1a25114a146bd1d29e04a18287314a76c2e7c9f0573263abef",
@@ -1832,7 +1832,7 @@
           "range": {
             "byteLength": 400,
             "byteStart": 14998,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L372-L382",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L372-L382",
             "lineEnd": 382,
             "lineStart": 372,
             "snippetSha256": "sha256:e5477dbe8a2e6111126aaa86aabd0d20d502dce25a4be2a16029997e6c295de2",
@@ -1875,7 +1875,7 @@
           "range": {
             "byteLength": 197,
             "byteStart": 15404,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L384-L389",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L384-L389",
             "lineEnd": 389,
             "lineStart": 384,
             "snippetSha256": "sha256:484c9c029bcdabc3dbef86bd22f1e9432a7fc9f61ffb3409145af7703be1d2f1",
@@ -1918,7 +1918,7 @@
           "range": {
             "byteLength": 436,
             "byteStart": 15607,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L391-L401",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L391-L401",
             "lineEnd": 401,
             "lineStart": 391,
             "snippetSha256": "sha256:debbcc2f12683629f34289012da37cae4948c29fd80920e164fa990d9bc76596",
@@ -1963,7 +1963,7 @@
           "range": {
             "byteLength": 1741,
             "byteStart": 16049,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L403-L444",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L403-L444",
             "lineEnd": 444,
             "lineStart": 403,
             "snippetSha256": "sha256:5ce25b7abcc260e6f01cce6da608eeee24d8e5862cd781a7e0a2c8eb47c9c713",
@@ -2018,7 +2018,7 @@
           "range": {
             "byteLength": 846,
             "byteStart": 17796,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L446-L470",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L446-L470",
             "lineEnd": 470,
             "lineStart": 446,
             "snippetSha256": "sha256:1477ee1868ec314f2c1d8b456ef61556832e47d6b14d2d1ad5bacddad11651b3",
@@ -2067,7 +2067,7 @@
           "range": {
             "byteLength": 636,
             "byteStart": 18648,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L472-L486",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L472-L486",
             "lineEnd": 486,
             "lineStart": 472,
             "snippetSha256": "sha256:31a74b54031c0cb12216fcd5f9d4015c50916e94576d05e56c9a395d3f711ee0",
@@ -2141,7 +2141,7 @@
           "range": {
             "byteLength": 897,
             "byteStart": 19290,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L488-L512",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L488-L512",
             "lineEnd": 512,
             "lineStart": 488,
             "snippetSha256": "sha256:14ff7ac2cf2c15366de800a5473b3a613ae39cadd4b4560e09bf71021a18fcdf",
@@ -2195,7 +2195,7 @@
           "range": {
             "byteLength": 463,
             "byteStart": 20193,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L514-L531",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L514-L531",
             "lineEnd": 531,
             "lineStart": 514,
             "snippetSha256": "sha256:e0439b5b190ef5121feb3441ab5f4c80572bfbdac920211d9ebe0a9d6620c9b9",
@@ -2284,7 +2284,7 @@
           "range": {
             "byteLength": 1199,
             "byteStart": 20662,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L533-L569",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L533-L569",
             "lineEnd": 569,
             "lineStart": 533,
             "snippetSha256": "sha256:d43258b696779026aafa37ee321236fad9be91c1a2d39c53e49a08c4fd0bdd92",
@@ -2348,7 +2348,7 @@
           "range": {
             "byteLength": 592,
             "byteStart": 21867,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L571-L592",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L571-L592",
             "lineEnd": 592,
             "lineStart": 571,
             "snippetSha256": "sha256:e4e183024fc3837f33ebc36724abe3abe8f37e9514e0ccffe1dbb05f9a744b66",
@@ -2422,7 +2422,7 @@
           "range": {
             "byteLength": 885,
             "byteStart": 22465,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L594-L618",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L594-L618",
             "lineEnd": 618,
             "lineStart": 594,
             "snippetSha256": "sha256:73a7f78d34c3f51a1f93beefa4d22e772cac3e0fcde8a43c2f61b1f23745c473",
@@ -2471,7 +2471,7 @@
           "range": {
             "byteLength": 408,
             "byteStart": 23356,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L620-L635",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L620-L635",
             "lineEnd": 635,
             "lineStart": 620,
             "snippetSha256": "sha256:b0f11c8da0959fe18e48312cbeadcb2c0b6e03524c1dd081baf64cba3c850ec6",
@@ -2521,7 +2521,7 @@
           "range": {
             "byteLength": 310,
             "byteStart": 23770,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L637-L646",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L637-L646",
             "lineEnd": 646,
             "lineStart": 637,
             "snippetSha256": "sha256:1d45e09a92e3b4e76b6041040fb7c6e6d97d82f9c41ae114c1e90ab203d8ff12",
@@ -2576,7 +2576,7 @@
           "range": {
             "byteLength": 385,
             "byteStart": 24086,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L648-L657",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L648-L657",
             "lineEnd": 657,
             "lineStart": 648,
             "snippetSha256": "sha256:d903e2f46764d59f5b2fa319a4e08ab67cdd6fd813f7b4aebb89083ee6fd9495",
@@ -2631,7 +2631,7 @@
           "range": {
             "byteLength": 389,
             "byteStart": 24477,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L659-L668",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L659-L668",
             "lineEnd": 668,
             "lineStart": 659,
             "snippetSha256": "sha256:170498b22b125c80b3c3ee7ec73c96b8ab742a155077d67a28775c82f118d31e",
@@ -2692,7 +2692,7 @@
           "range": {
             "byteLength": 492,
             "byteStart": 24872,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L670-L680",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L670-L680",
             "lineEnd": 680,
             "lineStart": 670,
             "snippetSha256": "sha256:2975fc1998b5913f6def435746d230592050e55f61d6772086fb611e97023853",
@@ -2763,7 +2763,7 @@
           "range": {
             "byteLength": 768,
             "byteStart": 25370,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L682-L703",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L682-L703",
             "lineEnd": 703,
             "lineStart": 682,
             "snippetSha256": "sha256:de2eed3c49f8223c49dce258a1ebd47ab4a3b186819c65da08689a182ba6c544",
@@ -2834,7 +2834,7 @@
           "range": {
             "byteLength": 692,
             "byteStart": 26144,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L705-L721",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L705-L721",
             "lineEnd": 721,
             "lineStart": 705,
             "snippetSha256": "sha256:153a4d706ffa3d7a248620b4f2817d5be7020d0d9d72c14384cdd1efb083e3dc",
@@ -2884,7 +2884,7 @@
           "range": {
             "byteLength": 422,
             "byteStart": 26842,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L723-L734",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L723-L734",
             "lineEnd": 734,
             "lineStart": 723,
             "snippetSha256": "sha256:0c9111eecad6be03b6e94b38ee50100ec46310954e6e7a78d31edc9de17ccf63",
@@ -2934,7 +2934,7 @@
           "range": {
             "byteLength": 410,
             "byteStart": 27270,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L736-L747",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L736-L747",
             "lineEnd": 747,
             "lineStart": 736,
             "snippetSha256": "sha256:ee8dd27e6103d15cd0006d7080faaf0791ba6c77e73da9938696293caf43a867",
@@ -2958,7 +2958,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 590,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:94861f8bd556011251a7300360fba5b4be878a32efc2f46eba803f2c4ec29b7c",
@@ -2970,7 +2970,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 631,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -2988,7 +2988,7 @@
           "range": {
             "byteLength": 114,
             "byteStart": 638,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L16-L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L16-L17",
             "lineEnd": 17,
             "lineStart": 16,
             "snippetSha256": "sha256:357a2cfac4096731249f2963c3f404b526ae87744f6b860db8946cfaa772592c",
@@ -3000,7 +3000,7 @@
           "valueRange": {
             "byteLength": 51,
             "byteStart": 701,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:4b4d6746c39e1f82fa2f4758d3a5e1c5e1f9713cbf0f553699bad1f87cc993a4",
@@ -3018,7 +3018,7 @@
           "range": {
             "byteLength": 112,
             "byteStart": 758,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L18-L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L18-L19",
             "lineEnd": 19,
             "lineStart": 18,
             "snippetSha256": "sha256:a6ef95ffcc8c6f2dff9a989be0c366f0cdadddf60eb03e517051f2d7d2e17e3a",
@@ -3030,7 +3030,7 @@
           "valueRange": {
             "byteLength": 50,
             "byteStart": 820,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:e58800055eb10ea1572c99be2b2d6746807aaa08210d508a931034120dc7e5f4",
@@ -3048,7 +3048,7 @@
           "range": {
             "byteLength": 124,
             "byteStart": 876,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L20-L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L20-L21",
             "lineEnd": 21,
             "lineStart": 20,
             "snippetSha256": "sha256:b8e16000c8ab3a8d08d83e5aa0f0e0e1452f418fc4646d6769c8aefba28dd61d",
@@ -3060,7 +3060,7 @@
           "valueRange": {
             "byteLength": 56,
             "byteStart": 944,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:5ef594d87d57cb180e7f56ab8ceb86b9bbe398036aecacf4d852b17e95100f0c",
@@ -3078,7 +3078,7 @@
           "range": {
             "byteLength": 114,
             "byteStart": 1006,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L22-L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L22-L23",
             "lineEnd": 23,
             "lineStart": 22,
             "snippetSha256": "sha256:5c12730e135744b85f463c978c21d0523ec099e2e0db7ebebc4543a9fe6bf2c6",
@@ -3090,7 +3090,7 @@
           "valueRange": {
             "byteLength": 51,
             "byteStart": 1069,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:94a26c6c7093fa6c2ad0f40dca3807197ec6dfa88da5c7f7a6399966473f1c70",
@@ -3108,7 +3108,7 @@
           "range": {
             "byteLength": 112,
             "byteStart": 1126,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L24-L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L24-L25",
             "lineEnd": 25,
             "lineStart": 24,
             "snippetSha256": "sha256:f9116a9a98caea0956514e856d131062053899a144fee4ab1bfb5f85d8944bce",
@@ -3120,7 +3120,7 @@
           "valueRange": {
             "byteLength": 50,
             "byteStart": 1188,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:2117197087a436c88579c714904e7188773c3ad0a3c6f74a45388733f749d530",
@@ -3138,7 +3138,7 @@
           "range": {
             "byteLength": 112,
             "byteStart": 1244,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L26-L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L26-L27",
             "lineEnd": 27,
             "lineStart": 26,
             "snippetSha256": "sha256:04ab845524c3b9721ba04282c570da84d3f0fae570831646c7661f0fe4a341d4",
@@ -3150,7 +3150,7 @@
           "valueRange": {
             "byteLength": 50,
             "byteStart": 1306,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:7c59b529bcbe9b2e30b084a3d077d915520d329e9a7f3510b06eb20baf1b5ae7",
@@ -3168,7 +3168,7 @@
           "range": {
             "byteLength": 108,
             "byteStart": 1362,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L28-L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L28-L29",
             "lineEnd": 29,
             "lineStart": 28,
             "snippetSha256": "sha256:aea24189935f3f219554b295c3910d2b05b52dfd9ed69effdb774a58e8557396",
@@ -3180,7 +3180,7 @@
           "valueRange": {
             "byteLength": 48,
             "byteStart": 1422,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L29",
             "lineEnd": 29,
             "lineStart": 29,
             "snippetSha256": "sha256:60054a8316e8b8bba122681167ec47b0f13894a5b0b7cbbf1084a73339dcda81",
@@ -3198,7 +3198,7 @@
           "range": {
             "byteLength": 108,
             "byteStart": 1476,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L30-L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L30-L31",
             "lineEnd": 31,
             "lineStart": 30,
             "snippetSha256": "sha256:eabead67c9e0033fd81221c13b075decb4c88ec9d4f2429f9fddcf6eaed1c20e",
@@ -3210,7 +3210,7 @@
           "valueRange": {
             "byteLength": 48,
             "byteStart": 1536,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L31",
             "lineEnd": 31,
             "lineStart": 31,
             "snippetSha256": "sha256:837d5ead71f666097c09eb98bfdc231541e747865f79cc50fcdff4d387f5f9dd",
@@ -3228,7 +3228,7 @@
           "range": {
             "byteLength": 112,
             "byteStart": 1590,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L32-L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L32-L33",
             "lineEnd": 33,
             "lineStart": 32,
             "snippetSha256": "sha256:3c43161a94ccdb124fea5fc769eba06d1f2717e10a9572c0206dadf5dcc13ac7",
@@ -3240,7 +3240,7 @@
           "valueRange": {
             "byteLength": 50,
             "byteStart": 1652,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L33",
             "lineEnd": 33,
             "lineStart": 33,
             "snippetSha256": "sha256:82a54e76f1d3b7e16430844d425b9b3abb446448501da2069ee9fb173f135515",
@@ -3258,7 +3258,7 @@
           "range": {
             "byteLength": 114,
             "byteStart": 1708,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L34-L35",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L34-L35",
             "lineEnd": 35,
             "lineStart": 34,
             "snippetSha256": "sha256:4b80bf49c56acd44246a0a2842069e1180a10075fccd17da7cea11fa07278e53",
@@ -3270,7 +3270,7 @@
           "valueRange": {
             "byteLength": 51,
             "byteStart": 1771,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L35",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L35",
             "lineEnd": 35,
             "lineStart": 35,
             "snippetSha256": "sha256:aff461d2c23a1d4f0e306344448c3648f5f823c9452cb12f1df859fed24e2f63",
@@ -3288,7 +3288,7 @@
           "range": {
             "byteLength": 126,
             "byteStart": 1828,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L36-L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L36-L37",
             "lineEnd": 37,
             "lineStart": 36,
             "snippetSha256": "sha256:0495a70e13b14ed7e36f85f24318bc6bcbae10ccbc591dacfa45fc9fc38f3f2d",
@@ -3300,7 +3300,7 @@
           "valueRange": {
             "byteLength": 57,
             "byteStart": 1897,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L37",
             "lineEnd": 37,
             "lineStart": 37,
             "snippetSha256": "sha256:4ce0f4154ecacf7c3e6e35ee58d4fb3f353cb2e0b5cae7b580620ebdcabf5178",
@@ -3318,7 +3318,7 @@
           "range": {
             "byteLength": 126,
             "byteStart": 1960,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L38-L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L38-L39",
             "lineEnd": 39,
             "lineStart": 38,
             "snippetSha256": "sha256:929fa4d34210236d8406c86fad7264c363ea19e134902b2f85c628c206065a81",
@@ -3330,7 +3330,7 @@
           "valueRange": {
             "byteLength": 57,
             "byteStart": 2029,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L39",
             "lineEnd": 39,
             "lineStart": 39,
             "snippetSha256": "sha256:b40c6514fe7d8f0c8662875a0d1b8795ebd62958674225fe4ae7751c0ec44a77",
@@ -3348,7 +3348,7 @@
           "range": {
             "byteLength": 126,
             "byteStart": 2092,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L40-L41",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L40-L41",
             "lineEnd": 41,
             "lineStart": 40,
             "snippetSha256": "sha256:69e24d3708affb94bd6edee891a1e71527e6c2554e373bc3eaea07dd34cd6ce8",
@@ -3360,7 +3360,7 @@
           "valueRange": {
             "byteLength": 57,
             "byteStart": 2161,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L41",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L41",
             "lineEnd": 41,
             "lineStart": 41,
             "snippetSha256": "sha256:7c748d6c36104fe4a968785a3e4533441230fdb7954ee213b61cb19df5cd77d6",
@@ -3380,7 +3380,7 @@
               "range": {
                 "byteLength": 34,
                 "byteStart": 2253,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L44",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L44",
                 "lineEnd": 44,
                 "lineStart": 44,
                 "snippetSha256": "sha256:6a1a028299019bfc51c243e0d0870ff71d6eae9286cda69d5491204ce4509c2c",
@@ -3396,7 +3396,7 @@
               "range": {
                 "byteLength": 35,
                 "byteStart": 2297,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L45",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L45",
                 "lineEnd": 45,
                 "lineStart": 45,
                 "snippetSha256": "sha256:344995cf7292694825a7d2cb39bf6670976d7af90a144b7c687a1f824aedbb7e",
@@ -3412,7 +3412,7 @@
               "range": {
                 "byteLength": 44,
                 "byteStart": 2342,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L46",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L46",
                 "lineEnd": 46,
                 "lineStart": 46,
                 "snippetSha256": "sha256:8108bece8c98a3284e34182d773f8af4fcca93341588005ca99bf7430146d65b",
@@ -3428,7 +3428,7 @@
               "range": {
                 "byteLength": 45,
                 "byteStart": 2396,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L47",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L47",
                 "lineEnd": 47,
                 "lineStart": 47,
                 "snippetSha256": "sha256:2f9db0829968e73d52ae6296fb6da0e032f42f3bf12883469c6b82ac29322d9d",
@@ -3444,7 +3444,7 @@
               "range": {
                 "byteLength": 50,
                 "byteStart": 2451,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L48",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L48",
                 "lineEnd": 48,
                 "lineStart": 48,
                 "snippetSha256": "sha256:bb63312cc14ba13be56c5614fce8b380b0864110df06e40f90da32d8fde551c0",
@@ -3460,7 +3460,7 @@
               "range": {
                 "byteLength": 50,
                 "byteStart": 2511,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L49",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L49",
                 "lineEnd": 49,
                 "lineStart": 49,
                 "snippetSha256": "sha256:d4e778d9d18e7e48c3637267c026f5ecd958f26294b8c19dc26e695a2aaed1e7",
@@ -3476,7 +3476,7 @@
               "range": {
                 "byteLength": 50,
                 "byteStart": 2571,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L50",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L50",
                 "lineEnd": 50,
                 "lineStart": 50,
                 "snippetSha256": "sha256:bd0782624879339b4d4c2dc31ba8cd0da42a2b43d97f3c33f94f2c2e173b9afe",
@@ -3492,7 +3492,7 @@
               "range": {
                 "byteLength": 50,
                 "byteStart": 2631,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L51",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L51",
                 "lineEnd": 51,
                 "lineStart": 51,
                 "snippetSha256": "sha256:ee9d1991f54845c7dab7e925ef05ecf5957d52c94ff175df06a2939a267b2bf1",
@@ -3507,7 +3507,7 @@
           "range": {
             "byteLength": 463,
             "byteStart": 2225,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L43-L52",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L43-L52",
             "lineEnd": 52,
             "lineStart": 43,
             "snippetSha256": "sha256:5420b16f14fce775073d771a2afd57db95eb066c9a793797897db00636adec65",
@@ -3523,7 +3523,7 @@
               "range": {
                 "byteLength": 14,
                 "byteStart": 2728,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L55",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L55",
                 "lineEnd": 55,
                 "lineStart": 55,
                 "snippetSha256": "sha256:3787950b8d1aed1283b96c1c70b9cb7274c6848219f526895d199dd15f0357c4",
@@ -3539,7 +3539,7 @@
               "range": {
                 "byteLength": 16,
                 "byteStart": 2752,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L56",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L56",
                 "lineEnd": 56,
                 "lineStart": 56,
                 "snippetSha256": "sha256:b14ef6c66b17428049b5e086372bf9ca0e30fe710d865446f9cb6538fbd8d4fd",
@@ -3555,7 +3555,7 @@
               "range": {
                 "byteLength": 17,
                 "byteStart": 2778,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L57",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L57",
                 "lineEnd": 57,
                 "lineStart": 57,
                 "snippetSha256": "sha256:f352f23378a3d5170462559ca88857e49b37668ac14ba09962c637eaf24fb717",
@@ -3571,7 +3571,7 @@
               "range": {
                 "byteLength": 17,
                 "byteStart": 2805,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L58",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L58",
                 "lineEnd": 58,
                 "lineStart": 58,
                 "snippetSha256": "sha256:d30111263932e6fd147aee0549154a5f88f758af1a22932f25002f3aad2a5bcf",
@@ -3587,7 +3587,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 2832,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L59",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L59",
                 "lineEnd": 59,
                 "lineStart": 59,
                 "snippetSha256": "sha256:67fdd1d7829aee31992557755c65b4cdb9c9032b53c8b6e383f742aef6a9e1fb",
@@ -3603,7 +3603,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 2862,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L60",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L60",
                 "lineEnd": 60,
                 "lineStart": 60,
                 "snippetSha256": "sha256:d2f141fa2f6045d2595c71336027afdbd5750819377be07ac81a9982f76f0475",
@@ -3619,7 +3619,7 @@
               "range": {
                 "byteLength": 19,
                 "byteStart": 2892,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L61",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L61",
                 "lineEnd": 61,
                 "lineStart": 61,
                 "snippetSha256": "sha256:a267da0f727d9dd5b06ebec4d3bb080843d67d243b6fc4e938e5849bbcbcbdfe",
@@ -3635,7 +3635,7 @@
               "range": {
                 "byteLength": 17,
                 "byteStart": 2921,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L62",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L62",
                 "lineEnd": 62,
                 "lineStart": 62,
                 "snippetSha256": "sha256:ddece0fe37e69415487560b393c8dba64cbee349418676694906c2ea4ca736ce",
@@ -3650,7 +3650,7 @@
           "range": {
             "byteLength": 251,
             "byteStart": 2694,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L54-L63",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L54-L63",
             "lineEnd": 63,
             "lineStart": 54,
             "snippetSha256": "sha256:ad4f4ce6eee10fbeb53816831dee69c58ebd25b3043d109291d5baa49c4140ce",
@@ -3683,7 +3683,7 @@
     "range": {
       "byteLength": 27129,
       "byteStart": 553,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernancePolicy.sol#L14-L748",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernancePolicy.sol#L14-L748",
       "lineEnd": 748,
       "lineStart": 14,
       "snippetSha256": "sha256:d33f66fb8fa3f03f77bf1a3eec388f14d1e14c26d9552869519435509a0d1442",

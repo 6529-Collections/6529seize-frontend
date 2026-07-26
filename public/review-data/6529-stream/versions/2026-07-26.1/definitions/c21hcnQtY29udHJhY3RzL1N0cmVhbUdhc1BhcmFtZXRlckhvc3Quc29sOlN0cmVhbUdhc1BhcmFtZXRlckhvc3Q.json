@@ -658,7 +658,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 602,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L13",
             "lineEnd": 13,
             "lineStart": 13,
             "snippetSha256": "sha256:ad24651b548634c20c3fd9bf0c5891bd71a56d5a9a2ea4a014ab0b93324836d4",
@@ -692,7 +692,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 664,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:65f345f4645f289cff7c89132e230be953b5ca73c10771221b3a17685443a73b",
@@ -726,7 +726,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 714,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:bcf4232b6b24edf417490800202a8c3d4c911b74ce15f69a3c51b6ab05556c42",
@@ -760,7 +760,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 774,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:c8dc7ceb294bbb3d207f8acf713b0679687a2f73549461f7177cf1b048b9e0ba",
@@ -794,7 +794,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 840,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:bd6cf92f46a0415ee4e75ed554b901d734faa3515f402a5d248e5e2382bb2d23",
@@ -828,7 +828,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 1493,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:9e26df1a82d2e34873ecc2b608d4927bf1a8560004225e672b44890d3937107d",
@@ -861,7 +861,7 @@
           "range": {
             "byteLength": 394,
             "byteStart": 1796,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L43-L53",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L43-L53",
             "lineEnd": 53,
             "lineStart": 43,
             "snippetSha256": "sha256:997c8f0c62c2fe7989087df8fba2287ea6d50b1219e6a88247501d00738c5412",
@@ -901,7 +901,7 @@
           "range": {
             "byteLength": 1265,
             "byteStart": 2265,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L56-L91",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L56-L91",
             "lineEnd": 91,
             "lineStart": 56,
             "snippetSha256": "sha256:0973733b4d501944fb749ef83ca46129f4b3184a6de708deaffecc5bcf7c6cc7",
@@ -955,7 +955,7 @@
           "range": {
             "byteLength": 358,
             "byteStart": 3580,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L94-L102",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L94-L102",
             "lineEnd": 102,
             "lineStart": 94,
             "snippetSha256": "sha256:c4ecfbd2622239051ec1c226c3ea6f6f7863b64a4bcd8f3a613e99404c0352ca",
@@ -994,7 +994,7 @@
           "range": {
             "byteLength": 205,
             "byteStart": 3988,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L105-L108",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L105-L108",
             "lineEnd": 108,
             "lineStart": 105,
             "snippetSha256": "sha256:cec8135207f674450fb023f61ac62f84bffec02c2fb9767f1e260e2c91b7050b",
@@ -1028,7 +1028,7 @@
           "range": {
             "byteLength": 117,
             "byteStart": 4243,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L111-L113",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L111-L113",
             "lineEnd": 113,
             "lineStart": 111,
             "snippetSha256": "sha256:e25d0935dd507f7351b05cbf64abb66878e083bc0ef9c34362d14a6868a55b0c",
@@ -1066,7 +1066,7 @@
           "range": {
             "byteLength": 1410,
             "byteStart": 4410,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L116-L148",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L116-L148",
             "lineEnd": 148,
             "lineStart": 116,
             "snippetSha256": "sha256:e1b6958b7097be7b7145ff1f9c901b635b4a674877b6d97c0cef97279ea89816",
@@ -1105,7 +1105,7 @@
           "range": {
             "byteLength": 130,
             "byteStart": 5903,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L151-L153",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L151-L153",
             "lineEnd": 153,
             "lineStart": 151,
             "snippetSha256": "sha256:54a7809e74c41604c77769db7717b819adab44e6eb64a4532b11a74d00f66baf",
@@ -1132,7 +1132,7 @@
           "range": {
             "byteLength": 208,
             "byteStart": 6039,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L155-L159",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L155-L159",
             "lineEnd": 159,
             "lineStart": 155,
             "snippetSha256": "sha256:7fbb0330436790111f1d641ebf172d9184e5f3bb6269e2978d6fc9477fd3cd79",
@@ -1172,7 +1172,7 @@
           "range": {
             "byteLength": 269,
             "byteStart": 6253,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L161-L168",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L161-L168",
             "lineEnd": 168,
             "lineStart": 161,
             "snippetSha256": "sha256:f615f4bb20a592820f9cff5b9d5dd45529e6ec8119fcfb5a9335fe5ebb6eeb74",
@@ -1211,7 +1211,7 @@
           "range": {
             "byteLength": 214,
             "byteStart": 6528,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L170-L174",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L170-L174",
             "lineEnd": 174,
             "lineStart": 170,
             "snippetSha256": "sha256:d2407ef54b58fcb6ba5b329f9c6bfc3cbc02d1d78b79ef5e597a242184b6dbb0",
@@ -1266,7 +1266,7 @@
           "range": {
             "byteLength": 454,
             "byteStart": 6748,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L176-L192",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L176-L192",
             "lineEnd": 192,
             "lineStart": 176,
             "snippetSha256": "sha256:8d4175c625afb6a7943e83e08d98dee8cd8683880121bdc55fbd9f7867facb16",
@@ -1310,7 +1310,7 @@
           "range": {
             "byteLength": 253,
             "byteStart": 7208,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L194-L199",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L194-L199",
             "lineEnd": 199,
             "lineStart": 194,
             "snippetSha256": "sha256:53b1fb9b6e4480ee5ffb931593ef694af03f02810a5d97492a27c5b52617a159",
@@ -1359,7 +1359,7 @@
           "range": {
             "byteLength": 1220,
             "byteStart": 7467,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L201-L229",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L201-L229",
             "lineEnd": 229,
             "lineStart": 201,
             "snippetSha256": "sha256:43ca8a63dec15db4474376dff670dd6b9fe84ad5243bb4b0d216c921b6e6daa1",
@@ -1417,7 +1417,7 @@
           "range": {
             "byteLength": 1462,
             "byteStart": 8693,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L231-L268",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L231-L268",
             "lineEnd": 268,
             "lineStart": 231,
             "snippetSha256": "sha256:d8ba21e412a536ee638d65ec849b2386a53715c175b9be2ae6cde4a978663596",
@@ -1456,7 +1456,7 @@
           "range": {
             "byteLength": 647,
             "byteStart": 10161,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L270-L284",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L270-L284",
             "lineEnd": 284,
             "lineStart": 270,
             "snippetSha256": "sha256:04e8f6821e1bb39fbdab9965fd775c3d21d56ba6834e1caf2a1803ec6ebf3f33",
@@ -1495,7 +1495,7 @@
           "range": {
             "byteLength": 752,
             "byteStart": 10814,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L286-L301",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L286-L301",
             "lineEnd": 301,
             "lineStart": 286,
             "snippetSha256": "sha256:0615a34daaf2916469124a444580ff66e59c7652ae8ab514300c228f1d2e2112",
@@ -1534,7 +1534,7 @@
           "range": {
             "byteLength": 328,
             "byteStart": 11572,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L303-L311",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L303-L311",
             "lineEnd": 311,
             "lineStart": 303,
             "snippetSha256": "sha256:590c354f71881401de814a708f60adb018725ae0898ce94585f70cd229f2fed7",
@@ -1558,7 +1558,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 602,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L13",
             "lineEnd": 13,
             "lineStart": 13,
             "snippetSha256": "sha256:ad24651b548634c20c3fd9bf0c5891bd71a56d5a9a2ea4a014ab0b93324836d4",
@@ -1570,7 +1570,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 656,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L13",
             "lineEnd": 13,
             "lineStart": 13,
             "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
@@ -1588,7 +1588,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 664,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:65f345f4645f289cff7c89132e230be953b5ca73c10771221b3a17685443a73b",
@@ -1600,7 +1600,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 707,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
@@ -1618,7 +1618,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 714,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:bcf4232b6b24edf417490800202a8c3d4c911b74ce15f69a3c51b6ab05556c42",
@@ -1630,7 +1630,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 767,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -1648,7 +1648,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 774,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:c8dc7ceb294bbb3d207f8acf713b0679687a2f73549461f7177cf1b048b9e0ba",
@@ -1660,7 +1660,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 833,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
@@ -1678,7 +1678,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 840,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:bd6cf92f46a0415ee4e75ed554b901d734faa3515f402a5d248e5e2382bb2d23",
@@ -1690,7 +1690,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 891,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
@@ -1708,7 +1708,7 @@
           "range": {
             "byteLength": 132,
             "byteStart": 899,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L20-L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L20-L21",
             "lineEnd": 21,
             "lineStart": 20,
             "snippetSha256": "sha256:c8546581a4d8f26eaa6ddc9ad0347720ecc2a3ca2d1c02e8bebd67b5d880b7be",
@@ -1720,7 +1720,7 @@
           "valueRange": {
             "byteLength": 66,
             "byteStart": 965,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:54dbcffdf0605b50d194000cb97fa20055db2ec9138cfb86c6fddd9436604c39",
@@ -1738,7 +1738,7 @@
           "range": {
             "byteLength": 132,
             "byteStart": 1037,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L22-L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L22-L23",
             "lineEnd": 23,
             "lineStart": 22,
             "snippetSha256": "sha256:e0a717e10ed12fc88e4047ef420b54fa999b2c17267ad9a9bf2fd7dbf8d167e4",
@@ -1750,7 +1750,7 @@
           "valueRange": {
             "byteLength": 66,
             "byteStart": 1103,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:992665ffee98da588ba4fad23f5bfc2d9d4546486e47720e0dc0292e1dc8347d",
@@ -1768,7 +1768,7 @@
           "range": {
             "byteLength": 58,
             "byteStart": 1176,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:190f8106a21f827276b0b7c9aae1830e58a1cb38859b22086913b3774ceb0f87",
@@ -1780,7 +1780,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 1233,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -1798,7 +1798,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 1493,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:9e26df1a82d2e34873ecc2b608d4927bf1a8560004225e672b44890d3937107d",
@@ -1820,7 +1820,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 1553,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L38",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L38",
             "lineEnd": 38,
             "lineStart": 38,
             "snippetSha256": "sha256:68023d9d3077286210eee09c685d4d69123b404b26fc53e746313e2cba2f4ee1",
@@ -1842,7 +1842,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 1619,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L39",
             "lineEnd": 39,
             "lineStart": 39,
             "snippetSha256": "sha256:87810494e89a0c3770fd77634569cec0ae3db2c5664f8b3eac3a6d865ee8bc71",
@@ -1866,7 +1866,7 @@
               "range": {
                 "byteLength": 13,
                 "byteStart": 1275,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L28",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L28",
                 "lineEnd": 28,
                 "lineStart": 28,
                 "snippetSha256": "sha256:f251b35835dd1fe589dcb9d8cdeac9754987cddf40112ffa4d4c7584e82dc4a6",
@@ -1882,7 +1882,7 @@
               "range": {
                 "byteLength": 13,
                 "byteStart": 1298,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L29",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L29",
                 "lineEnd": 29,
                 "lineStart": 29,
                 "snippetSha256": "sha256:420d6ccc9dd6791b5c07f963ec3b531de1b0508ad6309e57ce72b948fcbeb510",
@@ -1898,7 +1898,7 @@
               "range": {
                 "byteLength": 18,
                 "byteStart": 1321,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L30",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L30",
                 "lineEnd": 30,
                 "lineStart": 30,
                 "snippetSha256": "sha256:bd8a665d4e7bd2d65235c610045190bcbcd61ddc6611ed1b7136e0bf341c515a",
@@ -1914,7 +1914,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 1349,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L31",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L31",
                 "lineEnd": 31,
                 "lineStart": 31,
                 "snippetSha256": "sha256:07b4a1587c2ed4fd064eb7c3608572e27aded7a3fc956985ec46c91667eb9cfa",
@@ -1930,7 +1930,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 1460,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L33",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L33",
                 "lineEnd": 33,
                 "lineStart": 33,
                 "snippetSha256": "sha256:a227d72e9d4e2e710fbc28bc8d729bf4715dd0b4b1921d7654c0ddc714bab3b7",
@@ -1945,7 +1945,7 @@
           "range": {
             "byteLength": 246,
             "byteStart": 1241,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L27-L34",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L27-L34",
             "lineEnd": 34,
             "lineStart": 27,
             "snippetSha256": "sha256:75926ac100e8cf53736e23fb574834da9950488b94eb57d01efd9b6d55cca6b3",
@@ -1984,7 +1984,7 @@
     "range": {
       "byteLength": 11374,
       "byteStart": 528,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGasParameterHost.sol#L12-L312",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGasParameterHost.sol#L12-L312",
       "lineEnd": 312,
       "lineStart": 12,
       "snippetSha256": "sha256:f78f647b7c8d429b9628de6b08ef6cbccd407e77beeb712127b2c2f2299367d8",
