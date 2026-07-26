@@ -59,6 +59,9 @@ standalone row after `About`.
 - Open `NFTs`:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
   `/nft-activity`, `/meme-calendar`.
+- On local development and shared staging, `NFTs` also includes
+  `6529 Stream — Review` after `ReMemes`. It opens
+  `/reviews/6529-stream` and is absent on production.
 - Open `Waves`:
   `/waves` and `Discover Waves` at `/discover`.
 - Open `Join 6529`:
@@ -141,6 +144,8 @@ standalone row after `About`.
 ## Limitations / Notes
 
 - App-sidebar behavior is app-layout only.
+- The Stream review entry uses the same environment gate as its routes and is
+  never enabled by wallet state alone.
 - Bottom navigation and this drawer expose the same primary product concepts;
   profile/account actions stay in account surfaces.
 - Search stays in the header search control, not in this drawer.

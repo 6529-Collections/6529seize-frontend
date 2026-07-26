@@ -30,6 +30,8 @@ March 19, 2026.
   [Profiles](profiles/README.md),
   [Profile Troubleshooting](profiles/troubleshooting/README.md)
 - Browse memes, collections, minting, and media actions: [Media](media/README.md)
+- Review a proposed permanent contract before deployment:
+  [Public Contract Reviews](public-reviews/README.md)
 - Run Drop Forge craft and launch claim operations: [Drop Forge](drop-forge/README.md)
 - Check app notifications and push behavior:
   [Notifications](notifications/README.md)
@@ -61,6 +63,9 @@ March 19, 2026.
 - [Media](media/README.md): `/the-memes`, `/the-memes/{param*}`,
   `/6529-gradient`, `/6529-gradient/{param*}`, `/meme-lab`,
   `/meme-lab/{param*}`, `/rememes`, `/rememes/{param*}`, `/meme-calendar`
+- [Public Contract Reviews](public-reviews/README.md):
+  local/staging-only `/stream`, `/reviews/6529-stream`,
+  `/reviews/6529-stream/{page}`, and versioned review routes
 - [Drop Forge](drop-forge/README.md): `/drop-forge`, `/drop-forge/craft`,
   `/drop-forge/craft/{id}`, `/drop-forge/launch`, `/drop-forge/launch/{id}`
 - [Notifications](notifications/README.md): `/notifications`
@@ -106,6 +111,10 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/meme-lab`, `/meme-lab/collection/{collection}`, `/meme-lab/{id}`,
   `/meme-lab/{id}/distribution`, `/rememes`, `/rememes/add`,
   `/rememes/{contract}/{id}`, `/meme-calendar`
+- Public contract reviews, on local development and shared staging only:
+  `/stream`, `/reviews/6529-stream`, `/reviews/6529-stream/{page}`,
+  `/reviews/6529-stream/versions/{version}`,
+  `/reviews/6529-stream/versions/{version}/{page}`
 - Drop Forge:
   `/drop-forge`, `/drop-forge/craft`, `/drop-forge/craft/{id}`,
   `/drop-forge/launch`, `/drop-forge/launch/{id}`

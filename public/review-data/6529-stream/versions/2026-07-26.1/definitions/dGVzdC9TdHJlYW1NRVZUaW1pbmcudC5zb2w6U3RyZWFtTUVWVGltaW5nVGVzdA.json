@@ -1,0 +1,892 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0xed95384f",
+          "declaringDefinitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDeadlineBoundaryIsInclusiveAndExpiredAttemptDoesNotConsume",
+          "outputs": [],
+          "selector": "0xed95384f",
+          "signature": "testDeadlineBoundaryIsInclusiveAndExpiredAttemptDoesNotConsume()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x3811ece8",
+          "declaringDefinitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testExactEndBidIsAcceptedAndExtendsAuction",
+          "outputs": [],
+          "selector": "0x3811ece8",
+          "signature": "testExactEndBidIsAcceptedAndExtendsAuction()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0xefc32a44",
+          "declaringDefinitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testLateBidAfterStrictEndFailsWithoutStateMutation",
+          "outputs": [],
+          "selector": "0xefc32a44",
+          "signature": "testLateBidAfterStrictEndFailsWithoutStateMutation()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x77b11603",
+          "declaringDefinitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNearEndOutbidCreditsPreviousBidderAndExtendsOnce",
+          "outputs": [],
+          "selector": "0x77b11603",
+          "signature": "testNearEndOutbidCreditsPreviousBidderAndExtendsOnce()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x0004a8f4",
+          "declaringDefinitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPaidDropBindsPayerAndFailedSearcherAttemptDoesNotConsume",
+          "outputs": [],
+          "selector": "0x0004a8f4",
+          "signature": "testPaidDropBindsPayerAndFailedSearcherAttemptDoesNotConsume()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x90507645",
+          "declaringDefinitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testThirdPartyCanSubmitFreeDropButCannotStealRecipient",
+          "outputs": [],
+          "selector": "0x90507645",
+          "signature": "testThirdPartyCanSubmitFreeDropButCannotStealRecipient()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testThirdPartyCanSubmitFreeDropButCannotStealRecipient()",
+          "displaySignature": "testThirdPartyCanSubmitFreeDropButCannotStealRecipient()",
+          "functionKind": "function",
+          "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x90507645",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdCNmdW5jdGlvbjoweDkwNTA3NjQ1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testThirdPartyCanSubmitFreeDropButCannotStealRecipient",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1641,
+            "byteStart": 1176,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L30-L67",
+            "lineEnd": 67,
+            "lineStart": 30,
+            "snippetSha256": "sha256:da2021a45e76df40bd9a8feccfd17ea366a65ede1601eb9cec2da4fb2d7443ea",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": "0x90507645",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPaidDropBindsPayerAndFailedSearcherAttemptDoesNotConsume()",
+          "displaySignature": "testPaidDropBindsPayerAndFailedSearcherAttemptDoesNotConsume()",
+          "functionKind": "function",
+          "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x0004a8f4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdCNmdW5jdGlvbjoweDAwMDRhOGY0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPaidDropBindsPayerAndFailedSearcherAttemptDoesNotConsume",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1731,
+            "byteStart": 2823,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L69-L108",
+            "lineEnd": 108,
+            "lineStart": 69,
+            "snippetSha256": "sha256:217dd7dc87963d9553838fa822252dfb072d9c9e60117145d5ad05d1a75b4f39",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": "0x0004a8f4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDeadlineBoundaryIsInclusiveAndExpiredAttemptDoesNotConsume()",
+          "displaySignature": "testDeadlineBoundaryIsInclusiveAndExpiredAttemptDoesNotConsume()",
+          "functionKind": "function",
+          "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0xed95384f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdCNmdW5jdGlvbjoweGVkOTUzODRm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDeadlineBoundaryIsInclusiveAndExpiredAttemptDoesNotConsume",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1780,
+            "byteStart": 4560,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L110-L158",
+            "lineEnd": 158,
+            "lineStart": 110,
+            "snippetSha256": "sha256:2cba55c23285fc2a11500eb7ee9becfb789e71b127a473c6daea5cf45d5f575b",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": "0xed95384f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testExactEndBidIsAcceptedAndExtendsAuction()",
+          "displaySignature": "testExactEndBidIsAcceptedAndExtendsAuction()",
+          "functionKind": "function",
+          "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x3811ece8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdCNmdW5jdGlvbjoweDM4MTFlY2U4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testExactEndBidIsAcceptedAndExtendsAuction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 956,
+            "byteStart": 6346,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L160-L176",
+            "lineEnd": 176,
+            "lineStart": 160,
+            "snippetSha256": "sha256:f034ec322985a3e4bb18c1d91776c868aa4f4079087d983e5fa24c6b018bd559",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": "0x3811ece8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testLateBidAfterStrictEndFailsWithoutStateMutation()",
+          "displaySignature": "testLateBidAfterStrictEndFailsWithoutStateMutation()",
+          "functionKind": "function",
+          "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0xefc32a44",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdCNmdW5jdGlvbjoweGVmYzMyYTQ0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testLateBidAfterStrictEndFailsWithoutStateMutation",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1597,
+            "byteStart": 7308,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L178-L206",
+            "lineEnd": 206,
+            "lineStart": 178,
+            "snippetSha256": "sha256:5f6ecc5b4a0ac88ceac405f1d70184196305f49aa22ddd6e2efab2f4d7f3b03e",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": "0xefc32a44",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNearEndOutbidCreditsPreviousBidderAndExtendsOnce()",
+          "displaySignature": "testNearEndOutbidCreditsPreviousBidderAndExtendsOnce()",
+          "functionKind": "function",
+          "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x77b11603",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdCNmdW5jdGlvbjoweDc3YjExNjAz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNearEndOutbidCreditsPreviousBidderAndExtendsOnce",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1285,
+            "byteStart": 8911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L208-L229",
+            "lineEnd": 229,
+            "lineStart": 208,
+            "snippetSha256": "sha256:c983360cfbfffb80988e834ead3d245e7a8fee7ce48d5ce8509bb47195f3089b",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": "0x77b11603",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createAuction(uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:_createAuction(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "saltSeed",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdCNmdW5jdGlvbjpfY3JlYXRlQXVjdGlvbih1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createAuction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 1417,
+            "byteStart": 10358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L238-L271",
+            "lineEnd": 271,
+            "lineStart": 238,
+            "snippetSha256": "sha256:84c8e524d3ef4a0f28a0b8d3051adadae696e9c8de71d2acaa6808ab5646e7b9",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRevertedWithReason(bool,bytes,string)",
+          "functionKind": "function",
+          "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:_assertRevertedWithReason(bool,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "revertData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdCNmdW5jdGlvbjpfYXNzZXJ0UmV2ZXJ0ZWRXaXRoUmVhc29uKGJvb2wsYnl0ZXMsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRevertedWithReason",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 773,
+            "byteStart": 11781,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L273-L292",
+            "lineEnd": 292,
+            "lineStart": 273,
+            "snippetSha256": "sha256:7cc100d4b5ddb97a71c83453b795cf2a01abe3e7621eb34c0a7d9a7ab80583b1",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 474,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 508,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "address(0x1001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 529,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 563,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "address(0x2002)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 584,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 625,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "address(0x3003)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 646,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:a4e48e7900caa5475b325dd02ed7d4ddd4c407c8928bd655dc7ecf9173eb8230",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 683,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:1f4fd140ad2c560f9c39ca5e51b0dd8d00bd16cb2bb0afd99e8b005b7136d9d7",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "address(0x4004)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SEARCHER",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 704,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:49e10ae99a824b6dc9735ab66e8bcde7e6b8bcdfe136d65885e22120c3365116",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 740,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "address(0x5005)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYER",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 761,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:2c8cfd02cfc3a513a42bbd0c7250232d92b1d663d0b2a74693bbcdff2e5470a0",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 794,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:2b313e967de5483796211fbd6b58e26c0e1d5832d8be24b0b4b1d2ad4809a902",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "address(0x6006)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:1ad75f92ec92862f2d23475bc2e041941914e4a6c7748b917254cf7d2284b872",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 849,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:ac2733152df2595a308f253c6d663e57effbc243730ee25817f4fc7ed2c5c6b8",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "address(0x7007)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 870,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:ff3f57dc4d7656ca70b035168e15ca128476eb81a284328bd7e5d1a96383c286",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:c59018fa9925c027b90f40869f2cf2d45a9085ebd0d4ccf608b74606ef40cc7a",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "address(0x8008)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RESERVE_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 933,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:5d220cdbd734b87afbb29e781ce1a0927c3f4a7259c1d16b10ddb926f6ededa1",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 974,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:89d2e8f6fbb5823cc4c82092cd5b652e6504bca12f3a7e4bf6dd158f7e1bd67a",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "5 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BID",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 987,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:d6e7e28579e1cfed0eb06d7e93683d0533231202e1e1dc27df10fc976d030145",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1025,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:a073dd9f791dbcff86197a52bb8aac26d3cc467e5138fdf43027e9abf73fe25e",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "6 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FIRST_TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 1038,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:5e9842250b43db62b5740aa93331babcc5864e21094ba83ed99f30a2024f008c",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1080,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERROR_STRING_SELECTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 1087,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:6d360a41c9c4d9bb602417872810343b68000b7179c6999c974f9bf2a5664e9a",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 34,
+            "byteStart": 1135,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:ff066fd84e2e90cdc62fe611f91c42bb927893bba3429b6a76e7fe90e1709bd3",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          },
+          "valueSource": "bytes4(keccak256(\"Error(string)\"))",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 10232,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L232",
+                "lineEnd": 232,
+                "lineStart": 232,
+                "snippetSha256": "sha256:67cd5d2d923d960771e4de7c95f232699d5ce27f40fe1105c89e6a57535a802e",
+                "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+              },
+              "type": "DeployedStream",
+              "typeString": "struct StreamFixture.DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "auctions",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 10265,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L233",
+                "lineEnd": 233,
+                "lineStart": 233,
+                "snippetSha256": "sha256:a3b7196e6549c4e665308750d1c91c4b213c8bb4ead75bdaf415a72abb8c6668",
+                "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+              },
+              "type": "StreamAuctions",
+              "typeString": "contract StreamAuctions"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 10298,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L234",
+                "lineEnd": 234,
+                "lineStart": 234,
+                "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
+                "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "auctionEndTime",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 10323,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L235",
+                "lineEnd": 235,
+                "lineStart": 235,
+                "snippetSha256": "sha256:26836db544badd824d9d43e4a4d94cfa624ba520242ffd2564fdefa634f79ba9",
+                "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "AuctionSetup",
+          "natspec": "",
+          "range": {
+            "byteLength": 150,
+            "byteStart": 10202,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L231-L236",
+            "lineEnd": 236,
+            "lineStart": 231,
+            "snippetSha256": "sha256:c4bcb4287cf51d85cdf655b08adbd4f82ee50931a0929a9925b19811a90ce222",
+            "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NRVZUaW1pbmcudC5zb2w6U3RyZWFtTUVWVGltaW5nVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMEVTimingTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 12287,
+      "byteStart": 269,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMEVTiming.t.sol#L10-L293",
+      "lineEnd": 293,
+      "lineStart": 10,
+      "snippetSha256": "sha256:0fbac96e4b1594758128ebc8596132ada45e7eef8ad4d5177a8154f022d79f21",
+      "sourceSha256": "sha256:26536b3e1117ecbe0e42b274d334e1a041c80521b21b857d78761bd9e9acd344"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMEVTiming.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x0004a8f4",
+      "definitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x3811ece8",
+      "definitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x77b11603",
+      "definitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0x90507645",
+      "definitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0xed95384f",
+      "definitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest#function:0xefc32a44",
+      "definitionId": "test/StreamMEVTiming.t.sol:StreamMEVTimingTest",
+      "severity": "advisory"
+    }
+  ]
+}
