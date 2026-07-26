@@ -45,24 +45,31 @@ export default function CreateWave({
   useKeyboardFocusScroll(containerRef);
 
   // On the native /waves/create route the create flow has no height-bounding
-  // ancestor, so we hand CreateWaveFlow the layout system's keyboard-aware view
-  // height — the same source the wave views use. It is the viewport minus the
-  // measured app header (create-wave hides the bottom nav, so nothing else is
-  // subtracted), minus the software-keyboard inset on Capacitor when the
-  // viewport isn't already following the keyboard (iOS visualViewport vs
-  // Android). Bounding the scrollport EXACTLY to the space below the header
-  // matters two ways: the surface never grows past the viewport, so the
-  // app-shell scroller can't ride the header (its back arrow) up under the
-  // status bar; and it shrinks as the keyboard opens so the sticky footer stays
-  // reachable above it. The bottom safe-area is handled inside the flow (the
-  // footer's own inset padding). The web modal bounds its own height, so it
-  // passes no style.
+  // ancestor, so we hand CreateWaveFlow the layout system's measured content
+  // height: the viewport minus the measured app header (create-wave hides the
+  // bottom nav, so nothing else is subtracted). This bounds the scrollport
+  // EXACTLY to the space below the header, so the surface never grows past the
+  // viewport and the app-shell scroller can't ride the header (its back arrow)
+  // up under the status bar.
+  //
+  // Deliberately NOT keyboard-aware (contentContainerStyle, not the wave views'
+  // keyboard-following height): that height is stable regardless of keyboard
+  // state, so the sticky footer sits in the SAME place whether or not the
+  // keyboard has been opened — no shrink that gets stuck short and leaves a
+  // black gap under the footer after moving between steps. Focused inputs are
+  // kept visible by useKeyboardFocusScroll inside the scrollport; the bottom
+  // safe-area is handled by the footer's own inset. The web modal bounds its
+  // own height (no style); 100dvh is a brief pre-measurement fallback.
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
-  const { waveViewStyle } = useLayout();
+  const { contentContainerStyle } = useLayout();
   const isNativeRoute = isApp && pathname === "/waves/create";
+  const measuredOrFallbackStyle: CSSProperties =
+    contentContainerStyle.height !== undefined
+      ? contentContainerStyle
+      : { height: "100dvh", maxHeight: "100dvh" };
   const nativeBoundedStyle: CSSProperties | undefined = isNativeRoute
-    ? waveViewStyle
+    ? measuredOrFallbackStyle
     : undefined;
 
   // Each step renders fresh content, but the layout's scroll container keeps
