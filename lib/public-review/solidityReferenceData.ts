@@ -19,6 +19,7 @@ import {
   type SolidityReferenceRouteInventory,
 } from "@/lib/public-review/solidityReferenceRoutes";
 import type {
+  SolidityDeclarationIndexEntry,
   SolidityDeclarationKind,
   SolidityDefinitionIndexEntry,
   SolidityDefinitionShard,
@@ -151,9 +152,6 @@ function getDeclarations(
 
 type LoadedManifest = Awaited<
   ReturnType<SolidityReferenceReader["loadManifest"]>
->;
-type LoadedDefinition = Awaited<
-  ReturnType<SolidityReferenceReader["loadDefinition"]>
 >;
 type SourceBufferLoader = (
   file: SoliditySourceFileReference
@@ -360,41 +358,40 @@ function createSourceLoader({
 }
 
 function mapDeclarationRoutes(
-  definitions: readonly LoadedDefinition[],
-  kind: SolidityDeclarationKind
+  manifest: SolidityReferenceManifest,
+  kind: SolidityDeclarationIndexEntry["kind"]
 ) {
-  return definitions.flatMap(({ shard }) =>
-    getDeclarations(shard, kind).map((declaration) => ({
-      definitionKey: shard.definition.key,
-      declarationKey: declaration.key,
-    }))
+  return manifest.declarationIndex.flatMap((declaration) =>
+    declaration.kind === kind &&
+    !declaration.topLevel &&
+    declaration.definitionKey
+      ? [
+          {
+            declarationKey: declaration.key,
+            definitionKey: declaration.definitionKey,
+          },
+        ]
+      : []
   );
 }
 
 function createRouteInventoryLoader({
   identity,
-  loadDefinition,
   loadManifest,
 }: {
   readonly identity: SolidityReferenceReviewIdentity;
-  readonly loadDefinition: SolidityReferenceReader["loadDefinition"];
   readonly loadManifest: SolidityReferenceReader["loadManifest"];
 }): SolidityReferenceReader["loadRouteInventory"] {
   return async (version) => {
     const resolvedVersion = version ?? identity.activeVersion;
     const { manifest } = await loadManifest(resolvedVersion);
-    const definitions = await Promise.all(
-      manifest.definitionIndex.map((entry) =>
-        loadDefinition(resolvedVersion, entry.key)
-      )
-    );
     return {
       definitions: manifest.definitionIndex.map((entry) => ({
         definitionKey: entry.key,
       })),
-      functions: mapDeclarationRoutes(definitions, "functions"),
-      events: mapDeclarationRoutes(definitions, "events"),
-      errors: mapDeclarationRoutes(definitions, "errors"),
+      functions: mapDeclarationRoutes(manifest, "function"),
+      events: mapDeclarationRoutes(manifest, "event"),
+      errors: mapDeclarationRoutes(manifest, "error"),
       interfaces: manifest.definitionIndex
         .filter((entry) => entry.interface.published)
         .map((entry) => ({ definitionKey: entry.key })),
@@ -433,7 +430,6 @@ export function createSolidityReferenceReader({
     loadManifest,
     loadRouteInventory: createRouteInventoryLoader({
       identity,
-      loadDefinition,
       loadManifest,
     }),
     loadSource: createSourceLoader({ loadManifest, loadSourceBuffer }),
