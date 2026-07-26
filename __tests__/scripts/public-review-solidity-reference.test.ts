@@ -914,6 +914,7 @@ describe("Solidity public-review reference generator", () => {
     ]);
     const artifacts = {
       "release-artifacts/latest/protocol-surface-report.json": {
+        sha256: `sha256:${"a".repeat(64)}`,
         json: {
           contracts: {
             T: {
@@ -952,7 +953,9 @@ describe("Solidity public-review reference generator", () => {
         },
       },
     };
-    expect(validateNatSpecBaseline(sources, artifacts)).toEqual({
+    const evidence = validateNatSpecBaseline(sources, artifacts);
+    expect(() => validateNatSpecEvidence(evidence)).not.toThrow();
+    expect(evidence).toEqual({
       baseline: {
         path: "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
         schemaVersion: "1",
@@ -981,6 +984,11 @@ describe("Solidity public-review reference generator", () => {
         },
       ],
     });
+    const invalidEvidence = JSON.parse(JSON.stringify(evidence));
+    invalidEvidence.gaps[0]!.follow_up = "";
+    expect(() => validateNatSpecEvidence(invalidEvidence)).toThrow(
+      "generated NatSpec auditor evidence gap is invalid"
+    );
     artifacts[
       "release-artifacts/baselines/v0.1.0/natspec-coverage.json"
     ].json.exclusions[0]!.status = "declaration_not_in_source";
