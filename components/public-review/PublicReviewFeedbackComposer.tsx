@@ -1,12 +1,18 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import {
+  FeedbackConnectPrompt,
+  FeedbackPreview,
+  FeedbackResultMessages,
+  type PublicReviewReferenceIntegrityStatus,
+  ReferenceIntegrityNotice,
+} from "@/components/public-review/PublicReviewFeedbackComposerStatus";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -34,8 +40,12 @@ interface PublicReviewFeedbackComposerProps {
   readonly destination: PublicReviewDiscussionDestination;
   readonly page: PublicReviewPageContext;
   readonly referenceSelection?: PublicReviewReferenceSelection | undefined;
+  readonly referenceIntegrityMessage?: string | undefined;
+  readonly referenceIntegrityStatus?: PublicReviewReferenceIntegrityStatus | undefined;
   readonly submitter?: PublicReviewFeedbackSubmitter | undefined;
 }
+
+export type { PublicReviewReferenceIntegrityStatus } from "@/components/public-review/PublicReviewFeedbackComposerStatus";
 
 interface ContextBoundValue<Value> {
   readonly contextFingerprint: string;
@@ -68,12 +78,17 @@ function createSubmissionId(): string {
 
 function getFeedbackContextFingerprint({
   page,
+  referenceIntegrityStatus,
   referenceSelection,
 }: Pick<
   PublicReviewFeedbackComposerProps,
-  "page" | "referenceSelection"
+  "page" | "referenceIntegrityStatus" | "referenceSelection"
 >): string {
-  return JSON.stringify({ page, referenceSelection });
+  return JSON.stringify({
+    page,
+    referenceIntegrityStatus,
+    referenceSelection,
+  });
 }
 
 const INPUT_CLASSES =
@@ -109,40 +124,6 @@ function getFeedbackGate({
   return waveCanAcceptFeedback
     ? null
     : t(locale, "publicReview.feedback.ineligible");
-}
-
-function getConnectButtonLabel({
-  connected,
-  connecting,
-  locale,
-}: {
-  readonly connected: boolean;
-  readonly connecting: boolean;
-  readonly locale: SupportedLocale;
-}): string {
-  if (connecting) {
-    return t(locale, "publicReview.feedback.connecting");
-  }
-  return t(
-    locale,
-    connected
-      ? "publicReview.feedback.reconnect"
-      : "publicReview.feedback.connect"
-  );
-}
-
-function ReviewFeedbackConnectionStatus({
-  connecting,
-  locale,
-}: {
-  readonly connecting: boolean;
-  readonly locale: SupportedLocale;
-}) {
-  return (
-    <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
-      {connecting ? t(locale, "publicReview.feedback.connecting") : ""}
-    </output>
-  );
 }
 
 function ReviewFeedbackContext({
@@ -186,6 +167,8 @@ function useFeedbackComposerState({
   destination,
   locale,
   page,
+  referenceIntegrityMessage,
+  referenceIntegrityStatus,
   referenceSelection,
   submitter,
 }: PublicReviewFeedbackComposerProps & {
@@ -215,6 +198,7 @@ function useFeedbackComposerState({
   const [isConnecting, setIsConnecting] = useState(false);
   const contextFingerprint = getFeedbackContextFingerprint({
     page,
+    referenceIntegrityStatus,
     referenceSelection,
   });
   const setCurrentFormError = (message: string | null): void => {
@@ -251,6 +235,12 @@ function useFeedbackComposerState({
   };
 
   const createPayload = () => {
+    if (referenceIntegrityStatus !== "ready") {
+      throw new PublicReviewFeedbackValidationError([
+        referenceIntegrityMessage ??
+          t(locale, "publicReview.feedback.hashUnavailable"),
+      ]);
+    }
     if (!draft.comment.trim()) {
       const message = t(locale, "publicReview.feedback.commentRequired");
       setCommentError(message);
@@ -267,17 +257,19 @@ function useFeedbackComposerState({
     });
   };
 
-  const handlePreview = (): void => {
+  const handlePreview = (): boolean => {
     setCurrentFormError(null);
     try {
       setPreview({
         contextFingerprint,
         value: createPayload().parts[0]?.content ?? "",
       });
+      return true;
     } catch {
       setCurrentFormError(
         t(locale, "publicReview.feedback.validationError")
       );
+      return false;
     }
   };
 
@@ -386,11 +378,15 @@ export default function PublicReviewFeedbackComposer({
   config,
   destination,
   page,
+  referenceIntegrityMessage,
+  referenceIntegrityStatus = "ready",
   referenceSelection,
   submitter = submitPublicReviewFeedback,
 }: PublicReviewFeedbackComposerProps) {
   const formId = useId();
+  const commentRef = useRef<HTMLTextAreaElement>(null);
   const successRef = useRef<HTMLOutputElement>(null);
+  const referenceStatusId = `${formId}-reference-status`;
   const {
     authenticated,
     busy,
@@ -412,6 +408,8 @@ export default function PublicReviewFeedbackComposer({
     config,
     destination,
     page,
+    referenceIntegrityMessage,
+    referenceIntegrityStatus,
     referenceSelection,
     submitter,
   });
@@ -419,8 +417,16 @@ export default function PublicReviewFeedbackComposer({
   const submitAndFocusConfirmation = async () => {
     if (await handleSubmit()) {
       window.setTimeout(() => successRef.current?.focus(), 0);
+    } else if (!draft.comment.trim()) {
+      window.setTimeout(() => commentRef.current?.focus(), 0);
     }
   };
+  const previewAndFocusError = (): void => {
+    if (!handlePreview() && !draft.comment.trim()) {
+      window.setTimeout(() => commentRef.current?.focus(), 0);
+    }
+  };
+  const referenceReady = referenceIntegrityStatus === "ready";
 
   return (
     <section
@@ -442,27 +448,25 @@ export default function PublicReviewFeedbackComposer({
         page={page}
         referenceSelection={referenceSelection}
       />
+      <ReferenceIntegrityNotice
+        id={referenceStatusId}
+        locale={locale}
+        message={referenceIntegrityMessage}
+        status={referenceIntegrityStatus}
+      />
 
-      {!authenticated && config.submissionsOpen ? (
-        <>
-          <button
-            type="button"
-            aria-busy={connecting}
-            disabled={busy}
-            onClick={() => void handleConnect()}
-            className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-60"
-          >
-            {getConnectButtonLabel({ connected, connecting, locale })}
-          </button>
-          <ReviewFeedbackConnectionStatus
-            connecting={connecting}
-            locale={locale}
-          />
-        </>
-      ) : null}
+      <FeedbackConnectPrompt
+        busy={busy}
+        connected={connected}
+        connecting={connecting}
+        handleConnect={handleConnect}
+        locale={locale}
+        visible={!authenticated && config.submissionsOpen}
+      />
 
       {authenticated && config.submissionsOpen ? (
         <form
+          aria-describedby={!referenceReady ? referenceStatusId : undefined}
           className="tw-mt-5 tw-space-y-4"
           noValidate
           onSubmit={(event) => {
@@ -525,6 +529,8 @@ export default function PublicReviewFeedbackComposer({
               {t(locale, "publicReview.feedback.comment")}
             </label>
             <textarea
+              ref={commentRef}
+              data-public-review-feedback-primary
               id={`${formId}-comment`}
               aria-describedby={`${formId}-comment-hint${
                 commentError ? ` ${formId}-comment-error` : ""
@@ -543,6 +549,7 @@ export default function PublicReviewFeedbackComposer({
             {commentError ? (
               <span
                 id={`${formId}-comment-error`}
+                aria-live="polite"
                 className="tw-text-red-300 tw-mt-1 tw-block tw-font-normal"
               >
                 {commentError}
@@ -590,35 +597,26 @@ export default function PublicReviewFeedbackComposer({
             </div>
           </details>
 
-          {preview !== null ? (
-            <section
-              aria-labelledby={`${formId}-preview`}
-              className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4"
-            >
-              <h3
-                id={`${formId}-preview`}
-                className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100"
-              >
-                {t(locale, "publicReview.feedback.previewHeading")}
-              </h3>
-              <div className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-font-sans tw-text-sm tw-leading-6 tw-text-iron-300">
-                {preview}
-              </div>
-            </section>
-          ) : null}
+          <FeedbackPreview
+            formId={formId}
+            locale={locale}
+            preview={preview}
+          />
 
           <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row">
             <button
               type="button"
-              disabled={busy}
-              onClick={handlePreview}
+              disabled={busy || !referenceReady}
+              onClick={previewAndFocusError}
               className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-opacity-60"
             >
               {t(locale, "publicReview.feedback.preview")}
             </button>
             <button
               type="submit"
-              disabled={busy || Boolean(feedbackGate)}
+              disabled={
+                busy || !referenceReady || Boolean(feedbackGate)
+              }
               className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
             >
               {isSubmitting
@@ -629,40 +627,13 @@ export default function PublicReviewFeedbackComposer({
         </form>
       ) : null}
 
-      {feedbackGate ? (
-        <output
-          className="tw-mb-0 tw-mt-4 tw-block tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {feedbackGate}
-        </output>
-      ) : null}
-      {formError ? (
-        <p
-          className="tw-border-red-500/40 tw-bg-red-950/30 tw-text-red-200 tw-mb-0 tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm"
-          role="alert"
-        >
-          {formError}
-        </p>
-      ) : null}
-      {successPath ? (
-        <output
-          ref={successRef}
-          tabIndex={-1}
-          aria-live="polite"
-          aria-atomic="true"
-          className="tw-border-green-500/40 tw-bg-green-950/30 tw-text-green-100 tw-mb-0 tw-mt-4 tw-block tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-green-300"
-        >
-          {t(locale, "publicReview.feedback.success")}{" "}
-          <Link
-            className="tw-text-green-100 focus-visible:tw-ring-green-300 tw-font-semibold tw-underline focus:tw-outline-none focus-visible:tw-ring-2"
-            href={successPath}
-          >
-            {t(locale, "publicReview.feedback.viewWave")}
-          </Link>
-        </output>
-      ) : null}
+      <FeedbackResultMessages
+        feedbackGate={feedbackGate}
+        formError={formError}
+        locale={locale}
+        successPath={successPath}
+        successRef={successRef}
+      />
     </section>
   );
 }

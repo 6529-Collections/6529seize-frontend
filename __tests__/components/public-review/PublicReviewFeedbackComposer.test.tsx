@@ -1,4 +1,5 @@
 import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
+import type { PublicReviewReferenceIntegrityStatus } from "@/components/public-review/PublicReviewFeedbackComposer";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -79,7 +80,8 @@ const config: PublicReviewFeedbackConfig = {
 
 function renderComposer(
   submitter: PublicReviewFeedbackSubmitter,
-  referenceSelection?: PublicReviewReferenceSelection
+  referenceSelection?: PublicReviewReferenceSelection,
+  referenceIntegrityStatus: PublicReviewReferenceIntegrityStatus = "ready"
 ) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -92,7 +94,9 @@ function renderComposer(
   );
 
   const getComposer = (
-    currentReferenceSelection?: PublicReviewReferenceSelection
+    currentReferenceSelection?: PublicReviewReferenceSelection,
+    currentReferenceIntegrityStatus: PublicReviewReferenceIntegrityStatus =
+      "ready"
   ) => (
     <PublicReviewFeedbackComposer
       locale="en-US"
@@ -104,16 +108,30 @@ function renderComposer(
         canonicalPath: "/stream/review/architecture",
       }}
       referenceSelection={currentReferenceSelection}
+      referenceIntegrityMessage={
+        currentReferenceIntegrityStatus === "pending"
+          ? "Calculating exact source checksum."
+          : undefined
+      }
+      referenceIntegrityStatus={currentReferenceIntegrityStatus}
       submitter={submitter}
     />
   );
-  const result = render(getComposer(referenceSelection), { wrapper: Wrapper });
+  const result = render(
+    getComposer(referenceSelection, referenceIntegrityStatus),
+    { wrapper: Wrapper }
+  );
   return {
     ...result,
     queryClient,
     rerenderSelection: (
-      nextReferenceSelection?: PublicReviewReferenceSelection
-    ) => result.rerender(getComposer(nextReferenceSelection)),
+      nextReferenceSelection?: PublicReviewReferenceSelection,
+      nextReferenceIntegrityStatus: PublicReviewReferenceIntegrityStatus =
+        "ready"
+    ) =>
+      result.rerender(
+        getComposer(nextReferenceSelection, nextReferenceIntegrityStatus)
+      ),
   };
 }
 
@@ -273,5 +291,78 @@ describe("PublicReviewFeedbackComposer", () => {
     expect(
       screen.getByText("Source: smart-contracts/StreamCore.sol, lines 20–20")
     ).toBeInTheDocument();
+  });
+
+  it("preserves the draft while a changed source range is being hashed", async () => {
+    const user = userEvent.setup();
+    const submitter = jest.fn();
+    const sourceSelection = {
+      kind: "code",
+      path: "smart-contracts/StreamCore.sol",
+      sourceSha256: `sha256:${"b".repeat(64)}`,
+      lineStart: 10,
+      lineEnd: 12,
+      snippetSha256: `sha256:${"c".repeat(64)}`,
+    } as const;
+    const { rerenderSelection } = renderComposer(
+      submitter,
+      sourceSelection
+    );
+    const comment = await screen.findByLabelText("Comment", {
+      selector: "textarea",
+    });
+    await user.type(comment, "Keep this draft across a new line range.");
+
+    rerenderSelection(undefined, "pending");
+
+    expect(comment).toHaveValue("Keep this draft across a new line range.");
+    expect(
+      screen.getByRole("button", { name: "Preview Wave message" })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Post feedback to the Wave" })
+    ).toBeDisabled();
+    expect(screen.getByText("Calculating exact source checksum.")).toHaveAttribute(
+      "aria-live",
+      "polite"
+    );
+
+    rerenderSelection(
+      {
+        ...sourceSelection,
+        lineStart: 20,
+        lineEnd: 20,
+        snippetSha256: `sha256:${"d".repeat(64)}`,
+      },
+      "ready"
+    );
+
+    expect(comment).toHaveValue("Keep this draft across a new line range.");
+    expect(
+      screen.getByRole("button", { name: "Preview Wave message" })
+    ).toBeEnabled();
+  });
+
+  it("focuses and describes the required comment after validation", async () => {
+    const user = userEvent.setup();
+    renderComposer(jest.fn());
+    const comment = await screen.findByLabelText("Comment", {
+      selector: "textarea",
+    });
+    const submit = screen.getByRole("button", {
+      name: "Post feedback to the Wave",
+    });
+    await waitFor(() => expect(submit).toBeEnabled());
+    await user.click(submit);
+
+    await waitFor(() => expect(comment).toHaveFocus());
+    expect(comment).toHaveAttribute("aria-invalid", "true");
+    const describedBy = comment.getAttribute("aria-describedby");
+    expect(describedBy).toContain("comment-hint");
+    expect(describedBy).toContain("comment-error");
+    expect(screen.getByText("Enter a comment.")).toHaveAttribute(
+      "aria-live",
+      "polite"
+    );
   });
 });

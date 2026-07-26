@@ -45,6 +45,26 @@ function ReviewPageLinks({
   );
 }
 
+function ReviewSectionLinks({
+  sections,
+}: {
+  readonly sections: readonly PublicReviewSectionDefinition[];
+}) {
+  return (
+    <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-border-y-0 tw-border-b-0 tw-border-r-0 tw-border-l tw-border-solid tw-border-iron-700 tw-p-0 tw-pl-4">
+      {sections.map((section) => (
+        <li key={section.id}>
+          <a
+            href={`#${section.id}`}
+            className="tw-text-sm tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+            {section.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function PublicReviewNavigation({
   currentPage,
   pages,
@@ -56,6 +76,10 @@ export function PublicReviewNavigation({
   readonly sections: readonly PublicReviewSectionDefinition[];
   readonly version?: string | undefined;
 }) {
+  const onThisPageLabel = t(
+    DEFAULT_LOCALE,
+    "publicReview.navigation.onThisPage"
+  );
   return (
     <>
       <details className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 lg:tw-hidden">
@@ -74,6 +98,16 @@ export function PublicReviewNavigation({
             version={version}
           />
         </nav>
+        {sections.length > 0 && (
+          <nav
+            aria-label={onThisPageLabel}
+            className="tw-mt-6">
+            <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
+              {onThisPageLabel}
+            </p>
+            <ReviewSectionLinks sections={sections} />
+          </nav>
+        )}
       </details>
 
       <aside className="tw-hidden lg:tw-block">
@@ -93,21 +127,11 @@ export function PublicReviewNavigation({
             />
           </nav>
           {sections.length > 0 && (
-            <nav aria-label={t(DEFAULT_LOCALE, "publicReview.navigation.onThisPage")}>
+            <nav aria-label={onThisPageLabel}>
               <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
-                {t(DEFAULT_LOCALE, "publicReview.navigation.onThisPage")}
+                {onThisPageLabel}
               </p>
-              <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-border-y-0 tw-border-b-0 tw-border-r-0 tw-border-l tw-border-solid tw-border-iron-700 tw-p-0 tw-pl-4">
-                {sections.map((section) => (
-                  <li key={section.id}>
-                    <a
-                      href={`#${section.id}`}
-                      className="tw-text-sm tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-                      {section.title}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <ReviewSectionLinks sections={sections} />
             </nav>
           )}
         </div>

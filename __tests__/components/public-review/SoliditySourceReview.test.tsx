@@ -87,7 +87,7 @@ describe("SoliditySourceReview", () => {
     ).toHaveAttribute("href", expect.stringContaining("#L2"));
   });
 
-  it("supports keyboard-equivalent numeric ranges and line-button selection", async () => {
+  it("uses explicit keyboard ranges without adding a tab stop per source line", async () => {
     render(
       <SoliditySourceReview source={SOURCE} feedbackSlot={<SelectionProbe />} />
     );
@@ -106,15 +106,12 @@ describe("SoliditySourceReview", () => {
       expect(selection).toMatchObject({ lineStart: 1, lineEnd: 3 });
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Select line 3" }));
-    await waitFor(() => {
-      expect(
-        JSON.parse(screen.getByTestId("selection").textContent ?? "")
-      ).toMatchObject({
-        lineStart: 3,
-        lineEnd: 3,
-      });
-    });
+    expect(
+      screen.queryByRole("button", { name: "Select line 3" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Solidity source code" })
+    ).toHaveAttribute("tabindex", "0");
   });
 
   it("keeps absolute source coordinates for bounded declaration excerpts", async () => {
@@ -130,9 +127,7 @@ describe("SoliditySourceReview", () => {
       />
     );
 
-    expect(
-      screen.getByRole("button", { name: "Select line 201" })
-    ).toBeInTheDocument();
+    expect(screen.getByText("201")).toBeInTheDocument();
     await waitFor(() => {
       expect(
         JSON.parse(screen.getByTestId("selection").textContent ?? "")
@@ -156,13 +151,49 @@ describe("SoliditySourceReview", () => {
     });
   });
 
+  it("associates an invalid cross-field range with both numeric controls", () => {
+    render(
+      <SoliditySourceReview source={SOURCE} feedbackSlot={<SelectionProbe />} />
+    );
+
+    const startLine = screen.getByLabelText("Start line");
+    const endLine = screen.getByLabelText("End line");
+    fireEvent.change(startLine, { target: { value: "3" } });
+    fireEvent.change(endLine, { target: { value: "1" } });
+
+    expect(startLine).toHaveAttribute("aria-invalid", "true");
+    expect(endLine).toHaveAttribute("aria-invalid", "true");
+    expect(startLine).toHaveAttribute(
+      "aria-describedby",
+      endLine.getAttribute("aria-describedby")
+    );
+    expect(
+      screen.getByText("The start line must not be after the end line.")
+    ).toHaveAttribute("aria-live", "polite");
+  });
+
   it("moves focus to the structured feedback slot", () => {
+    const scrollDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "scrollIntoView"
+    );
+    const scrollIntoView = jest.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: scrollIntoView,
+    });
+    jest.spyOn(globalThis, "matchMedia").mockReturnValue({
+      matches: true,
+    } as MediaQueryList);
     render(
       <SoliditySourceReview
         source={SOURCE}
         feedbackSlot={
           <div>
-            <textarea aria-label="Feedback comment" />
+            <textarea
+              aria-label="Feedback comment"
+              data-public-review-feedback-primary
+            />
             <SelectionProbe />
           </div>
         }
@@ -173,6 +204,23 @@ describe("SoliditySourceReview", () => {
       screen.getByRole("button", { name: "Comment on selected lines" })
     );
     expect(screen.getByLabelText("Feedback comment")).toHaveFocus();
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      behavior: "auto",
+      block: "start",
+    });
+    if (scrollDescriptor) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "scrollIntoView",
+        scrollDescriptor
+      );
+    } else {
+      delete (
+        HTMLElement.prototype as Partial<
+          Pick<HTMLElement, "scrollIntoView">
+        >
+      ).scrollIntoView;
+    }
   });
 
   it("withholds code evidence until its exact snippet hash settles", async () => {
@@ -207,5 +255,34 @@ describe("SoliditySourceReview", () => {
         snippetSha256: `sha256:${"0".repeat(64)}`,
       });
     });
+  });
+
+  it("keeps a 5,335-line source to one code-region tab stop", () => {
+    const lines = Array.from(
+      { length: 5_335 },
+      (_, index) => `uint256 value${index};`
+    );
+    const { container } = render(
+      <SoliditySourceReview
+        source={{
+          ...SOURCE,
+          initialLineEnd: 1,
+          initialLineStart: 1,
+          lines,
+        }}
+      />
+    );
+
+    const sourceRegion = screen.getByRole("region", {
+      name: "Solidity source code",
+    });
+    expect(sourceRegion.querySelectorAll("li")).toHaveLength(5_335);
+    expect(sourceRegion.querySelectorAll("button")).toHaveLength(0);
+    expect(sourceRegion.querySelectorAll('[tabindex="0"]')).toHaveLength(0);
+    expect(
+      container.querySelectorAll(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]'
+      ).length
+    ).toBeLessThan(10);
   });
 });

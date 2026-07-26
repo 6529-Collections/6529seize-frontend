@@ -4,7 +4,10 @@ import type { ReactNode } from "react";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import type { PublicReviewDefinition } from "@/lib/public-review/publicReviewTypes";
+import type {
+  PublicReviewDefinition,
+  PublicReviewSource,
+} from "@/lib/public-review/publicReviewTypes";
 
 export function PublicReviewReferenceShell({
   children,
@@ -14,6 +17,7 @@ export function PublicReviewReferenceShell({
   feedbackHref,
   referenceHref,
   review,
+  source,
   title,
 }: {
   readonly children: ReactNode;
@@ -23,6 +27,7 @@ export function PublicReviewReferenceShell({
   readonly feedbackHref: string;
   readonly referenceHref: string;
   readonly review: PublicReviewDefinition;
+  readonly source: PublicReviewSource;
   readonly title: string;
 }) {
   return (
@@ -30,6 +35,7 @@ export function PublicReviewReferenceShell({
       <PublicReviewStatusBanner
         review={review}
         displayedVersion={displayedVersion}
+        source={source}
       />
       <div className="tw-mx-auto tw-w-full tw-max-w-[88rem] tw-px-4 tw-pb-20 tw-pt-8 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-12">
         <nav
@@ -55,13 +61,19 @@ export function PublicReviewReferenceShell({
           >
             {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
           </Link>
+          <a
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-3 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            href="#public-review-feedback"
+          >
+            {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
+          </a>
         </nav>
 
         <header className="tw-mt-8 tw-max-w-5xl">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-sky-300">
             {t(DEFAULT_LOCALE, "publicReview.reference.eyebrow")}
           </p>
-          <h1 className="tw-mb-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-5xl">
+          <h1 className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-mt-3 tw-min-w-0 tw-break-words tw-text-3xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-5xl">
             {title}
           </h1>
           <p className="tw-mb-0 tw-mt-5 tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-8">

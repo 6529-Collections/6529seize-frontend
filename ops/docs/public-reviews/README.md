@@ -36,6 +36,8 @@ Production activation requires a later reviewed configuration change.
 - `/reviews/6529-stream/versions/{version}/reference`: immutable generated
   technical reference
 - `/reviews/6529-stream/feedback`: searchable public feedback ledger
+- `/reviews/6529-stream/versions/{version}/feedback`: immutable,
+  version-filtered public feedback ledger
 - `/stream`: gated convenience redirect to the active overview
 
 When enabled, **NFTs > 6529 Stream — Review** appears after the live collection
@@ -103,11 +105,18 @@ category, suspected severity, and any exact code provenance. The category
 the same public pre-deployment review destination: Stream is not live, and
 finding those issues before finalization is the purpose of this review.
 
-The feedback ledger at `/reviews/6529-stream/feedback` reads the public review
-discussion, validates structured metadata against the exact review
-configuration, and supports filtering plus CSV and Markdown auditor exports.
-Source-linked entries open the immutable in-site source view first, with the
-pinned GitHub source as a secondary link.
+For Solidity feedback, start and end line fields are the keyboard selection
+controls and the source itself is one focusable scroll region. Changing the
+range keeps the written draft in place while the new snippet checksum is
+computed; preview and posting remain disabled until that exact reference is
+ready.
+
+The active feedback ledger at `/reviews/6529-stream/feedback` and each
+immutable ledger at `/reviews/6529-stream/versions/{version}/feedback` read the
+public review discussion, validate structured metadata against the exact
+resolved review configuration, and support filtering plus CSV and Markdown
+auditor exports. Source-linked entries open the immutable in-site source view
+first, with the pinned GitHub source as a secondary link.
 
 The form and ledger are reusable public-review modules. Review-specific
 configuration supplies the immutable manifest, page and section allowlists,

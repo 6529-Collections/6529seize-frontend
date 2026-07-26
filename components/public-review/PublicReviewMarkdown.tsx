@@ -86,9 +86,15 @@ const MARKDOWN_COMPONENTS: Components = {
     </pre>
   ),
   table: ({ children }) => (
-    <table className="tw-my-6 tw-w-full tw-min-w-[38rem] tw-border-collapse tw-text-left tw-text-sm tw-text-iron-200">
-      {children}
-    </table>
+    <div
+      aria-label={t(DEFAULT_LOCALE, "publicReview.markdown.tableRegion")}
+      className="tw-my-6 tw-overflow-x-auto tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+      role="region"
+      tabIndex={0}>
+      <table className="tw-w-full tw-min-w-[38rem] tw-border-collapse tw-text-left tw-text-sm tw-text-iron-200">
+        {children}
+      </table>
+    </div>
   ),
   th: ({ children }) => (
     <th className="tw-border-b tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-p-3 tw-font-semibold tw-text-white">
@@ -111,7 +117,7 @@ export function PublicReviewMarkdown({
   readonly markdown: string;
 }) {
   return (
-    <div className="tw-min-w-0 tw-overflow-x-auto">
+    <div className="tw-min-w-0">
       <Markdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSanitize]}

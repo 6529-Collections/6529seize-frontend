@@ -1,4 +1,5 @@
 import {
+  getStreamReviewFeedbackHref,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_PAGES,
   STREAM_REVIEW_SOURCE_COMMIT,
@@ -31,6 +32,15 @@ describe("6529 Stream public review definition", () => {
     );
   });
 
+  it("keeps active and immutable feedback ledgers version-addressable", () => {
+    expect(getStreamReviewFeedbackHref()).toBe(
+      "/reviews/6529-stream/feedback"
+    );
+    expect(getStreamReviewFeedbackHref(STREAM_REVIEW_VERSION)).toBe(
+      `/reviews/6529-stream/versions/${STREAM_REVIEW_VERSION}/feedback`
+    );
+  });
+
   it("defines fourteen stable, unique editorial pages in order", () => {
     expect(STREAM_REVIEW_PAGES).toHaveLength(14);
     expect(STREAM_REVIEW_PAGES.map((page) => page.title)).toEqual(
@@ -48,6 +58,6 @@ describe("6529 Stream public review definition", () => {
     expect(serialized).not.toMatch(
       /wave[_-]?id|subwave|discussion[_-]?id|destination[_-]?id/i
     );
-    expect(STREAM_REVIEW_DEFINITION.feedbackAvailable).toBe(false);
+    expect(STREAM_REVIEW_DEFINITION.feedbackAvailable).toBe(true);
   });
 });

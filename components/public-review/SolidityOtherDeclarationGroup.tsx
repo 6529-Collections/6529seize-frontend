@@ -50,8 +50,10 @@ function DeclarationProperties({
 }
 
 function DeclarationMembers({
+  declarationName,
   members,
 }: {
+  readonly declarationName: string;
   readonly members:
     | readonly SolidityParameter[]
     | readonly string[]
@@ -61,7 +63,15 @@ function DeclarationMembers({
     return null;
   }
   return (
-    <div className="tw-mt-3 tw-overflow-x-auto">
+    <div
+      aria-label={t(
+        DEFAULT_LOCALE,
+        "publicReview.reference.declarationMembersTable",
+        { declaration: declarationName }
+      )}
+      className="tw-mt-3 tw-overflow-x-auto focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+      role="region"
+      tabIndex={0}>
       <table className="tw-w-full tw-border-collapse tw-text-left tw-text-sm">
         <thead>
           <tr className="tw-border-b tw-border-solid tw-border-iron-700 tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500">
@@ -132,7 +142,10 @@ function OtherDeclaration({
         {declaration.natspec ||
           t(DEFAULT_LOCALE, "publicReview.reference.noNatspec")}
       </p>
-      <DeclarationMembers members={declaration.members} />
+      <DeclarationMembers
+        declarationName={declaration.name || "—"}
+        members={declaration.members}
+      />
     </li>
   );
 }

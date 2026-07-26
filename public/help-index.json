@@ -168,10 +168,11 @@
       "facts": [
         "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
         "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
-        "A code-reference submission remains unavailable until the browser computes the exact selected snippet checksum, and changing the selection invalidates any earlier preview.",
+        "A code-reference submission remains unavailable until the browser computes the exact selected snippet checksum; changing the selection invalidates any earlier preview but preserves the written draft.",
         "Every submission carries the immutable review version, page or section, category, suspected severity, and exact source provenance when code is selected.",
         "Possible exploitable security vulnerabilities are intentionally submitted to the same public pre-deployment review because Stream is not deployed.",
         "The public feedback ledger supports category, page, contract, severity, disposition, and text filters plus CSV and Markdown auditor exports.",
+        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner.",
         "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."
       ],
       "canonical_path": "/reviews/6529-stream/feedback",
@@ -179,11 +180,13 @@
         "/reviews/6529-stream",
         "/reviews/6529-stream/community-review",
         "/reviews/6529-stream/security-testing-and-known-limitations",
-        "/reviews/6529-stream/reference"
+        "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/versions/2026-07-26.1/feedback"
       ],
       "tags": ["stream", "review", "feedback", "security"],
       "source_refs": [
         "app/reviews/[review]/feedback/page.tsx",
+        "app/reviews/[review]/versions/[version]/feedback/page.tsx",
         "components/public-review/PublicReviewFeedbackComposer.tsx",
         "components/public-review/PublicReviewLedger.tsx",
         "components/public-review/PublicReviewShell.tsx",

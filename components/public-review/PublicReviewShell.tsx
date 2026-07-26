@@ -15,9 +15,13 @@ import type {
   PublicReviewDefinition,
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
+  PublicReviewSource,
 } from "@/lib/public-review/publicReviewTypes";
 import { getSolidityReferenceRootHref } from "@/lib/public-review/solidityReferenceRoutes";
-import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinition";
+import {
+  getStreamReviewFeedbackHref,
+  getStreamReviewPageHref,
+} from "@/lib/public-review/streamReviewDefinition";
 
 function PublicReviewPageStepper({
   currentPage,
@@ -78,6 +82,7 @@ export function PublicReviewShell({
   routeVersion,
   displayedVersion,
   feedbackSlot,
+  source,
 }: {
   readonly editorialMarkdown: string;
   readonly page: PublicReviewPageDefinition;
@@ -86,16 +91,18 @@ export function PublicReviewShell({
   readonly routeVersion?: string | undefined;
   readonly displayedVersion: string;
   readonly feedbackSlot: ReactNode;
+  readonly source: PublicReviewSource;
 }) {
   const pageIndex = review.pages.findIndex(
     (candidate) => candidate.id === page.id
   );
 
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
+    <div className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
       <PublicReviewStatusBanner
         review={review}
         displayedVersion={displayedVersion}
+        source={source}
       />
       <div className="tw-mx-auto tw-w-full tw-max-w-[88rem] tw-px-4 tw-pb-20 tw-pt-8 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-12">
         <header className="tw-max-w-4xl">
@@ -131,16 +138,24 @@ export function PublicReviewShell({
               {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
             </Link>
             <Link
-              href={`/reviews/${review.slug}/feedback`}
+              href={getStreamReviewFeedbackHref(routeVersion)}
               className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-primary-100 tw-no-underline hover:tw-border-primary-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
               {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
             </Link>
+            <a
+              href="#public-review-feedback"
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+              {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
+            </a>
           </div>
         </header>
 
         {page.id === "overview" && (
           <div className="tw-mt-8">
-            <PublicReviewAudiencePaths />
+            <PublicReviewAudiencePaths
+              pages={review.pages}
+              version={routeVersion}
+            />
           </div>
         )}
 
@@ -157,7 +172,12 @@ export function PublicReviewShell({
               <PublicReviewMarkdown markdown={editorialMarkdown} />
             </article>
 
-            <div className="tw-mt-8">{feedbackSlot}</div>
+            <div
+              id="public-review-feedback"
+              className="tw-mt-8 tw-scroll-mt-28"
+              tabIndex={-1}>
+              {feedbackSlot}
+            </div>
 
             <div className="tw-mt-8">
               <PublicReviewEvidenceLegend />
@@ -171,6 +191,6 @@ export function PublicReviewShell({
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

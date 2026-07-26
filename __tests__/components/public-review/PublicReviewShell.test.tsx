@@ -21,6 +21,7 @@ describe("PublicReviewShell", () => {
         sections={[{ id: "the-short-answer", title: "The short answer" }]}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
         feedbackSlot={<div>Feedback form</div>}
+        source={STREAM_REVIEW_DEFINITION.source}
       />
     );
 
@@ -54,6 +55,57 @@ describe("PublicReviewShell", () => {
     );
     expect(
       screen.getAllByRole("link", { name: /Community Review/ })
+    ).not.toHaveLength(0);
+    expect(
+      screen.getByRole("link", { name: "Jump to send feedback" })
+    ).toHaveAttribute("href", "#public-review-feedback");
+    expect(
+      screen.getAllByRole("navigation", { name: "On this page" })
     ).toHaveLength(2);
+    expect(
+      screen.getByRole("link", { name: "Start the Artists path" })
+    ).toHaveAttribute("href", "/reviews/6529-stream/artwork-lifecycle");
+    expect(document.querySelector("main")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Review status" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("uses the exact resolved source identity instead of the active default", () => {
+    const overview = STREAM_REVIEW_DEFINITION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+    const historicalCommit = "b".repeat(40);
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Editorial title"
+        page={overview}
+        review={STREAM_REVIEW_DEFINITION}
+        sections={[]}
+        routeVersion="2026-07-25.1"
+        displayedVersion="2026-07-25.1"
+        feedbackSlot={<div>Feedback form</div>}
+        source={{
+          repository: STREAM_REVIEW_DEFINITION.source.repository,
+          commit: historicalCommit,
+        }}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: `Open the exact 6529 Stream source commit ${historicalCommit}`,
+      })
+    ).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529Stream/tree/${historicalCommit}`
+    );
+    expect(
+      screen.getByRole("link", { name: "View public feedback" })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/versions/2026-07-25.1/feedback"
+    );
   });
 });

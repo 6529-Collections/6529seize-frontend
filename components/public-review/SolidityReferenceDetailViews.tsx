@@ -98,7 +98,11 @@ function ParameterTable({
           {t(DEFAULT_LOCALE, "publicReview.reference.noParameters")}
         </p>
       ) : (
-        <div className="tw-mt-4 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
+        <div
+          aria-labelledby={headingId}
+          className="tw-mt-4 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+          role="region"
+          tabIndex={0}>
           <table className="tw-w-full tw-min-w-[34rem] tw-border-collapse tw-text-left tw-text-sm">
             <thead className="tw-bg-iron-900 tw-text-iron-400">
               <tr>

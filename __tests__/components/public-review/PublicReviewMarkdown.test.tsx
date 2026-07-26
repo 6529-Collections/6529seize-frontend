@@ -54,4 +54,24 @@ describe("PublicReviewMarkdown", () => {
       "https://example.com/source"
     );
   });
+
+  it("labels wide tables as independently focusable scroll regions", () => {
+    render(
+      <PublicReviewMarkdown
+        markdown={`
+## Comparison
+
+| Module | Status |
+| --- | --- |
+| StreamCore | Implemented |
+`}
+      />
+    );
+
+    const tableRegion = screen.getByRole("region", {
+      name: "Scrollable table in the contract review",
+    });
+    expect(tableRegion).toHaveAttribute("tabindex", "0");
+    expect(tableRegion.querySelector("table")).toBeInTheDocument();
+  });
 });

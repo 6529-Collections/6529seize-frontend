@@ -48,6 +48,7 @@ import type {
   SolidityTopLevelDeclaration,
 } from "@/lib/public-review/solidityReferenceTypes";
 import {
+  getStreamReviewFeedbackHref,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -248,6 +249,7 @@ function ReferenceShell({
   children,
   description,
   feedbackSlot,
+  manifest,
   routeVersion,
   title,
   version,
@@ -255,6 +257,7 @@ function ReferenceShell({
   readonly children: ReactNode;
   readonly description: string;
   readonly feedbackSlot?: ReactNode | undefined;
+  readonly manifest: SolidityReferenceManifest;
   readonly routeVersion?: string | undefined;
   readonly title: string;
   readonly version: string;
@@ -265,14 +268,23 @@ function ReferenceShell({
       description={description}
       displayedVersion={version}
       editorialHref={getEditorialHref(routeVersion)}
-      feedbackHref={`/reviews/${STREAM_REVIEW_SLUG}/feedback`}
+      feedbackHref={getStreamReviewFeedbackHref(routeVersion)}
       referenceHref={getSolidityReferenceRootHref(hrefContext)}
       review={STREAM_REVIEW_DEFINITION}
+      source={{
+        repository: manifest.source.repository,
+        commit: manifest.source.commit,
+      }}
       title={title}
     >
       {children}
       {feedbackSlot !== undefined && feedbackSlot !== null ? (
-        <div className="tw-mt-8">{feedbackSlot}</div>
+        <div
+          id="public-review-feedback"
+          className="tw-mt-8 tw-scroll-mt-28"
+          tabIndex={-1}>
+          {feedbackSlot}
+        </div>
       ) : null}
     </PublicReviewReferenceShell>
   );
@@ -307,6 +319,7 @@ export async function renderStreamSolidityReferenceOverview({
         "publicReview.reference.overviewDescription"
       )}
       routeVersion={routeVersion}
+      manifest={manifest}
       feedbackSlot={
         <PublicReviewFeedbackComposer
           locale={DEFAULT_LOCALE}
@@ -366,6 +379,7 @@ export async function renderStreamSolidityDefinition({
         "publicReview.reference.definitionDescription"
       )}
       routeVersion={routeVersion}
+      manifest={manifest}
       feedbackSlot={
         <PublicReviewFeedbackComposer
           locale={DEFAULT_LOCALE}
@@ -442,6 +456,7 @@ export async function renderStreamSolidityDeclaration({
         "publicReview.reference.definitionDescription"
       )}
       routeVersion={routeVersion}
+      manifest={manifest}
       title={pageTitle}
       version={version}
     >
@@ -515,6 +530,7 @@ export async function renderStreamSolidityTopLevelDeclaration({
         "publicReview.reference.definitionDescription"
       )}
       routeVersion={routeVersion}
+      manifest={manifest}
       title={pageTitle}
       version={version}
     >
@@ -577,6 +593,7 @@ export async function renderStreamSolidityInterface({
         "publicReview.reference.interfaceDescription"
       )}
       routeVersion={routeVersion}
+      manifest={manifest}
       feedbackSlot={
         <PublicReviewFeedbackComposer
           locale={DEFAULT_LOCALE}
@@ -635,6 +652,7 @@ export async function renderStreamSoliditySource({
         "publicReview.reference.sourceDescription"
       )}
       routeVersion={routeVersion}
+      manifest={result.manifest}
       title={pageTitle}
       version={version}
     >

@@ -240,3 +240,12 @@ export function getStreamReviewPageHref({
 
   return page.id === "overview" ? root : `${root}/${page.slug}`;
 }
+
+export function getStreamReviewFeedbackHref(
+  version?: string
+): string {
+  const root = version
+    ? `/reviews/${STREAM_REVIEW_SLUG}/versions/${version}`
+    : `/reviews/${STREAM_REVIEW_SLUG}`;
+  return `${root}/feedback`;
+}

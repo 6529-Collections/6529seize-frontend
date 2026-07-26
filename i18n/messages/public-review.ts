@@ -29,6 +29,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.audiences.auditors.title": "Auditors",
   "publicReview.audiences.auditors.description":
     "Use the editorial map alongside generated reference and retained evidence.",
+  "publicReview.audiences.startPath": "Start the {audience} path",
+  "publicReview.audiences.showPath": "View all {count} pages in this path",
+  "publicReview.audiences.pathLabel": "{audience} review reading path",
   "publicReview.navigation.label": "Contract review pages",
   "publicReview.navigation.contentsLabel": "All contract review pages",
   "publicReview.navigation.sequenceLabel":
@@ -62,6 +65,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.evidence.knownLimitation":
     "Known limitation: a recorded constraint, gap, or unresolved risk.",
   "publicReview.markdown.externalLink": "Opens in a new tab",
+  "publicReview.markdown.tableRegion":
+    "Scrollable table in the contract review",
   "publicReview.reference.eyebrow": "Generated technical reference",
   "publicReview.reference.backToReview": "Back to contract review",
   "publicReview.reference.openReference": "Open technical reference",
@@ -254,6 +259,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.fileScopeDeclarationsDescription":
     "Structs, enums, custom value types, functions, events, errors, and variables declared outside a contract in this exact source file.",
   "publicReview.reference.members": "Members",
+  "publicReview.reference.declarationMembersTable":
+    "Members of {declaration}",
   "publicReview.reference.canonicalName": "Canonical name",
   "publicReview.reference.initializer": "Initializer",
   "publicReview.reference.semanticIdentity": "Stable generated identity",
@@ -314,6 +321,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "The selected code could not be copied. Select and copy it manually.",
   "publicReview.reference.openSelection": "Open selected lines on GitHub",
   "publicReview.reference.commentSelection": "Comment on selected lines",
+  "publicReview.reference.skipCode": "Skip source code and send feedback",
   "publicReview.reference.selectionReady":
     "This source reference is ready to attach to structured feedback.",
   "publicReview.reference.warningSummary": "Warning summary",
@@ -330,6 +338,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.routeUnavailable":
     "The requested generated reference does not exist in this review version.",
   "publicReview.feedback.title": "Send feedback",
+  "publicReview.feedback.jump": "Jump to send feedback",
   "publicReview.feedback.intro":
     "Your feedback will be posted as a top-level message in the review Wave with structured review metadata.",
   "publicReview.feedback.category": "Feedback category",

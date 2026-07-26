@@ -5,6 +5,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useState,
   useSyncExternalStore,
@@ -140,6 +141,7 @@ function SourceSelectionControls({
   readonly selectedSource: string;
   readonly showCommentAction: boolean;
 }) {
+  const rangeStatusId = useId();
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const selectionValid = lineStart <= lineEnd;
 
@@ -155,13 +157,18 @@ function SourceSelectionControls({
   };
 
   const focusFeedback = (): void => {
-    const feedback = document.querySelector<HTMLElement>(
-      "[data-public-review-feedback]"
+    const feedback = document.getElementById("public-review-feedback");
+    const reduceMotion = globalThis.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    feedback?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+    const primaryControl = feedback?.querySelector<HTMLElement>(
+      "[data-public-review-feedback-primary]"
     );
-    feedback?.scrollIntoView({ behavior: "smooth", block: "start" });
-    feedback
-      ?.querySelector<HTMLElement>("textarea, button, select, input, a")
-      ?.focus({ preventScroll: true });
+    (primaryControl ?? feedback)?.focus({ preventScroll: true });
   };
 
   return (
@@ -184,6 +191,8 @@ function SourceSelectionControls({
             {t(DEFAULT_LOCALE, "publicReview.reference.startLine")}
           </span>
           <input
+            aria-describedby={rangeStatusId}
+            aria-invalid={!selectionValid}
             className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
             max={maximumLine}
             min={minimumLine}
@@ -202,6 +211,8 @@ function SourceSelectionControls({
             {t(DEFAULT_LOCALE, "publicReview.reference.endLine")}
           </span>
           <input
+            aria-describedby={rangeStatusId}
+            aria-invalid={!selectionValid}
             className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
             max={maximumLine}
             min={minimumLine}
@@ -217,6 +228,9 @@ function SourceSelectionControls({
         </label>
       </div>
       <p
+        id={rangeStatusId}
+        aria-atomic="true"
+        aria-live="polite"
         className={`tw-mb-0 tw-mt-3 tw-text-sm ${
           selectionValid ? "tw-text-sky-200" : "tw-text-red-200"
         }`}
@@ -273,13 +287,11 @@ function SourceLines({
   lineEnd,
   lines,
   lineStart,
-  onSelectLine,
 }: {
   readonly firstLineNumber: number;
   readonly lineEnd: number;
   readonly lines: readonly string[];
   readonly lineStart: number;
-  readonly onSelectLine: (line: number) => void;
 }) {
   return (
     <div
@@ -300,21 +312,12 @@ function SourceLines({
                 selected ? "tw-bg-primary-400/15" : ""
               }`}
             >
-              <button
-                type="button"
-                aria-pressed={
-                  lineStart === lineNumber && lineEnd === lineNumber
-                }
-                aria-label={t(
-                  DEFAULT_LOCALE,
-                  "publicReview.reference.selectSingleLine",
-                  { line: lineNumber }
-                )}
-                onClick={() => onSelectLine(lineNumber)}
-                className="tw-min-h-7 tw-border-0 tw-bg-transparent tw-px-3 tw-text-right tw-font-mono tw-text-xs tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-white"
+              <span
+                aria-hidden="true"
+                className="tw-block tw-px-3 tw-text-right tw-font-mono tw-text-xs tw-text-iron-500"
               >
                 {lineNumber}
-              </button>
+              </span>
               <code className="tw-block tw-whitespace-pre tw-pr-5 tw-text-iron-200">
                 {line || " "}
               </code>
@@ -462,19 +465,25 @@ export function SoliditySourceReview({
         selectedSource={selectedSource}
         showCommentAction={feedbackSlot !== undefined}
       />
+      {feedbackSlot !== undefined ? (
+        <a
+          href="#public-review-feedback"
+          className="tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+          {t(DEFAULT_LOCALE, "publicReview.reference.skipCode")}
+        </a>
+      ) : null}
       <SourceLines
         firstLineNumber={firstLineNumber}
         lineEnd={lineEnd}
         lines={source.lines}
         lineStart={lineStart}
-        onSelectLine={(line) => {
-          setSelectionTouched(true);
-          setSelectedLineStart(line);
-          setSelectedLineEnd(line);
-        }}
       />
       {feedbackSlot !== undefined && feedbackSlot !== null ? (
-        <div className="tw-mt-8" data-public-review-feedback>
+        <div
+          id="public-review-feedback"
+          className="tw-mt-8 tw-scroll-mt-28"
+          data-public-review-feedback
+          tabIndex={-1}>
           {feedbackSlot}
         </div>
       ) : null}

@@ -83,6 +83,10 @@ export async function renderStreamReviewRoute(
       sections={sections}
       routeVersion={route.version}
       displayedVersion={contentVersion}
+      source={{
+        repository: manifest.source.repository,
+        commit: manifest.source.commit,
+      }}
       feedbackSlot={
         <PublicReviewEditorialFeedback
           config={feedbackConfig}

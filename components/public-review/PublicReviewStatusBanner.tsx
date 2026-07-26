@@ -1,6 +1,9 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import type { PublicReviewDefinition } from "@/lib/public-review/publicReviewTypes";
+import type {
+  PublicReviewDefinition,
+  PublicReviewSource,
+} from "@/lib/public-review/publicReviewTypes";
 
 const STATUS_CHIP =
   "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold";
@@ -8,24 +11,25 @@ const STATUS_CHIP =
 export function PublicReviewStatusBanner({
   review,
   displayedVersion,
+  source = review.source,
 }: {
   readonly review: PublicReviewDefinition;
   readonly displayedVersion: string;
+  readonly source?: PublicReviewSource | undefined;
 }) {
-  const shortCommit = review.source.commit.slice(0, 10);
-  const sourceUrl = `https://github.com/${review.source.repository}/tree/${review.source.commit}`;
+  const shortCommit = source.commit.slice(0, 10);
+  const sourceUrl = `https://github.com/${source.repository}/tree/${source.commit}`;
 
   return (
     <section
-      aria-labelledby="review-status-heading"
+      aria-label={t(DEFAULT_LOCALE, "publicReview.status.heading")}
       className="tw-border-y tw-border-solid tw-border-iron-700 tw-bg-iron-900/95 tw-px-4 tw-py-4 lg:tw-sticky lg:tw-top-0 lg:tw-z-30">
       <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-[88rem] tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
         <div>
-          <h2
-            id="review-status-heading"
+          <p
             className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
             {t(DEFAULT_LOCALE, "publicReview.status.heading")}
-          </h2>
+          </p>
           <p className="tw-mb-0 tw-mt-1 tw-max-w-3xl tw-text-sm tw-leading-5 tw-text-iron-300">
             {t(DEFAULT_LOCALE, "publicReview.status.explanation")}
           </p>
@@ -55,7 +59,7 @@ export function PublicReviewStatusBanner({
             aria-label={t(
               DEFAULT_LOCALE,
               "publicReview.status.sourceAriaLabel",
-              { commit: review.source.commit }
+              { commit: source.commit }
             )}
             className={`${STATUS_CHIP} tw-border-iron-600 tw-text-iron-100 tw-no-underline hover:tw-border-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}>
             {t(DEFAULT_LOCALE, "publicReview.status.source", {
