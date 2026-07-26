@@ -186,21 +186,26 @@ export default function PublicReviewLedger({
         />
       </fieldset>
 
-      <p
+      <output
         className="tw-sr-only"
-        role="status"
         aria-live="polite"
         aria-atomic="true"
       >
-        {t(locale, "publicReview.ledger.status", {
-          count: formatInteger(locale, visibleRecords.length),
-        })}
-      </p>
+        {ledgerQuery.isPending
+          ? t(locale, "publicReview.ledger.loading")
+          : t(locale, "publicReview.ledger.status", {
+              count: formatInteger(locale, visibleRecords.length),
+            })}
+        {!ledgerQuery.isPending && warnings.length > 0
+          ? ` ${t(locale, "publicReview.ledger.warning", {
+              count: formatInteger(locale, warnings.length),
+            })}`
+          : ""}
+      </output>
 
       {warnings.length > 0 ? (
         <p
           className="tw-mb-0 tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/40 tw-bg-amber-950/20 tw-p-3 tw-text-sm tw-text-amber-100"
-          role="alert"
         >
           {t(locale, "publicReview.ledger.warning", {
             count: formatInteger(locale, warnings.length),
@@ -209,7 +214,7 @@ export default function PublicReviewLedger({
       ) : null}
 
       {ledgerQuery.isPending ? (
-        <p className="tw-mb-0 tw-mt-6 tw-text-iron-300" role="status">
+        <p className="tw-mb-0 tw-mt-6 tw-text-iron-300">
           {t(locale, "publicReview.ledger.loading")}
         </p>
       ) : null}
@@ -283,9 +288,9 @@ export default function PublicReviewLedger({
                       time: formatTime(locale, record.createdAt),
                     })}
                   </p>
-                  <pre className="tw-mb-0 tw-mt-4 tw-whitespace-pre-wrap tw-break-words tw-font-sans tw-text-sm tw-leading-6 tw-text-iron-200">
+                  <div className="tw-mb-0 tw-mt-4 tw-whitespace-pre-wrap tw-break-words tw-font-sans tw-text-sm tw-leading-6 tw-text-iron-200">
                     {record.body}
-                  </pre>
+                  </div>
                   <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm">
                     <span className="tw-text-iron-400">
                       {t(locale, "publicReview.ledger.reactions", {

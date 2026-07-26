@@ -165,9 +165,14 @@ describe("PublicReviewFeedbackComposer", () => {
     });
 
     await waitFor(() => expect(comment).toHaveValue(""));
-    expect(
-      screen.getByRole("link", { name: "Open your feedback in the Wave" })
-    ).toHaveAttribute("href", expect.stringContaining("serialNo=12"));
+    const successLink = screen.getByRole("link", {
+      name: "Open your feedback in the Wave",
+    });
+    expect(successLink).toHaveAttribute(
+      "href",
+      expect.stringContaining("serialNo=12")
+    );
+    await waitFor(() => expect(successLink.closest("output")).toHaveFocus());
   });
 
   it("fails closed when the active authenticated address is unavailable", () => {
