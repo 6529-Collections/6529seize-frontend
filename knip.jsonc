@@ -67,8 +67,15 @@
       ],
       "components/drops/create/lexical/utils/rootContent.ts": ["exports"],
       "components/utils/toast/AppToast.tsx": ["exports"],
+      // Stacked public-review foundation. The route integration imports these
+      // components and exports in the next feature slice, which removes these
+      // exact exemptions when they become reachable from App Router entries.
+      "components/public-review/PublicReviewFeedbackComposer.tsx": ["files"],
+      "components/public-review/PublicReviewLedger.tsx": ["files"],
       "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
       "hooks/useWavePreviewById.ts": ["exports"],
+      "services/api/public-review/feedback-codec.ts": ["exports", "types"],
+      "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],
       "lib/storage/idb-keyval.ts": ["files"],
       "playwright.config.ts": ["exports"],
