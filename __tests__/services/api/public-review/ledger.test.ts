@@ -62,7 +62,7 @@ function makeDrop(serialNo: number, id = `drop-${serialNo}`): ApiDropV2 {
     reactions: [{ reaction: "👍", count: 3 }],
     boosts: 0,
     content: "Rendered feedback",
-  } as ApiDropV2;
+  } as unknown as ApiDropV2;
 }
 
 function makeFeed(drops: ApiDropV2[]): ApiWaveDropsFeedV2 {

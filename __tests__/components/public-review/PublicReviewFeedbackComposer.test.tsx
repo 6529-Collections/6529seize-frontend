@@ -99,14 +99,14 @@ describe("PublicReviewFeedbackComposer", () => {
     useAuthMock.mockReturnValue({
       connectedProfile: { id: "profile-1" },
       requestAuth: jest.fn(),
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
     useSeizeConnectContextMock.mockReturnValue({
       address: "0x000000000000000000000000000000000000dEaD",
       hasValidWalletAuth: true,
       isSafeWallet: false,
       seizeConnectFresh: jest.fn(),
       seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>);
+    } as unknown as ReturnType<typeof useSeizeConnectContext>);
     fetchWaveByIdMock.mockResolvedValue({
       wave: { type: ApiWaveType.Chat },
       chat: {
@@ -138,7 +138,9 @@ describe("PublicReviewFeedbackComposer", () => {
 
   it("awaits the returned drop before clearing the draft", async () => {
     const user = userEvent.setup();
-    let resolveDrop: (value: unknown) => void = () => undefined;
+    let resolveDrop: (
+      value: Awaited<ReturnType<PublicReviewFeedbackSubmitter>>
+    ) => void = () => undefined;
     const submitter = jest.fn(
       () =>
         new Promise((resolve) => {
@@ -160,12 +162,14 @@ describe("PublicReviewFeedbackComposer", () => {
     expect(submitButton).toBeDisabled();
     expect(comment).toHaveValue("Keep this until the API confirms.");
 
-    resolveDrop({
-      id: "drop-1",
-      serial_no: 12,
-      wave: { id: destination.waveId },
-      drop_type: ApiDropType.Chat,
-    });
+    resolveDrop(
+      {
+        id: "drop-1",
+        serial_no: 12,
+        wave: { id: destination.waveId },
+        drop_type: ApiDropType.Chat,
+      } as unknown as Awaited<ReturnType<PublicReviewFeedbackSubmitter>>
+    );
 
     await waitFor(() => expect(comment).toHaveValue(""));
     expect(invalidateQueries).toHaveBeenCalledWith({
@@ -195,7 +199,7 @@ describe("PublicReviewFeedbackComposer", () => {
       isSafeWallet: false,
       seizeConnectFresh: jest.fn(),
       seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>);
+    } as unknown as ReturnType<typeof useSeizeConnectContext>);
 
     renderComposer(submitter);
 
