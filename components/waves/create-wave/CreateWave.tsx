@@ -72,24 +72,12 @@ export default function CreateWave({
     ? measuredOrFallbackStyle
     : undefined;
 
-  // Each step renders fresh content, but the layout's scroll container keeps
-  // the offset where the user tapped Next (the bottom of the previous step),
-  // landing them mid-page on taller steps like the announce-wave Dates step.
-  // That scroller is the shared layout content container — the very element
-  // holding the stale offset — so anchoring the create flow to its top is
-  // exactly the fix, and is a no-op when the user is already at the top
-  // (so it never yanks an unscrolled desktop page).
-  const previousStepRef = useRef(step);
-  useEffect(() => {
-    if (previousStepRef.current === step) {
-      return;
-    }
-    previousStepRef.current = step;
-    const frame = requestAnimationFrame(() => {
-      containerRef.current?.scrollIntoView({ block: "start" });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [step]);
+  // On step change, snap the create-wave scrollport back to its top so a new
+  // (taller) step doesn't start mid-page. This is handled inside CreateWaveFlow
+  // via scrollResetKey={step} — it resets THAT scrollport, not the app-shell
+  // scroller. (The old approach, containerRef.scrollIntoView({block:"start"}),
+  // scrolled the shell instead — riding the app header up under the status bar
+  // and leaving a black gap at the bottom.)
 
   // The Next button can sit a full screen below the offending field on
   // phones, where a validation failure with no visible reaction reads as a
@@ -160,6 +148,7 @@ export default function CreateWave({
         }`}
         onBack={onBack}
         nativeBoundedStyle={nativeBoundedStyle}
+        scrollResetKey={step}
       >
         <CreateWaveLayout
           config={config}
