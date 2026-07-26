@@ -8,11 +8,14 @@ import {
 } from "@/components/public-review/SoliditySourceReview";
 
 function SelectionProbe() {
-  const { selection } = usePublicReviewCodeSelection();
+  const { integrityStatus, selection } = usePublicReviewCodeSelection();
   return (
-    <output data-testid="selection">
-      {selection ? JSON.stringify(selection) : "invalid"}
-    </output>
+    <>
+      <output data-testid="integrity-status">{integrityStatus}</output>
+      <output data-testid="selection">
+        {selection ? JSON.stringify(selection) : "invalid"}
+      </output>
+    </>
   );
 }
 
@@ -52,6 +55,7 @@ describe("SoliditySourceReview", () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     window.history.replaceState({}, "", window.location.pathname);
   });
 
@@ -103,11 +107,13 @@ describe("SoliditySourceReview", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Select line 3" }));
-    expect(
-      JSON.parse(screen.getByTestId("selection").textContent ?? "")
-    ).toMatchObject({
-      lineStart: 3,
-      lineEnd: 3,
+    await waitFor(() => {
+      expect(
+        JSON.parse(screen.getByTestId("selection").textContent ?? "")
+      ).toMatchObject({
+        lineStart: 3,
+        lineEnd: 3,
+      });
     });
   });
 
@@ -167,5 +173,39 @@ describe("SoliditySourceReview", () => {
       screen.getByRole("button", { name: "Comment on selected lines" })
     );
     expect(screen.getByLabelText("Feedback comment")).toHaveFocus();
+  });
+
+  it("withholds code evidence until its exact snippet hash settles", async () => {
+    let resolveDigest: ((value: ArrayBuffer) => void) | undefined;
+    jest.spyOn(globalThis.crypto.subtle, "digest").mockImplementation(
+      () =>
+        new Promise<ArrayBuffer>((resolve) => {
+          resolveDigest = resolve;
+        })
+    );
+
+    render(
+      <SoliditySourceReview source={SOURCE} feedbackSlot={<SelectionProbe />} />
+    );
+
+    expect(screen.getByTestId("integrity-status")).toHaveTextContent(
+      "pending"
+    );
+    expect(screen.getByTestId("selection")).toHaveTextContent("invalid");
+
+    resolveDigest?.(new Uint8Array(32).buffer);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("integrity-status")).toHaveTextContent(
+        "ready"
+      );
+      expect(
+        JSON.parse(screen.getByTestId("selection").textContent ?? "")
+      ).toMatchObject({
+        lineStart: 2,
+        lineEnd: 2,
+        snippetSha256: `sha256:${"0".repeat(64)}`,
+      });
+    });
   });
 });

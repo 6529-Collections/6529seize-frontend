@@ -12,6 +12,7 @@ import {
   type PublicReviewDiscussionDestination,
   type PublicReviewFeedbackConfig,
   type PublicReviewFeedbackSubmitter,
+  type PublicReviewReferenceSelection,
 } from "@/services/api/public-review/types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -63,9 +64,23 @@ const config: PublicReviewFeedbackConfig = {
   ],
   severityOptions: [{ value: "suggestion", label: "Suggestion" }],
   pages: [{ value: "architecture", label: "Architecture" }],
+  source: {
+    repository: "6529-Collections/6529Stream",
+    commit: "a".repeat(40),
+    files: [
+      {
+        path: "smart-contracts/StreamCore.sol",
+        lineCount: 200,
+        sha256: `sha256:${"b".repeat(64)}`,
+      },
+    ],
+  },
 };
 
-function renderComposer(submitter: PublicReviewFeedbackSubmitter) {
+function renderComposer(
+  submitter: PublicReviewFeedbackSubmitter,
+  referenceSelection?: PublicReviewReferenceSelection
+) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -76,7 +91,9 @@ function renderComposer(submitter: PublicReviewFeedbackSubmitter) {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  const result = render(
+  const getComposer = (
+    currentReferenceSelection?: PublicReviewReferenceSelection
+  ) => (
     <PublicReviewFeedbackComposer
       locale="en-US"
       config={config}
@@ -86,11 +103,18 @@ function renderComposer(submitter: PublicReviewFeedbackSubmitter) {
         pageTitle: "Architecture",
         canonicalPath: "/stream/review/architecture",
       }}
+      referenceSelection={currentReferenceSelection}
       submitter={submitter}
-    />,
-    { wrapper: Wrapper }
+    />
   );
-  return { ...result, queryClient };
+  const result = render(getComposer(referenceSelection), { wrapper: Wrapper });
+  return {
+    ...result,
+    queryClient,
+    rerenderSelection: (
+      nextReferenceSelection?: PublicReviewReferenceSelection
+    ) => result.rerender(getComposer(nextReferenceSelection)),
+  };
 }
 
 describe("PublicReviewFeedbackComposer", () => {
@@ -206,5 +230,48 @@ describe("PublicReviewFeedbackComposer", () => {
       screen.queryByRole("button", { name: "Post feedback to the Wave" })
     ).not.toBeInTheDocument();
     expect(fetchWaveByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("hides a preview when the attached source selection changes", async () => {
+    const user = userEvent.setup();
+    const submitter = jest.fn();
+    const sourceSelection = {
+      kind: "code",
+      path: "smart-contracts/StreamCore.sol",
+      sourceSha256: `sha256:${"b".repeat(64)}`,
+      lineStart: 10,
+      lineEnd: 12,
+      snippetSha256: `sha256:${"c".repeat(64)}`,
+    } as const;
+    const { rerenderSelection } = renderComposer(
+      submitter,
+      sourceSelection
+    );
+
+    await user.type(
+      await screen.findByLabelText("Comment", { selector: "textarea" }),
+      "Check this exact range."
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Preview Wave message" })
+    );
+    expect(
+      screen.getByRole("heading", { name: "Wave message preview" })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/lines 10-12/)).toBeInTheDocument();
+
+    rerenderSelection({
+      ...sourceSelection,
+      lineStart: 20,
+      lineEnd: 20,
+      snippetSha256: `sha256:${"d".repeat(64)}`,
+    });
+
+    expect(
+      screen.queryByRole("heading", { name: "Wave message preview" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Source: smart-contracts/StreamCore.sol, lines 20–20")
+    ).toBeInTheDocument();
   });
 });

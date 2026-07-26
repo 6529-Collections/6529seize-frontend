@@ -37,6 +37,11 @@ interface PublicReviewFeedbackComposerProps {
   readonly submitter?: PublicReviewFeedbackSubmitter | undefined;
 }
 
+interface ContextBoundValue<Value> {
+  readonly contextFingerprint: string;
+  readonly value: Value;
+}
+
 const EMPTY_TECHNICAL_FIELDS = {
   whyItMatters: "",
   suggestedChange: "",
@@ -59,6 +64,16 @@ function createEmptyDraft(
 
 function createSubmissionId(): string {
   return uuidv4();
+}
+
+function getFeedbackContextFingerprint({
+  page,
+  referenceSelection,
+}: Pick<
+  PublicReviewFeedbackComposerProps,
+  "page" | "referenceSelection"
+>): string {
+  return JSON.stringify({ page, referenceSelection });
 }
 
 const INPUT_CLASSES =
@@ -189,12 +204,26 @@ function useFeedbackComposerState({
     createEmptyDraft(config)
   );
   const [submissionId, setSubmissionId] = useState(createSubmissionId);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] =
+    useState<ContextBoundValue<string> | null>(null);
   const [commentError, setCommentError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [successPath, setSuccessPath] = useState<string | null>(null);
+  const [formError, setFormError] =
+    useState<ContextBoundValue<string> | null>(null);
+  const [successPath, setSuccessPath] =
+    useState<ContextBoundValue<string> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const contextFingerprint = getFeedbackContextFingerprint({
+    page,
+    referenceSelection,
+  });
+  const setCurrentFormError = (message: string | null): void => {
+    setFormError(
+      message === null
+        ? null
+        : { contextFingerprint, value: message }
+    );
+  };
   const authenticated = Boolean(
     connectedProfile && hasValidWalletAuth && address
   );
@@ -215,7 +244,7 @@ function useFeedbackComposerState({
   ): void => {
     setDraft((current) => ({ ...current, [field]: value }));
     setPreview(null);
-    setFormError(null);
+    setCurrentFormError(null);
     if (field === "comment" && value.trim()) {
       setCommentError(null);
     }
@@ -239,17 +268,22 @@ function useFeedbackComposerState({
   };
 
   const handlePreview = (): void => {
-    setFormError(null);
+    setCurrentFormError(null);
     try {
-      setPreview(createPayload().parts[0]?.content ?? "");
+      setPreview({
+        contextFingerprint,
+        value: createPayload().parts[0]?.content ?? "",
+      });
     } catch {
-      setFormError(t(locale, "publicReview.feedback.validationError"));
+      setCurrentFormError(
+        t(locale, "publicReview.feedback.validationError")
+      );
     }
   };
 
   const handleConnect = async (): Promise<void> => {
     setIsConnecting(true);
-    setFormError(null);
+    setCurrentFormError(null);
     try {
       if (!connectedProfile) {
         await seizeConnectFresh();
@@ -260,7 +294,7 @@ function useFeedbackComposerState({
         throw new Error("Authentication was not completed.");
       }
     } catch {
-      setFormError(t(locale, "publicReview.feedback.connectError"));
+      setCurrentFormError(t(locale, "publicReview.feedback.connectError"));
     } finally {
       setIsConnecting(false);
     }
@@ -270,27 +304,31 @@ function useFeedbackComposerState({
     if (isSubmitting || !authenticated || !waveCanAcceptFeedback) {
       return false;
     }
-    setFormError(null);
+    setCurrentFormError(null);
     setSuccessPath(null);
+    const submissionContextFingerprint = contextFingerprint;
     let payload;
     try {
       payload = createPayload();
     } catch {
-      setFormError(t(locale, "publicReview.feedback.validationError"));
+      setCurrentFormError(
+        t(locale, "publicReview.feedback.validationError")
+      );
       return false;
     }
 
     setIsSubmitting(true);
     try {
       const drop = await submitter({ destination, payload });
-      setSuccessPath(
-        getWaveRoute({
+      setSuccessPath({
+        contextFingerprint: submissionContextFingerprint,
+        value: getWaveRoute({
           waveId: destination.waveId,
           serialNo: drop.serial_no,
           isDirectMessage: false,
           isApp: false,
-        })
-      );
+        }),
+      });
       setDraft(createEmptyDraft(config));
       setPreview(null);
       setCommentError(null);
@@ -300,7 +338,7 @@ function useFeedbackComposerState({
       });
       return true;
     } catch {
-      setFormError(t(locale, "publicReview.feedback.submitError"));
+      setCurrentFormError(t(locale, "publicReview.feedback.submitError"));
       return false;
     } finally {
       setIsSubmitting(false);
@@ -323,13 +361,22 @@ function useFeedbackComposerState({
       locale,
       waveCanAcceptFeedback,
     }),
-    formError,
+    formError:
+      formError?.contextFingerprint === contextFingerprint
+        ? formError.value
+        : null,
     handleConnect,
     handlePreview,
     handleSubmit,
     isSubmitting,
-    preview,
-    successPath,
+    preview:
+      preview?.contextFingerprint === contextFingerprint
+        ? preview.value
+        : null,
+    successPath:
+      successPath?.contextFingerprint === contextFingerprint
+        ? successPath.value
+        : null,
     updateDraft,
   };
 }

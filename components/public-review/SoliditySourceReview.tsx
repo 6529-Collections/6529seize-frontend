@@ -12,17 +12,12 @@ import {
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { PublicReviewCodeSelection } from "@/services/api/public-review/types";
 
-export interface PublicReviewCodeSelection {
-  readonly kind: "code";
-  readonly path: string;
-  readonly sourceSha256: string;
-  readonly lineStart: number;
-  readonly lineEnd: number;
-  readonly contract?: string | undefined;
-  readonly declaration?: string | undefined;
-  readonly snippetSha256?: string | undefined;
-}
+export type PublicReviewCodeSelectionIntegrityStatus =
+  | "pending"
+  | "ready"
+  | "unavailable";
 
 interface SourceReviewInput {
   readonly contract?: string | undefined;
@@ -37,6 +32,7 @@ interface SourceReviewInput {
 }
 
 interface PublicReviewCodeSelectionContextValue {
+  readonly integrityStatus: PublicReviewCodeSelectionIntegrityStatus;
   readonly selection: PublicReviewCodeSelection | undefined;
 }
 
@@ -407,13 +403,13 @@ export function SoliditySourceReview({
   }, [selectedSource, selectionKey, selectionValid]);
 
   const selection = useMemo<PublicReviewCodeSelection | undefined>(() => {
-    if (!selectionValid) {
+    if (
+      !selectionValid ||
+      computedSnippet?.selectionKey !== selectionKey ||
+      !computedSnippet.checksum
+    ) {
       return undefined;
     }
-    const snippetSha256 =
-      computedSnippet?.selectionKey === selectionKey
-        ? computedSnippet.checksum
-        : undefined;
     return {
       kind: "code",
       path: source.path,
@@ -422,7 +418,7 @@ export function SoliditySourceReview({
       lineEnd,
       ...(source.contract ? { contract: source.contract } : {}),
       ...(source.declaration ? { declaration: source.declaration } : {}),
-      ...(snippetSha256 ? { snippetSha256 } : {}),
+      snippetSha256: computedSnippet.checksum,
     };
   }, [
     computedSnippet,
@@ -435,6 +431,10 @@ export function SoliditySourceReview({
     source.path,
     source.sourceSha256,
   ]);
+  let integrityStatus: PublicReviewCodeSelectionIntegrityStatus = "pending";
+  if (computedSnippet?.selectionKey === selectionKey) {
+    integrityStatus = computedSnippet.checksum ? "ready" : "unavailable";
+  }
   const selectionUrl = toGitHubSelectionUrl(
     source.githubUrl,
     lineStart,
@@ -442,7 +442,9 @@ export function SoliditySourceReview({
   );
 
   return (
-    <PublicReviewCodeSelectionContext.Provider value={{ selection }}>
+    <PublicReviewCodeSelectionContext.Provider
+      value={{ integrityStatus, selection }}
+    >
       <SourceSelectionControls
         maximumLine={lastLineNumber}
         minimumLine={firstLineNumber}
