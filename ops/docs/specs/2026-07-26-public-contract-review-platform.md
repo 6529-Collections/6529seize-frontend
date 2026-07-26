@@ -197,6 +197,8 @@ Canonical routes:
 ```text
 /reviews/6529-stream
 /reviews/6529-stream/[page]
+/reviews/6529-stream/versions/[version]
+/reviews/6529-stream/versions/[version]/[page]
 /reviews/6529-stream/reference
 /reviews/6529-stream/reference/contracts/[contract]
 /reviews/6529-stream/reference/functions/[function]
@@ -211,6 +213,14 @@ Canonical routes:
 static review/page/contract parameter generation, not-found behavior, metadata,
 and the shared page shell. Pages and layouts remain Server Components;
 feedback, filters, and source-line selection are narrow Client Components.
+
+The unversioned route is canonical for the active review version. Every
+published historical version has its own canonical path beneath
+`/versions/[version]`, with the same editorial and generated-reference
+sub-routes available under that prefix. Static parameter generation includes
+every retained version, and a historical route resolves only against that
+version's immutable bundle rather than the active registry entry. Existing
+feedback links retain the versioned route they were created against.
 
 The NFT/collections navigation adds **6529 Stream - Review** after the live
 collection links and before utility destinations such as NFT Activity. It does

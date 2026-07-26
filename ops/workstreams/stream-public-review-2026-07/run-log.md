@@ -44,3 +44,6 @@
   environment-partitioned ledger reads and exports, authoritative disposition
   semantics, generated reference route patterns, and accessible pagination and
   search behavior.
+- Added explicit canonical `/versions/[version]` archive routes after shell
+  preflight identified that immutable historical review versions otherwise had
+  no addressable route contract.
