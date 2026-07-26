@@ -213,7 +213,7 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   status: "PUBLIC_REVIEW",
   deploymentStatus: "NOT_DEPLOYED",
   auditStatus: "PRE_AUDIT",
-  feedbackAvailable: false,
+  feedbackAvailable: true,
   source: {
     repository: "6529-Collections/6529Stream",
     commit: STREAM_REVIEW_SOURCE_COMMIT,

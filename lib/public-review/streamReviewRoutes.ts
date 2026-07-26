@@ -14,6 +14,7 @@ export interface StreamReviewRouteParams {
 }
 
 export interface StreamReviewRouteModel {
+  readonly baseEndpoint: string;
   readonly page: PublicReviewPageDefinition;
   readonly version?: string | undefined;
   readonly canonicalPath: string;
@@ -46,6 +47,7 @@ export function resolveStreamReviewRoute({
   }
 
   return {
+    baseEndpoint,
     page,
     version: params.version,
     canonicalPath: getStreamReviewPageHref({

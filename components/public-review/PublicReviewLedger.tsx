@@ -24,6 +24,7 @@ import {
 import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,
+  PublicReviewFeedbackRecord,
   PublicReviewLedgerFilters,
 } from "@/services/api/public-review/types";
 
@@ -31,6 +32,7 @@ interface PublicReviewLedgerProps {
   readonly locale: SupportedLocale;
   readonly config: PublicReviewFeedbackConfig;
   readonly destination: PublicReviewDiscussionDestination;
+  readonly internalSourceBasePath?: string | undefined;
   readonly api?: PublicReviewLedgerApi | undefined;
   readonly pageSize?: number | undefined;
 }
@@ -48,10 +50,151 @@ const SELECT_CLASSES =
   "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
 const LEDGER_ALL_MESSAGE = "publicReview.ledger.all" as const;
 
+function protectSpreadsheetCell(value: string): string {
+  return /^[\t\n\r ]*[=+\-@]/.test(value) ? `'${value}` : value;
+}
+
+function toCsvCell(value: string | number | undefined): string {
+  const normalized = protectSpreadsheetCell(String(value ?? ""));
+  return `"${normalized.replaceAll('"', '""')}"`;
+}
+
+export function createPublicReviewLedgerCsv(
+  records: readonly PublicReviewFeedbackRecord[]
+): string {
+  const rows = [
+    [
+      "feedback_id",
+      "review_version",
+      "category",
+      "severity",
+      "page_id",
+      "section_id",
+      "author",
+      "created_at",
+      "contract",
+      "declaration",
+      "source_path",
+      "line_start",
+      "line_end",
+      "source_sha256",
+      "snippet_sha256",
+      "discussion_path",
+      "body",
+    ],
+    ...records.map((record) => {
+      const reference =
+        record.reference?.kind === "code" ? record.reference : undefined;
+      return [
+        record.feedbackId,
+        record.reviewVersion,
+        record.category,
+        record.severity,
+        record.pageId,
+        record.sectionId,
+        record.author.handle ?? record.author.id,
+        new Date(record.createdAt).toISOString(),
+        reference?.contract,
+        reference?.declaration,
+        reference?.path,
+        reference?.lineStart,
+        reference?.lineEnd,
+        reference?.sourceSha256,
+        reference?.snippetSha256,
+        record.discussionPath,
+        record.body,
+      ];
+    }),
+  ];
+  return rows.map((row) => row.map(toCsvCell).join(",")).join("\r\n");
+}
+
+export function createPublicReviewLedgerMarkdown(
+  records: readonly PublicReviewFeedbackRecord[],
+  title: string
+): string {
+  const sections = records.map((record) => {
+    const reference =
+      record.reference?.kind === "code" ? record.reference : undefined;
+    const lines = [
+      `## ${record.feedbackId}`,
+      "",
+      `- Review version: \`${record.reviewVersion}\``,
+      `- Category: \`${record.category}\``,
+      `- Suspected severity: \`${record.severity}\``,
+      `- Page: \`${record.pageId}\``,
+      ...(record.sectionId ? [`- Section: \`${record.sectionId}\``] : []),
+      `- Author: ${record.author.handle ?? record.author.id}`,
+      `- Submitted: ${new Date(record.createdAt).toISOString()}`,
+      `- Discussion: ${record.discussionPath}`,
+      ...(reference
+        ? [
+            `- Source: \`${reference.path}:${reference.lineStart}-${reference.lineEnd}\``,
+            `- Source checksum: \`${reference.sourceSha256}\``,
+            ...(reference.snippetSha256
+              ? [`- Snippet checksum: \`${reference.snippetSha256}\``]
+              : []),
+          ]
+        : []),
+      "",
+      ...record.body.split("\n").map((line) => `> ${line}`),
+    ];
+    return lines.join("\n");
+  });
+  return [`# ${title}`, "", ...sections].join("\n\n");
+}
+
+function getInternalSourceLink({
+  basePath,
+  record,
+}: {
+  readonly basePath: string;
+  readonly record: PublicReviewFeedbackRecord;
+}): string | undefined {
+  const reference =
+    record.reference?.kind === "code" ? record.reference : undefined;
+  if (
+    !reference ||
+    !basePath.startsWith("/reviews/") ||
+    basePath.includes("..")
+  ) {
+    return undefined;
+  }
+  const sourcePath = reference.path
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/");
+  const lineFragment =
+    reference.lineStart === reference.lineEnd
+      ? `#L${reference.lineStart}`
+      : `#L${reference.lineStart}-L${reference.lineEnd}`;
+  return `${basePath}/versions/${encodeURIComponent(
+    record.reviewVersion
+  )}/reference/sources/${sourcePath}${lineFragment}`;
+}
+
+function downloadLedgerExport({
+  content,
+  filename,
+  type,
+}: {
+  readonly content: string;
+  readonly filename: string;
+  readonly type: string;
+}): void {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function PublicReviewLedger({
   locale,
   config,
   destination,
+  internalSourceBasePath,
   api,
   pageSize = PUBLIC_REVIEW_LEDGER_PAGE_SIZE,
 }: PublicReviewLedgerProps) {
@@ -132,6 +275,39 @@ export default function PublicReviewLedger({
       <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "publicReview.ledger.intro")}
       </p>
+      <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-3">
+        <button
+          type="button"
+          disabled={visibleRecords.length === 0}
+          onClick={() =>
+            downloadLedgerExport({
+              content: createPublicReviewLedgerCsv(visibleRecords),
+              filename: `${config.reviewId}-${config.reviewVersion}-feedback.csv`,
+              type: "text/csv;charset=utf-8",
+            })
+          }
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+        >
+          {t(locale, "publicReview.ledger.exportCsv")}
+        </button>
+        <button
+          type="button"
+          disabled={visibleRecords.length === 0}
+          onClick={() =>
+            downloadLedgerExport({
+              content: createPublicReviewLedgerMarkdown(
+                visibleRecords,
+                config.reviewTitle
+              ),
+              filename: `${config.reviewId}-${config.reviewVersion}-feedback.md`,
+              type: "text/markdown;charset=utf-8",
+            })
+          }
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+        >
+          {t(locale, "publicReview.ledger.exportMarkdown")}
+        </button>
+      </div>
 
       <fieldset className="tw-mt-5 tw-grid tw-gap-4 tw-border-0 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
         <legend className="tw-sr-only">
@@ -268,6 +444,12 @@ export default function PublicReviewLedger({
               config.severityOptions.find(
                 (severity) => severity.value === record.severity
               )?.label ?? record.severity;
+            const internalSourceLink = internalSourceBasePath
+              ? getInternalSourceLink({
+                  basePath: internalSourceBasePath,
+                  record,
+                })
+              : undefined;
 
             return (
               <li key={record.feedbackId}>
@@ -306,14 +488,30 @@ export default function PublicReviewLedger({
                       })}
                     </span>
                     {record.reference?.kind === "code" ? (
-                      <a
-                        href={getPublicReviewSourceLink(record.reference)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="tw-font-semibold tw-text-primary-300 tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
-                      >
-                        {t(locale, "publicReview.ledger.sourceReference")}
-                      </a>
+                      <>
+                        {internalSourceLink ? (
+                          <Link
+                            href={internalSourceLink}
+                            className="tw-font-semibold tw-text-primary-300 tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+                          >
+                            {t(
+                              locale,
+                              "publicReview.ledger.internalSourceReference"
+                            )}
+                          </Link>
+                        ) : null}
+                        <a
+                          href={getPublicReviewSourceLink(record.reference)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="tw-font-semibold tw-text-primary-300 tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+                        >
+                          {t(
+                            locale,
+                            "publicReview.ledger.githubSourceReference"
+                          )}
+                        </a>
+                      </>
                     ) : null}
                     <Link
                       href={record.discussionPath}

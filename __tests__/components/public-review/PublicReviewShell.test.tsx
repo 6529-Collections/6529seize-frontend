@@ -20,6 +20,7 @@ describe("PublicReviewShell", () => {
         review={STREAM_REVIEW_DEFINITION}
         sections={[{ id: "the-short-answer", title: "The short answer" }]}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback form</div>}
       />
     );
 

@@ -11,6 +11,7 @@ export function PublicReviewReferenceShell({
   description,
   displayedVersion,
   editorialHref,
+  feedbackHref,
   referenceHref,
   review,
   title,
@@ -19,6 +20,7 @@ export function PublicReviewReferenceShell({
   readonly description: string;
   readonly displayedVersion: string;
   readonly editorialHref: string;
+  readonly feedbackHref: string;
   readonly referenceHref: string;
   readonly review: PublicReviewDefinition;
   readonly title: string;
@@ -46,6 +48,12 @@ export function PublicReviewReferenceShell({
             href={referenceHref}
           >
             {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
+          </Link>
+          <Link
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-3 tw-py-2 tw-font-semibold tw-text-primary-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            href={feedbackHref}
+          >
+            {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
           </Link>
         </nav>
 

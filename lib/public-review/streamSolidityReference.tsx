@@ -3,6 +3,8 @@ import "next/dist/compiled/server-only";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { PublicReviewCodeFeedback } from "@/components/public-review/PublicReviewCodeFeedback";
+import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
 import { PublicReviewReferenceShell } from "@/components/public-review/PublicReviewReferenceShell";
 import {
   SolidityDeclarationView,
@@ -14,6 +16,7 @@ import {
   SolidityReferenceOverview,
 } from "@/components/public-review/SolidityReferenceViews";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { publicEnv } from "@/config/env";
 import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -23,11 +26,24 @@ import {
   type SolidityReferenceReader,
 } from "@/lib/public-review/solidityReferenceData";
 import {
+  getSolidityDeclarationHref,
+  getSolidityDefinitionHref,
+  getSolidityInterfaceHref,
   getSolidityReferenceRootHref,
+  getSoliditySourceHref,
+  getSolidityTopLevelDeclarationHref,
   type SolidityReferenceHrefContext,
 } from "@/lib/public-review/solidityReferenceRoutes";
+import {
+  createStreamReviewFeedbackConfig,
+  createStreamTechnicalFeedbackPageContext,
+  resolveStreamReviewFeedbackDestination,
+  type StreamReviewTechnicalFeedbackPageId,
+} from "@/lib/public-review/streamReviewFeedback.server";
 import type {
   SolidityDeclarationKind,
+  SolidityDefinitionIndexEntry,
+  SolidityReferenceManifest,
   SolidityReferenceReviewIdentity,
   SolidityTopLevelDeclaration,
 } from "@/lib/public-review/solidityReferenceTypes";
@@ -35,6 +51,12 @@ import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
+import type {
+  PublicReviewCodeSelection,
+  PublicReviewDiscussionDestination,
+  PublicReviewFeedbackConfig,
+  PublicReviewPageContext,
+} from "@/services/api/public-review/types";
 
 export interface StreamSolidityReferenceRouteParams {
   readonly review: string;
@@ -106,6 +128,60 @@ function getHrefContext(
   };
 }
 
+function getImmutableHrefContext(
+  version: string
+): SolidityReferenceHrefContext {
+  return { reviewSlug: STREAM_REVIEW_SLUG, version };
+}
+
+async function getReferenceFeedback({
+  canonicalPath,
+  manifest,
+  pageId,
+  pageTitle,
+  sourcePaths,
+}: {
+  readonly canonicalPath: string;
+  readonly manifest: SolidityReferenceManifest;
+  readonly pageId: StreamReviewTechnicalFeedbackPageId;
+  readonly pageTitle: string;
+  readonly sourcePaths?: readonly string[] | undefined;
+}): Promise<{
+  readonly config: PublicReviewFeedbackConfig;
+  readonly destination: PublicReviewDiscussionDestination;
+  readonly page: PublicReviewPageContext;
+}> {
+  return {
+    config: await createStreamReviewFeedbackConfig({
+      manifest,
+      sourcePaths,
+    }),
+    destination: resolveStreamReviewFeedbackDestination(
+      publicEnv.BASE_ENDPOINT
+    ),
+    page: createStreamTechnicalFeedbackPageContext({
+      canonicalPath,
+      pageId,
+      pageTitle,
+    }),
+  };
+}
+
+function getDefinitionSelection(
+  definition: SolidityDefinitionIndexEntry
+): PublicReviewCodeSelection {
+  return {
+    kind: "code",
+    path: definition.sourcePath,
+    sourceSha256: definition.range.sourceSha256,
+    lineStart: definition.range.lineStart,
+    lineEnd: definition.range.lineEnd,
+    contract: definition.name,
+    declaration: definition.id,
+    snippetSha256: definition.range.snippetSha256,
+  };
+}
+
 function getEditorialHref(routeVersion: string | undefined): string {
   return routeVersion
     ? `/reviews/${STREAM_REVIEW_SLUG}/versions/${routeVersion}`
@@ -171,12 +247,14 @@ export function getStreamSolidityReferenceMetadata({
 function ReferenceShell({
   children,
   description,
+  feedbackSlot,
   routeVersion,
   title,
   version,
 }: {
   readonly children: ReactNode;
   readonly description: string;
+  readonly feedbackSlot?: ReactNode | undefined;
   readonly routeVersion?: string | undefined;
   readonly title: string;
   readonly version: string;
@@ -187,11 +265,15 @@ function ReferenceShell({
       description={description}
       displayedVersion={version}
       editorialHref={getEditorialHref(routeVersion)}
+      feedbackHref={`/reviews/${STREAM_REVIEW_SLUG}/feedback`}
       referenceHref={getSolidityReferenceRootHref(hrefContext)}
       review={STREAM_REVIEW_DEFINITION}
       title={title}
     >
       {children}
+      {feedbackSlot !== undefined && feedbackSlot !== null ? (
+        <div className="tw-mt-8">{feedbackSlot}</div>
+      ) : null}
     </PublicReviewReferenceShell>
   );
 }
@@ -206,6 +288,18 @@ export async function renderStreamSolidityReferenceOverview({
   readonly version: string;
 }) {
   const { manifest } = await reader.loadManifest(version);
+  const pageTitle = t(
+    DEFAULT_LOCALE,
+    "publicReview.reference.overviewTitle"
+  );
+  const feedback = await getReferenceFeedback({
+    canonicalPath: getSolidityReferenceRootHref(
+      getImmutableHrefContext(version)
+    ),
+    manifest,
+    pageId: "reference-overview",
+    pageTitle,
+  });
   return (
     <ReferenceShell
       description={t(
@@ -213,7 +307,15 @@ export async function renderStreamSolidityReferenceOverview({
         "publicReview.reference.overviewDescription"
       )}
       routeVersion={routeVersion}
-      title={t(DEFAULT_LOCALE, "publicReview.reference.overviewTitle")}
+      feedbackSlot={
+        <PublicReviewFeedbackComposer
+          locale={DEFAULT_LOCALE}
+          config={feedback.config}
+          destination={feedback.destination}
+          page={feedback.page}
+        />
+      }
+      title={pageTitle}
       version={version}
     >
       <SolidityReferenceOverview
@@ -239,6 +341,24 @@ export async function renderStreamSolidityDefinition({
     version,
     definitionKey
   );
+  const pageTitle = t(
+    DEFAULT_LOCALE,
+    "publicReview.reference.definitionTitle",
+    {
+      kind: indexEntry.kind,
+      name: indexEntry.name,
+    }
+  );
+  const feedback = await getReferenceFeedback({
+    canonicalPath: getSolidityDefinitionHref({
+      ...getImmutableHrefContext(version),
+      definitionKey,
+    }),
+    manifest,
+    pageId: "reference-definition",
+    pageTitle,
+    sourcePaths: [indexEntry.sourcePath],
+  });
   return (
     <ReferenceShell
       description={t(
@@ -246,10 +366,16 @@ export async function renderStreamSolidityDefinition({
         "publicReview.reference.definitionDescription"
       )}
       routeVersion={routeVersion}
-      title={t(DEFAULT_LOCALE, "publicReview.reference.definitionTitle", {
-        kind: indexEntry.kind,
-        name: indexEntry.name,
-      })}
+      feedbackSlot={
+        <PublicReviewFeedbackComposer
+          locale={DEFAULT_LOCALE}
+          config={feedback.config}
+          destination={feedback.destination}
+          page={feedback.page}
+          referenceSelection={getDefinitionSelection(indexEntry)}
+        />
+      }
+      title={pageTitle}
       version={version}
     >
       <SolidityDefinitionView
@@ -285,10 +411,30 @@ export async function renderStreamSolidityDeclaration({
     kind,
     declarationKey
   );
-  const { document } = await reader.loadSource(
+  const { document, manifest } = await reader.loadSource(
     version,
     indexEntry.sourcePath.split("/")
   );
+  const pageTitle =
+    declaration.canonicalSignature ?? declaration.displaySignature;
+  let pageId: StreamReviewTechnicalFeedbackPageId = "reference-error";
+  if (kind === "functions") {
+    pageId = "reference-function";
+  } else if (kind === "events") {
+    pageId = "reference-event";
+  }
+  const feedback = await getReferenceFeedback({
+    canonicalPath: getSolidityDeclarationHref({
+      ...getImmutableHrefContext(version),
+      declarationKey,
+      definitionKey,
+      kind,
+    }),
+    manifest,
+    pageId,
+    pageTitle,
+    sourcePaths: [indexEntry.sourcePath],
+  });
   return (
     <ReferenceShell
       description={t(
@@ -296,13 +442,21 @@ export async function renderStreamSolidityDeclaration({
         "publicReview.reference.definitionDescription"
       )}
       routeVersion={routeVersion}
-      title={declaration.canonicalSignature ?? declaration.displaySignature}
+      title={pageTitle}
       version={version}
     >
       <SolidityDeclarationView
         declaration={declaration}
         definition={indexEntry}
-        feedbackSlot={feedbackSlot}
+        feedbackSlot={
+          feedbackSlot ?? (
+            <PublicReviewCodeFeedback
+              config={feedback.config}
+              destination={feedback.destination}
+              page={feedback.page}
+            />
+          )
+        }
         source={document}
       />
     </ReferenceShell>
@@ -342,6 +496,18 @@ export async function renderStreamSolidityTopLevelDeclaration({
   if (!declaration || !isTopLevelCallable(declaration)) {
     throw new Error("File-scope Solidity declaration projection drift.");
   }
+  const pageTitle =
+    indexEntry.canonicalSignature ?? indexEntry.displaySignature;
+  const feedback = await getReferenceFeedback({
+    canonicalPath: getSolidityTopLevelDeclarationHref({
+      ...getImmutableHrefContext(version),
+      declarationKey,
+    }),
+    manifest,
+    pageId: "reference-declaration",
+    pageTitle,
+    sourcePaths: [indexEntry.sourcePath],
+  });
   return (
     <ReferenceShell
       description={t(
@@ -349,12 +515,20 @@ export async function renderStreamSolidityTopLevelDeclaration({
         "publicReview.reference.definitionDescription"
       )}
       routeVersion={routeVersion}
-      title={indexEntry.canonicalSignature ?? indexEntry.displaySignature}
+      title={pageTitle}
       version={version}
     >
       <SolidityDeclarationView
         declaration={declaration}
-        feedbackSlot={feedbackSlot}
+        feedbackSlot={
+          feedbackSlot ?? (
+            <PublicReviewCodeFeedback
+              config={feedback.config}
+              destination={feedback.destination}
+              page={feedback.page}
+            />
+          )
+        }
         source={document}
       />
     </ReferenceShell>
@@ -381,6 +555,21 @@ export async function renderStreamSolidityInterface({
       "The requested definition is not a published interface."
     );
   }
+  const pageTitle = t(
+    DEFAULT_LOCALE,
+    "publicReview.reference.interfaceTitle",
+    { name: indexEntry.name }
+  );
+  const feedback = await getReferenceFeedback({
+    canonicalPath: getSolidityInterfaceHref({
+      ...getImmutableHrefContext(version),
+      definitionKey,
+    }),
+    manifest,
+    pageId: "reference-interface",
+    pageTitle,
+    sourcePaths: [indexEntry.sourcePath],
+  });
   return (
     <ReferenceShell
       description={t(
@@ -388,9 +577,16 @@ export async function renderStreamSolidityInterface({
         "publicReview.reference.interfaceDescription"
       )}
       routeVersion={routeVersion}
-      title={t(DEFAULT_LOCALE, "publicReview.reference.interfaceTitle", {
-        name: indexEntry.name,
-      })}
+      feedbackSlot={
+        <PublicReviewFeedbackComposer
+          locale={DEFAULT_LOCALE}
+          config={feedback.config}
+          destination={feedback.destination}
+          page={feedback.page}
+          referenceSelection={getDefinitionSelection(indexEntry)}
+        />
+      }
+      title={pageTitle}
       version={version}
     >
       <SolidityInterfaceView
@@ -417,6 +613,21 @@ export async function renderStreamSoliditySource({
   readonly version: string;
 }) {
   const result = await reader.loadSource(version, source);
+  const pageTitle = t(
+    DEFAULT_LOCALE,
+    "publicReview.reference.sourceTitle",
+    { path: result.document.file.path }
+  );
+  const feedback = await getReferenceFeedback({
+    canonicalPath: getSoliditySourceHref({
+      ...getImmutableHrefContext(version),
+      sourcePath: result.document.file.path,
+    }),
+    manifest: result.manifest,
+    pageId: "reference-source",
+    pageTitle,
+    sourcePaths: [result.document.file.path],
+  });
   return (
     <ReferenceShell
       description={t(
@@ -424,14 +635,20 @@ export async function renderStreamSoliditySource({
         "publicReview.reference.sourceDescription"
       )}
       routeVersion={routeVersion}
-      title={t(DEFAULT_LOCALE, "publicReview.reference.sourceTitle", {
-        path: result.document.file.path,
-      })}
+      title={pageTitle}
       version={version}
     >
       <SoliditySourceView
         document={result.document}
-        feedbackSlot={feedbackSlot}
+        feedbackSlot={
+          feedbackSlot ?? (
+            <PublicReviewCodeFeedback
+              config={feedback.config}
+              destination={feedback.destination}
+              page={feedback.page}
+            />
+          )
+        }
         hrefContext={getHrefContext(routeVersion)}
         manifest={result.manifest}
       />

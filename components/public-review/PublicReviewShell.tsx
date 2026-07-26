@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { PublicReviewAudiencePaths } from "@/components/public-review/PublicReviewAudiencePaths";
 import {
@@ -76,6 +77,7 @@ export function PublicReviewShell({
   sections,
   routeVersion,
   displayedVersion,
+  feedbackSlot,
 }: {
   readonly editorialMarkdown: string;
   readonly page: PublicReviewPageDefinition;
@@ -83,6 +85,7 @@ export function PublicReviewShell({
   readonly sections: readonly PublicReviewSectionDefinition[];
   readonly routeVersion?: string | undefined;
   readonly displayedVersion: string;
+  readonly feedbackSlot: ReactNode;
 }) {
   const pageIndex = review.pages.findIndex(
     (candidate) => candidate.id === page.id
@@ -118,14 +121,21 @@ export function PublicReviewShell({
               <PublicReviewEvidenceBadge key={state} state={state} />
             ))}
           </div>
-          <Link
-            href={getSolidityReferenceRootHref({
-              reviewSlug: review.slug,
-              version: routeVersion,
-            })}
-            className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/40 tw-bg-sky-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-sky-100 tw-no-underline hover:tw-border-sky-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-            {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
-          </Link>
+          <div className="tw-mt-5 tw-flex tw-flex-wrap tw-gap-3">
+            <Link
+              href={getSolidityReferenceRootHref({
+                reviewSlug: review.slug,
+                version: routeVersion,
+              })}
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/40 tw-bg-sky-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-sky-100 tw-no-underline hover:tw-border-sky-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+              {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
+            </Link>
+            <Link
+              href={`/reviews/${review.slug}/feedback`}
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-primary-100 tw-no-underline hover:tw-border-primary-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+              {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
+            </Link>
+          </div>
         </header>
 
         {page.id === "overview" && (
@@ -147,18 +157,7 @@ export function PublicReviewShell({
               <PublicReviewMarkdown markdown={editorialMarkdown} />
             </article>
 
-            <section
-              aria-labelledby="feedback-status-heading"
-              className="tw-mt-8 tw-rounded-2xl tw-border tw-border-solid tw-border-amber-400/30 tw-bg-amber-400/5 tw-p-5 sm:tw-p-6">
-              <h2
-                id="feedback-status-heading"
-                className="tw-m-0 tw-text-lg tw-font-semibold tw-text-amber-100">
-                {t(DEFAULT_LOCALE, "publicReview.feedback.pendingTitle")}
-              </h2>
-              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-200">
-                {t(DEFAULT_LOCALE, "publicReview.feedback.pendingBody")}
-              </p>
-            </section>
+            <div className="tw-mt-8">{feedbackSlot}</div>
 
             <div className="tw-mt-8">
               <PublicReviewEvidenceLegend />

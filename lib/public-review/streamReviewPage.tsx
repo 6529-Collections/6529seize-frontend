@@ -2,12 +2,18 @@ import "next/dist/compiled/server-only";
 
 import type { Metadata } from "next";
 
+import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
+import {
+  createStreamEditorialFeedbackPageContext,
+  createStreamReviewFeedbackConfig,
+  resolveStreamReviewFeedbackDestination,
+} from "@/lib/public-review/streamReviewFeedback.server";
 import {
   resolveStreamReviewRoute,
   type StreamReviewRouteModel,
@@ -16,6 +22,7 @@ import {
 import {
   STREAM_REVIEW_DEFINITION,
 } from "@/lib/public-review/streamReviewDefinition";
+import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
 
 export { resolveStreamReviewRoute };
 
@@ -61,6 +68,12 @@ export async function renderStreamReviewRoute(
     contentVersion
   );
   const sections = extractPublicReviewSections(editorialMarkdown);
+  const { manifest } =
+    await getStreamSolidityReferenceReader().loadManifest(contentVersion);
+  const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
+  const feedbackDestination = resolveStreamReviewFeedbackDestination(
+    route.baseEndpoint
+  );
 
   return (
     <PublicReviewShell
@@ -70,6 +83,17 @@ export async function renderStreamReviewRoute(
       sections={sections}
       routeVersion={route.version}
       displayedVersion={contentVersion}
+      feedbackSlot={
+        <PublicReviewEditorialFeedback
+          config={feedbackConfig}
+          destination={feedbackDestination}
+          page={createStreamEditorialFeedbackPageContext({
+            page: route.page,
+            version: contentVersion,
+          })}
+          sections={sections}
+        />
+      }
     />
   );
 }

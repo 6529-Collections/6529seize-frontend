@@ -61,9 +61,6 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Deferred: intentionally outside the current implementation target.",
   "publicReview.evidence.knownLimitation":
     "Known limitation: a recorded constraint, gap, or unresolved risk.",
-  "publicReview.feedback.pendingTitle": "Structured feedback is being connected",
-  "publicReview.feedback.pendingBody":
-    "The Wave submission module is a separate review feature. Keep the page URL, review version, and exact source link with notes prepared in the meantime.",
   "publicReview.markdown.externalLink": "Opens in a new tab",
   "publicReview.reference.eyebrow": "Generated technical reference",
   "publicReview.reference.backToReview": "Back to contract review",
@@ -374,6 +371,41 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.feedback.sectionContext": "Section: {section}",
   "publicReview.feedback.sourceContext":
     "Source: {path}, lines {lineStart}–{lineEnd}",
+  "publicReview.feedback.sectionSelector": "Comment on",
+  "publicReview.feedback.wholePage": "The whole page",
+  "publicReview.feedback.hashingReference":
+    "Preparing the tamper-evident checksum for this exact code selection…",
+  "publicReview.feedback.hashUnavailable":
+    "This browser could not verify the selected code checksum. Code-linked feedback is disabled; reload in a current browser and try again.",
+  "publicReview.feedback.categories.general": "General feedback",
+  "publicReview.feedback.categories.artistExperience": "Artist experience",
+  "publicReview.feedback.categories.protocolDesign":
+    "Protocol and mechanism design",
+  "publicReview.feedback.categories.economics": "Sales and economics",
+  "publicReview.feedback.categories.governance": "Governance and trust",
+  "publicReview.feedback.categories.interoperability":
+    "Interfaces and interoperability",
+  "publicReview.feedback.categories.documentation": "Documentation",
+  "publicReview.feedback.categories.testing": "Testing and evidence",
+  "publicReview.feedback.categories.exploitable":
+    "Possible exploitable security vulnerability",
+  "publicReview.feedback.severities.question": "Question",
+  "publicReview.feedback.severities.suggestion": "Suggestion",
+  "publicReview.feedback.severities.low": "Low",
+  "publicReview.feedback.severities.medium": "Medium",
+  "publicReview.feedback.severities.high": "High",
+  "publicReview.feedback.severities.critical": "Critical",
+  "publicReview.feedback.pages.referenceOverview":
+    "Technical reference overview",
+  "publicReview.feedback.pages.referenceDefinition":
+    "Contract or library definition",
+  "publicReview.feedback.pages.referenceInterface": "Published interface",
+  "publicReview.feedback.pages.referenceSource": "Solidity source file",
+  "publicReview.feedback.pages.referenceFunction": "Solidity function",
+  "publicReview.feedback.pages.referenceEvent": "Solidity event",
+  "publicReview.feedback.pages.referenceError": "Solidity custom error",
+  "publicReview.feedback.pages.referenceDeclaration":
+    "File-scope declaration",
   "publicReview.ledger.title": "Public feedback ledger",
   "publicReview.ledger.intro":
     "Structured feedback submitted for this exact review version.",
@@ -398,6 +430,18 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.ledger.reactions": "{count} reactions",
   "publicReview.ledger.openDiscussion": "Open discussion in the Wave",
   "publicReview.ledger.sourceReference": "Open pinned source reference",
+  "publicReview.ledger.internalSourceReference":
+    "Open this selection in the review",
+  "publicReview.ledger.githubSourceReference":
+    "Open immutable evidence on GitHub",
+  "publicReview.ledger.exportCsv": "Export loaded feedback as CSV",
+  "publicReview.ledger.exportMarkdown": "Export loaded feedback as Markdown",
+  "publicReview.ledger.exportEmpty":
+    "Load feedback before creating an auditor export.",
+  "publicReview.ledger.pageTitle": "6529 Stream public feedback",
+  "publicReview.ledger.pageIntro":
+    "A filterable record of structured community and auditor feedback for this exact contract review version.",
+  "publicReview.ledger.navigation": "View public feedback",
   "publicReview.ledger.unknownAuthor": "Unknown author",
   "publicReview.ledger.byline":
     "{author} · {page} · Submitted {date} at {time}",
