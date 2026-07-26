@@ -32,6 +32,10 @@ Production activation requires a later reviewed configuration change.
 - `/reviews/6529-stream/{page}`: one of fourteen active editorial pages
 - `/reviews/6529-stream/versions/{version}`: versioned overview
 - `/reviews/6529-stream/versions/{version}/{page}`: versioned editorial page
+- `/reviews/6529-stream/reference`: active generated technical reference
+- `/reviews/6529-stream/versions/{version}/reference`: immutable generated
+  technical reference
+- `/reviews/6529-stream/feedback`: searchable public feedback ledger
 - `/stream`: gated convenience redirect to the active overview
 
 When enabled, **NFTs > 6529 Stream — Review** appears after the live collection
@@ -49,9 +53,12 @@ Every page includes:
 - an on-page contents list generated from the editorial headings
 - previous and next page controls
 - an evidence-label glossary
+- a structured feedback form bound to the immutable displayed review version
 
 The overview also provides reading paths for community members, artists,
-technical reviewers, and auditors.
+technical reviewers, and auditors. The generated technical reference lets
+reviewers inspect Solidity files, definitions, functions, events, errors, and
+other declarations without leaving the review.
 
 ## Evidence Labels
 
@@ -84,18 +91,27 @@ visible in future language controls.
 
 ## Feedback Status
 
-The review shell currently explains that structured feedback is being
-connected. It does not contain a Wave identifier and does not submit feedback.
-The reusable feedback transport, structured fields, code references, and
-review-ledger views are separate delivery slices.
+Structured feedback is enabled on every editorial and technical reference
+page. Editorial feedback can target one stable page section. Technical
+feedback can target an exact source range. The client computes the selected
+snippet checksum before enabling submission; changing the selected code
+invalidates any existing preview until the new checksum is ready.
 
-Until that module is enabled, readers should retain:
+Each submission records the immutable review version, page or section,
+category, suspected severity, and any exact code provenance. The category
+**Possible exploitable security vulnerability** is intentionally submitted to
+the same public pre-deployment review destination: Stream is not live, and
+finding those issues before finalization is the purpose of this review.
 
-- the page URL
-- the displayed review version
-- the exact source link
-- the relevant evidence label
-- a concise expected-versus-observed description
+The feedback ledger at `/reviews/6529-stream/feedback` reads the public review
+discussion, validates structured metadata against the exact review
+configuration, and supports filtering plus CSV and Markdown auditor exports.
+Source-linked entries open the immutable in-site source view first, with the
+pinned GitHub source as a secondary link.
+
+The form and ledger are reusable public-review modules. Review-specific
+configuration supplies the immutable manifest, page and section allowlists,
+feedback taxonomy, and server-resolved discussion destination.
 
 ## Failure and Recovery
 
@@ -109,6 +125,10 @@ Until that module is enabled, readers should retain:
 - If the displayed source differs from a code link, stop relying on the page
   and report the mismatch. All review evidence must refer to one source
   snapshot.
+- If a technical selection remains in the checksum state or reports an
+  integrity failure, do not submit it; reload the exact versioned source page.
+- If a valid structured entry is omitted from the ledger, open its Wave
+  discussion and report the entry link so its metadata can be inspected.
 
 ## Related Pages
 

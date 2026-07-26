@@ -117,6 +117,8 @@
         "Fourteen editorial pages explain artwork lifecycle, artist controls, roles, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, governance, security, and community review.",
         "Every page shows the review version, exact source link, evidence labels, page navigation, and on-page contents.",
         "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
+        "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",
+        "Every editorial and technical page includes one structured feedback composer bound to the immutable displayed review version.",
         "When enabled, NFTs > 6529 Stream — Review appears after ReMemes and before NFT Activity."
       ],
       "canonical_path": "/reviews/6529-stream",
@@ -134,7 +136,9 @@
         "/reviews/6529-stream/freezing-preservation-and-artwork-finality",
         "/reviews/6529-stream/governance-pausing-and-successors",
         "/reviews/6529-stream/security-testing-and-known-limitations",
-        "/reviews/6529-stream/community-review"
+        "/reviews/6529-stream/community-review",
+        "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/feedback"
       ],
       "tags": ["stream", "contract", "review", "security"],
       "source_refs": [
@@ -146,7 +150,7 @@
     {
       "id": "public-reviews.stream.feedback-status",
       "kind": "ui_affordance",
-      "title": "Stream review feedback status",
+      "title": "Stream review feedback and public ledger",
       "aliases": [
         "stream feedback",
         "comment on stream",
@@ -162,19 +166,28 @@
         "source"
       ],
       "facts": [
-        "The initial review shell does not submit feedback and contains no Wave or subwave destination identifier.",
-        "The page states that structured feedback is being connected as a separate reusable module.",
-        "Until submission is enabled, retain the page URL, displayed review version, exact source link, evidence label, and expected-versus-observed description with each note.",
-        "Because Stream is not deployed, possible exploitable vulnerabilities are in scope for this public pre-deployment review."
+        "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
+        "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
+        "A code-reference submission remains unavailable until the browser computes the exact selected snippet checksum, and changing the selection invalidates any earlier preview.",
+        "Every submission carries the immutable review version, page or section, category, suspected severity, and exact source provenance when code is selected.",
+        "Possible exploitable security vulnerabilities are intentionally submitted to the same public pre-deployment review because Stream is not deployed.",
+        "The public feedback ledger supports category, page, contract, severity, disposition, and text filters plus CSV and Markdown auditor exports.",
+        "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."
       ],
-      "canonical_path": "/reviews/6529-stream/community-review",
+      "canonical_path": "/reviews/6529-stream/feedback",
       "related_paths": [
         "/reviews/6529-stream",
-        "/reviews/6529-stream/security-testing-and-known-limitations"
+        "/reviews/6529-stream/community-review",
+        "/reviews/6529-stream/security-testing-and-known-limitations",
+        "/reviews/6529-stream/reference"
       ],
       "tags": ["stream", "review", "feedback", "security"],
       "source_refs": [
+        "app/reviews/[review]/feedback/page.tsx",
+        "components/public-review/PublicReviewFeedbackComposer.tsx",
+        "components/public-review/PublicReviewLedger.tsx",
         "components/public-review/PublicReviewShell.tsx",
+        "lib/public-review/streamReviewFeedback.server.ts",
         "ops/docs/public-reviews/README.md"
       ]
     },
