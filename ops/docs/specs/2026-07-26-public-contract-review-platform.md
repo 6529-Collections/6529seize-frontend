@@ -354,6 +354,15 @@ generated, so `DRAFT` cannot be advertised through machine-readable discovery.
 Changing a review from `DRAFT` to a public lifecycle state therefore requires
 one explicit, validated publication-state change.
 
+Each immutable review version also carries its own lifecycle, deployment
+status, and audit status. Rendering, technical-reference route generation,
+status copy, exploit-report policy, and ordinary feedback submission are
+derived from the displayed version rather than the review's active version.
+When a new version becomes active, the superseded version can remain public as
+`REVIEW_CLOSED`; it is marked historical, links to the current review, cannot
+silently keep accepting feedback, and cannot inherit newer deployment or audit
+claims.
+
 ## Environment Activation
 
 Merging the implementation does not authorize production exposure. Each review

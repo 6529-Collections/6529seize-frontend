@@ -107,9 +107,7 @@ function Property({
   );
 }
 
-function getDeclarationTitle(
-  declaration: SolidityTopLevelDeclaration
-): string {
+function getDeclarationTitle(declaration: SolidityTopLevelDeclaration): string {
   if (
     declaration.kind === "function" ||
     declaration.kind === "event" ||
@@ -168,8 +166,8 @@ function getFunctionProperties(
   ];
   if (declaration.modifiers.length > 0) {
     properties.push({
-        label: t(DEFAULT_LOCALE, "publicReview.reference.modifiers"),
-        value: declaration.modifiers.join(", "),
+      label: t(DEFAULT_LOCALE, "publicReview.reference.modifiers"),
+      value: declaration.modifiers.join(", "),
     });
   }
   return properties;
@@ -216,16 +214,16 @@ function getSpecificProperties(
     case "event":
       return [
         {
-      label: t(DEFAULT_LOCALE, "publicReview.reference.anonymous"),
+          label: t(DEFAULT_LOCALE, "publicReview.reference.anonymous"),
           value: booleanLabel(declaration.anonymous),
         },
       ];
     case "userDefinedValueType":
       return [
-      {
+        {
           label: t(DEFAULT_LOCALE, "publicReview.reference.underlyingType"),
           value: declaration.underlyingType,
-      },
+        },
       ];
     case "variable":
       return getVariableProperties(declaration);

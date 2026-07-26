@@ -47,6 +47,10 @@ describe("PublicReviewReferenceShell", () => {
         review={{
           ...STREAM_REVIEW_DEFINITION,
           status: "REVIEW_CLOSED",
+          versions: STREAM_REVIEW_DEFINITION.versions.map((version) => ({
+            ...version,
+            status: "REVIEW_CLOSED",
+          })),
         }}
       >
         <p>Reference content</p>

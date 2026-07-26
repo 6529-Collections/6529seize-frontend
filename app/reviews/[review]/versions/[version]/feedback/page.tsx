@@ -2,28 +2,31 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { publicEnv } from "@/config/env";
+import { isPublicReviewEnabled } from "@/config/publicReviews";
 import {
   getStreamReviewFeedbackMetadata,
   renderStreamReviewFeedbackPage,
 } from "@/lib/public-review/streamReviewFeedbackPage";
 import {
+  isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
-import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 
 type Props = {
   readonly params: Promise<{ review: string; version: string }>;
 };
 
 export function generateStaticParams() {
-  if (!isStreamReviewPubliclyAvailable(publicEnv.BASE_ENDPOINT)) {
+  if (!isPublicReviewEnabled(publicEnv.BASE_ENDPOINT)) {
     return [];
   }
-  return STREAM_REVIEW_DEFINITION.versions.map(({ version }) => ({
-    review: STREAM_REVIEW_SLUG,
-    version,
-  }));
+  return STREAM_REVIEW_DEFINITION.versions
+    .filter(({ version }) => isStreamReviewVersionPubliclyAvailable(version))
+    .map(({ version }) => ({
+      review: STREAM_REVIEW_SLUG,
+      version,
+    }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -45,10 +48,8 @@ export default async function VersionedPublicReviewFeedbackPage({
   const { review, version } = await params;
   if (
     review !== STREAM_REVIEW_SLUG ||
-    !STREAM_REVIEW_DEFINITION.versions.some(
-      (candidate) => candidate.version === version
-    ) ||
-    !isStreamReviewPubliclyAvailable(publicEnv.BASE_ENDPOINT)
+    !isStreamReviewVersionPubliclyAvailable(version) ||
+    !isPublicReviewEnabled(publicEnv.BASE_ENDPOINT)
   ) {
     notFound();
   }

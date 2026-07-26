@@ -2,6 +2,7 @@ import "next/dist/compiled/server-only";
 
 import { notFound } from "next/navigation";
 
+import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import {
   SolidityReferenceNotFoundError,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/public-review/streamSolidityReference";
 import type { SolidityReferenceRouteInventory } from "@/lib/public-review/solidityReferenceRoutes";
 import {
+  isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -82,14 +84,16 @@ export async function loadVersionedStreamReferenceInventories({
     readonly version: string;
   }[]
 > {
-  if (!isStreamReviewPubliclyAvailable(baseEndpoint)) {
+  if (!isPublicReviewEnabled(baseEndpoint)) {
     return [];
   }
   return Promise.all(
-    STREAM_REVIEW_DEFINITION.versions.map(async ({ version }) => ({
-      inventory: await reader.loadRouteInventory(version),
-      version,
-    }))
+    STREAM_REVIEW_DEFINITION.versions
+      .filter(({ version }) => isStreamReviewVersionPubliclyAvailable(version))
+      .map(async ({ version }) => ({
+        inventory: await reader.loadRouteInventory(version),
+        version,
+      }))
   );
 }
 
@@ -101,11 +105,10 @@ export function getActiveStreamReferenceRootParams() {
 }
 
 export function getVersionedStreamReferenceRootParams() {
-  return getPublicReviewLifecycleCapabilities(STREAM_REVIEW_DEFINITION.status)
-    .publicRoutesAvailable
-    ? STREAM_REVIEW_DEFINITION.versions.map(({ version }) => ({
-        review: STREAM_REVIEW_SLUG,
-        version,
-      }))
-    : [];
+  return STREAM_REVIEW_DEFINITION.versions
+    .filter(({ version }) => isStreamReviewVersionPubliclyAvailable(version))
+    .map(({ version }) => ({
+      review: STREAM_REVIEW_SLUG,
+      version,
+    }));
 }

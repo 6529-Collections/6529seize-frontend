@@ -195,6 +195,22 @@ function copyDirectory(source, destination, options = {}) {
   visit(source, destination, "");
 }
 
+function replaceDirectory(source, destination, options = {}) {
+  if (fs.existsSync(destination)) {
+    const destinationStats = fs.lstatSync(destination);
+    invariant(
+      !destinationStats.isSymbolicLink(),
+      `Refusing to replace symbolic-link destination: ${normalizeRelativePath(destination)}`
+    );
+    invariant(
+      destinationStats.isDirectory(),
+      `Replacement destination is not a directory: ${normalizeRelativePath(destination)}`
+    );
+    fs.rmSync(destination, { recursive: true });
+  }
+  copyDirectory(source, destination, options);
+}
+
 function isReviewDataPath(relativePath) {
   return (
     relativePath === "review-data" || relativePath.startsWith("review-data/")
@@ -205,8 +221,7 @@ function getPublicReviewPublicationConfigs(repoRoot) {
   const directory = path.join(repoRoot, PUBLIC_REVIEW_CONFIG_DIRECTORY);
   const publications = sortedDirectoryEntries(directory)
     .filter(
-      (entry) =>
-        entry.isFile() && entry.name.endsWith(".publication.json")
+      (entry) => entry.isFile() && entry.name.endsWith(".publication.json")
     )
     .map((entry) => {
       const config = readJson(
@@ -222,8 +237,7 @@ function getPublicReviewPublicationConfigs(repoRoot) {
       return config;
     });
   const referenceIds = discoverReviewConfigs(repoRoot).map(
-    (configPath) =>
-      readJson(configPath, "public-review source config").reviewId
+    (configPath) => readJson(configPath, "public-review source config").reviewId
   );
   const publicationIds = publications.map(
     (publication) => publication.reviewId
@@ -706,8 +720,7 @@ function assertStagingEvidence(repoRoot, bundleRoot) {
     directoryIdentity(sourcePublicReviewRoot, {
       ignore: (relativePath) =>
         isUnpublishedReviewRootPath(relativePath, publishedReviewIds),
-    }) ===
-      directoryIdentity(bundlePublicReviewRoot),
+    }) === directoryIdentity(bundlePublicReviewRoot),
     "Staging public-review data does not exactly match the trusted source tree."
   );
 
@@ -723,8 +736,7 @@ function assertStagingEvidence(repoRoot, bundleRoot) {
     directoryIdentity(sourceEditorialRoot, {
       ignore: (relativePath) =>
         isUnpublishedReviewRootPath(relativePath, publishedReviewIds),
-    }) ===
-      directoryIdentity(bundleEditorialRoot),
+    }) === directoryIdentity(bundleEditorialRoot),
     "Staging editorial content does not exactly match the trusted source tree."
   );
 
@@ -777,10 +789,7 @@ function assertPublicCopyIdentity(repoRoot, bundleRoot, profile) {
     ignore: (relativePath) =>
       profile === "production"
         ? isReviewDataPath(relativePath)
-        : isUnpublishedReviewDataPath(
-            relativePath,
-            publishedReviewIds
-          ),
+        : isUnpublishedReviewDataPath(relativePath, publishedReviewIds),
   };
   invariant(
     directoryIdentity(sourcePublic, options) ===
@@ -807,14 +816,11 @@ function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
   const sourcePublic = path.join(repoRoot, "public");
   const bundlePublic = path.join(bundleRoot, "public");
   const publishedReviewIds = getPublishedReviewIds(repoRoot);
-  copyDirectory(sourcePublic, bundlePublic, {
+  replaceDirectory(sourcePublic, bundlePublic, {
     ignore: (relativePath) =>
       profile === "production"
         ? isReviewDataPath(relativePath)
-        : isUnpublishedReviewDataPath(
-            relativePath,
-            publishedReviewIds
-          ),
+        : isUnpublishedReviewDataPath(relativePath, publishedReviewIds),
   });
 
   if (profile === "staging") {
@@ -830,22 +836,15 @@ function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
       invariant(
         directoryIdentity(sourceEditorial, {
           ignore: (relativePath) =>
-            isUnpublishedReviewRootPath(
-              relativePath,
-              publishedReviewIds
-            ),
-        }) ===
-          directoryIdentity(bundleEditorial),
+            isUnpublishedReviewRootPath(relativePath, publishedReviewIds),
+        }) === directoryIdentity(bundleEditorial),
         "Traced staging editorial content differs from its trusted source tree."
       );
     } else {
       if (publishedReviewIds.size > 0) {
         copyDirectory(sourceEditorial, bundleEditorial, {
           ignore: (relativePath) =>
-            isUnpublishedReviewRootPath(
-              relativePath,
-              publishedReviewIds
-            ),
+            isUnpublishedReviewRootPath(relativePath, publishedReviewIds),
         });
       }
     }

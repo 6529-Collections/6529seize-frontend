@@ -31,9 +31,16 @@ export function PublicReviewReferenceShell({
   readonly source: PublicReviewSource;
   readonly title: string;
 }) {
+  const displayedReviewVersion = review.versions.find(
+    (candidate) => candidate.version === displayedVersion
+  );
+  if (!displayedReviewVersion) {
+    throw new Error("The displayed public-review version is not configured.");
+  }
   const feedbackSubmissionsAvailable =
     review.feedbackAvailable &&
-    getPublicReviewLifecycleCapabilities(review.status).feedbackSubmissionsOpen;
+    getPublicReviewLifecycleCapabilities(displayedReviewVersion.status)
+      .feedbackSubmissionsOpen;
 
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
@@ -60,7 +67,7 @@ export function PublicReviewReferenceShell({
             {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
           </Link>
           <Link
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-3 tw-py-2 tw-font-semibold tw-text-primary-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="tw-text-primary-100 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-3 tw-py-2 tw-font-semibold tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
             href={feedbackHref}
           >
             {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}

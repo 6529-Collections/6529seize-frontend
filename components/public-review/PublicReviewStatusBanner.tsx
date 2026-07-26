@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { PublicReviewLifecycleState } from "@/lib/public-review/publicReviewLifecycle";
@@ -77,29 +79,26 @@ export function PublicReviewStatusBanner({
   readonly displayedVersion: string;
   readonly source?: PublicReviewSource | undefined;
 }) {
-  const resolvedSource =
-    source ??
-    review.versions.find(
-      (candidate) => candidate.version === displayedVersion
-    )?.source ??
-    review.versions.find(
-      (candidate) => candidate.version === review.activeVersion
-    )?.source;
-  if (!resolvedSource) {
-    throw new Error("The public review has no source for this version.");
+  const displayedReviewVersion = review.versions.find(
+    (candidate) => candidate.version === displayedVersion
+  );
+  if (!displayedReviewVersion) {
+    throw new Error("The displayed public-review version is not configured.");
   }
+  const resolvedSource = source ?? displayedReviewVersion.source;
   const shortCommit = resolvedSource.commit.slice(0, 10);
   const sourceUrl = `https://github.com/${resolvedSource.repository}/tree/${resolvedSource.commit}`;
-  const lifecycleCopy = LIFECYCLE_COPY[review.status];
+  const lifecycleCopy = LIFECYCLE_COPY[displayedReviewVersion.status];
+  const isHistoricalVersion = displayedVersion !== review.activeVersion;
 
   return (
     <section
       aria-label={t(DEFAULT_LOCALE, "publicReview.status.heading")}
-      className="tw-border-y tw-border-solid tw-border-iron-700 tw-bg-iron-900/95 tw-px-4 tw-py-4 lg:tw-sticky lg:tw-top-0 lg:tw-z-30">
+      className="tw-border-y tw-border-solid tw-border-iron-700 tw-bg-iron-900/95 tw-px-4 tw-py-4 lg:tw-sticky lg:tw-top-0 lg:tw-z-30"
+    >
       <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-[88rem] tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
         <div>
-          <p
-            className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
+          <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
             {t(DEFAULT_LOCALE, "publicReview.status.heading")}
           </p>
           <p className="tw-mb-0 tw-mt-1 tw-max-w-3xl tw-text-sm tw-leading-5 tw-text-iron-300">
@@ -108,22 +107,41 @@ export function PublicReviewStatusBanner({
         </div>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
           <span
-            className={`${STATUS_CHIP} tw-border-amber-400/40 tw-bg-amber-400/10 tw-text-amber-100`}>
+            className={`${STATUS_CHIP} tw-border-amber-400/40 tw-bg-amber-400/10 tw-text-amber-100`}
+          >
             {t(DEFAULT_LOCALE, lifecycleCopy.label)}
           </span>
           <span
-            className={`${STATUS_CHIP} tw-border-sky-400/40 tw-bg-sky-400/10 tw-text-sky-100`}>
-            {t(DEFAULT_LOCALE, DEPLOYMENT_LABELS[review.deploymentStatus])}
+            className={`${STATUS_CHIP} tw-border-sky-400/40 tw-bg-sky-400/10 tw-text-sky-100`}
+          >
+            {t(
+              DEFAULT_LOCALE,
+              DEPLOYMENT_LABELS[displayedReviewVersion.deploymentStatus]
+            )}
           </span>
           <span
-            className={`${STATUS_CHIP} tw-border-orange-400/40 tw-bg-orange-400/10 tw-text-orange-100`}>
-            {t(DEFAULT_LOCALE, AUDIT_LABELS[review.auditStatus])}
+            className={`${STATUS_CHIP} tw-border-orange-400/40 tw-bg-orange-400/10 tw-text-orange-100`}
+          >
+            {t(
+              DEFAULT_LOCALE,
+              AUDIT_LABELS[displayedReviewVersion.auditStatus]
+            )}
           </span>
-          <span className={`${STATUS_CHIP} tw-border-iron-600 tw-text-iron-200`}>
+          <span
+            className={`${STATUS_CHIP} tw-border-iron-600 tw-text-iron-200`}
+          >
             {t(DEFAULT_LOCALE, "publicReview.status.version", {
               version: displayedVersion,
             })}
           </span>
+          {isHistoricalVersion ? (
+            <Link
+              href={`/reviews/${review.slug}`}
+              className={`${STATUS_CHIP} tw-border-violet-400/40 tw-bg-violet-400/10 tw-text-violet-100 tw-no-underline hover:tw-border-violet-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
+            >
+              {t(DEFAULT_LOCALE, "publicReview.status.viewCurrentVersion")}
+            </Link>
+          ) : null}
           <a
             href={sourceUrl}
             target="_blank"
@@ -136,7 +154,8 @@ export function PublicReviewStatusBanner({
                 contract: review.contractName,
               }
             )}
-            className={`${STATUS_CHIP} tw-border-iron-600 tw-text-iron-100 tw-no-underline hover:tw-border-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}>
+            className={`${STATUS_CHIP} tw-border-iron-600 tw-text-iron-100 tw-no-underline hover:tw-border-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
+          >
             {t(DEFAULT_LOCALE, "publicReview.status.source", {
               commit: shortCommit,
             })}

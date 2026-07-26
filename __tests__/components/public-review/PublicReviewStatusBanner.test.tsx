@@ -40,12 +40,18 @@ describe("PublicReviewStatusBanner", () => {
     ({ auditStatus, deploymentStatus, explanation, labels, status }) => {
       render(
         <PublicReviewStatusBanner
-          displayedVersion="review-v2"
+          displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
           review={{
             ...STREAM_REVIEW_DEFINITION,
             auditStatus,
             deploymentStatus,
             status,
+            versions: STREAM_REVIEW_DEFINITION.versions.map((version) => ({
+              ...version,
+              status,
+              auditStatus,
+              deploymentStatus,
+            })),
           }}
         />
       );
@@ -56,4 +62,44 @@ describe("PublicReviewStatusBanner", () => {
       expect(screen.getByText(new RegExp(explanation))).toBeInTheDocument();
     }
   );
+
+  it("marks a superseded version closed and links to the current review", () => {
+    const activeVersion = STREAM_REVIEW_DEFINITION.versions[0];
+    if (!activeVersion) {
+      throw new Error("Expected an active review version.");
+    }
+    const currentVersion = {
+      ...activeVersion,
+      auditStatus: "AUDIT_COMPLETE" as const,
+      deploymentStatus: "DEPLOYED" as const,
+    };
+
+    render(
+      <PublicReviewStatusBanner
+        displayedVersion="review-v1"
+        review={{
+          ...STREAM_REVIEW_DEFINITION,
+          auditStatus: "AUDIT_COMPLETE",
+          deploymentStatus: "DEPLOYED",
+          versions: [
+            {
+              ...activeVersion,
+              version: "review-v1",
+              status: "REVIEW_CLOSED",
+            },
+            currentVersion,
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Review closed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View current review" })
+    ).toHaveAttribute("href", "/reviews/6529-stream");
+    expect(screen.getByText("Not deployed")).toBeInTheDocument();
+    expect(screen.getByText("Pre-audit")).toBeInTheDocument();
+    expect(screen.queryByText("Deployed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Audit complete")).not.toBeInTheDocument();
+  });
 });

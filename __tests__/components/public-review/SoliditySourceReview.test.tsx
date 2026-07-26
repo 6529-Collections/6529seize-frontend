@@ -187,6 +187,7 @@ describe("SoliditySourceReview", () => {
     } as MediaQueryList);
     render(
       <SoliditySourceReview
+        feedbackSubmissionsOpen
         source={SOURCE}
         feedbackSlot={
           <div>
@@ -216,11 +217,83 @@ describe("SoliditySourceReview", () => {
       );
     } else {
       delete (
-        HTMLElement.prototype as Partial<
-          Pick<HTMLElement, "scrollIntoView">
-        >
+        HTMLElement.prototype as Partial<Pick<HTMLElement, "scrollIntoView">>
       ).scrollIntoView;
     }
+  });
+
+  it("falls back to the feedback region when its primary control is disabled", () => {
+    const scrollDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "scrollIntoView"
+    );
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: jest.fn(),
+    });
+    render(
+      <SoliditySourceReview
+        feedbackSubmissionsOpen
+        source={SOURCE}
+        feedbackSlot={
+          <button type="button" data-public-review-feedback-primary disabled>
+            Connecting
+          </button>
+        }
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Comment on selected lines" })
+    );
+    expect(
+      document.querySelector("[data-public-review-feedback]")
+    ).toHaveFocus();
+
+    if (scrollDescriptor) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "scrollIntoView",
+        scrollDescriptor
+      );
+    } else {
+      delete (
+        HTMLElement.prototype as Partial<Pick<HTMLElement, "scrollIntoView">>
+      ).scrollIntoView;
+    }
+  });
+
+  it("does not advertise line comments when submissions are closed or no feedback region exists", () => {
+    const { rerender } = render(
+      <SoliditySourceReview
+        feedbackSubmissionsOpen={false}
+        source={SOURCE}
+        feedbackSlot={<p>Feedback is closed.</p>}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Comment on selected lines" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Feedback for selected source lines" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <SoliditySourceReview
+        feedbackSubmissionsOpen
+        source={SOURCE}
+        feedbackSlot={null}
+      />
+    );
+    expect(
+      screen.queryByRole("button", { name: "Comment on selected lines" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", {
+        name: "Feedback for selected source lines",
+      })
+    ).not.toBeInTheDocument();
   });
 
   it("withholds code evidence until its exact snippet hash settles", async () => {
@@ -236,17 +309,13 @@ describe("SoliditySourceReview", () => {
       <SoliditySourceReview source={SOURCE} feedbackSlot={<SelectionProbe />} />
     );
 
-    expect(screen.getByTestId("integrity-status")).toHaveTextContent(
-      "pending"
-    );
+    expect(screen.getByTestId("integrity-status")).toHaveTextContent("pending");
     expect(screen.getByTestId("selection")).toHaveTextContent("invalid");
 
     resolveDigest?.(new Uint8Array(32).buffer);
 
     await waitFor(() => {
-      expect(screen.getByTestId("integrity-status")).toHaveTextContent(
-        "ready"
-      );
+      expect(screen.getByTestId("integrity-status")).toHaveTextContent("ready");
       expect(
         JSON.parse(screen.getByTestId("selection").textContent ?? "")
       ).toMatchObject({

@@ -11,6 +11,25 @@ The two production-capable provider implementations in this review are
 and
 [`RandomizerRNG.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerRNG.sol).
 
+**VRF** means verifiable random function: the Chainlink coordinator returns
+random words with cryptographic proof through its configured subscription.
+**RNG** means random-number generator; in the second implementation, the
+external arRNG controller receives a payable request and later supplies the
+numbers through its authorized callback.
+
+| Question | Chainlink VRF implementation | arRNG implementation |
+| --- | --- | --- |
+| Who receives the request? | The configured Chainlink VRF coordinator | The configured arRNG controller |
+| How is it funded? | A configured Chainlink subscription ID | The randomizer sends the configured `ethRequired` amount with each request |
+| Who may fulfill? | The coordinator enforced by `VRFConsumerBaseV2` | The controller enforced by `ArrngConsumer` |
+| Mutable operating settings | Key hash, subscription, callback gas, confirmation count, and word count | Per-request ETH cost, plus the controller address fixed at construction |
+| What Stream pins | Provider address and Core randomizer epoch for each request | Provider address and Core randomizer epoch for each request |
+| What Stream does not prove | That the subscription remains funded or its mutable settings are correct | That the controller remains available, honestly operated, or correctly priced |
+
+These are materially different trust and payment paths. The shared lifecycle
+normalizes what Stream records after a request; it does not make the two
+external providers equivalent.
+
 ## Choosing a provider
 
 ### IMPLEMENTED

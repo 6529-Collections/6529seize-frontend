@@ -45,12 +45,19 @@ describe("6529 Stream public review definition", () => {
     expect(STREAM_REVIEW_DEFINITION.versions[0]?.pages).toBe(
       STREAM_REVIEW_PAGES
     );
+    expect(STREAM_REVIEW_DEFINITION.versions[0]?.status).toBe(
+      STREAM_REVIEW_DEFINITION.status
+    );
+    expect(STREAM_REVIEW_DEFINITION.versions[0]?.deploymentStatus).toBe(
+      STREAM_REVIEW_DEFINITION.deploymentStatus
+    );
+    expect(STREAM_REVIEW_DEFINITION.versions[0]?.auditStatus).toBe(
+      STREAM_REVIEW_DEFINITION.auditStatus
+    );
   });
 
   it("keeps active and immutable feedback ledgers version-addressable", () => {
-    expect(getStreamReviewFeedbackHref()).toBe(
-      "/reviews/6529-stream/feedback"
-    );
+    expect(getStreamReviewFeedbackHref()).toBe("/reviews/6529-stream/feedback");
     expect(getStreamReviewFeedbackHref(STREAM_REVIEW_VERSION)).toBe(
       `/reviews/6529-stream/versions/${STREAM_REVIEW_VERSION}/feedback`
     );

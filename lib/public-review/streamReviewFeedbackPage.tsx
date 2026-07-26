@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import PublicReviewLedger from "@/components/public-review/PublicReviewLedger";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -15,6 +16,7 @@ import {
 } from "@/lib/public-review/streamReviewFeedback.server";
 import {
   getStreamReviewFeedbackHref,
+  isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -33,11 +35,9 @@ export function getStreamReviewFeedbackMetadata({
 }): Metadata | undefined {
   if (
     review !== STREAM_REVIEW_SLUG ||
-    !isStreamReviewPubliclyAvailable(baseEndpoint) ||
-    (version !== undefined &&
-      !STREAM_REVIEW_DEFINITION.versions.some(
-        (candidate) => candidate.version === version
-      ))
+    !isPublicReviewEnabled(baseEndpoint) ||
+    (version === undefined && !isStreamReviewPubliclyAvailable(baseEndpoint)) ||
+    (version !== undefined && !isStreamReviewVersionPubliclyAvailable(version))
   ) {
     return undefined;
   }
@@ -111,10 +111,9 @@ export async function renderStreamReviewFeedbackPage({
 }) {
   const resolvedVersion = version ?? STREAM_REVIEW_DEFINITION.activeVersion;
   if (
-    !isStreamReviewPubliclyAvailable(baseEndpoint) ||
-    !STREAM_REVIEW_DEFINITION.versions.some(
-      (candidate) => candidate.version === resolvedVersion
-    )
+    !isPublicReviewEnabled(baseEndpoint) ||
+    (version === undefined && !isStreamReviewPubliclyAvailable(baseEndpoint)) ||
+    !isStreamReviewVersionPubliclyAvailable(resolvedVersion)
   ) {
     throw new Error("Public review feedback is disabled.");
   }

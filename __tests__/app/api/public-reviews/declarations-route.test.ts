@@ -7,20 +7,12 @@ import {
   getStreamSolidityReferenceReader,
   resolveStreamSolidityReferenceVersion,
 } from "@/lib/public-review/streamSolidityReference";
-import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 
-jest.mock("@/lib/public-review/streamReviewRoutes", () => ({
-  isStreamReviewPubliclyAvailable: jest.fn(),
-}));
 jest.mock("@/lib/public-review/streamSolidityReference", () => ({
   getStreamSolidityReferenceReader: jest.fn(),
   resolveStreamSolidityReferenceVersion: jest.fn(),
 }));
 
-const mockIsPubliclyAvailable =
-  isStreamReviewPubliclyAvailable as jest.MockedFunction<
-    typeof isStreamReviewPubliclyAvailable
-  >;
 const mockResolveVersion =
   resolveStreamSolidityReferenceVersion as jest.MockedFunction<
     typeof resolveStreamSolidityReferenceVersion
@@ -114,15 +106,14 @@ describe("public review declaration route", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockIsPubliclyAvailable.mockReturnValue(true);
     mockResolveVersion.mockReturnValue(VERSION);
     mockGetReader.mockReturnValue({
       loadManifest: jest.fn().mockResolvedValue({ manifest: MANIFEST }),
     } as unknown as ReturnType<typeof getStreamSolidityReferenceReader>);
   });
 
-  it("returns 404 without loading artifacts when public routes are gated", async () => {
-    mockIsPubliclyAvailable.mockReturnValue(false);
+  it("returns 404 without loading artifacts when the requested route is gated", async () => {
+    mockResolveVersion.mockReturnValue(undefined);
 
     const response = await GET(
       createRequest(`version=${VERSION}`),
@@ -130,6 +121,21 @@ describe("public review declaration route", () => {
     );
 
     expect(response.status).toBe(404);
+    expect(mockResolveVersion).toHaveBeenCalledWith({
+      baseEndpoint: expect.any(String),
+      params: { review: "6529-stream", version: VERSION },
+    });
+    expect(mockGetReader).not.toHaveBeenCalled();
+  });
+
+  it("rejects an unknown review before resolving a version", async () => {
+    const response = await GET(
+      createRequest(`version=${VERSION}`),
+      createContext("unknown")
+    );
+
+    expect(response.status).toBe(404);
+    expect(mockResolveVersion).not.toHaveBeenCalled();
     expect(mockGetReader).not.toHaveBeenCalled();
   });
 

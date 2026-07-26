@@ -6,6 +6,7 @@ import type {
   PublicReviewPageDefinition,
   PublicReviewVersionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
+import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import { createPublicReviewRouteBuilder } from "@/lib/public-review/publicReviewRoutes";
 import { STREAM_REVIEW_LIFECYCLE_STATE } from "@/lib/public-review/streamReviewPublication";
 
@@ -227,6 +228,9 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   versions: [
     {
       version: STREAM_REVIEW_VERSION,
+      status: STREAM_REVIEW_LIFECYCLE_STATE,
+      deploymentStatus: "NOT_DEPLOYED",
+      auditStatus: "PRE_AUDIT",
       source: {
         repository: "6529-Collections/6529Stream",
         commit: STREAM_REVIEW_SOURCE_COMMIT,
@@ -256,6 +260,17 @@ export function getStreamReviewVersion(
 ): PublicReviewVersionDefinition | undefined {
   return STREAM_REVIEW_DEFINITION.versions.find(
     (candidate) => candidate.version === version
+  );
+}
+
+export function isStreamReviewVersionPubliclyAvailable(
+  version: string
+): boolean {
+  const reviewVersion = getStreamReviewVersion(version);
+  return Boolean(
+    reviewVersion &&
+    getPublicReviewLifecycleCapabilities(reviewVersion.status)
+      .publicRoutesAvailable
   );
 }
 

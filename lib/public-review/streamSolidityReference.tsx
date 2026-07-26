@@ -17,6 +17,7 @@ import {
 } from "@/components/public-review/SolidityReferenceViews";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
+import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -48,8 +49,9 @@ import type {
   SolidityTopLevelDeclaration,
 } from "@/lib/public-review/solidityReferenceTypes";
 import {
-  getStreamReviewVersion,
   getStreamReviewFeedbackHref,
+  getStreamReviewVersion,
+  isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -122,14 +124,18 @@ export function resolveStreamSolidityReferenceVersion({
   readonly params: StreamSolidityReferenceRouteParams;
 }): string | undefined {
   if (
-    !isStreamReviewPubliclyAvailable(baseEndpoint) ||
-    params.review !== STREAM_REVIEW_SLUG
+    !isPublicReviewEnabled(baseEndpoint) ||
+    params.review !== STREAM_REVIEW_SLUG ||
+    (params.version === undefined &&
+      !isStreamReviewPubliclyAvailable(baseEndpoint))
   ) {
     return undefined;
   }
   const version =
     params.version ?? STREAM_SOLIDITY_REFERENCE_IDENTITY.activeVersion;
-  return STREAM_SOLIDITY_REFERENCE_IDENTITY.availableVersions.includes(version)
+  return STREAM_SOLIDITY_REFERENCE_IDENTITY.availableVersions.includes(
+    version
+  ) && isStreamReviewVersionPubliclyAvailable(version)
     ? version
     : undefined;
 }
@@ -475,6 +481,7 @@ export async function renderStreamSolidityDeclaration({
       <SolidityDeclarationView
         declaration={declaration}
         definition={indexEntry}
+        feedbackSubmissionsOpen={feedback.config.submissionsOpen}
         feedbackSlot={
           feedbackSlot ?? (
             <PublicReviewCodeFeedback
@@ -547,6 +554,7 @@ export async function renderStreamSolidityTopLevelDeclaration({
     >
       <SolidityDeclarationView
         declaration={declaration}
+        feedbackSubmissionsOpen={feedback.config.submissionsOpen}
         feedbackSlot={
           feedbackSlot ?? (
             <PublicReviewCodeFeedback
@@ -665,6 +673,7 @@ export async function renderStreamSoliditySource({
     >
       <SoliditySourceView
         document={result.document}
+        feedbackSubmissionsOpen={feedback.config.submissionsOpen}
         feedbackSlot={
           feedbackSlot ?? (
             <PublicReviewCodeFeedback

@@ -84,19 +84,24 @@ describe("PublicReviewShell", () => {
       throw new Error("Stream review overview is missing");
     }
     const historicalCommit = "b".repeat(40);
+    const historicalVersion = {
+      ...ACTIVE_REVIEW_VERSION,
+      version: "2026-07-25.1",
+      status: "REVIEW_CLOSED" as const,
+      source: {
+        repository: ACTIVE_REVIEW_VERSION.source.repository,
+        commit: historicalCommit,
+      },
+    };
     render(
       <PublicReviewShell
         editorialMarkdown="# Editorial title"
         page={overview}
-        review={STREAM_REVIEW_DEFINITION}
-        reviewVersion={{
-          ...ACTIVE_REVIEW_VERSION,
-          version: "2026-07-25.1",
-          source: {
-            repository: ACTIVE_REVIEW_VERSION.source.repository,
-            commit: historicalCommit,
-          },
+        review={{
+          ...STREAM_REVIEW_DEFINITION,
+          versions: [historicalVersion, ...STREAM_REVIEW_DEFINITION.versions],
         }}
+        reviewVersion={historicalVersion}
         sections={[]}
         routeVersion="2026-07-25.1"
         displayedVersion="2026-07-25.1"
@@ -130,6 +135,10 @@ describe("PublicReviewShell", () => {
       throw new Error("Stream review overview is missing");
     }
 
+    const candidateVersion = {
+      ...ACTIVE_REVIEW_VERSION,
+      version: "candidate-2",
+    };
     render(
       <PublicReviewShell
         editorialMarkdown="# Another review"
@@ -140,8 +149,10 @@ describe("PublicReviewShell", () => {
           slug: "another-contract",
           contractName: "Another Contract",
           title: "Another Contract Review",
+          activeVersion: candidateVersion.version,
+          versions: [candidateVersion],
         }}
-        reviewVersion={ACTIVE_REVIEW_VERSION}
+        reviewVersion={candidateVersion}
         sections={[]}
         routeVersion="candidate-2"
         displayedVersion="candidate-2"
@@ -189,8 +200,15 @@ describe("PublicReviewShell", () => {
         review={{
           ...STREAM_REVIEW_DEFINITION,
           status: "REVIEW_CLOSED",
+          versions: STREAM_REVIEW_DEFINITION.versions.map((version) => ({
+            ...version,
+            status: "REVIEW_CLOSED",
+          })),
         }}
-        reviewVersion={ACTIVE_REVIEW_VERSION}
+        reviewVersion={{
+          ...ACTIVE_REVIEW_VERSION,
+          status: "REVIEW_CLOSED",
+        }}
         sections={[]}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
         feedbackSlot={<div>Feedback closed</div>}

@@ -35,38 +35,23 @@ const STREAM_REVIEW_FEEDBACK_DESTINATION_KEY = "stream-review";
 export const STREAM_REVIEW_TECHNICAL_FEEDBACK_PAGES = [
   {
     value: "reference-overview",
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.pages.referenceOverview"
-    ),
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.pages.referenceOverview"),
   },
   {
     value: "reference-definition",
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.pages.referenceDefinition"
-    ),
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.pages.referenceDefinition"),
   },
   {
     value: "reference-interface",
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.pages.referenceInterface"
-    ),
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.pages.referenceInterface"),
   },
   {
     value: "reference-source",
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.pages.referenceSource"
-    ),
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.pages.referenceSource"),
   },
   {
     value: "reference-function",
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.pages.referenceFunction"
-    ),
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.pages.referenceFunction"),
   },
   {
     value: "reference-event",
@@ -99,10 +84,7 @@ const STREAM_REVIEW_FEEDBACK_CATEGORIES = [
   },
   {
     value: "artist-workflow",
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.categories.artistWorkflow"
-    ),
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.artistWorkflow"),
   },
   {
     value: "product-or-ux",
@@ -110,10 +92,7 @@ const STREAM_REVIEW_FEEDBACK_CATEGORIES = [
   },
   {
     value: "protocol-design",
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.categories.protocolDesign"
-    ),
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.protocolDesign"),
   },
   {
     value: "implementation-bug",
@@ -124,10 +103,7 @@ const STREAM_REVIEW_FEEDBACK_CATEGORIES = [
   },
   {
     value: PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.categories.exploitable"
-    ),
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.exploitable"),
   },
   {
     value: "testing-or-evidence-gap",
@@ -249,18 +225,16 @@ export async function createStreamReviewFeedbackConfig({
   readonly manifest: SolidityReferenceManifest;
   readonly sourcePaths?: "all" | readonly string[] | undefined;
 }): Promise<PublicReviewFeedbackConfig> {
-  if (
-    manifest.reviewId !== STREAM_REVIEW_SLUG ||
-    !STREAM_REVIEW_DEFINITION.versions.some(
-      (candidate) => candidate.version === manifest.reviewVersion
-    )
-  ) {
+  const reviewVersion = STREAM_REVIEW_DEFINITION.versions.find(
+    (candidate) => candidate.version === manifest.reviewVersion
+  );
+  if (manifest.reviewId !== STREAM_REVIEW_SLUG || !reviewVersion) {
     throw new Error("Feedback manifest does not belong to this review.");
   }
 
   const source = selectManifestFiles({ manifest, sourcePaths });
   const lifecycleCapabilities = getPublicReviewLifecycleCapabilities(
-    STREAM_REVIEW_DEFINITION.status
+    reviewVersion.status
   );
   return {
     reviewId: manifest.reviewId,
@@ -272,7 +246,7 @@ export async function createStreamReviewFeedbackConfig({
       lifecycleCapabilities.feedbackSubmissionsOpen,
     acceptsPublicExploitReports:
       STREAM_REVIEW_DEFINITION.feedbackAvailable &&
-      acceptsPublicReviewExploitReports(STREAM_REVIEW_DEFINITION.status),
+      acceptsPublicReviewExploitReports(reviewVersion.status),
     categories: STREAM_REVIEW_FEEDBACK_CATEGORIES,
     severityOptions: STREAM_REVIEW_FEEDBACK_SEVERITIES,
     pages: [
@@ -318,9 +292,7 @@ export function createStreamEditorialFeedbackPageContext({
     pageId: versionPage.id,
     pageTitle: t(DEFAULT_LOCALE, versionPage.titleKey),
     canonicalPath: getStreamReviewPageHref({ page: versionPage, version }),
-    ...(section
-      ? { sectionId: section.id, sectionTitle: section.title }
-      : {}),
+    ...(section ? { sectionId: section.id, sectionTitle: section.title } : {}),
   };
 }
 
@@ -333,11 +305,7 @@ export function createStreamTechnicalFeedbackPageContext({
   readonly pageId: StreamReviewTechnicalFeedbackPageId;
   readonly pageTitle: string;
 }): PublicReviewPageContext {
-  if (
-    !canonicalPath.startsWith(
-      `/reviews/${STREAM_REVIEW_SLUG}/versions/`
-    )
-  ) {
+  if (!canonicalPath.startsWith(`/reviews/${STREAM_REVIEW_SLUG}/versions/`)) {
     throw new Error("Technical feedback paths must be immutable.");
   }
   return { pageId, pageTitle, canonicalPath };

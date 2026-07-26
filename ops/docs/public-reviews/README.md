@@ -129,6 +129,14 @@ being embedded in the Stream shell. Review, audience, sequence, and feedback
 links are built from the configured review slug, so the shared components do
 not contain Stream routes.
 
+Lifecycle, deployment status, and audit status are also recorded on every
+immutable review version. The displayed version controls its banner and
+submission policy: a superseded version can remain readable as `REVIEW_CLOSED`
+while the active version accepts feedback, without inheriting the newer
+version's deployment or audit claims. Historical pages link back to the current
+review, and versioned editorial, source, reference, declaration, and ledger
+routes fail closed when that version's lifecycle is not public.
+
 ## Feedback Status
 
 Structured feedback is enabled on every editorial and technical reference

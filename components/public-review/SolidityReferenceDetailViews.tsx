@@ -102,7 +102,8 @@ function ParameterTable({
           aria-labelledby={headingId}
           className="tw-mt-4 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           role="region"
-          tabIndex={0}>
+          tabIndex={0}
+        >
           <table className="tw-w-full tw-min-w-[34rem] tw-border-collapse tw-text-left tw-text-sm">
             <thead className="tw-bg-iron-900 tw-text-iron-400">
               <tr>
@@ -114,10 +115,7 @@ function ParameterTable({
                 </th>
                 {showInternalType ? (
                   <th className="tw-p-3 tw-font-semibold">
-                    {t(
-                      DEFAULT_LOCALE,
-                      "publicReview.reference.internalType"
-                    )}
+                    {t(DEFAULT_LOCALE, "publicReview.reference.internalType")}
                   </th>
                 ) : null}
                 {showStorage ? (
@@ -219,11 +217,13 @@ function DeclarationSemanticProperties({
 export function SolidityDeclarationView({
   declaration,
   definition,
+  feedbackSubmissionsOpen,
   feedbackSlot,
   source,
 }: {
   readonly declaration: SolidityDisplayDeclaration;
   readonly definition?: SolidityDefinitionIndexEntry | undefined;
+  readonly feedbackSubmissionsOpen: boolean;
   readonly feedbackSlot?: ReactNode | undefined;
   readonly source: SoliditySourceDocument;
 }) {
@@ -317,6 +317,7 @@ export function SolidityDeclarationView({
         />
       </div>
       <SoliditySourceReview
+        feedbackSubmissionsOpen={feedbackSubmissionsOpen}
         feedbackSlot={feedbackSlot}
         source={{
           ...(definition ? { contract: definition.name } : {}),
@@ -390,11 +391,13 @@ export function SolidityInterfaceView({
 
 export function SoliditySourceView({
   document,
+  feedbackSubmissionsOpen,
   feedbackSlot,
   hrefContext,
   manifest,
 }: {
   readonly document: SoliditySourceDocument;
+  readonly feedbackSubmissionsOpen: boolean;
   readonly feedbackSlot?: ReactNode | undefined;
   readonly hrefContext: SolidityReferenceHrefContext;
   readonly manifest: SolidityReferenceManifest;
@@ -465,6 +468,7 @@ export function SoliditySourceView({
         declarations={document.file.topLevelDeclarations}
       />
       <SoliditySourceReview
+        feedbackSubmissionsOpen={feedbackSubmissionsOpen}
         feedbackSlot={feedbackSlot}
         source={{
           githubUrl: document.file.githubUrl,

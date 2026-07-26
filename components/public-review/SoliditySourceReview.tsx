@@ -166,7 +166,7 @@ function SourceSelectionControls({
       block: "start",
     });
     const primaryControl = feedback?.querySelector<HTMLElement>(
-      "[data-public-review-feedback-primary]"
+      "[data-public-review-feedback-primary]:not(:disabled)"
     );
     (primaryControl ?? feedback)?.focus({ preventScroll: true });
   };
@@ -330,9 +330,11 @@ function SourceLines({
 }
 
 export function SoliditySourceReview({
+  feedbackSubmissionsOpen = false,
   feedbackSlot,
   source,
 }: {
+  readonly feedbackSubmissionsOpen?: boolean | undefined;
   readonly feedbackSlot?: ReactNode | undefined;
   readonly source: SourceReviewInput;
 }) {
@@ -348,8 +350,7 @@ export function SoliditySourceReview({
     firstLineNumber,
     lastLineNumber
   );
-  const [selectedLineStart, setSelectedLineStart] =
-    useState(initialLineStart);
+  const [selectedLineStart, setSelectedLineStart] = useState(initialLineStart);
   const [selectedLineEnd, setSelectedLineEnd] = useState(initialLineEnd);
   const [selectionTouched, setSelectionTouched] = useState(false);
   const hash = useSyncExternalStore(
@@ -369,9 +370,7 @@ export function SoliditySourceReview({
       ? validHashRange.start
       : selectedLineStart;
   const lineEnd =
-    !selectionTouched && validHashRange
-      ? validHashRange.end
-      : selectedLineEnd;
+    !selectionTouched && validHashRange ? validHashRange.end : selectedLineEnd;
   const [computedSnippet, setComputedSnippet] = useState<
     | {
         readonly checksum: string | undefined;
@@ -382,10 +381,7 @@ export function SoliditySourceReview({
   const selectionValid = lineStart <= lineEnd;
   const selectedSource = selectionValid
     ? source.lines
-        .slice(
-          lineStart - firstLineNumber,
-          lineEnd - firstLineNumber + 1
-        )
+        .slice(lineStart - firstLineNumber, lineEnd - firstLineNumber + 1)
         .join("\n")
     : "";
   const selectionKey = `${lineStart}:${lineEnd}:${selectedSource}`;
@@ -463,7 +459,11 @@ export function SoliditySourceReview({
         }}
         selectionUrl={selectionUrl}
         selectedSource={selectedSource}
-        showCommentAction={feedbackSlot !== undefined}
+        showCommentAction={
+          feedbackSubmissionsOpen &&
+          feedbackSlot !== undefined &&
+          feedbackSlot !== null
+        }
       />
       <SourceLines
         firstLineNumber={firstLineNumber}
@@ -474,9 +474,15 @@ export function SoliditySourceReview({
       {feedbackSlot !== undefined && feedbackSlot !== null ? (
         <div
           id="public-review-feedback"
-          className="tw-mt-8 tw-scroll-mt-28"
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "publicReview.reference.feedbackRegion"
+          )}
+          className="tw-mt-8 tw-scroll-mt-28 focus-visible:tw-rounded-xl focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
           data-public-review-feedback
-          tabIndex={-1}>
+          role="region"
+          tabIndex={-1}
+        >
           {feedbackSlot}
         </div>
       ) : null}

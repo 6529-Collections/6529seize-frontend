@@ -311,6 +311,112 @@ describe("profile-aware public-review artifact packaging", () => {
     );
   });
 
+  it("replaces a traced standalone public tree with the exact production profile", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    writeFile(
+      fixture.bundleRoot,
+      "public/review-data/6529-stream/leaked.json",
+      "{}\n"
+    );
+    writeFile(
+      fixture.bundleRoot,
+      "public/stale-standalone-asset.txt",
+      "stale\n"
+    );
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toEqual([]);
+    expect(
+      fs.existsSync(path.join(fixture.bundleRoot, "public/review-data"))
+    ).toBe(false);
+    expect(
+      fs.existsSync(
+        path.join(fixture.bundleRoot, "public/stale-standalone-asset.txt")
+      )
+    ).toBe(false);
+    expect(
+      fs.readFileSync(
+        path.join(fixture.bundleRoot, "public/favicon.svg"),
+        "utf8"
+      )
+    ).toBe("<svg />\n");
+  });
+
+  it("refuses to replace a symbolic-link standalone public destination", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    const externalPublic = path.join(fixture.repoRoot, "external-public");
+    writeFile(fixture.repoRoot, "external-public/keep.txt", "keep\n");
+    fs.symlinkSync(
+      externalPublic,
+      path.join(fixture.bundleRoot, "public"),
+      process.platform === "win32" ? "junction" : "dir"
+    );
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow("Refusing to replace symbolic-link destination");
+    expect(fs.readFileSync(path.join(externalPublic, "keep.txt"), "utf8")).toBe(
+      "keep\n"
+    );
+  });
+
+  it("replaces a traced standalone public tree with the exact staging profile", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    writeFile(
+      fixture.bundleRoot,
+      "public/review-data/unpublished-review/leaked.json",
+      "{}\n"
+    );
+    writeFile(
+      fixture.bundleRoot,
+      "public/stale-standalone-asset.txt",
+      "stale\n"
+    );
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: REVIEW_VERSION,
+      }),
+    ]);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/reference-manifest.json`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(fixture.bundleRoot, "public/review-data/unpublished-review")
+      )
+    ).toBe(false);
+    expect(
+      fs.existsSync(
+        path.join(fixture.bundleRoot, "public/stale-standalone-asset.txt")
+      )
+    ).toBe(false);
+  });
+
   it("fails closed when Next standalone tracing carries editorial content into production", () => {
     const fixture = createFixture();
     fixtureRoots.push(fixture.repoRoot);

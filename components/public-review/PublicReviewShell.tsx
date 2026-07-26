@@ -44,15 +44,14 @@ function PublicReviewPageStepper({
 
   return (
     <nav
-      aria-label={t(
-        DEFAULT_LOCALE,
-        "publicReview.navigation.sequenceLabel"
-      )}
-      className="tw-mt-12 tw-grid tw-gap-3 sm:tw-grid-cols-2">
+      aria-label={t(DEFAULT_LOCALE, "publicReview.navigation.sequenceLabel")}
+      className="tw-mt-12 tw-grid tw-gap-3 sm:tw-grid-cols-2"
+    >
       {previousPage ? (
         <Link
           href={routes.getPageHref(previousPage, version)}
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        >
           <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.previous")}
           </span>
@@ -66,7 +65,8 @@ function PublicReviewPageStepper({
       {nextPage && (
         <Link
           href={routes.getPageHref(nextPage, version)}
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white sm:tw-text-right">
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white sm:tw-text-right"
+        >
           <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.next")}
           </span>
@@ -106,11 +106,10 @@ export function PublicReviewShell({
   const currentPageNumber = pageIndex >= 0 ? pageIndex + 1 : 1;
   const routes = createPublicReviewRouteBuilder(review.slug);
   const lifecycleCapabilities = getPublicReviewLifecycleCapabilities(
-    review.status
+    reviewVersion.status
   );
   const feedbackSubmissionsAvailable =
-    review.feedbackAvailable &&
-    lifecycleCapabilities.feedbackSubmissionsOpen;
+    review.feedbackAvailable && lifecycleCapabilities.feedbackSubmissionsOpen;
 
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
@@ -129,10 +128,7 @@ export function PublicReviewShell({
           <p className="tw-mb-0 tw-mt-4 tw-font-mono tw-text-xs tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
               current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
-              total: formatInteger(
-                DEFAULT_LOCALE,
-                reviewVersion.pages.length
-              ),
+              total: formatInteger(DEFAULT_LOCALE, reviewVersion.pages.length),
             })}
           </p>
           <h1 className="tw-mb-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-5xl">
@@ -143,7 +139,8 @@ export function PublicReviewShell({
           </p>
           <div
             aria-label={t(DEFAULT_LOCALE, "publicReview.evidence.heading")}
-            className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2">
+            className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2"
+          >
             {page.evidenceStates.map((state) => (
               <PublicReviewEvidenceBadge key={state} state={state} />
             ))}
@@ -154,20 +151,23 @@ export function PublicReviewShell({
                 reviewSlug: review.slug,
                 version: routeVersion,
               })}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/40 tw-bg-sky-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-sky-100 tw-no-underline hover:tw-border-sky-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/40 tw-bg-sky-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-sky-100 tw-no-underline hover:tw-border-sky-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            >
               {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
             </Link>
             {review.feedbackAvailable ? (
               <Link
                 href={routes.getFeedbackHref(routeVersion)}
-                className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-primary-100 tw-no-underline hover:tw-border-primary-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+                className="tw-text-primary-100 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-no-underline hover:tw-border-primary-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+              >
                 {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
               </Link>
             ) : null}
             {feedbackSubmissionsAvailable ? (
               <a
                 href="#public-review-feedback"
-                className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+                className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+              >
                 {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
               </a>
             ) : null}
@@ -201,7 +201,8 @@ export function PublicReviewShell({
             <div
               id="public-review-feedback"
               className="tw-mt-8 tw-scroll-mt-28"
-              tabIndex={-1}>
+              tabIndex={-1}
+            >
               {feedbackSlot}
             </div>
 

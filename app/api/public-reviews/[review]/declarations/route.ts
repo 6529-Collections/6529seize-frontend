@@ -10,7 +10,6 @@ import {
   getStreamSolidityReferenceReader,
   resolveStreamSolidityReferenceVersion,
 } from "@/lib/public-review/streamSolidityReference";
-import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 import { STREAM_REVIEW_SLUG } from "@/lib/public-review/streamReviewDefinition";
 
 export const runtime = "nodejs";
@@ -33,10 +32,7 @@ export async function GET(
   { params }: { readonly params: Promise<{ review: string }> }
 ): Promise<Response> {
   const { review } = await params;
-  if (
-    !isStreamReviewPubliclyAvailable(publicEnv.BASE_ENDPOINT) ||
-    review !== STREAM_REVIEW_SLUG
-  ) {
+  if (review !== STREAM_REVIEW_SLUG) {
     return jsonError("Not found.", 404);
   }
 

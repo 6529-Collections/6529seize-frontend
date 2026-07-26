@@ -27,6 +27,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.status.audit.inProgress": "Audit in progress",
   "publicReview.status.audit.complete": "Audit complete",
   "publicReview.status.version": "Review version {version}",
+  "publicReview.status.viewCurrentVersion": "View current review",
   "publicReview.status.source": "Source {commit}",
   "publicReview.status.sourceAriaLabel":
     "Open the exact {contract} source commit {commit}",
@@ -411,6 +412,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "The selected code could not be copied. Select and copy it manually.",
   "publicReview.reference.openSelection": "Open selected lines on GitHub",
   "publicReview.reference.commentSelection": "Comment on selected lines",
+  "publicReview.reference.feedbackRegion": "Feedback for selected source lines",
   "publicReview.reference.skipCode": "Send feedback on these selected lines",
   "publicReview.reference.selectionReady":
     "This source reference is ready to attach to structured feedback.",
