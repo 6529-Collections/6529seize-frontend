@@ -200,12 +200,19 @@ Canonical routes:
 /reviews/6529-stream/versions/[version]
 /reviews/6529-stream/versions/[version]/[page]
 /reviews/6529-stream/reference
-/reviews/6529-stream/reference/contracts/[contract]
-/reviews/6529-stream/reference/functions/[function]
-/reviews/6529-stream/reference/events/[event]
-/reviews/6529-stream/reference/errors/[error]
-/reviews/6529-stream/reference/interfaces/[interface]
+/reviews/6529-stream/reference/definitions/[definitionKey]
+/reviews/6529-stream/reference/definitions/[definitionKey]/functions/[declarationKey]
+/reviews/6529-stream/reference/definitions/[definitionKey]/events/[declarationKey]
+/reviews/6529-stream/reference/definitions/[definitionKey]/errors/[declarationKey]
+/reviews/6529-stream/reference/interfaces/[definitionKey]
 /reviews/6529-stream/reference/sources/[...source]
+/reviews/6529-stream/versions/[version]/reference
+/reviews/6529-stream/versions/[version]/reference/definitions/[definitionKey]
+/reviews/6529-stream/versions/[version]/reference/definitions/[definitionKey]/functions/[declarationKey]
+/reviews/6529-stream/versions/[version]/reference/definitions/[definitionKey]/events/[declarationKey]
+/reviews/6529-stream/versions/[version]/reference/definitions/[definitionKey]/errors/[declarationKey]
+/reviews/6529-stream/versions/[version]/reference/interfaces/[definitionKey]
+/reviews/6529-stream/versions/[version]/reference/sources/[...source]
 /reviews/6529-stream/feedback
 ```
 
@@ -221,6 +228,14 @@ sub-routes available under that prefix. Static parameter generation includes
 every retained version, and a historical route resolves only against that
 version's immutable bundle rather than the active registry entry. Existing
 feedback links retain the versioned route they were created against.
+
+`definitionKey` and `declarationKey` are the unpadded base64url encodings of the
+complete UTF-8 semantic identifiers defined by the generated bundle. They are
+lossless, never truncated hashes, AST IDs, names alone, or selectors alone.
+Declaration routes are nested beneath their declaring definition, preventing
+collisions between repeated names and overloaded signatures. Route-generation
+tests cover every active and historical definition, function, event, error,
+interface, and source route.
 
 The NFT/collections navigation adds **6529 Stream - Review** after the live
 collection links and before utility destinations such as NFT Activity. It does
@@ -999,21 +1014,25 @@ The integrated candidate requires:
 - technical reference completeness tests
 - ledger filter/export tests
 - deterministic `NEW` disposition fallback tests
-- `seize run lint:changed`
-- `seize run typecheck:changed`
-- `seize run react-doctor:diff`
-- `seize run check:changed`
+- `./bin/6529 run lint:changed`
+- `./bin/6529 run typecheck:changed`
+- `./bin/6529 run react-doctor:diff`
+- `./bin/6529 run check:changed`
 - targeted Jest tests
-- full `seize run build`
+- full `./bin/6529 run build`
 - desktop and mobile browser review
 - keyboard-only form and navigation pass
 - visible screenshot evidence
 - no new relevant console/runtime errors
 - Help Bot and docs link validation
 
-Staging deployment uses Simple Release Bus v2 with the exact current candidate
-SHA. `STAGING_DEPLOYED` is not accepted as completion; the workstream waits for
-manifest-bound staging validation and performs a final visible smoke review.
+Before any staging mutation, the operator runs
+`./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follows the
+repository's `deploy-6529` flow for the returned mode and controls. Staging
+deployment uses Simple Release Bus v2 with the exact current candidate SHA; no
+ad hoc workflow dispatch or production action is permitted. `STAGING_DEPLOYED`
+is not accepted as completion; the workstream waits for manifest-bound staging
+validation and performs a final visible smoke review.
 
 ## Acceptance Criteria
 

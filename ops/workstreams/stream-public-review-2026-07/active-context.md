@@ -3,7 +3,7 @@
 ## Goal
 
 Deliver the reusable public contract review system and the 6529 Stream review
-instance to staging today for community demonstration.
+instance to staging on July 26, 2026, for community demonstration.
 
 ## Current Phase
 

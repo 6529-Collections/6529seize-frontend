@@ -51,10 +51,20 @@ staging deployment.
 
 ## Reload Order
 
+Follow the root and applicable nested `AGENTS.md` load order first:
+
+1. applicable repository instructions
+2. current request, issue, or PR context
+3. `git status --short --branch` and the relevant diff
+4. implementation sources and tests
+5. relevant repository documentation, package metadata, and local skills
+
+Then reload the workstream-specific state:
+
 1. `active-context.md`
 2. `run-log.md`
-3. The merged specification
-4. Current PR and release-bus state
+3. the merged specification
+4. current PR and release-bus state
 
 ## Escalation Triggers
 
@@ -64,4 +74,3 @@ staging deployment.
   required.
 - The live release bus is unavailable or reports an unsafe/unknown state.
 - A contract source revision cannot be identified or deterministically pinned.
-

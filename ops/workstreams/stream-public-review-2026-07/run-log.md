@@ -47,3 +47,7 @@
 - Added explicit canonical `/versions/[version]` archive routes after shell
   preflight identified that immutable historical review versions otherwise had
   no addressable route contract.
+- Incorporated CodeRabbit's full-review findings by making generated-reference
+  routes collision-proof and explicit for historical versions, using durable
+  repository-wrapper validation commands, recording the mandatory Release Bus
+  status/deploy flow, and correcting workstream reload and deadline wording.
