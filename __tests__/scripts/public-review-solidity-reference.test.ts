@@ -29,6 +29,7 @@ const {
   validateRetainedSourceRanges,
   validateReleaseArtifactManifest,
   validateReleaseManifest,
+  validateRecordFamilyAuthorizationSourceCatalog,
 } = require("../../scripts/public-reviews/solidity-reference-lib.cjs") as {
   BUNDLE_SCHEMA_VERSION: string;
   DEFINITION_SHARD_SCHEMA_VERSION: string;
@@ -124,6 +125,16 @@ const {
       string,
       {
         buffer: Buffer;
+        json: Record<string, unknown>;
+        sha256: string;
+      }
+    >
+  ) => Record<string, unknown>;
+  validateRecordFamilyAuthorizationSourceCatalog: (
+    sources: Map<string, { sha256: string }>,
+    artifacts: Record<
+      string,
+      {
         json: Record<string, unknown>;
         sha256: string;
       }
@@ -760,6 +771,12 @@ describe("Solidity public-review reference generator", () => {
         ],
       }
     );
+    artifacts[
+      "release-artifacts/record-family-authorization-source-catalog.json"
+    ] = artifact(
+      "6529stream.record-family-authorization-source-catalog.v1",
+      {}
+    );
 
     const manifestKeysByPath: Record<string, string> = {
       "release-artifacts/contracts.json": "contract_config",
@@ -797,6 +814,18 @@ describe("Solidity public-review reference generator", () => {
         schema_version: bound.json["schema_version"],
       };
     }
+    const recordFamilyCatalog =
+      artifacts[
+        "release-artifacts/record-family-authorization-source-catalog.json"
+      ]!;
+    releaseArtifacts["record_family_authorization"] = {
+      source_catalog: {
+        path: "release-artifacts/record-family-authorization-source-catalog.json",
+        sha256: recordFamilyCatalog.sha256,
+        size_bytes: recordFamilyCatalog.buffer.length,
+        schema_version: recordFamilyCatalog.json["schema_version"],
+      },
+    };
     Object.assign(releaseArtifacts["public_beta_evidence"]!, {
       status: {
         public_beta: "blocked",
@@ -853,6 +882,129 @@ describe("Solidity public-review reference generator", () => {
     expect(() => validateReleaseManifest(artifacts)).toThrow(
       "readiness blocker counts drifted"
     );
+  });
+
+  it("validates record-family authorization source bindings against pinned blobs", () => {
+    const sourcePath = "smart-contracts/StreamRecordFamilyRegistry.sol";
+    const sourceSha256 = "a".repeat(64);
+    const catalogArtifact = {
+      sha256: `sha256:${"b".repeat(64)}`,
+      json: {
+        schema_version:
+          "6529stream.record-family-authorization-source-catalog.v1",
+        status: "source_implemented_candidate_unbound",
+        source_bindings: [{ path: sourcePath, sha256: sourceSha256 }],
+        classifier: { candidate_binding_status: "not_available" },
+        authorization_classes: [{ id: 1, name: "ARTIST_SIGNER" }],
+        family_groups: [
+          {
+            name: "ARTIST",
+            id: `0x${"c".repeat(64)}`,
+            allowed_authorization_class_ids: [1],
+          },
+        ],
+        host_bindings: [{ contract: "StreamCollectionMetadata" }],
+        source_tests: ["test/StreamRecordFamilyAuthorization.t.sol"],
+        remaining_blockers: ["exact_candidate_binding_not_available"],
+      },
+    };
+    const artifacts = {
+      "release-artifacts/record-family-authorization-source-catalog.json":
+        catalogArtifact,
+    };
+    const sources = new Map([
+      [sourcePath, { sha256: `sha256:${sourceSha256}` }],
+    ]);
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, artifacts)
+    ).not.toThrow();
+
+    sources.set(sourcePath, { sha256: `sha256:${"d".repeat(64)}` });
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, artifacts)
+    ).toThrow("source binding checksum drifted");
+
+    sources.set(sourcePath, { sha256: `sha256:${sourceSha256}` });
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            family_groups: [
+              {
+                name: "ARTIST",
+                id: `0x${"c".repeat(64)}`,
+                allowed_authorization_class_ids: [2],
+              },
+            ],
+          },
+        },
+      })
+    ).toThrow("family evidence is malformed");
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            source_bindings: [
+              ...catalogArtifact.json.source_bindings,
+              ...catalogArtifact.json.source_bindings,
+            ],
+          },
+        },
+      })
+    ).toThrow("duplicate record-family authorization source binding");
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            authorization_classes: [
+              ...catalogArtifact.json.authorization_classes,
+              ...catalogArtifact.json.authorization_classes,
+            ],
+          },
+        },
+      })
+    ).toThrow("class identifiers are invalid");
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            family_groups: [
+              ...catalogArtifact.json.family_groups,
+              ...catalogArtifact.json.family_groups,
+            ],
+          },
+        },
+      })
+    ).toThrow("family identifiers are duplicated");
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            family_groups: [
+              {
+                ...catalogArtifact.json.family_groups[0],
+                id: "0x01",
+              },
+            ],
+          },
+        },
+      })
+    ).toThrow("family evidence is malformed");
   });
 
   it("rejects a same-count custom-error catalog mutation", () => {
