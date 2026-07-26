@@ -1,7 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -48,6 +55,46 @@ export function usePublicReviewCodeSelection(): PublicReviewCodeSelectionContext
 
 function clampLine(line: number, minimum: number, maximum: number): number {
   return Math.min(Math.max(line, minimum), maximum);
+}
+
+function getHashLineRange(
+  hash: string
+): { readonly end: number; readonly start: number } | undefined {
+  if (!hash.startsWith("#L")) {
+    return undefined;
+  }
+  const segments = hash.slice(2).split("-L");
+  if (
+    segments.length < 1 ||
+    segments.length > 2 ||
+    segments.some(
+      (segment) =>
+        !segment ||
+        [...segment].some((character) => character < "0" || character > "9")
+    )
+  ) {
+    return undefined;
+  }
+  const start = Number(segments[0]);
+  const end = Number(segments[1] ?? segments[0]);
+  return Number.isSafeInteger(start) &&
+    Number.isSafeInteger(end) &&
+    start <= end
+    ? { end, start }
+    : undefined;
+}
+
+function subscribeToHashChange(onChange: () => void): () => void {
+  globalThis.addEventListener("hashchange", onChange);
+  return () => globalThis.removeEventListener("hashchange", onChange);
+}
+
+function getHashSnapshot(): string {
+  return globalThis.location.hash;
+}
+
+function getServerHashSnapshot(): string {
+  return "";
 }
 
 function toGitHubSelectionUrl(
@@ -302,8 +349,30 @@ export function SoliditySourceReview({
     firstLineNumber,
     lastLineNumber
   );
-  const [lineStart, setLineStart] = useState(initialLineStart);
-  const [lineEnd, setLineEnd] = useState(initialLineEnd);
+  const [selectedLineStart, setSelectedLineStart] =
+    useState(initialLineStart);
+  const [selectedLineEnd, setSelectedLineEnd] = useState(initialLineEnd);
+  const [selectionTouched, setSelectionTouched] = useState(false);
+  const hash = useSyncExternalStore(
+    subscribeToHashChange,
+    getHashSnapshot,
+    getServerHashSnapshot
+  );
+  const hashRange = getHashLineRange(hash);
+  const validHashRange =
+    hashRange &&
+    hashRange.start >= firstLineNumber &&
+    hashRange.end <= lastLineNumber
+      ? hashRange
+      : undefined;
+  const lineStart =
+    !selectionTouched && validHashRange
+      ? validHashRange.start
+      : selectedLineStart;
+  const lineEnd =
+    !selectionTouched && validHashRange
+      ? validHashRange.end
+      : selectedLineEnd;
   const [computedSnippet, setComputedSnippet] = useState<
     | {
         readonly checksum: string | undefined;
@@ -379,8 +448,14 @@ export function SoliditySourceReview({
         minimumLine={firstLineNumber}
         lineEnd={lineEnd}
         lineStart={lineStart}
-        onLineEndChange={setLineEnd}
-        onLineStartChange={setLineStart}
+        onLineEndChange={(line) => {
+          setSelectionTouched(true);
+          setSelectedLineEnd(line);
+        }}
+        onLineStartChange={(line) => {
+          setSelectionTouched(true);
+          setSelectedLineStart(line);
+        }}
         selectionUrl={selectionUrl}
         selectedSource={selectedSource}
         showCommentAction={feedbackSlot !== undefined}
@@ -391,8 +466,9 @@ export function SoliditySourceReview({
         lines={source.lines}
         lineStart={lineStart}
         onSelectLine={(line) => {
-          setLineStart(line);
-          setLineEnd(line);
+          setSelectionTouched(true);
+          setSelectedLineStart(line);
+          setSelectedLineEnd(line);
         }}
       />
       {feedbackSlot !== undefined && feedbackSlot !== null ? (

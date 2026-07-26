@@ -51,6 +51,10 @@ describe("SoliditySourceReview", () => {
     }
   });
 
+  afterEach(() => {
+    window.history.replaceState({}, "", window.location.pathname);
+  });
+
   it("hashes exactly the visible whole-line selection for feedback", async () => {
     render(
       <SoliditySourceReview source={SOURCE} feedbackSlot={<SelectionProbe />} />
@@ -131,6 +135,19 @@ describe("SoliditySourceReview", () => {
     expect(
       screen.getByRole("link", { name: "Open selected lines on GitHub" })
     ).toHaveAttribute("href", expect.stringContaining("#L201"));
+  });
+
+  it("uses an in-page source line anchor as the initial feedback range", async () => {
+    window.history.replaceState({}, "", "#L2-L3");
+    render(
+      <SoliditySourceReview source={SOURCE} feedbackSlot={<SelectionProbe />} />
+    );
+
+    await waitFor(() => {
+      expect(
+        JSON.parse(screen.getByTestId("selection").textContent ?? "")
+      ).toMatchObject({ lineStart: 2, lineEnd: 3 });
+    });
   });
 
   it("moves focus to the structured feedback slot", () => {
