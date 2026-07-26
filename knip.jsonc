@@ -74,6 +74,9 @@
       "components/public-review/PublicReviewLedger.tsx": ["files"],
       "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
       "hooks/useWavePreviewById.ts": ["exports"],
+      // The public-review generator exposes pure internals to its focused Jest
+      // contract tests; Knip intentionally does not analyze test-only usage.
+      "scripts/public-reviews/solidity-reference-lib.cjs": ["exports"],
       "services/api/public-review/feedback-codec.ts": ["exports", "types"],
       "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],

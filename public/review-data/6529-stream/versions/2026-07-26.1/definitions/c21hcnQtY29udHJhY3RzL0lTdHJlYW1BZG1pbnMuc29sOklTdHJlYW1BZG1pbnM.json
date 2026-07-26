@@ -1,0 +1,573 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0xbe9ee11f",
+          "declaringDefinitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+          "inherited": false,
+          "inputs": [],
+          "name": "emergencyRecipient",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xbe9ee11f",
+          "signature": "emergencyRecipient()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x9068edac",
+          "declaringDefinitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+          "inherited": false,
+          "inputs": [],
+          "name": "isAdminContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x9068edac",
+          "signature": "isAdminContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x241b71bb",
+          "declaringDefinitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_domain",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isPaused",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x241b71bb",
+          "signature": "isPaused(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x8da5cb5b",
+          "declaringDefinitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+          "inherited": false,
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x8da5cb5b",
+          "signature": "owner()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x6558aee8",
+          "declaringDefinitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_address",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveCollectionAdmin",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x6558aee8",
+          "signature": "retrieveCollectionAdmin(address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x51caa7cf",
+          "declaringDefinitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_address",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes4",
+              "name": "_selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "retrieveFunctionAdmin",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x51caa7cf",
+          "signature": "retrieveFunctionAdmin(address,address,bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0xb3076d55",
+          "declaringDefinitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_address",
+              "type": "address"
+            }
+          ],
+          "name": "retrieveGlobalAdmin",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xb3076d55",
+          "signature": "retrieveGlobalAdmin(address)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "retrieveGlobalAdmin(address)",
+          "displaySignature": "retrieveGlobalAdmin(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0xb3076d55",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_address",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BZG1pbnMuc29sOklTdHJlYW1BZG1pbnMjZnVuY3Rpb246MHhiMzA3NmQ1NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveGlobalAdmin",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 76,
+            "byteStart": 118,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:07f591c3e1a888ce9ff80901810fdb2c8c575355758b352b4d21e23a20977134",
+            "sourceSha256": "sha256:90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000"
+          },
+          "selector": "0xb3076d55",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveFunctionAdmin(address,address,bytes4)",
+          "displaySignature": "retrieveFunctionAdmin(address,address,bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x51caa7cf",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_address",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_selector",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BZG1pbnMuc29sOklTdHJlYW1BZG1pbnMjZnVuY3Rpb246MHg1MWNhYTdjZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveFunctionAdmin",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 137,
+            "byteStart": 231,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L10-L13",
+            "lineEnd": 13,
+            "lineStart": 10,
+            "snippetSha256": "sha256:7eaf0507ef8e2deb31894ebed80b75f119c9ce4d2c7aab1b645908fc9474c25a",
+            "sourceSha256": "sha256:90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000"
+          },
+          "selector": "0x51caa7cf",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveCollectionAdmin(address,uint256)",
+          "displaySignature": "retrieveCollectionAdmin(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x6558aee8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_address",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionID",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BZG1pbnMuc29sOklTdHJlYW1BZG1pbnMjZnVuY3Rpb246MHg2NTU4YWVlOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveCollectionAdmin",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 127,
+            "byteStart": 407,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L16-L19",
+            "lineEnd": 19,
+            "lineStart": 16,
+            "snippetSha256": "sha256:67dbb01799e995fada653ebfe5a0a3c74dad90979906688e518225869c471b75",
+            "sourceSha256": "sha256:90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000"
+          },
+          "selector": "0x6558aee8",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isPaused(bytes32)",
+          "displaySignature": "isPaused(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x241b71bb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_domain",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BZG1pbnMuc29sOklTdHJlYW1BZG1pbnMjZnVuY3Rpb246MHgyNDFiNzFiYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isPaused",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 578,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:b4796af5c136e298f9306db82edb60b10346e4a6d1da4df86ff72e333688797c",
+            "sourceSha256": "sha256:90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000"
+          },
+          "selector": "0x241b71bb",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "emergencyRecipient()",
+          "displaySignature": "emergencyRecipient()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0xbe9ee11f",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BZG1pbnMuc29sOklTdHJlYW1BZG1pbnMjZnVuY3Rpb246MHhiZTllZTExZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "emergencyRecipient",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 693,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:ff5963394ef935bd20b429668c583b5efe34179b270774345d1fdb34fb17a180",
+            "sourceSha256": "sha256:90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000"
+          },
+          "selector": "0xbe9ee11f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isAdminContract()",
+          "displaySignature": "isAdminContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x9068edac",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BZG1pbnMuc29sOklTdHJlYW1BZG1pbnMjZnVuY3Rpb246MHg5MDY4ZWRhYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isAdminContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 56,
+            "byteStart": 811,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:c9c44dadbcc9f0d4efb60c44a6cb9e7c00523b9b56254e608191cd15de7d3f9e",
+            "sourceSha256": "sha256:90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000"
+          },
+          "selector": "0x9068edac",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "owner()",
+          "displaySignature": "owner()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x8da5cb5b",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BZG1pbnMuc29sOklTdHJlYW1BZG1pbnMjZnVuY3Rpb246MHg4ZGE1Y2I1Yg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "owner",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 49,
+            "byteStart": 895,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:d4fbebb6d19d5553278faf66452c8e2b7337977d6cf2a27f4013381274a12142",
+            "sourceSha256": "sha256:90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000"
+          },
+          "selector": "0x8da5cb5b",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:b94c95898b38bda7deaf60046c0261a53659aee577e5bae4046088feeeb873c6",
+      "interfaceId": "0x00ddd221",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BZG1pbnMuc29sOklTdHJlYW1BZG1pbnM",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamAdmins.sol:IStreamAdmins"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamAdmins",
+    "natspec": "",
+    "range": {
+      "byteLength": 887,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L5-L32",
+      "lineEnd": 32,
+      "lineStart": 5,
+      "snippetSha256": "sha256:822cd878e70971be8c8871adc1ed0d28af7eab53fad970ca7c3c0900508e2419",
+      "sourceSha256": "sha256:90d63b7e262fcbd1edcdc10e08aa50580e31a6027eed94d71b1e83b36807e000"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamAdmins.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 8
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 7
+    },
+    "totalCount": 8
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x241b71bb",
+      "definitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x51caa7cf",
+      "definitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x6558aee8",
+      "definitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x8da5cb5b",
+      "definitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0x9068edac",
+      "definitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0xb3076d55",
+      "definitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins#function:0xbe9ee11f",
+      "definitionId": "smart-contracts/IStreamAdmins.sol:IStreamAdmins",
+      "severity": "advisory"
+    }
+  ]
+}

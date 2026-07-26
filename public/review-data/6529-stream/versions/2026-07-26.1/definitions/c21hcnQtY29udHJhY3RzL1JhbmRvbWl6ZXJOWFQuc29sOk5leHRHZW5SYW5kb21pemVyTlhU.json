@@ -1,0 +1,677 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xbf1b89d3",
+          "declaringDefinitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_saltfun_o",
+              "type": "uint256"
+            }
+          ],
+          "name": "calculateTokenHash",
+          "outputs": [],
+          "selector": "0xbf1b89d3",
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xc7b010b0",
+          "declaringDefinitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+          "inherited": false,
+          "inputs": [],
+          "name": "gencoreContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamCore",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xc7b010b0",
+          "signature": "gencoreContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x4cf0c697",
+          "declaringDefinitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+          "inherited": false,
+          "inputs": [],
+          "name": "isRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x4cf0c697",
+          "signature": "isRandomizerContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xbee666d8",
+          "declaringDefinitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+          "inherited": false,
+          "inputs": [],
+          "name": "randoms",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IXRandoms",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xbee666d8",
+          "signature": "randoms()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x388d2c24",
+          "declaringDefinitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_newadminsContract",
+              "type": "address"
+            }
+          ],
+          "name": "updateAdminContract",
+          "outputs": [],
+          "selector": "0x388d2c24",
+          "signature": "updateAdminContract(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x2b673a2e",
+          "declaringDefinitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_gencore",
+              "type": "address"
+            }
+          ],
+          "name": "updateCoreContract",
+          "outputs": [],
+          "selector": "0x2b673a2e",
+          "signature": "updateCoreContract(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x692bea2d",
+          "declaringDefinitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_randoms",
+              "type": "address"
+            }
+          ],
+          "name": "updateRandomsContract",
+          "outputs": [],
+          "selector": "0x692bea2d",
+          "signature": "updateRandomsContract(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "randoms()",
+          "displaySignature": "randoms()",
+          "functionKind": "getter",
+          "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xbee666d8",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhUI2Z1bmN0aW9uOjB4YmVlNjY2ZDg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randoms",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IXRandoms",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 24,
+            "byteStart": 357,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:2c5a76d759ba7218cb8d01576f3b52579e5709f0892d8df534561a7a5f2824a2",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0xbee666d8",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "gencoreContract()",
+          "displaySignature": "gencoreContract()",
+          "functionKind": "getter",
+          "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xc7b010b0",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhUI2Z1bmN0aW9uOjB4YzdiMDEwYjA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "gencoreContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamCore",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 34,
+            "byteStart": 429,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:506e051ab7a0653218ca9fef734921b2479a8742eda64b7627e3d6872e74cd56",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0xc7b010b0",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address,address,address)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:constructor(address,address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_randoms",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_admin",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_gencore",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhUI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKGFkZHJlc3MsYWRkcmVzcyxhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 235,
+            "byteStart": 491,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L24-L29",
+            "lineEnd": 29,
+            "lineStart": 24,
+            "snippetSha256": "sha256:83343970be16c5a9ea8eed70e3364a92fd311be8283b987fd6a05c1a20698bf5",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "updateRandomsContract(address)",
+          "displaySignature": "updateRandomsContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x692bea2d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_randoms",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhUI2Z1bmN0aW9uOjB4NjkyYmVhMmQ",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateRandomsContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 181,
+            "byteStart": 1139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L44-L49",
+            "lineEnd": 49,
+            "lineStart": 44,
+            "snippetSha256": "sha256:5feb3e6988786b400740f05cbc12dc974ca59f67942875ea09cb09c0461432ae",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0x692bea2d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "updateAdminContract(address)",
+          "displaySignature": "updateAdminContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x388d2c24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_newadminsContract",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhUI2Z1bmN0aW9uOjB4Mzg4ZDJjMjQ",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateAdminContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 333,
+            "byteStart": 1326,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L51-L59",
+            "lineEnd": 59,
+            "lineStart": 51,
+            "snippetSha256": "sha256:3df385e4cdd01b789dfcc7e0d35643d54414c253472cf30d1a8ca2829852980e",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0x388d2c24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "updateCoreContract(address)",
+          "displaySignature": "updateCoreContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x2b673a2e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_gencore",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhUI2Z1bmN0aW9uOjB4MmI2NzNhMmU",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateCoreContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 213,
+            "byteStart": 1665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L61-L67",
+            "lineEnd": 67,
+            "lineStart": 61,
+            "snippetSha256": "sha256:263c00e461d359980a20f6cb888e0ad37264c8bec031740811179e4dc6142ef2",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0x2b673a2e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "displaySignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xbf1b89d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_saltfun_o",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhUI2Z1bmN0aW9uOjB4YmYxYjg5ZDM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "calculateTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 612,
+            "byteStart": 1971,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L70-L87",
+            "lineEnd": 87,
+            "lineStart": 70,
+            "snippetSha256": "sha256:50cb2cab6959202eb957d65963744d9c869c21591e64e4274fdbb689a988861f",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0xbf1b89d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isRandomizerContract()",
+          "displaySignature": "isRandomizerContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x4cf0c697",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhUI2Z1bmN0aW9uOjB4NGNmMGM2OTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 90,
+            "byteStart": 2670,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L90-L92",
+            "lineEnd": 92,
+            "lineStart": 90,
+            "snippetSha256": "sha256:565bfc4763f7c947337a3a948a877083f01c8a824f27aedabaa643f4a5b51753",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0x4cf0c697",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [
+        {
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "FunctionAdminRequired",
+          "natspec": "",
+          "overrides": [],
+          "range": {
+            "byteLength": 291,
+            "byteStart": 807,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L33-L40",
+            "lineEnd": 40,
+            "lineStart": 33,
+            "snippetSha256": "sha256:d2b86078c6bc7300ffcf81bfedb5a8a24ac5f97764a479cec340246d5c25afe4",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "virtual": false
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xbee666d8",
+          "immutable": false,
+          "name": "randoms",
+          "natspec": "",
+          "range": {
+            "byteLength": 24,
+            "byteStart": 357,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:2c5a76d759ba7218cb8d01576f3b52579e5709f0892d8df534561a7a5f2824a2",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0xbee666d8",
+          "type": "IXRandoms",
+          "typeString": "contract IXRandoms",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "adminsContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 387,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:1754a17cc9aaeccdc5f6ba9305051d7a6d108a566bb43cc1b5a1c4dc2e37c823",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": null,
+          "type": "IStreamAdmins",
+          "typeString": "contract IStreamAdmins",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xc7b010b0",
+          "immutable": false,
+          "name": "gencoreContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 34,
+            "byteStart": 429,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:506e051ab7a0653218ca9fef734921b2479a8742eda64b7627e3d6872e74cd56",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": "0xc7b010b0",
+          "type": "IStreamCore",
+          "typeString": "contract IStreamCore",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "gencore",
+          "natspec": "",
+          "range": {
+            "byteLength": 15,
+            "byteStart": 469,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:e28367d900053412905e8c294b954a9768746e62eb1f41f021de61ed2656d491",
+            "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1JhbmRvbWl6ZXJOWFQuc29sOk5leHRHZW5SYW5kb21pemVyTlhU",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "NextGenRandomizerNXT",
+    "natspec": "",
+    "range": {
+      "byteLength": 2441,
+      "byteStart": 321,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/RandomizerNXT.sol#L18-L93",
+      "lineEnd": 93,
+      "lineStart": 18,
+      "snippetSha256": "sha256:63ed501aef890c63f089a78da2e126041a615df8470429e1d19f1926591de2f6",
+      "sourceSha256": "sha256:4cb62d92b8950c4b9745dd84e1846fed6c39c56abe05009dcd27b6dea8c7e417"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/RandomizerNXT.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 9
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 8
+    },
+    "totalCount": 9
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x2b673a2e",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x388d2c24",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x4cf0c697",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0x692bea2d",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xbee666d8",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xbf1b89d3",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:0xc7b010b0",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT#function:constructor(address,address,address)",
+      "definitionId": "smart-contracts/RandomizerNXT.sol:NextGenRandomizerNXT",
+      "severity": "advisory"
+    }
+  ]
+}
