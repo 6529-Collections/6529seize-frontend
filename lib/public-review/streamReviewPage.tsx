@@ -20,9 +20,7 @@ import {
 } from "@/lib/public-review/streamReviewRoutes";
 import { STREAM_REVIEW_DEFINITION } from "@/lib/public-review/streamReviewDefinition";
 
-export { resolveStreamReviewRoute };
-
-export function getStreamReviewMetadata({
+function getStreamReviewMetadata({
   baseEndpoint,
   params,
 }: {
@@ -51,7 +49,7 @@ export function getStreamReviewMetadata({
   };
 }
 
-export async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
+async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
   let editorialMarkdown: string | undefined;
