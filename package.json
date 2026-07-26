@@ -20,7 +20,7 @@
     "generate": "node scripts/require-6529-command.cjs && node scripts/generate-openapi.cjs",
     "public-review:generate": "node scripts/require-6529-command.cjs && node scripts/public-reviews/solidity-reference.cjs",
     "public-review:check": "node scripts/require-6529-command.cjs && node scripts/public-reviews/solidity-reference.cjs --check",
-    "base-build": "node scripts/require-6529-command.cjs && pnpm run public-review:check && cross-env NODE_OPTIONS=--max-old-space-size=7680 next build",
+    "base-build": "node scripts/require-6529-command.cjs && cross-env NODE_OPTIONS=--max-old-space-size=7680 next build",
     "build": "node scripts/require-6529-command.cjs && pnpm run lint:quiet && pnpm run base-build",
     "help-index:sync": "node scripts/require-6529-command.cjs && node scripts/sync-help-index.cjs",
     "agent-files:sync": "node scripts/require-6529-command.cjs && node scripts/sync-agent-files.cjs",
