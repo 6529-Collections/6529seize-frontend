@@ -1,12 +1,12 @@
 export const SOLIDITY_REFERENCE_INDEX_SCHEMA =
   "public-review.solidity-reference-index.v1";
 export const SOLIDITY_REFERENCE_BUNDLE_SCHEMA =
-  "public-review.solidity-reference.v2";
+  "public-review.solidity-reference.v3";
 export const SOLIDITY_REFERENCE_SHARD_SCHEMA =
   "public-review.solidity-definition-shard.v1";
 export const SOLIDITY_REFERENCE_GENERATOR_NAME =
   "6529-public-review-solidity-reference";
-export const SOLIDITY_REFERENCE_GENERATOR_VERSION = "1";
+export const SOLIDITY_REFERENCE_GENERATOR_VERSION = "2";
 
 export type SolidityReferenceScope = "protocol" | "script" | "test";
 
@@ -101,8 +101,243 @@ export interface SoliditySourceFileReference {
   readonly topLevelDeclarations: readonly SolidityTopLevelDeclaration[];
 }
 
+export interface SolidityEvidenceArtifact {
+  readonly path: string;
+  readonly sha256: string;
+}
+
+export interface SolidityReadinessRequirement {
+  readonly evidence: readonly SolidityEvidenceArtifact[];
+  readonly id: string;
+  readonly notes: string;
+  readonly owner: string;
+  readonly phase: "public_beta" | "production_release";
+  readonly risk_acceptance: unknown;
+  readonly status: string;
+}
+
+export interface SolidityRiskRegisterEntry {
+  readonly area: string;
+  readonly checks: readonly string[];
+  readonly evidence: readonly SolidityEvidenceArtifact[];
+  readonly id: string;
+  readonly mitigation: string;
+  readonly owner: string;
+  readonly residual_risk: string;
+  readonly risk_acceptance: unknown;
+  readonly severity: string;
+  readonly source: string;
+  readonly status: string;
+  readonly target_gate: string;
+  readonly title: string;
+  readonly tracking: readonly string[];
+}
+
+export interface SolidityGovernedParameter {
+  readonly constant_name: string;
+  readonly expected_hosts: {
+    readonly count: number;
+    readonly profiles: readonly {
+      readonly id: number;
+      readonly key: string;
+    }[];
+    readonly status: string;
+  };
+  readonly family: "GGP" | "GTP";
+  readonly guarded_consumers: {
+    readonly consumers: readonly string[];
+    readonly status: string;
+  };
+  readonly identifier_schema_version: number;
+  readonly gas: {
+    readonly failure_class: {
+      readonly id: number;
+      readonly name: string;
+      readonly status: string;
+    };
+    readonly genesis_value: {
+      readonly status: string;
+      readonly value: number | null;
+    };
+    readonly immutable_floor: {
+      readonly status: string;
+      readonly value: number | null;
+    };
+  } | null;
+  readonly measurement_evidence: {
+    readonly path: string | null;
+    readonly sha256: string | null;
+    readonly status: string;
+  };
+  readonly name: string;
+  readonly normative_source: {
+    readonly anchor: string;
+    readonly path: string;
+    readonly status: string;
+  };
+  readonly order: number;
+  readonly parameter_id: string;
+  readonly preimage: string;
+  readonly fixed_stipend_compatibility: {
+    readonly consumers: readonly string[];
+    readonly disposition: string;
+    readonly evidence_path: string | null;
+    readonly evidence_sha256: string | null;
+    readonly status: string;
+  };
+  readonly time: {
+    readonly genesis_value_blocks: {
+      readonly status: string;
+      readonly value: number | null;
+    };
+    readonly immutable_floor_blocks: {
+      readonly status: string;
+      readonly value: number | null;
+    };
+    readonly wall_clock_floor_seconds: {
+      readonly status: string;
+      readonly value: number | null;
+    };
+  } | null;
+}
+
+export interface SolidityNatSpecGap {
+  readonly contract: string;
+  readonly follow_up: string;
+  readonly gapType:
+    | "custom_error"
+    | "declaration"
+    | "event"
+    | "function"
+    | "public_variable_getter";
+  readonly id: string;
+  readonly kind: "custom_error" | "event" | "function";
+  readonly line: number | null;
+  readonly reason: string;
+  readonly signature: string;
+  readonly source: string;
+  readonly status:
+    | "declaration_not_in_source"
+    | "missing_natspec"
+    | "public_variable_getter_missing_natspec";
+}
+
+export interface SolidityAuditorEvidence {
+  readonly blockerReports: {
+    readonly productionRelease: {
+      readonly path: string;
+      readonly sha256: string;
+      readonly size_bytes: number;
+    };
+    readonly publicBeta: {
+      readonly path: string;
+      readonly sha256: string;
+      readonly size_bytes: number;
+    };
+  };
+  readonly boundArtifactDigests: Readonly<
+    Record<
+      string,
+      {
+        readonly schemaVersion: string | null;
+        readonly sha256: string;
+        readonly sizeBytes: number;
+      }
+    >
+  >;
+  readonly checksumBundle: Readonly<Record<string, unknown>>;
+  readonly governedParameterInventory: {
+    readonly candidate_binding: {
+      readonly blocked_by_issue: string;
+      readonly candidate_artifact_path: string | null;
+      readonly candidate_artifact_sha256: string | null;
+      readonly candidate_commit: string | null;
+      readonly candidate_id: string | null;
+      readonly host_bindings: readonly unknown[];
+      readonly status: string;
+    };
+    readonly governance_policy: {
+      readonly action_class: {
+        readonly id: number;
+        readonly name: string;
+      };
+      readonly domains: Readonly<
+        Record<
+          string,
+          {
+            readonly keccak256: string;
+            readonly preimage: string;
+          }
+        >
+      >;
+      readonly forbidden_surfaces: readonly string[];
+      readonly genesis_revision: number;
+      readonly maximum_raise_multiplier: {
+        readonly denominator: number;
+        readonly numerator: number;
+      };
+      readonly minimum_delay_seconds: number;
+      readonly mutation_model: string;
+      readonly one_write_per_action_per_parameter: boolean;
+      readonly status: string;
+    };
+    readonly inventory_summary: {
+      readonly expected_host_binding_count: number;
+      readonly ggp_count: number;
+      readonly gtp_count: number;
+      readonly logical_parameter_count: number;
+    };
+    readonly parameters: readonly SolidityGovernedParameter[];
+    readonly schema_version: string;
+  };
+  readonly natSpecGaps: {
+    readonly baseline: {
+      readonly path: string;
+      readonly policy: string;
+      readonly schemaVersion: string;
+      readonly scope: string;
+      readonly sha256: string;
+    };
+    readonly counts: {
+      readonly byGapType: Readonly<Record<string, number>>;
+      readonly byKind: Readonly<Record<string, number>>;
+      readonly byStatus: Readonly<Record<string, number>>;
+    };
+    readonly gapCount: number;
+    readonly gaps: readonly SolidityNatSpecGap[];
+  };
+  readonly readiness: {
+    readonly release_version: string;
+    readonly requirements: readonly SolidityReadinessRequirement[];
+    readonly schema_version: string;
+    readonly status: {
+      readonly production_release: string;
+      readonly public_beta: string;
+    };
+  };
+  readonly release: {
+    readonly deployment_versions: readonly string[];
+    readonly project: string;
+    readonly protocol_versions: readonly string[];
+    readonly status: string;
+  };
+  readonly riskRegister: {
+    readonly maturity: string;
+    readonly readiness_boundary: string;
+    readonly risk_acceptance_policy: string;
+    readonly risks: readonly SolidityRiskRegisterEntry[];
+    readonly schema_version: string;
+    readonly status_taxonomy: Readonly<Record<string, string>>;
+  };
+  readonly schemaVersion: string;
+  readonly sha256: string;
+  readonly unavailableReleaseCeremony: Readonly<Record<string, string>>;
+}
+
 export interface SolidityReferenceManifest {
+  readonly auditorEvidence: SolidityAuditorEvidence;
   readonly bundleSchemaVersion: string;
+  readonly declarationIndex: readonly SolidityDeclarationIndexEntry[];
   readonly definitionIndex: readonly SolidityDefinitionIndexEntry[];
   readonly files: readonly SoliditySourceFileReference[];
   readonly generator: {
@@ -138,14 +373,36 @@ export interface SolidityReferenceManifest {
   readonly summary: {
     readonly classifications: Readonly<Record<string, number>>;
     readonly contractCount: number;
+    readonly declarationCount: number;
     readonly definitionCount: number;
     readonly fileCount: number;
     readonly interfaceCount: number;
     readonly libraryCount: number;
     readonly releaseSurface: Readonly<Record<string, number>>;
+    readonly topLevelDeclarationCount: number;
     readonly warningCount: number;
   };
   readonly warningSummary: SolidityWarningSummary;
+}
+
+export interface SolidityDeclarationIndexEntry {
+  readonly canonicalSignature: string | null;
+  readonly definitionId: string | null;
+  readonly definitionKey: string | null;
+  readonly definitionShardPath: string | null;
+  readonly displaySignature: string;
+  readonly id: string;
+  readonly key: string;
+  readonly kind: "function" | "event" | "error";
+  readonly name: string;
+  readonly range: SoliditySourceRange;
+  readonly scope: SolidityReferenceScope;
+  readonly selector: string | null;
+  readonly sourcePath: string;
+  readonly sourcePublicPath: string;
+  readonly syntheticGetter: boolean;
+  readonly topLevel: boolean;
+  readonly topic0: string | null;
 }
 
 export interface SolidityReferenceVersionIndexEntry {
@@ -198,15 +455,15 @@ export interface SolidityFunctionDeclaration extends SolidityDeclarationBase {
 
 export interface SolidityEventDeclaration extends SolidityDeclarationBase {
   readonly anonymous: boolean;
-  readonly canonicalSignature: string;
+  readonly canonicalSignature: string | null;
   readonly displaySignature: string;
   readonly inputs: readonly SolidityParameter[];
   readonly kind: "event";
-  readonly topic0: string;
+  readonly topic0: string | null;
 }
 
 export interface SolidityErrorDeclaration extends SolidityDeclarationBase {
-  readonly canonicalSignature: string;
+  readonly canonicalSignature: string | null;
   readonly displaySignature: string;
   readonly inputs: readonly SolidityParameter[];
   readonly kind: "error";
@@ -406,9 +663,9 @@ export interface SoliditySourceDocument {
 export type SolidityDeclarationKind = "functions" | "events" | "errors";
 
 export interface SolidityReferenceReviewIdentity {
+  readonly activeSourceCommit: string;
   readonly activeVersion: string;
   readonly availableVersions: readonly string[];
   readonly reviewId: string;
-  readonly sourceCommit: string;
   readonly sourceRepository: string;
 }

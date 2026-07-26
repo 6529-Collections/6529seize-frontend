@@ -5,10 +5,15 @@ import {
   SolidityDeclarationExplorer,
   type SolidityDeclarationListItem,
 } from "@/components/public-review/SolidityDeclarationExplorer";
+import { SolidityAuditorEvidenceView } from "@/components/public-review/SolidityAuditorEvidenceView";
 import {
   SolidityDefinitionExplorer,
   type SolidityDefinitionListItem,
 } from "@/components/public-review/SolidityDefinitionExplorer";
+import {
+  SolidityGlobalDeclarationExplorer,
+  type SolidityGlobalDeclarationListItem,
+} from "@/components/public-review/SolidityGlobalDeclarationExplorer";
 import { SolidityInheritance } from "@/components/public-review/SolidityInheritance";
 import { SolidityOtherDeclarationGroup } from "@/components/public-review/SolidityOtherDeclarationGroup";
 import { SoliditySemanticIdentity } from "@/components/public-review/SoliditySemanticIdentity";
@@ -17,6 +22,7 @@ import { formatDate, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  getSolidityDeclarationIndexHref,
   getSolidityDeclarationHref,
   getSolidityDefinitionHref,
   getSolidityInterfaceHref,
@@ -235,6 +241,33 @@ export function SolidityReferenceOverview({
       warningCount: definition.warningSummary.totalCount,
     })
   );
+  const definitionsById = new Map(
+    manifest.definitionIndex.map((definition) => [
+      definition.id,
+      definition.name,
+    ])
+  );
+  const declarationItems: SolidityGlobalDeclarationListItem[] =
+    manifest.declarationIndex.map((declaration) => ({
+      definitionName: declaration.definitionId
+        ? definitionsById.get(declaration.definitionId)
+        : undefined,
+      href: getSolidityDeclarationIndexHref({
+        ...hrefContext,
+        declaration,
+      }),
+      key: declaration.key,
+      kind: declaration.kind,
+      name: declaration.name,
+      scope: declaration.scope,
+      selectorOrTopic:
+        declaration.selector ?? declaration.topic0 ?? "\u2014",
+      signature:
+        declaration.canonicalSignature ?? declaration.displaySignature,
+      sourcePath: declaration.sourcePath,
+      syntheticGetter: declaration.syntheticGetter,
+      topLevel: declaration.topLevel,
+    }));
 
   return (
     <div className="tw-space-y-8">
@@ -419,6 +452,13 @@ export function SolidityReferenceOverview({
         </dl>
       </section>
 
+      <SolidityAuditorEvidenceView
+        hrefContext={hrefContext}
+        manifest={manifest}
+      />
+
+      <SolidityGlobalDeclarationExplorer items={declarationItems} />
+
       <SolidityDefinitionExplorer items={listItems} />
     </div>
   );
@@ -459,8 +499,8 @@ function getDeclarationItems({
     key: declaration.key,
     kind: "event" as const,
     name: declaration.name,
-    selectorOrTopic: declaration.topic0,
-    signature: declaration.canonicalSignature,
+    selectorOrTopic: declaration.topic0 ?? "—",
+    signature: declaration.canonicalSignature ?? declaration.displaySignature,
   }));
   const errors = shard.definition.declarations.errors.map((declaration) => ({
     href: getSolidityDeclarationHref({
@@ -473,7 +513,7 @@ function getDeclarationItems({
     kind: "error" as const,
     name: declaration.name,
     selectorOrTopic: declaration.selector,
-    signature: declaration.canonicalSignature,
+    signature: declaration.canonicalSignature ?? declaration.displaySignature,
   }));
   return [...functions, ...events, ...errors];
 }
@@ -636,6 +676,27 @@ export function SolidityDefinitionView({
             >
               {t(DEFAULT_LOCALE, "publicReview.reference.openPinnedSource")}
             </a>
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceChecksum")}
+          >
+            <code>{indexEntry.range.sourceSha256}</code>
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.snippetChecksum")}
+          >
+            <code>{indexEntry.range.snippetSha256}</code>
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.byteRange")}
+          >
+            {t(DEFAULT_LOCALE, "publicReview.reference.byteRangeValue", {
+              length: formatInteger(
+                DEFAULT_LOCALE,
+                indexEntry.range.byteLength
+              ),
+              start: formatInteger(DEFAULT_LOCALE, indexEntry.range.byteStart),
+            })}
           </KeyValue>
           <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.natspec")}>
             {shard.definition.natspec ||

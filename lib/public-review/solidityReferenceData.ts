@@ -8,38 +8,37 @@ import {
   toSha256Urn,
 } from "@/lib/public-review/solidityReferenceIntegrity.server";
 import {
+  assertSolidityDefinitionSourceIntegrity,
+  assertSolidityFileScopeSourceIntegrity,
+} from "@/lib/public-review/solidityReferenceSourceIntegrity.server";
+import {
   encodeSoliditySemanticId,
   getIndexedDefinitionByKey,
   getIndexedSourceByPath,
   resolveSoliditySourcePath,
   type SolidityReferenceRouteInventory,
 } from "@/lib/public-review/solidityReferenceRoutes";
-import {
-  SOLIDITY_REFERENCE_BUNDLE_SCHEMA,
-  SOLIDITY_REFERENCE_GENERATOR_NAME,
-  SOLIDITY_REFERENCE_GENERATOR_VERSION,
-  SOLIDITY_REFERENCE_INDEX_SCHEMA,
-  SOLIDITY_REFERENCE_SHARD_SCHEMA,
-  type SolidityDeclarationKind,
-  type SolidityDefinitionIndexEntry,
-  type SolidityDefinitionShard,
-  type SolidityEventDeclaration,
-  type SolidityFunctionDeclaration,
-  type SolidityReferenceIndex,
-  type SolidityReferenceManifest,
-  type SolidityReferenceReviewIdentity,
-  type SolidityRoutedDeclaration,
-  type SoliditySourceDocument,
-  type SoliditySourceFileReference,
-  type SoliditySourceRange,
-  type SolidityWarningSummary,
+import type {
+  SolidityDeclarationKind,
+  SolidityDefinitionIndexEntry,
+  SolidityDefinitionShard,
+  SolidityEventDeclaration,
+  SolidityFunctionDeclaration,
+  SolidityReferenceIndex,
+  SolidityReferenceManifest,
+  SolidityReferenceReviewIdentity,
+  SolidityRoutedDeclaration,
+  SoliditySourceDocument,
+  SoliditySourceFileReference,
 } from "@/lib/public-review/solidityReferenceTypes";
+import {
+  assertSolidityReferenceIndex,
+  assertSolidityReferenceManifest,
+} from "@/lib/public-review/solidityReferenceValidation.server";
+import { assertSolidityDefinitionShard } from "@/lib/public-review/solidityReferenceShardValidation.server";
+import { assertSafePublicPath } from "@/lib/public-review/solidityReferenceValidationPrimitives.server";
 
 const REVIEW_DATA_ROOT = "/review-data";
-const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/;
-const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/;
-const SAFE_PUBLIC_PATH_PATTERN = /^\/review-data\/[A-Za-z0-9._/-]+$/;
-const SAFE_SOURCE_PATH_PATTERN = /^[A-Za-z0-9._/-]+$/;
 
 interface SolidityReferenceReaderOptions {
   readonly identity: SolidityReferenceReviewIdentity;
@@ -89,404 +88,6 @@ export interface SolidityReferenceReader {
     readonly document: SoliditySourceDocument;
     readonly manifest: SolidityReferenceManifest;
   }>;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isNonNegativeInteger(value: unknown): value is number {
-  return Number.isSafeInteger(value) && Number(value) >= 0;
-}
-
-function isPositiveInteger(value: unknown): value is number {
-  return Number.isSafeInteger(value) && Number(value) > 0;
-}
-
-function isSha256(value: unknown): value is string {
-  return typeof value === "string" && SHA256_PATTERN.test(value);
-}
-
-function assertStringRecord(
-  value: unknown,
-  label: string
-): asserts value is Readonly<Record<string, string>> {
-  if (
-    !isRecord(value) ||
-    Object.values(value).some((entry) => typeof entry !== "string")
-  ) {
-    throw new Error(`Invalid ${label} in the Solidity reference.`);
-  }
-}
-
-function assertNumberRecord(
-  value: unknown,
-  label: string
-): asserts value is Readonly<Record<string, number>> {
-  if (
-    !isRecord(value) ||
-    Object.values(value).some((entry) => !isNonNegativeInteger(entry))
-  ) {
-    throw new Error(`Invalid ${label} in the Solidity reference.`);
-  }
-}
-
-function assertSourceRange(
-  value: unknown,
-  label: string
-): asserts value is SoliditySourceRange {
-  if (
-    !isRecord(value) ||
-    !isNonNegativeInteger(value["byteStart"]) ||
-    !isPositiveInteger(value["byteLength"]) ||
-    !isPositiveInteger(value["lineStart"]) ||
-    !isPositiveInteger(value["lineEnd"]) ||
-    value["lineStart"] > value["lineEnd"] ||
-    typeof value["githubUrl"] !== "string" ||
-    !value["githubUrl"].startsWith("https://github.com/") ||
-    !isSha256(value["sourceSha256"]) ||
-    !isSha256(value["snippetSha256"])
-  ) {
-    throw new Error(`Invalid ${label} source range.`);
-  }
-}
-
-function sourceRangesEqual(
-  left: SoliditySourceRange,
-  right: SoliditySourceRange
-): boolean {
-  return (
-    left.byteStart === right.byteStart &&
-    left.byteLength === right.byteLength &&
-    left.lineStart === right.lineStart &&
-    left.lineEnd === right.lineEnd &&
-    left.sourceSha256 === right.sourceSha256 &&
-    left.snippetSha256 === right.snippetSha256 &&
-    left.githubUrl === right.githubUrl
-  );
-}
-
-function assertReferenceCounts(value: unknown, label: string): void {
-  if (
-    !isRecord(value) ||
-    !isNonNegativeInteger(value["functions"]) ||
-    !isNonNegativeInteger(value["events"]) ||
-    !isNonNegativeInteger(value["errors"])
-  ) {
-    throw new Error(`Invalid ${label} counts in the Solidity reference.`);
-  }
-}
-
-function assertWarningSummary(
-  value: unknown
-): asserts value is SolidityWarningSummary {
-  if (!isRecord(value) || !isNonNegativeInteger(value["totalCount"])) {
-    throw new Error("Invalid warning summary in the Solidity reference.");
-  }
-  assertNumberRecord(value["byCategory"], "warning categories");
-  assertNumberRecord(value["byCode"], "warning codes");
-}
-
-function assertSafePublicPath(publicPath: string, suffix: string): void {
-  if (
-    !SAFE_PUBLIC_PATH_PATTERN.test(publicPath) ||
-    !publicPath.startsWith(`${REVIEW_DATA_ROOT}/`) ||
-    publicPath.includes("//") ||
-    publicPath
-      .split("/")
-      .some((segment) => segment === "." || segment === "..") ||
-    !publicPath.endsWith(suffix)
-  ) {
-    throw new Error("The Solidity reference contains an unsafe public path.");
-  }
-}
-
-function assertSafeSourcePath(sourcePath: string): void {
-  if (
-    !SAFE_SOURCE_PATH_PATTERN.test(sourcePath) ||
-    sourcePath.startsWith("/") ||
-    sourcePath.includes("//") ||
-    sourcePath.includes("\\") ||
-    sourcePath
-      .split("/")
-      .some((segment) => segment === "." || segment === "..") ||
-    !sourcePath.endsWith(".sol")
-  ) {
-    throw new Error("The Solidity reference contains an unsafe source path.");
-  }
-}
-
-function assertIndex(
-  value: unknown,
-  identity: SolidityReferenceReviewIdentity
-): asserts value is SolidityReferenceIndex {
-  if (
-    !isRecord(value) ||
-    value["schemaVersion"] !== SOLIDITY_REFERENCE_INDEX_SCHEMA ||
-    value["reviewId"] !== identity.reviewId ||
-    value["activeVersion"] !== identity.activeVersion ||
-    !Array.isArray(value["versions"]) ||
-    value["versions"].length !== identity.availableVersions.length
-  ) {
-    throw new Error("Invalid Solidity reference index identity.");
-  }
-
-  const seenVersions = new Set<string>();
-  for (const entry of value["versions"]) {
-    if (
-      !isRecord(entry) ||
-      typeof entry["version"] !== "string" ||
-      !identity.availableVersions.includes(entry["version"]) ||
-      typeof entry["bundlePath"] !== "string" ||
-      !isSha256(entry["bundleSha256"]) ||
-      typeof entry["tree"] !== "string" ||
-      !/^[0-9a-f]{40}$/.test(entry["tree"]) ||
-      entry["commit"] !== identity.sourceCommit
-    ) {
-      throw new Error("Invalid Solidity reference version entry.");
-    }
-    assertSafePublicPath(entry["bundlePath"], ".json");
-    if (seenVersions.has(entry["version"])) {
-      throw new Error("Duplicate Solidity reference version.");
-    }
-    seenVersions.add(entry["version"]);
-  }
-}
-
-function assertDefinitionIndexEntry(
-  value: unknown
-): asserts value is SolidityDefinitionIndexEntry {
-  if (
-    !isRecord(value) ||
-    typeof value["id"] !== "string" ||
-    typeof value["key"] !== "string" ||
-    !BASE64URL_PATTERN.test(value["key"]) ||
-    encodeSoliditySemanticId(value["id"]) !== value["key"] ||
-    typeof value["name"] !== "string" ||
-    typeof value["kind"] !== "string" ||
-    typeof value["classification"] !== "string" ||
-    typeof value["classificationReason"] !== "string" ||
-    !["protocol", "script", "test"].includes(String(value["scope"])) ||
-    typeof value["sourcePath"] !== "string" ||
-    typeof value["shardPath"] !== "string" ||
-    !isSha256(value["shardSha256"]) ||
-    typeof value["abstract"] !== "boolean" ||
-    !isRecord(value["interface"]) ||
-    typeof value["interface"]["published"] !== "boolean" ||
-    !isRecord(value["membership"]) ||
-    !isRecord(value["release"])
-  ) {
-    throw new Error("Invalid Solidity definition index entry.");
-  }
-  assertSafeSourcePath(value["sourcePath"]);
-  assertSafePublicPath(value["shardPath"], ".json");
-  assertSourceRange(value["range"], "definition");
-  assertReferenceCounts(value["abiSurfaceCounts"], "ABI surface");
-  assertReferenceCounts(value["declarationCounts"], "declaration");
-  assertWarningSummary(value["warningSummary"]);
-}
-
-function assertSourceFile(
-  value: unknown
-): asserts value is SoliditySourceFileReference {
-  if (
-    !isRecord(value) ||
-    typeof value["path"] !== "string" ||
-    typeof value["publicPath"] !== "string" ||
-    typeof value["githubUrl"] !== "string" ||
-    !value["githubUrl"].startsWith("https://github.com/") ||
-    !["protocol", "script", "test"].includes(String(value["scope"])) ||
-    !isPositiveInteger(value["lineCount"]) ||
-    !isPositiveInteger(value["byteLength"]) ||
-    !isSha256(value["sha256"]) ||
-    !Array.isArray(value["definitionIds"]) ||
-    value["definitionIds"].some((id) => typeof id !== "string") ||
-    !Array.isArray(value["topLevelDeclarations"])
-  ) {
-    throw new Error("Invalid Solidity source file entry.");
-  }
-  assertSafeSourcePath(value["path"]);
-  assertSafePublicPath(value["publicPath"], ".sol");
-}
-
-function assertManifest(
-  value: unknown,
-  {
-    identity,
-    version,
-    versionEntry,
-  }: {
-    readonly identity: SolidityReferenceReviewIdentity;
-    readonly version: string;
-    readonly versionEntry: SolidityReferenceIndex["versions"][number];
-  }
-): asserts value is SolidityReferenceManifest {
-  if (
-    !isRecord(value) ||
-    value["bundleSchemaVersion"] !== SOLIDITY_REFERENCE_BUNDLE_SCHEMA ||
-    value["reviewId"] !== identity.reviewId ||
-    value["reviewVersion"] !== version ||
-    !isRecord(value["source"]) ||
-    value["source"]["repository"] !== identity.sourceRepository ||
-    value["source"]["commit"] !== identity.sourceCommit ||
-    value["source"]["tree"] !== versionEntry.tree ||
-    !isRecord(value["generator"]) ||
-    value["generator"]["name"] !== SOLIDITY_REFERENCE_GENERATOR_NAME ||
-    value["generator"]["version"] !== SOLIDITY_REFERENCE_GENERATOR_VERSION ||
-    value["generator"]["outputSha256"] !== versionEntry.bundleSha256 ||
-    !isSha256(value["generator"]["configSha256"]) ||
-    !isSha256(value["generator"]["sourceSha256"]) ||
-    !isRecord(value["summary"]) ||
-    !Array.isArray(value["definitionIndex"]) ||
-    !Array.isArray(value["files"])
-  ) {
-    throw new Error("Invalid Solidity reference manifest identity.");
-  }
-
-  assertStringRecord(value["source"]["sourceChecksums"], "source checksums");
-  assertStringRecord(
-    value["source"]["artifactChecksums"],
-    "artifact checksums"
-  );
-  assertWarningSummary(value["warningSummary"]);
-  assertNumberRecord(value["summary"]["classifications"], "classifications");
-  assertNumberRecord(value["summary"]["releaseSurface"], "release surface");
-
-  const definitionKeys = new Set<string>();
-  const definitionIds = new Set<string>();
-  for (const definition of value["definitionIndex"]) {
-    assertDefinitionIndexEntry(definition);
-    if (
-      definitionKeys.has(definition.key) ||
-      definitionIds.has(definition.id)
-    ) {
-      throw new Error("Duplicate Solidity definition identity.");
-    }
-    definitionKeys.add(definition.key);
-    definitionIds.add(definition.id);
-  }
-
-  const sourcePaths = new Set<string>();
-  for (const file of value["files"]) {
-    assertSourceFile(file);
-    if (sourcePaths.has(file.path)) {
-      throw new Error("Duplicate Solidity source path.");
-    }
-    sourcePaths.add(file.path);
-    if (value["source"]["sourceChecksums"][file.path] !== file.sha256) {
-      throw new Error("Solidity source checksum index drift.");
-    }
-  }
-
-  if (
-    value["summary"]["definitionCount"] !== value["definitionIndex"].length ||
-    value["summary"]["fileCount"] !== value["files"].length ||
-    value["summary"]["warningCount"] !== value["warningSummary"]["totalCount"]
-  ) {
-    throw new Error("Solidity reference summary drift.");
-  }
-}
-
-function assertDeclaration(
-  value: unknown,
-  kind: SolidityDeclarationKind,
-  sourceSha256: string
-): asserts value is SolidityRoutedDeclaration {
-  const singularKind = kind.slice(0, -1);
-  if (
-    !isRecord(value) ||
-    value["kind"] !== singularKind ||
-    typeof value["id"] !== "string" ||
-    typeof value["key"] !== "string" ||
-    encodeSoliditySemanticId(value["id"]) !== value["key"] ||
-    typeof value["name"] !== "string" ||
-    typeof value["displaySignature"] !== "string" ||
-    !Array.isArray(value["inputs"]) ||
-    typeof value["natspec"] !== "string"
-  ) {
-    throw new Error(`Invalid Solidity ${singularKind} declaration.`);
-  }
-  assertSourceRange(value["range"], `Solidity ${singularKind}`);
-  if (value["range"].sourceSha256 !== sourceSha256) {
-    throw new Error("Solidity declaration source checksum drift.");
-  }
-  if (
-    kind === "functions" &&
-    ((value["canonicalSignature"] !== null &&
-      typeof value["canonicalSignature"] !== "string") ||
-      (value["selector"] !== null && typeof value["selector"] !== "string") ||
-      !Array.isArray(value["outputs"]) ||
-      typeof value["stateMutability"] !== "string" ||
-      typeof value["visibility"] !== "string")
-  ) {
-    throw new Error("Invalid Solidity function declaration.");
-  }
-  if (
-    kind === "events" &&
-    (typeof value["canonicalSignature"] !== "string" ||
-      typeof value["topic0"] !== "string")
-  ) {
-    throw new Error("Invalid Solidity event declaration.");
-  }
-  if (
-    kind === "errors" &&
-    (typeof value["canonicalSignature"] !== "string" ||
-      typeof value["selector"] !== "string")
-  ) {
-    throw new Error("Invalid Solidity error declaration.");
-  }
-}
-
-function assertShard(
-  value: unknown,
-  {
-    indexEntry,
-    manifest,
-  }: {
-    readonly indexEntry: SolidityDefinitionIndexEntry;
-    readonly manifest: SolidityReferenceManifest;
-  }
-): asserts value is SolidityDefinitionShard {
-  if (
-    !isRecord(value) ||
-    value["shardSchemaVersion"] !== SOLIDITY_REFERENCE_SHARD_SCHEMA ||
-    value["reviewId"] !== manifest.reviewId ||
-    value["reviewVersion"] !== manifest.reviewVersion ||
-    !isRecord(value["definition"]) ||
-    value["definition"]["id"] !== indexEntry.id ||
-    value["definition"]["key"] !== indexEntry.key ||
-    value["definition"]["name"] !== indexEntry.name ||
-    value["definition"]["kind"] !== indexEntry.kind ||
-    value["definition"]["scope"] !== indexEntry.scope ||
-    value["definition"]["classification"] !== indexEntry.classification ||
-    value["definition"]["sourcePath"] !== indexEntry.sourcePath ||
-    !isRecord(value["definition"]["declarations"]) ||
-    !isRecord(value["definition"]["abiSurface"]) ||
-    !Array.isArray(value["warnings"])
-  ) {
-    throw new Error("Invalid Solidity definition shard identity.");
-  }
-
-  assertSourceRange(value["definition"]["range"], "shard definition");
-  if (!sourceRangesEqual(value["definition"]["range"], indexEntry.range)) {
-    throw new Error("Solidity definition source range drift.");
-  }
-  assertWarningSummary(value["warningSummary"]);
-
-  for (const kind of ["functions", "events", "errors"] as const) {
-    const declarations = value["definition"]["declarations"][kind];
-    if (!Array.isArray(declarations)) {
-      throw new Error(`Missing Solidity ${kind} declarations.`);
-    }
-    const declarationKeys = new Set<string>();
-    for (const declaration of declarations) {
-      assertDeclaration(declaration, kind, indexEntry.range.sourceSha256);
-      if (declarationKeys.has(declaration.key)) {
-        throw new Error(`Duplicate Solidity ${kind} declaration identity.`);
-      }
-      declarationKeys.add(declaration.key);
-    }
-  }
 }
 
 function resolveContainedPublicPath(
@@ -554,6 +155,39 @@ type LoadedManifest = Awaited<
 type LoadedDefinition = Awaited<
   ReturnType<SolidityReferenceReader["loadDefinition"]>
 >;
+type SourceBufferLoader = (
+  file: SoliditySourceFileReference
+) => Promise<Buffer>;
+
+function createSourceBufferLoader(
+  publicRoot: string
+): SourceBufferLoader {
+  const cache = new Map<string, Promise<Buffer>>();
+  return (file) => {
+    let pending = cache.get(file.publicPath);
+    if (!pending) {
+      pending = (async () => {
+        const filePath = resolveContainedPublicPath(
+          publicRoot,
+          file.publicPath,
+          ".sol"
+        );
+        // The manifest allowlists the path and containment is checked above.
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        const source = await readFile(filePath);
+        if (
+          toSha256Urn(source) !== file.sha256 ||
+          source.byteLength !== file.byteLength
+        ) {
+          throw new Error("Solidity source file checksum drift.");
+        }
+        return source;
+      })();
+      cache.set(file.publicPath, pending);
+    }
+    return pending;
+  };
+}
 
 function createIndexLoader({
   identity,
@@ -569,7 +203,7 @@ function createIndexLoader({
         publicRoot,
         `${REVIEW_DATA_ROOT}/${identity.reviewId}/index.json`
       );
-      assertIndex(value, identity);
+      assertSolidityReferenceIndex(value, identity);
       return value;
     })();
     return indexPromise;
@@ -613,7 +247,11 @@ function createManifestLoader({
         versionEntry.bundleSha256,
         "manifest-output"
       );
-      assertManifest(value, { identity, version, versionEntry });
+      assertSolidityReferenceManifest(value, {
+        identity,
+        version,
+        versionEntry,
+      });
       return { index, manifest: value, versionEntry };
     })();
     cache.set(version, pending);
@@ -622,9 +260,11 @@ function createManifestLoader({
 }
 
 function createDefinitionLoader({
+  loadSourceBuffer,
   loadManifest,
   publicRoot,
 }: {
+  readonly loadSourceBuffer: SourceBufferLoader;
   readonly loadManifest: SolidityReferenceReader["loadManifest"];
   readonly publicRoot: string;
 }): SolidityReferenceReader["loadDefinition"] {
@@ -647,7 +287,19 @@ function createDefinitionLoader({
           indexEntry.shardPath,
           indexEntry.shardSha256
         );
-        assertShard(value, { indexEntry, manifest });
+        assertSolidityDefinitionShard(value, { indexEntry, manifest });
+        const file = getIndexedSourceByPath(
+          manifest.files,
+          indexEntry.sourcePath
+        );
+        if (!file) {
+          throw new Error("Solidity definition source file is missing.");
+        }
+        assertSolidityDefinitionSourceIntegrity({
+          file,
+          shard: value,
+          source: await loadSourceBuffer(file),
+        });
         return value;
       })();
       cache.set(cacheKey, shardPromise);
@@ -675,11 +327,11 @@ function createDeclarationLoader(
 }
 
 function createSourceLoader({
+  loadSourceBuffer,
   loadManifest,
-  publicRoot,
 }: {
+  readonly loadSourceBuffer: SourceBufferLoader;
   readonly loadManifest: SolidityReferenceReader["loadManifest"];
-  readonly publicRoot: string;
 }): SolidityReferenceReader["loadSource"] {
   return async (version, sourceSegments) => {
     const sourcePath = resolveSoliditySourcePath(sourceSegments);
@@ -693,20 +345,8 @@ function createSourceLoader({
     if (!file) {
       throw new SolidityReferenceNotFoundError("Unknown Solidity source file.");
     }
-    const filePath = resolveContainedPublicPath(
-      publicRoot,
-      file.publicPath,
-      ".sol"
-    );
-    // The manifest allowlists the path and containment is checked above.
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    const sourceBuffer = await readFile(filePath);
-    if (
-      toSha256Urn(sourceBuffer) !== file.sha256 ||
-      sourceBuffer.byteLength !== file.byteLength
-    ) {
-      throw new Error("Solidity source file checksum drift.");
-    }
+    const sourceBuffer = await loadSourceBuffer(file);
+    assertSolidityFileScopeSourceIntegrity({ file, source: sourceBuffer });
     const source = sourceBuffer.toString("utf8");
     const lines = splitSourceLines(source);
     if (lines.length !== file.lineCount) {
@@ -761,6 +401,11 @@ function createRouteInventoryLoader({
       sources: manifest.files.map((file) => ({
         source: file.path.split("/"),
       })),
+      topLevelDeclarations: manifest.declarationIndex
+        .filter((declaration) => declaration.topLevel)
+        .map((declaration) => ({
+          declarationKey: declaration.key,
+        })),
     };
   };
 }
@@ -770,12 +415,14 @@ export function createSolidityReferenceReader({
   publicRoot = path.resolve(process.cwd(), "public"),
 }: SolidityReferenceReaderOptions): SolidityReferenceReader {
   const loadIndex = createIndexLoader({ identity, publicRoot });
+  const loadSourceBuffer = createSourceBufferLoader(publicRoot);
   const loadManifest = createManifestLoader({
     identity,
     loadIndex,
     publicRoot,
   });
   const loadDefinition = createDefinitionLoader({
+    loadSourceBuffer,
     loadManifest,
     publicRoot,
   });
@@ -789,6 +436,6 @@ export function createSolidityReferenceReader({
       loadDefinition,
       loadManifest,
     }),
-    loadSource: createSourceLoader({ loadManifest, publicRoot }),
+    loadSource: createSourceLoader({ loadManifest, loadSourceBuffer }),
   };
 }

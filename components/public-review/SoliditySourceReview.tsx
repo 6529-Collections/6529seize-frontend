@@ -20,7 +20,7 @@ export interface PublicReviewCodeSelection {
 interface SourceReviewInput {
   readonly contract?: string | undefined;
   readonly declaration?: string | undefined;
-  readonly generatedSnippetSha256?: string | undefined;
+  readonly firstLineNumber?: number | undefined;
   readonly githubUrl: string;
   readonly initialLineEnd: number;
   readonly initialLineStart: number;
@@ -46,8 +46,8 @@ export function usePublicReviewCodeSelection(): PublicReviewCodeSelectionContext
   return value;
 }
 
-function clampLine(line: number, lineCount: number): number {
-  return Math.min(Math.max(line, 1), lineCount);
+function clampLine(line: number, minimum: number, maximum: number): number {
+  return Math.min(Math.max(line, minimum), maximum);
 }
 
 function toGitHubSelectionUrl(
@@ -77,7 +77,8 @@ async function getSnippetSha256(source: string): Promise<string | undefined> {
 }
 
 function SourceSelectionControls({
-  lineCount,
+  maximumLine,
+  minimumLine,
   lineEnd,
   lineStart,
   onLineEndChange,
@@ -86,7 +87,8 @@ function SourceSelectionControls({
   selectedSource,
   showCommentAction,
 }: {
-  readonly lineCount: number;
+  readonly maximumLine: number;
+  readonly minimumLine: number;
   readonly lineEnd: number;
   readonly lineStart: number;
   readonly onLineEndChange: (line: number) => void;
@@ -140,14 +142,14 @@ function SourceSelectionControls({
           </span>
           <input
             className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
-            max={lineCount}
-            min={1}
+            max={maximumLine}
+            min={minimumLine}
             type="number"
             value={lineStart}
             onChange={(event) => {
               const value = Number(event.target.value);
               if (Number.isSafeInteger(value)) {
-                onLineStartChange(clampLine(value, lineCount));
+                onLineStartChange(clampLine(value, minimumLine, maximumLine));
               }
             }}
           />
@@ -158,14 +160,14 @@ function SourceSelectionControls({
           </span>
           <input
             className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
-            max={lineCount}
-            min={1}
+            max={maximumLine}
+            min={minimumLine}
             type="number"
             value={lineEnd}
             onChange={(event) => {
               const value = Number(event.target.value);
               if (Number.isSafeInteger(value)) {
-                onLineEndChange(clampLine(value, lineCount));
+                onLineEndChange(clampLine(value, minimumLine, maximumLine));
               }
             }}
           />
@@ -224,11 +226,13 @@ function SourceSelectionControls({
 }
 
 function SourceLines({
+  firstLineNumber,
   lineEnd,
   lines,
   lineStart,
   onSelectLine,
 }: {
+  readonly firstLineNumber: number;
   readonly lineEnd: number;
   readonly lines: readonly string[];
   readonly lineStart: number;
@@ -243,10 +247,11 @@ function SourceLines({
     >
       <ol className="tw-m-0 tw-min-w-max tw-list-none tw-p-0 tw-py-3 tw-font-mono tw-text-xs tw-leading-6 sm:tw-text-sm">
         {lines.map((line, index) => {
-          const lineNumber = index + 1;
+          const lineNumber = firstLineNumber + index;
           const selected = lineNumber >= lineStart && lineNumber <= lineEnd;
           return (
             <li
+              id={`L${lineNumber}`}
               key={lineNumber}
               className={`tw-grid tw-grid-cols-[4.5rem_minmax(0,1fr)] ${
                 selected ? "tw-bg-primary-400/15" : ""
@@ -285,9 +290,18 @@ export function SoliditySourceReview({
   readonly feedbackSlot?: ReactNode | undefined;
   readonly source: SourceReviewInput;
 }) {
-  const lineCount = source.lines.length;
-  const initialLineStart = clampLine(source.initialLineStart, lineCount);
-  const initialLineEnd = clampLine(source.initialLineEnd, lineCount);
+  const firstLineNumber = source.firstLineNumber ?? 1;
+  const lastLineNumber = firstLineNumber + source.lines.length - 1;
+  const initialLineStart = clampLine(
+    source.initialLineStart,
+    firstLineNumber,
+    lastLineNumber
+  );
+  const initialLineEnd = clampLine(
+    source.initialLineEnd,
+    firstLineNumber,
+    lastLineNumber
+  );
   const [lineStart, setLineStart] = useState(initialLineStart);
   const [lineEnd, setLineEnd] = useState(initialLineEnd);
   const [computedSnippet, setComputedSnippet] = useState<
@@ -299,14 +313,17 @@ export function SoliditySourceReview({
   >();
   const selectionValid = lineStart <= lineEnd;
   const selectedSource = selectionValid
-    ? source.lines.slice(lineStart - 1, lineEnd).join("\n")
+    ? source.lines
+        .slice(
+          lineStart - firstLineNumber,
+          lineEnd - firstLineNumber + 1
+        )
+        .join("\n")
     : "";
-  const generatedRangeSelected =
-    lineStart === initialLineStart && lineEnd === initialLineEnd;
   const selectionKey = `${lineStart}:${lineEnd}:${selectedSource}`;
 
   useEffect(() => {
-    if (!selectionValid || generatedRangeSelected) {
+    if (!selectionValid) {
       return;
     }
     let cancelled = false;
@@ -318,18 +335,16 @@ export function SoliditySourceReview({
     return () => {
       cancelled = true;
     };
-  }, [generatedRangeSelected, selectedSource, selectionKey, selectionValid]);
+  }, [selectedSource, selectionKey, selectionValid]);
 
   const selection = useMemo<PublicReviewCodeSelection | undefined>(() => {
     if (!selectionValid) {
       return undefined;
     }
-    let snippetSha256: string | undefined;
-    if (generatedRangeSelected) {
-      snippetSha256 = source.generatedSnippetSha256;
-    } else if (computedSnippet?.selectionKey === selectionKey) {
-      snippetSha256 = computedSnippet.checksum;
-    }
+    const snippetSha256 =
+      computedSnippet?.selectionKey === selectionKey
+        ? computedSnippet.checksum
+        : undefined;
     return {
       kind: "code",
       path: source.path,
@@ -342,14 +357,12 @@ export function SoliditySourceReview({
     };
   }, [
     computedSnippet,
-    generatedRangeSelected,
     lineEnd,
     lineStart,
     selectionValid,
     selectionKey,
     source.contract,
     source.declaration,
-    source.generatedSnippetSha256,
     source.path,
     source.sourceSha256,
   ]);
@@ -362,7 +375,8 @@ export function SoliditySourceReview({
   return (
     <PublicReviewCodeSelectionContext.Provider value={{ selection }}>
       <SourceSelectionControls
-        lineCount={lineCount}
+        maximumLine={lastLineNumber}
+        minimumLine={firstLineNumber}
         lineEnd={lineEnd}
         lineStart={lineStart}
         onLineEndChange={setLineEnd}
@@ -372,6 +386,7 @@ export function SoliditySourceReview({
         showCommentAction={feedbackSlot !== undefined}
       />
       <SourceLines
+        firstLineNumber={firstLineNumber}
         lineEnd={lineEnd}
         lines={source.lines}
         lineStart={lineStart}

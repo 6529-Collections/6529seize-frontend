@@ -95,6 +95,86 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.releaseNotTracked": "No release artifact",
   "publicReview.reference.releaseEvidenceDescription":
     "Checksums and counts below come from retained release artifacts. They describe this source snapshot; they are not an audit result.",
+  "publicReview.reference.auditorEvidence": "Auditor evidence",
+  "publicReview.reference.auditorEvidenceDescription":
+    "These records are generated from the retained release manifest, readiness evidence, risk register, governed-parameter inventory, and NatSpec baseline at this exact source commit. They expose known gaps; they do not imply approval.",
+  "publicReview.reference.releaseStatus": "Release status",
+  "publicReview.reference.publicBeta": "Public beta",
+  "publicReview.reference.productionRelease": "Production release",
+  "publicReview.reference.unfinishedRequirements": "Unfinished requirements",
+  "publicReview.reference.openRiskBlockers": "Open risk blockers",
+  "publicReview.reference.retainedArtifacts": "Bound artifacts",
+  "publicReview.reference.releaseReadiness": "Release-readiness evidence",
+  "publicReview.reference.releaseReadinessDescription":
+    "Every retained requirement for public beta and production is shown, including incomplete rows, owners, notes, and exact evidence files.",
+  "publicReview.reference.searchRequirements": "Search requirements",
+  "publicReview.reference.searchRequirementsPlaceholder":
+    "Requirement, owner, or notes",
+  "publicReview.reference.releasePhase": "Release phase",
+  "publicReview.reference.requirementStatus": "Requirement status",
+  "publicReview.reference.requirementResults": "{total} requirements",
+  "publicReview.reference.noEvidenceRetained":
+    "No retained evidence is attached to this requirement.",
+  "publicReview.reference.riskRegister": "Risk register",
+  "publicReview.reference.riskRegisterDescription":
+    "Search the contract's retained risk register. Open blockers, planned mitigations, and locally mitigated risks remain distinct.",
+  "publicReview.reference.searchRisks": "Search risks",
+  "publicReview.reference.searchRisksPlaceholder":
+    "Risk ID, title, owner, mitigation, or residual risk",
+  "publicReview.reference.riskArea": "Risk area",
+  "publicReview.reference.riskStatus": "Risk status",
+  "publicReview.reference.riskResults": "{visible} of {total} risks",
+  "publicReview.reference.mitigation": "Mitigation",
+  "publicReview.reference.residualRisk": "Residual risk",
+  "publicReview.reference.owner": "Owner",
+  "publicReview.reference.targetGate": "Target gate",
+  "publicReview.reference.trackingLink": "Tracking link {number}",
+  "publicReview.reference.showMoreRisks": "Show more risks",
+  "publicReview.reference.governedParameters": "Governed parameters",
+  "publicReview.reference.governedParametersDescription":
+    "This is the generated inventory of gas and time parameters governed after deployment, with their permanent identifiers, normative sources, expected hosts, and guarded consumers.",
+  "publicReview.reference.searchParameters": "Search governed parameters",
+  "publicReview.reference.searchParametersPlaceholder":
+    "Name, identifier, preimage, source, or consumer",
+  "publicReview.reference.parameterFamily": "Parameter family",
+  "publicReview.reference.parameterResults": "{total} governed parameters",
+  "publicReview.reference.parameterId": "Permanent parameter ID",
+  "publicReview.reference.parameterPreimage": "Identifier preimage",
+  "publicReview.reference.normativeSource": "Normative source",
+  "publicReview.reference.expectedHosts": "Expected host bindings",
+  "publicReview.reference.consumers": "Guarded consumers",
+  "publicReview.reference.candidateBinding": "Candidate binding",
+  "publicReview.reference.candidateBindingIssue":
+    "Open the issue blocking candidate binding",
+  "publicReview.reference.mutationModel": "Mutation model",
+  "publicReview.reference.minimumDelay": "Minimum delay",
+  "publicReview.reference.maximumRaise": "Maximum raise multiplier",
+  "publicReview.reference.seconds": "{count} seconds",
+  "publicReview.reference.forbiddenSurfaces": "Forbidden surfaces:",
+  "publicReview.reference.genesisGasValue": "Genesis gas value",
+  "publicReview.reference.immutableGasFloor": "Immutable gas floor",
+  "publicReview.reference.failureClass": "Failure class",
+  "publicReview.reference.genesisBlocks": "Genesis blocks",
+  "publicReview.reference.immutableBlockFloor": "Immutable block floor",
+  "publicReview.reference.wallClockFloor": "Wall-clock floor (seconds)",
+  "publicReview.reference.measurementEvidence": "Measurement evidence",
+  "publicReview.reference.fixedStipendCompatibility":
+    "Fixed-stipend compatibility",
+  "publicReview.reference.natSpecGaps": "Known documentation gaps",
+  "publicReview.reference.natSpecGapsDescription":
+    "This is the complete normalized NatSpec baseline for the release surface. Functions, public-variable getters, events, custom errors, and declarations not found in the local source are counted separately and retain their reason and follow-up.",
+  "publicReview.reference.searchDocumentationGaps":
+    "Search documentation gaps",
+  "publicReview.reference.searchDocumentationGapsPlaceholder":
+    "Contract, signature, source, reason, or follow-up",
+  "publicReview.reference.documentationGapType": "Documentation gap type",
+  "publicReview.reference.documentationGapStatus": "Documentation gap status",
+  "publicReview.reference.documentationGapResults":
+    "{visible} of {total} documentation gaps",
+  "publicReview.reference.followUp": "Follow-up:",
+  "publicReview.reference.noDocumentationGaps":
+    "No documentation gaps match the selected filters.",
+  "publicReview.reference.showMoreGaps": "Show more documentation gaps",
   "publicReview.reference.artifactChecksums": "Retained artifact checksums",
   "publicReview.reference.classifications": "Source classifications",
   "publicReview.reference.searchDefinitions": "Search definitions",
@@ -141,6 +221,17 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "The exact C3 linearized definition order recorded by the compiler, beginning with this definition.",
   "publicReview.reference.noInheritance": "No inherited definitions recorded.",
   "publicReview.reference.declarations": "Local declarations",
+  "publicReview.reference.globalDeclarations": "All callable declarations",
+  "publicReview.reference.globalDeclarationsDescription":
+    "Search every function, event, and custom error in the pinned source, including synthetic getters and file-scope declarations.",
+  "publicReview.reference.searchAllDeclarations":
+    "Search functions, events, and errors",
+  "publicReview.reference.searchAllDeclarationsPlaceholder":
+    "Signature, selector, topic, contract, or source path",
+  "publicReview.reference.declarationLocation": "Declaration location",
+  "publicReview.reference.definitionScope": "Inside a contract or library",
+  "publicReview.reference.fileScope": "File scope",
+  "publicReview.reference.showMoreDeclarations": "Show more declarations",
   "publicReview.reference.abiSurface": "Compiled ABI surface",
   "publicReview.reference.abiSurfaceDescription":
     "Includes inherited ABI entries and links each entry to its declaring definition.",
@@ -177,6 +268,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.topic": "Topic 0",
   "publicReview.reference.mutability": "Mutability",
   "publicReview.reference.functionKind": "Function kind",
+  "publicReview.reference.syntheticGetter": "Synthetic state-variable getter",
+  "publicReview.reference.virtual": "Virtual",
+  "publicReview.reference.anonymousEvent": "Anonymous event",
+  "publicReview.reference.none": "None",
   "publicReview.reference.anonymous": "Anonymous",
   "publicReview.reference.visibility": "Visibility",
   "publicReview.reference.parameters": "Inputs",
@@ -200,6 +295,11 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.sourceDescription":
     "Exact source bytes retained for this review version, with line-level feedback context.",
   "publicReview.reference.sourceChecksum": "Source checksum",
+  "publicReview.reference.snippetChecksum":
+    "Exact declaration snippet checksum",
+  "publicReview.reference.byteRange": "Compiler byte range",
+  "publicReview.reference.byteRangeValue":
+    "Start {start}, length {length} bytes",
   "publicReview.reference.sourceScope": "Source scope",
   "publicReview.reference.sourceDefinitions": "Definitions in this file",
   "publicReview.reference.selectLines": "Select code lines",

@@ -20,10 +20,25 @@ import type {
   SolidityReferenceManifest,
   SolidityRoutedDeclaration,
   SoliditySourceDocument,
+  SolidityTopLevelDeclaration,
 } from "@/lib/public-review/solidityReferenceTypes";
 
 const CARD_CLASSES =
   "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5";
+const DECLARATION_SOURCE_CONTEXT_LINES = 8;
+type SolidityDisplayDeclaration =
+  | SolidityRoutedDeclaration
+  | Extract<
+      SolidityTopLevelDeclaration,
+      { kind: "function" | "event" | "error" }
+    >;
+
+function getBooleanLabel(value: boolean): string {
+  return t(
+    DEFAULT_LOCALE,
+    value ? "publicReview.reference.yes" : "publicReview.reference.no"
+  );
+}
 
 function KeyValue({
   children,
@@ -48,9 +63,7 @@ function getIndexedLabel(indexed: boolean | undefined): string {
   if (indexed === undefined) {
     return "—";
   }
-  return indexed
-    ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
-    : t(DEFAULT_LOCALE, "publicReview.reference.no");
+  return getBooleanLabel(indexed);
 }
 
 function ParameterTable({
@@ -155,14 +168,58 @@ function ParameterTable({
   );
 }
 
+function DeclarationSemanticProperties({
+  declaration,
+}: {
+  readonly declaration: SolidityDisplayDeclaration;
+}) {
+  return (
+    <>
+      {"functionKind" in declaration ? (
+        <KeyValue
+          label={t(DEFAULT_LOCALE, "publicReview.reference.functionKind")}
+        >
+          {declaration.functionKind}
+        </KeyValue>
+      ) : null}
+      {"modifiers" in declaration ? (
+        <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.modifiers")}>
+          {declaration.modifiers.length > 0
+            ? declaration.modifiers.join(", ")
+            : t(DEFAULT_LOCALE, "publicReview.reference.none")}
+        </KeyValue>
+      ) : null}
+      {"virtual" in declaration ? (
+        <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.virtual")}>
+          {getBooleanLabel(declaration.virtual)}
+        </KeyValue>
+      ) : null}
+      {"syntheticGetter" in declaration ? (
+        <KeyValue
+          label={t(DEFAULT_LOCALE, "publicReview.reference.syntheticGetter")}
+        >
+          {getBooleanLabel(declaration.syntheticGetter)}
+        </KeyValue>
+      ) : null}
+      {"anonymous" in declaration ? (
+        <KeyValue
+          label={t(DEFAULT_LOCALE, "publicReview.reference.anonymousEvent")}
+        >
+          {getBooleanLabel(declaration.anonymous)}
+        </KeyValue>
+      ) : null}
+    </>
+  );
+}
+
 export function SolidityDeclarationView({
   declaration,
   definition,
   feedbackSlot,
   source,
 }: {
-  readonly declaration: SolidityRoutedDeclaration;
-  readonly definition: SolidityDefinitionIndexEntry;
+  readonly declaration: SolidityDisplayDeclaration;
+  readonly definition?: SolidityDefinitionIndexEntry | undefined;
   readonly feedbackSlot?: ReactNode | undefined;
   readonly source: SoliditySourceDocument;
 }) {
@@ -171,6 +228,14 @@ export function SolidityDeclarationView({
   const outputs = "outputs" in declaration ? declaration.outputs : [];
   const signature =
     declaration.canonicalSignature ?? declaration.displaySignature;
+  const excerptLineStart = Math.max(
+    1,
+    declaration.range.lineStart - DECLARATION_SOURCE_CONTEXT_LINES
+  );
+  const excerptLineEnd = Math.min(
+    source.file.lineCount,
+    declaration.range.lineEnd + DECLARATION_SOURCE_CONTEXT_LINES
+  );
 
   return (
     <div className="tw-space-y-8">
@@ -205,9 +270,31 @@ export function SolidityDeclarationView({
               {declaration.visibility}
             </KeyValue>
           ) : null}
+          <DeclarationSemanticProperties declaration={declaration} />
           <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.natspec")}>
             {declaration.natspec ||
               t(DEFAULT_LOCALE, "publicReview.reference.noNatspec")}
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceChecksum")}
+          >
+            <code>{declaration.range.sourceSha256}</code>
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.snippetChecksum")}
+          >
+            <code>{declaration.range.snippetSha256}</code>
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.byteRange")}
+          >
+            {t(DEFAULT_LOCALE, "publicReview.reference.byteRangeValue", {
+              length: formatInteger(
+                DEFAULT_LOCALE,
+                declaration.range.byteLength
+              ),
+              start: formatInteger(DEFAULT_LOCALE, declaration.range.byteStart),
+            })}
           </KeyValue>
         </dl>
         <SoliditySemanticIdentity
@@ -228,13 +315,13 @@ export function SolidityDeclarationView({
       <SoliditySourceReview
         feedbackSlot={feedbackSlot}
         source={{
-          contract: definition.name,
+          ...(definition ? { contract: definition.name } : {}),
           declaration: signature,
-          generatedSnippetSha256: declaration.range.snippetSha256,
+          firstLineNumber: excerptLineStart,
           githubUrl: declaration.range.githubUrl,
           initialLineEnd: declaration.range.lineEnd,
           initialLineStart: declaration.range.lineStart,
-          lines: source.lines,
+          lines: source.lines.slice(excerptLineStart - 1, excerptLineEnd),
           path: source.file.path,
           sourceSha256: source.file.sha256,
         }}

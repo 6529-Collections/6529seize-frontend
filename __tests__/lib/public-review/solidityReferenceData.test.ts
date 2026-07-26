@@ -34,10 +34,10 @@ const FIXTURE_INDEX = path.join(
 const describeFixture = existsSync(FIXTURE_INDEX) ? describe : describe.skip;
 
 const IDENTITY: SolidityReferenceReviewIdentity = {
+  activeSourceCommit: STREAM_REVIEW_DEFINITION.source.commit,
   activeVersion: STREAM_REVIEW_VERSION,
   availableVersions: [STREAM_REVIEW_VERSION],
   reviewId: STREAM_REVIEW_SLUG,
-  sourceCommit: STREAM_REVIEW_DEFINITION.source.commit,
   sourceRepository: STREAM_REVIEW_DEFINITION.source.repository,
 };
 
@@ -156,6 +156,9 @@ describeFixture("generated Stream Solidity reference fixture", () => {
         ({ definitionKey }) => `interface:${definitionKey}`
       ),
       ...inventory.sources.map(({ source }) => `source:${source.join("/")}`),
+      ...inventory.topLevelDeclarations.map(
+        ({ declarationKey }) => `top-level:${declarationKey}`
+      ),
     ];
 
     expect(new Set(allIdentities).size).toBe(allIdentities.length);
@@ -202,7 +205,7 @@ describeFixture("generated Stream Solidity reference fixture", () => {
     const wrongIdentityReader = createSolidityReferenceReader({
       identity: {
         ...IDENTITY,
-        sourceCommit: "0".repeat(40),
+        activeSourceCommit: "0".repeat(40),
       },
       publicRoot: FIXTURE_ROOT,
     });

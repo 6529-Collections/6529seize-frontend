@@ -29,6 +29,7 @@ import {
 import type {
   SolidityDeclarationKind,
   SolidityReferenceReviewIdentity,
+  SolidityTopLevelDeclaration,
 } from "@/lib/public-review/solidityReferenceTypes";
 import {
   STREAM_REVIEW_DEFINITION,
@@ -41,14 +42,23 @@ export interface StreamSolidityReferenceRouteParams {
 }
 
 const STREAM_SOLIDITY_REFERENCE_IDENTITY: SolidityReferenceReviewIdentity = {
+  activeSourceCommit: STREAM_REVIEW_DEFINITION.source.commit,
   activeVersion: STREAM_REVIEW_DEFINITION.activeVersion,
   availableVersions: STREAM_REVIEW_DEFINITION.availableVersions,
   reviewId: STREAM_REVIEW_SLUG,
-  sourceCommit: STREAM_REVIEW_DEFINITION.source.commit,
   sourceRepository: STREAM_REVIEW_DEFINITION.source.repository,
 };
 
 let defaultReader: SolidityReferenceReader | undefined;
+
+function isTopLevelCallable(
+  declaration: SolidityTopLevelDeclaration
+): declaration is Extract<
+  SolidityTopLevelDeclaration,
+  { kind: "function" | "event" | "error" }
+> {
+  return ["function", "event", "error"].includes(declaration.kind);
+}
 
 export function getStreamSolidityReferenceReader({
   publicRoot,
@@ -292,6 +302,58 @@ export async function renderStreamSolidityDeclaration({
       <SolidityDeclarationView
         declaration={declaration}
         definition={indexEntry}
+        feedbackSlot={feedbackSlot}
+        source={document}
+      />
+    </ReferenceShell>
+  );
+}
+
+export async function renderStreamSolidityTopLevelDeclaration({
+  declarationKey,
+  feedbackSlot,
+  reader = getStreamSolidityReferenceReader(),
+  routeVersion,
+  version,
+}: {
+  readonly declarationKey: string;
+  readonly feedbackSlot?: ReactNode | undefined;
+  readonly reader?: SolidityReferenceReader | undefined;
+  readonly routeVersion?: string | undefined;
+  readonly version: string;
+}) {
+  const { manifest } = await reader.loadManifest(version);
+  const indexEntry = manifest.declarationIndex.find(
+    (declaration) =>
+      declaration.key === declarationKey && declaration.topLevel
+  );
+  if (!indexEntry) {
+    throw new SolidityReferenceNotFoundError(
+      "Unknown file-scope Solidity declaration."
+    );
+  }
+  const { document } = await reader.loadSource(
+    version,
+    indexEntry.sourcePath.split("/")
+  );
+  const declaration = document.file.topLevelDeclarations.find(
+    (candidate) => candidate.id === indexEntry.id
+  );
+  if (!declaration || !isTopLevelCallable(declaration)) {
+    throw new Error("File-scope Solidity declaration projection drift.");
+  }
+  return (
+    <ReferenceShell
+      description={t(
+        DEFAULT_LOCALE,
+        "publicReview.reference.definitionDescription"
+      )}
+      routeVersion={routeVersion}
+      title={indexEntry.canonicalSignature ?? indexEntry.displaySignature}
+      version={version}
+    >
+      <SolidityDeclarationView
+        declaration={declaration}
         feedbackSlot={feedbackSlot}
         source={document}
       />

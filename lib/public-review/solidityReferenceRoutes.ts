@@ -1,7 +1,7 @@
 import type {
+  SolidityDeclarationIndexEntry,
   SolidityDeclarationKind,
   SolidityDefinitionIndexEntry,
-  SolidityReferenceReviewIdentity,
   SoliditySourceFileReference,
 } from "@/lib/public-review/solidityReferenceTypes";
 
@@ -68,6 +68,48 @@ export function getSoliditySourceHref({
   return `${getSolidityReferenceRootHref(context)}/sources/${encodedPath}`;
 }
 
+export function getSolidityTopLevelDeclarationHref({
+  declarationKey,
+  ...context
+}: SolidityReferenceHrefContext & {
+  readonly declarationKey: string;
+}): string {
+  return `${getSolidityReferenceRootHref(
+    context
+  )}/declarations/${declarationKey}`;
+}
+
+export function getSolidityDeclarationIndexHref({
+  declaration,
+  ...context
+}: SolidityReferenceHrefContext & {
+  readonly declaration: SolidityDeclarationIndexEntry;
+}): string {
+  if (declaration.topLevel) {
+    return getSolidityTopLevelDeclarationHref({
+      ...context,
+      declarationKey: declaration.key,
+    });
+  }
+  if (!declaration.definitionKey) {
+    throw new Error("Definition-scoped declaration is missing its owner.");
+  }
+  const kinds: Record<
+    SolidityDeclarationIndexEntry["kind"],
+    SolidityDeclarationKind
+  > = {
+    error: "errors",
+    event: "events",
+    function: "functions",
+  };
+  return getSolidityDeclarationHref({
+    ...context,
+    declarationKey: declaration.key,
+    definitionKey: declaration.definitionKey,
+    kind: kinds[declaration.kind],
+  });
+}
+
 export interface SolidityReferenceRouteInventory {
   readonly definitions: readonly {
     readonly definitionKey: string;
@@ -89,6 +131,9 @@ export interface SolidityReferenceRouteInventory {
   }[];
   readonly sources: readonly {
     readonly source: readonly string[];
+  }[];
+  readonly topLevelDeclarations: readonly {
+    readonly declarationKey: string;
   }[];
 }
 
@@ -115,31 +160,6 @@ export function resolveSoliditySourcePath(
   return isSafeSoliditySourceSegments(segments)
     ? segments.join("/")
     : undefined;
-}
-
-export function assertSolidityReferenceIdentity({
-  identity,
-  reviewId,
-  sourceCommit,
-  sourceRepository,
-  version,
-}: {
-  readonly identity: SolidityReferenceReviewIdentity;
-  readonly reviewId: string;
-  readonly sourceCommit: string;
-  readonly sourceRepository: string;
-  readonly version: string;
-}): void {
-  if (
-    identity.reviewId !== reviewId ||
-    !identity.availableVersions.includes(version) ||
-    identity.sourceCommit !== sourceCommit ||
-    identity.sourceRepository !== sourceRepository
-  ) {
-    throw new Error(
-      "The Solidity reference does not match the review identity."
-    );
-  }
 }
 
 export function getIndexedDefinitionByKey(

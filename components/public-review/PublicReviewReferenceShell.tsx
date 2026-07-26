@@ -24,7 +24,7 @@ export function PublicReviewReferenceShell({
   readonly title: string;
 }) {
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
+    <div className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
       <PublicReviewStatusBanner
         review={review}
         displayedVersion={displayedVersion}
@@ -66,6 +66,6 @@ export function PublicReviewReferenceShell({
 
         <div className="tw-mt-8">{children}</div>
       </div>
-    </main>
+    </div>
   );
 }
