@@ -11,13 +11,13 @@ export type SubscriptionCoverageTone =
   | "caution"
   | "danger";
 
-export type SubscriptionCoverageAction =
+type SubscriptionCoverageAction =
   | "manage"
   | "set_up"
   | "choose_drops"
   | "top_up";
 
-export interface SubscriptionCoveragePresentation {
+interface SubscriptionCoveragePresentation {
   readonly action: SubscriptionCoverageAction;
   readonly label: string;
   readonly tone: SubscriptionCoverageTone;
