@@ -10,7 +10,9 @@ import {
   type SolidityDefinitionListItem,
 } from "@/components/public-review/SolidityDefinitionExplorer";
 import { SolidityOtherDeclarationGroup } from "@/components/public-review/SolidityOtherDeclarationGroup";
-import { formatInteger } from "@/i18n/format";
+import { SoliditySemanticIdentity } from "@/components/public-review/SoliditySemanticIdentity";
+import { SolidityWarnings } from "@/components/public-review/SolidityWarnings";
+import { formatDate, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -26,7 +28,6 @@ import type {
   SolidityDefinitionIndexEntry,
   SolidityDefinitionShard,
   SolidityReferenceManifest,
-  SolidityWarningSummary,
 } from "@/lib/public-review/solidityReferenceTypes";
 
 const CARD_CLASSES =
@@ -74,47 +75,6 @@ function KeyValue({
   );
 }
 
-function WarningSummary({
-  summary,
-}: {
-  readonly summary: SolidityWarningSummary;
-}) {
-  return (
-    <section
-      aria-labelledby="solidity-warning-summary"
-      className={CARD_CLASSES}
-    >
-      <h2
-        id="solidity-warning-summary"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
-      >
-        {t(DEFAULT_LOCALE, "publicReview.reference.warningSummary")}
-      </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(DEFAULT_LOCALE, "publicReview.reference.warningDescription")}
-      </p>
-      {summary.totalCount === 0 ? (
-        <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-emerald-200">
-          {t(DEFAULT_LOCALE, "publicReview.reference.noWarnings")}
-        </p>
-      ) : (
-        <dl className="tw-mb-0 tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2">
-          {Object.entries(summary.byCode).map(([code, count]) => (
-            <div key={code} className="tw-rounded-lg tw-bg-iron-900 tw-p-3">
-              <dt className="tw-break-all tw-font-mono tw-text-xs tw-text-amber-200">
-                {code}
-              </dt>
-              <dd className="tw-m-0 tw-mt-1 tw-font-mono tw-text-sm tw-text-white">
-                {formatInteger(DEFAULT_LOCALE, count)}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </section>
-  );
-}
-
 function ReleaseEvidence({
   definition,
 }: {
@@ -150,6 +110,58 @@ function ReleaseEvidence({
         >
           {definition.membership.deployment.status}
         </KeyValue>
+        {release.summary ? (
+          <>
+            <KeyValue
+              label={t(DEFAULT_LOCALE, "publicReview.reference.functions")}
+            >
+              {formatInteger(
+                DEFAULT_LOCALE,
+                release.summary.function_count
+              )}
+            </KeyValue>
+            <KeyValue
+              label={t(DEFAULT_LOCALE, "publicReview.reference.events")}
+            >
+              {formatInteger(DEFAULT_LOCALE, release.summary.event_count)}
+            </KeyValue>
+            <KeyValue
+              label={t(DEFAULT_LOCALE, "publicReview.reference.errors")}
+            >
+              {formatInteger(
+                DEFAULT_LOCALE,
+                release.summary.custom_error_count
+              )}
+            </KeyValue>
+            <KeyValue
+              label={t(DEFAULT_LOCALE, "publicReview.reference.readFunctions")}
+            >
+              {formatInteger(
+                DEFAULT_LOCALE,
+                release.summary.read_function_count
+              )}
+            </KeyValue>
+            <KeyValue
+              label={t(DEFAULT_LOCALE, "publicReview.reference.writeFunctions")}
+            >
+              {formatInteger(
+                DEFAULT_LOCALE,
+                release.summary.write_function_count
+              )}
+            </KeyValue>
+            <KeyValue
+              label={t(
+                DEFAULT_LOCALE,
+                "publicReview.reference.payableFunctions"
+              )}
+            >
+              {formatInteger(
+                DEFAULT_LOCALE,
+                release.summary.payable_function_count
+              )}
+            </KeyValue>
+          </>
+        ) : null}
         {release.deployedBytecodeSizeBytes !== undefined ? (
           <KeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.bytecodeSize")}
@@ -276,10 +288,56 @@ export function SolidityReferenceOverview({
           <KeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.compiler")}
           >
-            <code>
-              {manifest.source.compiler.version} /{" "}
-              {manifest.source.compiler.evmVersion}
-            </code>
+            <code>{manifest.source.compiler.version}</code>
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.evmVersion")}
+          >
+            <code>{manifest.source.compiler.evmVersion}</code>
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.optimizer")}
+          >
+            {manifest.source.compiler.optimizer.enabled
+              ? t(DEFAULT_LOCALE, "publicReview.reference.optimizerEnabled", {
+                  runs: formatInteger(
+                    DEFAULT_LOCALE,
+                    manifest.source.compiler.optimizer.runs
+                  ),
+                })
+              : t(DEFAULT_LOCALE, "publicReview.reference.optimizerDisabled")}
+          </KeyValue>
+          {manifest.source.compiler.viaIR !== undefined ? (
+            <KeyValue
+              label={t(DEFAULT_LOCALE, "publicReview.reference.viaIr")}
+            >
+              {manifest.source.compiler.viaIR
+                ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
+                : t(DEFAULT_LOCALE, "publicReview.reference.no")}
+            </KeyValue>
+          ) : null}
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.commitTimestamp")}
+          >
+            <time
+              dateTime={manifest.source.commitTimestamp}
+              title={manifest.source.commitTimestamp}
+            >
+              {formatDate(
+                DEFAULT_LOCALE,
+                manifest.source.commitTimestamp,
+                {
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  month: "short",
+                  second: "2-digit",
+                  timeZone: "UTC",
+                  timeZoneName: "short",
+                  year: "numeric",
+                }
+              )}
+            </time>
           </KeyValue>
           <KeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.generator")}
@@ -530,6 +588,19 @@ export function SolidityDefinitionView({
         </h2>
         <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-5 md:tw-grid-cols-2">
           <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.definitionKind")}
+          >
+            {indexEntry.kind}
+            {indexEntry.abstract
+              ? ` (${t(DEFAULT_LOCALE, "publicReview.reference.abstract")})`
+              : ""}
+          </KeyValue>
+          <KeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceScope")}
+          >
+            {indexEntry.scope}
+          </KeyValue>
+          <KeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.classification")}
           >
             <HumanizedValue value={indexEntry.classification} />
@@ -570,11 +641,18 @@ export function SolidityDefinitionView({
               t(DEFAULT_LOCALE, "publicReview.reference.noNatspec")}
           </KeyValue>
         </dl>
+        <SoliditySemanticIdentity
+          routeKey={indexEntry.key}
+          semanticId={indexEntry.id}
+        />
       </section>
 
       <div className="tw-grid tw-gap-8 xl:tw-grid-cols-2">
         <ReleaseEvidence definition={indexEntry} />
-        <WarningSummary summary={shard.warningSummary} />
+        <SolidityWarnings
+          summary={shard.warningSummary}
+          warnings={shard.warnings}
+        />
       </div>
 
       <section

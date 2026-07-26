@@ -85,7 +85,7 @@ function FilterSelect({
         </option>
         {options.map((option) => (
           <option key={option} value={option}>
-            {option}
+            {option.replaceAll("_", " ")}
           </option>
         ))}
       </select>
@@ -198,25 +198,58 @@ export function SolidityDefinitionExplorer({
                       {item.sourcePath}
                     </p>
                   </div>
-                  <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300">
-                    {item.kind}
+                  <span className="tw-flex tw-flex-wrap tw-justify-end tw-gap-2">
+                    <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300">
+                      {item.kind}
+                    </span>
+                    <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300">
+                      {item.scope}
+                    </span>
                   </span>
                 </div>
-                <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-                  {item.classification}
-                </p>
+                <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                  <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+                    {item.classification.replaceAll("_", " ")}
+                  </p>
+                  <span
+                    className={`tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[0.7rem] tw-font-semibold ${
+                      item.tracked
+                        ? "tw-bg-emerald-400/10 tw-text-emerald-200"
+                        : "tw-bg-iron-900 tw-text-iron-400"
+                    }`}
+                  >
+                    {t(
+                      DEFAULT_LOCALE,
+                      item.tracked
+                        ? "publicReview.reference.releaseTracked"
+                        : "publicReview.reference.releaseNotTracked"
+                    )}
+                  </span>
+                </div>
                 <dl className="tw-mb-0 tw-mt-4 tw-grid tw-grid-cols-4 tw-gap-2 tw-text-xs">
                   {[
-                    ["F", item.functionCount],
-                    ["E", item.eventCount],
-                    ["R", item.errorCount],
-                    ["W", item.warningCount],
+                    [
+                      t(DEFAULT_LOCALE, "publicReview.reference.functions"),
+                      item.functionCount,
+                    ],
+                    [
+                      t(DEFAULT_LOCALE, "publicReview.reference.events"),
+                      item.eventCount,
+                    ],
+                    [
+                      t(DEFAULT_LOCALE, "publicReview.reference.errors"),
+                      item.errorCount,
+                    ],
+                    [
+                      t(DEFAULT_LOCALE, "publicReview.reference.warnings"),
+                      item.warningCount,
+                    ],
                   ].map(([label, count]) => (
                     <div
                       key={String(label)}
                       className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-text-center"
                     >
-                      <dt className="tw-font-semibold tw-text-iron-500">
+                      <dt className="tw-break-words tw-text-[0.65rem] tw-font-semibold tw-leading-4 tw-text-iron-500">
                         {label}
                       </dt>
                       <dd className="tw-m-0 tw-mt-1 tw-font-mono tw-text-iron-200">

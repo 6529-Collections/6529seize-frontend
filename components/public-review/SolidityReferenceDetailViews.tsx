@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { SolidityFileScopeDeclarations } from "@/components/public-review/SolidityFileScopeDeclarations";
+import { SoliditySemanticIdentity } from "@/components/public-review/SoliditySemanticIdentity";
 import { SoliditySourceReview } from "@/components/public-review/SoliditySourceReview";
 import { SolidityDefinitionView } from "@/components/public-review/SolidityReferenceViews";
 import { formatInteger } from "@/i18n/format";
@@ -209,6 +210,10 @@ export function SolidityDeclarationView({
               t(DEFAULT_LOCALE, "publicReview.reference.noNatspec")}
           </KeyValue>
         </dl>
+        <SoliditySemanticIdentity
+          routeKey={declaration.key}
+          semanticId={declaration.id}
+        />
       </section>
       <div className="tw-grid tw-gap-8 xl:tw-grid-cols-2">
         <ParameterTable

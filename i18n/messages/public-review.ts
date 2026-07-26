@@ -75,6 +75,12 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.sourceCommit": "Pinned source commit",
   "publicReview.reference.sourceTree": "Pinned source tree",
   "publicReview.reference.compiler": "Compiler",
+  "publicReview.reference.evmVersion": "EVM version",
+  "publicReview.reference.optimizer": "Optimizer",
+  "publicReview.reference.optimizerEnabled": "Enabled, {runs} runs",
+  "publicReview.reference.optimizerDisabled": "Disabled",
+  "publicReview.reference.viaIr": "Via IR",
+  "publicReview.reference.commitTimestamp": "Source commit timestamp",
   "publicReview.reference.generator": "Generator",
   "publicReview.reference.outputChecksum": "Bundle checksum",
   "publicReview.reference.definitions": "Definitions",
@@ -85,6 +91,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.lineCount": "Line count",
   "publicReview.reference.warnings": "Generator warnings",
   "publicReview.reference.releaseEvidence": "Release evidence",
+  "publicReview.reference.releaseTracked": "Release evidence tracked",
+  "publicReview.reference.releaseNotTracked": "No release artifact",
   "publicReview.reference.releaseEvidenceDescription":
     "Checksums and counts below come from retained release artifacts. They describe this source snapshot; they are not an audit result.",
   "publicReview.reference.artifactChecksums": "Retained artifact checksums",
@@ -103,6 +111,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "{visible} of {total} declarations",
   "publicReview.reference.openDefinition": "Open {name}",
   "publicReview.reference.definitionTitle": "{kind} {name}",
+  "publicReview.reference.definitionKind": "Definition kind",
+  "publicReview.reference.abstract": "abstract",
   "publicReview.reference.definitionDescription":
     "Generated declaration inventory, ABI surface, source ranges, and release evidence for this definition.",
   "publicReview.reference.classification": "Classification",
@@ -136,6 +146,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.noDeclarations":
     "No declarations match the selected filters.",
   "publicReview.reference.functions": "Functions",
+  "publicReview.reference.readFunctions": "Read functions",
+  "publicReview.reference.writeFunctions": "Write functions",
+  "publicReview.reference.payableFunctions": "Payable functions",
   "publicReview.reference.events": "Events",
   "publicReview.reference.errors": "Errors",
   "publicReview.reference.otherDeclarations": "Other local declarations",
@@ -202,6 +215,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.selectionReady":
     "This source reference is ready to attach to structured feedback.",
   "publicReview.reference.warningSummary": "Warning summary",
+  "publicReview.reference.warningCategories": "Categories",
+  "publicReview.reference.warningCodes": "Codes",
+  "publicReview.reference.warningRecords": "Individual warning records",
   "publicReview.reference.warningDescription":
     "Warnings identify documentation or evidence gaps. They do not mean the generator omitted the declaration.",
   "publicReview.reference.noWarnings":

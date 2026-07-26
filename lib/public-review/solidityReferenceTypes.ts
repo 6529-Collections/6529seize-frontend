@@ -124,6 +124,7 @@ export interface SolidityReferenceManifest {
         readonly enabled: boolean;
         readonly runs: number;
       };
+      readonly viaIR?: boolean | undefined;
       readonly version: string;
     };
     readonly repository: string;

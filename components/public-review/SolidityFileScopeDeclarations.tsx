@@ -1,6 +1,7 @@
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { SoliditySemanticIdentity } from "@/components/public-review/SoliditySemanticIdentity";
 import type {
   SolidityParameter,
   SolidityTopLevelDeclaration,
@@ -345,21 +346,10 @@ function FileScopeDeclaration({
       </p>
       <DeclarationProperties declaration={declaration} />
       <DeclarationDetails declaration={declaration} />
-      <details className="tw-mt-4">
-        <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-          {t(DEFAULT_LOCALE, "publicReview.reference.semanticIdentity")}
-        </summary>
-        <dl className="tw-mb-0 tw-mt-2 tw-grid tw-gap-3">
-          <Property
-            label={t(DEFAULT_LOCALE, "publicReview.reference.semanticId")}
-            value={declaration.id}
-          />
-          <Property
-            label={t(DEFAULT_LOCALE, "publicReview.reference.routeKey")}
-            value={declaration.key}
-          />
-        </dl>
-      </details>
+      <SoliditySemanticIdentity
+        routeKey={declaration.key}
+        semanticId={declaration.id}
+      />
     </li>
   );
 }
