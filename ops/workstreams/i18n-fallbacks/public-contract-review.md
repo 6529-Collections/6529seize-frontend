@@ -4,7 +4,8 @@
   version feedback ledgers, audience reading paths, source range controls,
   `PublicReviewFeedbackComposer`, and `PublicReviewLedger`.
 - Untranslated surface: all public-review feedback fields, validation and
-  connection states, ledger filters, status messages, record labels, and
+  connection states, ledger filters, lifecycle/deployment/audit status messages,
+  record labels, and
   accessible names, keyboard skip actions, table-region labels, and dynamic
   source-integrity announcements.
 - Current fallback: the complete `en-US` messages under `publicReview.*` are

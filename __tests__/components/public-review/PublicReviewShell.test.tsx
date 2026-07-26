@@ -108,4 +108,77 @@ describe("PublicReviewShell", () => {
       "/reviews/6529-stream/versions/2026-07-25.1/feedback"
     );
   });
+
+  it("builds every reusable shell route from another review slug", () => {
+    const overview = STREAM_REVIEW_DEFINITION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Another review"
+        page={overview}
+        review={{
+          ...STREAM_REVIEW_DEFINITION,
+          id: "another-contract",
+          slug: "another-contract",
+          title: "Another Contract Review",
+        }}
+        sections={[]}
+        routeVersion="candidate-2"
+        displayedVersion="candidate-2"
+        feedbackSlot={<div>Feedback form</div>}
+        source={STREAM_REVIEW_DEFINITION.source}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "View public feedback" })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/another-contract/versions/candidate-2/feedback"
+    );
+    expect(
+      screen.getByRole("link", { name: "Start the Artists path" })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/another-contract/versions/candidate-2/artwork-lifecycle"
+    );
+    expect(
+      screen.getAllByRole("link", { name: /Artwork Lifecycle/ })[0]
+    ).toHaveAttribute(
+      "href",
+      "/reviews/another-contract/versions/candidate-2/artwork-lifecycle"
+    );
+  });
+
+  it("keeps the ledger visible but removes the submit shortcut after review closes", () => {
+    const overview = STREAM_REVIEW_DEFINITION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Closed review"
+        page={overview}
+        review={{
+          ...STREAM_REVIEW_DEFINITION,
+          status: "REVIEW_CLOSED",
+        }}
+        sections={[]}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback closed</div>}
+        source={STREAM_REVIEW_DEFINITION.source}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "View public feedback" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Jump to send feedback" })
+    ).not.toBeInTheDocument();
+  });
 });

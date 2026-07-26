@@ -2,6 +2,7 @@ import type {
   PublicReviewDefinition,
   PublicReviewPageDefinition,
 } from "@/lib/public-review/publicReviewTypes";
+import { createPublicReviewRouteBuilder } from "@/lib/public-review/publicReviewRoutes";
 
 export const STREAM_REVIEW_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
@@ -221,6 +222,9 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   pages: STREAM_REVIEW_PAGES,
 };
 
+const STREAM_REVIEW_ROUTES =
+  createPublicReviewRouteBuilder(STREAM_REVIEW_SLUG);
+
 export function getStreamReviewPage(
   slug: string
 ): PublicReviewPageDefinition | undefined {
@@ -234,18 +238,11 @@ export function getStreamReviewPageHref({
   readonly page: PublicReviewPageDefinition;
   readonly version?: string | undefined;
 }): string {
-  const root = version
-    ? `/reviews/${STREAM_REVIEW_SLUG}/versions/${version}`
-    : `/reviews/${STREAM_REVIEW_SLUG}`;
-
-  return page.id === "overview" ? root : `${root}/${page.slug}`;
+  return STREAM_REVIEW_ROUTES.getPageHref(page, version);
 }
 
 export function getStreamReviewFeedbackHref(
   version?: string
 ): string {
-  const root = version
-    ? `/reviews/${STREAM_REVIEW_SLUG}/versions/${version}`
-    : `/reviews/${STREAM_REVIEW_SLUG}`;
-  return `${root}/feedback`;
+  return STREAM_REVIEW_ROUTES.getFeedbackHref(version);
 }

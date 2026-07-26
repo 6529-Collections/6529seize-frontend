@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAuth } from "@/components/auth/Auth";
@@ -44,9 +44,7 @@ interface PublicReviewFeedbackComposerProps {
   readonly referenceIntegrityStatus?: PublicReviewReferenceIntegrityStatus | undefined;
   readonly submitter?: PublicReviewFeedbackSubmitter | undefined;
 }
-
 export type { PublicReviewReferenceIntegrityStatus } from "@/components/public-review/PublicReviewFeedbackComposerStatus";
-
 interface ContextBoundValue<Value> {
   readonly contextFingerprint: string;
   readonly value: Value;
@@ -196,11 +194,16 @@ function useFeedbackComposerState({
     useState<ContextBoundValue<string> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const draftRevisionRef = useRef(0);
   const contextFingerprint = getFeedbackContextFingerprint({
     page,
     referenceIntegrityStatus,
     referenceSelection,
   });
+  const latestContextFingerprintRef = useRef(contextFingerprint);
+  useLayoutEffect(() => {
+    latestContextFingerprintRef.current = contextFingerprint;
+  }, [contextFingerprint]);
   const setCurrentFormError = (message: string | null): void => {
     setFormError(
       message === null
@@ -226,6 +229,7 @@ function useFeedbackComposerState({
     field: keyof PublicReviewFeedbackDraft,
     value: string
   ): void => {
+    draftRevisionRef.current += 1;
     setDraft((current) => ({ ...current, [field]: value }));
     setPreview(null);
     setCurrentFormError(null);
@@ -299,6 +303,7 @@ function useFeedbackComposerState({
     setCurrentFormError(null);
     setSuccessPath(null);
     const submissionContextFingerprint = contextFingerprint;
+    const submittedDraftRevision = draftRevisionRef.current;
     let payload;
     try {
       payload = createPayload();
@@ -321,9 +326,15 @@ function useFeedbackComposerState({
           isApp: false,
         }),
       });
-      setDraft(createEmptyDraft(config));
+      const submittedStateIsCurrent =
+        latestContextFingerprintRef.current === submissionContextFingerprint &&
+        draftRevisionRef.current === submittedDraftRevision;
+      if (submittedStateIsCurrent) {
+        draftRevisionRef.current += 1;
+        setDraft(createEmptyDraft(config));
+        setCommentError(null);
+      }
       setPreview(null);
-      setCommentError(null);
       setSubmissionId(createSubmissionId());
       await queryClient.invalidateQueries({
         queryKey: getPublicReviewLedgerQueryKey({ config, destination }),

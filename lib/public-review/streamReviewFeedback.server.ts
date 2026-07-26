@@ -9,6 +9,10 @@ import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
+import {
+  acceptsPublicReviewExploitReports,
+  getPublicReviewLifecycleCapabilities,
+} from "@/lib/public-review/publicReviewLifecycle";
 import type { SolidityReferenceManifest } from "@/lib/public-review/solidityReferenceTypes";
 import {
   getStreamReviewPageHref,
@@ -248,12 +252,20 @@ export async function createStreamReviewFeedbackConfig({
   }
 
   const source = selectManifestFiles({ manifest, sourcePaths });
+  const lifecycleCapabilities = getPublicReviewLifecycleCapabilities(
+    STREAM_REVIEW_DEFINITION.status
+  );
   return {
     reviewId: manifest.reviewId,
     reviewVersion: manifest.reviewVersion,
     reviewTitle: STREAM_REVIEW_DEFINITION.title,
     feedbackSchemaVersion: PUBLIC_REVIEW_FEEDBACK_SCHEMA_VERSION,
-    submissionsOpen: true,
+    submissionsOpen:
+      STREAM_REVIEW_DEFINITION.feedbackAvailable &&
+      lifecycleCapabilities.feedbackSubmissionsOpen,
+    acceptsPublicExploitReports:
+      STREAM_REVIEW_DEFINITION.feedbackAvailable &&
+      acceptsPublicReviewExploitReports(STREAM_REVIEW_DEFINITION.status),
     categories: STREAM_REVIEW_FEEDBACK_CATEGORIES,
     severityOptions: STREAM_REVIEW_FEEDBACK_SEVERITIES,
     pages: [

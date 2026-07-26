@@ -77,6 +77,13 @@ describe("Stream review feedback manifest binding", () => {
         expect.objectContaining({ value: "reference-function" }),
       ])
     );
+    expect(config.submissionsOpen).toBe(true);
+    expect(config.acceptsPublicExploitReports).toBe(true);
+    expect(config.categories).toContainEqual(
+      expect.objectContaining({
+        value: "possible-exploitable-security-vulnerability",
+      })
+    );
   });
 
   it("rejects a file that is absent from the exact manifest", async () => {

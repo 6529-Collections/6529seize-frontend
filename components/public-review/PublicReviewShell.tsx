@@ -17,19 +17,22 @@ import type {
   PublicReviewSectionDefinition,
   PublicReviewSource,
 } from "@/lib/public-review/publicReviewTypes";
-import { getSolidityReferenceRootHref } from "@/lib/public-review/solidityReferenceRoutes";
+import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import {
-  getStreamReviewFeedbackHref,
-  getStreamReviewPageHref,
-} from "@/lib/public-review/streamReviewDefinition";
+  createPublicReviewRouteBuilder,
+  type PublicReviewRouteBuilder,
+} from "@/lib/public-review/publicReviewRoutes";
+import { getSolidityReferenceRootHref } from "@/lib/public-review/solidityReferenceRoutes";
 
 function PublicReviewPageStepper({
   currentPage,
   pages,
+  routes,
   version,
 }: {
   readonly currentPage: PublicReviewPageDefinition;
   readonly pages: readonly PublicReviewPageDefinition[];
+  readonly routes: PublicReviewRouteBuilder;
   readonly version?: string | undefined;
 }) {
   const currentIndex = pages.findIndex((page) => page.id === currentPage.id);
@@ -46,7 +49,7 @@ function PublicReviewPageStepper({
       className="tw-mt-12 tw-grid tw-gap-3 sm:tw-grid-cols-2">
       {previousPage ? (
         <Link
-          href={getStreamReviewPageHref({ page: previousPage, version })}
+          href={routes.getPageHref(previousPage, version)}
           className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
           <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.previous")}
@@ -60,7 +63,7 @@ function PublicReviewPageStepper({
       )}
       {nextPage && (
         <Link
-          href={getStreamReviewPageHref({ page: nextPage, version })}
+          href={routes.getPageHref(nextPage, version)}
           className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white sm:tw-text-right">
           <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.next")}
@@ -96,6 +99,13 @@ export function PublicReviewShell({
   const pageIndex = review.pages.findIndex(
     (candidate) => candidate.id === page.id
   );
+  const routes = createPublicReviewRouteBuilder(review.slug);
+  const lifecycleCapabilities = getPublicReviewLifecycleCapabilities(
+    review.status
+  );
+  const feedbackSubmissionsAvailable =
+    review.feedbackAvailable &&
+    lifecycleCapabilities.feedbackSubmissionsOpen;
 
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
@@ -137,16 +147,20 @@ export function PublicReviewShell({
               className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/40 tw-bg-sky-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-sky-100 tw-no-underline hover:tw-border-sky-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
               {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
             </Link>
-            <Link
-              href={getStreamReviewFeedbackHref(routeVersion)}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-primary-100 tw-no-underline hover:tw-border-primary-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-              {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
-            </Link>
-            <a
-              href="#public-review-feedback"
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-              {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
-            </a>
+            {review.feedbackAvailable ? (
+              <Link
+                href={routes.getFeedbackHref(routeVersion)}
+                className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-primary-100 tw-no-underline hover:tw-border-primary-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+                {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
+              </Link>
+            ) : null}
+            {feedbackSubmissionsAvailable ? (
+              <a
+                href="#public-review-feedback"
+                className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+                {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
+              </a>
+            ) : null}
           </div>
         </header>
 
@@ -154,6 +168,7 @@ export function PublicReviewShell({
           <div className="tw-mt-8">
             <PublicReviewAudiencePaths
               pages={review.pages}
+              routes={routes}
               version={routeVersion}
             />
           </div>
@@ -163,6 +178,7 @@ export function PublicReviewShell({
           <PublicReviewNavigation
             currentPage={page}
             pages={review.pages}
+            routes={routes}
             sections={sections}
             version={routeVersion}
           />
@@ -186,6 +202,7 @@ export function PublicReviewShell({
             <PublicReviewPageStepper
               currentPage={page}
               pages={review.pages}
+              routes={routes}
               version={routeVersion}
             />
           </div>

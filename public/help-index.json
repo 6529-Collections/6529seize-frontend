@@ -119,6 +119,7 @@
         "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
         "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",
         "Every editorial and technical page includes one structured feedback composer bound to the immutable displayed review version.",
+        "The reusable lifecycle map supports draft, scheduled, public review, review closed, remediation, audit, final candidate, deployed, and archived states; only public review accepts new feedback.",
         "When enabled, NFTs > 6529 Stream — Review appears after ReMemes and before NFT Activity."
       ],
       "canonical_path": "/reviews/6529-stream",
@@ -169,8 +170,10 @@
         "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
         "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
         "A code-reference submission remains unavailable until the browser computes the exact selected snippet checksum; changing the selection invalidates any earlier preview but preserves the written draft.",
+        "If a reviewer edits the draft or changes its attached page, section, or source range while a post is in flight, a successful response preserves the newer work and the next post uses a fresh submission ID.",
         "Every submission carries the immutable review version, page or section, category, suspected severity, and exact source provenance when code is selected.",
         "Possible exploitable security vulnerabilities are intentionally submitted to the same public pre-deployment review because Stream is not deployed.",
+        "Public vulnerability submission is available only during the PUBLIC_REVIEW lifecycle state; deployed reviews use their configured post-deployment disclosure policy.",
         "The public feedback ledger supports category, page, contract, severity, disposition, and text filters plus CSV and Markdown auditor exports.",
         "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner.",
         "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."

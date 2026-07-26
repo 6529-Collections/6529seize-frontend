@@ -56,6 +56,7 @@ const config: PublicReviewFeedbackConfig = {
   reviewTitle: "Stream Contract",
   feedbackSchemaVersion: PUBLIC_REVIEW_FEEDBACK_SCHEMA_VERSION,
   submissionsOpen: true,
+  acceptsPublicExploitReports: true,
   categories: [
     { value: "general", label: "General comment" },
     {
@@ -227,6 +228,91 @@ describe("PublicReviewFeedbackComposer", () => {
       expect.stringContaining("serialNo=12")
     );
     await waitFor(() => expect(successLink.closest("output")).toHaveFocus());
+  });
+
+  it("does not erase a newer draft when an earlier submission resolves", async () => {
+    const user = userEvent.setup();
+    let resolveFirstDrop: (value: unknown) => void = () => undefined;
+    const submitterMock = jest
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirstDrop = resolve;
+          })
+      )
+      .mockResolvedValueOnce({
+        id: "drop-2",
+        serial_no: 13,
+        wave: { id: destination.waveId },
+        drop_type: ApiDropType.Chat,
+      });
+    const submitter = submitterMock as PublicReviewFeedbackSubmitter;
+    const sourceSelection = {
+      kind: "code",
+      path: "smart-contracts/StreamCore.sol",
+      sourceSha256: `sha256:${"b".repeat(64)}`,
+      lineStart: 10,
+      lineEnd: 12,
+      snippetSha256: `sha256:${"c".repeat(64)}`,
+    } as const;
+    const { rerenderSelection } = renderComposer(
+      submitter,
+      sourceSelection
+    );
+
+    const comment = await screen.findByLabelText("Comment", {
+      selector: "textarea",
+    });
+    await user.type(comment, "First submitted draft.");
+    await user.click(
+      screen.getByRole("button", { name: "Post feedback to the Wave" })
+    );
+    rerenderSelection({
+      ...sourceSelection,
+      lineStart: 20,
+      lineEnd: 20,
+      snippetSha256: `sha256:${"d".repeat(64)}`,
+    });
+    await user.clear(comment);
+    await user.type(comment, "New draft written while the first post is pending.");
+
+    resolveFirstDrop({
+      id: "drop-1",
+      serial_no: 12,
+      wave: { id: destination.waveId },
+      drop_type: ApiDropType.Chat,
+    });
+
+    await waitFor(() =>
+      expect(comment).toHaveValue(
+        "New draft written while the first post is pending."
+      )
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Post feedback to the Wave" })
+      ).toBeEnabled()
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Post feedback to the Wave" })
+    );
+    await waitFor(() => expect(submitterMock).toHaveBeenCalledTimes(2));
+
+    const firstPayload = JSON.parse(
+      submitterMock.mock.calls[0]![0].payload.metadata[3]!.data_value
+    );
+    const secondPayload = JSON.parse(
+      submitterMock.mock.calls[1]![0].payload.metadata[3]!.data_value
+    );
+    expect(firstPayload.submissionId).not.toBe(secondPayload.submissionId);
+    expect(submitterMock.mock.calls[1]![0].payload.parts[0]!.content).toContain(
+      "New draft written while the first post is pending."
+    );
+    expect(secondPayload.reference).toMatchObject({
+      lineStart: 20,
+      lineEnd: 20,
+    });
   });
 
   it("fails closed when the active authenticated address is unavailable", () => {

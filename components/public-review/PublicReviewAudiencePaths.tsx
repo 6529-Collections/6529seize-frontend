@@ -8,7 +8,7 @@ import {
   type PublicReviewAudience,
   type PublicReviewPageDefinition,
 } from "@/lib/public-review/publicReviewTypes";
-import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinition";
+import type { PublicReviewRouteBuilder } from "@/lib/public-review/publicReviewRoutes";
 
 const AUDIENCE_COPY: Record<
   PublicReviewAudience,
@@ -34,9 +34,11 @@ const AUDIENCE_COPY: Record<
 
 export function PublicReviewAudiencePaths({
   pages,
+  routes,
   version,
 }: {
   readonly pages: readonly PublicReviewPageDefinition[];
+  readonly routes: PublicReviewRouteBuilder;
   readonly version?: string | undefined;
 }) {
   return (
@@ -72,10 +74,7 @@ export function PublicReviewAudiencePaths({
               {firstPage ? (
                 <>
                   <Link
-                    href={getStreamReviewPageHref({
-                      page: firstPage,
-                      version,
-                    })}
+                    href={routes.getPageHref(firstPage, version)}
                     className="tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-100 tw-no-underline hover:tw-border-primary-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
                     {t(DEFAULT_LOCALE, "publicReview.audiences.startPath", {
                       audience: t(DEFAULT_LOCALE, copy.title),
@@ -100,7 +99,7 @@ export function PublicReviewAudiencePaths({
                         {audiencePages.map((page) => (
                           <li key={page.id}>
                             <Link
-                              href={getStreamReviewPageHref({ page, version })}
+                              href={routes.getPageHref(page, version)}
                               className="tw-text-sky-300 tw-underline tw-decoration-sky-400/50 tw-underline-offset-4 hover:tw-text-sky-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
                               {page.title}
                             </Link>

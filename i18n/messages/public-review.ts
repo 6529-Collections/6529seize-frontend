@@ -5,15 +5,42 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Review the proposed 6529 Stream contract before finalization and deployment.",
   "publicReview.eyebrow": "6529 Stream contract",
   "publicReview.status.heading": "Review status",
-  "publicReview.status.publicReview": "Public review",
-  "publicReview.status.notDeployed": "Not deployed",
-  "publicReview.status.preAudit": "Pre-audit",
+  "publicReview.status.lifecycle.draft": "Draft",
+  "publicReview.status.lifecycle.scheduled": "Scheduled",
+  "publicReview.status.lifecycle.publicReview": "Public review",
+  "publicReview.status.lifecycle.reviewClosed": "Review closed",
+  "publicReview.status.lifecycle.remediation": "Remediation",
+  "publicReview.status.lifecycle.audit": "Audit",
+  "publicReview.status.lifecycle.finalCandidate": "Final candidate",
+  "publicReview.status.lifecycle.deployed": "Deployed",
+  "publicReview.status.lifecycle.archived": "Archived",
+  "publicReview.status.deployment.notDeployed": "Not deployed",
+  "publicReview.status.deployment.deployed": "Contract deployed",
+  "publicReview.status.audit.preAudit": "Pre-audit",
+  "publicReview.status.audit.inProgress": "Audit in progress",
+  "publicReview.status.audit.complete": "Audit complete",
   "publicReview.status.version": "Review version {version}",
   "publicReview.status.source": "Source {commit}",
   "publicReview.status.sourceAriaLabel":
     "Open the exact 6529 Stream source commit {commit}",
-  "publicReview.status.explanation":
+  "publicReview.status.explanations.draft":
+    "This review is being prepared and its public routes are not available.",
+  "publicReview.status.explanations.scheduled":
+    "This review is scheduled. Its materials are visible, but new feedback is not open.",
+  "publicReview.status.explanations.publicReview":
     "This is code under active review. It is not a live contract and has not completed an external audit.",
+  "publicReview.status.explanations.reviewClosed":
+    "The public feedback window is closed. The review record remains available.",
+  "publicReview.status.explanations.remediation":
+    "The contract is being revised in response to review findings. New feedback is closed.",
+  "publicReview.status.explanations.audit":
+    "The contract is in formal audit. New public feedback is closed.",
+  "publicReview.status.explanations.finalCandidate":
+    "This is the final deployment candidate. New public feedback is closed.",
+  "publicReview.status.explanations.deployed":
+    "The reviewed contract has been deployed. Security reports now follow the configured post-deployment disclosure policy.",
+  "publicReview.status.explanations.archived":
+    "This review is archived. Its source, explanation, and feedback record remain available.",
   "publicReview.audiences.heading": "Choose a reading path",
   "publicReview.audiences.description":
     "Every page is public. These paths highlight the questions most useful to each kind of reviewer.",

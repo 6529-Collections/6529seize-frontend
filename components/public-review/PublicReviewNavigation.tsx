@@ -6,15 +6,17 @@ import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
-import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinition";
+import type { PublicReviewRouteBuilder } from "@/lib/public-review/publicReviewRoutes";
 
 function ReviewPageLinks({
   currentPage,
   pages,
+  routes,
   version,
 }: {
   readonly currentPage: PublicReviewPageDefinition;
   readonly pages: readonly PublicReviewPageDefinition[];
+  readonly routes: PublicReviewRouteBuilder;
   readonly version?: string | undefined;
 }) {
   return (
@@ -24,7 +26,7 @@ function ReviewPageLinks({
         return (
           <li key={page.id}>
             <Link
-              href={getStreamReviewPageHref({ page, version })}
+              href={routes.getPageHref(page, version)}
               aria-current={isCurrent ? "page" : undefined}
               className={`tw-flex tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white ${
                 isCurrent
@@ -68,11 +70,13 @@ function ReviewSectionLinks({
 export function PublicReviewNavigation({
   currentPage,
   pages,
+  routes,
   sections,
   version,
 }: {
   readonly currentPage: PublicReviewPageDefinition;
   readonly pages: readonly PublicReviewPageDefinition[];
+  readonly routes: PublicReviewRouteBuilder;
   readonly sections: readonly PublicReviewSectionDefinition[];
   readonly version?: string | undefined;
 }) {
@@ -95,6 +99,7 @@ export function PublicReviewNavigation({
           <ReviewPageLinks
             currentPage={currentPage}
             pages={pages}
+            routes={routes}
             version={version}
           />
         </nav>
@@ -123,6 +128,7 @@ export function PublicReviewNavigation({
             <ReviewPageLinks
               currentPage={currentPage}
               pages={pages}
+              routes={routes}
               version={version}
             />
           </nav>

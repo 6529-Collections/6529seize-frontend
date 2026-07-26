@@ -1,3 +1,5 @@
+import type { PublicReviewLifecycleState } from "./publicReviewLifecycle";
+
 export const PUBLIC_REVIEW_EVIDENCE_STATES = [
   "IMPLEMENTED",
   "TESTED",
@@ -47,9 +49,9 @@ export interface PublicReviewDefinition {
   readonly description: string;
   readonly activeVersion: string;
   readonly availableVersions: readonly string[];
-  readonly status: "PUBLIC_REVIEW";
-  readonly deploymentStatus: "NOT_DEPLOYED";
-  readonly auditStatus: "PRE_AUDIT";
+  readonly status: PublicReviewLifecycleState;
+  readonly deploymentStatus: "NOT_DEPLOYED" | "DEPLOYED";
+  readonly auditStatus: "PRE_AUDIT" | "AUDIT_IN_PROGRESS" | "AUDIT_COMPLETE";
   readonly feedbackAvailable: boolean;
   readonly source: PublicReviewSource;
   readonly pages: readonly PublicReviewPageDefinition[];

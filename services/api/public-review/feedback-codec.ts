@@ -2,18 +2,19 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getAddress, isAddress } from "viem";
-import type {
-  PublicReviewCodeReference,
-  PublicReviewCodeSelection,
-  PublicReviewDiscussionDestination,
-  PublicReviewFeedbackConfig,
-  PublicReviewFeedbackContext,
-  PublicReviewFeedbackDraft,
-  PublicReviewFeedbackSigner,
-  PublicReviewPageContext,
-  PublicReviewReference,
-  PublicReviewReferenceSelection,
-  PublicReviewSourceConfig,
+import {
+  PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
+  type PublicReviewCodeReference,
+  type PublicReviewCodeSelection,
+  type PublicReviewDiscussionDestination,
+  type PublicReviewFeedbackConfig,
+  type PublicReviewFeedbackContext,
+  type PublicReviewFeedbackDraft,
+  type PublicReviewFeedbackSigner,
+  type PublicReviewPageContext,
+  type PublicReviewReference,
+  type PublicReviewReferenceSelection,
+  type PublicReviewSourceConfig,
 } from "./types";
 import {
   isPublicReviewSha256Urn,
@@ -371,8 +372,19 @@ export function encodePublicReviewFeedback({
   const issues: string[] = [];
   const category = getAllowedOption(config.categories, draft.category);
   const severity = getAllowedOption(config.severityOptions, draft.severity);
+  if (!config.submissionsOpen) {
+    issues.push("This public review is not accepting new feedback.");
+  }
   if (!category) {
     issues.push("Select a feedback category from this review.");
+  }
+  if (
+    draft.category === PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE &&
+    !config.acceptsPublicExploitReports
+  ) {
+    issues.push(
+      "Possible exploitable security vulnerabilities must use the configured disclosure policy for this review state."
+    );
   }
   if (!severity) {
     issues.push("Select a severity from this review.");

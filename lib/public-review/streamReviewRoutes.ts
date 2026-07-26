@@ -1,4 +1,5 @@
 import { isPublicReviewEnabled } from "@/config/publicReviews";
+import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
   getStreamReviewPage,
@@ -29,6 +30,8 @@ export function resolveStreamReviewRoute({
 }): StreamReviewRouteModel | undefined {
   if (
     !isPublicReviewEnabled(baseEndpoint) ||
+    !getPublicReviewLifecycleCapabilities(STREAM_REVIEW_DEFINITION.status)
+      .publicRoutesAvailable ||
     params.review !== STREAM_REVIEW_SLUG
   ) {
     return undefined;

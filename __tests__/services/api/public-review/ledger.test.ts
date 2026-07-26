@@ -34,6 +34,7 @@ const config: PublicReviewFeedbackConfig = {
   reviewTitle: "Stream Contract",
   feedbackSchemaVersion: PUBLIC_REVIEW_FEEDBACK_SCHEMA_VERSION,
   submissionsOpen: true,
+  acceptsPublicExploitReports: true,
   categories: [
     { value: "security", label: "Security" },
     {

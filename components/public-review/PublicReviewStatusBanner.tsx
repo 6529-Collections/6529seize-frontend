@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
+import type { PublicReviewLifecycleState } from "@/lib/public-review/publicReviewLifecycle";
 import type {
   PublicReviewDefinition,
   PublicReviewSource,
@@ -7,6 +8,65 @@ import type {
 
 const STATUS_CHIP =
   "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold";
+
+const LIFECYCLE_COPY: Record<
+  PublicReviewLifecycleState,
+  {
+    readonly explanation: MessageKey;
+    readonly label: MessageKey;
+  }
+> = {
+  DRAFT: {
+    explanation: "publicReview.status.explanations.draft",
+    label: "publicReview.status.lifecycle.draft",
+  },
+  SCHEDULED: {
+    explanation: "publicReview.status.explanations.scheduled",
+    label: "publicReview.status.lifecycle.scheduled",
+  },
+  PUBLIC_REVIEW: {
+    explanation: "publicReview.status.explanations.publicReview",
+    label: "publicReview.status.lifecycle.publicReview",
+  },
+  REVIEW_CLOSED: {
+    explanation: "publicReview.status.explanations.reviewClosed",
+    label: "publicReview.status.lifecycle.reviewClosed",
+  },
+  REMEDIATION: {
+    explanation: "publicReview.status.explanations.remediation",
+    label: "publicReview.status.lifecycle.remediation",
+  },
+  AUDIT: {
+    explanation: "publicReview.status.explanations.audit",
+    label: "publicReview.status.lifecycle.audit",
+  },
+  FINAL_CANDIDATE: {
+    explanation: "publicReview.status.explanations.finalCandidate",
+    label: "publicReview.status.lifecycle.finalCandidate",
+  },
+  DEPLOYED: {
+    explanation: "publicReview.status.explanations.deployed",
+    label: "publicReview.status.lifecycle.deployed",
+  },
+  ARCHIVED: {
+    explanation: "publicReview.status.explanations.archived",
+    label: "publicReview.status.lifecycle.archived",
+  },
+};
+
+const DEPLOYMENT_LABELS = {
+  NOT_DEPLOYED: "publicReview.status.deployment.notDeployed",
+  DEPLOYED: "publicReview.status.deployment.deployed",
+} as const satisfies Record<
+  PublicReviewDefinition["deploymentStatus"],
+  MessageKey
+>;
+
+const AUDIT_LABELS = {
+  PRE_AUDIT: "publicReview.status.audit.preAudit",
+  AUDIT_IN_PROGRESS: "publicReview.status.audit.inProgress",
+  AUDIT_COMPLETE: "publicReview.status.audit.complete",
+} as const satisfies Record<PublicReviewDefinition["auditStatus"], MessageKey>;
 
 export function PublicReviewStatusBanner({
   review,
@@ -19,6 +79,7 @@ export function PublicReviewStatusBanner({
 }) {
   const shortCommit = source.commit.slice(0, 10);
   const sourceUrl = `https://github.com/${source.repository}/tree/${source.commit}`;
+  const lifecycleCopy = LIFECYCLE_COPY[review.status];
 
   return (
     <section
@@ -31,21 +92,21 @@ export function PublicReviewStatusBanner({
             {t(DEFAULT_LOCALE, "publicReview.status.heading")}
           </p>
           <p className="tw-mb-0 tw-mt-1 tw-max-w-3xl tw-text-sm tw-leading-5 tw-text-iron-300">
-            {t(DEFAULT_LOCALE, "publicReview.status.explanation")}
+            {t(DEFAULT_LOCALE, lifecycleCopy.explanation)}
           </p>
         </div>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
           <span
             className={`${STATUS_CHIP} tw-border-amber-400/40 tw-bg-amber-400/10 tw-text-amber-100`}>
-            {t(DEFAULT_LOCALE, "publicReview.status.publicReview")}
+            {t(DEFAULT_LOCALE, lifecycleCopy.label)}
           </span>
           <span
             className={`${STATUS_CHIP} tw-border-sky-400/40 tw-bg-sky-400/10 tw-text-sky-100`}>
-            {t(DEFAULT_LOCALE, "publicReview.status.notDeployed")}
+            {t(DEFAULT_LOCALE, DEPLOYMENT_LABELS[review.deploymentStatus])}
           </span>
           <span
             className={`${STATUS_CHIP} tw-border-orange-400/40 tw-bg-orange-400/10 tw-text-orange-100`}>
-            {t(DEFAULT_LOCALE, "publicReview.status.preAudit")}
+            {t(DEFAULT_LOCALE, AUDIT_LABELS[review.auditStatus])}
           </span>
           <span className={`${STATUS_CHIP} tw-border-iron-600 tw-text-iron-200`}>
             {t(DEFAULT_LOCALE, "publicReview.status.version", {

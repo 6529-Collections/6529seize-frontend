@@ -47,8 +47,8 @@ links and before NFT Activity.
 
 Every page includes:
 
-- a persistent status area showing **Public review**, **Not deployed**, and
-  **Pre-audit**
+- a persistent status area showing the lifecycle, deployment, and audit states;
+  Stream currently shows **Public review**, **Not deployed**, and **Pre-audit**
 - the review version and a link to the exact source snapshot
 - page-level evidence labels
 - navigation across fourteen stable pages
@@ -91,6 +91,25 @@ in `en-US` only and falls back to English for all supported locales. Localized
 editorial versions are follow-up work; the English-only state must remain
 visible in future language controls.
 
+## Lifecycle Capabilities
+
+The reusable review module supports `DRAFT`, `SCHEDULED`, `PUBLIC_REVIEW`,
+`REVIEW_CLOSED`, `REMEDIATION`, `AUDIT`, `FINAL_CANDIDATE`, `DEPLOYED`, and
+`ARCHIVED`. A single lifecycle capability map controls public routes, new
+feedback, and the security-reporting policy:
+
+- every state except `DRAFT` exposes public routes
+- only `PUBLIC_REVIEW` accepts new public feedback
+- only `PUBLIC_REVIEW` sends possible exploitable vulnerabilities to the
+  review Wave
+- `DEPLOYED` changes security reporting to the configured post-deployment
+  disclosure policy
+
+Status copy and chips are selected from the review definition rather than
+being embedded in the Stream shell. Review, audience, sequence, and feedback
+links are built from the configured review slug, so the shared components do
+not contain Stream routes.
+
 ## Feedback Status
 
 Structured feedback is enabled on every editorial and technical reference
@@ -111,6 +130,11 @@ range keeps the written draft in place while the new snippet checksum is
 computed; preview and posting remain disabled until that exact reference is
 ready.
 
+Submitting uses an immutable snapshot of the draft and its attached context.
+If the reviewer edits the draft or changes its page, section, or source range
+while a post is still in flight, a successful response does not clear the newer
+work. The next post receives a fresh submission ID.
+
 The active feedback ledger at `/reviews/6529-stream/feedback` and each
 immutable ledger at `/reviews/6529-stream/versions/{version}/feedback` read the
 public review discussion, validate structured metadata against the exact
@@ -120,7 +144,8 @@ first, with the pinned GitHub source as a secondary link.
 
 The form and ledger are reusable public-review modules. Review-specific
 configuration supplies the immutable manifest, page and section allowlists,
-feedback taxonomy, and server-resolved discussion destination.
+feedback taxonomy, lifecycle-derived submission capabilities, review slug, and
+server-resolved discussion destination.
 
 ## Failure and Recovery
 
