@@ -31,6 +31,14 @@ const SOLC_SHA256 =
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 const DECIMAL_PATTERN = /^[1-9][0-9]*$/;
 const GIT_REGULAR_MODE = "100644";
+const PROTECTED_TRUST_ROOT_PATHS = new Set([
+  ".gitattributes",
+  ".github/workflows/public-review-snapshot-trust.yml",
+  "ops/scripts/testing-strategy.cjs",
+  "scripts/public-reviews/solidity-reference-lib.cjs",
+  "scripts/public-reviews/solidity-reference.cjs",
+  "scripts/public-reviews/verify-snapshot-pr.cjs",
+]);
 const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
 const MAX_BUFFER = 512 * 1024 * 1024;
 const MAX_BLOB_BYTES = 64 * 1024 * 1024;
@@ -213,6 +221,13 @@ function isReviewDataPath(candidatePath) {
 
 function snapshotChangePolicy(entries) {
   const flattenedPaths = entries.flatMap((entry) => entry.paths);
+  const protectedPaths = flattenedPaths.filter((candidatePath) =>
+    PROTECTED_TRUST_ROOT_PATHS.has(candidatePath)
+  );
+  invariant(
+    protectedPaths.length === 0,
+    `Protected public-review trust-root changes require explicit maintainer bypass: ${protectedPaths.join(", ")}.`
+  );
   const touchesSnapshot = flattenedPaths.some(
     (candidatePath) =>
       candidatePath === CONFIG_PATH || isReviewDataPath(candidatePath)
@@ -332,15 +347,9 @@ function fetchAndBindCandidate(context, dependencies = {}) {
   );
   const candidateRef =
     `refs/codex-public-review/pr-${context.prNumber}-${context.headSha}`;
-  run("git", [
-    "-C",
-    context.repositoryRoot,
-    "fetch",
-    "--no-tags",
-    "--force",
-    FRONTEND_REMOTE,
-    `refs/pull/${context.prNumber}/head:${candidateRef}`,
-  ]);
+  const baseRef =
+    `refs/codex-public-review/base-${context.prNumber}-${context.baseSha}`;
+  fetchAndAssertRemoteRefs(context, candidateRef, baseRef, run);
   const resolvedHead = gitText(
     context.repositoryRoot,
     ["rev-parse", `${candidateRef}^{commit}`],
@@ -385,10 +394,15 @@ function fetchAndBindCandidate(context, dependencies = {}) {
       "Snapshot PR head must be rebased onto the exact event base."
     );
   }
-  return { candidateRef, changes, mergeBase, ...policy };
+  return { candidateRef, baseRef, changes, mergeBase, ...policy };
 }
 
-function assertCandidateStillCurrent(context, candidateRef, run = defaultRun) {
+function fetchAndAssertRemoteRefs(
+  context,
+  candidateRef,
+  baseRef,
+  run = defaultRun
+) {
   run("git", [
     "-C",
     context.repositoryRoot,
@@ -397,6 +411,7 @@ function assertCandidateStillCurrent(context, candidateRef, run = defaultRun) {
     "--force",
     FRONTEND_REMOTE,
     `refs/pull/${context.prNumber}/head:${candidateRef}`,
+    `refs/heads/main:${baseRef}`,
   ]);
   const currentHead = gitText(
     context.repositoryRoot,
@@ -405,7 +420,16 @@ function assertCandidateStillCurrent(context, candidateRef, run = defaultRun) {
   );
   invariant(
     currentHead === context.headSha,
-    `PR head advanced from verified event head ${context.headSha} to ${currentHead}.`
+    `PR head advanced from event head ${context.headSha} to ${currentHead}.`
+  );
+  const currentBase = gitText(
+    context.repositoryRoot,
+    ["rev-parse", `${baseRef}^{commit}`],
+    run
+  );
+  invariant(
+    currentBase === context.baseSha,
+    `Frontend main advanced from event base ${context.baseSha} to ${currentBase}.`
   );
 }
 
@@ -827,6 +851,8 @@ async function verifySnapshotPr(context, dependencies = {}) {
   validateIdentifiers(context);
   const candidateRef =
     `refs/codex-public-review/pr-${context.prNumber}-${context.headSha}`;
+  const baseRef =
+    `refs/codex-public-review/base-${context.prNumber}-${context.baseSha}`;
   let tempRoot;
   let worktree;
   let worktreeRegistered = false;
@@ -838,7 +864,7 @@ async function verifySnapshotPr(context, dependencies = {}) {
       `Bound snapshot verifier to head ${context.headSha} and base ${context.baseSha}.`
     );
     if (!binding.touchesSnapshot) {
-      assertCandidateStillCurrent(context, candidateRef, run);
+      fetchAndAssertRemoteRefs(context, candidateRef, baseRef, run);
       console.log(
         "No public-review snapshot inputs changed; trusted check passed."
       );
@@ -919,7 +945,7 @@ async function verifySnapshotPr(context, dependencies = {}) {
     verifyNoGenerationResidue(worktree);
     const regeneratedBlobs = filesystemBlobMap(worktree, REVIEW_ROOT);
     compareCandidateToRegeneration(reviewBlobs, regeneratedBlobs);
-    assertCandidateStillCurrent(context, candidateRef, run);
+    fetchAndAssertRemoteRefs(context, candidateRef, baseRef, run);
     console.log(
       `Trusted snapshot verified ${regeneratedBlobs.size} blobs for head ${context.headSha} against base ${context.baseSha}.`
     );
@@ -947,10 +973,12 @@ async function verifySnapshotPr(context, dependencies = {}) {
         cleanupErrors.push(error);
       }
     }
-    try {
-      deleteCandidateRef(context.repositoryRoot, candidateRef, status);
-    } catch (error) {
-      cleanupErrors.push(error);
+    for (const temporaryRef of [candidateRef, baseRef]) {
+      try {
+        deleteCandidateRef(context.repositoryRoot, temporaryRef, status);
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
     }
     if (primaryError && cleanupErrors.length > 0) {
       throw new AggregateError(
@@ -991,6 +1019,7 @@ module.exports = {
   CONFIG_PATH,
   FRONTEND_REMOTE,
   GIT_REGULAR_MODE,
+  PROTECTED_TRUST_ROOT_PATHS,
   REVIEW_ROOT,
   SOLC_LONG_VERSION,
   SOLC_SHA256,
@@ -1001,6 +1030,7 @@ module.exports = {
   compareCandidateToRegeneration,
   decodeUtf8,
   exactCandidateBlobMaps,
+  fetchAndAssertRemoteRefs,
   fetchAndBindCandidate,
   filesystemBlobMap,
   immutableConfigProjection,

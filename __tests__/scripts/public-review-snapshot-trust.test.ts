@@ -370,6 +370,19 @@ describe("public-review snapshot trust change policy", () => {
     ).toThrow("never deleted");
   });
 
+  it.each([
+    ".gitattributes",
+    ".github/workflows/public-review-snapshot-trust.yml",
+    "ops/scripts/testing-strategy.cjs",
+    "scripts/public-reviews/solidity-reference-lib.cjs",
+    "scripts/public-reviews/solidity-reference.cjs",
+    "scripts/public-reviews/verify-snapshot-pr.cjs",
+  ])("fails closed for protected trust-root path %s", (protectedPath) => {
+    expect(() =>
+      snapshotChangePolicy([{ status: "M", paths: [protectedPath] }])
+    ).toThrow("require explicit maintainer bypass");
+  });
+
   it("binds fetch output to the exact event head and exact event base", () => {
     const responses = new Map<string, Buffer>([
       ["rev-parse HEAD^{commit}", Buffer.from(shaB)],
@@ -377,6 +390,10 @@ describe("public-review snapshot trust change policy", () => {
       [
         `rev-parse refs/codex-public-review/pr-7-${shaA}^{commit}`,
         Buffer.from(shaA),
+      ],
+      [
+        `rev-parse refs/codex-public-review/base-7-${shaB}^{commit}`,
+        Buffer.from(shaB),
       ],
       [`rev-parse ${shaB}^{commit}`, Buffer.from(shaB)],
       [`merge-base ${shaB} ${shaA}`, Buffer.from(shaB)],
@@ -426,7 +443,7 @@ describe("public-review snapshot trust change policy", () => {
         },
         { run }
       )
-    ).toThrow("does not match event head");
+    ).toThrow("PR head advanced");
   });
 
   it("rejects a relevant head that is not rebased onto the event base", () => {
@@ -442,8 +459,11 @@ describe("public-review snapshot trust change policy", () => {
         if (args[3] === "HEAD^{commit}") {
           return Buffer.from(shaB);
         }
+        if (args[3]!.startsWith("refs/codex-public-review/base-")) {
+          return Buffer.from(shaB);
+        }
         return Buffer.from(
-          args[3]!.startsWith("refs/codex-public-review") ? shaA : shaB
+          args[3]!.startsWith("refs/codex-public-review/pr-") ? shaA : shaB
         );
       }
       if (operation === "merge-base") {
@@ -672,6 +692,7 @@ describe("public-review snapshot trust orchestration", () => {
   type HarnessOptions = {
     unrelated?: boolean;
     advanceDuringVerification?: boolean;
+    advanceBaseDuringVerification?: boolean;
     generatorFailure?: boolean;
     cleanupFailure?: boolean;
     candidateBytes?: Buffer;
@@ -729,9 +750,16 @@ describe("public-review snapshot trust orchestration", () => {
         if (revision === `${shaB}^{commit}`) {
           return Buffer.from(shaB);
         }
-        if (revision!.startsWith("refs/codex-public-review/")) {
+        if (revision!.startsWith("refs/codex-public-review/pr-")) {
           return Buffer.from(
             options.advanceDuringVerification && fetchCount > 1 ? shaC : shaA
+          );
+        }
+        if (revision!.startsWith("refs/codex-public-review/base-")) {
+          return Buffer.from(
+            options.advanceBaseDuringVerification && fetchCount > 1
+              ? shaC
+              : shaB
           );
         }
         if (revision === `${baseConfig.source.commit}^{commit}`) {
@@ -865,6 +893,11 @@ describe("public-review snapshot trust orchestration", () => {
     expect(harness.cleanupOperations).toEqual(
       expect.arrayContaining(["worktree remove", "worktree prune", "update-ref -d"])
     );
+    expect(
+      harness.cleanupOperations.filter(
+        (operation) => operation === "update-ref -d"
+      )
+    ).toHaveLength(2);
   });
 
   it("quick-passes unrelated PRs but still rechecks freshness and removes its ref", async () => {
@@ -878,6 +911,12 @@ describe("public-review snapshot trust orchestration", () => {
     await expect(
       runHarness({ advanceDuringVerification: true })
     ).rejects.toThrow("PR head advanced");
+  });
+
+  it("fails when frontend main advances beyond the event base", async () => {
+    await expect(
+      runHarness({ advanceBaseDuringVerification: true })
+    ).rejects.toThrow("Frontend main advanced");
   });
 
   it("rejects self-consistent-looking candidate bytes not reproduced by the base generator", async () => {
