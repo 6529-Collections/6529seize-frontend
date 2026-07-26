@@ -64,7 +64,14 @@ export default function CreateWaveLayout({
             // content sits below the fold and dims at the end of the step, and
             // a soft light glow rides above the edge as an extra hint.
             <div
-              className={`tw-sticky tw-bottom-0 tw-z-10 tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-bg-iron-950/10 tw-px-4 tw-pb-[calc(1rem+env(safe-area-inset-bottom,0px))] tw-pt-4 tw-shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] tw-backdrop-blur-md tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none lg:tw-pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] lg:tw-pl-8 lg:tw-pr-28 lg:tw-pt-5 ${
+              // Bottom inset: clear the iOS home affordance without the
+              // oversized gap the full inset + 1rem produced. Mirrors the app's
+              // BottomNavigation approach (trim the inset rather than add to
+              // it), but a touch more conservative — subtract 0.5rem with a
+              // 0.5rem floor so home-indicator devices tighten up (~env-8px)
+              // while home-button/Android-button devices still keep breathing
+              // room. Scales per device via env(); never goes flush.
+              className={`tw-sticky tw-bottom-0 tw-z-10 tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-bg-iron-950/10 tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)_-_0.5rem),0.5rem)] tw-pt-4 tw-shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] tw-backdrop-blur-md tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none lg:tw-pb-5 lg:tw-pl-8 lg:tw-pr-28 lg:tw-pt-5 ${
                 canScrollDown ? "tw-border-white/25" : "tw-border-white/[0.08]"
               }`}
             >
