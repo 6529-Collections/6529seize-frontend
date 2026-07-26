@@ -19,6 +19,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   createSolidityReferenceReader,
+  SolidityReferenceNotFoundError,
   type SolidityReferenceReader,
 } from "@/lib/public-review/solidityReferenceData";
 import {
@@ -314,7 +315,9 @@ export async function renderStreamSolidityInterface({
     definitionKey
   );
   if (!indexEntry.interface.published) {
-    throw new Error("The requested definition is not a published interface.");
+    throw new SolidityReferenceNotFoundError(
+      "The requested definition is not a published interface."
+    );
   }
   return (
     <ReferenceShell

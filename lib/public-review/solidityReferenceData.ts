@@ -16,6 +16,8 @@ import {
 } from "@/lib/public-review/solidityReferenceRoutes";
 import {
   SOLIDITY_REFERENCE_BUNDLE_SCHEMA,
+  SOLIDITY_REFERENCE_GENERATOR_NAME,
+  SOLIDITY_REFERENCE_GENERATOR_VERSION,
   SOLIDITY_REFERENCE_INDEX_SCHEMA,
   SOLIDITY_REFERENCE_SHARD_SCHEMA,
   type SolidityDeclarationKind,
@@ -147,6 +149,21 @@ function assertSourceRange(
   ) {
     throw new Error(`Invalid ${label} source range.`);
   }
+}
+
+function sourceRangesEqual(
+  left: SoliditySourceRange,
+  right: SoliditySourceRange
+): boolean {
+  return (
+    left.byteStart === right.byteStart &&
+    left.byteLength === right.byteLength &&
+    left.lineStart === right.lineStart &&
+    left.lineEnd === right.lineEnd &&
+    left.sourceSha256 === right.sourceSha256 &&
+    left.snippetSha256 === right.snippetSha256 &&
+    left.githubUrl === right.githubUrl
+  );
 }
 
 function assertReferenceCounts(value: unknown, label: string): void {
@@ -314,6 +331,11 @@ function assertManifest(
     value["source"]["commit"] !== identity.sourceCommit ||
     value["source"]["tree"] !== versionEntry.tree ||
     !isRecord(value["generator"]) ||
+    value["generator"]["name"] !== SOLIDITY_REFERENCE_GENERATOR_NAME ||
+    value["generator"]["version"] !== SOLIDITY_REFERENCE_GENERATOR_VERSION ||
+    value["generator"]["outputSha256"] !== versionEntry.bundleSha256 ||
+    !isSha256(value["generator"]["configSha256"]) ||
+    !isSha256(value["generator"]["sourceSha256"]) ||
     !isRecord(value["summary"]) ||
     !Array.isArray(value["definitionIndex"]) ||
     !Array.isArray(value["files"])
@@ -433,6 +455,10 @@ function assertShard(
     !isRecord(value["definition"]) ||
     value["definition"]["id"] !== indexEntry.id ||
     value["definition"]["key"] !== indexEntry.key ||
+    value["definition"]["name"] !== indexEntry.name ||
+    value["definition"]["kind"] !== indexEntry.kind ||
+    value["definition"]["scope"] !== indexEntry.scope ||
+    value["definition"]["classification"] !== indexEntry.classification ||
     value["definition"]["sourcePath"] !== indexEntry.sourcePath ||
     !isRecord(value["definition"]["declarations"]) ||
     !isRecord(value["definition"]["abiSurface"]) ||
@@ -442,11 +468,8 @@ function assertShard(
   }
 
   assertSourceRange(value["definition"]["range"], "shard definition");
-  if (
-    value["definition"]["range"]["sourceSha256"] !==
-    indexEntry.range.sourceSha256
-  ) {
-    throw new Error("Solidity definition source checksum drift.");
+  if (!sourceRangesEqual(value["definition"]["range"], indexEntry.range)) {
+    throw new Error("Solidity definition source range drift.");
   }
   assertWarningSummary(value["warningSummary"]);
 

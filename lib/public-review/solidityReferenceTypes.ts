@@ -4,6 +4,9 @@ export const SOLIDITY_REFERENCE_BUNDLE_SCHEMA =
   "public-review.solidity-reference.v2";
 export const SOLIDITY_REFERENCE_SHARD_SCHEMA =
   "public-review.solidity-definition-shard.v1";
+export const SOLIDITY_REFERENCE_GENERATOR_NAME =
+  "6529-public-review-solidity-reference";
+export const SOLIDITY_REFERENCE_GENERATOR_VERSION = "1";
 
 export type SolidityReferenceScope = "protocol" | "script" | "test";
 
