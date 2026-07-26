@@ -37,3 +37,10 @@
   by requiring tested lifecycle capability boundaries, production-profile
   exclusion of staging Wave IDs, deterministic `NEW` disposition fallback, and
   an explicit English-editorial localization debt record.
+- Incorporated the advisory review swarm's valid consistency findings:
+  canonical UTC review dates, an explicit lifecycle transition table, immutable
+  review-version/bundle/source keys, exhaustive classification wording,
+  versioned Wave metadata mapping, pinned-file line-range validation,
+  environment-partitioned ledger reads and exports, authoritative disposition
+  semantics, generated reference route patterns, and accessible pagination and
+  search behavior.

@@ -30,11 +30,11 @@ Specification review and validation.
 
 - The review section is a public protocol-review system, not a marketing page.
 - It uses progressive disclosure for community, artist, and technical readers.
-- It contains approximately fourteen editorial pages plus generated contract
+- It contains fourteen editorial pages plus generated contract
   reference pages.
 - Feedback posts to a dedicated Stream review subwave under Follow the Wave.
 - Feedback carries structured review and source context.
-- The implementation is reusable for future permanent-contract reviews.
+- The implementation is reusable for future public-contract reviews.
 - Stream-specific content and configuration must not be embedded in shared
   review components.
 

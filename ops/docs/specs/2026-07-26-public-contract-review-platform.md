@@ -199,6 +199,11 @@ Canonical routes:
 /reviews/6529-stream/[page]
 /reviews/6529-stream/reference
 /reviews/6529-stream/reference/contracts/[contract]
+/reviews/6529-stream/reference/functions/[function]
+/reviews/6529-stream/reference/events/[event]
+/reviews/6529-stream/reference/errors/[error]
+/reviews/6529-stream/reference/interfaces/[interface]
+/reviews/6529-stream/reference/sources/[...source]
 /reviews/6529-stream/feedback
 ```
 
@@ -228,7 +233,9 @@ interface PublicReviewDefinition {
   readonly summary: string;
   readonly status: PublicReviewStatus;
   readonly version: string;
+  /** RFC 3339 UTC instant with a `Z` suffix. */
   readonly opensAt: string | null;
+  /** RFC 3339 UTC instant with a `Z` suffix. */
   readonly closesAt: string | null;
   readonly source: PublicReviewSource;
   readonly discussion: PublicReviewDiscussion;
@@ -252,7 +259,9 @@ Configuration validation fails for:
 - missing discussion destination in an open review
 - an enabled environment without an environment-specific discussion destination
 - duplicate feedback metadata keys
-- invalid dates or lifecycle transitions
+- dates that are not canonical RFC 3339 UTC instants, or an opening time that
+  is not earlier than its closing time
+- invalid lifecycle transitions
 - missing canonical routes
 - generated-data/review-version mismatch
 
@@ -285,6 +294,27 @@ as scattered copy checks. Tests prove that public vulnerability submission is
 enabled only for configured pre-deployment states and changes to the configured
 post-deployment policy at the transition boundary.
 
+The allowed forward transitions are:
+
+| From | Allowed next states |
+| --- | --- |
+| `DRAFT` | `SCHEDULED`, `PUBLIC_REVIEW`, `ARCHIVED` |
+| `SCHEDULED` | `DRAFT`, `PUBLIC_REVIEW`, `ARCHIVED` |
+| `PUBLIC_REVIEW` | `REVIEW_CLOSED` |
+| `REVIEW_CLOSED` | `REMEDIATION`, `AUDIT`, `FINAL_CANDIDATE`, `ARCHIVED` |
+| `REMEDIATION` | `PUBLIC_REVIEW`, `AUDIT`, `FINAL_CANDIDATE`, `ARCHIVED` |
+| `AUDIT` | `REMEDIATION`, `FINAL_CANDIDATE`, `ARCHIVED` |
+| `FINAL_CANDIDATE` | `REMEDIATION`, `AUDIT`, `DEPLOYED`, `ARCHIVED` |
+| `DEPLOYED` | `ARCHIVED` |
+| `ARCHIVED` | none |
+
+Moving from `REMEDIATION` back to `PUBLIC_REVIEW` requires a new review version
+when the reviewed source changed. The initial capability map exposes public
+routes for every state except `DRAFT`, permits new public feedback only in
+`PUBLIC_REVIEW`, and therefore permits public vulnerability submissions only in
+`PUBLIC_REVIEW`. A future review may opt into additional pre-deployment feedback
+states only by changing the validated capability map and its tests.
+
 ## Environment Activation
 
 Merging the implementation does not authorize production exposure. Each review
@@ -304,6 +334,9 @@ review and deployment authorization.
 
 An automated production-profile render/configuration test scans the review
 output and navigation for staging review IDs and fails if any are present.
+The server route boundary returns not-found before rendering a disabled review,
+and sitemap, canonical, Open Graph, and search-index generation use the same
+environment predicate.
 
 ## Page Content Contract
 
@@ -409,7 +442,7 @@ Recommended shape:
 
 ```ts
 interface ContractReviewBundle {
-  readonly schemaVersion: number;
+  readonly bundleSchemaVersion: number;
   readonly reviewId: string;
   readonly reviewVersion: string;
   readonly source: {
@@ -470,14 +503,17 @@ Generation fails when:
 - an expected production contract disappears without an explicit manifest
   change
 - a top-level Solidity definition is absent from the exhaustive source index
-- a source definition has no explicit release/support/test/vendor/excluded
-  classification
+- a source definition has no explicit classification from the exhaustive list
+  of release contract, published interface, genesis target, first-party
+  candidate, production support, deployment/operational, test/harness, vendored,
+  legacy non-production, or explicitly excluded with reason
 - ABI totals disagree with the protocol surface report
 - event or error catalogs disagree with the ABI surface
 - a public/external function lacks a generated record
 - a generated source line falls outside its source file
 - two records share an identifier or selector unexpectedly
 - an input or output checksum drifts in `--check` mode
+- the source commit changes without a corresponding review-version increment
 
 The generator emits warnings for incomplete NatSpec or unavailable
 non-authoritative editorial fields, but missing technical surface is an error.
@@ -503,6 +539,10 @@ and snippet checksum that its author reviewed. When a stable declaration still
 exists in a later version, the UI may show the new location; when its snippet
 changed or disappeared, the feedback is marked **source changed** and continues
 to link to the original snapshot.
+
+The immutable lookup and cache key is the tuple of review ID, review version,
+bundle output SHA-256, and source commit. A bundle may not be regenerated under
+an existing review version when any member of that tuple would change.
 
 Generated files use canonical ordering, LF line endings, final newlines,
 content-derived timestamps where needed, and no absolute local paths or
@@ -555,6 +595,11 @@ Code references include repository, commit, path, contract, function when
 known, and inclusive line range. Line references are never built against a
 moving branch.
 
+Before submission, source line values must be decimal positive integers,
+`lineStart` must be less than or equal to `lineEnd`, and both values must fall
+within the exact pinned file's line count in the generated bundle. The selected
+range must resolve to the same file checksum carried by that review version.
+
 ### Public Pre-Deployment Security Review
 
 While the review status is pre-deployment, potential security vulnerabilities
@@ -603,6 +648,15 @@ Metadata keys are unique. The current API limits ordinary metadata values to
 validator enforces these and the current key/title/description limits before
 submission.
 
+`review_schema` is the feedback-schema version literal. The selected
+`feedbackCategories` entry maps directly to the allow-listed `review_type`
+value, and the selected `severityOptions` entry maps directly to the allow-listed
+`review_severity` value. `review_context` is canonical JSON with a documented
+property order and no duplicate properties. Submission fails locally when a
+selected value is absent from the active definition or when the serialized
+payload exceeds an API limit. Payload-shape tests use the checked-in Wave API
+contract so ordinary builds stay offline.
+
 The drop body remains understandable without metadata rendering. It includes
 the feedback type, comment, optional reasoning/change, and links back to the
 exact review and source.
@@ -633,6 +687,12 @@ The form fetches its current chat eligibility before submission. Chat feedback
 does not opt into participation-ranking signatures or terms merely because the
 Wave model also supports participatory drops.
 
+Ledger reads, exports, cache keys, and submission all partition by the exact
+environment-specific discussion destination ID in addition to review ID and
+version. The ledger rejects records from any other destination even when their
+metadata claims the same review ID. Cross-environment isolation is tested with
+staging and production fixtures.
+
 ### Review Ledger
 
 The Community Review page reads structured review drops and provides:
@@ -652,6 +712,12 @@ The Community Review page reads structured review drops and provides:
 Filters include category, page, contract, severity, disposition, and text
 search. Reaction count may indicate attention but never determines technical
 severity.
+
+The projection uses cursor pagination and preserves filters while fetching
+additional pages. Text search is debounced, loading and empty results are
+distinct states, and result-count/status changes are announced through an
+accessible live region. Large result sets do not require all hydrated drops to
+be mounted at once.
 
 For the staging release, this ledger is explicitly a frontend projection over
 paginated Wave Chat drops and hydrated metadata. The current API cannot
@@ -683,8 +749,11 @@ if mutable/indexed disposition support is not yet available. It must not fake
 workflow states that cannot be persisted.
 
 When authoritative disposition persistence is unavailable, the projection
-derives `NEW` deterministically. It never reuses stale browser state or guesses a
-later disposition from reactions or ordinary replies.
+derives `NEW` deterministically: the feedback drop exists and no structured,
+authoritative disposition record exists for that drop. An official reply may be
+displayed as a team response but does not change the disposition by itself. The
+projection never reuses stale browser state or guesses a later disposition from
+reactions or ordinary replies.
 
 The drop API does not currently provide an idempotency key. The client UUID
 supports duplicate detection in projections, but the staging UI must not claim
@@ -975,7 +1044,7 @@ manifest-bound staging validation and performs a final visible smoke review.
 - Pre-deployment security findings are public.
 - Technical inventory is generated deterministically, not inferred by an LLM.
 - Generated and editorial content are separate truth layers.
-- The public experience exposes approximately fourteen editorial pages plus
+- The public experience exposes fourteen editorial pages plus
   generated technical reference pages.
 - The initial deployment target is staging only.
 
