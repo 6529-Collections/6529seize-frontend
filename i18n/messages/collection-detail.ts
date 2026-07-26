@@ -406,6 +406,7 @@ export const LINK_PREVIEW_MESSAGES = namespaceMessages("linkPreview", [
   ["etherscan.open", "Open on Etherscan"],
   ["etherscan.copy", "Copy {kind}"],
   ["etherscan.copied", "{kind} copied"],
+  ["etherscan.copyFailed", "{kind} could not be copied"],
   ["etherscan.retry", "Retry"],
   ["etherscan.loading", "Loading Etherscan preview"],
   ["etherscan.partial", "Some live details are unavailable"],

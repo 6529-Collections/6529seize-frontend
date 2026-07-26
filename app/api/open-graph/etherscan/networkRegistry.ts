@@ -32,10 +32,33 @@ const hoodiClient = createPublicClient({
   }),
 });
 
+// ENS lookups use isolated public transports so untrusted names never consume
+// the first-party mainnet RPC used for bounded entity reads.
+const mainnetEnsClient = createPublicClient({
+  chain: mainnet,
+  transport: http(undefined, {
+    retryCount: 0,
+    timeout: RPC_TIMEOUT_MS,
+  }),
+});
+
+const sepoliaEnsClient = createPublicClient({
+  chain: sepolia,
+  transport: http(undefined, {
+    retryCount: 0,
+    timeout: RPC_TIMEOUT_MS,
+  }),
+});
+
 const CLIENTS_BY_CHAIN_ID = new Map<number, PublicClient>([
   [mainnet.id, mainnetClient],
   [sepolia.id, sepoliaClient],
   [hoodi.id, hoodiClient],
+]);
+
+const ENS_CLIENTS_BY_CHAIN_ID = new Map<number, PublicClient>([
+  [mainnet.id, mainnetEnsClient],
+  [sepolia.id, sepoliaEnsClient],
 ]);
 
 export function getEtherscanPublicClient(
@@ -45,4 +68,13 @@ export function getEtherscanPublicClient(
     return null;
   }
   return CLIENTS_BY_CHAIN_ID.get(network.chainId) ?? null;
+}
+
+export function getEtherscanEnsClient(
+  network: EtherscanNetwork
+): PublicClient | null {
+  if (network.status === "legacy") {
+    return null;
+  }
+  return ENS_CLIENTS_BY_CHAIN_ID.get(network.chainId) ?? null;
 }

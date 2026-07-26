@@ -308,6 +308,7 @@ describe("LinkPreviewCard", () => {
 
     expect(mockEnsPreviewCard).not.toHaveBeenCalled();
     expect(screen.queryByTestId("fallback")).toBeNull();
+    expect(screen.getByTestId("href-buttons")).toBeInTheDocument();
     const frame = screen.getByTestId("link-preview-card-stable-frame");
     expect(frame).toHaveClass(
       "tw-h-[14rem]",

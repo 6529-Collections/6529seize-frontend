@@ -7,6 +7,8 @@ import type {
   EtherscanPreviewBase,
 } from "@/lib/link-preview/etherscan/types";
 
+const TO = "0x0000000000000000000000000000000000000002";
+
 const BASE: EtherscanPreviewBase = {
   provider: "etherscan",
   requestUrl: "https://etherscan.io/tx/example",
@@ -53,7 +55,7 @@ describe("EtherscanCard", () => {
         status: "success",
         action: "native-transfer",
         from: "0x0000000000000000000000000000000000000001",
-        to: "0x0000000000000000000000000000000000000002",
+        to: TO,
         valueEth: "1.5",
         blockNumber: "23000000",
         confirmations: "18",
@@ -75,6 +77,60 @@ describe("EtherscanCard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Copy transaction" }));
 
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(hash));
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent("transaction copied")
+    );
+    expect(
+      screen.getByRole("button", { name: "Copy transaction" })
+    ).toBeInTheDocument();
+    expect(screen.getByText(TO)).toHaveClass("tw-sr-only");
+  });
+
+  it("announces clipboard failures without changing the action name", async () => {
+    writeText.mockRejectedValueOnce(new Error("clipboard unavailable"));
+    const hash = `0x${"b".repeat(64)}`;
+    const preview: EtherscanPreview = {
+      ...BASE,
+      canonicalUrl: `https://etherscan.io/tx/${hash}`,
+      type: "etherscan.transaction",
+      transaction: {
+        hash,
+        status: "pending",
+        action: "ethereum-transaction",
+      },
+    };
+
+    render(<EtherscanCard preview={preview} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy transaction" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "transaction could not be copied"
+      )
+    );
+    expect(
+      screen.getByRole("button", { name: "Copy transaction" })
+    ).toBeInTheDocument();
+  });
+
+  it("localizes large block quantities", () => {
+    const preview: EtherscanPreview = {
+      ...BASE,
+      canonicalUrl: "https://etherscan.io/block/23000000",
+      routeFamily: "/block/{identifier}",
+      type: "etherscan.block",
+      block: {
+        identifier: "23000000",
+        number: "23000000",
+        status: "finalized",
+        gasUsed: "12345678",
+      },
+    };
+
+    render(<EtherscanCard preview={preview} />);
+
+    expect(screen.getByText("12,345,678")).toBeInTheDocument();
   });
 
   it("explains route-only pages without implying live data", () => {

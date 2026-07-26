@@ -80,3 +80,24 @@
   binding and routed hostname examples through a typed test helper so CodeQL
   does not misclassify object-method calls as `String.match` regular
   expressions. Both affected suites (7 assertions) and targeted lint pass.
+
+## 2026-07-26 — Correctness, security, i18n, and WCAG bot iteration
+
+- Fixed pending transactions so a missing receipt/block number produces an
+  explicit short-lived `pending` card instead of throwing into `unknown`.
+- Fixed current-network client-unavailable fallbacks to retain the short
+  30-second partial TTL while legacy explorers keep the 24-hour route-only TTL.
+- Isolated untrusted ENS lookups onto dedicated public default transports;
+  entity reads can still use the bounded first-party mainnet fallback without
+  sending arbitrary ENS names to it.
+- Canonicalized NFT token IDs to decimal and included secondary identities in
+  cache keys, removing a contract-level collision between different NFTs.
+- Added runtime block-hash validation, defensive exact-length EIP-7702
+  delegation parsing, and case-normalized duplicate search handling.
+- Localized block gas quantities and recorded the permitted fallback debt for
+  less-common Etherscan titles/facts/contexts.
+- Added stable copy action names, polite success/failure announcements, visible
+  failure feedback, robust full-value assistive text, and regression evidence
+  that chat layouts retain the keyboard-operable open-link action.
+- The expanded focused matrix passes 9 suites and 235 assertions. Targeted
+  lint, changed-file TypeScript, Knip, and React Doctor 100/100 also pass.

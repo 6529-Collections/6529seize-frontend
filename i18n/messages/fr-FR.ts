@@ -65,6 +65,7 @@ export const FR_FR_MESSAGES = {
   "linkPreview.etherscan.open": "Ouvrir sur Etherscan",
   "linkPreview.etherscan.copy": "Copier {kind}",
   "linkPreview.etherscan.copied": "{kind} copié",
+  "linkPreview.etherscan.copyFailed": "Impossible de copier {kind}",
   "linkPreview.etherscan.retry": "Réessayer",
   "linkPreview.etherscan.loading": "Chargement de l’aperçu Etherscan",
   "linkPreview.etherscan.partial":

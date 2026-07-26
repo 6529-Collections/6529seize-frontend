@@ -39,6 +39,7 @@ type EtherscanPagePreview = Extract<
       | "etherscan.page";
   }
 >;
+type CopyStatus = "idle" | "success" | "error";
 
 type StatusAppearance = {
   readonly labelKey: MessageKey;
@@ -358,7 +359,7 @@ function getFacts(
         },
         {
           labelKey: "linkPreview.etherscan.fact.gas",
-          value: preview.block.gasUsed,
+          value: formatIntegerString(locale, preview.block.gasUsed),
         },
         {
           labelKey: "linkPreview.etherscan.fact.feeRecipient",
@@ -424,6 +425,32 @@ function isPagePreview(
   ].includes(preview.type);
 }
 
+function getCopyStatusMessage(
+  status: CopyStatus,
+  copiedLabel: string,
+  copyFailedLabel: string
+): string {
+  switch (status) {
+    case "success":
+      return copiedLabel;
+    case "error":
+      return copyFailedLabel;
+    case "idle":
+      return "";
+  }
+}
+
+function getCopyButtonText(
+  status: CopyStatus,
+  copyLabel: string,
+  copiedLabel: string,
+  copyFailedLabel: string
+): string {
+  return status === "idle"
+    ? copyLabel
+    : getCopyStatusMessage(status, copiedLabel, copyFailedLabel);
+}
+
 function StatusChip({
   status,
   isLegacy,
@@ -461,7 +488,7 @@ export default function EtherscanCard({
 }) {
   const locale = useBrowserLocale();
   const variant = useLinkPreviewVariant();
-  const [copied, setCopied] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle");
   const kind = t(locale, getKindKey(preview));
   const headline = getHeadline(locale, preview);
   const facts = getFacts(locale, preview)
@@ -472,6 +499,25 @@ export default function EtherscanCard({
     .slice(0, variant === "home" ? 6 : 4);
   const copyValue = getCopyValue(preview);
   const status = getStatus(preview);
+  const copyParameters = { kind: kind.toLowerCase() };
+  const copyLabel = t(locale, "linkPreview.etherscan.copy", copyParameters);
+  const copiedLabel = t(locale, "linkPreview.etherscan.copied", copyParameters);
+  const copyFailedLabel = t(
+    locale,
+    "linkPreview.etherscan.copyFailed",
+    copyParameters
+  );
+  const copyStatusMessage = getCopyStatusMessage(
+    copyStatus,
+    copiedLabel,
+    copyFailedLabel
+  );
+  const copyButtonText = getCopyButtonText(
+    copyStatus,
+    copyLabel,
+    copiedLabel,
+    copyFailedLabel
+  );
   const resourceLabel = t(locale, "linkPreview.etherscan.previewLabel", {
     kind,
     network: preview.network.label,
@@ -481,10 +527,14 @@ export default function EtherscanCard({
     if (!copyValue) {
       return;
     }
-    void navigator.clipboard.writeText(copyValue).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 700);
-    });
+    void navigator.clipboard.writeText(copyValue).then(
+      () => {
+        setCopyStatus("success");
+      },
+      () => {
+        setCopyStatus("error");
+      }
+    );
   };
 
   return (
@@ -527,10 +577,16 @@ export default function EtherscanCard({
               </dt>
               <dd
                 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs tw-font-medium tw-text-iron-100"
-                aria-label={fact.fullValue}
                 title={fact.fullValue}
               >
-                {fact.value}
+                {fact.fullValue ? (
+                  <>
+                    <span aria-hidden="true">{fact.value}</span>
+                    <span className="tw-sr-only">{fact.fullValue}</span>
+                  </>
+                ) : (
+                  fact.value
+                )}
               </dd>
             </div>
           ))}
@@ -567,19 +623,24 @@ export default function EtherscanCard({
 
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         {copyValue && (
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="tw-min-h-9 tw-rounded-lg tw-border tw-border-iron-600 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-          >
-            {t(
-              locale,
-              copied
-                ? "linkPreview.etherscan.copied"
-                : "linkPreview.etherscan.copy",
-              { kind: kind.toLowerCase() }
-            )}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={handleCopy}
+              aria-label={copyLabel}
+              className="tw-min-h-9 tw-rounded-lg tw-border tw-border-iron-600 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            >
+              <span aria-hidden="true">{copyButtonText}</span>
+            </button>
+            <span
+              className="tw-sr-only"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {copyStatusMessage}
+            </span>
+          </>
         )}
         {variant === "home" && (
           <Link

@@ -42,6 +42,17 @@ coverage for lists, analytics, tools, unknown routes, and retired networks.
   and partial until documented structured sources provide bounded data.
 - Reuse Compound event decoding as an evidence-based transaction adapter.
 
+## Recorded localization debt
+
+- Component: `EtherscanCard`.
+- Surface: specialized route titles, fact labels, context labels, entity kinds,
+  and the less-common proposed/future states.
+- Current fallback: the complete `en-US` catalog is used where `en-GB`,
+  `de-DE`, `es-ES`, or `fr-FR` does not yet provide a localized key.
+- Owner and follow-up: frontend i18n maintainers should complete parity before
+  the next Etherscan provider expansion; core actions, status, fallback, and
+  error messages are translated in this workstream.
+
 ## Next actions
 
 1. Merge refreshed `origin/main` after spec PR #3460 lands.

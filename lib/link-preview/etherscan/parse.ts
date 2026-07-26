@@ -110,7 +110,7 @@ function normalizeTokenId(value: string): string | null {
   if (!/^0x[0-9a-fA-F]{1,64}$/.test(value)) {
     return null;
   }
-  return `0x${value.slice(2).replace(/^0+/, "").toLowerCase() || "0"}`;
+  return BigInt(value).toString(10);
 }
 
 function normalizeEnsName(value: string): string | null {
@@ -126,6 +126,14 @@ function normalizeEnsName(value: string): string | null {
 
 function normalizeAddressOrEns(value: string): string | null {
   return normalizeAddress(value) ?? normalizeEnsName(value);
+}
+
+function removeTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 1 && value[end - 1] === "/") {
+    end -= 1;
+  }
+  return value.slice(0, end);
 }
 
 function validateUrlShape(url: URL): void {
@@ -174,7 +182,7 @@ function getSingleIdentityParam(
   }
 
   const normalized = values.map(normalize);
-  if (normalized.some((value) => value === null)) {
+  if (normalized.includes(null)) {
     throw new EtherscanParseError("Invalid Etherscan identity parameter");
   }
 
@@ -252,7 +260,7 @@ function buildCanonicalUrl(url: URL): string {
   }
 
   if (canonical.pathname.length > 1) {
-    canonical.pathname = canonical.pathname.replace(/\/+$/, "");
+    canonical.pathname = removeTrailingSlashes(canonical.pathname);
   }
   return canonical.toString();
 }
@@ -277,9 +285,10 @@ function buildTarget(options: {
     contexts.push(fragmentContext);
   }
 
-  const identity =
-    options.identifier?.toLowerCase() ??
-    `${options.routeFamily}:${options.secondaryIdentifier?.toLowerCase() ?? ""}`;
+  const identity = [
+    options.identifier?.toLowerCase() ?? options.routeFamily,
+    options.secondaryIdentifier?.toLowerCase() ?? "",
+  ].join(":");
   return {
     provider: "etherscan",
     requestUrl: options.url.toString(),
@@ -660,7 +669,13 @@ function parseSearchQuery(url: URL, pathname: string): EtherscanTarget | null {
     return null;
   }
   const queryValues = url.searchParams.getAll("q");
-  if (queryValues.length > 1 && new Set(queryValues).size > 1) {
+  const normalizedQueryValues = queryValues.map((value) =>
+    value.trim().toLowerCase()
+  );
+  if (
+    normalizedQueryValues.length > 1 &&
+    new Set(normalizedQueryValues).size > 1
+  ) {
     throw new EtherscanParseError("Conflicting search identity");
   }
   const query = queryValues[0]?.trim();
@@ -687,7 +702,7 @@ function parseSearchQuery(url: URL, pathname: string): EtherscanTarget | null {
 }
 
 function parseEntityQuery(url: URL): EtherscanTarget | null {
-  const pathname = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+  const pathname = removeTrailingSlashes(url.pathname.toLowerCase()) || "/";
   return (
     parseTransactionQuery(url, pathname) ??
     parseAddressQuery(url, pathname) ??
@@ -698,7 +713,7 @@ function parseEntityQuery(url: URL): EtherscanTarget | null {
 }
 
 function parsePageTarget(url: URL): EtherscanTarget {
-  const pathname = url.pathname.replace(/\/+$/, "") || "/";
+  const pathname = removeTrailingSlashes(url.pathname) || "/";
   const definition = getEtherscanRouteDefinition(pathname);
   return buildTarget({
     url,

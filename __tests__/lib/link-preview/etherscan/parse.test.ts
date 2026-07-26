@@ -206,7 +206,7 @@ describe("parseEtherscanUrl", () => {
     expect(target).toEqual(
       expect.objectContaining({
         canonicalUrl: `https://etherscan.io/token/${ADDRESS}?a=42#balances`,
-        cacheKey: `etherscan:v1:1:token:${ADDRESS.toLowerCase()}`,
+        cacheKey: `etherscan:v1:1:token:${ADDRESS.toLowerCase()}:42`,
         secondaryIdentifier: "42",
       })
     );
@@ -215,6 +215,39 @@ describe("parseEtherscanUrl", () => {
         labelKey: "linkPreview.etherscan.context.balances",
       }),
     ]);
+  });
+
+  it("canonicalizes NFT token IDs and keeps them distinct in cache keys", () => {
+    const hexTarget = parseEtherscanUrl(
+      `https://etherscan.io/nft/${ADDRESS}/0x2a`
+    );
+    const nextTarget = parseEtherscanUrl(
+      `https://etherscan.io/nft/${ADDRESS}/43`
+    );
+
+    expect(hexTarget).toEqual(
+      expect.objectContaining({
+        secondaryIdentifier: "42",
+        cacheKey: `etherscan:v1:1:nft:${ADDRESS.toLowerCase()}:42`,
+      })
+    );
+    expect(nextTarget?.cacheKey).toBe(
+      `etherscan:v1:1:nft:${ADDRESS.toLowerCase()}:43`
+    );
+  });
+
+  it("accepts duplicate search identities that differ only by case", () => {
+    const uppercaseHash = `0x${"A".repeat(64)}`;
+    const target = parseEtherscanUrl(
+      `https://etherscan.io/search?q=${HASH}&q=${uppercaseHash}`
+    );
+
+    expect(target).toEqual(
+      expect.objectContaining({
+        kind: "transaction",
+        identifier: HASH,
+      })
+    );
   });
 
   it.each([

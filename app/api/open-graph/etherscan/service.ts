@@ -24,21 +24,27 @@ import type {
   EtherscanNftView,
   EtherscanPageView,
   EtherscanPreview,
-  EtherscanPreviewBase,
   EtherscanTarget,
   EtherscanTokenView,
   EtherscanTransactionView,
 } from "@/lib/link-preview/etherscan/types";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 
-import { getEtherscanPublicClient } from "./networkRegistry";
+import {
+  getEtherscanEnsClient,
+  getEtherscanPublicClient,
+} from "./networkRegistry";
+import {
+  ADDRESS_TTL_MS,
+  createBase,
+  IMMUTABLE_TTL_MS,
+  PENDING_TTL_MS,
+  RECENT_TTL_MS,
+  ROUTE_ONLY_TTL_MS,
+  TOKEN_TTL_MS,
+} from "./previewBase";
+import { asBigInt, getTransactionBlockNumber, isBlockHash } from "./runtime";
 
-const ROUTE_ONLY_TTL_MS = 24 * 60 * 60 * 1000;
-const IMMUTABLE_TTL_MS = 24 * 60 * 60 * 1000;
-const PENDING_TTL_MS = 10 * 1000;
-const RECENT_TTL_MS = 30 * 1000;
-const ADDRESS_TTL_MS = 45 * 1000;
-const TOKEN_TTL_MS = 5 * 60 * 1000;
 const TOTAL_BUDGET_MS = 6000;
 const EMPTY_HEX = "0x";
 const TRANSFER_TOPIC = keccak256(
@@ -55,50 +61,6 @@ const TOKEN_ABI = parseAbi([
   "function supportsInterface(bytes4 interfaceId) view returns (bool)",
   "function ownerOf(uint256 tokenId) view returns (address)",
 ]);
-
-function nowIso(): string {
-  return new Date().toISOString();
-}
-
-function getCacheMetadata(ttlMs: number) {
-  return {
-    maxAgeSeconds: Math.max(1, Math.floor(ttlMs / 1000)),
-    staleWhileRevalidateSeconds: Math.max(5, Math.floor(ttlMs / 1000)),
-    immutable: ttlMs >= IMMUTABLE_TTL_MS ? true : undefined,
-  };
-}
-
-function createBase(
-  target: EtherscanTarget,
-  options: {
-    readonly completeness: EtherscanPreviewBase["completeness"];
-    readonly ttlMs: number;
-    readonly blockNumber?: string | undefined;
-    readonly hasRpc?: boolean | undefined;
-  }
-): EtherscanPreviewBase {
-  return {
-    provider: "etherscan",
-    requestUrl: target.requestUrl,
-    canonicalUrl: target.canonicalUrl,
-    network: target.network,
-    routeFamily: target.routeFamily,
-    contexts: target.contexts,
-    provenance: options.hasRpc
-      ? [
-          {
-            source: "rpc",
-            asOf: nowIso(),
-            blockNumber: options.blockNumber,
-            confidence: "authoritative",
-          },
-        ]
-      : [],
-    completeness: options.completeness,
-    stale: false,
-    cache: getCacheMetadata(options.ttlMs),
-  };
-}
 
 function createPagePreview(target: EtherscanTarget): EtherscanPreview {
   const fallbackPage: EtherscanPageView = {
@@ -317,15 +279,24 @@ async function fetchTransactionPreview(
   const hash = target.identifier as Hash;
   const transaction = await client.getTransaction({ hash });
   const receipt = await settledValue(client.getTransactionReceipt({ hash }));
-  const blockNumber = receipt?.blockNumber ?? transaction.blockNumber;
+  const blockNumber =
+    receipt?.blockNumber ?? getTransactionBlockNumber(transaction);
   const [block, latest, finalizedBlock] = await Promise.all([
-    settledValue(client.getBlock({ blockNumber })),
+    blockNumber === undefined
+      ? Promise.resolve(undefined)
+      : settledValue(client.getBlock({ blockNumber })),
     settledValue(client.getBlockNumber()),
     settledValue(client.getBlock({ blockTag: "finalized" })),
   ]);
   const status = receipt?.status ?? "pending";
-  const confirmations = getConfirmations(blockNumber, latest);
-  const finalized = getFinalized(blockNumber, finalizedBlock?.number);
+  const confirmations =
+    blockNumber === undefined
+      ? undefined
+      : getConfirmations(blockNumber, latest);
+  const finalized =
+    blockNumber === undefined
+      ? undefined
+      : getFinalized(blockNumber, finalizedBlock?.number);
   const fee = receipt ? receipt.gasUsed * receipt.effectiveGasPrice : undefined;
   const ttl = getTransactionTtl(status, finalized);
 
@@ -347,7 +318,7 @@ async function fetchTransactionPreview(
     valueEth:
       transaction.value > 0n ? formatEther(transaction.value) : undefined,
     timestamp: getTimestamp(block?.timestamp),
-    blockNumber: blockNumber.toString(),
+    blockNumber: blockNumber?.toString(),
     confirmations: confirmations?.toString(),
     finalized,
     feeEth: fee === undefined ? undefined : formatEther(fee),
@@ -369,7 +340,7 @@ async function fetchTransactionPreview(
         completeness:
           block !== undefined && receipt !== undefined ? "complete" : "partial",
         ttlMs: ttl,
-        blockNumber: blockNumber.toString(),
+        blockNumber: blockNumber?.toString(),
         hasRpc: true,
       }),
       type: "etherscan.transaction",
@@ -405,18 +376,18 @@ function getAddressSubtype(
 
 async function resolveAddressInput(
   target: EtherscanTarget,
-  client: PublicClient
+  ensClient: PublicClient | null
 ): Promise<Address | null> {
   const input = target.identifier ?? "";
   if (isAddress(input)) {
     return getAddress(input);
   }
-  if (!input.endsWith(".eth") || target.network.key === "hoodi") {
+  if (!input.endsWith(".eth") || ensClient === null) {
     return null;
   }
   try {
     return (
-      (await client.getEnsAddress({
+      (await ensClient.getEnsAddress({
         name: input,
       })) ?? null
     );
@@ -429,7 +400,10 @@ async function fetchAddressPreview(
   target: EtherscanTarget,
   client: PublicClient
 ): Promise<{ readonly data: EtherscanPreview; readonly ttl: number }> {
-  const address = await resolveAddressInput(target, client);
+  const address = await resolveAddressInput(
+    target,
+    getEtherscanEnsClient(target.network)
+  );
   if (!address) {
     return { data: createEntityFallback(target), ttl: ADDRESS_TTL_MS };
   }
@@ -439,9 +413,13 @@ async function fetchAddressPreview(
     settledValue(client.getCode({ address })),
     settledValue(client.getBlockNumber()),
   ]);
+  const delegationCandidate =
+    code?.toLowerCase().startsWith("0xef0100") && code.length === 48
+      ? `0x${code.slice(8, 48)}`
+      : undefined;
   const delegationTarget =
-    code?.toLowerCase().startsWith("0xef0100") && code.length >= 48
-      ? getAddress(`0x${code.slice(8, 48)}`)
+    delegationCandidate && isAddress(delegationCandidate)
+      ? getAddress(delegationCandidate)
       : undefined;
   const view: EtherscanAddressView = {
     input: target.identifier ?? address,
@@ -626,16 +604,31 @@ async function fetchNftPreview(
   };
 }
 
+async function getBlockByIdentifier(
+  client: PublicClient,
+  identifier: string,
+  numeric: bigint | null
+) {
+  if (numeric !== null) {
+    return client.getBlock({ blockNumber: numeric });
+  }
+  if (!isBlockHash(identifier)) {
+    throw new Error("Invalid Etherscan block identifier");
+  }
+  return client.getBlock({ blockHash: identifier });
+}
+
 async function fetchBlockPreview(
   target: EtherscanTarget,
   client: PublicClient
 ): Promise<{ readonly data: EtherscanPreview; readonly ttl: number }> {
   const identifier = target.identifier ?? "";
   const numeric = /^\d+$/.test(identifier) ? BigInt(identifier) : null;
-  const [latest, finalized] = await Promise.all([
+  const [latestValue, finalized] = await Promise.all([
     settledValue(client.getBlockNumber()),
     settledValue(client.getBlock({ blockTag: "finalized" })),
   ]);
+  const latest = asBigInt(latestValue);
 
   if (numeric !== null && latest !== undefined && numeric > latest) {
     const block: EtherscanBlockView = {
@@ -660,10 +653,7 @@ async function fetchBlockPreview(
     };
   }
 
-  const chainBlock =
-    numeric === null
-      ? await client.getBlock({ blockHash: identifier as Hash })
-      : await client.getBlock({ blockNumber: numeric });
+  const chainBlock = await getBlockByIdentifier(client, identifier, numeric);
   const isFinalized =
     finalized !== undefined && chainBlock.number <= finalized.number;
   const ttl = isFinalized ? IMMUTABLE_TTL_MS : RECENT_TTL_MS;
@@ -758,12 +748,14 @@ export function createEtherscanPlan(url: URL): PreviewPlan | null {
 
   const client = getEtherscanPublicClient(target.network);
   if (!client) {
+    const ttl =
+      target.network.status === "legacy" ? ROUTE_ONLY_TTL_MS : RECENT_TTL_MS;
     return {
       cacheKey: target.cacheKey,
       execute: () =>
         Promise.resolve({
           data: createEntityFallback(target) as LinkPreviewResponse,
-          ttl: ROUTE_ONLY_TTL_MS,
+          ttl,
         }),
     };
   }
