@@ -39,6 +39,7 @@ const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
   [ApiNotificationCause.WaveCreated]: 10,
   [ApiNotificationCause.AllDrops]: 11,
   [ApiNotificationCause.PriorityAlert]: 12,
+  [ApiNotificationCause.SubscriptionCoverage]: 13,
 };
 
 const compareNotificationCause = (

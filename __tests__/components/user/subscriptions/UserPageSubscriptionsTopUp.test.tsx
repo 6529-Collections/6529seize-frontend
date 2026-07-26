@@ -4,6 +4,7 @@ import {
   SUBSCRIPTIONS_ADDRESS,
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
+import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";
@@ -100,7 +101,9 @@ describe("UserPageSubscriptionsTopUp", () => {
     const oneCardOption = screen.getByRole("radio", { name: "1 Card" });
     await user.click(oneCardOption);
 
-    const sendButton = screen.getByRole("button", { name: "Send top up" });
+    const sendButton = screen.getByRole("button", {
+      name: "Top up 0.06529 ETH",
+    });
     expect(sendButton).not.toBeDisabled();
     await user.click(sendButton);
 
@@ -193,7 +196,9 @@ describe("UserPageSubscriptionsTopUp", () => {
     const countInput = screen.getByPlaceholderText("count");
     await user.type(countInput, "2");
 
-    const sendButton = screen.getByRole("button", { name: "Send top up" });
+    const sendButton = screen.getByRole("button", {
+      name: "Top up 0.13058 ETH",
+    });
     expect(sendButton).not.toBeDisabled();
     await user.click(sendButton);
 
@@ -201,6 +206,64 @@ describe("UserPageSubscriptionsTopUp", () => {
       chainId: SUBSCRIPTIONS_CHAIN.id,
       to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther((2 * MEMES_MINT_PRICE).toString()),
+    });
+  });
+
+  it("uses the exact backend recommendation for the primary top-up", async () => {
+    const user = userEvent.setup();
+    const coverage = {
+      recommended_top_up: {
+        target_fully_funded_drops: 7,
+        additional_mints: 3,
+        amount_eth: "0.17087",
+        projected_through: {
+          token_id: 560,
+          mint_at: new Date("2026-10-12T15:40:00Z"),
+        },
+      },
+      minimum_top_up: {
+        additional_mints: 1,
+        amount_eth: "0.04029",
+        resulting_fully_funded_drops: 1,
+        projected_through: {
+          token_id: 554,
+          mint_at: new Date("2026-09-30T15:40:00Z"),
+        },
+      },
+    } as ApiSubscriptionCoverage;
+
+    render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+
+    await user.click(
+      screen.getByRole("radio", { name: "Recommended - 3 Cards" })
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.17087 ETH" })
+    );
+
+    expect(
+      screen.getByText("Funds 7 intended drops through The Memes #560")
+    ).toBeInTheDocument();
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther("0.17087"),
+    });
+  });
+
+  it("refreshes coverage after the submitted transaction is confirmed", async () => {
+    const onTransactionConfirmed = jest.fn();
+    sendTransaction.data = "0x123";
+    waitSendTransaction.isSuccess = true;
+
+    render(
+      <UserPageSubscriptionsTopUp
+        onTransactionConfirmed={onTransactionConfirmed}
+      />
+    );
+
+    await waitFor(() => {
+      expect(onTransactionConfirmed).toHaveBeenCalledTimes(1);
     });
   });
 });

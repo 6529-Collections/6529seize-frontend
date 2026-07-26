@@ -2,6 +2,7 @@ import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { commonApiFetch } from "@/services/api/common-api";
 import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
 
@@ -362,6 +363,94 @@ describe("fetchNotificationsV2", () => {
       expect(response.notifications).toEqual([]);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Unsupported notification cause "NEW_CAUSE"')
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("maps subscription coverage without requiring a related identity", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 1,
+      notifications: [
+        {
+          id: 15,
+          cause: ApiNotificationCause.SubscriptionCoverage,
+          created_at: 9000,
+          read_at: null,
+          related_identity: null,
+          related_drops: [],
+          additional_context: {
+            profile_handle: "sesamenoodles",
+            status: ApiSubscriptionCoverageStatus.RunningLow,
+            consolidation_key: "profile-key",
+            mint_capacity: 4,
+            allocated_mints: 4,
+            fully_funded_drops: 2,
+            funded_through: {
+              token_id: 560,
+              mint_at: new Date("2026-10-12T15:40:00Z"),
+            },
+            next_unfunded: {
+              token_id: 561,
+              mint_at: new Date("2026-10-14T15:40:00Z"),
+              requested_mints: 3,
+              funded_mints: 1,
+              missing_mints: 2,
+            },
+            minimum_top_up_eth: "0.08058",
+            top_up_deadline: null,
+          },
+        },
+      ],
+    });
+
+    const response = await fetchNotificationsV2({ limit: "30" });
+
+    expect(response.notifications).toEqual([
+      expect.objectContaining({
+        cause: ApiNotificationCause.SubscriptionCoverage,
+        additional_context: expect.objectContaining({
+          profile_handle: "sesamenoodles",
+          status: ApiSubscriptionCoverageStatus.RunningLow,
+          fully_funded_drops: 2,
+          minimum_top_up_eth: "0.08058",
+        }),
+      }),
+    ]);
+  });
+
+  it("drops malformed subscription coverage notifications", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    try {
+      (commonApiFetch as jest.Mock).mockResolvedValue({
+        unread_count: 1,
+        notifications: [
+          {
+            id: 16,
+            cause: ApiNotificationCause.SubscriptionCoverage,
+            created_at: 9000,
+            read_at: null,
+            related_identity: null,
+            related_drops: [],
+            additional_context: {
+              profile_handle: "sesamenoodles",
+              status: ApiSubscriptionCoverageStatus.Covered,
+            },
+          },
+        ],
+      });
+
+      const response = await fetchNotificationsV2({ limit: "30" });
+
+      expect(response.notifications).toEqual([]);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "Invalid SUBSCRIPTION_COVERAGE notification context"
+        )
       );
     } finally {
       consoleErrorSpy.mockRestore();
