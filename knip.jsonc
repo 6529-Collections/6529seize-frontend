@@ -69,6 +69,9 @@
       "components/utils/toast/AppToast.tsx": ["exports"],
       "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
       "hooks/useWavePreviewById.ts": ["exports"],
+      // The public-review generator exposes pure internals to its focused Jest
+      // contract tests; Knip intentionally does not analyze test-only usage.
+      "scripts/public-reviews/solidity-reference-lib.cjs": ["exports"],
       "services/**": ["files"],
       "lib/storage/idb-keyval.ts": ["files"],
       "playwright.config.ts": ["exports"],
