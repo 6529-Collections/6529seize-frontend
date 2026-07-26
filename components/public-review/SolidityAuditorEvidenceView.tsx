@@ -10,7 +10,10 @@ import {
   SolidityReadinessExplorer,
   type SolidityReadinessListItem,
 } from "@/components/public-review/SolidityReadinessExplorer";
-import { SolidityRiskExplorer } from "@/components/public-review/SolidityRiskExplorer";
+import {
+  SolidityRiskExplorer,
+  type SolidityRiskListItem,
+} from "@/components/public-review/SolidityRiskExplorer";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -127,7 +130,6 @@ function getReadinessItems(
 ): readonly SolidityReadinessListItem[] {
   return manifest.auditorEvidence.readiness.requirements.map(
     (requirement) => ({
-      ...requirement,
       evidence: requirement.evidence.map((artifact) => ({
         ...artifact,
         href: getPinnedRepositoryHref({
@@ -136,8 +138,30 @@ function getReadinessItems(
           repository: manifest.source.repository,
         }),
       })),
+      id: requirement.id,
+      notes: requirement.notes,
+      owner: requirement.owner,
+      phase: requirement.phase,
+      status: requirement.status,
     })
   );
+}
+
+function getRiskItems(
+  manifest: SolidityReferenceManifest
+): readonly SolidityRiskListItem[] {
+  return manifest.auditorEvidence.riskRegister.risks.map((risk) => ({
+    area: risk.area,
+    id: risk.id,
+    mitigation: risk.mitigation,
+    owner: risk.owner,
+    residual_risk: risk.residual_risk,
+    severity: risk.severity,
+    status: risk.status,
+    target_gate: risk.target_gate,
+    title: risk.title,
+    tracking: risk.tracking,
+  }));
 }
 
 function getGovernedParameterItems(
@@ -236,7 +260,7 @@ export function SolidityAuditorEvidenceView({
       </section>
 
       <SolidityReadinessExplorer items={getReadinessItems(manifest)} />
-      <SolidityRiskExplorer items={evidence.riskRegister.risks} />
+      <SolidityRiskExplorer items={getRiskItems(manifest)} />
       <SolidityGovernedParameterExplorer
         candidateBinding={
           evidence.governedParameterInventory.candidate_binding

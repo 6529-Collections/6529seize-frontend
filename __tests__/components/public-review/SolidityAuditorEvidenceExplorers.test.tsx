@@ -54,7 +54,6 @@ const READINESS: readonly SolidityReadinessListItem[] = [
     notes: "A completed external audit report is not retained.",
     owner: "TBD",
     phase: "public_beta",
-    risk_acceptance: null,
     status: "missing",
   },
   {
@@ -69,7 +68,6 @@ const READINESS: readonly SolidityReadinessListItem[] = [
     notes: "A signature bundle is pending.",
     owner: "release",
     phase: "production_release",
-    risk_acceptance: null,
     status: "pending",
   },
 ];

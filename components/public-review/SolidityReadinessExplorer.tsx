@@ -8,7 +8,10 @@ import { t } from "@/i18n/messages";
 import type { SolidityReadinessRequirement } from "@/lib/public-review/solidityReferenceTypes";
 
 export interface SolidityReadinessListItem
-  extends Omit<SolidityReadinessRequirement, "evidence"> {
+  extends Pick<
+    SolidityReadinessRequirement,
+    "id" | "notes" | "owner" | "phase" | "status"
+  > {
   readonly evidence: readonly {
     readonly href: string;
     readonly path: string;

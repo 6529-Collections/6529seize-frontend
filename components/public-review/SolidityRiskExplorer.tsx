@@ -7,6 +7,20 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { SolidityRiskRegisterEntry } from "@/lib/public-review/solidityReferenceTypes";
 
+export type SolidityRiskListItem = Pick<
+  SolidityRiskRegisterEntry,
+  | "area"
+  | "id"
+  | "mitigation"
+  | "owner"
+  | "residual_risk"
+  | "severity"
+  | "status"
+  | "target_gate"
+  | "title"
+  | "tracking"
+>;
+
 const INITIAL_RESULT_LIMIT = 25;
 const INPUT_CLASSES =
   "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
@@ -16,7 +30,7 @@ function humanize(value: string): string {
 }
 
 function matchesQuery(
-  item: SolidityRiskRegisterEntry,
+  item: SolidityRiskListItem,
   query: string
 ): boolean {
   return [
@@ -35,7 +49,7 @@ function matchesQuery(
 export function SolidityRiskExplorer({
   items,
 }: {
-  readonly items: readonly SolidityRiskRegisterEntry[];
+  readonly items: readonly SolidityRiskListItem[];
 }) {
   const [query, setQuery] = useState("");
   const [area, setArea] = useState("");

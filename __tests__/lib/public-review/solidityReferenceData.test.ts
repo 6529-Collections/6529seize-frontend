@@ -136,6 +136,11 @@ describeFixture("generated Stream Solidity reference fixture", () => {
 
   it("materializes every generated route identity without duplicates", async () => {
     const inventory = await reader.loadRouteInventory(STREAM_REVIEW_VERSION);
+    await Promise.all(
+      inventory.definitions.map(({ definitionKey }) =>
+        reader.loadDefinition(STREAM_REVIEW_VERSION, definitionKey)
+      )
+    );
     const allIdentities = [
       ...inventory.definitions.map(
         ({ definitionKey }) => `definition:${definitionKey}`
