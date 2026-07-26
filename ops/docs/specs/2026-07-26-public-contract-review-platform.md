@@ -348,6 +348,9 @@ the overview, editorial, technical-reference, source, declaration-search, and
 feedback-ledger route families all return the standard not-found behavior.
 Navigation omits the review, and staging packages omit both the generated raw
 evidence under `public/review-data` and the corresponding editorial corpus.
+Help records carry a review identifier and are filtered through the same
+publication configuration before the Help Bot and agent artifacts are
+generated, so `DRAFT` cannot be advertised through machine-readable discovery.
 Changing a review from `DRAFT` to a public lifecycle state therefore requires
 one explicit, validated publication-state change.
 

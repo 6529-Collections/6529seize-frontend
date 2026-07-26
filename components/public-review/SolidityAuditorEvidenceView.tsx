@@ -212,7 +212,7 @@ export function SolidityAuditorEvidenceView({
       <section aria-labelledby="solidity-auditor-evidence">
         <h2
           id="solidity-auditor-evidence"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+          className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
         >
           {t(DEFAULT_LOCALE, "publicReview.reference.auditorEvidence")}
         </h2>

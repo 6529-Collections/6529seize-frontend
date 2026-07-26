@@ -120,8 +120,9 @@ feedback, and the security-reporting policy:
 In `DRAFT`, the same gate hides the review from navigation, returns not-found
 for editorial, technical-reference, source, declaration-search, and ledger
 routes, and omits raw generated evidence plus editorial files from staging
-packages. The lifecycle gate and environment gate must both permit publication
-before any public review surface is available.
+packages. Review-tagged Help Bot records and the agent artifacts generated from
+them are omitted as well. The lifecycle gate and environment gate must both
+permit publication before any public review surface is available.
 
 Status copy and chips are selected from the review definition rather than
 being embedded in the Stream shell. Review, audience, sequence, and feedback

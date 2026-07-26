@@ -125,7 +125,7 @@ export function SolidityDefinitionExplorer({
     <section aria-labelledby="solidity-definition-inventory">
       <h2
         id="solidity-definition-inventory"
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+        className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.definitions")}
       </h2>

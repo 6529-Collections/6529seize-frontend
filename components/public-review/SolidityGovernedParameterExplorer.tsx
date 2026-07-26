@@ -69,7 +69,7 @@ export function SolidityGovernedParameterExplorer({
     >
       <h2
         id="solidity-governed-parameters"
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+        className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.governedParameters")}
       </h2>

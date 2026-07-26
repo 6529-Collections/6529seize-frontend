@@ -1,6 +1,10 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const prettier = require("prettier");
+const {
+  getPublicationEnvironment,
+  getPublishedHelpRecords,
+} = require("./help-index-publication.cjs");
 
 const repoRoot = path.resolve(__dirname, "..");
 const appDir = path.join(repoRoot, "app");
@@ -31,22 +35,7 @@ const LEGACY_WORDPRESS_MARKERS = [
   "wp-content/",
 ];
 const ALLOWED_PUBLICATION_ENVIRONMENTS = new Set(["local", "staging"]);
-
-// Keep this build-time allowlist aligned with config/publicReviews.ts.
-function getPublicationEnvironment(baseEndpoint) {
-  try {
-    const hostname = new URL(baseEndpoint).hostname.toLowerCase();
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "local";
-    }
-    if (hostname === "staging.6529.io") {
-      return "staging";
-    }
-  } catch {
-    // Missing or invalid build configuration must fail closed to production.
-  }
-  return "production";
-}
+const PUBLIC_REVIEW_ID_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
 
 function fail(message) {
   console.error(message);
@@ -327,6 +316,12 @@ function validateRecord(record, ids, routePatterns) {
       }
     }
   }
+  if (record.public_review_id !== undefined) {
+    requireString(record.public_review_id, "public_review_id", record.id);
+    if (!PUBLIC_REVIEW_ID_PATTERN.test(record.public_review_id)) {
+      fail(`${record.id}: public_review_id is not a valid review id`);
+    }
+  }
   for (const relatedPath of record.related_paths || []) {
     validateInternalPath(
       relatedPath,
@@ -370,13 +365,11 @@ async function publishHelpIndex() {
   );
   const publishedIndex = {
     ...index,
-    records: index.records
-      .filter(
-        (record) =>
-          record.environments === undefined ||
-          record.environments.includes(publicationEnvironment)
-      )
-      .map(({ environments: _environments, ...record }) => record),
+    records: getPublishedHelpRecords({
+      records: index.records,
+      publicationEnvironment,
+      repoRoot,
+    }),
   };
   const output = await prettier.format(JSON.stringify(publishedIndex), {
     parser: "json",
@@ -389,4 +382,11 @@ async function publishHelpIndex() {
   );
 }
 
-publishHelpIndex().catch((error) => fail(error.message));
+if (require.main === module) {
+  publishHelpIndex().catch((error) => fail(error.message));
+}
+
+module.exports = {
+  publishHelpIndex,
+  validateIndex,
+};

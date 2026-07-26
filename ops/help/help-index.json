@@ -90,6 +90,7 @@
     {
       "id": "public-reviews.stream",
       "environments": ["local", "staging"],
+      "public_review_id": "6529-stream",
       "kind": "route",
       "title": "6529 Stream contract review",
       "aliases": [
@@ -153,6 +154,7 @@
     {
       "id": "public-reviews.stream.feedback-status",
       "environments": ["local", "staging"],
+      "public_review_id": "6529-stream",
       "kind": "ui_affordance",
       "title": "Stream review feedback and public ledger",
       "aliases": [
