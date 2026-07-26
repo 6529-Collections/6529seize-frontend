@@ -39,12 +39,17 @@ export function resolveStreamReviewRoute({
 
   if (
     params.version !== undefined &&
-    !STREAM_REVIEW_DEFINITION.availableVersions.includes(params.version)
+    !STREAM_REVIEW_DEFINITION.versions.some(
+      (candidate) => candidate.version === params.version
+    )
   ) {
     return undefined;
   }
 
-  const page = getStreamReviewPage(params.page ?? "overview");
+  const page = getStreamReviewPage(
+    params.page ?? "overview",
+    params.version ?? STREAM_REVIEW_DEFINITION.activeVersion
+  );
   if (!page) {
     return undefined;
   }

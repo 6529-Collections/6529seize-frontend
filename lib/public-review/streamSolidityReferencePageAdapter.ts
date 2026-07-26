@@ -85,7 +85,7 @@ export async function loadVersionedStreamReferenceInventories({
     return [];
   }
   return Promise.all(
-    STREAM_REVIEW_DEFINITION.availableVersions.map(async (version) => ({
+    STREAM_REVIEW_DEFINITION.versions.map(async ({ version }) => ({
       inventory: await reader.loadRouteInventory(version),
       version,
     }))
@@ -97,7 +97,7 @@ export function getActiveStreamReferenceRootParams() {
 }
 
 export function getVersionedStreamReferenceRootParams() {
-  return STREAM_REVIEW_DEFINITION.availableVersions.map((version) => ({
+  return STREAM_REVIEW_DEFINITION.versions.map(({ version }) => ({
     review: STREAM_REVIEW_SLUG,
     version,
   }));

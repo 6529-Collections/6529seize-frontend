@@ -68,6 +68,56 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.navigation.previous": "Previous",
   "publicReview.navigation.next": "Next",
   "publicReview.navigation.pagePosition": "Page {current} of {total}",
+  "publicReview.pages.overview.title": "Overview",
+  "publicReview.pages.overview.summary":
+    "A map of the full protocol, its present review state, and the decisions the community is being asked to examine.",
+  "publicReview.pages.artworkLifecycle.title": "Artwork Lifecycle",
+  "publicReview.pages.artworkLifecycle.summary":
+    "How an artwork moves from preparation through minting, preservation, and finality.",
+  "publicReview.pages.forArtists.title": "For Artists",
+  "publicReview.pages.forArtists.summary":
+    "The artist-facing choices, approvals, responsibilities, and irreversible moments.",
+  "publicReview.pages.rolesAndTrust.title": "Roles and Trust",
+  "publicReview.pages.rolesAndTrust.summary":
+    "Every role that can act, what it can change, and where trust remains.",
+  "publicReview.pages.curationAndTdhAuthorization.title":
+    "Curation and TDH Authorization",
+  "publicReview.pages.curationAndTdhAuthorization.summary":
+    "How offchain curation and TDH decisions become signed onchain authorization.",
+  "publicReview.pages.tokensCollectionsAndMinting.title":
+    "Tokens, Collections, and Minting",
+  "publicReview.pages.tokensCollectionsAndMinting.summary":
+    "The shared ERC-721 system for collections, token issuance, supply, and mint controls.",
+  "publicReview.pages.fixedPriceSalesAndAuctions.title":
+    "Fixed-Price Sales and Auctions",
+  "publicReview.pages.fixedPriceSalesAndAuctions.summary":
+    "The sale mechanisms, bidding rules, settlement paths, and edge cases.",
+  "publicReview.pages.revenueSplitsAndRoyalties.title":
+    "Revenue, Splits, and Royalties",
+  "publicReview.pages.revenueSplitsAndRoyalties.summary":
+    "Where primary-sale funds and secondary royalties go, and how recipients are configured.",
+  "publicReview.pages.randomness.title": "Randomness",
+  "publicReview.pages.randomness.summary":
+    "How unpredictable values enter the protocol and which outcomes depend on them.",
+  "publicReview.pages.metadataScriptsAndDependencies.title":
+    "Metadata, Scripts, and Dependencies",
+  "publicReview.pages.metadataScriptsAndDependencies.summary":
+    "How token presentation, generative scripts, and external dependencies are stored and referenced.",
+  "publicReview.pages.freezingPreservationAndArtworkFinality.title":
+    "Freezing, Preservation, and Artwork Finality",
+  "publicReview.pages.freezingPreservationAndArtworkFinality.summary":
+    "The mechanisms that move artwork data from editable to permanently fixed.",
+  "publicReview.pages.governancePausingAndSuccessors.title":
+    "Governance, Pausing, and Successors",
+  "publicReview.pages.governancePausingAndSuccessors.summary":
+    "How governance acts, emergencies are handled, and successor contracts are recognized.",
+  "publicReview.pages.securityTestingAndKnownLimitations.title":
+    "Security, Testing, and Known Limitations",
+  "publicReview.pages.securityTestingAndKnownLimitations.summary":
+    "Current engineering evidence, unresolved findings, constraints, and pre-audit caveats.",
+  "publicReview.pages.communityReview.title": "Community Review",
+  "publicReview.pages.communityReview.summary":
+    "How to examine the proposal, frame actionable feedback, and follow the review record.",
   "publicReview.evidence.heading": "Evidence labels",
   "publicReview.evidence.summary": "How to read evidence labels",
   "publicReview.evidence.labels.implemented": "Implemented",
@@ -348,7 +398,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "The selected code could not be copied. Select and copy it manually.",
   "publicReview.reference.openSelection": "Open selected lines on GitHub",
   "publicReview.reference.commentSelection": "Comment on selected lines",
-  "publicReview.reference.skipCode": "Skip source code and send feedback",
+  "publicReview.reference.skipCode":
+    "Send feedback on these selected lines",
   "publicReview.reference.selectionReady":
     "This source reference is ready to attach to structured feedback.",
   "publicReview.reference.warningSummary": "Warning summary",
@@ -368,7 +419,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.feedback.jump": "Jump to send feedback",
   "publicReview.feedback.intro":
     "Your feedback will be posted as a top-level message in the review Wave with structured review metadata.",
-  "publicReview.feedback.category": "Feedback category",
+  "publicReview.feedback.category": "Feedback type",
   "publicReview.feedback.severity": "Suspected severity",
   "publicReview.feedback.comment": "Comment",
   "publicReview.feedback.commentHint":
@@ -413,20 +464,21 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Preparing the tamper-evident checksum for this exact code selection…",
   "publicReview.feedback.hashUnavailable":
     "This browser could not verify the selected code checksum. Code-linked feedback is disabled; reload in a current browser and try again.",
-  "publicReview.feedback.categories.general": "General feedback",
-  "publicReview.feedback.categories.artistExperience": "Artist experience",
+  "publicReview.feedback.categories.question": "Question",
+  "publicReview.feedback.categories.artistWorkflow": "Artist workflow",
+  "publicReview.feedback.categories.productOrUx": "Product or UX",
   "publicReview.feedback.categories.protocolDesign":
     "Protocol and mechanism design",
-  "publicReview.feedback.categories.economics": "Sales and economics",
-  "publicReview.feedback.categories.governance": "Governance and trust",
-  "publicReview.feedback.categories.interoperability":
-    "Interfaces and interoperability",
   "publicReview.feedback.categories.documentation": "Documentation",
-  "publicReview.feedback.categories.testing": "Testing and evidence",
+  "publicReview.feedback.categories.implementationBug": "Implementation bug",
   "publicReview.feedback.categories.exploitable":
     "Possible exploitable security vulnerability",
-  "publicReview.feedback.severities.question": "Question",
-  "publicReview.feedback.severities.suggestion": "Suggestion",
+  "publicReview.feedback.categories.testingOrEvidenceGap":
+    "Testing or evidence gap",
+  "publicReview.feedback.categories.accessibilityOrLocalization":
+    "Accessibility or localization",
+  "publicReview.feedback.severities.notAssessed": "Not assessed",
+  "publicReview.feedback.severities.informational": "Informational",
   "publicReview.feedback.severities.low": "Low",
   "publicReview.feedback.severities.medium": "Medium",
   "publicReview.feedback.severities.high": "High",
@@ -446,7 +498,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.ledger.intro":
     "Structured feedback submitted for this exact review version.",
   "publicReview.ledger.search": "Search loaded feedback",
-  "publicReview.ledger.category": "Category",
+  "publicReview.ledger.category": "Type",
   "publicReview.ledger.page": "Page",
   "publicReview.ledger.contract": "Contract",
   "publicReview.ledger.severity": "Severity",

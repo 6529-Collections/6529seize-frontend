@@ -57,14 +57,18 @@ function assertJsonValue(value: unknown, label: string): void {
   throw new Error(`Invalid ${label} JSON in Solidity auditor evidence.`);
 }
 
+function isSafeArtifactPath(value: unknown): value is string {
+  return (
+    isNonEmptyString(value) &&
+    SAFE_ARTIFACT_PATH_PATTERN.test(value) &&
+    !value.startsWith("/") &&
+    !value.includes("//") &&
+    !value.split("/").some((segment) => segment === "." || segment === "..")
+  );
+}
+
 function assertArtifactPath(value: unknown, label: string): asserts value is string {
-  if (
-    !isNonEmptyString(value) ||
-    !SAFE_ARTIFACT_PATH_PATTERN.test(value) ||
-    value.startsWith("/") ||
-    value.includes("//") ||
-    value.split("/").some((segment) => segment === "." || segment === "..")
-  ) {
+  if (!isSafeArtifactPath(value)) {
     throw new Error(`Invalid ${label} path in Solidity auditor evidence.`);
   }
 }
@@ -126,9 +130,8 @@ function assertRiskEntry(
   if (
     value["tracking"].some(
       (href) =>
-        !href.startsWith(
-          "https://github.com/6529-Collections/6529Stream/"
-        )
+        !href.startsWith("https://github.com/6529-Collections/6529Stream/") &&
+        !isSafeArtifactPath(href)
     )
   ) {
     throw new Error("Invalid risk-register tracking link.");
@@ -435,7 +438,7 @@ function assertNatSpecEvidence(
     assertNatSpecGap(gap, sourcePaths);
     if (
       ids.has(gap.id) ||
-      (previousId !== undefined && previousId.localeCompare(gap.id, "en") >= 0)
+      (previousId !== undefined && previousId >= gap.id)
     ) {
       throw new Error("Duplicate or unsorted normalized NatSpec gap.");
     }

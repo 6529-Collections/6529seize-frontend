@@ -9,6 +9,7 @@ import {
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
 import { PublicReviewNavigation } from "@/components/public-review/PublicReviewNavigation";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -16,6 +17,7 @@ import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
   PublicReviewSource,
+  PublicReviewVersionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
 import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import {
@@ -55,7 +57,7 @@ function PublicReviewPageStepper({
             {t(DEFAULT_LOCALE, "publicReview.navigation.previous")}
           </span>
           <span className="tw-mt-1 tw-block tw-font-semibold tw-text-white">
-            {previousPage.title}
+            {t(DEFAULT_LOCALE, previousPage.titleKey)}
           </span>
         </Link>
       ) : (
@@ -69,7 +71,7 @@ function PublicReviewPageStepper({
             {t(DEFAULT_LOCALE, "publicReview.navigation.next")}
           </span>
           <span className="tw-mt-1 tw-block tw-font-semibold tw-text-white">
-            {nextPage.title}
+            {t(DEFAULT_LOCALE, nextPage.titleKey)}
           </span>
         </Link>
       )}
@@ -81,6 +83,7 @@ export function PublicReviewShell({
   editorialMarkdown,
   page,
   review,
+  reviewVersion,
   sections,
   routeVersion,
   displayedVersion,
@@ -90,15 +93,17 @@ export function PublicReviewShell({
   readonly editorialMarkdown: string;
   readonly page: PublicReviewPageDefinition;
   readonly review: PublicReviewDefinition;
+  readonly reviewVersion: PublicReviewVersionDefinition;
   readonly sections: readonly PublicReviewSectionDefinition[];
   readonly routeVersion?: string | undefined;
   readonly displayedVersion: string;
   readonly feedbackSlot: ReactNode;
   readonly source: PublicReviewSource;
 }) {
-  const pageIndex = review.pages.findIndex(
+  const pageIndex = reviewVersion.pages.findIndex(
     (candidate) => candidate.id === page.id
   );
+  const currentPageNumber = pageIndex >= 0 ? pageIndex + 1 : 1;
   const routes = createPublicReviewRouteBuilder(review.slug);
   const lifecycleCapabilities = getPublicReviewLifecycleCapabilities(
     review.status
@@ -121,15 +126,18 @@ export function PublicReviewShell({
           </p>
           <p className="tw-mb-0 tw-mt-4 tw-font-mono tw-text-xs tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
-              current: pageIndex + 1,
-              total: review.pages.length,
+              current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
+              total: formatInteger(
+                DEFAULT_LOCALE,
+                reviewVersion.pages.length
+              ),
             })}
           </p>
           <h1 className="tw-mb-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-5xl">
-            {page.title}
+            {t(DEFAULT_LOCALE, page.titleKey)}
           </h1>
           <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-lg tw-leading-8 tw-text-iron-300">
-            {page.summary}
+            {t(DEFAULT_LOCALE, page.summaryKey)}
           </p>
           <div
             aria-label={t(DEFAULT_LOCALE, "publicReview.evidence.heading")}
@@ -167,7 +175,7 @@ export function PublicReviewShell({
         {page.id === "overview" && (
           <div className="tw-mt-8">
             <PublicReviewAudiencePaths
-              pages={review.pages}
+              pages={reviewVersion.pages}
               routes={routes}
               version={routeVersion}
             />
@@ -177,7 +185,7 @@ export function PublicReviewShell({
         <div className="tw-mt-8 tw-grid tw-gap-8 lg:tw-grid-cols-[18rem_minmax(0,1fr)] lg:tw-items-start">
           <PublicReviewNavigation
             currentPage={page}
-            pages={review.pages}
+            pages={reviewVersion.pages}
             routes={routes}
             sections={sections}
             version={routeVersion}
@@ -201,7 +209,7 @@ export function PublicReviewShell({
 
             <PublicReviewPageStepper
               currentPage={page}
-              pages={review.pages}
+              pages={reviewVersion.pages}
               routes={routes}
               version={routeVersion}
             />

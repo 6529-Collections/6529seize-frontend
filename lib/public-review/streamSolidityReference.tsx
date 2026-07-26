@@ -48,6 +48,7 @@ import type {
   SolidityTopLevelDeclaration,
 } from "@/lib/public-review/solidityReferenceTypes";
 import {
+  getStreamReviewVersion,
   getStreamReviewFeedbackHref,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
@@ -64,12 +65,19 @@ export interface StreamSolidityReferenceRouteParams {
   readonly version?: string | undefined;
 }
 
+const activeStreamReviewVersion = getStreamReviewVersion();
+if (!activeStreamReviewVersion) {
+  throw new Error("The active Stream review version is unavailable.");
+}
+
 const STREAM_SOLIDITY_REFERENCE_IDENTITY: SolidityReferenceReviewIdentity = {
-  activeSourceCommit: STREAM_REVIEW_DEFINITION.source.commit,
+  activeSourceCommit: activeStreamReviewVersion.source.commit,
   activeVersion: STREAM_REVIEW_DEFINITION.activeVersion,
-  availableVersions: STREAM_REVIEW_DEFINITION.availableVersions,
+  availableVersions: STREAM_REVIEW_DEFINITION.versions.map(
+    (candidate) => candidate.version
+  ),
   reviewId: STREAM_REVIEW_SLUG,
-  sourceRepository: STREAM_REVIEW_DEFINITION.source.repository,
+  sourceRepository: activeStreamReviewVersion.source.repository,
 };
 
 let defaultReader: SolidityReferenceReader | undefined;

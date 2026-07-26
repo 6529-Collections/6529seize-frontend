@@ -166,4 +166,49 @@ describe("Solidity auditor-evidence validation", () => {
       assertAuditorEvidence(evidence, new Set([SOURCE_PATH]))
     ).toThrow("inventory summary drift");
   });
+
+  it("accepts safe retained risk tracking paths and rejects unsafe paths", () => {
+    const createRisk = (tracking: readonly string[]) => ({
+      area: "governance",
+      checks: ["review_backlog"],
+      evidence: [],
+      id: "RISK-ONE-001",
+      mitigation: "Resolve the tracked execution item.",
+      owner: "protocol",
+      residual_risk: "The item remains open.",
+      risk_acceptance: null,
+      severity: "high",
+      source: "release package",
+      status: "planned_mitigation",
+      target_gate: "Gate E",
+      title: "Execution backlog item remains open",
+      tracking,
+    });
+
+    const retainedPath = createEvidence();
+    (
+      retainedPath.riskRegister as {
+        risks: ReturnType<typeof createRisk>[];
+      }
+    ).risks = [createRisk(["ops/EXECUTION_BACKLOG.md"])];
+    expect(() =>
+      assertAuditorEvidence(retainedPath, new Set([SOURCE_PATH]))
+    ).not.toThrow();
+
+    for (const unsafePath of [
+      "../ops/EXECUTION_BACKLOG.md",
+      "javascript:alert(1)",
+      "/ops/EXECUTION_BACKLOG.md",
+    ]) {
+      const unsafe = createEvidence();
+      (
+        unsafe.riskRegister as {
+          risks: ReturnType<typeof createRisk>[];
+        }
+      ).risks = [createRisk([unsafePath])];
+      expect(() =>
+        assertAuditorEvidence(unsafe, new Set([SOURCE_PATH]))
+      ).toThrow("Invalid risk-register tracking link.");
+    }
+  });
 });

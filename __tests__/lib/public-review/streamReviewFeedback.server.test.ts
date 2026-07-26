@@ -14,8 +14,8 @@ import {
 
 jest.mock("@/lib/public-review/editorialContent", () => ({
   loadStreamEditorialContent: jest.fn(
-    async (page: { readonly title: string }) =>
-      `# ${page.title}\n\n## Exact section\n\nBody.`
+    async (page: { readonly id: string }) =>
+      `# ${page.id}\n\n## Exact section\n\nBody.`
   ),
 }));
 
@@ -79,10 +79,40 @@ describe("Stream review feedback manifest binding", () => {
     );
     expect(config.submissionsOpen).toBe(true);
     expect(config.acceptsPublicExploitReports).toBe(true);
-    expect(config.categories).toContainEqual(
-      expect.objectContaining({
-        value: "possible-exploitable-security-vulnerability",
+    expect(config.categories.map((option) => option.value)).toEqual([
+      "question",
+      "documentation",
+      "artist-workflow",
+      "product-or-ux",
+      "protocol-design",
+      "implementation-bug",
+      "possible-exploitable-security-vulnerability",
+      "testing-or-evidence-gap",
+      "accessibility-or-localization",
+    ]);
+    expect(config.severityOptions.map((option) => option.value)).toEqual([
+      "not-assessed",
+      "informational",
+      "low",
+      "medium",
+      "high",
+      "critical",
+    ]);
+  });
+
+  it("rejects editorial feedback context from another review version", () => {
+    const editorialPage = STREAM_REVIEW_PAGES[0];
+    if (!editorialPage) {
+      throw new Error("Stream overview is missing.");
+    }
+
+    expect(() =>
+      createStreamEditorialFeedbackPageContext({
+        page: editorialPage,
+        version: "not-a-retained-version",
       })
+    ).toThrow(
+      "Feedback page does not belong to this review version."
     );
   });
 

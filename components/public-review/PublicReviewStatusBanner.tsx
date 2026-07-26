@@ -71,14 +71,25 @@ const AUDIT_LABELS = {
 export function PublicReviewStatusBanner({
   review,
   displayedVersion,
-  source = review.source,
+  source,
 }: {
   readonly review: PublicReviewDefinition;
   readonly displayedVersion: string;
   readonly source?: PublicReviewSource | undefined;
 }) {
-  const shortCommit = source.commit.slice(0, 10);
-  const sourceUrl = `https://github.com/${source.repository}/tree/${source.commit}`;
+  const resolvedSource =
+    source ??
+    review.versions.find(
+      (candidate) => candidate.version === displayedVersion
+    )?.source ??
+    review.versions.find(
+      (candidate) => candidate.version === review.activeVersion
+    )?.source;
+  if (!resolvedSource) {
+    throw new Error("The public review has no source for this version.");
+  }
+  const shortCommit = resolvedSource.commit.slice(0, 10);
+  const sourceUrl = `https://github.com/${resolvedSource.repository}/tree/${resolvedSource.commit}`;
   const lifecycleCopy = LIFECYCLE_COPY[review.status];
 
   return (
@@ -120,7 +131,7 @@ export function PublicReviewStatusBanner({
             aria-label={t(
               DEFAULT_LOCALE,
               "publicReview.status.sourceAriaLabel",
-              { commit: source.commit }
+              { commit: resolvedSource.commit }
             )}
             className={`${STATUS_CHIP} tw-border-iron-600 tw-text-iron-100 tw-no-underline hover:tw-border-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}>
             {t(DEFAULT_LOCALE, "publicReview.status.source", {

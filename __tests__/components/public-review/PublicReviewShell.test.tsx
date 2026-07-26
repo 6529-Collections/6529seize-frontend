@@ -4,11 +4,17 @@ import { PublicReviewShell } from "@/components/public-review/PublicReviewShell"
 import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SOURCE_COMMIT,
+  getStreamReviewVersion,
 } from "@/lib/public-review/streamReviewDefinition";
+
+const ACTIVE_REVIEW_VERSION = getStreamReviewVersion();
+if (!ACTIVE_REVIEW_VERSION) {
+  throw new Error("Stream review active version is missing");
+}
 
 describe("PublicReviewShell", () => {
   it("renders a source-pinned, audience-aware fourteen-page review shell", () => {
-    const overview = STREAM_REVIEW_DEFINITION.pages[0];
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
     if (!overview) {
       throw new Error("Stream review overview is missing");
     }
@@ -18,10 +24,11 @@ describe("PublicReviewShell", () => {
         editorialMarkdown={"# Editorial title\n\n## The short answer\n\nBody."}
         page={overview}
         review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
         sections={[{ id: "the-short-answer", title: "The short answer" }]}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
         feedbackSlot={<div>Feedback form</div>}
-        source={STREAM_REVIEW_DEFINITION.source}
+        source={ACTIVE_REVIEW_VERSION.source}
       />
     );
 
@@ -72,7 +79,7 @@ describe("PublicReviewShell", () => {
   });
 
   it("uses the exact resolved source identity instead of the active default", () => {
-    const overview = STREAM_REVIEW_DEFINITION.pages[0];
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
     if (!overview) {
       throw new Error("Stream review overview is missing");
     }
@@ -82,12 +89,20 @@ describe("PublicReviewShell", () => {
         editorialMarkdown="# Editorial title"
         page={overview}
         review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={{
+          ...ACTIVE_REVIEW_VERSION,
+          version: "2026-07-25.1",
+          source: {
+            repository: ACTIVE_REVIEW_VERSION.source.repository,
+            commit: historicalCommit,
+          },
+        }}
         sections={[]}
         routeVersion="2026-07-25.1"
         displayedVersion="2026-07-25.1"
         feedbackSlot={<div>Feedback form</div>}
         source={{
-          repository: STREAM_REVIEW_DEFINITION.source.repository,
+          repository: ACTIVE_REVIEW_VERSION.source.repository,
           commit: historicalCommit,
         }}
       />
@@ -110,7 +125,7 @@ describe("PublicReviewShell", () => {
   });
 
   it("builds every reusable shell route from another review slug", () => {
-    const overview = STREAM_REVIEW_DEFINITION.pages[0];
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
     if (!overview) {
       throw new Error("Stream review overview is missing");
     }
@@ -125,11 +140,12 @@ describe("PublicReviewShell", () => {
           slug: "another-contract",
           title: "Another Contract Review",
         }}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
         sections={[]}
         routeVersion="candidate-2"
         displayedVersion="candidate-2"
         feedbackSlot={<div>Feedback form</div>}
-        source={STREAM_REVIEW_DEFINITION.source}
+        source={ACTIVE_REVIEW_VERSION.source}
       />
     );
 
@@ -154,7 +170,7 @@ describe("PublicReviewShell", () => {
   });
 
   it("keeps the ledger visible but removes the submit shortcut after review closes", () => {
-    const overview = STREAM_REVIEW_DEFINITION.pages[0];
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
     if (!overview) {
       throw new Error("Stream review overview is missing");
     }
@@ -167,10 +183,11 @@ describe("PublicReviewShell", () => {
           ...STREAM_REVIEW_DEFINITION,
           status: "REVIEW_CLOSED",
         }}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
         sections={[]}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
         feedbackSlot={<div>Feedback closed</div>}
-        source={STREAM_REVIEW_DEFINITION.source}
+        source={ACTIVE_REVIEW_VERSION.source}
       />
     );
 

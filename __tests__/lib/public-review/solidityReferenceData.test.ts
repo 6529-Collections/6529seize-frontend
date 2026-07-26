@@ -32,13 +32,17 @@ const FIXTURE_INDEX = path.join(
   "index.json"
 );
 const describeFixture = existsSync(FIXTURE_INDEX) ? describe : describe.skip;
+const REVIEW_VERSION = STREAM_REVIEW_DEFINITION.versions[0];
+if (!REVIEW_VERSION) {
+  throw new Error("The Stream review fixture version is missing.");
+}
 
 const IDENTITY: SolidityReferenceReviewIdentity = {
-  activeSourceCommit: STREAM_REVIEW_DEFINITION.source.commit,
+  activeSourceCommit: REVIEW_VERSION.source.commit,
   activeVersion: STREAM_REVIEW_VERSION,
   availableVersions: [STREAM_REVIEW_VERSION],
   reviewId: STREAM_REVIEW_SLUG,
-  sourceRepository: STREAM_REVIEW_DEFINITION.source.repository,
+  sourceRepository: REVIEW_VERSION.source.repository,
 };
 
 describe("Solidity reference route identities", () => {
@@ -120,11 +124,11 @@ describeFixture("generated Stream Solidity reference fixture", () => {
     );
 
     expect(index.activeVersion).toBe(STREAM_REVIEW_VERSION);
-    expect(versionEntry.commit).toBe(STREAM_REVIEW_DEFINITION.source.commit);
+    expect(versionEntry.commit).toBe(REVIEW_VERSION.source.commit);
     expect(manifest.reviewId).toBe(STREAM_REVIEW_SLUG);
     expect(manifest.reviewVersion).toBe(STREAM_REVIEW_VERSION);
     expect(manifest.source.repository).toBe(
-      STREAM_REVIEW_DEFINITION.source.repository
+      REVIEW_VERSION.source.repository
     );
     expect(manifest.summary.definitionCount).toBe(
       manifest.definitionIndex.length
@@ -215,7 +219,7 @@ describeFixture("generated Stream Solidity reference fixture", () => {
       publicRoot: FIXTURE_ROOT,
     });
     await expect(wrongIdentityReader.loadIndex()).rejects.toThrow(
-      "Invalid Solidity reference"
+      "Invalid active Solidity reference source commit."
     );
   });
 });

@@ -1,207 +1,235 @@
+import type { MessageKey } from "@/i18n/messages";
 import type {
+  PublicReviewAudience,
   PublicReviewDefinition,
+  PublicReviewEvidenceState,
   PublicReviewPageDefinition,
+  PublicReviewVersionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
 import { createPublicReviewRouteBuilder } from "@/lib/public-review/publicReviewRoutes";
 
 export const STREAM_REVIEW_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
 export const STREAM_REVIEW_SOURCE_COMMIT =
-  "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8";
+  "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
 
-type PageInput = Omit<PublicReviewPageDefinition, "editorialFile">;
+type PageMessageStem =
+  | "overview"
+  | "artworkLifecycle"
+  | "forArtists"
+  | "rolesAndTrust"
+  | "curationAndTdhAuthorization"
+  | "tokensCollectionsAndMinting"
+  | "fixedPriceSalesAndAuctions"
+  | "revenueSplitsAndRoyalties"
+  | "randomness"
+  | "metadataScriptsAndDependencies"
+  | "freezingPreservationAndArtworkFinality"
+  | "governancePausingAndSuccessors"
+  | "securityTestingAndKnownLimitations"
+  | "communityReview";
 
-function definePage(page: PageInput): PublicReviewPageDefinition {
+function definePage(
+  id: string,
+  messageStem: PageMessageStem,
+  audiences: readonly PublicReviewAudience[],
+  evidenceStates: readonly PublicReviewEvidenceState[]
+): PublicReviewPageDefinition {
   return {
-    ...page,
-    editorialFile: `${page.slug}.md`,
+    id,
+    slug: id,
+    titleKey: `publicReview.pages.${messageStem}.title` as MessageKey,
+    summaryKey: `publicReview.pages.${messageStem}.summary` as MessageKey,
+    editorialFile: `${id}.md`,
+    audiences,
+    evidenceStates,
   };
 }
 
+const ALL_AUDIENCES = [
+  "community",
+  "artists",
+  "technical",
+  "auditors",
+] as const;
+const COMMUNITY_ARTIST_TECHNICAL = [
+  "community",
+  "artists",
+  "technical",
+] as const;
+const ARTIST_COMMUNITY = ["artists", "community"] as const;
+const ARTIST_TECHNICAL_AUDITOR = ["artists", "technical", "auditors"] as const;
+const COMMUNITY_TECHNICAL_AUDITOR = [
+  "community",
+  "technical",
+  "auditors",
+] as const;
+
+const IMPLEMENTED_OPEN_AUDIT = [
+  "IMPLEMENTED",
+  "OPEN_FOR_FEEDBACK",
+  "AUDIT_PENDING",
+] as const;
+const IMPLEMENTED_OPEN_AUDIT_LIMITATION = [
+  ...IMPLEMENTED_OPEN_AUDIT,
+  "KNOWN_LIMITATION",
+] as const;
+
 export const STREAM_REVIEW_PAGES = [
-  definePage({
-    id: "overview",
-    slug: "overview",
-    title: "Overview",
-    summary:
-      "A map of the full protocol, its present review state, and the decisions the community is being asked to examine.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: [
+  definePage("overview", "overview", ALL_AUDIENCES, [
+    "IMPLEMENTED",
+    "TESTED",
+    "PROPOSED",
+    "OPEN_FOR_FEEDBACK",
+    "AUDIT_PENDING",
+    "DEFERRED",
+    "KNOWN_LIMITATION",
+  ]),
+  definePage(
+    "artwork-lifecycle",
+    "artworkLifecycle",
+    COMMUNITY_ARTIST_TECHNICAL,
+    [
       "IMPLEMENTED",
       "TESTED",
       "OPEN_FOR_FEEDBACK",
       "AUDIT_PENDING",
       "KNOWN_LIMITATION",
-    ],
-  }),
-  definePage({
-    id: "artwork-lifecycle",
-    slug: "artwork-lifecycle",
-    title: "Artwork Lifecycle",
-    summary:
-      "How an artwork moves from preparation through minting, preservation, and finality.",
-    audiences: ["community", "artists", "technical"],
-    evidenceStates: ["IMPLEMENTED", "OPEN_FOR_FEEDBACK", "AUDIT_PENDING"],
-  }),
-  definePage({
-    id: "for-artists",
-    slug: "for-artists",
-    title: "For Artists",
-    summary:
-      "The artist-facing choices, approvals, responsibilities, and irreversible moments.",
-    audiences: ["artists", "community"],
-    evidenceStates: [
+    ]
+  ),
+  definePage(
+    "for-artists",
+    "forArtists",
+    ARTIST_COMMUNITY,
+    [
       "IMPLEMENTED",
       "PROPOSED",
       "OPEN_FOR_FEEDBACK",
       "AUDIT_PENDING",
-    ],
-  }),
-  definePage({
-    id: "roles-and-trust",
-    slug: "roles-and-trust",
-    title: "Roles and Trust",
-    summary:
-      "Every role that can act, what it can change, and where trust remains.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: [
+      "DEFERRED",
+      "KNOWN_LIMITATION",
+    ]
+  ),
+  definePage(
+    "roles-and-trust",
+    "rolesAndTrust",
+    ALL_AUDIENCES,
+    IMPLEMENTED_OPEN_AUDIT_LIMITATION
+  ),
+  definePage(
+    "curation-and-tdh-authorization",
+    "curationAndTdhAuthorization",
+    ALL_AUDIENCES,
+    [
       "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+    ]
+  ),
+  definePage(
+    "tokens-collections-and-minting",
+    "tokensCollectionsAndMinting",
+    ALL_AUDIENCES,
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
       "OPEN_FOR_FEEDBACK",
       "AUDIT_PENDING",
       "KNOWN_LIMITATION",
-    ],
-  }),
-  definePage({
-    id: "curation-and-tdh-authorization",
-    slug: "curation-and-tdh-authorization",
-    title: "Curation and TDH Authorization",
-    summary:
-      "How offchain curation and TDH decisions become signed onchain authorization.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: [
+    ]
+  ),
+  definePage(
+    "fixed-price-sales-and-auctions",
+    "fixedPriceSalesAndAuctions",
+    ALL_AUDIENCES,
+    [
       "IMPLEMENTED",
+      "TESTED",
       "PROPOSED",
       "OPEN_FOR_FEEDBACK",
       "AUDIT_PENDING",
-    ],
-  }),
-  definePage({
-    id: "tokens-collections-and-minting",
-    slug: "tokens-collections-and-minting",
-    title: "Tokens, Collections, and Minting",
-    summary:
-      "The shared ERC-721 system for collections, token issuance, supply, and mint controls.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: ["IMPLEMENTED", "TESTED", "AUDIT_PENDING"],
-  }),
-  definePage({
-    id: "fixed-price-sales-and-auctions",
-    slug: "fixed-price-sales-and-auctions",
-    title: "Fixed-Price Sales and Auctions",
-    summary:
-      "The sale mechanisms, bidding rules, settlement paths, and edge cases.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: [
+      "DEFERRED",
+    ]
+  ),
+  definePage(
+    "revenue-splits-and-royalties",
+    "revenueSplitsAndRoyalties",
+    ALL_AUDIENCES,
+    [
       "IMPLEMENTED",
       "TESTED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-    ],
-  }),
-  definePage({
-    id: "revenue-splits-and-royalties",
-    slug: "revenue-splits-and-royalties",
-    title: "Revenue, Splits, and Royalties",
-    summary:
-      "Where primary-sale funds and secondary royalties go, and how recipients are configured.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: [
-      "IMPLEMENTED",
-      "TESTED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-    ],
-  }),
-  definePage({
-    id: "randomness",
-    slug: "randomness",
-    title: "Randomness",
-    summary:
-      "How unpredictable values enter the protocol and which outcomes depend on them.",
-    audiences: ["artists", "technical", "auditors"],
-    evidenceStates: [
-      "IMPLEMENTED",
-      "TESTED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-    ],
-  }),
-  definePage({
-    id: "metadata-scripts-and-dependencies",
-    slug: "metadata-scripts-and-dependencies",
-    title: "Metadata, Scripts, and Dependencies",
-    summary:
-      "How token presentation, generative scripts, and external dependencies are stored and referenced.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: [
-      "IMPLEMENTED",
       "PROPOSED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-    ],
-  }),
-  definePage({
-    id: "freezing-preservation-and-artwork-finality",
-    slug: "freezing-preservation-and-artwork-finality",
-    title: "Freezing, Preservation, and Artwork Finality",
-    summary:
-      "The mechanisms that move artwork data from editable to permanently fixed.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: [
-      "IMPLEMENTED",
-      "PROPOSED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-    ],
-  }),
-  definePage({
-    id: "governance-pausing-and-successors",
-    slug: "governance-pausing-and-successors",
-    title: "Governance, Pausing, and Successors",
-    summary:
-      "How governance acts, emergencies are handled, and successor contracts are recognized.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: [
-      "IMPLEMENTED",
       "OPEN_FOR_FEEDBACK",
       "AUDIT_PENDING",
       "KNOWN_LIMITATION",
-    ],
-  }),
-  definePage({
-    id: "security-testing-and-known-limitations",
-    slug: "security-testing-and-known-limitations",
-    title: "Security, Testing, and Known Limitations",
-    summary:
-      "Current engineering evidence, unresolved findings, constraints, and pre-audit caveats.",
-    audiences: ["community", "technical", "auditors"],
-    evidenceStates: [
+    ]
+  ),
+  definePage(
+    "randomness",
+    "randomness",
+    ARTIST_TECHNICAL_AUDITOR,
+    [
+      "IMPLEMENTED",
       "TESTED",
+      "PROPOSED",
       "OPEN_FOR_FEEDBACK",
       "AUDIT_PENDING",
       "KNOWN_LIMITATION",
-    ],
-  }),
-  definePage({
-    id: "community-review",
-    slug: "community-review",
-    title: "Community Review",
-    summary:
-      "How to examine the proposal, frame actionable feedback, and follow the review record.",
-    audiences: ["community", "artists", "technical", "auditors"],
-    evidenceStates: ["OPEN_FOR_FEEDBACK", "AUDIT_PENDING"],
-  }),
-] as const satisfies readonly PublicReviewPageDefinition[];
+    ]
+  ),
+  definePage(
+    "metadata-scripts-and-dependencies",
+    "metadataScriptsAndDependencies",
+    ALL_AUDIENCES,
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
+  ),
+  definePage(
+    "freezing-preservation-and-artwork-finality",
+    "freezingPreservationAndArtworkFinality",
+    ALL_AUDIENCES,
+    [
+      "IMPLEMENTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
+  ),
+  definePage(
+    "governance-pausing-and-successors",
+    "governancePausingAndSuccessors",
+    ALL_AUDIENCES,
+    IMPLEMENTED_OPEN_AUDIT_LIMITATION
+  ),
+  definePage(
+    "security-testing-and-known-limitations",
+    "securityTestingAndKnownLimitations",
+    COMMUNITY_TECHNICAL_AUDITOR,
+    [
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
+  ),
+  definePage("community-review", "communityReview", ALL_AUDIENCES, [
+    "IMPLEMENTED",
+    "OPEN_FOR_FEEDBACK",
+    "AUDIT_PENDING",
+    "KNOWN_LIMITATION",
+  ]),
+] as const;
 
 export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   id: "stream",
@@ -210,25 +238,40 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   description:
     "A source-grounded public review of the proposed 6529 Stream protocol before finalization and deployment.",
   activeVersion: STREAM_REVIEW_VERSION,
-  availableVersions: [STREAM_REVIEW_VERSION],
+  versions: [
+    {
+      version: STREAM_REVIEW_VERSION,
+      source: {
+        repository: "6529-Collections/6529Stream",
+        commit: STREAM_REVIEW_SOURCE_COMMIT,
+      },
+      pages: STREAM_REVIEW_PAGES,
+    },
+  ],
   status: "PUBLIC_REVIEW",
   deploymentStatus: "NOT_DEPLOYED",
   auditStatus: "PRE_AUDIT",
   feedbackAvailable: true,
-  source: {
-    repository: "6529-Collections/6529Stream",
-    commit: STREAM_REVIEW_SOURCE_COMMIT,
-  },
-  pages: STREAM_REVIEW_PAGES,
 };
 
 const STREAM_REVIEW_ROUTES =
   createPublicReviewRouteBuilder(STREAM_REVIEW_SLUG);
 
 export function getStreamReviewPage(
-  slug: string
+  slug: string,
+  version = STREAM_REVIEW_VERSION
 ): PublicReviewPageDefinition | undefined {
-  return STREAM_REVIEW_PAGES.find((page) => page.slug === slug);
+  return getStreamReviewVersion(version)?.pages.find(
+    (page) => page.slug === slug
+  );
+}
+
+export function getStreamReviewVersion(
+  version = STREAM_REVIEW_VERSION
+): PublicReviewVersionDefinition | undefined {
+  return STREAM_REVIEW_DEFINITION.versions.find(
+    (candidate) => candidate.version === version
+  );
 }
 
 export function getStreamReviewPageHref({
@@ -241,8 +284,6 @@ export function getStreamReviewPageHref({
   return STREAM_REVIEW_ROUTES.getPageHref(page, version);
 }
 
-export function getStreamReviewFeedbackHref(
-  version?: string
-): string {
+export function getStreamReviewFeedbackHref(version?: string): string {
   return STREAM_REVIEW_ROUTES.getFeedbackHref(version);
 }

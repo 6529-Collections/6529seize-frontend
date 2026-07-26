@@ -37,7 +37,9 @@ export function getStreamReviewFeedbackMetadata({
     review !== STREAM_REVIEW_SLUG ||
     !isPublicReviewEnabled(baseEndpoint) ||
     (version !== undefined &&
-      !STREAM_REVIEW_DEFINITION.availableVersions.includes(version))
+      !STREAM_REVIEW_DEFINITION.versions.some(
+        (candidate) => candidate.version === version
+      ))
   ) {
     return undefined;
   }
@@ -113,7 +115,9 @@ export async function renderStreamReviewFeedbackPage({
     version ?? STREAM_REVIEW_DEFINITION.activeVersion;
   if (
     !isPublicReviewEnabled(baseEndpoint) ||
-    !STREAM_REVIEW_DEFINITION.availableVersions.includes(resolvedVersion)
+    !STREAM_REVIEW_DEFINITION.versions.some(
+      (candidate) => candidate.version === resolvedVersion
+    )
   ) {
     throw new Error("Public review feedback is disabled.");
   }

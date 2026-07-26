@@ -20,7 +20,7 @@ export function generateStaticParams() {
   if (!isPublicReviewEnabled(publicEnv.BASE_ENDPOINT)) {
     return [];
   }
-  return STREAM_REVIEW_DEFINITION.availableVersions.map((version) => ({
+  return STREAM_REVIEW_DEFINITION.versions.map(({ version }) => ({
     review: STREAM_REVIEW_SLUG,
     version,
   }));
@@ -45,7 +45,9 @@ export default async function VersionedPublicReviewFeedbackPage({
   const { review, version } = await params;
   if (
     review !== STREAM_REVIEW_SLUG ||
-    !STREAM_REVIEW_DEFINITION.availableVersions.includes(version) ||
+    !STREAM_REVIEW_DEFINITION.versions.some(
+      (candidate) => candidate.version === version
+    ) ||
     !isPublicReviewEnabled(publicEnv.BASE_ENDPOINT)
   ) {
     notFound();

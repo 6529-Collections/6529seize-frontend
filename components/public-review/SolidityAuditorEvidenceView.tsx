@@ -160,7 +160,15 @@ function getRiskItems(
     status: risk.status,
     target_gate: risk.target_gate,
     title: risk.title,
-    tracking: risk.tracking,
+    tracking: risk.tracking.map((href) =>
+      href.startsWith("https://github.com/")
+        ? href
+        : getPinnedRepositoryHref({
+            commit: manifest.source.commit,
+            path: href,
+            repository: manifest.source.repository,
+          })
+    ),
   }));
 }
 

@@ -38,7 +38,7 @@ function ReviewPageLinks({
                 className="tw-w-6 tw-flex-none tw-font-mono tw-text-xs tw-text-iron-500">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <span>{page.title}</span>
+              <span>{t(DEFAULT_LOCALE, page.titleKey)}</span>
             </Link>
           </li>
         );

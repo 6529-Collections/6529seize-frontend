@@ -1,4 +1,5 @@
 import {
+  extractPublicReviewEvidenceStates,
   extractPublicReviewSections,
   getPublicReviewHeadingId,
 } from "@/lib/public-review/editorialSections";
@@ -29,5 +30,37 @@ describe("public review editorial sections", () => {
       "metadata-scripts-dependencies"
     );
     expect(getPublicReviewHeadingId("  ")).toBe("");
+  });
+
+  it("suffixes repeated section titles deterministically", () => {
+    expect(
+      extractPublicReviewSections("## Same title\n\n## Same title\n")
+    ).toEqual([
+      { id: "same-title", title: "Same title" },
+      { id: "same-title-2", title: "Same title" },
+    ]);
+  });
+
+  it("derives evidence states from editorial labels without treating not implemented as implemented", () => {
+    expect(
+      extractPublicReviewEvidenceStates(`
+### SOURCE IMPLEMENTED - CANDIDATE UNBOUND
+### TESTED
+### ACCEPTED TARGET - NOT IMPLEMENTED
+### OPEN FOR FEEDBACK
+### AUDIT PENDING
+The profile is **PROPOSED OR
+DEFERRED**.
+### IMPORTANT LIMIT
+`)
+    ).toEqual([
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "DEFERRED",
+      "KNOWN_LIMITATION",
+    ]);
   });
 });

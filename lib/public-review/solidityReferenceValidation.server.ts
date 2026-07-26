@@ -524,7 +524,7 @@ function assertManifestDefinitionsAndFiles(
     if (
       definitionsById.has(definition.id) ||
       (previousDefinitionId !== undefined &&
-        previousDefinitionId.localeCompare(definition.id, "en") >= 0)
+        previousDefinitionId >= definition.id)
     ) {
       throw new Error("Duplicate or unsorted Solidity definition identity.");
     }
@@ -630,8 +630,7 @@ function crossCheckDeclarationIndex(
     assertDeclarationIndexEntry(declaration);
     if (
       seenIds.has(declaration.id) ||
-      (previousId !== undefined &&
-        previousId.localeCompare(declaration.id, "en") >= 0)
+      (previousId !== undefined && previousId >= declaration.id)
     ) {
       throw new Error("Duplicate or unsorted global declaration identity.");
     }

@@ -101,7 +101,7 @@ export function PublicReviewAudiencePaths({
                             <Link
                               href={routes.getPageHref(page, version)}
                               className="tw-text-sky-300 tw-underline tw-decoration-sky-400/50 tw-underline-offset-4 hover:tw-text-sky-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-                              {page.title}
+                              {t(DEFAULT_LOCALE, page.titleKey)}
                             </Link>
                           </li>
                         ))}

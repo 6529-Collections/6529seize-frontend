@@ -15,9 +15,9 @@ import {
 } from "@/lib/public-review/publicReviewLifecycle";
 import type { SolidityReferenceManifest } from "@/lib/public-review/solidityReferenceTypes";
 import {
+  getStreamReviewVersion,
   getStreamReviewPageHref,
   STREAM_REVIEW_DEFINITION,
-  STREAM_REVIEW_PAGES,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
 import { resolvePublicReviewDiscussionDestination } from "@/services/api/public-review/destination.server";
@@ -90,15 +90,23 @@ export type StreamReviewTechnicalFeedbackPageId =
 
 const STREAM_REVIEW_FEEDBACK_CATEGORIES = [
   {
-    value: "general",
-    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.general"),
+    value: "question",
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.question"),
   },
   {
-    value: "artist-experience",
+    value: "documentation",
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.documentation"),
+  },
+  {
+    value: "artist-workflow",
     label: t(
       DEFAULT_LOCALE,
-      "publicReview.feedback.categories.artistExperience"
+      "publicReview.feedback.categories.artistWorkflow"
     ),
+  },
+  {
+    value: "product-or-ux",
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.productOrUx"),
   },
   {
     value: "protocol-design",
@@ -108,30 +116,11 @@ const STREAM_REVIEW_FEEDBACK_CATEGORIES = [
     ),
   },
   {
-    value: "economics",
-    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.economics"),
-  },
-  {
-    value: "governance",
-    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.governance"),
-  },
-  {
-    value: "interoperability",
+    value: "implementation-bug",
     label: t(
       DEFAULT_LOCALE,
-      "publicReview.feedback.categories.interoperability"
+      "publicReview.feedback.categories.implementationBug"
     ),
-  },
-  {
-    value: "documentation",
-    label: t(
-      DEFAULT_LOCALE,
-      "publicReview.feedback.categories.documentation"
-    ),
-  },
-  {
-    value: "testing",
-    label: t(DEFAULT_LOCALE, "publicReview.feedback.categories.testing"),
   },
   {
     value: PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
@@ -140,16 +129,30 @@ const STREAM_REVIEW_FEEDBACK_CATEGORIES = [
       "publicReview.feedback.categories.exploitable"
     ),
   },
+  {
+    value: "testing-or-evidence-gap",
+    label: t(
+      DEFAULT_LOCALE,
+      "publicReview.feedback.categories.testingOrEvidenceGap"
+    ),
+  },
+  {
+    value: "accessibility-or-localization",
+    label: t(
+      DEFAULT_LOCALE,
+      "publicReview.feedback.categories.accessibilityOrLocalization"
+    ),
+  },
 ] as const;
 
 const STREAM_REVIEW_FEEDBACK_SEVERITIES = [
   {
-    value: "question",
-    label: t(DEFAULT_LOCALE, "publicReview.feedback.severities.question"),
+    value: "not-assessed",
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.severities.notAssessed"),
   },
   {
-    value: "suggestion",
-    label: t(DEFAULT_LOCALE, "publicReview.feedback.severities.suggestion"),
+    value: "informational",
+    label: t(DEFAULT_LOCALE, "publicReview.feedback.severities.informational"),
   },
   {
     value: "low",
@@ -181,13 +184,17 @@ async function loadEditorialPageOptions(
   if (cached) {
     return cached;
   }
+  const reviewVersion = getStreamReviewVersion(version);
+  if (!reviewVersion) {
+    throw new Error(`Unknown Stream review version: ${version}`);
+  }
 
   const pending = Promise.all(
-    STREAM_REVIEW_PAGES.map(async (page) => {
+    reviewVersion.pages.map(async (page) => {
       const markdown = await loadStreamEditorialContent(page, version);
       return {
         value: page.id,
-        label: page.title,
+        label: t(DEFAULT_LOCALE, page.titleKey),
         sectionValues: extractPublicReviewSections(markdown).map(
           (section) => section.id
         ),
@@ -244,8 +251,8 @@ export async function createStreamReviewFeedbackConfig({
 }): Promise<PublicReviewFeedbackConfig> {
   if (
     manifest.reviewId !== STREAM_REVIEW_SLUG ||
-    !STREAM_REVIEW_DEFINITION.availableVersions.includes(
-      manifest.reviewVersion
+    !STREAM_REVIEW_DEFINITION.versions.some(
+      (candidate) => candidate.version === manifest.reviewVersion
     )
   ) {
     throw new Error("Feedback manifest does not belong to this review.");
@@ -300,10 +307,17 @@ export function createStreamEditorialFeedbackPageContext({
   readonly section?: PublicReviewSectionDefinition | undefined;
   readonly version: string;
 }): PublicReviewPageContext {
+  const reviewVersion = getStreamReviewVersion(version);
+  const versionPage = reviewVersion?.pages.find(
+    (candidate) => candidate.id === page.id && candidate.slug === page.slug
+  );
+  if (!versionPage) {
+    throw new Error("Feedback page does not belong to this review version.");
+  }
   return {
-    pageId: page.id,
-    pageTitle: page.title,
-    canonicalPath: getStreamReviewPageHref({ page, version }),
+    pageId: versionPage.id,
+    pageTitle: t(DEFAULT_LOCALE, versionPage.titleKey),
+    canonicalPath: getStreamReviewPageHref({ page: versionPage, version }),
     ...(section
       ? { sectionId: section.id, sectionTitle: section.title }
       : {}),

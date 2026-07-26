@@ -22,7 +22,9 @@ It is disabled on production. When disabled:
 - the NFT navigation does not show the review
 - `/stream` and `/reviews/6529-stream*` return the standard not-found behavior
 - review pages are excluded from the production sitemap
-- review content and future staging discussion destinations are not rendered
+- review content is excluded from production server tracing
+- review records are omitted from the production help and agent corpora
+- future staging discussion destinations are not rendered
 
 Production activation requires a later reviewed configuration change.
 
@@ -51,7 +53,7 @@ Every page includes:
   Stream currently shows **Public review**, **Not deployed**, and **Pre-audit**
 - the review version and a link to the exact source snapshot
 - page-level evidence labels
-- navigation across fourteen stable pages
+- navigation across the fourteen pages in the current version snapshot
 - an on-page contents list generated from the editorial headings
 - previous and next page controls
 - an evidence-label glossary
@@ -81,9 +83,11 @@ Editorial source lives under
 `content/public-reviews/6529-stream/versions/{version}/editorial/` as plain
 UTF-8 Markdown. Active and historical routes both load from their exact
 immutable version directory. The shell validates the editorial manifest
-against the configured review version, source commit, page IDs, page titles,
-and filenames before rendering, then derives stable on-page anchors from
-level-two headings.
+against that version snapshot's source commit, page IDs, page titles, and
+filenames before rendering. Each version owns its page topology and source
+metadata, so adding or renaming a page in a later review cannot change an older
+route. The shell then derives collision-safe on-page anchors from level-two
+headings.
 
 The shell, status, navigation, audience, evidence, and metadata copy use the
 shared message system. The long-form Stream editorial is currently maintained

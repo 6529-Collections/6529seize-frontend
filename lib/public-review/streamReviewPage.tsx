@@ -1,10 +1,12 @@
 import "next/dist/compiled/server-only";
 
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
@@ -20,6 +22,7 @@ import {
   type StreamReviewRouteParams,
 } from "@/lib/public-review/streamReviewRoutes";
 import {
+  getStreamReviewVersion,
   STREAM_REVIEW_DEFINITION,
 } from "@/lib/public-review/streamReviewDefinition";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
@@ -41,7 +44,7 @@ export function getStreamReviewMetadata({
   return {
     ...getAppMetadata({
       title: t(DEFAULT_LOCALE, "publicReview.metadata.title", {
-        page: route.page.title,
+        page: t(DEFAULT_LOCALE, route.page.titleKey),
       }),
       description: t(
         DEFAULT_LOCALE,
@@ -63,6 +66,10 @@ export async function renderStreamReviewRoute(
 ) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
+  const reviewVersion = getStreamReviewVersion(contentVersion);
+  if (!reviewVersion) {
+    throw new Error("The resolved Stream review version is unavailable.");
+  }
   const editorialMarkdown = await loadStreamEditorialContent(
     route.page,
     contentVersion
@@ -80,6 +87,7 @@ export async function renderStreamReviewRoute(
       editorialMarkdown={editorialMarkdown}
       page={route.page}
       review={STREAM_REVIEW_DEFINITION}
+      reviewVersion={reviewVersion}
       sections={sections}
       routeVersion={route.version}
       displayedVersion={contentVersion}
@@ -100,4 +108,34 @@ export async function renderStreamReviewRoute(
       }
     />
   );
+}
+
+type StreamReviewRoutePageProps = {
+  readonly params: Promise<StreamReviewRouteParams>;
+};
+
+export async function generateStreamReviewRouteMetadata({
+  params,
+}: StreamReviewRoutePageProps): Promise<Metadata> {
+  const metadata = getStreamReviewMetadata({
+    baseEndpoint: publicEnv.BASE_ENDPOINT,
+    params: await params,
+  });
+  if (!metadata) {
+    notFound();
+  }
+  return metadata;
+}
+
+export async function renderStreamReviewRoutePage({
+  params,
+}: StreamReviewRoutePageProps) {
+  const route = resolveStreamReviewRoute({
+    baseEndpoint: publicEnv.BASE_ENDPOINT,
+    params: await params,
+  });
+  if (!route) {
+    notFound();
+  }
+  return renderStreamReviewRoute(route);
 }
