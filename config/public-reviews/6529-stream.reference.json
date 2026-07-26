@@ -4,8 +4,8 @@
   "reviewVersion": "2026-07-26.1",
   "source": {
     "repository": "6529-Collections/6529Stream",
-    "commit": "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8",
-    "tree": "3a8e3cb8102e891a73972282026d2811e7591852",
+    "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+    "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
     "compilerVersion": "0.8.19+commit.7dd6d404",
     "evmVersion": "paris",
     "viaIR": true,
@@ -40,6 +40,10 @@
     {
       "path": "release-artifacts/governed-parameter-inventory.json",
       "schemaVersion": "6529stream.governed-parameter-inventory.v1"
+    },
+    {
+      "path": "release-artifacts/record-family-authorization-source-catalog.json",
+      "schemaVersion": "6529stream.record-family-authorization-source-catalog.v1"
     },
     {
       "path": "release-artifacts/latest/abi-checksums.json",
