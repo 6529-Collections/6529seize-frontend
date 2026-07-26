@@ -700,6 +700,15 @@ describe("Solidity public-review reference generator", () => {
     expect(keccak256("")).toBe(
       "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
     );
+    expect(keccak256("abc")).toBe(
+      "0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45"
+    );
+    expect(keccak256("a".repeat(135))).toBe(
+      "0x34367dc248bbd832f4e3e69dfaac2f92638bd0bbd18f2912ba4ef454919cf446"
+    );
+    expect(keccak256("a".repeat(137))).toBe(
+      "0xd869f639c7046b4929fc92a4d988a8b22c55fbadb802c0c66ebcd484f1915f39"
+    );
     expect(selectorForSignature("transfer(address,uint256)")).toBe(
       "0xa9059cbb"
     );

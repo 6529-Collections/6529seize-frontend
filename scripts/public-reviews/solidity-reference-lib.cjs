@@ -1325,6 +1325,7 @@ function createClassificationContext(config, artifacts) {
 function prepareDefinitions(config, sources, compilerOutput, artifacts) {
   assertCompilerSourceSet(sources, compilerOutput);
   const rawDefinitions = new Map();
+  const seenSemanticIds = new Set();
   const classificationContext = createClassificationContext(config, artifacts);
   for (const [sourcePath, compiledSource] of Object.entries(
     compilerOutput.sources ?? {}
@@ -1351,11 +1352,10 @@ function prepareDefinitions(config, sources, compilerOutput, artifacts) {
       }
       const semanticId = definitionSemanticId(sourcePath, node.name);
       invariant(
-        ![...rawDefinitions.values()].some(
-          (entry) => entry.semanticId === semanticId
-        ),
+        !seenSemanticIds.has(semanticId),
         `Duplicate definition semantic ID: ${semanticId}`
       );
+      seenSemanticIds.add(semanticId);
       const raw = {
         node,
         astId: node.id,
