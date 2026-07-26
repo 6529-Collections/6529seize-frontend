@@ -9,6 +9,7 @@ import {
   SolidityDefinitionExplorer,
   type SolidityDefinitionListItem,
 } from "@/components/public-review/SolidityDefinitionExplorer";
+import { SolidityOtherDeclarationGroup } from "@/components/public-review/SolidityOtherDeclarationGroup";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -24,7 +25,6 @@ import type {
   SolidityDeclarationKind,
   SolidityDefinitionIndexEntry,
   SolidityDefinitionShard,
-  SolidityOtherDeclaration,
   SolidityReferenceManifest,
   SolidityWarningSummary,
 } from "@/lib/public-review/solidityReferenceTypes";
@@ -419,48 +419,6 @@ function getDeclarationItems({
   return [...functions, ...events, ...errors];
 }
 
-function OtherDeclarationGroup({
-  declarations,
-  label,
-}: {
-  readonly declarations: readonly SolidityOtherDeclaration[];
-  readonly label: string;
-}) {
-  if (declarations.length === 0) {
-    return null;
-  }
-  return (
-    <details className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4">
-      <summary className="tw-cursor-pointer tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-        {label} ({formatInteger(DEFAULT_LOCALE, declarations.length)})
-      </summary>
-      <ul className="tw-mb-0 tw-mt-4 tw-list-none tw-space-y-2 tw-p-0">
-        {declarations.map((declaration) => (
-          <li
-            key={`${declaration.name}:${declaration.range.lineStart}`}
-            className="tw-rounded-lg tw-bg-iron-900 tw-p-3"
-          >
-            <code className="tw-break-all tw-text-sm tw-text-iron-100">
-              {declaration.name}
-            </code>
-            <a
-              className="tw-mt-1 tw-block tw-text-xs tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-              href={declaration.range.githubUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {t(DEFAULT_LOCALE, "publicReview.reference.lines", {
-                start: declaration.range.lineStart,
-                end: declaration.range.lineEnd,
-              })}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </details>
-  );
-}
-
 function AbiSurface({
   hrefContext,
   manifest,
@@ -675,23 +633,23 @@ export function SolidityDefinitionView({
           {t(DEFAULT_LOCALE, "publicReview.reference.otherDeclarations")}
         </h2>
         <div className="tw-mt-5 tw-grid tw-gap-3 lg:tw-grid-cols-2">
-          <OtherDeclarationGroup
+          <SolidityOtherDeclarationGroup
             declarations={shard.definition.declarations.stateVariables}
             label={t(DEFAULT_LOCALE, "publicReview.reference.stateVariables")}
           />
-          <OtherDeclarationGroup
+          <SolidityOtherDeclarationGroup
             declarations={shard.definition.declarations.modifiers}
             label={t(DEFAULT_LOCALE, "publicReview.reference.modifiers")}
           />
-          <OtherDeclarationGroup
+          <SolidityOtherDeclarationGroup
             declarations={shard.definition.declarations.structs}
             label={t(DEFAULT_LOCALE, "publicReview.reference.structs")}
           />
-          <OtherDeclarationGroup
+          <SolidityOtherDeclarationGroup
             declarations={shard.definition.declarations.enums}
             label={t(DEFAULT_LOCALE, "publicReview.reference.enums")}
           />
-          <OtherDeclarationGroup
+          <SolidityOtherDeclarationGroup
             declarations={shard.definition.declarations.userDefinedValueTypes}
             label={t(
               DEFAULT_LOCALE,

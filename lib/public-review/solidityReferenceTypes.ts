@@ -217,9 +217,19 @@ export type SolidityRoutedDeclaration =
   | SolidityErrorDeclaration;
 
 export interface SolidityOtherDeclaration {
+  readonly constant?: boolean | undefined;
+  readonly immutable?: boolean | undefined;
+  readonly members?:
+    | readonly SolidityParameter[]
+    | readonly string[]
+    | undefined;
   readonly name: string;
   readonly natspec: string;
   readonly range: SoliditySourceRange;
+  readonly selector?: string | null | undefined;
+  readonly type?: string | undefined;
+  readonly underlyingType?: string | undefined;
+  readonly visibility?: string | null | undefined;
   readonly [key: string]: unknown;
 }
 

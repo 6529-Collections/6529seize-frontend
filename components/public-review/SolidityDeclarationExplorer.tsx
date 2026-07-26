@@ -96,7 +96,7 @@ export function SolidityDeclarationExplorer({
         </label>
       </div>
       <p role="status" className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400">
-        {t(DEFAULT_LOCALE, "publicReview.reference.resultsCount", {
+        {t(DEFAULT_LOCALE, "publicReview.reference.declarationResultsCount", {
           visible: formatInteger(DEFAULT_LOCALE, visibleItems.length),
           total: formatInteger(DEFAULT_LOCALE, items.length),
         })}

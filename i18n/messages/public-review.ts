@@ -82,6 +82,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.interfaces": "Interfaces",
   "publicReview.reference.libraries": "Libraries",
   "publicReview.reference.sourceFiles": "Source files",
+  "publicReview.reference.lineCount": "Line count",
   "publicReview.reference.warnings": "Generator warnings",
   "publicReview.reference.releaseEvidence": "Release evidence",
   "publicReview.reference.releaseEvidenceDescription":
@@ -98,6 +99,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.noDefinitions":
     "No definitions match the selected filters.",
   "publicReview.reference.resultsCount": "{visible} of {total} definitions",
+  "publicReview.reference.declarationResultsCount":
+    "{visible} of {total} declarations",
   "publicReview.reference.openDefinition": "Open {name}",
   "publicReview.reference.definitionTitle": "{kind} {name}",
   "publicReview.reference.definitionDescription":
@@ -153,6 +156,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.indexed": "Indexed",
   "publicReview.reference.name": "Name",
   "publicReview.reference.type": "Type",
+  "publicReview.reference.underlyingType": "Underlying type",
+  "publicReview.reference.constant": "Constant",
+  "publicReview.reference.immutable": "Immutable",
   "publicReview.reference.interfaceTitle": "Interface {name}",
   "publicReview.reference.interfaceDescription":
     "Published interface identity and compiled selector surface for the pinned review source.",

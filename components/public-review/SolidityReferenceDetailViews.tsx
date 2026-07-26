@@ -282,7 +282,7 @@ export function SoliditySourceView({
             {document.file.scope}
           </KeyValue>
           <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceFiles")}
+            label={t(DEFAULT_LOCALE, "publicReview.reference.lineCount")}
           >
             {formatInteger(DEFAULT_LOCALE, document.file.lineCount)}
           </KeyValue>
