@@ -46,6 +46,7 @@ const {
 const {
   acquireGenerationLock,
   check,
+  commitTimestampFromUnixSeconds,
   configSha256,
   discoveredSnapshotVersions,
   generatorSourceSha256,
@@ -58,6 +59,7 @@ const {
     configRecord: { json: Record<string, unknown>; text: string },
     dependencies?: Record<string, unknown>
   ) => void;
+  commitTimestampFromUnixSeconds: (value: string) => string;
   configSha256: (configText: string) => string;
   discoveredSnapshotVersions: (
     config: { output: { directory: string } },
@@ -179,6 +181,16 @@ function historicalShardFixture(reviewVersion: string) {
 }
 
 describe("Solidity public-review generator trust boundaries", () => {
+  it("normalizes Git commit seconds to one cross-platform UTC spelling", () => {
+    expect(commitTimestampFromUnixSeconds("0")).toBe("1970-01-01T00:00:00Z");
+    expect(commitTimestampFromUnixSeconds("1785081895")).toBe(
+      "2026-07-26T16:04:55Z"
+    );
+    expect(() => commitTimestampFromUnixSeconds("1785081895+00:00")).toThrow(
+      "Git commit timestamp must be Unix seconds"
+    );
+  });
+
   let fixtureRoot: string;
 
   beforeEach(() => {
@@ -640,7 +652,11 @@ describe("Solidity public-review generator trust boundaries", () => {
     expect(loaded.artifacts["release-artifacts/catalog.json"]?.json).toEqual({
       contracts: ["Stream"],
     });
-    expect(loaded.commitTimestamp).not.toBe("");
+    expect(loaded.commitTimestamp).toBe(
+      commitTimestampFromUnixSeconds(
+        git(fixtureRoot, "show", "-s", "--format=%ct", commit)
+      )
+    );
 
     expect(() =>
       loadPinnedInputs(fixtureRoot, {
