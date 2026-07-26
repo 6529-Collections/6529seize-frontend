@@ -30,6 +30,13 @@ const ARTIFACT_SHA256 =
 const REQUIRED_WEB_SURFACES = ["web:desktop-chromium", "web:mobile-chromium"];
 
 describe("release bus staging artifact transfer", () => {
+  const productionDeployWorkflowSource = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      ".github/workflows/release-bus-deploy-production.yml"
+    ),
+    "utf8"
+  );
   const deployWorkflow = YAML.parse(
     fs.readFileSync(
       path.join(
@@ -95,6 +102,30 @@ describe("release bus staging artifact transfer", () => {
     expect(deployStep.run).toContain('test "$http_status" = 200');
     expect(deployStep.run.indexOf('test "$http_status" = 200')).toBeLessThan(
       deployStep.run.indexOf("sha256sum -c -")
+    );
+  });
+
+  it("injects public-review destinations at staging runtime only", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+
+    expect(deployStep.env.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS).toBe(
+      "${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(deployStep.run).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+    );
+    expect(deployStep.run).toContain(
+      "public-review-discussion-destinations.json"
+    );
+    expect(deployStep.run).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:"
+    );
+    expect(deployStep.run).toContain('(has("production") | not)');
+    expect(productionDeployWorkflowSource).not.toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"
     );
   });
 

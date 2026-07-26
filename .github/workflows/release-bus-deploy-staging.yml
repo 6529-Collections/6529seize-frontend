@@ -164,15 +164,25 @@ jobs:
           EXPECTED_DIGEST: ${{ steps.artifact.outputs.package_digest }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
         run: |
           set -euo pipefail
           test -n "$INSTANCE_ID"
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
           {
             printf 'ARTIFACT_URL=%q\n' "$ARTIFACT_URL"
             printf 'EXPECTED_DIGEST=%q\n' "$EXPECTED_DIGEST"
             printf 'EXPECTED_SHA=%q\n' "$EXPECTED_SHA"
+            printf 'PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=%q\n' \
+              "$(printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0)"
             printf 'REPO_DIR=%q\n' "$REPO_DIR"
             printf 'RUN_AS=%q\n' "$RUN_AS"
             cat <<'REMOTE'
@@ -343,7 +353,29 @@ jobs:
           rm -f "$release_dir/package.zip"
           chown -R "$RUN_AS:$RUN_AS" "$release_dir"
           ln -sfn "$release_dir/app" "$current_link"
+          review_destinations="$(
+            printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" | base64 -d
+          )"
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' <<<"$review_destinations" >/dev/null
+          printf '%s' "$review_destinations" \
+            > "$release_root/public-review-discussion-destinations.json"
+          chown "$RUN_AS:$RUN_AS" \
+            "$release_root/public-review-discussion-destinations.json"
+          chmod 600 "$release_root/public-review-discussion-destinations.json"
+          unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
           cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
+          const fs = require('node:fs');
+          const publicReviewDiscussionDestinations = fs.readFileSync(
+            __dirname + '/public-review-discussion-destinations.json',
+            'utf8'
+          ).trim();
+
           module.exports = {
             apps: [{
               name: '6529seize',
@@ -351,7 +383,13 @@ jobs:
               cwd: __dirname + '/current',
               exec_mode: 'cluster',
               instances: 1,
-              env: { PORT: '3001', HOSTNAME: '0.0.0.0', NODE_ENV: 'production' }
+              env: {
+                PORT: '3001',
+                HOSTNAME: '0.0.0.0',
+                NODE_ENV: 'production',
+                PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:
+                  publicReviewDiscussionDestinations
+              }
             }]
           };
           PM2_CONFIG
