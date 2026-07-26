@@ -307,17 +307,40 @@ jobs:
       - name: Package immutable environment profile
         run: |
           set -euo pipefail
+          rm -rf release-bus-profile
           mkdir -p release-bus-profile/target/_next release-bus-profile/bundle/.next
           cp -r .next/standalone/. release-bus-profile/bundle/
           cp -r .next/static release-bus-profile/target/_next/
           cp -r .next/static release-bus-profile/bundle/.next/
-          cp -r public Procfile .ebextensions release-bus-profile/bundle/
+          cp -r Procfile .ebextensions release-bus-profile/bundle/
           if [ -d .platform ]; then cp -r .platform release-bus-profile/bundle/; fi
           find release-bus-profile/bundle -xtype l -delete
           for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
             if [ -f ".next/$file" ]; then cp ".next/$file" "release-bus-profile/bundle/.next/$file"; fi
           done
+          node scripts/package-public-review-artifacts.cjs prepare \
+            --profile "$BUILD_ENVIRONMENT" \
+            --bundle-root release-bus-profile/bundle
+          test -z "$(find release-bus-profile/target/_next -type l -print -quit)"
           (cd release-bus-profile/bundle && zip -yr ../target/package.zip .)
+          zip_listing="$(mktemp)"
+          zip_extract="$(mktemp -d)"
+          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
+          unzip -Z1 release-bus-profile/target/package.zip > "$zip_listing"
+          node scripts/package-public-review-artifacts.cjs assert-listing \
+            --profile "$BUILD_ENVIRONMENT" \
+            --bundle-root release-bus-profile/bundle \
+            --listing-file "$zip_listing"
+          unzip -q release-bus-profile/target/package.zip -d "$zip_extract"
+          node scripts/package-public-review-artifacts.cjs assert-zip \
+            --profile "$BUILD_ENVIRONMENT" \
+            --bundle-root release-bus-profile/bundle \
+            --listing-file "$zip_listing" \
+            --extracted-root "$zip_extract"
+          rm -f "$zip_listing"
+          rm -rf "$zip_extract"
+          trap - EXIT
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
       - name: Upload exact build profile
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

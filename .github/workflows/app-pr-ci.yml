@@ -411,17 +411,40 @@ jobs:
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           profile=release-bus-v2-pr-artifact/profiles/production
+          rm -rf "$profile"
           mkdir -p "$profile/target/_next" "$profile/bundle/.next"
           cp -r .next/standalone/. "$profile/bundle/"
           cp -r .next/static "$profile/target/_next/"
           cp -r .next/static "$profile/bundle/.next/"
-          cp -r public Procfile .ebextensions "$profile/bundle/"
+          cp -r Procfile .ebextensions "$profile/bundle/"
           if [ -d .platform ]; then cp -r .platform "$profile/bundle/"; fi
           find "$profile/bundle" -xtype l -delete
           for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
             if [ -f ".next/$file" ]; then cp ".next/$file" "$profile/bundle/.next/$file"; fi
           done
+          node scripts/package-public-review-artifacts.cjs prepare \
+            --profile production \
+            --bundle-root "$profile/bundle"
+          test -z "$(find "$profile/target/_next" -type l -print -quit)"
           (cd "$profile/bundle" && zip -yr ../target/package.zip .)
+          zip_listing="$(mktemp)"
+          zip_extract="$(mktemp -d)"
+          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
+          unzip -Z1 "$profile/target/package.zip" > "$zip_listing"
+          node scripts/package-public-review-artifacts.cjs assert-listing \
+            --profile production \
+            --bundle-root "$profile/bundle" \
+            --listing-file "$zip_listing"
+          unzip -q "$profile/target/package.zip" -d "$zip_extract"
+          node scripts/package-public-review-artifacts.cjs assert-zip \
+            --profile production \
+            --bundle-root "$profile/bundle" \
+            --listing-file "$zip_listing" \
+            --extracted-root "$zip_extract"
+          rm -f "$zip_listing"
+          rm -rf "$zip_extract"
+          trap - EXIT
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
 
       - name: Build staging profile for exact artifact reuse
         if: needs.plan.outputs.build_required == 'true'
@@ -448,17 +471,40 @@ jobs:
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           profile=release-bus-v2-pr-artifact/profiles/staging
+          rm -rf "$profile"
           mkdir -p "$profile/target/_next" "$profile/bundle/.next"
           cp -r .next/standalone/. "$profile/bundle/"
           cp -r .next/static "$profile/target/_next/"
           cp -r .next/static "$profile/bundle/.next/"
-          cp -r public Procfile .ebextensions "$profile/bundle/"
+          cp -r Procfile .ebextensions "$profile/bundle/"
           if [ -d .platform ]; then cp -r .platform "$profile/bundle/"; fi
           find "$profile/bundle" -xtype l -delete
           for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
             if [ -f ".next/$file" ]; then cp ".next/$file" "$profile/bundle/.next/$file"; fi
           done
+          node scripts/package-public-review-artifacts.cjs prepare \
+            --profile staging \
+            --bundle-root "$profile/bundle"
+          test -z "$(find "$profile/target/_next" -type l -print -quit)"
           (cd "$profile/bundle" && zip -yr ../target/package.zip .)
+          zip_listing="$(mktemp)"
+          zip_extract="$(mktemp -d)"
+          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
+          unzip -Z1 "$profile/target/package.zip" > "$zip_listing"
+          node scripts/package-public-review-artifacts.cjs assert-listing \
+            --profile staging \
+            --bundle-root "$profile/bundle" \
+            --listing-file "$zip_listing"
+          unzip -q "$profile/target/package.zip" -d "$zip_extract"
+          node scripts/package-public-review-artifacts.cjs assert-zip \
+            --profile staging \
+            --bundle-root "$profile/bundle" \
+            --listing-file "$zip_listing" \
+            --extracted-root "$zip_extract"
+          rm -f "$zip_listing"
+          rm -rf "$zip_extract"
+          trap - EXIT
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
           staging_digest="$(sha256sum release-bus-v2-pr-artifact/profiles/staging/target/package.zip | cut -d' ' -f1)"
           production_digest="$(sha256sum release-bus-v2-pr-artifact/profiles/production/target/package.zip | cut -d' ' -f1)"
           jq -n --arg source_sha "$EXPECTED_MERGE_SHA" --arg staging_digest "$staging_digest" --arg production_digest "$production_digest" \
