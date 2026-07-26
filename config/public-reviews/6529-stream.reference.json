@@ -42,6 +42,10 @@
       "schemaVersion": "6529stream.governed-parameter-inventory.v1"
     },
     {
+      "path": "release-artifacts/record-family-authorization-source-catalog.json",
+      "schemaVersion": "6529stream.record-family-authorization-source-catalog.v1"
+    },
+    {
       "path": "release-artifacts/latest/abi-checksums.json",
       "schemaVersion": "6529stream.abi-checksums.v1"
     },

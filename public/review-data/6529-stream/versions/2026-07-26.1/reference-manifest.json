@@ -77,6 +77,11 @@
         "schemaVersion": "6529stream.source-verification-inputs.v1",
         "sha256": "sha256:e2e43ccaec8274f37a698e5832244379d889e124e87e6656af25ba5c1c66d53e",
         "sizeBytes": 96951
+      },
+      "release-artifacts/record-family-authorization-source-catalog.json": {
+        "schemaVersion": "6529stream.record-family-authorization-source-catalog.v1",
+        "sha256": "sha256:c3cb5cc265c740b9a1b5c0ed9ccdc06f06513db9c6bb8ede6041eb86d16d4cde",
+        "sizeBytes": 8423
       }
     },
     "checksumBundle": {
@@ -12386,6 +12391,296 @@
         "production_release": "blocked",
         "public_beta": "blocked"
       }
+    },
+    "recordFamilyAuthorizationSourceCatalog": {
+      "authorization_classes": [
+        {
+          "id": 1,
+          "mode": "live_provider",
+          "name": "ARTIST_SIGNER"
+        },
+        {
+          "id": 2,
+          "mode": "live_provider",
+          "name": "OWNER_SIGNER"
+        },
+        {
+          "id": 3,
+          "mode": "family_grant",
+          "name": "CURATOR_SIGNER"
+        },
+        {
+          "id": 4,
+          "mode": "live_provider",
+          "name": "INSTITUTION_SIGNER"
+        },
+        {
+          "id": 5,
+          "mode": "direct_self_attributed",
+          "name": "INDEPENDENT_ATTESTOR"
+        },
+        {
+          "id": 6,
+          "mode": "family_grant",
+          "name": "PRESERVATION_ADMIN"
+        },
+        {
+          "id": 7,
+          "mode": "family_grant",
+          "name": "METADATA_ADMIN"
+        },
+        {
+          "id": 8,
+          "mode": "family_grant",
+          "name": "GLOBAL_ADMIN"
+        }
+      ],
+      "classifier": {
+        "authority_provider_interface_path": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
+        "candidate_binding_status": "not_available",
+        "configuration_authority": "stream_admins_owner",
+        "contract": "StreamCollectionMetadata",
+        "deployment_model": "embedded_in_collection_metadata_host",
+        "implementation_source_path": "smart-contracts/StreamRecordFamilyRegistry.sol",
+        "interface_id": "0xb19a79de",
+        "interface_path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
+        "marker_selector": "0x20e9f458",
+        "record_type_admission": "append_only_exact_bytes32",
+        "schema_version": 1,
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "wildcard_admission": false
+      },
+      "family_groups": [
+        {
+          "admin_authority_rejected": true,
+          "allowed_authorization_class_ids": [
+            1
+          ],
+          "id": "0x3d8f31ee46ecb9b89fee34e6abc6987daf40ec43650ca838df8f4d4440985fbf",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_ARTIST_V1",
+          "name": "ARTIST"
+        },
+        {
+          "admin_authority_rejected": true,
+          "allowed_authorization_class_ids": [
+            2
+          ],
+          "id": "0xc7de3ac1b2e3c40a8c1b3e435f7c65fa15c202d9679c69ee855ef9f5b0725606",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_OWNER_V1",
+          "name": "OWNER"
+        },
+        {
+          "admin_authority_rejected": true,
+          "allowed_authorization_class_ids": [
+            5
+          ],
+          "id": "0x3d6783a53e9ee408332f476190214259f17b7658b5c78835ef36a3297ca949e4",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_INDEPENDENT_V1",
+          "name": "INDEPENDENT"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            3,
+            8
+          ],
+          "id": "0xeeac19d70c3d1ed563ebf5a18bc84d214bf13390dc2c45ec701a679bb51a465c",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_CURATOR_V1",
+          "name": "CURATOR"
+        },
+        {
+          "admin_authority_rejected": true,
+          "allowed_authorization_class_ids": [
+            4
+          ],
+          "id": "0x3f08fa07a7a50519532a7a1d38176090f0fe3658aa24e2a93a808fda6b167bdd",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_INSTITUTION_V1",
+          "name": "INSTITUTION"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            7,
+            8
+          ],
+          "id": "0x0ac4845ea7c71ae24076ac125aece1fbe555ad3772b9d4321a8ddfaf72fb1182",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_RIGHTS_V1",
+          "name": "RIGHTS"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            6,
+            8
+          ],
+          "id": "0x7fe99c2d5382e3f222f07476408e839f3c760fc3bb919399c36210500621cada",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_ARCHIVE_V1",
+          "name": "ARCHIVE"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            4,
+            6,
+            8
+          ],
+          "id": "0x371df78414259ffae7f400fb3684d32b79a85ab55ede6d87a9a65cf6719cb47d",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_FIXITY_V1",
+          "name": "FIXITY"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            4,
+            6,
+            8
+          ],
+          "id": "0xd3afd2b1425b71c3926c945fbd6843d447300ff86666083430b8b6bdd8358dd2",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_C2PA_V1",
+          "name": "C2PA"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            6,
+            7,
+            8
+          ],
+          "id": "0xd079063dbc54d66071a3941cbbb4b013656d970173035f810d1cf9ad90bc34f2",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_IIIF_V1",
+          "name": "IIIF"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            6,
+            7
+          ],
+          "id": "0x01c3e3e144bf723d69bcf723c514c628e82d7d3d971b21830a1d436df414adb6",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_MEDIA_RELATIONSHIP_V1",
+          "name": "MEDIA_RELATIONSHIP"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            7,
+            8
+          ],
+          "id": "0x574230e8aa599708bb647ce64cbe59441a63558adf38401987fd75dbd3a2a977",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_IDENTITY_DISPLAY_V1",
+          "name": "IDENTITY_DISPLAY"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            7,
+            8
+          ],
+          "id": "0xadc9589adaf8b5c94bffd82dd7d6b973f1bfa1ad6bbb3e6a269d0d39eb266352",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_SNAPSHOT_V1",
+          "name": "SNAPSHOT"
+        },
+        {
+          "admin_authority_rejected": false,
+          "allowed_authorization_class_ids": [
+            7,
+            8
+          ],
+          "id": "0x4dbe05954884f7cc073a27786ddb9783d7fe47369ab6faf2cbcb66eb55f72b99",
+          "id_preimage": "6529STREAM_RECORD_FAMILY_AGENT_V1",
+          "name": "AGENT"
+        }
+      ],
+      "host_bindings": [
+        {
+          "authorization_class_persisted": true,
+          "contract": "StreamCollectionMetadata",
+          "interface_id": "0x2c2422f4",
+          "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+          "registry_binding": "immutable",
+          "source_path": "smart-contracts/StreamCollectionMetadata.sol"
+        },
+        {
+          "authorization_class_persisted": true,
+          "contract": "StreamPreservationRecords",
+          "interface_id": "0x45cc434d",
+          "interface_path": "smart-contracts/IStreamPreservationRecords.sol",
+          "registry_binding": "immutable",
+          "source_path": "smart-contracts/StreamPreservationRecords.sol"
+        }
+      ],
+      "remaining_blockers": [
+        "exact_candidate_binding_not_available",
+        "genesis_profile_binding_not_available",
+        "production_record_type_admission_set_not_available",
+        "artist_owner_institution_provider_bindings_not_available",
+        "candidate_grant_map_not_available",
+        "deployed_runtime_codehash_evidence_not_available",
+        "non_local_rotation_revocation_evidence_not_available",
+        "independent_security_review_not_available"
+      ],
+      "schema_version": "6529stream.record-family-authorization-source-catalog.v1",
+      "snapshot_policy": {
+        "abi": "publishCollectionSnapshot(uint256,bytes32,bytes32[],(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+        "covered_record_types": "strictly_ascending_nonempty_exact_ids",
+        "covered_record_types_hash_stored": true,
+        "every_record_type_authority_revalidated": true,
+        "per_record_type_authorization_event": true,
+        "selector": "0xfc57068f"
+      },
+      "source_bindings": [
+        {
+          "path": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
+          "sha256": "eb381ae81e56bfa27495c5c20de82843a642995b50d5c07de102e4e20399cb2f"
+        },
+        {
+          "path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
+          "sha256": "82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+        },
+        {
+          "path": "smart-contracts/StreamRecordFamilyRegistry.sol",
+          "sha256": "9ffb6e90c1905f8eebf91039f4c947b08d07730038b115f9204a348e52c85bb2"
+        },
+        {
+          "path": "smart-contracts/IStreamCollectionMetadata.sol",
+          "sha256": "f22398c6650c3de6599c2e6edc48068d251cab782cc2f1f931ea96fdd9877295"
+        },
+        {
+          "path": "smart-contracts/StreamCollectionMetadata.sol",
+          "sha256": "5324ff8e8791ce0bfff46649c7969a9884d4c0ef4249b54daf597d93218270d7"
+        },
+        {
+          "path": "smart-contracts/IStreamPreservationRecords.sol",
+          "sha256": "bdfbddab0249e6048ab644b7c0f833ca1ed261e706973742b54636089fbdfc54"
+        },
+        {
+          "path": "smart-contracts/StreamPreservationRecords.sol",
+          "sha256": "c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+        },
+        {
+          "path": "script/RehearseDeployment.s.sol",
+          "sha256": "492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b"
+        }
+      ],
+      "source_commit": "522ec69adc075b6514ca96b410926128cfdfe1b0",
+      "source_tests": [
+        "test/StreamRecordFamilyAuthorization.t.sol",
+        "test/StreamCollectionMetadata.t.sol",
+        "test/StreamPreservationRecords.t.sol",
+        "test/StreamDeploymentManifest.t.sol"
+      ],
+      "status": "source_implemented_candidate_unbound",
+      "tracking_issue": "https://github.com/6529-Collections/6529Stream/issues/690"
+    },
+    "recordFamilyAuthorizationValidation": {
+      "authorizationClassCount": 8,
+      "familyGroupCount": 14,
+      "hostBindingCount": 2,
+      "path": "release-artifacts/record-family-authorization-source-catalog.json",
+      "remainingBlockerCount": 8,
+      "sha256": "sha256:c3cb5cc265c740b9a1b5c0ed9ccdc06f06513db9c6bb8ede6041eb86d16d4cde",
+      "sourceBindingCount": 8,
+      "status": "source_implemented_candidate_unbound"
     },
     "release": {
       "deployment_versions": [
@@ -197312,10 +197607,10 @@
     }
   ],
   "generator": {
-    "configSha256": "sha256:70fbc34f73dd41db000de044e13a21e0ba2aa995492804ee7f3afa26a819612c",
+    "configSha256": "sha256:944a3e62099df232f0d602a1d05f966b3acabddd782915c54569376237939c88",
     "name": "6529-public-review-solidity-reference",
-    "outputSha256": "sha256:997485cc1b3faceab0a0da2e8f3905aa18b96f07c831b57e08befbb283c22126",
-    "sourceSha256": "sha256:22914956ad1a8a956a192aa3d30ebde8b346ecc6f3a447b722a1569ad996999a",
+    "outputSha256": "sha256:8adb898e68066d84823dbeab766788229d08cd62d082fac1b66f9640158bcd4e",
+    "sourceSha256": "sha256:641a98a5eb818635d72d4282822334c37450c2ca250ff56467cd921f47509ada",
     "version": "2"
   },
   "reviewId": "6529-stream",
@@ -197335,7 +197630,8 @@
       "release-artifacts/latest/release-artifact-manifest.json": "sha256:793c063c53433e96e8354f44187b242bffaf39aa8f82e76e3617e8da2164f6bb",
       "release-artifacts/latest/release-manifest.json": "sha256:025317021e3f272ae9e5ae6118125f033ba3b8b7dc6207abaedc03a9f8a76e04",
       "release-artifacts/latest/risk-register.json": "sha256:1c952670e5401ac1fa234717985d85ccd2847bbad13fc6da4f225f9e73f1a8b6",
-      "release-artifacts/latest/source-verification-inputs.json": "sha256:e2e43ccaec8274f37a698e5832244379d889e124e87e6656af25ba5c1c66d53e"
+      "release-artifacts/latest/source-verification-inputs.json": "sha256:e2e43ccaec8274f37a698e5832244379d889e124e87e6656af25ba5c1c66d53e",
+      "release-artifacts/record-family-authorization-source-catalog.json": "sha256:c3cb5cc265c740b9a1b5c0ed9ccdc06f06513db9c6bb8ede6041eb86d16d4cde"
     },
     "commit": "018c8788750980e143c38ace0666684bf641ec4f",
     "commitTimestamp": "2026-07-26T16:53:37Z",
