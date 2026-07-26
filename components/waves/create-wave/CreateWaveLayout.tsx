@@ -39,11 +39,19 @@ export default function CreateWaveLayout({
       </div>
       <div className="tw-min-w-0 tw-flex-1 tw-bg-iron-950 tw-shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
         <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">
-          <CreateWaveMobileProgress
-            activeStep={step}
-            ongoingRanking={config.dates.ongoingRanking ?? false}
-            waveType={config.overview.type}
-          />
+          {/* Joined to the top of the flow: the compact step progress pins to
+              the top of the create-wave scrollport (mirror of the sticky
+              footer), so it reads as one header row with the app shell's back
+              arrow and never scrolls away underneath it. It carries its own
+              opaque background + bottom border so scrolled content passes
+              cleanly behind it. */}
+          <div className="tw-sticky tw-top-0 tw-z-20 tw-flex-shrink-0">
+            <CreateWaveMobileProgress
+              activeStep={step}
+              ongoingRanking={config.dates.ongoingRanking ?? false}
+              waveType={config.overview.type}
+            />
+          </div>
           <div className="tw-w-full tw-flex-1 tw-p-4 lg:tw-p-8">{children}</div>
           {showActions ? (
             // Sticky liquid-glass footer: pins to the live scroller (modal

@@ -45,23 +45,24 @@ export default function CreateWave({
   useKeyboardFocusScroll(containerRef);
 
   // On the native /waves/create route the create flow has no height-bounding
-  // ancestor, so we hand CreateWaveFlow the layout system's measured content
-  // height (viewport minus header/nav/safe-area). That makes its scroll region
-  // a real bounded scrollport the sticky footer can pin to — inside the app
-  // shell's transformed wrappers, where document-level sticky fails. The web
-  // modal bounds its own height, so it passes no style. `100dvh` is a safety
-  // fallback for the brief window before the layout system reports a measured
-  // height (keeps the footer reachable, never clipped).
+  // ancestor, so we hand CreateWaveFlow the layout system's keyboard-aware view
+  // height — the same source the wave views use. It is the viewport minus the
+  // measured app header (create-wave hides the bottom nav, so nothing else is
+  // subtracted), minus the software-keyboard inset on Capacitor when the
+  // viewport isn't already following the keyboard (iOS visualViewport vs
+  // Android). Bounding the scrollport EXACTLY to the space below the header
+  // matters two ways: the surface never grows past the viewport, so the
+  // app-shell scroller can't ride the header (its back arrow) up under the
+  // status bar; and it shrinks as the keyboard opens so the sticky footer stays
+  // reachable above it. The bottom safe-area is handled inside the flow (the
+  // footer's own inset padding). The web modal bounds its own height, so it
+  // passes no style.
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
-  const { contentContainerStyle } = useLayout();
+  const { waveViewStyle } = useLayout();
   const isNativeRoute = isApp && pathname === "/waves/create";
-  const measuredOrFallbackStyle: CSSProperties =
-    contentContainerStyle.height !== undefined
-      ? contentContainerStyle
-      : { height: "100dvh", maxHeight: "100dvh" };
   const nativeBoundedStyle: CSSProperties | undefined = isNativeRoute
-    ? measuredOrFallbackStyle
+    ? waveViewStyle
     : undefined;
 
   // Each step renders fresh content, but the layout's scroll container keeps
@@ -144,7 +145,7 @@ export default function CreateWave({
     // field) up above the keyboard instead of trapping it underneath.
     <div
       ref={containerRef}
-      className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-[calc(env(safe-area-inset-bottom,0px)+var(--native-keyboard-inset-bottom,0px))]"
+      className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
     >
       <CreateWaveFlow
         title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
