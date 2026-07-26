@@ -300,6 +300,7 @@ jobs:
         run: ./bin/6529 run build:env-schema
       - name: Build exact environment profile once
         run: |
+          set -euo pipefail
           if [ "$BUILD_ENVIRONMENT" = staging ]; then
             unset ANNOUNCED_VERSION_ENDPOINT
           fi
