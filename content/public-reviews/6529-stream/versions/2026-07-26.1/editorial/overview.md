@@ -129,6 +129,15 @@ Claims use the following labels:
 - **DEFERRED** — outside the current candidate.
 - **KNOWN LIMITATION** — an acknowledged gap, risk, or incomplete piece of
   evidence.
+- **EVIDENCE PENDING** — a mechanism or claim whose named proof is not yet in
+  the accepted review evidence.
+
+Composite headings are explicit modifiers, not extra certainty tiers.
+**IMPLEMENTED WITH CONSTRAINTS** means the mechanism exists, but the stated
+constraint is part of the claim. **IMPLEMENTED FOR THE REVIEW PLATFORM**
+describes this website and feedback system, not Solidity. **PROPOSED OR
+DEFERRED** groups design material that is either not implemented or outside the
+current candidate; the surrounding text must say which.
 
 ## What we think
 
@@ -158,4 +167,3 @@ changes will be linked to a source commit and the review will show what moved.
    usable for decades?
 5. Which current limitations must block deployment rather than become explicit
    follow-up work?
-

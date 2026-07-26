@@ -8,10 +8,12 @@ all current contract behavior.
 
 ### IMPLEMENTED
 
-Both sale paths begin with a signed authorization that binds the intended
-collection, participant values, price or auction mode, deadline, signer epoch,
-and replay identifier. Signature validity is only one condition. Mint policy,
-supply, pause state, payment, and sale-specific checks still apply.
+Both sale paths begin with a signed authorization. Its EIP-712 domain binds the
+chain and verifying contract. Its payload binds the intended collection,
+participant values, currency or token address separately from price, pricing or
+auction mode, deadline, signer epoch, and replay identifier. Signature validity
+is only one condition. Mint policy, supply, pause state, payment, and
+sale-specific checks still apply.
 
 ## Fixed-price mint
 
@@ -201,4 +203,3 @@ should not absorb speculative sale mechanisms.
 4. Is no-bid behavior fair to the artist and potential collector?
 5. Can every liability be reconstructed from events and storage?
 6. Which additional sale profiles, if any, must exist at genesis?
-

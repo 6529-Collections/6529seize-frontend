@@ -99,17 +99,25 @@ Reviewers should verify that:
 
 ## Scheduling artwork finality
 
-### IMPLEMENTED
+### IMPLEMENTED WITH CONSTRAINTS
 
 Artwork finality is scheduled rather than executed immediately. A delay creates
 time to discover a bad manifest, missing artifact, incorrect hash, or premature
 approval before the action becomes terminal.
 
-The scheduled record should bind the complete intended action. Execution must
-not reread mutable values and finalize a different package from the one that
-was reviewed during the delay.
+This label covers the scheduling and delay mechanism. It does not establish
+that every field required for terminal finality is already bound through every
+writer and execution path.
 
-The event trail should show:
+### EVIDENCE PENDING — TERMINAL GUARANTEE
+
+For finality to be accepted as terminal, the scheduled record must bind the
+complete intended action. Execution must not reread mutable values and finalize
+a different package from the one that was reviewed during the delay. That
+complete payload-binding and writer-inventory proof is not yet part of the
+review evidence.
+
+The evidence must show:
 
 1. who proposed finality;
 2. the collection and exact manifest commitments;

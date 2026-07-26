@@ -59,10 +59,12 @@ absence of:
 
 ### KNOWN LIMITATION
 
-The current normalized static-analysis register has 30 open High or Medium
-findings: 3 High and 27 Medium. A count alone does not establish severity or
-exploitability, and tools can produce false positives. It does establish that
-the release cannot honestly be described as static-analysis clean.
+The pinned
+[`SLITHER_BASELINE.json`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/ops/SLITHER_BASELINE.json)
+contains 30 open High or Medium findings: 3 High and 27 Medium. A count alone
+does not establish severity or exploitability, and tools can produce false
+positives. It does establish that the release cannot honestly be described as
+static-analysis clean.
 
 Every item needs one of:
 
@@ -78,8 +80,10 @@ normalization rules, source commit, and disposition evidence.
 
 ### KNOWN LIMITATION
 
-The current release evidence records `StreamCore` deployed bytecode at 24,152
-bytes. That is 424 bytes below the EIP-170 maximum of 24,576 bytes.
+The pinned
+[`bytecode release proof`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/release-artifacts/latest/bytecode-release-proof.json)
+records `StreamCore` deployed bytecode at 24,152 bytes. That is 424 bytes below
+the EIP-170 maximum of 24,576 bytes.
 
 The repository uses an interim 384-byte margin, which this candidate passes by
 40 bytes. Its normative production target is a 2,000-byte margin, which this
@@ -200,9 +204,15 @@ criteria need both smart-contract security and preservation evidence.
 
 ## How public findings are handled
 
-Because Stream is not deployed, possible exploitable vulnerabilities belong in
-this review rather than being hidden from the Wave. Reviewers may describe the
+This review instance is in a validated, configured predeployment state, and its
+published disclosure policy explicitly permits possible exploitable
+vulnerabilities to be reported in the public Wave. Reviewers may describe the
 affected code and consequences directly.
+
+That permission is scoped to this review state and policy; it is not inferred
+solely from the absence of a deployment. If the review state or disclosure
+policy changes, the submission UI must fail closed or use the newly configured
+disclosure route.
 
 Do not include private keys, credentials, personal information, or instructions
 that attack an unrelated live system. A finding should contain enough

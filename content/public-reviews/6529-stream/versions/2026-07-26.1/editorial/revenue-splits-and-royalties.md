@@ -75,16 +75,25 @@ For native ETH, reviewers should check:
 
 ### IMPLEMENTED WITH CONSTRAINTS
 
-Where ERC-20 settlement is supported, exact transfer behavior matters. Some
-tokens charge fees, rebase, return no boolean, invoke hooks, blacklist
-recipients, or otherwise deviate from ordinary assumptions.
+The current settlement path accepts only contract addresses whose
+deployment-wide onchain
+[`StreamAssetPolicyRegistry`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamAssetPolicyRegistry.sol#L7-L83)
+status is `ACTIVE`. Unknown, inactive, deprecated, and unsupported assets fail
+closed. The registry stores an evidence hash and effective timestamp for each
+policy decision, and its owner controls status changes.
 
-The protocol should either:
+Settlement then requires a successful boolean-returning transfer and verifies
+exact before-and-after balance changes for the payer, settlement adapter, and
+split wallet. The
+[`StreamPrimarySaleSettlement`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamPrimarySaleSettlement.sol#L124-L145)
+path rejects a missing or false return value, fee-on-transfer behavior, no-op
+transfers, failed balance reads, and wrong balance deltas. The pinned
+[`settlement tests`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamPrimarySaleSettlement.t.sol#L778-L1043)
+exercise the active standard-token path and those rejection cases.
 
-- support only an explicit token policy and verify the exact amount received; or
-- reject unsupported behavior.
-
-A UI allowlist is not an onchain accounting control.
+The accepted token set is deployment configuration, not a hardcoded list.
+Reviewers must inspect the configured registry state before launch. A UI
+allowlist alone would not be an onchain accounting control.
 
 ## Rounding and dust
 
@@ -203,4 +212,3 @@ exact profile and settlement code.
 5. Can total liabilities be proven across all holding contracts?
 6. Is the curator-root process reproducible and contestable?
 7. Is the royalty language honest about marketplace enforcement?
-

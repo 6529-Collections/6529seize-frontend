@@ -196,6 +196,32 @@ The Wave can be filtered around practical areas:
 If a comment spans categories, pick the primary one and link the other relevant
 pages.
 
+### Authoritative feedback schema for this review version
+
+Every submission uses feedback schema version `1` and exactly four Wave
+metadata keys, in this order: `review_schema`, `type`, `severity`, and
+`context`. `review_schema` is the literal schema version. `type` and `severity`
+must be values from the following allowlists:
+
+- `type`: `artist-experience-and-approvals`,
+  `curation-and-tdh-authorization`, `minting-and-supply`,
+  `fixed-price-sales-and-auctions`, `revenue-splits-and-royalties`,
+  `randomness`, `metadata-scripts-and-dependencies`,
+  `freezing-preservation-and-finality`,
+  `governance-roles-pausing-and-successors`,
+  `security-testing-and-release-evidence`,
+  `documentation-product-accessibility-and-localization`, or
+  `possible-exploitable-security-vulnerability`;
+- `severity`: `note`, `low`, `medium`, `high`, or `critical`.
+
+`context` is canonical JSON containing the submission ID, review ID and
+version, page and section identifiers, and any exact documentation or code
+reference. Optional properties are omitted rather than filled with placeholder
+values. Page identifiers are the IDs in this version's editorial manifest.
+
+The special possible-exploit type remains in the same public Wave while this
+validated predeployment disclosure policy is active.
+
 ## Public conduct and sensitive information
 
 Be direct about the code and civil toward people. Disagreement about severity

@@ -53,13 +53,16 @@ connected to the intended dependencies.
 
 ## Scheduled actions
 
-### IMPLEMENTED
+### IMPLEMENTED WITH CONSTRAINTS
 
 The governance executor schedules sensitive calls, enforces a delay, permits
 cancellation or guardian intervention, and executes the bound action after its
-waiting period.
+waiting period. This label describes the represented scheduling machinery. It
+does not prove complete parameter binding for every governed selector.
 
-The scheduled record needs to commit to:
+### EVIDENCE PENDING — COMPLETE ACTION BINDING
+
+For each governed selector, the scheduled record must commit to:
 
 - target;
 - native value;
@@ -71,7 +74,9 @@ The scheduled record needs to commit to:
 - unique salt or nonce.
 
 Execution must apply that exact record. It must not accept a fresh value or
-calldata fragment that was not visible during the review delay.
+calldata fragment that was not visible during the review delay. The current
+evidence does not yet establish this invariant for the complete governed
+surface; see the known limitation below.
 
 ## Native-value authority
 
@@ -130,23 +135,24 @@ the full governance path.
 
 ## Pause domains
 
-### IMPLEMENTED
+### EVIDENCE PENDING
 
-Stream uses domain-specific pausing rather than treating the whole protocol as
-one switch. This can let ownership transfers continue while a mint or auction
-path is investigated.
+The candidate exposes domain-specific pause machinery rather than treating the
+whole protocol as one switch. The selector-level coverage and real pause/resume
+authorities have not yet been published as accepted evidence.
 
-Every pause domain needs a published matrix:
+The following is the required documentation shape, not a verified authority or
+selector inventory:
 
 | Domain | Stops | Does not stop | Who pauses | Who resumes |
 | --- | --- | --- | --- | --- |
-| Minting | New token creation paths | Existing token ownership unless stated | Defined guardian/governance role | Defined governance path |
-| Sales | New sale execution or auction operations as specified | Unrelated metadata or transfers | Defined guardian/governance role | Defined governance path |
-| Metadata | Defined mutation paths | Reads of existing metadata | Defined guardian/governance role | Defined governance path |
-| Governance | Defined execution paths | Already permanent Core behavior | Defined emergency role | Explicit recovery path |
+| Minting | New token creation paths | Existing token ownership unless stated | To be verified | To be verified |
+| Sales | New sale execution or auction operations as specified | Unrelated metadata or transfers | To be verified | To be verified |
+| Metadata | Defined mutation paths | Reads of existing metadata | To be verified | To be verified |
+| Governance | Defined execution paths | Already permanent Core behavior | To be verified | To be verified |
 
-The final matrix must come from selector-level code inspection. The table above
-states the required documentation shape, not a substitute for that inspection.
+The accepted matrix must come from selector-level code inspection and name the
+actual authorized roles.
 
 Pausing should not strand refunds, withdrawals, or other user exits unless that
 tradeoff is explicit and justified.
