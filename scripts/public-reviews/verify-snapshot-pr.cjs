@@ -60,7 +60,10 @@ function parseArgs(argv) {
       ["--pr-number", "--head-sha", "--base-sha"].includes(key) && value,
       `Invalid verifier argument: ${key ?? "(missing)"}.`
     );
-    invariant(parsed[key] === undefined, `Duplicate verifier argument: ${key}.`);
+    invariant(
+      parsed[key] === undefined,
+      `Duplicate verifier argument: ${key}.`
+    );
     parsed[key] = value;
   }
   return {
@@ -72,8 +75,14 @@ function parseArgs(argv) {
 
 function validateIdentifiers({ prNumber, headSha, baseSha }) {
   invariant(DECIMAL_PATTERN.test(prNumber), "PR number must be decimal.");
-  invariant(SHA_PATTERN.test(headSha), "PR head SHA must be lowercase full SHA.");
-  invariant(SHA_PATTERN.test(baseSha), "PR base SHA must be lowercase full SHA.");
+  invariant(
+    SHA_PATTERN.test(headSha),
+    "PR head SHA must be lowercase full SHA."
+  );
+  invariant(
+    SHA_PATTERN.test(baseSha),
+    "PR base SHA must be lowercase full SHA."
+  );
   invariant(headSha !== baseSha, "PR head and base SHAs must differ.");
 }
 
@@ -183,7 +192,10 @@ function parseLsTree(buffer) {
     const [mode, type, oid] = metadata;
     const candidatePath = record.slice(tabIndex + 1);
     validateCandidatePath(candidatePath);
-    invariant(!entries.has(candidatePath), `Duplicate Git path: ${candidatePath}.`);
+    invariant(
+      !entries.has(candidatePath),
+      `Duplicate Git path: ${candidatePath}.`
+    );
     invariant(
       /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(oid),
       `Invalid Git object: ${oid}.`
@@ -198,7 +210,11 @@ function readGitBlob(repositoryRoot, entry, run = defaultRun) {
     entry.mode === GIT_REGULAR_MODE && entry.type === "blob",
     `${entry.path} must be a non-executable regular Git blob.`
   );
-  const buffer = gitBuffer(repositoryRoot, ["cat-file", "blob", entry.oid], run);
+  const buffer = gitBuffer(
+    repositoryRoot,
+    ["cat-file", "blob", entry.oid],
+    run
+  );
   invariant(
     buffer.length <= MAX_BLOB_BYTES,
     `${entry.path} exceeds the trusted blob size limit.`
@@ -272,11 +288,7 @@ function readTreeAtPaths(
   );
 }
 
-function exactCandidateBlobMaps(
-  repositoryRoot,
-  headSha,
-  run = defaultRun
-) {
+function exactCandidateBlobMaps(repositoryRoot, headSha, run = defaultRun) {
   const configEntries = readTreeAtPaths(
     repositoryRoot,
     headSha,
@@ -345,10 +357,8 @@ function fetchAndBindCandidate(context, dependencies = {}) {
     ) === "",
     "Trusted base checkout contains tracked modifications."
   );
-  const candidateRef =
-    `refs/codex-public-review/pr-${context.prNumber}-${context.headSha}`;
-  const baseRef =
-    `refs/codex-public-review/base-${context.prNumber}-${context.baseSha}`;
+  const candidateRef = `refs/codex-public-review/pr-${context.prNumber}-${context.headSha}`;
+  const baseRef = `refs/codex-public-review/base-${context.prNumber}-${context.baseSha}`;
   fetchAndAssertRemoteRefs(context, candidateRef, baseRef, run);
   const resolvedHead = gitText(
     context.repositoryRoot,
@@ -433,7 +443,11 @@ function fetchAndAssertRemoteRefs(
   );
 }
 
-function deleteCandidateRef(repositoryRoot, candidateRef, status = defaultStatus) {
+function deleteCandidateRef(
+  repositoryRoot,
+  candidateRef,
+  status = defaultStatus
+) {
   const result = status(
     "git",
     ["-C", repositoryRoot, "update-ref", "-d", candidateRef],
@@ -643,7 +657,14 @@ function initializeOfficialStreamRepository(tempRoot, run = defaultRun) {
   const streamRepository = path.join(tempRoot, "stream.git");
   fs.mkdirSync(streamRepository, { recursive: true });
   run("git", ["-C", streamRepository, "init", "--bare"]);
-  run("git", ["-C", streamRepository, "remote", "add", "origin", STREAM_REMOTE]);
+  run("git", [
+    "-C",
+    streamRepository,
+    "remote",
+    "add",
+    "origin",
+    STREAM_REMOTE,
+  ]);
   run("git", [
     "-C",
     streamRepository,
@@ -783,9 +804,9 @@ function compareCandidateToRegeneration(candidateBlobs, regeneratedBlobs) {
   );
   for (const candidatePath of candidatePaths) {
     invariant(
-      candidateBlobs.get(candidatePath).buffer.equals(
-        regeneratedBlobs.get(candidatePath)
-      ),
+      candidateBlobs
+        .get(candidatePath)
+        .buffer.equals(regeneratedBlobs.get(candidatePath)),
       `${candidatePath} differs from trusted regeneration.`
     );
   }
@@ -813,7 +834,10 @@ function verifyNoGenerationResidue(repositoryRoot) {
     }
   };
   visit(root);
-  invariant(residue.length === 0, "Trusted regeneration left temporary residue.");
+  invariant(
+    residue.length === 0,
+    "Trusted regeneration left temporary residue."
+  );
 }
 
 function createTrustedWorktree(
@@ -845,7 +869,11 @@ function validateTrustedWorktree(worktree, baseSha, run = defaultRun) {
   );
 }
 
-function removeTrustedWorktree(repositoryRoot, worktree, status = defaultStatus) {
+function removeTrustedWorktree(
+  repositoryRoot,
+  worktree,
+  status = defaultStatus
+) {
   const result = status(
     "git",
     ["-C", repositoryRoot, "worktree", "remove", "--force", worktree],
@@ -866,15 +894,14 @@ async function verifySnapshotPr(context, dependencies = {}) {
   const run = dependencies.run ?? defaultRun;
   const status = dependencies.status ?? defaultStatus;
   validateIdentifiers(context);
-  const candidateRef =
-    `refs/codex-public-review/pr-${context.prNumber}-${context.headSha}`;
-  const baseRef =
-    `refs/codex-public-review/base-${context.prNumber}-${context.baseSha}`;
+  const candidateRef = `refs/codex-public-review/pr-${context.prNumber}-${context.headSha}`;
+  const baseRef = `refs/codex-public-review/base-${context.prNumber}-${context.baseSha}`;
   let tempRoot;
   let worktree;
   let worktreeRegistered = false;
   let result;
   let primaryError;
+  const cleanupErrors = [];
   try {
     const binding = fetchAndBindCandidate(context, { run });
     console.log(
@@ -890,92 +917,97 @@ async function verifySnapshotPr(context, dependencies = {}) {
         headSha: context.headSha,
         baseSha: context.baseSha,
       };
-      return result;
     }
 
-    const { configBuffer, reviewBlobs } = exactCandidateBlobMaps(
-      context.repositoryRoot,
-      context.headSha,
-      run
-    );
-    const baseConfigPath = path.join(
-      context.repositoryRoot,
-      ...CONFIG_PATH.split("/")
-    );
-    const baseConfig = parseJson(
-      fs.readFileSync(baseConfigPath),
-      "trusted base config"
-    );
-    const candidateConfig = parseJson(configBuffer, "candidate config");
-    const versions = baseIndexVersions(context.repositoryRoot);
-    validateTrustedConfigPolicy(baseConfig, candidateConfig, versions);
+    if (binding.touchesSnapshot) {
+      const { configBuffer, reviewBlobs } = exactCandidateBlobMaps(
+        context.repositoryRoot,
+        context.headSha,
+        run
+      );
+      const baseConfigPath = path.join(
+        context.repositoryRoot,
+        ...CONFIG_PATH.split("/")
+      );
+      const baseConfig = parseJson(
+        fs.readFileSync(baseConfigPath),
+        "trusted base config"
+      );
+      const candidateConfig = parseJson(configBuffer, "candidate config");
+      const versions = baseIndexVersions(context.repositoryRoot);
+      validateTrustedConfigPolicy(baseConfig, candidateConfig, versions);
 
-    tempRoot = fs.mkdtempSync(
-      path.join(os.tmpdir(), `public-review-trust-${context.prNumber}-`)
-    );
-    const streamRepository =
-      dependencies.initializeStreamRepository?.(tempRoot) ??
-      initializeOfficialStreamRepository(tempRoot, run);
-    verifyOfficialStreamInputs(streamRepository, baseConfig, candidateConfig, {
-      run,
-      status,
-    });
-    const solcPath =
-      (await dependencies.installSolc?.(tempRoot)) ??
-      (await installTrustedSolc(tempRoot, {
-        run,
-        download: dependencies.download,
-      }));
-    worktree = path.join(tempRoot, "regen");
-    createTrustedWorktree(
-      context.repositoryRoot,
-      context.baseSha,
-      worktree,
-      run
-    );
-    worktreeRegistered = true;
-    validateTrustedWorktree(worktree, context.baseSha, run);
-    const candidateConfigPath = path.join(
-      worktree,
-      ...CONFIG_PATH.split("/")
-    );
-    fs.writeFileSync(candidateConfigPath, configBuffer);
-    const generatorPath = path.join(
-      worktree,
-      "scripts",
-      "public-reviews",
-      "solidity-reference.cjs"
-    );
-    run(
-      process.execPath,
-      [
-        generatorPath,
-        "--config",
-        CONFIG_PATH,
-        "--source-repo",
+      tempRoot = fs.mkdtempSync(
+        path.join(os.tmpdir(), `public-review-trust-${context.prNumber}-`)
+      );
+      const streamRepository =
+        dependencies.initializeStreamRepository?.(tempRoot) ??
+        initializeOfficialStreamRepository(tempRoot, run);
+      verifyOfficialStreamInputs(
         streamRepository,
-        "--solc",
-        solcPath,
-      ],
-      { cwd: worktree, timeout: 10 * 60_000 }
-    );
-    verifyNoGenerationResidue(worktree);
-    const regeneratedBlobs = filesystemBlobMap(worktree, REVIEW_ROOT);
-    compareCandidateToRegeneration(reviewBlobs, regeneratedBlobs);
-    fetchAndAssertRemoteRefs(context, candidateRef, baseRef, run);
-    console.log(
-      `Trusted snapshot verified ${regeneratedBlobs.size} blobs for head ${context.headSha} against base ${context.baseSha}.`
-    );
-    result = {
-      skipped: false,
-      blobCount: regeneratedBlobs.size,
-      headSha: context.headSha,
-      baseSha: context.baseSha,
-    };
+        baseConfig,
+        candidateConfig,
+        {
+          run,
+          status,
+        }
+      );
+      const solcPath =
+        (await dependencies.installSolc?.(tempRoot)) ??
+        (await installTrustedSolc(tempRoot, {
+          run,
+          download: dependencies.download,
+        }));
+      worktree = path.join(tempRoot, "regen");
+      createTrustedWorktree(
+        context.repositoryRoot,
+        context.baseSha,
+        worktree,
+        run
+      );
+      worktreeRegistered = true;
+      validateTrustedWorktree(worktree, context.baseSha, run);
+      const candidateConfigPath = path.join(
+        worktree,
+        ...CONFIG_PATH.split("/")
+      );
+      fs.writeFileSync(candidateConfigPath, configBuffer);
+      const generatorPath = path.join(
+        worktree,
+        "scripts",
+        "public-reviews",
+        "solidity-reference.cjs"
+      );
+      run(
+        process.execPath,
+        [
+          generatorPath,
+          "--config",
+          CONFIG_PATH,
+          "--source-repo",
+          streamRepository,
+          "--solc",
+          solcPath,
+        ],
+        { cwd: worktree, timeout: 10 * 60_000 }
+      );
+      verifyNoGenerationResidue(worktree);
+      const regeneratedBlobs = filesystemBlobMap(worktree, REVIEW_ROOT);
+      compareCandidateToRegeneration(reviewBlobs, regeneratedBlobs);
+      fetchAndAssertRemoteRefs(context, candidateRef, baseRef, run);
+      console.log(
+        `Trusted snapshot verified ${regeneratedBlobs.size} blobs for head ${context.headSha} against base ${context.baseSha}.`
+      );
+      result = {
+        skipped: false,
+        blobCount: regeneratedBlobs.size,
+        headSha: context.headSha,
+        baseSha: context.baseSha,
+      };
+    }
   } catch (error) {
     primaryError = error;
   } finally {
-    const cleanupErrors = [];
     if (worktreeRegistered) {
       try {
         removeTrustedWorktree(context.repositoryRoot, worktree, status);
@@ -997,21 +1029,21 @@ async function verifySnapshotPr(context, dependencies = {}) {
         cleanupErrors.push(error);
       }
     }
-    if (primaryError && cleanupErrors.length > 0) {
-      throw new AggregateError(
-        [primaryError, ...cleanupErrors],
-        "Snapshot verification and trusted cleanup both failed."
-      );
-    }
-    if (primaryError) {
-      throw primaryError;
-    }
-    if (cleanupErrors.length > 0) {
-      throw new AggregateError(
-        cleanupErrors,
-        "Snapshot verification cleanup failed."
-      );
-    }
+  }
+  if (primaryError && cleanupErrors.length > 0) {
+    throw new AggregateError(
+      [primaryError, ...cleanupErrors],
+      "Snapshot verification and trusted cleanup both failed."
+    );
+  }
+  if (primaryError) {
+    throw primaryError;
+  }
+  if (cleanupErrors.length > 0) {
+    throw new AggregateError(
+      cleanupErrors,
+      "Snapshot verification cleanup failed."
+    );
   }
   return result;
 }
