@@ -429,6 +429,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "No NatSpec was present at this source declaration.",
   "publicReview.reference.routeUnavailable":
     "The requested generated reference does not exist in this review version.",
+  "publicReview.reference.sourceLine": "Line {lineNumber}",
   "publicReview.feedback.title": "Send feedback",
   "publicReview.feedback.jump": "Jump to send feedback",
   "publicReview.feedback.intro":
@@ -436,6 +437,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.feedback.category": "Feedback type",
   "publicReview.feedback.severity": "Suspected severity",
   "publicReview.feedback.comment": "Comment",
+  "publicReview.feedback.required": "required",
   "publicReview.feedback.commentHint":
     "Describe what you found and be as specific as possible.",
   "publicReview.feedback.advanced": "Add technical detail",

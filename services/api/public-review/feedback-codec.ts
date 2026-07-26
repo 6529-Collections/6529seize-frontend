@@ -425,7 +425,7 @@ export function encodePublicReviewFeedback({
   });
   if (body.length > PUBLIC_REVIEW_DROP_CONTENT_LIMIT) {
     throw new PublicReviewFeedbackValidationError([
-      "The rendered feedback exceeds the drop content limit.",
+      "The rendered feedback exceeds the 25,000-character Wave limit. Shorten the comment or technical-detail fields and try again.",
     ]);
   }
 

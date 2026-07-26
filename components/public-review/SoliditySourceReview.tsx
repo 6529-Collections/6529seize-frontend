@@ -300,7 +300,10 @@ function SourceLines({
       role="region"
       tabIndex={0}
     >
-      <ol className="tw-m-0 tw-min-w-max tw-list-none tw-p-0 tw-py-3 tw-font-mono tw-text-xs tw-leading-6 sm:tw-text-sm">
+      <ol
+        start={firstLineNumber}
+        className="tw-m-0 tw-min-w-max tw-list-none tw-p-0 tw-py-3 tw-font-mono tw-text-xs tw-leading-6 sm:tw-text-sm"
+      >
         {lines.map((line, index) => {
           const lineNumber = firstLineNumber + index;
           const selected = lineNumber >= lineStart && lineNumber <= lineEnd;
@@ -313,10 +316,14 @@ function SourceLines({
               }`}
             >
               <span
-                aria-hidden="true"
                 className="tw-block tw-px-3 tw-text-right tw-font-mono tw-text-xs tw-text-iron-500"
               >
-                {lineNumber}
+                <span className="tw-sr-only">
+                  {t(DEFAULT_LOCALE, "publicReview.reference.sourceLine", {
+                    lineNumber,
+                  })}
+                </span>
+                <span aria-hidden="true">{lineNumber}</span>
               </span>
               <code className="tw-block tw-whitespace-pre tw-pr-5 tw-text-iron-200">
                 {line || " "}

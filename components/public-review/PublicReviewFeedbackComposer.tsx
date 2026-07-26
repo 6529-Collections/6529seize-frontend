@@ -74,6 +74,29 @@ function createSubmissionId(): string {
   return uuidv4();
 }
 
+function getFeedbackValidationMessage({
+  error,
+  locale,
+}: {
+  readonly error: unknown;
+  readonly locale: SupportedLocale;
+}): string | null {
+  if (
+    error instanceof PublicReviewFeedbackValidationError &&
+    error.issues.length > 0
+  ) {
+    if (
+      error.issues.length === 1 &&
+      error.issues[0] ===
+        t(locale, "publicReview.feedback.commentRequired")
+    ) {
+      return null;
+    }
+    return error.issues.join(" ");
+  }
+  return t(locale, "publicReview.feedback.validationError");
+}
+
 function getFeedbackContextFingerprint({
   page,
   referenceIntegrityStatus,
@@ -269,10 +292,8 @@ function useFeedbackComposerState({
         value: createPayload().parts[0]?.content ?? "",
       });
       return true;
-    } catch {
-      setCurrentFormError(
-        t(locale, "publicReview.feedback.validationError")
-      );
+    } catch (error) {
+      setCurrentFormError(getFeedbackValidationMessage({ error, locale }));
       return false;
     }
   };
@@ -307,10 +328,8 @@ function useFeedbackComposerState({
     let payload;
     try {
       payload = createPayload();
-    } catch {
-      setCurrentFormError(
-        t(locale, "publicReview.feedback.validationError")
-      );
+    } catch (error) {
+      setCurrentFormError(getFeedbackValidationMessage({ error, locale }));
       return false;
     }
 
@@ -537,7 +556,10 @@ export default function PublicReviewFeedbackComposer({
               htmlFor={`${formId}-comment`}
               className="tw-mb-1.5 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
             >
-              {t(locale, "publicReview.feedback.comment")}
+              {t(locale, "publicReview.feedback.comment")}{" "}
+              <span className="tw-text-iron-400">
+                ({t(locale, "publicReview.feedback.required")})
+              </span>
             </label>
             <textarea
               ref={commentRef}
@@ -548,6 +570,7 @@ export default function PublicReviewFeedbackComposer({
               }`}
               aria-invalid={Boolean(commentError)}
               className={`${INPUT_CLASSES} tw-min-h-36 tw-resize-y`}
+              required
               value={draft.comment}
               onChange={(event) => updateDraft("comment", event.target.value)}
             />

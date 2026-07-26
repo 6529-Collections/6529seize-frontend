@@ -16,7 +16,7 @@ import {
   type PublicReviewReferenceSelection,
 } from "@/services/api/public-review/types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
@@ -162,7 +162,7 @@ describe("PublicReviewFeedbackComposer", () => {
     const submitter = jest.fn().mockRejectedValue(new Error("API unavailable"));
     renderComposer(submitter);
 
-    const comment = await screen.findByLabelText("Comment", {
+    const comment = await screen.findByLabelText("Comment (required)", {
       selector: "textarea",
     });
     await user.type(comment, "Do not lose this exploit report.");
@@ -189,7 +189,7 @@ describe("PublicReviewFeedbackComposer", () => {
     const { queryClient } = renderComposer(submitter);
     const invalidateQueries = jest.spyOn(queryClient, "invalidateQueries");
 
-    const comment = await screen.findByLabelText("Comment", {
+    const comment = await screen.findByLabelText("Comment (required)", {
       selector: "textarea",
     });
     await user.type(comment, "Keep this until the API confirms.");
@@ -256,7 +256,7 @@ describe("PublicReviewFeedbackComposer", () => {
     } as const;
     const { rerenderSelection } = renderComposer(submitter, sourceSelection);
 
-    const comment = await screen.findByLabelText("Comment", {
+    const comment = await screen.findByLabelText("Comment (required)", {
       selector: "textarea",
     });
     await user.type(comment, "First submitted draft.");
@@ -348,7 +348,9 @@ describe("PublicReviewFeedbackComposer", () => {
     const { rerenderSelection } = renderComposer(submitter, sourceSelection);
 
     await user.type(
-      await screen.findByLabelText("Comment", { selector: "textarea" }),
+      await screen.findByLabelText("Comment (required)", {
+        selector: "textarea",
+      }),
       "Check this exact range."
     );
     await user.click(
@@ -386,7 +388,7 @@ describe("PublicReviewFeedbackComposer", () => {
       snippetSha256: `sha256:${"c".repeat(64)}`,
     } as const;
     const { rerenderSelection } = renderComposer(submitter, sourceSelection);
-    const comment = await screen.findByLabelText("Comment", {
+    const comment = await screen.findByLabelText("Comment (required)", {
       selector: "textarea",
     });
     await user.type(comment, "Keep this draft across a new line range.");
@@ -423,12 +425,14 @@ describe("PublicReviewFeedbackComposer", () => {
   it("focuses and describes the required comment after validation", async () => {
     const user = userEvent.setup();
     renderComposer(jest.fn());
-    const comment = await screen.findByLabelText("Comment", {
+    const comment = await screen.findByLabelText("Comment (required)", {
       selector: "textarea",
     });
     const submit = screen.getByRole("button", {
       name: "Post feedback to the Wave",
     });
+    expect(comment).toBeRequired();
+    expect(screen.getByText("(required)")).toBeVisible();
     await waitFor(() => expect(submit).toBeEnabled());
     await user.click(submit);
 
@@ -440,6 +444,25 @@ describe("PublicReviewFeedbackComposer", () => {
     expect(screen.getByText("Enter a comment.")).toHaveAttribute(
       "aria-live",
       "polite"
+    );
+  });
+
+  it("explains how to recover when the rendered Wave message is too long", async () => {
+    const user = userEvent.setup();
+    renderComposer(jest.fn());
+    const comment = await screen.findByLabelText("Comment (required)", {
+      selector: "textarea",
+    });
+    fireEvent.change(comment, {
+      target: { value: "x".repeat(25_000) },
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Preview Wave message" })
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Shorten the comment or technical-detail fields and try again."
     );
   });
 });

@@ -128,6 +128,12 @@ describe("SoliditySourceReview", () => {
     );
 
     expect(screen.getByText("201")).toBeInTheDocument();
+    expect(
+      screen
+        .getByRole("region", { name: "Solidity source code" })
+        .querySelector("ol")
+    ).toHaveAttribute("start", "200");
+    expect(screen.getByText("Line 200")).toHaveClass("tw-sr-only");
     await waitFor(() => {
       expect(
         JSON.parse(screen.getByTestId("selection").textContent ?? "")
