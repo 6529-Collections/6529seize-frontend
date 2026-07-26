@@ -20,13 +20,18 @@ The initial Stream review is enabled only on:
 It is disabled on production. When disabled:
 
 - the NFT navigation does not show the review
-- `/stream` and `/reviews/6529-stream*` return the standard not-found behavior
+- `/stream` and all editorial, technical-reference, source, declaration-search,
+  and feedback-ledger routes return the standard not-found behavior
 - review pages are excluded from the production sitemap
 - review content is excluded from production server tracing
 - review records are omitted from the production help and agent corpora
+- generated raw review evidence and editorial content are omitted from the
+  packaged site artifact
 - future staging discussion destinations are not rendered
 
 Production activation requires a later reviewed configuration change.
+The same complete public boundary applies while the review lifecycle is
+`DRAFT`, even on an otherwise enabled local or staging host.
 
 ## Entry Points
 
@@ -62,7 +67,10 @@ Every page includes:
 The overview also provides reading paths for community members, artists,
 technical reviewers, and auditors. The generated technical reference lets
 reviewers inspect Solidity files, definitions, functions, events, errors, and
-other declarations without leaving the review.
+other declarations without leaving the review. Its all-declarations explorer
+queries the server with the active text, kind, scope, and location filters and
+loads up to 100 matching records at a time, rather than sending the complete
+declaration inventory to the browser.
 
 ## Evidence Labels
 
@@ -109,6 +117,12 @@ feedback, and the security-reporting policy:
 - `DEPLOYED` changes security reporting to the configured post-deployment
   disclosure policy
 
+In `DRAFT`, the same gate hides the review from navigation, returns not-found
+for editorial, technical-reference, source, declaration-search, and ledger
+routes, and omits raw generated evidence plus editorial files from staging
+packages. The lifecycle gate and environment gate must both permit publication
+before any public review surface is available.
+
 Status copy and chips are selected from the review definition rather than
 being embedded in the Stream shell. Review, audience, sequence, and feedback
 links are built from the configured review slug, so the shared components do
@@ -145,6 +159,13 @@ public review discussion, validate structured metadata against the exact
 resolved review configuration, and support filtering plus CSV and Markdown
 auditor exports. Source-linked entries open the immutable in-site source view
 first, with the pinned GitHub source as a secondary link.
+
+Ledger entries are identified and deduplicated by immutable Wave drop ID, not
+by the client-supplied submission UUID inside the drop metadata. Metadata for a
+50-drop page is hydrated in batches of no more than eight concurrent requests.
+If a drop supplies a section ID, that section must appear in the page's explicit
+section allow-list; pages without a section allow-list accept no section IDs.
+Invalid structured entries are omitted and reported as ledger warnings.
 
 The form and ledger are reusable public-review modules. Review-specific
 configuration supplies the immutable manifest, page and section allowlists,

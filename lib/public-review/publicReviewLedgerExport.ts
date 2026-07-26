@@ -15,6 +15,7 @@ export function createPublicReviewLedgerCsv(
   const rows = [
     [
       "feedback_id",
+      "wave_drop_id",
       "review_version",
       "type",
       "severity",
@@ -37,6 +38,7 @@ export function createPublicReviewLedgerCsv(
         record.reference?.kind === "code" ? record.reference : undefined;
       return [
         record.feedbackId,
+        record.dropId,
         record.reviewVersion,
         record.category,
         record.severity,
@@ -67,8 +69,10 @@ export function createPublicReviewLedgerMarkdown(
     const reference =
       record.reference?.kind === "code" ? record.reference : undefined;
     const lines = [
-      `## ${record.feedbackId}`,
+      `## Wave drop ${record.dropId}`,
       "",
+      `- Submission ID: \`${record.feedbackId}\``,
+      `- Wave drop ID: \`${record.dropId}\``,
       `- Review version: \`${record.reviewVersion}\``,
       `- Type: \`${record.category}\``,
       `- Suspected severity: \`${record.severity}\``,

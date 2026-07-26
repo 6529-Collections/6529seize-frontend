@@ -10,20 +10,16 @@ import {
   SolidityDefinitionExplorer,
   type SolidityDefinitionListItem,
 } from "@/components/public-review/SolidityDefinitionExplorer";
-import {
-  SolidityGlobalDeclarationExplorer,
-  type SolidityGlobalDeclarationListItem,
-} from "@/components/public-review/SolidityGlobalDeclarationExplorer";
+import { SolidityGlobalDeclarationExplorer } from "@/components/public-review/SolidityGlobalDeclarationExplorer";
 import { SolidityInheritance } from "@/components/public-review/SolidityInheritance";
 import { SolidityOtherDeclarationGroup } from "@/components/public-review/SolidityOtherDeclarationGroup";
 import { SolidityReferenceSectionNavigation } from "@/components/public-review/SolidityReferenceSectionNavigation";
 import { SoliditySemanticIdentity } from "@/components/public-review/SoliditySemanticIdentity";
 import { SolidityWarnings } from "@/components/public-review/SolidityWarnings";
-import { formatDate, formatInteger } from "@/i18n/format";
+import { compareLocalized, formatDate, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
-  getSolidityDeclarationIndexHref,
   getSolidityDeclarationHref,
   getSolidityDefinitionHref,
   getSolidityInterfaceHref,
@@ -123,10 +119,7 @@ function ReleaseEvidence({
             <KeyValue
               label={t(DEFAULT_LOCALE, "publicReview.reference.functions")}
             >
-              {formatInteger(
-                DEFAULT_LOCALE,
-                release.summary.function_count
-              )}
+              {formatInteger(DEFAULT_LOCALE, release.summary.function_count)}
             </KeyValue>
             <KeyValue
               label={t(DEFAULT_LOCALE, "publicReview.reference.events")}
@@ -242,33 +235,9 @@ export function SolidityReferenceOverview({
       warningCount: definition.warningSummary.totalCount,
     })
   );
-  const definitionsById = new Map(
-    manifest.definitionIndex.map((definition) => [
-      definition.id,
-      definition.name,
-    ])
-  );
-  const declarationItems: SolidityGlobalDeclarationListItem[] =
-    manifest.declarationIndex.map((declaration) => ({
-      definitionName: declaration.definitionId
-        ? definitionsById.get(declaration.definitionId)
-        : undefined,
-      href: getSolidityDeclarationIndexHref({
-        ...hrefContext,
-        declaration,
-      }),
-      key: declaration.key,
-      kind: declaration.kind,
-      name: declaration.name,
-      scope: declaration.scope,
-      selectorOrTopic:
-        declaration.selector ?? declaration.topic0 ?? "\u2014",
-      signature:
-        declaration.canonicalSignature ?? declaration.displaySignature,
-      sourcePath: declaration.sourcePath,
-      syntheticGetter: declaration.syntheticGetter,
-      topLevel: declaration.topLevel,
-    }));
+  const declarationScopes = Array.from(
+    new Set(manifest.declarationIndex.map((declaration) => declaration.scope))
+  ).sort((left, right) => compareLocalized(DEFAULT_LOCALE, left, right));
 
   return (
     <div className="tw-space-y-8">
@@ -345,9 +314,7 @@ export function SolidityReferenceOverview({
               : t(DEFAULT_LOCALE, "publicReview.reference.optimizerDisabled")}
           </KeyValue>
           {manifest.source.compiler.viaIR !== undefined ? (
-            <KeyValue
-              label={t(DEFAULT_LOCALE, "publicReview.reference.viaIr")}
-            >
+            <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.viaIr")}>
               {manifest.source.compiler.viaIR
                 ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
                 : t(DEFAULT_LOCALE, "publicReview.reference.no")}
@@ -360,20 +327,16 @@ export function SolidityReferenceOverview({
               dateTime={manifest.source.commitTimestamp}
               title={manifest.source.commitTimestamp}
             >
-              {formatDate(
-                DEFAULT_LOCALE,
-                manifest.source.commitTimestamp,
-                {
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  month: "short",
-                  second: "2-digit",
-                  timeZone: "UTC",
-                  timeZoneName: "short",
-                  year: "numeric",
-                }
-              )}
+              {formatDate(DEFAULT_LOCALE, manifest.source.commitTimestamp, {
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                month: "short",
+                second: "2-digit",
+                timeZone: "UTC",
+                timeZoneName: "short",
+                year: "numeric",
+              })}
             </time>
           </KeyValue>
           <KeyValue
@@ -460,7 +423,13 @@ export function SolidityReferenceOverview({
         manifest={manifest}
       />
 
-      <SolidityGlobalDeclarationExplorer items={declarationItems} />
+      <SolidityGlobalDeclarationExplorer
+        linkMode={hrefContext.version ? "versioned" : "active"}
+        reviewId={manifest.reviewId}
+        scopes={declarationScopes}
+        sourceCommit={manifest.source.commit}
+        version={manifest.reviewVersion}
+      />
 
       <SolidityDefinitionExplorer items={listItems} />
     </div>

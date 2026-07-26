@@ -140,8 +140,7 @@ describe("public review feedback codec", () => {
         submissionsOpen: false,
         acceptsPublicExploitReports: false,
         categories: config.categories.filter(
-          (option) =>
-            option.value !== PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE
+          (option) => option.value !== PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE
         ),
       })
     ).not.toThrow();
@@ -358,6 +357,27 @@ describe("public review feedback codec", () => {
         submissionId: SUBMISSION_ID,
       })
     ).toThrow("checksum does not match");
+  });
+
+  it("rejects a section when the configured page has no section allowlist", () => {
+    expect(() =>
+      encodePublicReviewFeedback({
+        config: {
+          ...config,
+          pages: [{ value: "architecture", label: "Architecture" }],
+        },
+        destination,
+        draft,
+        page: {
+          pageId: "architecture",
+          pageTitle: "Architecture",
+          canonicalPath: "/stream/review/architecture",
+          sectionId: "forged-section",
+        },
+        signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
+        submissionId: SUBMISSION_ID,
+      })
+    ).toThrow("section is not part");
   });
 
   it("preserves Safe signer context while keeping the Chat signature null", () => {

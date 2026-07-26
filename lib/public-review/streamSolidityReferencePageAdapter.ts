@@ -2,7 +2,7 @@ import "next/dist/compiled/server-only";
 
 import { notFound } from "next/navigation";
 
-import { isPublicReviewEnabled } from "@/config/publicReviews";
+import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import {
   SolidityReferenceNotFoundError,
   type SolidityReferenceReader,
@@ -17,6 +17,7 @@ import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
+import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 
 interface ResolvedStreamReferenceRoute {
   readonly routeVersion?: string | undefined;
@@ -63,7 +64,7 @@ export async function loadActiveStreamReferenceInventory({
   readonly baseEndpoint: string;
   readonly reader?: SolidityReferenceReader | undefined;
 }): Promise<SolidityReferenceRouteInventory | undefined> {
-  if (!isPublicReviewEnabled(baseEndpoint)) {
+  if (!isStreamReviewPubliclyAvailable(baseEndpoint)) {
     return undefined;
   }
   return reader.loadRouteInventory(STREAM_REVIEW_DEFINITION.activeVersion);
@@ -81,7 +82,7 @@ export async function loadVersionedStreamReferenceInventories({
     readonly version: string;
   }[]
 > {
-  if (!isPublicReviewEnabled(baseEndpoint)) {
+  if (!isStreamReviewPubliclyAvailable(baseEndpoint)) {
     return [];
   }
   return Promise.all(
@@ -93,12 +94,18 @@ export async function loadVersionedStreamReferenceInventories({
 }
 
 export function getActiveStreamReferenceRootParams() {
-  return [{ review: STREAM_REVIEW_SLUG }];
+  return getPublicReviewLifecycleCapabilities(STREAM_REVIEW_DEFINITION.status)
+    .publicRoutesAvailable
+    ? [{ review: STREAM_REVIEW_SLUG }]
+    : [];
 }
 
 export function getVersionedStreamReferenceRootParams() {
-  return STREAM_REVIEW_DEFINITION.versions.map(({ version }) => ({
-    review: STREAM_REVIEW_SLUG,
-    version,
-  }));
+  return getPublicReviewLifecycleCapabilities(STREAM_REVIEW_DEFINITION.status)
+    .publicRoutesAvailable
+    ? STREAM_REVIEW_DEFINITION.versions.map(({ version }) => ({
+        review: STREAM_REVIEW_SLUG,
+        version,
+      }))
+    : [];
 }

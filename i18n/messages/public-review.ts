@@ -250,8 +250,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.natSpecGaps": "Known documentation gaps",
   "publicReview.reference.natSpecGapsDescription":
     "This is the complete normalized NatSpec baseline for the release surface. Functions, public-variable getters, events, custom errors, and declarations not found in the local source are counted separately and retain their reason and follow-up.",
-  "publicReview.reference.searchDocumentationGaps":
-    "Search documentation gaps",
+  "publicReview.reference.searchDocumentationGaps": "Search documentation gaps",
   "publicReview.reference.searchDocumentationGapsPlaceholder":
     "Contract, signature, source, reason, or follow-up",
   "publicReview.reference.documentationGapType": "Documentation gap type",
@@ -320,6 +319,12 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.definitionScope": "Inside a contract or library",
   "publicReview.reference.fileScope": "File scope",
   "publicReview.reference.showMoreDeclarations": "Show more declarations",
+  "publicReview.reference.loadingDeclarations": "Loading declarations…",
+  "publicReview.reference.loadingMoreDeclarations":
+    "Loading more declarations…",
+  "publicReview.reference.declarationsLoadError":
+    "The declaration index could not be loaded. Try again.",
+  "publicReview.reference.retryDeclarations": "Try again",
   "publicReview.reference.abiSurface": "Compiled ABI surface",
   "publicReview.reference.abiSurfaceDescription":
     "Includes inherited ABI entries and links each entry to its declaring definition.",
@@ -345,8 +350,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.fileScopeDeclarationsDescription":
     "Structs, enums, custom value types, functions, events, errors, and variables declared outside a contract in this exact source file.",
   "publicReview.reference.members": "Members",
-  "publicReview.reference.declarationMembersTable":
-    "Members of {declaration}",
+  "publicReview.reference.declarationMembersTable": "Members of {declaration}",
   "publicReview.reference.canonicalName": "Canonical name",
   "publicReview.reference.initializer": "Initializer",
   "publicReview.reference.semanticIdentity": "Stable generated identity",
@@ -407,8 +411,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "The selected code could not be copied. Select and copy it manually.",
   "publicReview.reference.openSelection": "Open selected lines on GitHub",
   "publicReview.reference.commentSelection": "Comment on selected lines",
-  "publicReview.reference.skipCode":
-    "Send feedback on these selected lines",
+  "publicReview.reference.skipCode": "Send feedback on these selected lines",
   "publicReview.reference.selectionReady":
     "This source reference is ready to attach to structured feedback.",
   "publicReview.reference.warningSummary": "Warning summary",
@@ -501,8 +504,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.feedback.pages.referenceFunction": "Solidity function",
   "publicReview.feedback.pages.referenceEvent": "Solidity event",
   "publicReview.feedback.pages.referenceError": "Solidity custom error",
-  "publicReview.feedback.pages.referenceDeclaration":
-    "File-scope declaration",
+  "publicReview.feedback.pages.referenceDeclaration": "File-scope declaration",
   "publicReview.ledger.title": "Public feedback ledger",
   "publicReview.ledger.intro":
     "Structured feedback submitted for this exact review version.",

@@ -137,9 +137,9 @@ describe("Solidity auditor-evidence validation", () => {
 
   it("rejects summary drift and unknown source references", () => {
     const summaryDrift = createEvidence();
-    (
-      summaryDrift.natSpecGaps.counts.byGapType as Record<string, number>
-    )["event"] = 2;
+    (summaryDrift.natSpecGaps.counts.byGapType as Record<string, number>)[
+      "event"
+    ] = 2;
     expect(() =>
       assertAuditorEvidence(summaryDrift, new Set([SOURCE_PATH]))
     ).toThrow("summary drift");
@@ -187,7 +187,7 @@ describe("Solidity auditor-evidence validation", () => {
 
     const retainedPath = createEvidence();
     (
-      retainedPath.riskRegister as {
+      retainedPath.riskRegister as unknown as {
         risks: ReturnType<typeof createRisk>[];
       }
     ).risks = [createRisk(["ops/EXECUTION_BACKLOG.md"])];
@@ -202,7 +202,7 @@ describe("Solidity auditor-evidence validation", () => {
     ]) {
       const unsafe = createEvidence();
       (
-        unsafe.riskRegister as {
+        unsafe.riskRegister as unknown as {
           risks: ReturnType<typeof createRisk>[];
         }
       ).risks = [createRisk([unsafePath])];

@@ -63,7 +63,7 @@ function makeDrop(serialNo: number, id = `drop-${serialNo}`): ApiDropV2 {
     reactions: [{ reaction: "👍", count: 3 }],
     boosts: 0,
     content: "Rendered feedback",
-  } as ApiDropV2;
+  } as unknown as ApiDropV2;
 }
 
 function makeFeed(drops: ApiDropV2[]): ApiWaveDropsFeedV2 {
@@ -286,9 +286,10 @@ describe("public review ledger projection", () => {
     expect(JSON.stringify(stagingKey)).toContain("2026-07-26.1");
   });
 
-  it("filters loaded records and deduplicates submission IDs", () => {
+  it("filters loaded records and deduplicates immutable drop IDs", () => {
     const record = {
       feedbackId: "feedback-1",
+      dropId: "drop-1",
       category: "security",
       severity: "critical",
       pageId: "architecture",
@@ -311,5 +312,46 @@ describe("public review ledger projection", () => {
       })
     ).toEqual([record]);
     expect(dedupePublicReviewLedgerRecords([record, record])).toEqual([record]);
+  });
+
+  it("retains separate drops that reuse a client-authored submission ID", () => {
+    const first = {
+      feedbackId: "copied-submission-id",
+      dropId: "drop-1",
+    } as PublicReviewFeedbackRecord;
+    const second = {
+      feedbackId: "copied-submission-id",
+      dropId: "drop-2",
+    } as PublicReviewFeedbackRecord;
+
+    expect(dedupePublicReviewLedgerRecords([first, second])).toEqual([
+      first,
+      second,
+    ]);
+  });
+
+  it("bounds concurrent metadata hydration", async () => {
+    let activeRequests = 0;
+    let maximumConcurrentRequests = 0;
+    const drops = Array.from({ length: 18 }, (_, index) =>
+      makeDrop(100 - index)
+    );
+    const api = makeApi({
+      drops,
+      metadata: async () => {
+        activeRequests += 1;
+        maximumConcurrentRequests = Math.max(
+          maximumConcurrentRequests,
+          activeRequests
+        );
+        await Promise.resolve();
+        activeRequests -= 1;
+        return makeMetadata();
+      },
+    });
+
+    await fetchPublicReviewLedgerPage({ api, config, destination });
+
+    expect(maximumConcurrentRequests).toBeLessThanOrEqual(8);
   });
 });

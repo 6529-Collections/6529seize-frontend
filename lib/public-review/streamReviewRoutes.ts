@@ -21,6 +21,14 @@ export interface StreamReviewRouteModel {
   readonly canonicalPath: string;
 }
 
+export function isStreamReviewPubliclyAvailable(baseEndpoint: string): boolean {
+  return (
+    isPublicReviewEnabled(baseEndpoint) &&
+    getPublicReviewLifecycleCapabilities(STREAM_REVIEW_DEFINITION.status)
+      .publicRoutesAvailable
+  );
+}
+
 export function resolveStreamReviewRoute({
   baseEndpoint,
   params,
@@ -29,9 +37,7 @@ export function resolveStreamReviewRoute({
   readonly params: StreamReviewRouteParams;
 }): StreamReviewRouteModel | undefined {
   if (
-    !isPublicReviewEnabled(baseEndpoint) ||
-    !getPublicReviewLifecycleCapabilities(STREAM_REVIEW_DEFINITION.status)
-      .publicRoutesAvailable ||
+    !isStreamReviewPubliclyAvailable(baseEndpoint) ||
     params.review !== STREAM_REVIEW_SLUG
   ) {
     return undefined;

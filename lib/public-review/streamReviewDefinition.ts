@@ -7,6 +7,7 @@ import type {
   PublicReviewVersionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
 import { createPublicReviewRouteBuilder } from "@/lib/public-review/publicReviewRoutes";
+import { STREAM_REVIEW_LIFECYCLE_STATE } from "@/lib/public-review/streamReviewPublication";
 
 export const STREAM_REVIEW_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
@@ -97,19 +98,14 @@ export const STREAM_REVIEW_PAGES = [
       "KNOWN_LIMITATION",
     ]
   ),
-  definePage(
-    "for-artists",
-    "forArtists",
-    ARTIST_COMMUNITY,
-    [
-      "IMPLEMENTED",
-      "PROPOSED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-      "DEFERRED",
-      "KNOWN_LIMITATION",
-    ]
-  ),
+  definePage("for-artists", "forArtists", ARTIST_COMMUNITY, [
+    "IMPLEMENTED",
+    "PROPOSED",
+    "OPEN_FOR_FEEDBACK",
+    "AUDIT_PENDING",
+    "DEFERRED",
+    "KNOWN_LIMITATION",
+  ]),
   definePage(
     "roles-and-trust",
     "rolesAndTrust",
@@ -120,13 +116,7 @@ export const STREAM_REVIEW_PAGES = [
     "curation-and-tdh-authorization",
     "curationAndTdhAuthorization",
     ALL_AUDIENCES,
-    [
-      "IMPLEMENTED",
-      "TESTED",
-      "PROPOSED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-    ]
+    ["IMPLEMENTED", "TESTED", "PROPOSED", "OPEN_FOR_FEEDBACK", "AUDIT_PENDING"]
   ),
   definePage(
     "tokens-collections-and-minting",
@@ -167,19 +157,14 @@ export const STREAM_REVIEW_PAGES = [
       "KNOWN_LIMITATION",
     ]
   ),
-  definePage(
-    "randomness",
-    "randomness",
-    ARTIST_TECHNICAL_AUDITOR,
-    [
-      "IMPLEMENTED",
-      "TESTED",
-      "PROPOSED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-      "KNOWN_LIMITATION",
-    ]
-  ),
+  definePage("randomness", "randomness", ARTIST_TECHNICAL_AUDITOR, [
+    "IMPLEMENTED",
+    "TESTED",
+    "PROPOSED",
+    "OPEN_FOR_FEEDBACK",
+    "AUDIT_PENDING",
+    "KNOWN_LIMITATION",
+  ]),
   definePage(
     "metadata-scripts-and-dependencies",
     "metadataScriptsAndDependencies",
@@ -249,14 +234,13 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
       pages: STREAM_REVIEW_PAGES,
     },
   ],
-  status: "PUBLIC_REVIEW",
+  status: STREAM_REVIEW_LIFECYCLE_STATE,
   deploymentStatus: "NOT_DEPLOYED",
   auditStatus: "PRE_AUDIT",
   feedbackAvailable: true,
 };
 
-const STREAM_REVIEW_ROUTES =
-  createPublicReviewRouteBuilder(STREAM_REVIEW_SLUG);
+const STREAM_REVIEW_ROUTES = createPublicReviewRouteBuilder(STREAM_REVIEW_SLUG);
 
 export function getStreamReviewPage(
   slug: string,

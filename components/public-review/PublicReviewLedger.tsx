@@ -279,11 +279,7 @@ export default function PublicReviewLedger({
         />
       </fieldset>
 
-      <output
-        className="tw-sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-      >
+      <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
         {ledgerQuery.isPending
           ? t(locale, "publicReview.ledger.loading")
           : t(locale, "publicReview.ledger.status", {
@@ -297,9 +293,7 @@ export default function PublicReviewLedger({
       </output>
 
       {warnings.length > 0 ? (
-        <p
-          className="tw-mb-0 tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/40 tw-bg-amber-950/20 tw-p-3 tw-text-sm tw-text-amber-100"
-        >
+        <p className="tw-mb-0 tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/40 tw-bg-amber-950/20 tw-p-3 tw-text-sm tw-text-amber-100">
           {t(locale, "publicReview.ledger.warning", {
             count: formatInteger(locale, warnings.length),
           })}
@@ -362,7 +356,7 @@ export default function PublicReviewLedger({
               : undefined;
 
             return (
-              <li key={record.feedbackId}>
+              <li key={record.dropId}>
                 <article
                   aria-label={t(locale, "publicReview.ledger.itemLabel", {
                     author,

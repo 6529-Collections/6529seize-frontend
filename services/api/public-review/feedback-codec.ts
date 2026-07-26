@@ -218,8 +218,7 @@ function buildFeedbackContext({
   }
   if (
     page.sectionId !== undefined &&
-    configuredPage.sectionValues !== undefined &&
-    !configuredPage.sectionValues.includes(page.sectionId)
+    !configuredPage.sectionValues?.includes(page.sectionId)
   ) {
     throw new PublicReviewFeedbackValidationError([
       "The selected section is not part of this review page.",
@@ -625,8 +624,7 @@ function decodeContext({
   }
   if (
     typeof value["sectionId"] === "string" &&
-    configuredPage.sectionValues !== undefined &&
-    !configuredPage.sectionValues.includes(value["sectionId"])
+    !configuredPage.sectionValues?.includes(value["sectionId"])
   ) {
     throw new Error("Feedback references an unknown review section.");
   }

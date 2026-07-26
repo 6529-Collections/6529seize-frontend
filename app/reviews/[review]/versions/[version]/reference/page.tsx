@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { publicEnv } from "@/config/env";
-import { isPublicReviewEnabled } from "@/config/publicReviews";
 import {
   getStreamSolidityReferenceMetadata,
   renderStreamSolidityReferenceOverview,
@@ -11,13 +10,14 @@ import {
   getVersionedStreamReferenceRootParams,
   resolveStreamReferenceRouteOrNotFound,
 } from "@/lib/public-review/streamSolidityReferencePageAdapter";
+import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 
 type Props = {
   readonly params: Promise<{ review: string; version: string }>;
 };
 
 export function generateStaticParams() {
-  return isPublicReviewEnabled(publicEnv.BASE_ENDPOINT)
+  return isStreamReviewPubliclyAvailable(publicEnv.BASE_ENDPOINT)
     ? getVersionedStreamReferenceRootParams()
     : [];
 }

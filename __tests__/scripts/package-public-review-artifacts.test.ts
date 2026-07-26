@@ -100,7 +100,7 @@ function writeJson(root: string, relativePath: string, value: unknown): string {
   return writeFile(root, relativePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function createFixture(): {
+function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
   readonly repoRoot: string;
   readonly bundleRoot: string;
   readonly sourceFile: string;
@@ -141,6 +141,11 @@ function createFixture(): {
     `config/public-reviews/${REVIEW_ID}.reference.json`,
     configText
   );
+  writeJson(repoRoot, `config/public-reviews/${REVIEW_ID}.publication.json`, {
+    schemaVersion: "public-review.publication.v1",
+    reviewId: REVIEW_ID,
+    lifecycleState,
+  });
 
   const sourceText = "contract StreamCore {}\n";
   const sourceFile = writeFile(
@@ -411,6 +416,25 @@ describe("profile-aware public-review artifact packaging", () => {
         "utf8"
       )
     ).toContain("Fixture editorial content");
+  });
+
+  it("omits draft routes' raw evidence from staging artifacts", () => {
+    const fixture = createFixture("DRAFT");
+    fixtureRoots.push(fixture.repoRoot);
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([]);
+    expect(
+      fs.existsSync(path.join(fixture.bundleRoot, "public/review-data"))
+    ).toBe(false);
+    expect(
+      fs.existsSync(path.join(fixture.bundleRoot, "content/public-reviews"))
+    ).toBe(false);
   });
 
   it.each([

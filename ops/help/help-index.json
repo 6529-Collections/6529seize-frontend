@@ -111,15 +111,17 @@
         "not deployed"
       ],
       "facts": [
-        "The 6529 Stream public review lives at /reviews/6529-stream on local development and shared staging only; it is disabled on production.",
+        "The 6529 Stream public review lives at /reviews/6529-stream only when both its lifecycle and the current environment permit publication; the initial environment allow-list is local development and shared staging, not production.",
         "The review describes a proposed multi-collection ERC-721 protocol, not only a one-of-one mint contract.",
         "Stream is not deployed, is pre-audit, and is not presented as final or production-ready.",
         "Fourteen editorial pages explain artwork lifecycle, artist controls, roles, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, governance, security, and community review.",
         "Every page shows the review version, exact source link, evidence labels, page navigation, and on-page contents.",
         "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
         "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",
+        "The all-declarations explorer applies its text, kind, scope, and location filters on the server and returns at most 100 matches per page instead of sending the complete declaration inventory to the browser.",
         "Every editorial and technical page includes one structured feedback composer bound to the immutable displayed review version.",
         "The reusable lifecycle map supports draft, scheduled, public review, review closed, remediation, audit, final candidate, deployed, and archived states; only public review accepts new feedback.",
+        "While the lifecycle is DRAFT, navigation and all editorial, technical-reference, source, declaration-search, and feedback-ledger routes are unavailable, and raw generated evidence plus editorial content are omitted from staging packages.",
         "When enabled, NFTs > 6529 Stream — Review appears after ReMemes and before NFT Activity."
       ],
       "canonical_path": "/reviews/6529-stream",
@@ -176,6 +178,9 @@
         "Possible exploitable security vulnerabilities are intentionally submitted to the same public pre-deployment review because Stream is not deployed.",
         "Public vulnerability submission is available only during the PUBLIC_REVIEW lifecycle state; deployed reviews use their configured post-deployment disclosure policy.",
         "The public feedback ledger supports category, page, contract, severity, disposition, and text filters plus CSV and Markdown auditor exports.",
+        "Ledger entries are identified and deduplicated by immutable Wave drop ID rather than the client-supplied submission UUID.",
+        "Ledger metadata for a 50-drop page is hydrated in batches of no more than eight concurrent requests.",
+        "A feedback section is accepted only when that exact section is explicitly allowed for the selected page; pages without a section allow-list accept no section IDs.",
         "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner.",
         "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."
       ],

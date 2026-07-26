@@ -17,6 +17,21 @@ const PROFILES = new Set(["production", "staging"]);
 const PUBLIC_REVIEW_CONFIG_DIRECTORY = "config/public-reviews";
 const PUBLIC_REVIEW_DATA_DIRECTORY = "public/review-data";
 const PUBLIC_REVIEW_EDITORIAL_DIRECTORY = "content/public-reviews";
+const PUBLIC_REVIEW_PUBLICATION_SCHEMA = "public-review.publication.v1";
+const PUBLIC_REVIEW_LIFECYCLE_STATES = new Set([
+  "DRAFT",
+  "SCHEDULED",
+  "PUBLIC_REVIEW",
+  "REVIEW_CLOSED",
+  "REMEDIATION",
+  "AUDIT",
+  "FINAL_CANDIDATE",
+  "DEPLOYED",
+  "ARCHIVED",
+]);
+const PUBLIC_REVIEW_PUBLIC_ROUTE_STATES = new Set(
+  [...PUBLIC_REVIEW_LIFECYCLE_STATES].filter((state) => state !== "DRAFT")
+);
 const SHA256_URN_PATTERN = /^sha256:[0-9a-f]{64}$/;
 const SOURCE_PIN_PATTERN = /^[0-9a-f]{40}$/;
 const SOURCE_REPOSITORY_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
@@ -184,6 +199,76 @@ function isReviewDataPath(relativePath) {
   return (
     relativePath === "review-data" || relativePath.startsWith("review-data/")
   );
+}
+
+function getPublicReviewPublicationConfigs(repoRoot) {
+  const directory = path.join(repoRoot, PUBLIC_REVIEW_CONFIG_DIRECTORY);
+  const publications = sortedDirectoryEntries(directory)
+    .filter(
+      (entry) =>
+        entry.isFile() && entry.name.endsWith(".publication.json")
+    )
+    .map((entry) => {
+      const config = readJson(
+        path.join(directory, entry.name),
+        "public-review publication config"
+      );
+      invariant(
+        config.schemaVersion === PUBLIC_REVIEW_PUBLICATION_SCHEMA &&
+          SAFE_ID_PATTERN.test(config.reviewId) &&
+          PUBLIC_REVIEW_LIFECYCLE_STATES.has(config.lifecycleState),
+        `${entry.name} is not a valid public-review publication config.`
+      );
+      return config;
+    });
+  const referenceIds = discoverReviewConfigs(repoRoot).map(
+    (configPath) =>
+      readJson(configPath, "public-review source config").reviewId
+  );
+  const publicationIds = publications.map(
+    (publication) => publication.reviewId
+  );
+  invariant(
+    new Set(publicationIds).size === publicationIds.length &&
+      JSON.stringify(
+        [...publicationIds].sort((left, right) =>
+          left.localeCompare(right, "en")
+        )
+      ) ===
+        JSON.stringify(
+          [...referenceIds].sort((left, right) =>
+            left.localeCompare(right, "en")
+          )
+        ),
+    "Every public-review reference config must have one publication config."
+  );
+  return publications;
+}
+
+function getPublishedReviewIds(repoRoot) {
+  return new Set(
+    getPublicReviewPublicationConfigs(repoRoot)
+      .filter((config) =>
+        PUBLIC_REVIEW_PUBLIC_ROUTE_STATES.has(config.lifecycleState)
+      )
+      .map((config) => config.reviewId)
+  );
+}
+
+function isUnpublishedReviewDataPath(relativePath, publishedReviewIds) {
+  if (relativePath === "review-data") {
+    return publishedReviewIds.size === 0;
+  }
+  if (!relativePath.startsWith("review-data/")) {
+    return false;
+  }
+  const reviewId = relativePath.split("/")[1];
+  return !reviewId || !publishedReviewIds.has(reviewId);
+}
+
+function isUnpublishedReviewRootPath(relativePath, publishedReviewIds) {
+  const reviewId = normalizeRelativePath(relativePath).split("/")[0];
+  return !reviewId || !publishedReviewIds.has(reviewId);
 }
 
 function containsSegmentPair(relativePath, first, second) {
@@ -608,6 +693,7 @@ function assertEditorialEvidence({ bundleRoot, review }) {
 }
 
 function assertStagingEvidence(repoRoot, bundleRoot) {
+  const publishedReviewIds = getPublishedReviewIds(repoRoot);
   const sourcePublicReviewRoot = path.join(
     repoRoot,
     PUBLIC_REVIEW_DATA_DIRECTORY
@@ -617,7 +703,10 @@ function assertStagingEvidence(repoRoot, bundleRoot) {
     PUBLIC_REVIEW_DATA_DIRECTORY
   );
   invariant(
-    directoryIdentity(sourcePublicReviewRoot) ===
+    directoryIdentity(sourcePublicReviewRoot, {
+      ignore: (relativePath) =>
+        isUnpublishedReviewRootPath(relativePath, publishedReviewIds),
+    }) ===
       directoryIdentity(bundlePublicReviewRoot),
     "Staging public-review data does not exactly match the trusted source tree."
   );
@@ -631,28 +720,45 @@ function assertStagingEvidence(repoRoot, bundleRoot) {
     PUBLIC_REVIEW_EDITORIAL_DIRECTORY
   );
   invariant(
-    directoryIdentity(sourceEditorialRoot) ===
+    directoryIdentity(sourceEditorialRoot, {
+      ignore: (relativePath) =>
+        isUnpublishedReviewRootPath(relativePath, publishedReviewIds),
+    }) ===
       directoryIdentity(bundleEditorialRoot),
     "Staging editorial content does not exactly match the trusted source tree."
   );
 
-  const reviews = discoverReviewConfigs(repoRoot).map((configPath) =>
-    assertCanonicalReviewEvidence({
-      bundlePublicRoot: path.join(bundleRoot, "public"),
-      configPath,
-    })
-  );
+  const reviews = discoverReviewConfigs(repoRoot)
+    .filter((configPath) =>
+      publishedReviewIds.has(
+        readJson(configPath, "public-review source config").reviewId
+      )
+    )
+    .map((configPath) =>
+      assertCanonicalReviewEvidence({
+        bundlePublicRoot: path.join(bundleRoot, "public"),
+        configPath,
+      })
+    );
   const reviewIds = reviews.map((review) => review.reviewId);
-  assertExactChildDirectories(
-    bundlePublicReviewRoot,
-    reviewIds,
-    "Staging public-review data"
-  );
-  assertExactChildDirectories(
-    bundleEditorialRoot,
-    reviewIds,
-    "Staging editorial content"
-  );
+  if (reviewIds.length === 0) {
+    invariant(
+      !fs.existsSync(bundlePublicReviewRoot) &&
+        !fs.existsSync(bundleEditorialRoot),
+      "Draft public-review evidence must be absent from staging."
+    );
+  } else {
+    assertExactChildDirectories(
+      bundlePublicReviewRoot,
+      reviewIds,
+      "Staging public-review data"
+    );
+    assertExactChildDirectories(
+      bundleEditorialRoot,
+      reviewIds,
+      "Staging editorial content"
+    );
+  }
 
   return reviews.map((review) => ({
     ...review,
@@ -666,10 +772,16 @@ function assertStagingEvidence(repoRoot, bundleRoot) {
 function assertPublicCopyIdentity(repoRoot, bundleRoot, profile) {
   const sourcePublic = path.join(repoRoot, "public");
   const bundlePublic = path.join(bundleRoot, "public");
-  const options =
-    profile === "production"
-      ? { ignore: (relativePath) => isReviewDataPath(relativePath) }
-      : undefined;
+  const publishedReviewIds = getPublishedReviewIds(repoRoot);
+  const options = {
+    ignore: (relativePath) =>
+      profile === "production"
+        ? isReviewDataPath(relativePath)
+        : isUnpublishedReviewDataPath(
+            relativePath,
+            publishedReviewIds
+          ),
+  };
   invariant(
     directoryIdentity(sourcePublic, options) ===
       directoryIdentity(bundlePublic),
@@ -694,11 +806,15 @@ function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
   const sourceIdentity = captureSourceIdentity(repoRoot);
   const sourcePublic = path.join(repoRoot, "public");
   const bundlePublic = path.join(bundleRoot, "public");
+  const publishedReviewIds = getPublishedReviewIds(repoRoot);
   copyDirectory(sourcePublic, bundlePublic, {
-    ignore:
+    ignore: (relativePath) =>
       profile === "production"
-        ? (relativePath) => isReviewDataPath(relativePath)
-        : undefined,
+        ? isReviewDataPath(relativePath)
+        : isUnpublishedReviewDataPath(
+            relativePath,
+            publishedReviewIds
+          ),
   });
 
   if (profile === "staging") {
@@ -712,12 +828,26 @@ function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
     );
     if (fs.existsSync(bundleEditorial)) {
       invariant(
-        directoryIdentity(sourceEditorial) ===
+        directoryIdentity(sourceEditorial, {
+          ignore: (relativePath) =>
+            isUnpublishedReviewRootPath(
+              relativePath,
+              publishedReviewIds
+            ),
+        }) ===
           directoryIdentity(bundleEditorial),
         "Traced staging editorial content differs from its trusted source tree."
       );
     } else {
-      copyDirectory(sourceEditorial, bundleEditorial);
+      if (publishedReviewIds.size > 0) {
+        copyDirectory(sourceEditorial, bundleEditorial, {
+          ignore: (relativePath) =>
+            isUnpublishedReviewRootPath(
+              relativePath,
+              publishedReviewIds
+            ),
+        });
+      }
     }
   }
 
@@ -911,6 +1041,7 @@ module.exports = {
   captureSourceIdentity,
   directoryIdentity,
   expectedBundleEntries,
+  getPublishedReviewIds,
   main,
   parseCli,
   parseZipListing,

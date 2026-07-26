@@ -96,8 +96,7 @@ function renderComposer(
 
   const getComposer = (
     currentReferenceSelection?: PublicReviewReferenceSelection,
-    currentReferenceIntegrityStatus: PublicReviewReferenceIntegrityStatus =
-      "ready"
+    currentReferenceIntegrityStatus: PublicReviewReferenceIntegrityStatus = "ready"
   ) => (
     <PublicReviewFeedbackComposer
       locale="en-US"
@@ -127,8 +126,7 @@ function renderComposer(
     queryClient,
     rerenderSelection: (
       nextReferenceSelection?: PublicReviewReferenceSelection,
-      nextReferenceIntegrityStatus: PublicReviewReferenceIntegrityStatus =
-        "ready"
+      nextReferenceIntegrityStatus: PublicReviewReferenceIntegrityStatus = "ready"
     ) =>
       result.rerender(
         getComposer(nextReferenceSelection, nextReferenceIntegrityStatus)
@@ -142,14 +140,14 @@ describe("PublicReviewFeedbackComposer", () => {
     useAuthMock.mockReturnValue({
       connectedProfile: { id: "profile-1" },
       requestAuth: jest.fn(),
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
     useSeizeConnectContextMock.mockReturnValue({
       address: "0x000000000000000000000000000000000000dEaD",
       hasValidWalletAuth: true,
       isSafeWallet: false,
       seizeConnectFresh: jest.fn(),
       seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>);
+    } as unknown as ReturnType<typeof useSeizeConnectContext>);
     fetchWaveByIdMock.mockResolvedValue({
       wave: { type: ApiWaveType.Chat },
       chat: {
@@ -187,7 +185,7 @@ describe("PublicReviewFeedbackComposer", () => {
         new Promise((resolve) => {
           resolveDrop = resolve;
         })
-    ) as PublicReviewFeedbackSubmitter;
+    ) as unknown as PublicReviewFeedbackSubmitter;
     const { queryClient } = renderComposer(submitter);
     const invalidateQueries = jest.spyOn(queryClient, "invalidateQueries");
 
@@ -256,10 +254,7 @@ describe("PublicReviewFeedbackComposer", () => {
       lineEnd: 12,
       snippetSha256: `sha256:${"c".repeat(64)}`,
     } as const;
-    const { rerenderSelection } = renderComposer(
-      submitter,
-      sourceSelection
-    );
+    const { rerenderSelection } = renderComposer(submitter, sourceSelection);
 
     const comment = await screen.findByLabelText("Comment", {
       selector: "textarea",
@@ -275,7 +270,10 @@ describe("PublicReviewFeedbackComposer", () => {
       snippetSha256: `sha256:${"d".repeat(64)}`,
     });
     await user.clear(comment);
-    await user.type(comment, "New draft written while the first post is pending.");
+    await user.type(
+      comment,
+      "New draft written while the first post is pending."
+    );
 
     resolveFirstDrop({
       id: "drop-1",
@@ -323,7 +321,7 @@ describe("PublicReviewFeedbackComposer", () => {
       isSafeWallet: false,
       seizeConnectFresh: jest.fn(),
       seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>);
+    } as unknown as ReturnType<typeof useSeizeConnectContext>);
 
     renderComposer(submitter);
 
@@ -347,10 +345,7 @@ describe("PublicReviewFeedbackComposer", () => {
       lineEnd: 12,
       snippetSha256: `sha256:${"c".repeat(64)}`,
     } as const;
-    const { rerenderSelection } = renderComposer(
-      submitter,
-      sourceSelection
-    );
+    const { rerenderSelection } = renderComposer(submitter, sourceSelection);
 
     await user.type(
       await screen.findByLabelText("Comment", { selector: "textarea" }),
@@ -390,10 +385,7 @@ describe("PublicReviewFeedbackComposer", () => {
       lineEnd: 12,
       snippetSha256: `sha256:${"c".repeat(64)}`,
     } as const;
-    const { rerenderSelection } = renderComposer(
-      submitter,
-      sourceSelection
-    );
+    const { rerenderSelection } = renderComposer(submitter, sourceSelection);
     const comment = await screen.findByLabelText("Comment", {
       selector: "textarea",
     });
@@ -408,10 +400,9 @@ describe("PublicReviewFeedbackComposer", () => {
     expect(
       screen.getByRole("button", { name: "Post feedback to the Wave" })
     ).toBeDisabled();
-    expect(screen.getByText("Calculating exact source checksum.")).toHaveAttribute(
-      "aria-live",
-      "polite"
-    );
+    expect(
+      screen.getByText("Calculating exact source checksum.")
+    ).toHaveAttribute("aria-live", "polite");
 
     rerenderSelection(
       {

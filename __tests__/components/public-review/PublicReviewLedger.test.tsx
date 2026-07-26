@@ -45,10 +45,12 @@ const record: PublicReviewFeedbackRecord = {
 describe("PublicReviewLedger auditor exports", () => {
   it("exports exact source provenance and neutralizes spreadsheet formulas", () => {
     const csv = createPublicReviewLedgerCsv([
-      { ...record, body: " \t=HYPERLINK(\"https://example.invalid\")" },
+      { ...record, body: ' \t=HYPERLINK("https://example.invalid")' },
     ]);
 
     expect(csv).toContain(`"'=auditor-formula"`);
+    expect(csv).toContain('"wave_drop_id"');
+    expect(csv).toContain('"drop-1"');
     expect(csv).toContain(`"'@reviewer"`);
     expect(csv).toContain('"src/StreamCore.sol"');
     expect(csv).toContain('"10","12"');
@@ -63,9 +65,9 @@ describe("PublicReviewLedger auditor exports", () => {
     );
 
     expect(markdown).toContain("# Stream feedback");
-    expect(markdown).toContain(
-      "Source: `src/StreamCore.sol:10-12`"
-    );
+    expect(markdown).toContain("## Wave drop drop-1");
+    expect(markdown).toContain("- Submission ID: `=auditor-formula`");
+    expect(markdown).toContain("Source: `src/StreamCore.sol:10-12`");
     expect(markdown).toContain(`Snippet checksum: \`${"b".repeat(64)}\``);
     expect(markdown).toContain("> The exact invariant can fail.");
   });

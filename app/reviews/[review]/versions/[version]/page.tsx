@@ -1,5 +1,4 @@
 import { publicEnv } from "@/config/env";
-import { isPublicReviewEnabled } from "@/config/publicReviews";
 import {
   generateStreamReviewRouteMetadata,
   renderStreamReviewRoutePage,
@@ -8,12 +7,13 @@ import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
+import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 
 export const generateMetadata = generateStreamReviewRouteMetadata;
 export default renderStreamReviewRoutePage;
 
 export function generateStaticParams() {
-  if (!isPublicReviewEnabled(publicEnv.BASE_ENDPOINT)) {
+  if (!isStreamReviewPubliclyAvailable(publicEnv.BASE_ENDPOINT)) {
     return [];
   }
 

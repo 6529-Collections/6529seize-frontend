@@ -13,6 +13,14 @@ export const PUBLIC_REVIEW_LIFECYCLE_STATES = [
 export type PublicReviewLifecycleState =
   (typeof PUBLIC_REVIEW_LIFECYCLE_STATES)[number];
 
+export function isPublicReviewLifecycleState(
+  value: unknown
+): value is PublicReviewLifecycleState {
+  return PUBLIC_REVIEW_LIFECYCLE_STATES.some(
+    (candidate) => candidate === value
+  );
+}
+
 type PublicReviewSecurityFindingPolicy =
   | "CLOSED"
   | "PUBLIC_REVIEW_WAVE"

@@ -17,7 +17,6 @@ import {
 } from "@/components/public-review/SolidityReferenceViews";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -34,6 +33,7 @@ import {
   getSolidityTopLevelDeclarationHref,
   type SolidityReferenceHrefContext,
 } from "@/lib/public-review/solidityReferenceRoutes";
+import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 import {
   createStreamReviewFeedbackConfig,
   createStreamTechnicalFeedbackPageContext,
@@ -122,7 +122,7 @@ export function resolveStreamSolidityReferenceVersion({
   readonly params: StreamSolidityReferenceRouteParams;
 }): string | undefined {
   if (
-    !isPublicReviewEnabled(baseEndpoint) ||
+    !isStreamReviewPubliclyAvailable(baseEndpoint) ||
     params.review !== STREAM_REVIEW_SLUG
   ) {
     return undefined;
@@ -296,7 +296,8 @@ function ReferenceShell({
         <div
           id="public-review-feedback"
           className="tw-mt-8 tw-scroll-mt-28"
-          tabIndex={-1}>
+          tabIndex={-1}
+        >
           {feedbackSlot}
         </div>
       ) : null}
@@ -314,10 +315,7 @@ export async function renderStreamSolidityReferenceOverview({
   readonly version: string;
 }) {
   const { manifest } = await reader.loadManifest(version);
-  const pageTitle = t(
-    DEFAULT_LOCALE,
-    "publicReview.reference.overviewTitle"
-  );
+  const pageTitle = t(DEFAULT_LOCALE, "publicReview.reference.overviewTitle");
   const feedback = await getReferenceFeedback({
     canonicalPath: getSolidityReferenceRootHref(
       getImmutableHrefContext(version)
@@ -507,8 +505,7 @@ export async function renderStreamSolidityTopLevelDeclaration({
 }) {
   const { manifest } = await reader.loadManifest(version);
   const indexEntry = manifest.declarationIndex.find(
-    (declaration) =>
-      declaration.key === declarationKey && declaration.topLevel
+    (declaration) => declaration.key === declarationKey && declaration.topLevel
   );
   if (!indexEntry) {
     throw new SolidityReferenceNotFoundError(
@@ -585,11 +582,9 @@ export async function renderStreamSolidityInterface({
       "The requested definition is not a published interface."
     );
   }
-  const pageTitle = t(
-    DEFAULT_LOCALE,
-    "publicReview.reference.interfaceTitle",
-    { name: indexEntry.name }
-  );
+  const pageTitle = t(DEFAULT_LOCALE, "publicReview.reference.interfaceTitle", {
+    name: indexEntry.name,
+  });
   const feedback = await getReferenceFeedback({
     canonicalPath: getSolidityInterfaceHref({
       ...getImmutableHrefContext(version),
@@ -644,11 +639,9 @@ export async function renderStreamSoliditySource({
   readonly version: string;
 }) {
   const result = await reader.loadSource(version, source);
-  const pageTitle = t(
-    DEFAULT_LOCALE,
-    "publicReview.reference.sourceTitle",
-    { path: result.document.file.path }
-  );
+  const pageTitle = t(DEFAULT_LOCALE, "publicReview.reference.sourceTitle", {
+    path: result.document.file.path,
+  });
   const feedback = await getReferenceFeedback({
     canonicalPath: getSoliditySourceHref({
       ...getImmutableHrefContext(version),

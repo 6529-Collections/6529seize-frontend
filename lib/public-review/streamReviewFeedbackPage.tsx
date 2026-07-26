@@ -7,7 +7,6 @@ import type { ReactNode } from "react";
 import PublicReviewLedger from "@/components/public-review/PublicReviewLedger";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -19,6 +18,7 @@ import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
+import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 import type { SolidityReferenceManifest } from "@/lib/public-review/solidityReferenceTypes";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
 
@@ -33,7 +33,7 @@ export function getStreamReviewFeedbackMetadata({
 }): Metadata | undefined {
   if (
     review !== STREAM_REVIEW_SLUG ||
-    !isPublicReviewEnabled(baseEndpoint) ||
+    !isStreamReviewPubliclyAvailable(baseEndpoint) ||
     (version !== undefined &&
       !STREAM_REVIEW_DEFINITION.versions.some(
         (candidate) => candidate.version === version
@@ -109,31 +109,29 @@ export async function renderStreamReviewFeedbackPage({
   readonly baseEndpoint: string;
   readonly version?: string | undefined;
 }) {
-  const resolvedVersion =
-    version ?? STREAM_REVIEW_DEFINITION.activeVersion;
+  const resolvedVersion = version ?? STREAM_REVIEW_DEFINITION.activeVersion;
   if (
-    !isPublicReviewEnabled(baseEndpoint) ||
+    !isStreamReviewPubliclyAvailable(baseEndpoint) ||
     !STREAM_REVIEW_DEFINITION.versions.some(
       (candidate) => candidate.version === resolvedVersion
     )
   ) {
     throw new Error("Public review feedback is disabled.");
   }
-  const { manifest } = await getStreamSolidityReferenceReader().loadManifest(
-    resolvedVersion
-  );
+  const { manifest } =
+    await getStreamSolidityReferenceReader().loadManifest(resolvedVersion);
   const config = await createStreamReviewFeedbackConfig({
     manifest,
     sourcePaths: "all",
   });
-  const destination =
-    resolveStreamReviewFeedbackDestination(baseEndpoint);
+  const destination = resolveStreamReviewFeedbackDestination(baseEndpoint);
 
   return (
     <FeedbackPageShell
       immutable={version !== undefined}
       manifest={manifest}
-      version={resolvedVersion}>
+      version={resolvedVersion}
+    >
       <PublicReviewLedger
         locale={DEFAULT_LOCALE}
         config={config}
