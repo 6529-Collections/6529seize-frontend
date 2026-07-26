@@ -98,9 +98,17 @@ function getNextRawCursor(
 
 function getReactionCount(drop: ApiDropV2): number {
   return (drop.reactions ?? []).reduce(
-    (total, reaction) => total + Math.max(0, reaction.count),
+    (total, reaction) =>
+      Number.isSafeInteger(reaction.count)
+        ? total + Math.max(0, reaction.count)
+        : total,
     0
   );
+}
+
+function isTopLevelDrop(drop: ApiDropV2): boolean {
+  const replyToDrop: unknown = drop.reply_to_drop;
+  return replyToDrop === undefined || replyToDrop === null;
 }
 
 function projectFeedbackRecord({
@@ -231,8 +239,7 @@ export async function fetchPublicReviewLedgerPage({
 
   const candidateDrops = feed.drops.filter(
     (drop) =>
-      drop.drop_type === ApiDropMainType.Chat &&
-      drop.reply_to_drop === undefined
+      drop.drop_type === ApiDropMainType.Chat && isTopLevelDrop(drop)
   );
   const hydrated = await Promise.all(
     candidateDrops.map((drop) =>

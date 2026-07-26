@@ -399,7 +399,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.ledger.openDiscussion": "Open discussion in the Wave",
   "publicReview.ledger.sourceReference": "Open pinned source reference",
   "publicReview.ledger.unknownAuthor": "Unknown author",
-  "publicReview.ledger.submitted": "Submitted {date} at {time}",
+  "publicReview.ledger.byline":
+    "{author} · {page} · Submitted {date} at {time}",
   "publicReview.ledger.filters": "Filter public feedback",
   "publicReview.ledger.itemLabel": "Feedback from {author}",
 } as const;

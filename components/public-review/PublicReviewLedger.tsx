@@ -5,7 +5,12 @@ import Link from "next/link";
 import { useEffect, useId, useMemo, useState } from "react";
 
 import type { SupportedLocale } from "@/i18n/locales";
-import { formatDate, formatInteger, formatTime } from "@/i18n/format";
+import {
+  compareLocalized,
+  formatDate,
+  formatInteger,
+  formatTime,
+} from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { getPublicReviewSourceLink } from "@/services/api/public-review/feedback-codec";
 import {
@@ -88,8 +93,10 @@ export default function PublicReviewLedger({
     () => filterPublicReviewLedgerRecords({ records, filters }),
     [filters, records]
   );
-  const warnings =
-    ledgerQuery.data?.pages.flatMap((page) => page.warnings) ?? [];
+  const warnings = useMemo(
+    () => ledgerQuery.data?.pages.flatMap((page) => page.warnings) ?? [],
+    [ledgerQuery.data]
+  );
   const contracts = useMemo(
     () =>
       [
@@ -100,7 +107,7 @@ export default function PublicReviewLedger({
               : []
           )
         ),
-      ].sort((left, right) => left.localeCompare(right, locale)),
+      ].sort((left, right) => compareLocalized(locale, left, right)),
     [locale, records]
   );
 
@@ -282,8 +289,9 @@ export default function PublicReviewLedger({
                     </span>
                   </div>
                   <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-400">
-                    {author} · {pageLabel} ·{" "}
-                    {t(locale, "publicReview.ledger.submitted", {
+                    {t(locale, "publicReview.ledger.byline", {
+                      author,
+                      page: pageLabel,
                       date: formatDate(locale, record.createdAt),
                       time: formatTime(locale, record.createdAt),
                     })}

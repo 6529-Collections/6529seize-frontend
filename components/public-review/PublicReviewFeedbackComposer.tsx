@@ -3,6 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useId, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -57,7 +58,7 @@ function createEmptyDraft(
 }
 
 function createSubmissionId(): string {
-  return globalThis.crypto.randomUUID();
+  return uuidv4();
 }
 
 const INPUT_CLASSES =
