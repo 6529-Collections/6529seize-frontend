@@ -25,7 +25,10 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.length > 0;
 }
 
-function assertStringArray(value: unknown, label: string): void {
+function assertStringArray(
+  value: unknown,
+  label: string
+): asserts value is readonly string[] {
   if (
     !Array.isArray(value) ||
     value.some((entry) => !isNonEmptyString(entry))
@@ -120,6 +123,16 @@ function assertRiskEntry(
   }
   assertStringArray(value["checks"], "risk checks");
   assertStringArray(value["tracking"], "risk tracking");
+  if (
+    value["tracking"].some(
+      (href) =>
+        !href.startsWith(
+          "https://github.com/6529-Collections/6529Stream/"
+        )
+    )
+  ) {
+    throw new Error("Invalid risk-register tracking link.");
+  }
   value["evidence"].forEach((entry) =>
     assertEvidenceArtifact(entry, "risk-register")
   );
@@ -310,6 +323,9 @@ function assertCandidateBinding(value: unknown): void {
     !isRecord(value) ||
     !isNonEmptyString(value["status"]) ||
     !isNonEmptyString(value["blocked_by_issue"]) ||
+    !value["blocked_by_issue"].startsWith(
+      "https://github.com/6529-Collections/6529Stream/"
+    ) ||
     !Array.isArray(value["host_bindings"])
   ) {
     throw new Error("Invalid governed-parameter candidate binding.");
