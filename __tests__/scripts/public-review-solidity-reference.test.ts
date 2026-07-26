@@ -924,6 +924,40 @@ describe("Solidity public-review reference generator", () => {
     expect(() =>
       validateRecordFamilyAuthorizationSourceCatalog(sources, artifacts)
     ).toThrow("source binding checksum drifted");
+
+    sources.set(sourcePath, { sha256: `sha256:${sourceSha256}` });
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            family_groups: [
+              {
+                name: "ARTIST",
+                id: `0x${"c".repeat(64)}`,
+                allowed_authorization_class_ids: [2],
+              },
+            ],
+          },
+        },
+      })
+    ).toThrow("family evidence is malformed");
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            source_bindings: [
+              ...catalogArtifact.json.source_bindings,
+              ...catalogArtifact.json.source_bindings,
+            ],
+          },
+        },
+      })
+    ).toThrow("duplicate record-family authorization source binding");
   });
 
   it("rejects a same-count custom-error catalog mutation", () => {

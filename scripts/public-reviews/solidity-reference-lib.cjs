@@ -2066,21 +2066,32 @@ function validateRecordFamilyAuthorizationSourceCatalog(sources, artifacts) {
     );
   }
   const uniqueIds = (records, label) => {
-    const ids = records.map((record) => record.id);
+    const ids = records.map((record) =>
+      record && typeof record === "object" ? record.id : null
+    );
     invariant(
       ids.every((id) => Number.isSafeInteger(id) && id > 0) &&
         new Set(ids).size === ids.length,
       `Record-family authorization ${label} identifiers are invalid.`
     );
+    return new Set(ids);
   };
-  uniqueIds(catalog.authorization_classes, "class");
+  const authorizationClassIds = uniqueIds(
+    catalog.authorization_classes,
+    "class"
+  );
   invariant(
     catalog.family_groups.every(
       (family) =>
         typeof family?.name === "string" &&
         /^0x[0-9a-f]{64}$/.test(family?.id) &&
         Array.isArray(family?.allowed_authorization_class_ids) &&
-        family.allowed_authorization_class_ids.length > 0
+        family.allowed_authorization_class_ids.length > 0 &&
+        family.allowed_authorization_class_ids.every(
+          (classId) =>
+            Number.isSafeInteger(classId) &&
+            authorizationClassIds.has(classId)
+        )
     ),
     "Record-family authorization family evidence is malformed."
   );
