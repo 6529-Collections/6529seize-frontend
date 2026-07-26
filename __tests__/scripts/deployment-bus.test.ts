@@ -132,6 +132,10 @@ describe("release bus staging artifact transfer", () => {
     expect(deployStep.run).toContain(
       "const currentApp = fs.realpathSync(path.join(__dirname, 'current'));"
     );
+    expect(deployStep.run).toContain("path.dirname(currentApp)");
+    expect(deployStep.run).toContain(
+      "disables review submission rather than selecting another Wave."
+    );
     expect(deployStep.run).toContain("if (error?.code !== 'ENOENT')");
     expect(
       deployStep.run.indexOf(

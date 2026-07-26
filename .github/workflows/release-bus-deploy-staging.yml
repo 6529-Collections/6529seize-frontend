@@ -385,6 +385,9 @@ jobs:
               'utf8'
             ).trim();
           } catch (error) {
+            // A rollback may target a release from before public review existed.
+            // Omitting this env value is intentional and fail-closed: the app
+            // disables review submission rather than selecting another Wave.
             if (error?.code !== 'ENOENT') {
               throw error;
             }
