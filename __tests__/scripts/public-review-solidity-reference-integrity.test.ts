@@ -47,6 +47,7 @@ const {
   acquireGenerationLock,
   check,
   configSha256,
+  discoveredSnapshotVersions,
   generatorSourceSha256,
   loadPinnedInputs,
   resolveContainedPath,
@@ -58,6 +59,10 @@ const {
     dependencies?: Record<string, unknown>
   ) => void;
   configSha256: (configText: string) => string;
+  discoveredSnapshotVersions: (
+    config: { output: { directory: string } },
+    dependencies?: { repositoryPath: (relativePath: string) => string }
+  ) => string[];
   generatorSourceSha256: () => string;
   loadPinnedInputs: (
     sourceRepo: string,
@@ -512,7 +517,9 @@ describe("Solidity public-review generator trust boundaries", () => {
     const lockPath = path.join(fixtureRoot, "reference-generator.lock");
     const release = acquireGenerationLock(lockPath);
     expect(fs.existsSync(lockPath)).toBe(true);
-    expect(() => acquireGenerationLock(lockPath)).toThrow();
+    expect(() => acquireGenerationLock(lockPath)).toThrow(
+      "Another public-review generation owns the lock"
+    );
 
     release();
     expect(fs.existsSync(lockPath)).toBe(false);
@@ -521,6 +528,50 @@ describe("Solidity public-review generator trust boundaries", () => {
     expect(fs.existsSync(lockPath)).toBe(true);
     releaseAgain();
     expect(fs.existsSync(lockPath)).toBe(false);
+  });
+
+  it("removes a newly created lock when lock initialization fails", () => {
+    const lockPath = path.join(fixtureRoot, "failed-generator.lock");
+    const writeFailure = Object.assign(new Error("disk full"), {
+      code: "ENOSPC",
+    });
+    const writeSpy = jest
+      .spyOn(fs, "writeFileSync")
+      .mockImplementationOnce(() => {
+        throw writeFailure;
+      });
+
+    try {
+      expect(() => acquireGenerationLock(lockPath)).toThrow(
+        "Unable to acquire the public-review generation lock"
+      );
+      expect(fs.existsSync(lockPath)).toBe(false);
+    } finally {
+      writeSpy.mockRestore();
+    }
+  });
+
+  it("ignores orphaned staging directories when discovering review history", () => {
+    const versionsRoot = path.join(fixtureRoot, "versions");
+    fs.mkdirSync(path.join(versionsRoot, "2026-07-26.1"), {
+      recursive: true,
+    });
+    fs.mkdirSync(path.join(versionsRoot, ".stage-2026-07-26.2-orphan"), {
+      recursive: true,
+    });
+    fs.writeFileSync(path.join(versionsRoot, "README.txt"), "not a snapshot");
+
+    expect(
+      discoveredSnapshotVersions(
+        {
+          output: {
+            directory:
+              "public/review-data/6529-stream/versions/2026-07-26.2",
+          },
+        },
+        { repositoryPath: () => versionsRoot }
+      )
+    ).toEqual(["2026-07-26.1"]);
   });
 
   it("reads exact pinned commit objects and ignores dirty worktree state", () => {

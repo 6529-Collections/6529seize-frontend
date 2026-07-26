@@ -101,11 +101,35 @@ function acquireGenerationLock(lockPath) {
     descriptor = fs.openSync(lockPath, "wx");
     fs.writeFileSync(descriptor, `${process.pid}\n`);
   } catch (error) {
+    const cleanupErrors = [];
     if (descriptor !== undefined) {
-      fs.closeSync(descriptor);
+      try {
+        fs.closeSync(descriptor);
+      } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+      }
+      try {
+        fs.rmSync(lockPath, { force: true });
+      } catch (cleanupError) {
+        cleanupErrors.push(cleanupError);
+      }
     }
+    if (cleanupErrors.length > 0) {
+      throw new AggregateError(
+        [error, ...cleanupErrors],
+        `Unable to acquire and clean up the public-review generation lock ${lockPath}.`
+      );
+    }
+    const contended =
+      error &&
+      typeof error === "object" &&
+      error.code === "EEXIST";
     throw new Error(
-      `Another public-review generation owns the lock ${lockPath}: ${
+      `${
+        contended
+          ? "Another public-review generation owns the lock"
+          : "Unable to acquire the public-review generation lock"
+      } ${lockPath}: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -386,8 +410,10 @@ function configForVersion(config, version) {
   return clone;
 }
 
-function discoveredSnapshotVersions(config) {
-  const versionsRoot = repositoryPath(
+function discoveredSnapshotVersions(config, dependencies = {}) {
+  const resolveRepositoryPath =
+    dependencies.repositoryPath ?? repositoryPath;
+  const versionsRoot = resolveRepositoryPath(
     normalizePath(path.posix.dirname(config.output.directory))
   );
   if (!fs.existsSync(versionsRoot)) {
@@ -397,6 +423,7 @@ function discoveredSnapshotVersions(config) {
     .readdirSync(versionsRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() || entry.isSymbolicLink())
     .map((entry) => entry.name)
+    .filter((name) => !name.startsWith(".stage-"))
     .sort(compareReviewVersions);
 }
 
@@ -926,6 +953,7 @@ module.exports = {
   configSha256,
   ensureImmutableSnapshot,
   expectedSnapshotFiles,
+  discoveredSnapshotVersions,
   generatorSourceSha256,
   listSolidityPaths,
   loadPinnedInputs,
