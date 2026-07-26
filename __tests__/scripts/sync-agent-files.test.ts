@@ -199,24 +199,38 @@ describe("sync-agent-files", () => {
   });
 
   describe("published help-index.json", () => {
-    it("keeps staging-only review records out of the committed production corpus", () => {
+    it("keeps the committed production corpus aligned with environment-filtered source records", () => {
       const source = JSON.parse(
         fs.readFileSync(path.join(repoRoot, "ops/help/help-index.json"), "utf8")
       );
       const published = JSON.parse(
         fs.readFileSync(path.join(repoRoot, "public/help-index.json"), "utf8")
       );
+      const expectedProduction = {
+        ...source,
+        records: source.records
+          .filter(
+            (record: { environments?: string[] }) =>
+              record.environments === undefined ||
+              record.environments.includes("production")
+          )
+          .map(
+            ({
+              environments: _environments,
+              ...record
+            }: {
+              environments?: string[];
+              [key: string]: unknown;
+            }) => record
+          ),
+      };
 
       expect(
         source.records.find(
           (record: { id: string }) => record.id === "public-reviews.stream"
         )?.environments
       ).toEqual(["local", "staging"]);
-      expect(
-        published.records.some(
-          (record: { id: string }) => record.id === "public-reviews.stream"
-        )
-      ).toBe(false);
+      expect(published).toEqual(expectedProduction);
     });
   });
 
