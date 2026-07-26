@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "review_id": "6529-stream",
+  "review_version": "2026-07-26.1",
+  "locale": "en-US",
+  "source_repository": "https://github.com/6529-Collections/6529Stream",
+  "source_commit": "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8",
+  "pages": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "file": "overview.md"
+    },
+    {
+      "id": "artwork-lifecycle",
+      "title": "Artwork Lifecycle",
+      "file": "artwork-lifecycle.md"
+    },
+    {
+      "id": "for-artists",
+      "title": "For Artists",
+      "file": "for-artists.md"
+    },
+    {
+      "id": "roles-and-trust",
+      "title": "Roles and Trust",
+      "file": "roles-and-trust.md"
+    },
+    {
+      "id": "curation-and-tdh-authorization",
+      "title": "Curation and TDH Authorization",
+      "file": "curation-and-tdh-authorization.md"
+    },
+    {
+      "id": "tokens-collections-and-minting",
+      "title": "Tokens, Collections, and Minting",
+      "file": "tokens-collections-and-minting.md"
+    },
+    {
+      "id": "fixed-price-sales-and-auctions",
+      "title": "Fixed-Price Sales and Auctions",
+      "file": "fixed-price-sales-and-auctions.md"
+    },
+    {
+      "id": "revenue-splits-and-royalties",
+      "title": "Revenue, Splits, and Royalties",
+      "file": "revenue-splits-and-royalties.md"
+    },
+    {
+      "id": "randomness",
+      "title": "Randomness",
+      "file": "randomness.md"
+    },
+    {
+      "id": "metadata-scripts-and-dependencies",
+      "title": "Metadata, Scripts, and Dependencies",
+      "file": "metadata-scripts-and-dependencies.md"
+    },
+    {
+      "id": "freezing-preservation-and-artwork-finality",
+      "title": "Freezing, Preservation, and Artwork Finality",
+      "file": "freezing-preservation-and-artwork-finality.md"
+    },
+    {
+      "id": "governance-pausing-and-successors",
+      "title": "Governance, Pausing, and Successors",
+      "file": "governance-pausing-and-successors.md"
+    },
+    {
+      "id": "security-testing-and-known-limitations",
+      "title": "Security, Testing, and Known Limitations",
+      "file": "security-testing-and-known-limitations.md"
+    },
+    {
+      "id": "community-review",
+      "title": "Community Review",
+      "file": "community-review.md"
+    }
+  ]
+}
