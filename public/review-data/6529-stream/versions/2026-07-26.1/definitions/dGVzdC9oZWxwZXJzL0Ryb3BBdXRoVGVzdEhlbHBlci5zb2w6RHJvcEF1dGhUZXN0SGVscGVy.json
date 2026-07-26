@@ -1,0 +1,601 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": true,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "signerAddress()",
+          "functionKind": "function",
+          "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper#function:signerAddress()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVyI2Z1bmN0aW9uOnNpZ25lckFkZHJlc3MoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "signerAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 95,
+            "byteStart": 448,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L13-L15",
+            "lineEnd": 15,
+            "lineStart": 13,
+            "snippetSha256": "sha256:a6036f786e5a8dff0b252f80b2015da1b03eacf4955962105db436a8239db8c0",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "otherSignerAddress()",
+          "functionKind": "function",
+          "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper#function:otherSignerAddress()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVyI2Z1bmN0aW9uOm90aGVyU2lnbmVyQWRkcmVzcygp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "otherSignerAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 106,
+            "byteStart": 549,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L17-L19",
+            "lineEnd": 19,
+            "lineStart": 17,
+            "snippetSha256": "sha256:79a99d45ff66ed2cd5f85f0f707f0ef54d3556596c7f6a1c1348d1acc07a379a",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "buildFixedPriceAuthorization(StreamDrops,address,address,address,string,uint256,uint256,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper#function:buildFixedPriceAuthorization(StreamDrops,address,address,address,string,uint256,uint256,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 5,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVyI2Z1bmN0aW9uOmJ1aWxkRml4ZWRQcmljZUF1dGhvcml6YXRpb24oU3RyZWFtRHJvcHMsYWRkcmVzcyxhZGRyZXNzLGFkZHJlc3Msc3RyaW5nLHVpbnQyNTYsdWludDI1Nix1aW50MjU2LHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "buildFixedPriceAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "range": {
+            "byteLength": 1044,
+            "byteStart": 661,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L21-L51",
+            "lineEnd": 51,
+            "lineStart": 21,
+            "snippetSha256": "sha256:57b1bbdb68e0e6198d3589a0d91dc99174edbb3fe0e2d48fcaffc35c5545f01a",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "buildAuctionAuthorization(StreamDrops,address,address,string,uint256,uint256,uint256,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper#function:buildAuctionAuthorization(StreamDrops,address,address,string,uint256,uint256,uint256,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 4,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "reservePrice",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVyI2Z1bmN0aW9uOmJ1aWxkQXVjdGlvbkF1dGhvcml6YXRpb24oU3RyZWFtRHJvcHMsYWRkcmVzcyxhZGRyZXNzLHN0cmluZyx1aW50MjU2LHVpbnQyNTYsdWludDI1Nix1aW50MjU2LHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "buildAuctionAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "range": {
+            "byteLength": 1078,
+            "byteStart": 1711,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L53-L83",
+            "lineEnd": 83,
+            "lineStart": 53,
+            "snippetSha256": "sha256:9bf3406ab9af33a488106c46360e7567e9a959c6915d4915ec43268959456cd7",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "signAuthorization(StreamDrops,StreamDrops.DropAuthorization)",
+          "functionKind": "function",
+          "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper#function:signAuthorization(StreamDrops,StreamDrops.DropAuthorization)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVyI2Z1bmN0aW9uOnNpZ25BdXRob3JpemF0aW9uKFN0cmVhbURyb3BzLFN0cmVhbURyb3BzLkRyb3BBdXRob3JpemF0aW9uKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "signAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 234,
+            "byteStart": 2795,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L85-L90",
+            "lineEnd": 90,
+            "lineStart": 85,
+            "snippetSha256": "sha256:dbf13b6f3a7840bd4bd706a73cbe43dd97bd056ef1f9d217d563419bd96c2dc0",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "signAuthorizationWithKey(StreamDrops,StreamDrops.DropAuthorization,uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper#function:signAuthorizationWithKey(StreamDrops,StreamDrops.DropAuthorization,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 2,
+              "name": "signerKey",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVyI2Z1bmN0aW9uOnNpZ25BdXRob3JpemF0aW9uV2l0aEtleShTdHJlYW1Ecm9wcyxTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "signAuthorizationWithKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 353,
+            "byteStart": 3035,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L92-L100",
+            "lineEnd": 100,
+            "lineStart": 92,
+            "snippetSha256": "sha256:84758dca2a2a799bbf164593ea55084859c9562c038c5ab4d31f2e5989153ab4",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "signCompactAuthorization(StreamDrops,StreamDrops.DropAuthorization)",
+          "functionKind": "function",
+          "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper#function:signCompactAuthorization(StreamDrops,StreamDrops.DropAuthorization)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVyI2Z1bmN0aW9uOnNpZ25Db21wYWN0QXV0aG9yaXphdGlvbihTdHJlYW1Ecm9wcyxTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "signCompactAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 404,
+            "byteStart": 3394,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L102-L111",
+            "lineEnd": 111,
+            "lineStart": 102,
+            "snippetSha256": "sha256:dbfab00177f20c8bc31c1c3c6c24b42c5c186d531e0c67817af4608278151492",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "signMalleableAuthorization(StreamDrops,StreamDrops.DropAuthorization)",
+          "functionKind": "function",
+          "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper#function:signMalleableAuthorization(StreamDrops,StreamDrops.DropAuthorization)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVyI2Z1bmN0aW9uOnNpZ25NYWxsZWFibGVBdXRob3JpemF0aW9uKFN0cmVhbURyb3BzLFN0cmVhbURyb3BzLkRyb3BBdXRob3JpemF0aW9uKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "signMalleableAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 467,
+            "byteStart": 3804,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L113-L123",
+            "lineEnd": 123,
+            "lineStart": 113,
+            "snippetSha256": "sha256:67faebaa16c93af5874364448acad88dbd4fe8c9f9ccda2e48f7c2bc569f4fb8",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SIGNER_KEY",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 219,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:23446d66185a2db932a004ba02ed53b6c5fb071135009c5a5ff1dce87c5c3d6c",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 258,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:bfca7fba1700a19a3e273d41ced09c1fceed240e49d534ac6e7e75c21054ca23",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "valueSource": "0xA11CE",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OTHER_SIGNER_KEY",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 271,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:7de74a93b746f9f6a22744270207483e84abae306591c91d74cf00861c11ef90",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 5,
+            "byteStart": 316,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:9c61865de147e102294bc2f77ffd167c9c7ffe2b7ccb9837578b4dfc2100ac5d",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "valueSource": "0xB0B",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECP256K1_N",
+          "natspec": "",
+          "range": {
+            "byteLength": 114,
+            "byteStart": 327,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L10-L11",
+            "lineEnd": 11,
+            "lineStart": 10,
+            "snippetSha256": "sha256:d521b80545e0eb5b0e545851697654c621afd9d0296a8daa9c18223238410a00",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 375,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:5702e826aaa3bc66cfb0827a510e2d0114bd8702c761dc60f65db93cc3f06bd9",
+            "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+          },
+          "valueSource": "0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL0Ryb3BBdXRoVGVzdEhlbHBlci5zb2w6RHJvcEF1dGhUZXN0SGVscGVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "DropAuthTestHelper",
+    "natspec": "",
+    "range": {
+      "byteLength": 4125,
+      "byteStart": 148,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/DropAuthTestHelper.sol#L7-L124",
+      "lineEnd": 124,
+      "lineStart": 7,
+      "snippetSha256": "sha256:f6b8e031cb30b5c26aef81ac75b75bc770fccccb8ff379e4f39eb565c8c3c7e7",
+      "sourceSha256": "sha256:dfdf28ea571a3241ab2d493d73837ea4c136ba189d248e124ff3233c336f6523"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/DropAuthTestHelper.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "severity": "advisory"
+    }
+  ]
+}

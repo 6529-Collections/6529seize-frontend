@@ -1,0 +1,3540 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#event:RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "configChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "configRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleManagerUpdated",
+          "signature": "RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "topic0": "0xb08dd46dd5caf79cdfd7060f42cebba12dc707c2d25f0646753c6c240ea5b627"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#event:RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "granted",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "roleChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "roleRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "globalChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "globalRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 8,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleMutationCommitted",
+          "signature": "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "topic0": "0xe7db8fc830e4a9ad4e109992e6cf9d48e383ea6b7b37cf64be502d2ad4143666"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#event:StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamRoleGranted",
+          "signature": "StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "topic0": "0x9b9b410e01df674848a6af9c4677f982bcd5957194cd51eb34ed04532bc7a2aa"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#event:StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamRoleRevoked",
+          "signature": "StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "topic0": "0x674124c7fd9b40a7e8da58914611e15b27e8f0645cae8abf147adb7eb68d841f"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x546ea281",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "currentAction",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x546ea281",
+          "signature": "currentAction()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x6b4e85f3",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "governanceRootState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "governanceRoot",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x6b4e85f3",
+          "signature": "governanceRootState()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x74ec29a0",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "isProposer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x74ec29a0",
+          "signature": "isProposer(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x3fa09053",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCompromisedManagerCannotCensorImmediateRemovalByAdvancingGlobalChain",
+          "outputs": [],
+          "selector": "0x3fa09053",
+          "signature": "testCompromisedManagerCannotCensorImmediateRemovalByAdvancingGlobalChain()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x4d2a953a",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDelegatedEOADoesNotSatisfyContractHolderClassification",
+          "outputs": [],
+          "selector": "0x4d2a953a",
+          "signature": "testDelegatedEOADoesNotSatisfyContractHolderClassification()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x890c1320",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDirectOperationalMutationInvalidatesStaleRootContext",
+          "outputs": [],
+          "selector": "0x890c1320",
+          "signature": "testDirectOperationalMutationInvalidatesStaleRootContext()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xaf9f2463",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC165PinsExactRoleRegistryInterface",
+          "outputs": [],
+          "selector": "0xaf9f2463",
+          "signature": "testERC165PinsExactRoleRegistryInterface()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x837decc3",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEmergencyRecipientResolvesThroughRegistry",
+          "outputs": [],
+          "selector": "0x837decc3",
+          "signature": "testEmergencyRecipientResolvesThroughRegistry()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x5c885d15",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testExecutorOwnedRoleMutationRequiresExactGovernanceContext",
+          "outputs": [],
+          "selector": "0x5c885d15",
+          "signature": "testExecutorOwnedRoleMutationRequiresExactGovernanceContext()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x2ed24a24",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernedBaseAndScopedRoleEventsCarryExactActionId",
+          "outputs": [],
+          "selector": "0x2ed24a24",
+          "signature": "testGovernedBaseAndScopedRoleEventsCarryExactActionId()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x115e0c0d",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGrantClassVocabulary",
+          "outputs": [],
+          "selector": "0x115e0c0d",
+          "signature": "testGrantClassVocabulary()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xe8176ca8",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGrantValidation",
+          "outputs": [],
+          "selector": "0xe8176ca8",
+          "signature": "testGrantValidation()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xab50f483",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testHolderEnumerationSwapRemove",
+          "outputs": [],
+          "selector": "0xab50f483",
+          "signature": "testHolderEnumerationSwapRemove()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x35aaeca4",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testManagerRemovalCommitmentsAreIndependentAcrossAccounts",
+          "outputs": [],
+          "selector": "0x35aaeca4",
+          "signature": "testManagerRemovalCommitmentsAreIndependentAcrossAccounts()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xc5ea695a",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOperationalManagerRoleEventsUseZeroActionIdSentinel",
+          "outputs": [],
+          "selector": "0xc5ea695a",
+          "signature": "testOperationalManagerRoleEventsUseZeroActionIdSentinel()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x35bd3812",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOperationalRoleGrantAuthority",
+          "outputs": [],
+          "selector": "0x35bd3812",
+          "signature": "testOperationalRoleGrantAuthority()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x324d9360",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPauseUnpauseDisjointness",
+          "outputs": [],
+          "selector": "0x324d9360",
+          "signature": "testPauseUnpauseDisjointness()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x549cbd22",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testResolveRoleRequiresExactlyOneHolder",
+          "outputs": [],
+          "selector": "0x549cbd22",
+          "signature": "testResolveRoleRequiresExactlyOneHolder()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xa7ec9be2",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoleManagerConfigIsVersionedAndRejectsNoOp",
+          "outputs": [],
+          "selector": "0xa7ec9be2",
+          "signature": "testRoleManagerConfigIsVersionedAndRejectsNoOp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x06b00670",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoleManagerEnableIsDelayedAndDisableIsImmediate",
+          "outputs": [],
+          "selector": "0x06b00670",
+          "signature": "testRoleManagerEnableIsDelayedAndDisableIsImmediate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xc99b4c9f",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoleManagerEventsCarryExactGovernanceActionId",
+          "outputs": [],
+          "selector": "0xc99b4c9f",
+          "signature": "testRoleManagerEventsCarryExactGovernanceActionId()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x01c54580",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoleManagerRegistration",
+          "outputs": [],
+          "selector": "0x01c54580",
+          "signature": "testRoleManagerRegistration()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xd4de2dc2",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoleRedundancyViews",
+          "outputs": [],
+          "selector": "0xd4de2dc2",
+          "signature": "testRoleRedundancyViews()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x84b74a1d",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRootRoleGrantAuthority",
+          "outputs": [],
+          "selector": "0x84b74a1d",
+          "signature": "testRootRoleGrantAuthority()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xa20707e9",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopableRoleVocabularyIsClosed",
+          "outputs": [],
+          "selector": "0xa20707e9",
+          "signature": "testScopableRoleVocabularyIsClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x624b0b23",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedGrantRejectsNonScopableBaseAndUnauthorized",
+          "outputs": [],
+          "selector": "0x624b0b23",
+          "signature": "testScopedGrantRejectsNonScopableBaseAndUnauthorized()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x57d40cb0",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedRoleDerivationAndGrant",
+          "outputs": [],
+          "selector": "0x57d40cb0",
+          "signature": "testScopedRoleDerivationAndGrant()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x1ddcb31f",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTerminalVetoGrantRejectsProposerAndGovernanceRootBaseAndScoped",
+          "outputs": [],
+          "selector": "0x1ddcb31f",
+          "signature": "testTerminalVetoGrantRejectsProposerAndGovernanceRootBaseAndScoped()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x9437c74e",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTerminalVetoMembershipTracksBaseAndScopedAtoBtoA",
+          "outputs": [],
+          "selector": "0x9437c74e",
+          "signature": "testTerminalVetoMembershipTracksBaseAndScopedAtoBtoA()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xff6b4aad",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUnknownRoleIsClosedWorld",
+          "outputs": [],
+          "selector": "0xff6b4aad",
+          "signature": "testUnknownRoleIsClosedWorld()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 281537,
+          "canonicalSignature": "StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "displaySignature": "StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#event:StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNldmVudDpTdHJlYW1Sb2xlR3JhbnRlZCh1aW50MTYsYnl0ZXMzMixhZGRyZXNzLHVpbnQ4LGFkZHJlc3MsYnl0ZXMzMik",
+          "kind": "event",
+          "name": "StreamRoleGranted",
+          "natspec": "",
+          "range": {
+            "byteLength": 205,
+            "byteStart": 687,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L23-L30",
+            "lineEnd": 30,
+            "lineStart": 23,
+            "snippetSha256": "sha256:2ae30cb62c6d8e1d9498116c3b67785bbb6ae548599dff804173a665e71b670e",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "topic0": "0x9b9b410e01df674848a6af9c4677f982bcd5957194cd51eb34ed04532bc7a2aa"
+        },
+        {
+          "anonymous": false,
+          "astId": 281551,
+          "canonicalSignature": "StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "displaySignature": "StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#event:StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNldmVudDpTdHJlYW1Sb2xlUmV2b2tlZCh1aW50MTYsYnl0ZXMzMixhZGRyZXNzLHVpbnQ4LGFkZHJlc3MsYnl0ZXMzMik",
+          "kind": "event",
+          "name": "StreamRoleRevoked",
+          "natspec": "",
+          "range": {
+            "byteLength": 205,
+            "byteStart": 898,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L32-L39",
+            "lineEnd": 39,
+            "lineStart": 32,
+            "snippetSha256": "sha256:024cd1d0c15044ff139c5f9fdef8cbc415d52de6733fde8b93ffe8119f6b4342",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "topic0": "0x674124c7fd9b40a7e8da58914611e15b27e8f0645cae8abf147adb7eb68d841f"
+        },
+        {
+          "anonymous": false,
+          "astId": 281567,
+          "canonicalSignature": "RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "displaySignature": "RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#event:RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "configChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "configRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNldmVudDpSb2xlTWFuYWdlclVwZGF0ZWQodWludDE2LGFkZHJlc3MsYm9vbCxhZGRyZXNzLGJ5dGVzMzIsdWludDY0LGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "RoleManagerUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 245,
+            "byteStart": 1109,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L41-L49",
+            "lineEnd": 49,
+            "lineStart": 41,
+            "snippetSha256": "sha256:911148f7259e5b71d8e86045f93274afdc419f451aed5088ab5ea0a54eba194c",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "topic0": "0xb08dd46dd5caf79cdfd7060f42cebba12dc707c2d25f0646753c6c240ea5b627"
+        },
+        {
+          "anonymous": false,
+          "astId": 281587,
+          "canonicalSignature": "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "displaySignature": "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#event:RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "granted",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "roleChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "roleRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "globalChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "globalRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 8,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNldmVudDpSb2xlTXV0YXRpb25Db21taXR0ZWQodWludDE2LGJ5dGVzMzIsYWRkcmVzcyxib29sLGJ5dGVzMzIsdWludDY0LGJ5dGVzMzIsdWludDY0LGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "RoleMutationCommitted",
+          "natspec": "",
+          "range": {
+            "byteLength": 306,
+            "byteStart": 1360,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L51-L61",
+            "lineEnd": 61,
+            "lineStart": 51,
+            "snippetSha256": "sha256:ebeccc922caa733f240d9e49273bc8a27a89f35687d530e50223fb387da73579",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "topic0": "0xe7db8fc830e4a9ad4e109992e6cf9d48e383ea6b7b37cf64be502d2ad4143666"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "currentAction()",
+          "displaySignature": "currentAction()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x546ea281",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDU0NmVhMjgx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "currentAction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 477,
+            "byteStart": 3697,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L102-L122",
+            "lineEnd": 122,
+            "lineStart": 102,
+            "snippetSha256": "sha256:a946f33760ca6efe16051d4204c7985b7edd432314db7660dc9a4cf0101a0a9d",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x546ea281",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isProposer(address)",
+          "displaySignature": "isProposer(address)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x74ec29a0",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDc0ZWMyOWEw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isProposer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 112,
+            "byteStart": 4180,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L124-L126",
+            "lineEnd": 126,
+            "lineStart": 124,
+            "snippetSha256": "sha256:0ce91e739aee42131b3d407b70d1950add794d7c5da555e268568f3163b95675",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x74ec29a0",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "governanceRootState()",
+          "displaySignature": "governanceRootState()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x6b4e85f3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDZiNGU4NWYz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "governanceRootState",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "governanceRoot",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 294,
+            "byteStart": 4298,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L128-L136",
+            "lineEnd": 136,
+            "lineStart": 128,
+            "snippetSha256": "sha256:fbc476eccc4241dd258b8b772e292caf39210b7a16d7661dc7a7173f16e9b981",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x6b4e85f3",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 4598,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L138-L141",
+            "lineEnd": 141,
+            "lineStart": 138,
+            "snippetSha256": "sha256:b1951049c08ab14ba21de1e9fd4b9aa3f2eeb578671c81974bd36f847ee46567",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC165PinsExactRoleRegistryInterface()",
+          "displaySignature": "testERC165PinsExactRoleRegistryInterface()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xaf9f2463",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGFmOWYyNDYz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC165PinsExactRoleRegistryInterface",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 646,
+            "byteStart": 4746,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L143-L155",
+            "lineEnd": 155,
+            "lineStart": 143,
+            "snippetSha256": "sha256:96de9819e2761711215f03b37599b1f1693838c00c48b6902329063d3e01455c",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xaf9f2463",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGrantClassVocabulary()",
+          "displaySignature": "testGrantClassVocabulary()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x115e0c0d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDExNWUwYzBk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGrantClassVocabulary",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1557,
+            "byteStart": 5398,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L157-L178",
+            "lineEnd": 178,
+            "lineStart": 157,
+            "snippetSha256": "sha256:20cd635b44343ae0d728b84950efc809433a736e760a67efbca14824c6f8dd3f",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x115e0c0d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRoot(bytes32,string)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_assertRoot(bytes32,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0Um9vdChieXRlczMyLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRoot",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 241,
+            "byteStart": 6961,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L180-L184",
+            "lineEnd": 184,
+            "lineStart": 180,
+            "snippetSha256": "sha256:564054432bde5dd1d65844f4835a5f7cba09eca706039e85145ed9d20ad85109",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertOperational(bytes32,string)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_assertOperational(bytes32,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0T3BlcmF0aW9uYWwoYnl0ZXMzMixzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertOperational",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 255,
+            "byteStart": 7208,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L186-L190",
+            "lineEnd": 190,
+            "lineStart": 186,
+            "snippetSha256": "sha256:86eea437456db8aa9c4740966a7d99b56e9fed23905545400ef82921fab593ba",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testUnknownRoleIsClosedWorld()",
+          "displaySignature": "testUnknownRoleIsClosedWorld()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xff6b4aad",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGZmNmI0YWFk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUnknownRoleIsClosedWorld",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 463,
+            "byteStart": 7469,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L192-L199",
+            "lineEnd": 199,
+            "lineStart": 192,
+            "snippetSha256": "sha256:66a72d418ef5e809ce1e2730cd2deebd0174a7322b3589482f79f83ba8a10021",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xff6b4aad",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRootRoleGrantAuthority()",
+          "displaySignature": "testRootRoleGrantAuthority()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x84b74a1d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDg0Yjc0YTFk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRootRoleGrantAuthority",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1393,
+            "byteStart": 7938,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L201-L238",
+            "lineEnd": 238,
+            "lineStart": 201,
+            "snippetSha256": "sha256:16c0c1ee017df0d1131c509b6ee6dd91b8c871dd737a692445fa78e533f8cf7b",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x84b74a1d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOperationalRoleGrantAuthority()",
+          "displaySignature": "testOperationalRoleGrantAuthority()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x35bd3812",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDM1YmQzODEy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOperationalRoleGrantAuthority",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1224,
+            "byteStart": 9337,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L240-L271",
+            "lineEnd": 271,
+            "lineStart": 240,
+            "snippetSha256": "sha256:2a50ab9662f4532ea28fca65b198dc02f1161d6251f924bbe93948c23f0b3801",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x35bd3812",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernedBaseAndScopedRoleEventsCarryExactActionId()",
+          "displaySignature": "testGovernedBaseAndScopedRoleEventsCarryExactActionId()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x2ed24a24",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDJlZDI0YTI0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernedBaseAndScopedRoleEventsCarryExactActionId",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2954,
+            "byteStart": 10567,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L273-L352",
+            "lineEnd": 352,
+            "lineStart": 273,
+            "snippetSha256": "sha256:f035b0e47b33481f92f7684d6809ab1f2922f7de59dd30dc6ed9df0bce7771bf",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x2ed24a24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOperationalManagerRoleEventsUseZeroActionIdSentinel()",
+          "displaySignature": "testOperationalManagerRoleEventsUseZeroActionIdSentinel()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xc5ea695a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGM1ZWE2OTVh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOperationalManagerRoleEventsUseZeroActionIdSentinel",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 937,
+            "byteStart": 13527,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L354-L386",
+            "lineEnd": 386,
+            "lineStart": 354,
+            "snippetSha256": "sha256:da43ed25a77b18684c81a84498c4c41a17c89a5c100ac8de41f5523976ccafa0",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xc5ea695a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoleManagerEventsCarryExactGovernanceActionId()",
+          "displaySignature": "testRoleManagerEventsCarryExactGovernanceActionId()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xc99b4c9f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGM5OWI0Yzlm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoleManagerEventsCarryExactGovernanceActionId",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 662,
+            "byteStart": 14470,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L388-L401",
+            "lineEnd": 401,
+            "lineStart": 388,
+            "snippetSha256": "sha256:a3ddb4f0c565cf538e369569488163106e2c613ad32ce26ac7f835e9039a3fb7",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xc99b4c9f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGrantValidation()",
+          "displaySignature": "testGrantValidation()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xe8176ca8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGU4MTc2Y2E4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGrantValidation",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 847,
+            "byteStart": 15138,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L403-L425",
+            "lineEnd": 425,
+            "lineStart": 403,
+            "snippetSha256": "sha256:a2acc10f3e8159d44d3084ddbddc736ba7d5fa8ece75405280ab21e722bdf33d",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xe8176ca8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testHolderEnumerationSwapRemove()",
+          "displaySignature": "testHolderEnumerationSwapRemove()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xab50f483",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGFiNTBmNDgz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testHolderEnumerationSwapRemove",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1727,
+            "byteStart": 15991,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L427-L457",
+            "lineEnd": 457,
+            "lineStart": 427,
+            "snippetSha256": "sha256:b0eb57239a7d3182b1ae94fbbf07ac2fa42836ca4dad6a61073b3eaf814c28ea",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xab50f483",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testResolveRoleRequiresExactlyOneHolder()",
+          "displaySignature": "testResolveRoleRequiresExactlyOneHolder()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x549cbd22",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDU0OWNiZDIy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testResolveRoleRequiresExactlyOneHolder",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 746,
+            "byteStart": 17724,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L459-L477",
+            "lineEnd": 477,
+            "lineStart": 459,
+            "snippetSha256": "sha256:6af611581123b69eb95369bc84d4d6954d6542004767d281caec28da6788f89f",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x549cbd22",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEmergencyRecipientResolvesThroughRegistry()",
+          "displaySignature": "testEmergencyRecipientResolvesThroughRegistry()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x837decc3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDgzN2RlY2Mz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEmergencyRecipientResolvesThroughRegistry",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 876,
+            "byteStart": 18476,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L479-L496",
+            "lineEnd": 496,
+            "lineStart": 479,
+            "snippetSha256": "sha256:4c173e6ac3161725777c46d86258bca889107bd95d8bab2f5e1293a34d4d5139",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x837decc3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPauseUnpauseDisjointness()",
+          "displaySignature": "testPauseUnpauseDisjointness()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x324d9360",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDMyNGQ5MzYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPauseUnpauseDisjointness",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 962,
+            "byteStart": 19358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L498-L522",
+            "lineEnd": 522,
+            "lineStart": 498,
+            "snippetSha256": "sha256:fc0bcfab234d91c153f4753c2ae1678ce389e622d5366bc37bd56d62aa97c657",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x324d9360",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoleRedundancyViews()",
+          "displaySignature": "testRoleRedundancyViews()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xd4de2dc2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGQ0ZGUyZGMy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoleRedundancyViews",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1661,
+            "byteStart": 20326,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L524-L556",
+            "lineEnd": 556,
+            "lineStart": 524,
+            "snippetSha256": "sha256:f1f26e91ae0cd11e81b76ede0652defcf42115803075a5e14a515f0a40591332",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xd4de2dc2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDelegatedEOADoesNotSatisfyContractHolderClassification()",
+          "displaySignature": "testDelegatedEOADoesNotSatisfyContractHolderClassification()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x4d2a953a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDRkMmE5NTNh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDelegatedEOADoesNotSatisfyContractHolderClassification",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2001,
+            "byteStart": 21993,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L558-L599",
+            "lineEnd": 599,
+            "lineStart": 558,
+            "snippetSha256": "sha256:8196f73b0d9e0a41fe9f4e57b79a22cdd9b018cd4980df9ea01c53be7b40f8b0",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x4d2a953a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoleManagerRegistration()",
+          "displaySignature": "testRoleManagerRegistration()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x01c54580",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDAxYzU0NTgw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoleManagerRegistration",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 748,
+            "byteStart": 24000,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L601-L618",
+            "lineEnd": 618,
+            "lineStart": 601,
+            "snippetSha256": "sha256:7e99ac56e2b68537d3a1d5aa52f081e08b85d227eb7bc5a4223f052fb2a14dce",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x01c54580",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testExecutorOwnedRoleMutationRequiresExactGovernanceContext()",
+          "displaySignature": "testExecutorOwnedRoleMutationRequiresExactGovernanceContext()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x5c885d15",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDVjODg1ZDE1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testExecutorOwnedRoleMutationRequiresExactGovernanceContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2358,
+            "byteStart": 24754,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L620-L682",
+            "lineEnd": 682,
+            "lineStart": 620,
+            "snippetSha256": "sha256:39e9af648d81a35505a88dc04993e81efe6b13ab0499211aa9fb4ce8c0f65e5b",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x5c885d15",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDirectOperationalMutationInvalidatesStaleRootContext()",
+          "displaySignature": "testDirectOperationalMutationInvalidatesStaleRootContext()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x890c1320",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDg5MGMxMzIw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDirectOperationalMutationInvalidatesStaleRootContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 935,
+            "byteStart": 27118,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L684-L706",
+            "lineEnd": 706,
+            "lineStart": 684,
+            "snippetSha256": "sha256:fcc841f0dca927370d059c112f0caa35bf39da309e6b8bb9cfb3e9c8cc7abec2",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x890c1320",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoleManagerConfigIsVersionedAndRejectsNoOp()",
+          "displaySignature": "testRoleManagerConfigIsVersionedAndRejectsNoOp()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xa7ec9be2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGE3ZWM5YmUy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoleManagerConfigIsVersionedAndRejectsNoOp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1532,
+            "byteStart": 28059,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L708-L734",
+            "lineEnd": 734,
+            "lineStart": 708,
+            "snippetSha256": "sha256:b42a3ae97ac5d4575e48ddfe155a28bd782f91e903ddd5c8eccfd7ab5ceb822d",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xa7ec9be2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCompromisedManagerCannotCensorImmediateRemovalByAdvancingGlobalChain()",
+          "displaySignature": "testCompromisedManagerCannotCensorImmediateRemovalByAdvancingGlobalChain()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x3fa09053",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDNmYTA5MDUz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCompromisedManagerCannotCensorImmediateRemovalByAdvancingGlobalChain",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1414,
+            "byteStart": 29597,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L736-L763",
+            "lineEnd": 763,
+            "lineStart": 736,
+            "snippetSha256": "sha256:2d242c881e841b4c216b093704ddaf5a2a7cb46269836ca4d5ebe248f1fca4f5",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x3fa09053",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoleManagerEnableIsDelayedAndDisableIsImmediate()",
+          "displaySignature": "testRoleManagerEnableIsDelayedAndDisableIsImmediate()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x06b00670",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDA2YjAwNjcw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoleManagerEnableIsDelayedAndDisableIsImmediate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 884,
+            "byteStart": 31017,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L765-L786",
+            "lineEnd": 786,
+            "lineStart": 765,
+            "snippetSha256": "sha256:3994fce9fed9b16086be8d8cab7f395f711fd15d4c12f37afc36ff52b0fad84c",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x06b00670",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testManagerRemovalCommitmentsAreIndependentAcrossAccounts()",
+          "displaySignature": "testManagerRemovalCommitmentsAreIndependentAcrossAccounts()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x35aaeca4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDM1YWFlY2E0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testManagerRemovalCommitmentsAreIndependentAcrossAccounts",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1205,
+            "byteStart": 31907,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L788-L812",
+            "lineEnd": 812,
+            "lineStart": 788,
+            "snippetSha256": "sha256:1abcee7279bf0b9df49841112ee37000b91ba892bcdd6eb5a312c0e2d98487df",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x35aaeca4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopableRoleVocabularyIsClosed()",
+          "displaySignature": "testScopableRoleVocabularyIsClosed()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xa20707e9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweGEyMDcwN2U5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopableRoleVocabularyIsClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 469,
+            "byteStart": 33198,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L816-L823",
+            "lineEnd": 823,
+            "lineStart": 816,
+            "snippetSha256": "sha256:40e6b3a84e75f29dc6efe63ca5c3e65c625e6747d2918838cd933504f1c1f11b",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0xa20707e9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedRoleDerivationAndGrant()",
+          "displaySignature": "testScopedRoleDerivationAndGrant()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x57d40cb0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDU3ZDQwY2Iw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedRoleDerivationAndGrant",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1646,
+            "byteStart": 33673,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L825-L855",
+            "lineEnd": 855,
+            "lineStart": 825,
+            "snippetSha256": "sha256:48b31fb59f2c30214738a0ef04ef50f013be9cfda210bd3c6dae953c11309051",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x57d40cb0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTerminalVetoMembershipTracksBaseAndScopedAtoBtoA()",
+          "displaySignature": "testTerminalVetoMembershipTracksBaseAndScopedAtoBtoA()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x9437c74e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDk0MzdjNzRl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTerminalVetoMembershipTracksBaseAndScopedAtoBtoA",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1384,
+            "byteStart": 35325,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L857-L878",
+            "lineEnd": 878,
+            "lineStart": 857,
+            "snippetSha256": "sha256:be3cd7348e63544991bfe364749a06320f074363b357b6df5a15abf6a7a70c12",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x9437c74e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTerminalVetoGrantRejectsProposerAndGovernanceRootBaseAndScoped()",
+          "displaySignature": "testTerminalVetoGrantRejectsProposerAndGovernanceRootBaseAndScoped()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x1ddcb31f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDFkZGNiMzFm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTerminalVetoGrantRejectsProposerAndGovernanceRootBaseAndScoped",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1794,
+            "byteStart": 36715,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L880-L924",
+            "lineEnd": 924,
+            "lineStart": 880,
+            "snippetSha256": "sha256:91b8022382d61e9726a911ee5e1549099e1f1e889f134350353579bc5e429fbf",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x1ddcb31f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedGrantRejectsNonScopableBaseAndUnauthorized()",
+          "displaySignature": "testScopedGrantRejectsNonScopableBaseAndUnauthorized()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x624b0b23",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjoweDYyNGIwYjIz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedGrantRejectsNonScopableBaseAndUnauthorized",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 851,
+            "byteStart": 38515,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L926-L946",
+            "lineEnd": 946,
+            "lineStart": 926,
+            "snippetSha256": "sha256:0c045c6c85dc68f34abebf4032e7f12a2d4a69199a7f13b33f47775d231fe892",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x624b0b23",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRoleMutationLogs(Vm.Log[],bytes32,address,bool,uint8,address,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_assertRoleMutationLogs(Vm.Log[],bytes32,address,bool,uint8,address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "granted",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 5,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "lifecycleTopic",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0Um9sZU11dGF0aW9uTG9ncyhWbS5Mb2dbXSxieXRlczMyLGFkZHJlc3MsYm9vbCx1aW50OCxhZGRyZXNzLGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRoleMutationLogs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 504,
+            "byteStart": 39372,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L948-L961",
+            "lineEnd": 961,
+            "lineStart": 948,
+            "snippetSha256": "sha256:fe4da48aadcac9c30dfd6af463ef1bed44a0a3b1e7591c3a63cc42285425ce00",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRoleMutationLog(Vm.Log,bytes32,address,bool,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_assertRoleMutationLog(Vm.Log,bytes32,address,bool,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "log",
+              "storageLocation": "memory",
+              "type": "Vm.Log"
+            },
+            {
+              "index": 1,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "granted",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0Um9sZU11dGF0aW9uTG9nKFZtLkxvZyxieXRlczMyLGFkZHJlc3MsYm9vbCxieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRoleMutationLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1671,
+            "byteStart": 39882,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L963-L995",
+            "lineEnd": 995,
+            "lineStart": 963,
+            "snippetSha256": "sha256:3ecca35bcfbbc3bfec9495e3d30b3fa56d0fa18ea364ea4f772cd733b2e4f5d7",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRoleLifecycleLog(Vm.Log,bytes32,bytes32,address,uint8,address,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_assertRoleLifecycleLog(Vm.Log,bytes32,bytes32,address,uint8,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "log",
+              "storageLocation": "memory",
+              "type": "Vm.Log"
+            },
+            {
+              "index": 1,
+              "name": "lifecycleTopic",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 5,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0Um9sZUxpZmVjeWNsZUxvZyhWbS5Mb2csYnl0ZXMzMixieXRlczMyLGFkZHJlc3MsdWludDgsYWRkcmVzcyxieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRoleLifecycleLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1037,
+            "byteStart": 41559,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L997-L1017",
+            "lineEnd": 1017,
+            "lineStart": 997,
+            "snippetSha256": "sha256:7f2724a24da953a2a6553888e95acf23ff10e90c0034ee886ee236cc9cf950ea",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRoleManagerUpdatedLog(Vm.Log,address,bool,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_assertRoleManagerUpdatedLog(Vm.Log,address,bool,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "log",
+              "storageLocation": "memory",
+              "type": "Vm.Log"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0Um9sZU1hbmFnZXJVcGRhdGVkTG9nKFZtLkxvZyxhZGRyZXNzLGJvb2wsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRoleManagerUpdatedLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1216,
+            "byteStart": 42602,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1019-L1039",
+            "lineEnd": 1039,
+            "lineStart": 1019,
+            "snippetSha256": "sha256:5e9670b8ffa4f12dc6bb212f4a40e8fd38793f189f1ee6668144fb9570ae887b",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_rootGrant(bytes32,address)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_rootGrant(bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfcm9vdEdyYW50KGJ5dGVzMzIsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_rootGrant",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 211,
+            "byteStart": 43824,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1041-L1045",
+            "lineEnd": 1045,
+            "lineStart": 1041,
+            "snippetSha256": "sha256:ad0ffd85be2ff6cbd978a64251fecf009d821461b0782ff19df11858b5c49d3c",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_rootRevoke(bytes32,address)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_rootRevoke(bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfcm9vdFJldm9rZShieXRlczMyLGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_rootRevoke",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 213,
+            "byteStart": 44041,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1047-L1051",
+            "lineEnd": 1051,
+            "lineStart": 1047,
+            "snippetSha256": "sha256:1d4c75028b44889522f0ad68d164d8e15f75362ff656a50e793181ef4dc28a2e",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_rootGrantScoped(bytes32,bytes32,address)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_rootGrantScoped(bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfcm9vdEdyYW50U2NvcGVkKGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_rootGrantScoped",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 326,
+            "byteStart": 44260,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1053-L1058",
+            "lineEnd": 1058,
+            "lineStart": 1053,
+            "snippetSha256": "sha256:f20416b7b9b1558621201fedd6d1875a6b1e6a224a46caff9cbb90a3d35160c5",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_rootRevokeScoped(bytes32,bytes32,address)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_rootRevokeScoped(bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfcm9vdFJldm9rZVNjb3BlZChieXRlczMyLGJ5dGVzMzIsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_rootRevokeScoped",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 328,
+            "byteStart": 44592,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1060-L1065",
+            "lineEnd": 1065,
+            "lineStart": 1060,
+            "snippetSha256": "sha256:868b8c581fff0a9292f96be111a68e68b82b2a690906c6927b3fa8b19a913510",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_rootRegisterRoleManager(address,bool)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_rootRegisterRoleManager(address,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfcm9vdFJlZ2lzdGVyUm9sZU1hbmFnZXIoYWRkcmVzcyxib29sKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_rootRegisterRoleManager",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 268,
+            "byteStart": 44926,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1067-L1071",
+            "lineEnd": 1071,
+            "lineStart": 1067,
+            "snippetSha256": "sha256:cd4ce79c9b9c004e1b2f78f5df4118d14d076e809c7e33403f75668c819f8340",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setRoleManagerGovernanceContext(address,bool,bool)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_setRoleManagerGovernanceContext(address,bool,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "oldEnabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "newEnabled",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfc2V0Um9sZU1hbmFnZXJHb3Zlcm5hbmNlQ29udGV4dChhZGRyZXNzLGJvb2wsYm9vbCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setRoleManagerGovernanceContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1282,
+            "byteStart": 45200,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1073-L1106",
+            "lineEnd": 1106,
+            "lineStart": 1073,
+            "snippetSha256": "sha256:22787339c8189028eede86c18a2bee1b03bc04cd670999cfce54cfefcafa5cc1",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_roleManagerConfigStateHash(bytes32,bool,bytes32,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_roleManagerConfigStateHash(bytes32,bool,bytes32,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfcm9sZU1hbmFnZXJDb25maWdTdGF0ZUhhc2goYnl0ZXMzMixib29sLGJ5dGVzMzIsdWludDY0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_roleManagerConfigStateHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 473,
+            "byteStart": 46488,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1108-L1125",
+            "lineEnd": 1125,
+            "lineStart": 1108,
+            "snippetSha256": "sha256:f8df478065706ce334c6aedfd171c251d780734a63bccda0df91b7506ba13bae",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setRoleGovernanceContext(bytes32,address,bool,bool)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_setRoleGovernanceContext(bytes32,address,bool,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "oldGranted",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "name": "newGranted",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfc2V0Um9sZUdvdmVybmFuY2VDb250ZXh0KGJ5dGVzMzIsYWRkcmVzcyxib29sLGJvb2wp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setRoleGovernanceContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1941,
+            "byteStart": 46967,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1127-L1181",
+            "lineEnd": 1181,
+            "lineStart": 1127,
+            "snippetSha256": "sha256:ef56852716d98a7228b8334388a93af996e1787e997f479a9a34804e5e1bf5af",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_roleMutationStateHash(bytes32,bool,bytes32,uint64,bytes32,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_roleMutationStateHash(bytes32,bool,bytes32,uint64,bytes32,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "granted",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "roleChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "roleRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 4,
+              "name": "globalChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "globalRevision",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfcm9sZU11dGF0aW9uU3RhdGVIYXNoKGJ5dGVzMzIsYm9vbCxieXRlczMyLHVpbnQ2NCxieXRlczMyLHVpbnQ2NCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_roleMutationStateHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 607,
+            "byteStart": 48914,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1183-L1204",
+            "lineEnd": 1204,
+            "lineStart": 1183,
+            "snippetSha256": "sha256:8123fa842203651ac4a35bec3e745923edffabaf638cbffa8ee45c58d82d9c1f",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_clearRoleGovernanceContext()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:_clearRoleGovernanceContext()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdCNmdW5jdGlvbjpfY2xlYXJSb2xlR292ZXJuYW5jZUNvbnRleHQoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_clearRoleGovernanceContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 263,
+            "byteStart": 49527,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L1206-L1213",
+            "lineEnd": 1213,
+            "lineStart": 1206,
+            "snippetSha256": "sha256:71c013029b197ca0b62627fa1930f919894606bc49529dbc520e5f0d4fa1d6ac",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "registry",
+          "natspec": "",
+          "range": {
+            "byteLength": 35,
+            "byteStart": 1672,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L63",
+            "lineEnd": 63,
+            "lineStart": 63,
+            "snippetSha256": "sha256:23f571f60a74dddc1375007da4b096b33dc49c8bff66f3d8216f58f0dc50c704",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "StreamRoleRegistry",
+          "typeString": "contract StreamRoleRegistry",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "roleManager",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1714,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:c4d3d7e68a8d6fbaa205ea89dbbefe1ad531225935f40c9e142739f2b670a9a3",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1744,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:dc978dfe96a7a3bd8762da076c60c44f8a8833090b45544300265f8fd26df092",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "address(0x40A6)",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "holder",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 1765,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L66",
+            "lineEnd": 66,
+            "lineStart": 66,
+            "snippetSha256": "sha256:7416db40c6b76876c14b7f8ac8504c91ac696e2771f84965cdb4cbd80b87a041",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1790,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L66",
+            "lineEnd": 66,
+            "lineStart": 66,
+            "snippetSha256": "sha256:9fca6fc5c4e788009e0a79b758710504f11e7e9d7f7a11e2ec928356a8f2f0a4",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "address(0x101D)",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "secondHolder",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1811,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L67",
+            "lineEnd": 67,
+            "lineStart": 67,
+            "snippetSha256": "sha256:7d08f201d7a3173dfb6af4da8c477b9140854952a15a24b6bf0b4ea5b4592a43",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1842,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L67",
+            "lineEnd": 67,
+            "lineStart": 67,
+            "snippetSha256": "sha256:b35a773b88b4d012bdd3abbd94cce2c37a58b47a357442f2b839c7d9065feb5d",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "address(0x201D)",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "stranger",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 1863,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L68",
+            "lineEnd": 68,
+            "lineStart": 68,
+            "snippetSha256": "sha256:9a17a827bff8c17040bb47d618a1e2de80f2228d4de1059317e679a9bd1bce49",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1890,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L68",
+            "lineEnd": 68,
+            "lineStart": 68,
+            "snippetSha256": "sha256:893584be3369b3c475f72b63e41886c5a275653e2fcac2e6f352aed06b1c9700",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "address(0x5719)",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mockProposers",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L69",
+            "lineEnd": 69,
+            "lineStart": 69,
+            "snippetSha256": "sha256:758c8aa7dd668a2aa94cccc90715e3760e6c9b40be0d26226155d86ecdfbdc37",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "mapping(address => bool)",
+          "typeString": "mapping(address => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mockGovernanceRoot",
+          "natspec": "",
+          "range": {
+            "byteLength": 34,
+            "byteStart": 1963,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L70",
+            "lineEnd": 70,
+            "lineStart": 70,
+            "snippetSha256": "sha256:08a027d6604217e42682eebfc6716564e2faeb4db68495cf58899d06d6ac3b85",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mockExecuting",
+          "natspec": "",
+          "range": {
+            "byteLength": 26,
+            "byteStart": 2003,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L71",
+            "lineEnd": 71,
+            "lineStart": 71,
+            "snippetSha256": "sha256:a166cccee00130c60f7b476144b87ec87caffa1749e99b4c3801b0f4746ded96",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mockActionId",
+          "natspec": "",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 2035,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L72",
+            "lineEnd": 72,
+            "lineStart": 72,
+            "snippetSha256": "sha256:0d367c10ffccccd3d865776d488a301c23b2b3b2e77f0ba048ddf3e34dcf66b7",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mockActionClass",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 2069,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L73",
+            "lineEnd": 73,
+            "lineStart": 73,
+            "snippetSha256": "sha256:5955fb6b72719eccb1b27c60c3c4e27c886da9be2e959c3c926beb3f56fdf66d",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mockScopeHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 2104,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L74",
+            "lineEnd": 74,
+            "lineStart": 74,
+            "snippetSha256": "sha256:4bd57f7b12447735b79b34900c64dd16079ee8119ea7698d0007183287ac6f28",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mockOldStateHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 2139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L75",
+            "lineEnd": 75,
+            "lineStart": 75,
+            "snippetSha256": "sha256:6b2248cb0b22375f6b3124f7e7186a24741cc0fb2b95c45b7075c046fd64c280",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mockNewStateHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 2177,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L76",
+            "lineEnd": 76,
+            "lineStart": 76,
+            "snippetSha256": "sha256:ecca048bb68c3b6aadcf3f324c8d353002c5b77ec2aee1e0615e2a92c1fca499",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_REGISTRY_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 2216,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L78",
+            "lineEnd": 78,
+            "lineStart": 78,
+            "snippetSha256": "sha256:57d0102a02f2762308fdd7ee5591590c9b3a921082db680be90888b79b7d71da",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 10,
+            "byteStart": 2269,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L78",
+            "lineEnd": 78,
+            "lineStart": 78,
+            "snippetSha256": "sha256:83320ac9348a8645e777c216f8b27a9c451bcd7edac7e371e59ea802b0417bc6",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "0xd77ee305",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_MUTATION_SCOPE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 104,
+            "byteStart": 2285,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L79-L80",
+            "lineEnd": 80,
+            "lineStart": 79,
+            "snippetSha256": "sha256:1d8b78bf699fad757f895592f26e9187802bacd6bb569da7a2c3368e097202ae",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 2343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L80",
+            "lineEnd": 80,
+            "lineStart": 80,
+            "snippetSha256": "sha256:71a90a9061dda938a770ccf3f60f5ae315497cafa04f1dd575e585d87220100d",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ROLE_MUTATION_SCOPE_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_MUTATION_STATE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 104,
+            "byteStart": 2395,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L81-L82",
+            "lineEnd": 82,
+            "lineStart": 81,
+            "snippetSha256": "sha256:f1719694fcf3c7f313591e027279c068fa138baec55d42b86d92bb228e99f3cf",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 2453,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L82",
+            "lineEnd": 82,
+            "lineStart": 82,
+            "snippetSha256": "sha256:d92336a8ad8a36709caacdd3127215ccdc67382f0f8c8a6f3a9291bf50e1cb06",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ROLE_MUTATION_STATE_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_MUTATION_RECORD_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 91,
+            "byteStart": 2505,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L83",
+            "lineEnd": 83,
+            "lineStart": 83,
+            "snippetSha256": "sha256:a7655a53bb91f424a224570d460515a98aac8cc3206b832ec664a157acd4bf8d",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 40,
+            "byteStart": 2556,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L83",
+            "lineEnd": 83,
+            "lineStart": 83,
+            "snippetSha256": "sha256:3c4b9ad14e72055035c93e04aac68b383860f8a14f62b2d9327705b7cb0de74b",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ROLE_MUTATION_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "GLOBAL_ROLE_MUTATION_RECORD_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 113,
+            "byteStart": 2602,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L84-L85",
+            "lineEnd": 85,
+            "lineStart": 84,
+            "snippetSha256": "sha256:6c3b3538e100750300fd768b5f651a91b78a4df22fb92a9a70dbc9cb722f4282",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 47,
+            "byteStart": 2668,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L85",
+            "lineEnd": 85,
+            "lineStart": 85,
+            "snippetSha256": "sha256:edc353ccfaec5aaa190937fac7a1a7c1f244811e84f102b71efcf48dac902f19",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"6529STREAM_GLOBAL_ROLE_MUTATION_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_MANAGER_CONFIG_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 104,
+            "byteStart": 2721,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L86-L87",
+            "lineEnd": 87,
+            "lineStart": 86,
+            "snippetSha256": "sha256:08d5c5f0a6f69abc71567f4bea13466da22177aafc3668c072ec0233063d8028",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 2779,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L87",
+            "lineEnd": 87,
+            "lineStart": 87,
+            "snippetSha256": "sha256:8879a833fda0f1e62c3fdddb6543a02d8578523543c8a58cb30f516a09812a85",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ROLE_MANAGER_CONFIG_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_MANAGER_CONFIG_STATE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 116,
+            "byteStart": 2831,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L88-L89",
+            "lineEnd": 89,
+            "lineStart": 88,
+            "snippetSha256": "sha256:1c9bfb8d1f98a57941e2382821620b926e97f33ace849ab80f2c8e8c918127cf",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 52,
+            "byteStart": 2895,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L89",
+            "lineEnd": 89,
+            "lineStart": 89,
+            "snippetSha256": "sha256:c1db0446143f5c925aa05b50f0219fb15ce11b219751bcd524d5b5af0fad5479",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ROLE_MANAGER_CONFIG_STATE_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_MANAGER_CONFIG_MUTATION_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 122,
+            "byteStart": 2953,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L90-L91",
+            "lineEnd": 91,
+            "lineStart": 90,
+            "snippetSha256": "sha256:6ed91d513be100574f21d7365e459b41bfaa36538015ecb83480bf3a23755748",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 55,
+            "byteStart": 3020,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L91",
+            "lineEnd": 91,
+            "lineStart": 91,
+            "snippetSha256": "sha256:ab7894e2db1ca6013bfd62b935d265e2845036c5ca606d117f7dd109a0026f31",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_ROLE_GRANTED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 137,
+            "byteStart": 3081,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L92-L93",
+            "lineEnd": 93,
+            "lineStart": 92,
+            "snippetSha256": "sha256:ad93c2443c0474a88aea6098cca851c7e403ea9c39a1dcf22514ed53597b1fad",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 76,
+            "byteStart": 3142,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L93",
+            "lineEnd": 93,
+            "lineStart": 93,
+            "snippetSha256": "sha256:bcf5202d25607ccec3a0781e9a9ef64bf79ec9bc27e9121b52cef72f0f071e20",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_ROLE_REVOKED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 137,
+            "byteStart": 3224,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L94-L95",
+            "lineEnd": 95,
+            "lineStart": 94,
+            "snippetSha256": "sha256:7e1e5ec584906227b2c130e0667d800d4330b7e00d04ead5d711a1d09a23374b",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 76,
+            "byteStart": 3285,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L95",
+            "lineEnd": 95,
+            "lineStart": 95,
+            "snippetSha256": "sha256:4f32606e2c63a778ba6595b5484d6f59fc4a9ad536b4aa76294cf40a66854438",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_MANAGER_UPDATED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 145,
+            "byteStart": 3367,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L96-L97",
+            "lineEnd": 97,
+            "lineStart": 96,
+            "snippetSha256": "sha256:20b597e9b8320e0314c3c268ea1e41ebba4967edd5a25c1bfec4f673e55273e5",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 83,
+            "byteStart": 3429,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L97",
+            "lineEnd": 97,
+            "lineStart": 97,
+            "snippetSha256": "sha256:f7db3eaab3c159ec576b3408cfc0408bee76d941c7d434e5e5ced0267e44b87e",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\"RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_MUTATION_COMMITTED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 172,
+            "byteStart": 3518,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L98-L100",
+            "lineEnd": 100,
+            "lineStart": 98,
+            "snippetSha256": "sha256:7a405dc667ff4eaa3a97a4d09e1c3bac786fb8d5ae73d1b62192da89ef13714c",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 115,
+            "byteStart": 3575,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L98-L100",
+            "lineEnd": 100,
+            "lineStart": 98,
+            "snippetSha256": "sha256:b0b53d3313d1c1d69bdcdc54507200a28e490e30f090668a3e67aa6e58c76f66",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "valueSource": "keccak256(\n        \"RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)\"\n    )",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6U3RyZWFtUm9sZVJlZ2lzdHJ5VGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRoleRegistryTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 49305,
+      "byteStart": 487,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamRoleRegistry.t.sol#L17-L1214",
+      "lineEnd": 1214,
+      "lineStart": 17,
+      "snippetSha256": "sha256:74f5fb5aa4ce52a5accbba8ee43919e61368ad83bd8e5b0ac3ba3214a0ffa4ff",
+      "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRoleRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 32
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 31
+    },
+    "totalCount": 32
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x01c54580",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x06b00670",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x0a9254e4",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x115e0c0d",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x1ddcb31f",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x2ed24a24",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x324d9360",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x35aaeca4",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x35bd3812",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x3fa09053",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x4d2a953a",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x546ea281",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x549cbd22",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x57d40cb0",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x5c885d15",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x624b0b23",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x6b4e85f3",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x74ec29a0",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x837decc3",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x84b74a1d",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x890c1320",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0x9437c74e",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xa20707e9",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xa7ec9be2",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xab50f483",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xaf9f2463",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xc5ea695a",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xc99b4c9f",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xd4de2dc2",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xe8176ca8",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest#function:0xff6b4aad",
+      "definitionId": "test/StreamRoleRegistry.t.sol:StreamRoleRegistryTest",
+      "severity": "advisory"
+    }
+  ]
+}

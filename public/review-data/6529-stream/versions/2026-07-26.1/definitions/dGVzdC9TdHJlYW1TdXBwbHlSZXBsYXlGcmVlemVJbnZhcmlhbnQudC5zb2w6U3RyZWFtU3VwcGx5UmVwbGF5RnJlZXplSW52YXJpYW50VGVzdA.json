@@ -1,0 +1,255 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest#function:0x8e0fc351",
+          "declaringDefinitionId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256[20]",
+              "name": "actionSeeds",
+              "type": "uint256[20]"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256[20]",
+              "name": "valueSeeds",
+              "type": "uint256[20]"
+            }
+          ],
+          "name": "testSupplyReplayAndFreezeInvariantsHoldAcrossBoundedSequences",
+          "outputs": [],
+          "selector": "0x8e0fc351",
+          "signature": "testSupplyReplayAndFreezeInvariantsHoldAcrossBoundedSequences(uint256[20],uint256[20])",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TdXBwbHlSZXBsYXlGcmVlemVJbnZhcmlhbnQudC5zb2w6U3RyZWFtU3VwcGx5UmVwbGF5RnJlZXplSW52YXJpYW50VGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 106,
+            "byteStart": 448,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSupplyReplayFreezeInvariant.t.sol#L15-L17",
+            "lineEnd": 17,
+            "lineStart": 15,
+            "snippetSha256": "sha256:b1801bad047c28faa55f97741691524b3a7f91374cc68614bd520c6facb1b577",
+            "sourceSha256": "sha256:0d54c7b79171198cadde0a81b9a44f85b59b60b8a40e9db7add95987e640347a"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSupplyReplayAndFreezeInvariantsHoldAcrossBoundedSequences(uint256[20],uint256[20])",
+          "displaySignature": "testSupplyReplayAndFreezeInvariantsHoldAcrossBoundedSequences(uint256[SEQUENCE_LENGTH],uint256[SEQUENCE_LENGTH])",
+          "functionKind": "function",
+          "id": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest#function:0x8e0fc351",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionSeeds",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            },
+            {
+              "index": 1,
+              "name": "valueSeeds",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TdXBwbHlSZXBsYXlGcmVlemVJbnZhcmlhbnQudC5zb2w6U3RyZWFtU3VwcGx5UmVwbGF5RnJlZXplSW52YXJpYW50VGVzdCNmdW5jdGlvbjoweDhlMGZjMzUx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSupplyReplayAndFreezeInvariantsHoldAcrossBoundedSequences",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 599,
+            "byteStart": 560,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSupplyReplayFreezeInvariant.t.sol#L19-L34",
+            "lineEnd": 34,
+            "lineStart": 19,
+            "snippetSha256": "sha256:c53fd2bc646cc2f04b03b8e4382704e0cf957c2811b2900c593343db4acab75a",
+            "sourceSha256": "sha256:0d54c7b79171198cadde0a81b9a44f85b59b60b8a40e9db7add95987e640347a"
+          },
+          "selector": "0x8e0fc351",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SEQUENCE_LENGTH",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 339,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSupplyReplayFreezeInvariant.t.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:62214ab03097d12d17c7fe4b8f98f9f090177f4f8c36c8a1a218b92c4298589f",
+            "sourceSha256": "sha256:0d54c7b79171198cadde0a81b9a44f85b59b60b8a40e9db7add95987e640347a"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 2,
+            "byteStart": 382,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSupplyReplayFreezeInvariant.t.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b",
+            "sourceSha256": "sha256:0d54c7b79171198cadde0a81b9a44f85b59b60b8a40e9db7add95987e640347a"
+          },
+          "valueSource": "20",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "handler",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 391,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSupplyReplayFreezeInvariant.t.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:db1b54136d961e2062eb121e565f06331e315d07e1eb948657a47bb51cd57bc8",
+            "sourceSha256": "sha256:0d54c7b79171198cadde0a81b9a44f85b59b60b8a40e9db7add95987e640347a"
+          },
+          "selector": null,
+          "type": "SupplyReplayFreezeInvariantHandler",
+          "typeString": "contract SupplyReplayFreezeInvariantHandler",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1TdXBwbHlSZXBsYXlGcmVlemVJbnZhcmlhbnQudC5zb2w6U3RyZWFtU3VwcGx5UmVwbGF5RnJlZXplSW52YXJpYW50VGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamSupplyReplayFreezeInvariantTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 897,
+      "byteStart": 264,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamSupplyReplayFreezeInvariant.t.sol#L10-L35",
+      "lineEnd": 35,
+      "lineStart": 10,
+      "snippetSha256": "sha256:eaaf59145b28fd3bb142fc233005864d0eded36d5c7233587eda20ddcf9412b4",
+      "sourceSha256": "sha256:0d54c7b79171198cadde0a81b9a44f85b59b60b8a40e9db7add95987e640347a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamSupplyReplayFreezeInvariant.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest#function:0x0a9254e4",
+      "definitionId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest#function:0x8e0fc351",
+      "definitionId": "test/StreamSupplyReplayFreezeInvariant.t.sol:StreamSupplyReplayFreezeInvariantTest",
+      "severity": "advisory"
+    }
+  ]
+}

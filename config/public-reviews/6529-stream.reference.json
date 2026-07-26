@@ -4,8 +4,8 @@
   "reviewVersion": "2026-07-26.1",
   "source": {
     "repository": "6529-Collections/6529Stream",
-    "commit": "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8",
-    "tree": "3a8e3cb8102e891a73972282026d2811e7591852",
+    "commit": "018c8788750980e143c38ace0666684bf641ec4f",
+    "tree": "5108f97a5570b2ff981252c6653a2bb81b82b8b9",
     "compilerVersion": "0.8.19+commit.7dd6d404",
     "evmVersion": "paris",
     "viaIR": true,

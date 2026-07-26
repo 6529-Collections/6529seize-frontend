@@ -1,0 +1,749 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x83114ad0",
+          "declaringDefinitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAdversarialAuctionPreSettlementOrderingPreservesCustodyAndAccounting",
+          "outputs": [],
+          "selector": "0x83114ad0",
+          "signature": "testAdversarialAuctionPreSettlementOrderingPreservesCustodyAndAccounting()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x6b61b622",
+          "declaringDefinitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAdversarialAuctionSettlementAndWithdrawalFailuresPreserveAccounting",
+          "outputs": [],
+          "selector": "0x6b61b622",
+          "signature": "testAdversarialAuctionSettlementAndWithdrawalFailuresPreserveAccounting()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0xf61b1968",
+          "declaringDefinitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAdversarialDropAuthorizationOrderingDoesNotMutateInvalidDrops",
+          "outputs": [],
+          "selector": "0xf61b1968",
+          "signature": "testAdversarialDropAuthorizationOrderingDoesNotMutateInvalidDrops()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x877f44e0",
+          "declaringDefinitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAdversarialFixedPriceWithdrawalFailurePreservesCredits",
+          "outputs": [],
+          "selector": "0x877f44e0",
+          "signature": "testAdversarialFixedPriceWithdrawalFailurePreservesCredits()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x9355fe14",
+          "declaringDefinitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testProtocolStateMachineExecutesDeterministicSmokeSequence",
+          "outputs": [],
+          "selector": "0x9355fe14",
+          "signature": "testProtocolStateMachineExecutesDeterministicSmokeSequence()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246MHgwYTkyNTRlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 70,
+            "byteStart": 489,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L16-L18",
+            "lineEnd": 18,
+            "lineStart": 16,
+            "snippetSha256": "sha256:abae456dd761f8b405addd44685cb5af3219d4d684010f4208b002ad7b4f957a",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testProtocolStateMachineExecutesDeterministicSmokeSequence()",
+          "displaySignature": "testProtocolStateMachineExecutesDeterministicSmokeSequence()",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x9355fe14",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246MHg5MzU1ZmUxNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testProtocolStateMachineExecutesDeterministicSmokeSequence",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2144,
+            "byteStart": 565,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L20-L57",
+            "lineEnd": 57,
+            "lineStart": 20,
+            "snippetSha256": "sha256:024afd15cb360664780857389a000fbd7c2bbd5fd599d5af2a1d9f916089fa49",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": "0x9355fe14",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAdversarialDropAuthorizationOrderingDoesNotMutateInvalidDrops()",
+          "displaySignature": "testAdversarialDropAuthorizationOrderingDoesNotMutateInvalidDrops()",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0xf61b1968",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246MHhmNjFiMTk2OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAdversarialDropAuthorizationOrderingDoesNotMutateInvalidDrops",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2800,
+            "byteStart": 2715,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L59-L105",
+            "lineEnd": 105,
+            "lineStart": 59,
+            "snippetSha256": "sha256:90d0ae913710b246e3f4e9e46234e559692189c975ce379eec75482559e08c8d",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": "0xf61b1968",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAdversarialFixedPriceWithdrawalFailurePreservesCredits()",
+          "displaySignature": "testAdversarialFixedPriceWithdrawalFailurePreservesCredits()",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x877f44e0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246MHg4NzdmNDRlMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAdversarialFixedPriceWithdrawalFailurePreservesCredits",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1824,
+            "byteStart": 5521,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L107-L138",
+            "lineEnd": 138,
+            "lineStart": 107,
+            "snippetSha256": "sha256:683d5db892fa1fa682311be27ee91058abcf77a6605799ed0ad60419e55576f0",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": "0x877f44e0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAdversarialAuctionPreSettlementOrderingPreservesCustodyAndAccounting()",
+          "displaySignature": "testAdversarialAuctionPreSettlementOrderingPreservesCustodyAndAccounting()",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x83114ad0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246MHg4MzExNGFkMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAdversarialAuctionPreSettlementOrderingPreservesCustodyAndAccounting",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2420,
+            "byteStart": 7351,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L140-L179",
+            "lineEnd": 179,
+            "lineStart": 140,
+            "snippetSha256": "sha256:62e6bcb84a0a0a884e6e8269d8167545468f0db9e50754bbe26d7fcada95c754",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": "0x83114ad0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAdversarialAuctionSettlementAndWithdrawalFailuresPreserveAccounting()",
+          "displaySignature": "testAdversarialAuctionSettlementAndWithdrawalFailuresPreserveAccounting()",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x6b61b622",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246MHg2YjYxYjYyMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAdversarialAuctionSettlementAndWithdrawalFailuresPreserveAccounting",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3057,
+            "byteStart": 9777,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L181-L231",
+            "lineEnd": 231,
+            "lineStart": 181,
+            "snippetSha256": "sha256:4960f1fa243d5716921c42a350ded51540f8f0d77db10e30792acbc7987535f5",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": "0x6b61b622",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_buildProtocolFreeFixedPriceAuthorization(string,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:_buildProtocolFreeFixedPriceAuthorization(string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246X2J1aWxkUHJvdG9jb2xGcmVlRml4ZWRQcmljZUF1dGhvcml6YXRpb24oc3RyaW5nLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_buildProtocolFreeFixedPriceAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "range": {
+            "byteLength": 593,
+            "byteStart": 12840,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L233-L251",
+            "lineEnd": 251,
+            "lineStart": 233,
+            "snippetSha256": "sha256:9c76931abab2bf6f93a69b0890218c3803ea0fb8cacf4274fe24e478c97a47b4",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertDropMintFailsWithoutConsumption(StreamDrops.DropAuthorization,string,bytes,string)",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:_assertDropMintFailsWithoutConsumption(StreamDrops.DropAuthorization,string,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "name": "expectedRevert",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246X2Fzc2VydERyb3BNaW50RmFpbHNXaXRob3V0Q29uc3VtcHRpb24oU3RyZWFtRHJvcHMuRHJvcEF1dGhvcml6YXRpb24sc3RyaW5nLGJ5dGVzLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertDropMintFailsWithoutConsumption",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 525,
+            "byteStart": 13439,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L253-L263",
+            "lineEnd": 263,
+            "lineStart": 253,
+            "snippetSha256": "sha256:7226c732f4b955537884737a39dc63b042d2eccec8bbfe330410c49d724ded47",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callMintDrop(StreamDrops.DropAuthorization,string,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:_callMintDrop(StreamDrops.DropAuthorization,string,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246X2NhbGxNaW50RHJvcChTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbixzdHJpbmcsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callMintDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 471,
+            "byteStart": 13970,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L265-L276",
+            "lineEnd": 276,
+            "lineStart": 265,
+            "snippetSha256": "sha256:cc365103d22b86377e7e8837fa75cf69a96990832d6da57fa6bde4337747068d",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertAuctionActive(uint256,uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:_assertAuctionActive(uint256,uint256,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "expectedBid",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "expectedBidder",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246X2Fzc2VydEF1Y3Rpb25BY3RpdmUodWludDI1Nix1aW50MjU2LGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertAuctionActive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 636,
+            "byteStart": 14447,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L278-L289",
+            "lineEnd": 289,
+            "lineStart": 278,
+            "snippetSha256": "sha256:47c0baa32234c0c6c6d2164de966cce3e1f3ab352b4f7c1d1594872a5dce2eea",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callBid(uint256,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:_callBid(uint256,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "bidder",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "bid",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246X2NhbGxCaWQodWludDI1NixhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callBid",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 601,
+            "byteStart": 15089,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L291-L303",
+            "lineEnd": 303,
+            "lineStart": 291,
+            "snippetSha256": "sha256:bc90b2ba7ef3fc816162c499fa6b4cf4d27cb277fdc6867584adae8f5bc81a0d",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callAuction(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:_callAuction(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246X2NhbGxBdWN0aW9uKGJ5dGVzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callAuction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 194,
+            "byteStart": 15696,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L305-L310",
+            "lineEnd": 310,
+            "lineStart": 305,
+            "snippetSha256": "sha256:e2527efabe2b13f7bac5f0663849f646b5da8ee39f7e71093543828843f748b5",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callDrops(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:_callDrops(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246X2NhbGxEcm9wcyhieXRlcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callDrops",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 178,
+            "byteStart": 15896,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L312-L314",
+            "lineEnd": 314,
+            "lineStart": 312,
+            "snippetSha256": "sha256:8f2cd0f8dbac5c22abcf7a2f8e84dce2ba295ceef0372281c62e8228910bcac5",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRevertedWithMessage(bool,bytes,string)",
+          "functionKind": "function",
+          "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:_assertRevertedWithMessage(bool,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "expectedMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3QjZnVuY3Rpb246X2Fzc2VydFJldmVydGVkV2l0aE1lc3NhZ2UoYm9vbCxieXRlcyxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRevertedWithMessage",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 406,
+            "byteStart": 16080,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L316-L327",
+            "lineEnd": 327,
+            "lineStart": 316,
+            "snippetSha256": "sha256:3b5e37965c1ffcb77f22693bd39557259755ee17648ff7e965c113a28aed499a",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine",
+        "name": "ProtocolStateMachine"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpTdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZVRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+      "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamProtocolStateMachineTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 16203,
+      "byteStart": 285,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamProtocolStateMachine.t.sol#L10-L328",
+      "lineEnd": 328,
+      "lineStart": 10,
+      "snippetSha256": "sha256:ebfed00f3db75ae2ab1861849df2d662802349cce3dcfb5beec725e9bcfc0179",
+      "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamProtocolStateMachine.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x0a9254e4",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x6b61b622",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x83114ad0",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x877f44e0",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0x9355fe14",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest#function:0xf61b1968",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:StreamProtocolStateMachineTest",
+      "severity": "advisory"
+    }
+  ]
+}

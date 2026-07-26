@@ -1,0 +1,1124 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x9bcb1062",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [],
+          "name": "MODE_GAS_BURN",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x9bcb1062",
+          "signature": "MODE_GAS_BURN()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x3af3d783",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [],
+          "name": "MODE_NORMAL",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x3af3d783",
+          "signature": "MODE_NORMAL()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x4112cda5",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [],
+          "name": "MODE_OVERSIZED_RETURN",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x4112cda5",
+          "signature": "MODE_OVERSIZED_RETURN()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x540ee911",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [],
+          "name": "MODE_REVERT",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x540ee911",
+          "signature": "MODE_REVERT()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x14953821",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [],
+          "name": "MODE_SHORT_RETURN",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x14953821",
+          "signature": "MODE_SHORT_RETURN()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0xd87fae42",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [],
+          "name": "MODE_SLOW_SUCCESS",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xd87fae42",
+          "signature": "MODE_SLOW_SUCCESS()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x1300f2d7",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "finalityState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentState",
+              "name": "state",
+              "type": "(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x1300f2d7",
+          "signature": "finalityState(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x8004d4f5",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityScope",
+              "name": "scope",
+              "type": "(uint8,uint256,uint256,bytes32)"
+            }
+          ],
+          "name": "finalityStateForScope",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentState",
+              "name": "state",
+              "type": "(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x8004d4f5",
+          "signature": "finalityStateForScope((uint8,uint256,uint256,bytes32))",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x40758bf3",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamFinalityComponentState",
+              "name": "state",
+              "type": "(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "name": "setCollectionState",
+          "outputs": [],
+          "selector": "0x40758bf3",
+          "signature": "setCollectionState(uint256,(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32))",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x21175b4a",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "mode",
+              "type": "uint8"
+            }
+          ],
+          "name": "setMode",
+          "outputs": [],
+          "selector": "0x21175b4a",
+          "signature": "setMode(uint8)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x2cdd3960",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityScope",
+              "name": "scope",
+              "type": "(uint8,uint256,uint256,bytes32)"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamFinalityComponentState",
+              "name": "state",
+              "type": "(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "name": "setScopedState",
+          "outputs": [],
+          "selector": "0x2cdd3960",
+          "signature": "setScopedState((uint8,uint256,uint256,bytes32),(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32))",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "MODE_NORMAL()",
+          "displaySignature": "MODE_NORMAL()",
+          "functionKind": "getter",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x3af3d783",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDNhZjNkNzgz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MODE_NORMAL",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 37,
+            "byteStart": 11883,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L342",
+            "lineEnd": 342,
+            "lineStart": 342,
+            "snippetSha256": "sha256:8fbdf374822988410af556c12d0ae2b9c9278a1d5cd4be7fcec9873f3fd5934a",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x3af3d783",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MODE_REVERT()",
+          "displaySignature": "MODE_REVERT()",
+          "functionKind": "getter",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x540ee911",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDU0MGVlOTEx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MODE_REVERT",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 37,
+            "byteStart": 11926,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L343",
+            "lineEnd": 343,
+            "lineStart": 343,
+            "snippetSha256": "sha256:7b6c327b77e5dfb6bb380342c6499b4c7e33b2782d643a472d846326c162e8e5",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x540ee911",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MODE_SHORT_RETURN()",
+          "displaySignature": "MODE_SHORT_RETURN()",
+          "functionKind": "getter",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x14953821",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDE0OTUzODIx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MODE_SHORT_RETURN",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 43,
+            "byteStart": 11969,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L344",
+            "lineEnd": 344,
+            "lineStart": 344,
+            "snippetSha256": "sha256:46c9d048f0c2c817dfc665dbd6bf874525991cfe36509a354b277328c0622a7d",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x14953821",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MODE_GAS_BURN()",
+          "displaySignature": "MODE_GAS_BURN()",
+          "functionKind": "getter",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x9bcb1062",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDliY2IxMDYy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MODE_GAS_BURN",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 39,
+            "byteStart": 12018,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L345",
+            "lineEnd": 345,
+            "lineStart": 345,
+            "snippetSha256": "sha256:3512ba107537b3b597aebb0e62bf59e0a26e32cca885e043f5cd96084f929813",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x9bcb1062",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MODE_OVERSIZED_RETURN()",
+          "displaySignature": "MODE_OVERSIZED_RETURN()",
+          "functionKind": "getter",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x4112cda5",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDQxMTJjZGE1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MODE_OVERSIZED_RETURN",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 47,
+            "byteStart": 12063,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L346",
+            "lineEnd": 346,
+            "lineStart": 346,
+            "snippetSha256": "sha256:d9d19303d5afe3c2a76a5995e134b6b5620c704e0d926553934e2047449bcf24",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x4112cda5",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MODE_SLOW_SUCCESS()",
+          "displaySignature": "MODE_SLOW_SUCCESS()",
+          "functionKind": "getter",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0xd87fae42",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweGQ4N2ZhZTQy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MODE_SLOW_SUCCESS",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 43,
+            "byteStart": 12116,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L347",
+            "lineEnd": 347,
+            "lineStart": 347,
+            "snippetSha256": "sha256:e4e2b58b53af004ce18c9f21a0425334bea10ba0e71bad69d5cdb2ee2e47657a",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xd87fae42",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setMode(uint8)",
+          "displaySignature": "setMode(uint8)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x21175b4a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "mode",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDIxMTc1YjRh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setMode",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 67,
+            "byteStart": 12348,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L353-L355",
+            "lineEnd": 355,
+            "lineStart": 353,
+            "snippetSha256": "sha256:126654ce20b96163f2ed3d0434a824a6415cdc18d1db848c7646af0b97c3eb70",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x21175b4a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setCollectionState(uint256,(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32))",
+          "displaySignature": "setCollectionState(uint256,StreamFinalityComponentState)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x40758bf3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "state",
+              "storageLocation": "calldata",
+              "type": "StreamFinalityComponentState"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDQwNzU4YmYz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setCollectionState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 172,
+            "byteStart": 12421,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L357-L361",
+            "lineEnd": 361,
+            "lineStart": 357,
+            "snippetSha256": "sha256:82e11b1f1e7493084ab44afaa90e3df7adc44da6e3760da424bdc82184c37635",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x40758bf3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setScopedState((uint8,uint256,uint256,bytes32),(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32))",
+          "displaySignature": "setScopedState(StreamFinalityScope,StreamFinalityComponentState)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x2cdd3960",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "storageLocation": "calldata",
+              "type": "StreamFinalityScope"
+            },
+            {
+              "index": 1,
+              "name": "state",
+              "storageLocation": "calldata",
+              "type": "StreamFinalityComponentState"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDJjZGQzOTYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setScopedState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 192,
+            "byteStart": 12599,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L363-L368",
+            "lineEnd": 368,
+            "lineStart": 363,
+            "snippetSha256": "sha256:1a6a71a001ab2f51e947b8eb55b91e87456c6c1cd29817145237989cc6124019",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x2cdd3960",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "finalityState(uint256)",
+          "displaySignature": "finalityState(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x1300f2d7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDEzMDBmMmQ3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "finalityState",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "state",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentState"
+            }
+          ],
+          "range": {
+            "byteLength": 222,
+            "byteStart": 12797,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L370-L377",
+            "lineEnd": 377,
+            "lineStart": 370,
+            "snippetSha256": "sha256:e9c3f68ef45e05436fb07fb7d2bb52c619e2a8fcc5142dcde951b0eb995010e5",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x1300f2d7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "finalityStateForScope((uint8,uint256,uint256,bytes32))",
+          "displaySignature": "finalityStateForScope(StreamFinalityScope)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x8004d4f5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "storageLocation": "calldata",
+              "type": "StreamFinalityScope"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjoweDgwMDRkNGY1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "finalityStateForScope",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "state",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentState"
+            }
+          ],
+          "range": {
+            "byteLength": 244,
+            "byteStart": 13025,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L379-L386",
+            "lineEnd": 386,
+            "lineStart": 379,
+            "snippetSha256": "sha256:de3bb01e7b402f60a99274954e1ce828f0037e4111c78c66ae01b88f0ac5097e",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x8004d4f5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_applyMode(StreamFinalityComponentState)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:_applyMode(StreamFinalityComponentState)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "state",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentState"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjpfYXBwbHlNb2RlKFN0cmVhbUZpbmFsaXR5Q29tcG9uZW50U3RhdGUp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_applyMode",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 748,
+            "byteStart": 13275,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L388-L412",
+            "lineEnd": 412,
+            "lineStart": 388,
+            "snippetSha256": "sha256:fbe26223f5638c71abc4eb642488fa407953fe8cc72339479a2f55cd8238f7b8",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_burnGas(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:_burnGas(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjpfYnVybkdhcyh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_burnGas",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 330,
+            "byteStart": 14029,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L414-L423",
+            "lineEnd": 423,
+            "lineStart": 414,
+            "snippetSha256": "sha256:71759550b7e3d8b21e4c02ee89f55927907f58f0aae8e63fb5c499ef1c331e08",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_scopeKey(StreamFinalityScope)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:_scopeKey(StreamFinalityScope)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "storageLocation": "calldata",
+              "type": "StreamFinalityScope"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudCNmdW5jdGlvbjpfc2NvcGVLZXkoU3RyZWFtRmluYWxpdHlTY29wZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_scopeKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 227,
+            "byteStart": 14365,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L425-L429",
+            "lineEnd": 429,
+            "lineStart": 425,
+            "snippetSha256": "sha256:aeb378ae74868cddfe48e6f9da1cf0f5abc962f1f84c7cb099ccb7a9435c9744",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x3af3d783",
+          "immutable": false,
+          "name": "MODE_NORMAL",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 11883,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L342",
+            "lineEnd": 342,
+            "lineStart": 342,
+            "snippetSha256": "sha256:8fbdf374822988410af556c12d0ae2b9c9278a1d5cd4be7fcec9873f3fd5934a",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x3af3d783",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 11919,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L342",
+            "lineEnd": 342,
+            "lineStart": 342,
+            "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "valueSource": "0",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x540ee911",
+          "immutable": false,
+          "name": "MODE_REVERT",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 11926,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L343",
+            "lineEnd": 343,
+            "lineStart": 343,
+            "snippetSha256": "sha256:7b6c327b77e5dfb6bb380342c6499b4c7e33b2782d643a472d846326c162e8e5",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x540ee911",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 11962,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L343",
+            "lineEnd": 343,
+            "lineStart": 343,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x14953821",
+          "immutable": false,
+          "name": "MODE_SHORT_RETURN",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 11969,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L344",
+            "lineEnd": 344,
+            "lineStart": 344,
+            "snippetSha256": "sha256:46c9d048f0c2c817dfc665dbd6bf874525991cfe36509a354b277328c0622a7d",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x14953821",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 12011,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L344",
+            "lineEnd": 344,
+            "lineStart": 344,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "valueSource": "2",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x9bcb1062",
+          "immutable": false,
+          "name": "MODE_GAS_BURN",
+          "natspec": "",
+          "range": {
+            "byteLength": 39,
+            "byteStart": 12018,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L345",
+            "lineEnd": 345,
+            "lineStart": 345,
+            "snippetSha256": "sha256:3512ba107537b3b597aebb0e62bf59e0a26e32cca885e043f5cd96084f929813",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x9bcb1062",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 12056,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L345",
+            "lineEnd": 345,
+            "lineStart": 345,
+            "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "valueSource": "3",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x4112cda5",
+          "immutable": false,
+          "name": "MODE_OVERSIZED_RETURN",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 12063,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L346",
+            "lineEnd": 346,
+            "lineStart": 346,
+            "snippetSha256": "sha256:d9d19303d5afe3c2a76a5995e134b6b5620c704e0d926553934e2047449bcf24",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x4112cda5",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 12109,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L346",
+            "lineEnd": 346,
+            "lineStart": 346,
+            "snippetSha256": "sha256:4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "valueSource": "4",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0xd87fae42",
+          "immutable": false,
+          "name": "MODE_SLOW_SUCCESS",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 12116,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L347",
+            "lineEnd": 347,
+            "lineStart": 347,
+            "snippetSha256": "sha256:e4e2b58b53af004ce18c9f21a0425334bea10ba0e71bad69d5cdb2ee2e47657a",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xd87fae42",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 12158,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L347",
+            "lineEnd": 347,
+            "lineStart": 347,
+            "snippetSha256": "sha256:ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "valueSource": "5",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_mode",
+          "natspec": "",
+          "range": {
+            "byteLength": 19,
+            "byteStart": 12166,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L349",
+            "lineEnd": 349,
+            "lineStart": 349,
+            "snippetSha256": "sha256:447ef27384f515bbdd9c21802d9fcdd9cbe59006ec43a057b7377c89e8a52f99",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionStates",
+          "natspec": "",
+          "range": {
+            "byteLength": 74,
+            "byteStart": 12191,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L350",
+            "lineEnd": 350,
+            "lineStart": 350,
+            "snippetSha256": "sha256:3cc2674d3cf114ccad2829585eb5f35ee9f807bdbba2401a5963b68c7e6f08a4",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => StreamFinalityComponentState)",
+          "typeString": "mapping(uint256 => struct StreamFinalityComponentState)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_scopedStates",
+          "natspec": "",
+          "range": {
+            "byteLength": 70,
+            "byteStart": 12271,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L351",
+            "lineEnd": 351,
+            "lineStart": 351,
+            "snippetSha256": "sha256:3be841b3d3d6e7e3a30de1a90eaa7f8f7b53e802c63bc5ec4de2c60ae503e1b7",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => StreamFinalityComponentState)",
+          "typeString": "mapping(bytes32 => struct StreamFinalityComponentState)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvbXBvbmVudA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/FinalityMocks.sol:MockFinalityComponent"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockFinalityComponent",
+    "natspec": "@notice Configurable finality component implementing both component read surfaces, with\n         failure modes for the never-revert diagnostic tests.",
+    "range": {
+      "byteLength": 2748,
+      "byteStart": 11846,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/helpers/FinalityMocks.sol#L341-L430",
+      "lineEnd": 430,
+      "lineStart": 341,
+      "snippetSha256": "sha256:6c8c86ff1dca0348ce68f162f372506b115452ab4f07c2341538e92b38aaaabb",
+      "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/FinalityMocks.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 11
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 11
+    },
+    "totalCount": 11
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x1300f2d7",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x14953821",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x21175b4a",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x2cdd3960",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x3af3d783",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x40758bf3",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x4112cda5",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x540ee911",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x8004d4f5",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0x9bcb1062",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityComponent#function:0xd87fae42",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityComponent",
+      "severity": "advisory"
+    }
+  ]
+}

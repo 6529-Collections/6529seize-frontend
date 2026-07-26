@@ -1,0 +1,302 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/ArrngConsumer.sol:ArrngConsumer#function:0x9d014275",
+          "declaringDefinitionId": "smart-contracts/ArrngConsumer.sol:ArrngConsumer",
+          "inherited": false,
+          "inputs": [],
+          "name": "arrngController",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IArrngController",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x9d014275",
+          "signature": "arrngController()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ArrngConsumer.sol:ArrngConsumer#function:0x37f9c70d",
+          "declaringDefinitionId": "smart-contracts/ArrngConsumer.sol:ArrngConsumer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "arrngRequestId_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256[]",
+              "name": "randomNumbers_",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "receiveRandomness",
+          "outputs": [],
+          "selector": "0x37f9c70d",
+          "signature": "receiveRandomness(uint256,uint256[])",
+          "stateMutability": "payable"
+        }
+      ]
+    },
+    "abstract": true,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "arrngController()",
+          "displaySignature": "arrngController()",
+          "functionKind": "getter",
+          "id": "smart-contracts/ArrngConsumer.sol:ArrngConsumer#function:0x9d014275",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0Fycm5nQ29uc3VtZXIuc29sOkFycm5nQ29uc3VtZXIjZnVuY3Rpb246MHg5ZDAxNDI3NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "arrngController",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IArrngController",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 49,
+            "byteStart": 321,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/ArrngConsumer.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:79ee6c342a7afbe721e7f38da82e1d5e47af525a6d59cfc04d93a55d8b784cdc",
+            "sourceSha256": "sha256:3160b1f6640c286bbcc01a1d79c8c8feaeaee7e1e169930ec81a596015eb138e"
+          },
+          "selector": "0x9d014275",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/ArrngConsumer.sol:ArrngConsumer#function:constructor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "arrngController_",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0Fycm5nQ29uc3VtZXIuc29sOkFycm5nQ29uc3VtZXIjZnVuY3Rpb246Y29uc3RydWN0b3IoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "@dev constructor",
+          "outputs": [],
+          "range": {
+            "byteLength": 107,
+            "byteStart": 417,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/ArrngConsumer.sol#L22-L24",
+            "lineEnd": 24,
+            "lineStart": 22,
+            "snippetSha256": "sha256:e9c7ca8d8d5a83c3162f69e167c02d56e67e5e329751e1284d44065348dda03e",
+            "sourceSha256": "sha256:3160b1f6640c286bbcc01a1d79c8c8feaeaee7e1e169930ec81a596015eb138e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fulfillRandomWords(uint256,uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/ArrngConsumer.sol:ArrngConsumer#function:fulfillRandomWords(uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "randomWords",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0Fycm5nQ29uc3VtZXIuc29sOkFycm5nQ29uc3VtZXIjZnVuY3Rpb246ZnVsZmlsbFJhbmRvbVdvcmRzKHVpbnQyNTYsdWludDI1NltdKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fulfillRandomWords",
+          "natspec": "@dev fulfillRandomWords: Do something with the randomness\n @param requestId: unique ID for this request\n @param randomWords: array of random integers requested",
+          "outputs": [],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 746,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/ArrngConsumer.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:da35fbb75145e57e9e180c955ace3ae1ed0593a72df9e36750a72b37810d46d5",
+            "sourceSha256": "sha256:3160b1f6640c286bbcc01a1d79c8c8feaeaee7e1e169930ec81a596015eb138e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": "receiveRandomness(uint256,uint256[])",
+          "displaySignature": "receiveRandomness(uint256,uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/ArrngConsumer.sol:ArrngConsumer#function:0x37f9c70d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "arrngRequestId_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "randomNumbers_",
+              "storageLocation": "calldata",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0Fycm5nQ29uc3VtZXIuc29sOkFycm5nQ29uc3VtZXIjZnVuY3Rpb246MHgzN2Y5YzcwZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receiveRandomness",
+          "natspec": "@dev receiveRandomness: receive RNG\n @param arrngRequestId_: unique ID for this request\n @param randomNumbers_: array of random integers requested",
+          "outputs": [],
+          "range": {
+            "byteLength": 274,
+            "byteStart": 1049,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/ArrngConsumer.sol#L44-L50",
+            "lineEnd": 50,
+            "lineStart": 44,
+            "snippetSha256": "sha256:0ee717a4885d5892bc3245ea4df7a565218380b6413c207443542cbad1388ced",
+            "sourceSha256": "sha256:3160b1f6640c286bbcc01a1d79c8c8feaeaee7e1e169930ec81a596015eb138e"
+          },
+          "selector": "0x37f9c70d",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/ArrngConsumer.sol:ArrngConsumer#function:0x9d014275",
+          "immutable": true,
+          "name": "arrngController",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 321,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/ArrngConsumer.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:79ee6c342a7afbe721e7f38da82e1d5e47af525a6d59cfc04d93a55d8b784cdc",
+            "sourceSha256": "sha256:3160b1f6640c286bbcc01a1d79c8c8feaeaee7e1e169930ec81a596015eb138e"
+          },
+          "selector": "0x9d014275",
+          "type": "IArrngController",
+          "typeString": "contract IArrngController",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/ArrngConsumer.sol:ArrngConsumer",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IArrngConsumer.sol:IArrngConsumer",
+        "name": "IArrngConsumer"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0Fycm5nQ29uc3VtZXIuc29sOkFycm5nQ29uc3VtZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/ArrngConsumer.sol:ArrngConsumer",
+      "smart-contracts/IArrngConsumer.sol:IArrngConsumer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ArrngConsumer",
+    "natspec": "",
+    "range": {
+      "byteLength": 1060,
+      "byteStart": 265,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/ArrngConsumer.sol#L16-L51",
+      "lineEnd": 51,
+      "lineStart": 16,
+      "snippetSha256": "sha256:65a2e1e96edb680b3a174f5545eb758db34e9bffb9649a0a94cfa5a8e5d26236",
+      "sourceSha256": "sha256:3160b1f6640c286bbcc01a1d79c8c8feaeaee7e1e169930ec81a596015eb138e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/ArrngConsumer.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/ArrngConsumer.sol:ArrngConsumer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/ArrngConsumer.sol:ArrngConsumer#function:0x9d014275",
+      "definitionId": "smart-contracts/ArrngConsumer.sol:ArrngConsumer",
+      "severity": "advisory"
+    }
+  ]
+}

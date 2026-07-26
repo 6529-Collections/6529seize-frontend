@@ -1,0 +1,14 @@
+{
+  "activeVersion": "2026-07-26.1",
+  "reviewId": "6529-stream",
+  "schemaVersion": "public-review.solidity-reference-index.v1",
+  "versions": [
+    {
+      "bundlePath": "/review-data/6529-stream/versions/2026-07-26.1/reference-manifest.json",
+      "bundleSha256": "sha256:997485cc1b3faceab0a0da2e8f3905aa18b96f07c831b57e08befbb283c22126",
+      "commit": "018c8788750980e143c38ace0666684bf641ec4f",
+      "tree": "5108f97a5570b2ff981252c6653a2bb81b82b8b9",
+      "version": "2026-07-26.1"
+    }
+  ]
+}

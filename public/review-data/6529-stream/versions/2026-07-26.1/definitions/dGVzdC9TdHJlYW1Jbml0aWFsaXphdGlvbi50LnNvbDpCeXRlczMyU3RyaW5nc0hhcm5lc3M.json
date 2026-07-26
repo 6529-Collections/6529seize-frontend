@@ -1,0 +1,172 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamInitialization.t.sol:Bytes32StringsHarness#function:0x8878edc8",
+          "declaringDefinitionId": "test/StreamInitialization.t.sol:Bytes32StringsHarness",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "source",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "utf8CharCode",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint8",
+              "name": "targetQty",
+              "type": "uint8"
+            }
+          ],
+          "name": "containsExactCharacterQty",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x8878edc8",
+          "signature": "containsExactCharacterQty(bytes32,uint8,uint8)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "containsExactCharacterQty(bytes32,uint8,uint8)",
+          "displaySignature": "containsExactCharacterQty(bytes32,uint8,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamInitialization.t.sol:Bytes32StringsHarness#function:0x8878edc8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "source",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "utf8CharCode",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "targetQty",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Jbml0aWFsaXphdGlvbi50LnNvbDpCeXRlczMyU3RyaW5nc0hhcm5lc3MjZnVuY3Rpb246MHg4ODc4ZWRjOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "containsExactCharacterQty",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 242,
+            "byteStart": 398,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamInitialization.t.sol#L13-L19",
+            "lineEnd": 19,
+            "lineStart": 13,
+            "snippetSha256": "sha256:5b6095a772099f26bf0a82161d064d14aa0bd22010b78f801140a434492a50b2",
+            "sourceSha256": "sha256:7e0487afb07db219a9449b2ac30d21b77a8fb7006fc5cc6c17afd3cc8d9cb480"
+          },
+          "selector": "0x8878edc8",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamInitialization.t.sol:Bytes32StringsHarness",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Jbml0aWFsaXphdGlvbi50LnNvbDpCeXRlczMyU3RyaW5nc0hhcm5lc3M",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamInitialization.t.sol:Bytes32StringsHarness"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "Bytes32StringsHarness",
+    "natspec": "",
+    "range": {
+      "byteLength": 281,
+      "byteStart": 361,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamInitialization.t.sol#L12-L20",
+      "lineEnd": 20,
+      "lineStart": 12,
+      "snippetSha256": "sha256:d891974f93c6677c6197014736afad3302adb423f73189ff831a222b9de09714",
+      "sourceSha256": "sha256:7e0487afb07db219a9449b2ac30d21b77a8fb7006fc5cc6c17afd3cc8d9cb480"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamInitialization.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamInitialization.t.sol:Bytes32StringsHarness",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamInitialization.t.sol:Bytes32StringsHarness#function:0x8878edc8",
+      "definitionId": "test/StreamInitialization.t.sol:Bytes32StringsHarness",
+      "severity": "advisory"
+    }
+  ]
+}

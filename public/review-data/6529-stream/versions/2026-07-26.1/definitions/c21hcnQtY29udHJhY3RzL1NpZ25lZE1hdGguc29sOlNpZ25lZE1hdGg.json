@@ -1,0 +1,237 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "max(int256,int256)",
+          "functionKind": "function",
+          "id": "smart-contracts/SignedMath.sol:SignedMath#function:max(int256,int256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "int256"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "int256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1NpZ25lZE1hdGguc29sOlNpZ25lZE1hdGgjZnVuY3Rpb246bWF4KGludDI1NixpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "max",
+          "natspec": "@dev Returns the largest of two signed numbers.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "int256"
+            }
+          ],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 311,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L13-L15",
+            "lineEnd": 15,
+            "lineStart": 13,
+            "snippetSha256": "sha256:db6d46a053888e7e36f79d3a5b76c74e6b5244aeeb7d9bb9fa67b803122b7003",
+            "sourceSha256": "sha256:aeecc7e5ad0f981b63b486e2f296bb12439ca6c500fa1e62c7471ad7f72ca429"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "min(int256,int256)",
+          "functionKind": "function",
+          "id": "smart-contracts/SignedMath.sol:SignedMath#function:min(int256,int256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "int256"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "int256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1NpZ25lZE1hdGguc29sOlNpZ25lZE1hdGgjZnVuY3Rpb246bWluKGludDI1NixpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "min",
+          "natspec": "@dev Returns the smallest of two signed numbers.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "int256"
+            }
+          ],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 490,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L20-L22",
+            "lineEnd": 22,
+            "lineStart": 20,
+            "snippetSha256": "sha256:d72e821ddbbaf0e6b64fd4d549d8a16c547d8871bd31dc66af0b78b17d6cd918",
+            "sourceSha256": "sha256:aeecc7e5ad0f981b63b486e2f296bb12439ca6c500fa1e62c7471ad7f72ca429"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "average(int256,int256)",
+          "functionKind": "function",
+          "id": "smart-contracts/SignedMath.sol:SignedMath#function:average(int256,int256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "int256"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "int256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1NpZ25lZE1hdGguc29sOlNpZ25lZE1hdGgjZnVuY3Rpb246YXZlcmFnZShpbnQyNTYsaW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "average",
+          "natspec": "@dev Returns the average of two signed numbers without overflow.\n The result is rounded towards zero.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "int256"
+            }
+          ],
+          "range": {
+            "byteLength": 230,
+            "byteStart": 728,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L28-L32",
+            "lineEnd": 32,
+            "lineStart": 28,
+            "snippetSha256": "sha256:3448ed57fec775247a86041cd5a819566fe9e52889e37382156bdc87cf21d8bd",
+            "sourceSha256": "sha256:aeecc7e5ad0f981b63b486e2f296bb12439ca6c500fa1e62c7471ad7f72ca429"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "abs(int256)",
+          "functionKind": "function",
+          "id": "smart-contracts/SignedMath.sol:SignedMath#function:abs(int256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "n",
+              "type": "int256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1NpZ25lZE1hdGguc29sOlNpZ25lZE1hdGgjZnVuY3Rpb246YWJzKGludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "abs",
+          "natspec": "@dev Returns the absolute unsigned value of a signed value.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 213,
+            "byteStart": 1047,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L37-L42",
+            "lineEnd": 42,
+            "lineStart": 37,
+            "snippetSha256": "sha256:5270344a00cdc79629603a0764b4d4d106d1b1d5bd09c87bcd774c640bf43a14",
+            "sourceSha256": "sha256:aeecc7e5ad0f981b63b486e2f296bb12439ca6c500fa1e62c7471ad7f72ca429"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/SignedMath.sol:SignedMath",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1NpZ25lZE1hdGguc29sOlNpZ25lZE1hdGg",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/SignedMath.sol:SignedMath"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "SignedMath",
+    "natspec": "@dev Standard signed math utilities missing in the Solidity language.",
+    "range": {
+      "byteLength": 1047,
+      "byteStart": 215,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/SignedMath.sol#L9-L43",
+      "lineEnd": 43,
+      "lineStart": 9,
+      "snippetSha256": "sha256:adcc06043c1381d95fec03d9dbb89fc64902246dc139229c5a54c44f1627e957",
+      "sourceSha256": "sha256:aeecc7e5ad0f981b63b486e2f296bb12439ca6c500fa1e62c7471ad7f72ca429"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/SignedMath.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

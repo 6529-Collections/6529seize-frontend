@@ -1,0 +1,1359 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#event:TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "genesisValue",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floorBlocks",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "wallClockFloorSeconds",
+              "type": "uint64"
+            }
+          ],
+          "name": "TimeParameterRegistered",
+          "signature": "TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+          "topic0": "0x5353879504550bbe5b296dd41cc6f26f3470a34651d423e4b9d6acf5889c5421"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#event:TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "host",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "oldValue",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floorBlocks",
+              "type": "uint256"
+            }
+          ],
+          "name": "TimeParameterUpdated",
+          "signature": "TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "topic0": "0x503882277086575edc26a1c92db8b562bc44167d8639e30451d231226f1170c0"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0738f36d",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuthorityMarkerAndContextRejectMalformedAbi",
+          "outputs": [],
+          "selector": "0x0738f36d",
+          "signature": "testAuthorityMarkerAndContextRejectMalformedAbi()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xc503eba6",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuthorityMarkerIsExactAndForwardsAvailableGas",
+          "outputs": [],
+          "selector": "0xc503eba6",
+          "signature": "testAuthorityMarkerIsExactAndForwardsAvailableGas()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xe1feb93f",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas",
+          "outputs": [],
+          "selector": "0xe1feb93f",
+          "signature": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x310f839f",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDelayedRaiseConsumesExactContextAndEmits",
+          "outputs": [],
+          "selector": "0x310f839f",
+          "signature": "testDelayedRaiseConsumesExactContextAndEmits()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x11da4b26",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift",
+          "outputs": [],
+          "selector": "0x11da4b26",
+          "signature": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xadc323ae",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOneActionCannotCompoundMultipleRaisesForSameParameter",
+          "outputs": [],
+          "selector": "0xadc323ae",
+          "signature": "testOneActionCannotCompoundMultipleRaisesForSameParameter()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xdb2fa108",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable",
+          "outputs": [],
+          "selector": "0xdb2fa108",
+          "signature": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x6b7e57e4",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRaiseMustBeStrictAndAtMostDouble",
+          "outputs": [],
+          "selector": "0x6b7e57e4",
+          "signature": "testRaiseMustBeStrictAndAtMostDouble()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x4264913c",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistrationAndIntrospectionAreExact",
+          "outputs": [],
+          "selector": "0x4264913c",
+          "signature": "testRegistrationAndIntrospectionAreExact()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x935e4e1e",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistrationEventUsesRaiseOnlySchema",
+          "outputs": [],
+          "selector": "0x935e4e1e",
+          "signature": "testRegistrationEventUsesRaiseOnlySchema()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0917bcd3",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRemovedMutationSelectorsAreUnreachable",
+          "outputs": [],
+          "selector": "0x0917bcd3",
+          "signature": "testRemovedMutationSelectorsAreUnreachable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xe88065a1",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRevisionCommitmentRejectsStaleContext",
+          "outputs": [],
+          "selector": "0xe88065a1",
+          "signature": "testRevisionCommitmentRejectsStaleContext()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xde2fff23",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRevisionOverflowFailsClosed",
+          "outputs": [],
+          "selector": "0xde2fff23",
+          "signature": "testRevisionOverflowFailsClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x1d201e02",
+          "declaringDefinitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUnknownIdAndInvalidConfigurationsFailClosed",
+          "outputs": [],
+          "selector": "0x1d201e02",
+          "signature": "testUnknownIdAndInvalidConfigurationsFailClosed()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 300873,
+          "canonicalSignature": "TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+          "displaySignature": "TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#event:TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "genesisValue",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "floorBlocks",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "wallClockFloorSeconds",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNldmVudDpUaW1lUGFyYW1ldGVyUmVnaXN0ZXJlZCh1aW50MTYsYnl0ZXMzMixzdHJpbmcsdWludDI1Nix1aW50MjU2LHVpbnQ2NCk",
+          "kind": "event",
+          "name": "TimeParameterRegistered",
+          "natspec": "",
+          "range": {
+            "byteLength": 221,
+            "byteStart": 1245,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L30-L37",
+            "lineEnd": 37,
+            "lineStart": 30,
+            "snippetSha256": "sha256:8673909578f7f5113e74c709b066acd7e019daed8502cfc2d37f8faf070343ca",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "topic0": "0x5353879504550bbe5b296dd41cc6f26f3470a34651d423e4b9d6acf5889c5421"
+        },
+        {
+          "anonymous": false,
+          "astId": 300889,
+          "canonicalSignature": "TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "displaySignature": "TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#event:TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "host",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "oldValue",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "floorBlocks",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNldmVudDpUaW1lUGFyYW1ldGVyVXBkYXRlZCh1aW50MTYsYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIsdWludDI1Nix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "event",
+          "name": "TimeParameterUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 245,
+            "byteStart": 1472,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L39-L47",
+            "lineEnd": 47,
+            "lineStart": 39,
+            "snippetSha256": "sha256:668c64483c6ca8790e13c6843eeeb6653d008081767e3eee7b27e018fc529405",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "topic0": "0x503882277086575edc26a1c92db8b562bc44167d8639e30451d231226f1170c0"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 186,
+            "byteStart": 1831,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L52-L55",
+            "lineEnd": 55,
+            "lineStart": 52,
+            "snippetSha256": "sha256:1b59e9b0d5385b3322b3c5b47ce702d65945b1a1a2c20e4a0bca36bcabdab9c8",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegistrationAndIntrospectionAreExact()",
+          "displaySignature": "testRegistrationAndIntrospectionAreExact()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x4264913c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDQyNjQ5MTNj",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistrationAndIntrospectionAreExact",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1235,
+            "byteStart": 2023,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L57-L76",
+            "lineEnd": 76,
+            "lineStart": 57,
+            "snippetSha256": "sha256:a4e2158dec725344356be606c97096e67fcc79137861b1922f863fb349a5a49f",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x4264913c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegistrationEventUsesRaiseOnlySchema()",
+          "displaySignature": "testRegistrationEventUsesRaiseOnlySchema()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x935e4e1e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDkzNWU0ZTFl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistrationEventUsesRaiseOnlySchema",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 319,
+            "byteStart": 3264,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L78-L84",
+            "lineEnd": 84,
+            "lineStart": 78,
+            "snippetSha256": "sha256:c829c007c7de8ed48f82520c46e707d298b749d00e95afb39616239080d1294d",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x935e4e1e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDelayedRaiseConsumesExactContextAndEmits()",
+          "displaySignature": "testDelayedRaiseConsumesExactContextAndEmits()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x310f839f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDMxMGY4Mzlm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDelayedRaiseConsumesExactContextAndEmits",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 589,
+            "byteStart": 3589,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L86-L97",
+            "lineEnd": 97,
+            "lineStart": 86,
+            "snippetSha256": "sha256:579f1e179dea85798e6831fc3d49f01caa5ecf020fe36e67bab11402715bcf8d",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x310f839f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOneActionCannotCompoundMultipleRaisesForSameParameter()",
+          "displaySignature": "testOneActionCannotCompoundMultipleRaisesForSameParameter()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xadc323ae",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweGFkYzMyM2Fl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOneActionCannotCompoundMultipleRaisesForSameParameter",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 886,
+            "byteStart": 4184,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L99-L118",
+            "lineEnd": 118,
+            "lineStart": 99,
+            "snippetSha256": "sha256:30186667c5cd364b04eb1bff225001960220510861d2b337807cb29f1cfb9b55",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0xadc323ae",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable()",
+          "displaySignature": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xdb2fa108",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweGRiMmZhMTA4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 674,
+            "byteStart": 5076,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L120-L136",
+            "lineEnd": 136,
+            "lineStart": 120,
+            "snippetSha256": "sha256:ec144733a4c85a280fc2093c5b47c98f73bea3bc1b1c856813f46004ceffa1fd",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0xdb2fa108",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRaiseMustBeStrictAndAtMostDouble()",
+          "displaySignature": "testRaiseMustBeStrictAndAtMostDouble()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x6b7e57e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDZiN2U1N2U0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRaiseMustBeStrictAndAtMostDouble",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1103,
+            "byteStart": 5756,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L138-L171",
+            "lineEnd": 171,
+            "lineStart": 138,
+            "snippetSha256": "sha256:8d7151654dabf41d85f6de1a1eac637e19c250d0ff7cdd30ccbf4172bf3d44d0",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x6b7e57e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRevisionOverflowFailsClosed()",
+          "displaySignature": "testRevisionOverflowFailsClosed()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xde2fff23",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweGRlMmZmZjIz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRevisionOverflowFailsClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 394,
+            "byteStart": 6865,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L173-L182",
+            "lineEnd": 182,
+            "lineStart": 173,
+            "snippetSha256": "sha256:b6b88b1a725285a3100afd5bedf39f58e7339ae35b73f832b716d970873212c9",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0xde2fff23",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift()",
+          "displaySignature": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x11da4b26",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDExZGE0YjI2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2622,
+            "byteStart": 7265,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L184-L248",
+            "lineEnd": 248,
+            "lineStart": 184,
+            "snippetSha256": "sha256:b562f05bf28be69c42e27ce352dcd69521401aebd30e63d40205a661167ee1f6",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x11da4b26",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRevisionCommitmentRejectsStaleContext()",
+          "displaySignature": "testRevisionCommitmentRejectsStaleContext()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xe88065a1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweGU4ODA2NWEx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRevisionCommitmentRejectsStaleContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 912,
+            "byteStart": 9893,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L250-L268",
+            "lineEnd": 268,
+            "lineStart": 250,
+            "snippetSha256": "sha256:c9bbb32c22cdad26d361e4671aa2bb4d45b17cad37848484012cb5b34e7292de",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0xe88065a1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas()",
+          "displaySignature": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xe1feb93f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweGUxZmViOTNm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1294,
+            "byteStart": 10811,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L270-L297",
+            "lineEnd": 297,
+            "lineStart": 270,
+            "snippetSha256": "sha256:dfa589630f593d6f18a30c5c3d1a4210b0fcef8a55284251d34b87bb0ccdbef2",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0xe1feb93f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRemovedMutationSelectorsAreUnreachable()",
+          "displaySignature": "testRemovedMutationSelectorsAreUnreachable()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0917bcd3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDA5MTdiY2Qz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRemovedMutationSelectorsAreUnreachable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 667,
+            "byteStart": 12111,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L299-L310",
+            "lineEnd": 310,
+            "lineStart": 299,
+            "snippetSha256": "sha256:85ea4ede89a49b1d2d19815774a754fcbd61b52a299c0687ef3e9024e07bf178",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x0917bcd3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUnknownIdAndInvalidConfigurationsFailClosed()",
+          "displaySignature": "testUnknownIdAndInvalidConfigurationsFailClosed()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x1d201e02",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDFkMjAxZTAy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUnknownIdAndInvalidConfigurationsFailClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2223,
+            "byteStart": 12784,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L312-L363",
+            "lineEnd": 363,
+            "lineStart": 312,
+            "snippetSha256": "sha256:87b09e67c907372c3f8baee9ce14ae0e8c2e78011f8bf02492658de4e77bde51",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x1d201e02",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuthorityMarkerIsExactAndForwardsAvailableGas()",
+          "displaySignature": "testAuthorityMarkerIsExactAndForwardsAvailableGas()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xc503eba6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweGM1MDNlYmE2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuthorityMarkerIsExactAndForwardsAvailableGas",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1434,
+            "byteStart": 15013,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L365-L397",
+            "lineEnd": 397,
+            "lineStart": 365,
+            "snippetSha256": "sha256:bbf4c89d0aae44c7bf6a8a826227a8124b3f8b44e58996ed886de2f65a91f53c",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0xc503eba6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuthorityMarkerAndContextRejectMalformedAbi()",
+          "displaySignature": "testAuthorityMarkerAndContextRejectMalformedAbi()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0738f36d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjoweDA3MzhmMzZk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuthorityMarkerAndContextRejectMalformedAbi",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2049,
+            "byteStart": 16453,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L399-L438",
+            "lineEnd": 438,
+            "lineStart": 399,
+            "snippetSha256": "sha256:05c50465724b3d18f9c3e8222ce0f42031876d81d4dd3fdde974902f1eb7db9d",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": "0x0738f36d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setContext(StreamTimeParameterStore,bytes32,uint256,bytes32,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:_setContext(StreamTimeParameterStore,bytes32,uint256,bytes32,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "store",
+              "type": "StreamTimeParameterStore"
+            },
+            {
+              "index": 1,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "actionClass",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjpfc2V0Q29udGV4dChTdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUsYnl0ZXMzMix1aW50MjU2LGJ5dGVzMzIsdWludDgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 452,
+            "byteStart": 18508,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L440-L452",
+            "lineEnd": 452,
+            "lineStart": 440,
+            "snippetSha256": "sha256:0b0342da1a98c9b7c0fffdca2f50755e6c2b1794d8e9bbd9bbef81964507f0a6",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_transitionHashes(StreamTimeParameterStore,bytes32,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:_transitionHashes(StreamTimeParameterStore,bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "store",
+              "type": "StreamTimeParameterStore"
+            },
+            {
+              "index": 1,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjpfdHJhbnNpdGlvbkhhc2hlcyhTdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUsYnl0ZXMzMix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_transitionHashes",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldStateHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 794,
+            "byteStart": 18966,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L454-L471",
+            "lineEnd": 471,
+            "lineStart": 454,
+            "snippetSha256": "sha256:0f36ddc17af524bd9cf26926644d1d6815a84f4b1c50156a8fc3915d63bd53bc",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_singleConfig()",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:_singleConfig()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjpfc2luZ2xlQ29uZmlnKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_singleConfig",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "configs",
+              "storageLocation": "memory",
+              "type": "IStreamTimeParameterHost.TimeParameterConfig[]"
+            }
+          ],
+          "range": {
+            "byteLength": 299,
+            "byteStart": 19766,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L473-L480",
+            "lineEnd": 480,
+            "lineStart": 473,
+            "snippetSha256": "sha256:0ca15638a8422af926fd9fb16862fcc4bce1f572376f3353e7e367b6db721c93",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_config(string,uint256,uint256,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:_config(string,uint256,uint256,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "name",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "genesisValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "floorBlocks",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "wallClockFloorSeconds",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdCNmdW5jdGlvbjpfY29uZmlnKHN0cmluZyx1aW50MjU2LHVpbnQyNTYsdWludDY0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_config",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamTimeParameterHost.TimeParameterConfig"
+            }
+          ],
+          "range": {
+            "byteLength": 463,
+            "byteStart": 20071,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L482-L494",
+            "lineEnd": 494,
+            "lineStart": 482,
+            "snippetSha256": "sha256:ab413017c025bf9743d498c024560b9bc3e9149a9a18b734447b46736b7d7d0c",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SCOPE_DOMAIN_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 117,
+            "byteStart": 808,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L22-L23",
+            "lineEnd": 23,
+            "lineStart": 22,
+            "snippetSha256": "sha256:02426ba06c8472390740581e94ffd3b9bc403d65d80813404df8870ed0c59fcf",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 859,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:a538427d5fec319f5e2ca9c9fa4890014e40683049ce35453e2603dc88ca3045",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "valueSource": "0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STATE_DOMAIN_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 117,
+            "byteStart": 931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L24-L25",
+            "lineEnd": 25,
+            "lineStart": 24,
+            "snippetSha256": "sha256:8688203c9f4aa4e80f5f6d4da6025d6e3601185b8b1bebbcc07b8408135da6af",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 982,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:124169f8f81fbd8f809a008b36ec6c15695ccee2ff07a09e232806e9c43c2e8e",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "valueSource": "0x26290762a61f3dda3fad05a62e5a95dcb1c59db2eaf506cb363c2aa2ab7b8384",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PARAMETER_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 106,
+            "byteStart": 1054,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L26-L27",
+            "lineEnd": 27,
+            "lineStart": 26,
+            "snippetSha256": "sha256:c9fe77ee633711d940e81e019559db7920f0c297f4a3be39a3ed85cf8f1e1284",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 58,
+            "byteStart": 1102,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:f343d1dfb5ae3733726360c0268d6f508d9e954d1d4851333bad57cae0f5af1c",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "valueSource": "keccak256(\"6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ACTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 72,
+            "byteStart": 1166,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:8aba59a87ceac1715f11651794da5b72025206fcd58d47cb4b63d5092ff82301",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 35,
+            "byteStart": 1203,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:a09ae3768e21169b496c19e037ab9f2013bc550d7164687af62eec430a5e3e84",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "valueSource": "keccak256(\"raise-only-time-action\")",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_authority",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1723,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:11b64c058f583a9703f5e73d3e8dc8e0f89ce54c83e619ae87fd77ba27a2f199",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "type": "MockGovernedParameterAuthority",
+          "typeString": "contract MockGovernedParameterAuthority",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_store",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1778,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:9c23b8cd2530916f6824be0c033748a1c0373f58234a89d86b7048b0ef2f68a6",
+            "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+          },
+          "selector": null,
+          "type": "StreamTimeParameterStoreHarness",
+          "typeString": "contract StreamTimeParameterStoreHarness",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1UaW1lUGFyYW1ldGVyU3RvcmUudC5zb2w6U3RyZWFtVGltZVBhcmFtZXRlclN0b3JlVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamTimeParameterStoreTest",
+    "natspec": "@notice Launch-v1 raise-only GTP acceptance and adversarial regressions.",
+    "range": {
+      "byteLength": 19800,
+      "byteStart": 736,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamTimeParameterStore.t.sol#L21-L495",
+      "lineEnd": 495,
+      "lineStart": 21,
+      "snippetSha256": "sha256:5c52c0b62df64b7f9726328e8b393eb7392e12672e3205988e728ae379bc7a09",
+      "sourceSha256": "sha256:89759defd38400314f9eebcbaf8097ac974ddb08996bc623e337a8c8efbafa36"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamTimeParameterStore.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 15
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 15
+    },
+    "totalCount": 15
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0738f36d",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0917bcd3",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x0a9254e4",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x11da4b26",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x1d201e02",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x310f839f",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x4264913c",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x6b7e57e4",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0x935e4e1e",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xadc323ae",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xc503eba6",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xdb2fa108",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xde2fff23",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xe1feb93f",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest#function:0xe88065a1",
+      "definitionId": "test/StreamTimeParameterStore.t.sol:StreamTimeParameterStoreTest",
+      "severity": "advisory"
+    }
+  ]
+}
