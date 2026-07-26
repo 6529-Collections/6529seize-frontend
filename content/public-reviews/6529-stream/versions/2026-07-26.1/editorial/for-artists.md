@@ -16,14 +16,28 @@ recipients, a randomizer, and other module-owned configuration.
 The artist address is an important identity field, but it does not by itself
 make every collection mutation artist-only.
 
+Your collection also does not receive a separate ERC-721 contract address.
+Address-only marketplaces see the shared Stream Core. Stream exposes collection
+identity reads and token-JSON fields, but marketplace support is external
+evidence and there is no dormant per-collection facade in this launch Core.
+
 ## Approving a specific collection state
 
 ### IMPLEMENTED
 
 The current mechanism in
-[`StreamArtistApprovals.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtistApprovals.sol)
+[`StreamArtistApprovals.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtistApprovals.sol#L8-L21)
 computes a collection-state hash and verifies an artist signature over that
-state. It supports:
+state. The EIP-712 domain binds the chain and Core contract. The signed state
+binds exactly:
+
+- artist address;
+- current collection-freeze manifest hash;
+- maximum collection purchases;
+- collection total supply;
+- final-supply delay.
+
+The current approval supports:
 
 - an ordinary externally owned account signature;
 - an ERC-1271 signature from a contract wallet such as a Safe;
@@ -43,6 +57,54 @@ itself require a new artist signature.
 The community should review whether final approval, final supply, Core freeze,
 preservation manifests, and terminal finality each need an artist signature,
 governance approval, a delay, or a combination.
+
+## Records written in the artist's name
+
+### SOURCE IMPLEMENTED - CANDIDATE UNBOUND
+
+Collection metadata and preservation use a closed record-family registry. An
+exact record type is admitted once to one family and cannot later be remapped.
+Artist, owner, institution, and independent families reject admin grants.
+Artist authority must come from a live artist-authority provider.
+
+The source check is meaningful, but the candidate's admitted record types,
+artist/owner/institution provider addresses, grant map, runtime code hashes, and
+rotation/revocation evidence are not yet published. An artist should not treat
+the presence of an `ARTIST` family in source as proof that the eventual provider
+recognizes the correct wallet.
+
+An `INDEPENDENT` record is different: any caller can publish a self-attributed
+record in that family. It is evidence from that address, not endorsement by the
+artist, 6529, or the protocol.
+
+See the
+[`family/class matrix`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L143)
+and
+[`remaining candidate blockers`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/release-artifacts/record-family-authorization-source-catalog.json#L197-L205).
+
+## Proposed artist-registry validation adapter
+
+### PROPOSED - NOT IMPLEMENTED
+
+ADR 0022 proposes a size-feasible future architecture for the full artist
+registry. One registered `StreamArtistRegistry` would remain the only authority,
+state owner, event emitter, and source of permanent artist reads. A separate
+immutable, stateless, implementation-private adapter would perform only exact
+typed validation calls. It would not be a registered module, hold authority,
+store artist state, emit normative artist events, or be replaceable through a
+setter.
+
+This is a proposal, not current contract behavior. The ADR explicitly says it
+does not authorize implementation. Acceptance, a frozen normative interface,
+specification reconciliation, implementation, generated evidence, and
+deployment are separate gates. See
+[`ADR 0022`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0022-immutable-artist-registry-validation-adapter.md#L3-L18)
+and its proposed
+[`registry/adapter boundary`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0022-immutable-artist-registry-validation-adapter.md#L75-L129).
+
+Artists should review whether this separation is understandable and whether an
+immutable validation dependency is acceptable when replacing it would require
+a new registry and the protocol's successor process.
 
 ## Artwork files, scripts, and token data
 
@@ -88,11 +150,22 @@ repository, but that should not make edition behavior implicit.
 
 ## Mint policy and audience
 
-### IMPLEMENTED
+### SOURCE IMPLEMENTED
 
 Mint phases can describe time windows, executors, optional gates, limits, and
 counter scopes. Signed drop authorization can bind a mint to a payer, recipient,
 collection, quantity, price, deadline, and sale mode.
+
+These are not currently one path. The signed Drop uses the legacy minter. The
+newer manager/ledger lane supplies phases, gates, and durable counters but is not
+called by `StreamDrops`. An artist-facing sale screen must name which lane it
+uses. In the current Drop lane, the signed `quantity` must equal exactly `1`
+and one authorization mints one token. Stream can still support a many-token
+edition through multiple authorizations or another configured mint lane; the
+Drop payload is not currently a batch mint. See
+[`StreamDrops._validateAuthorization`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L561-L581)
+and
+[`_executeFixedPriceDrop`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L609-L632).
 
 ### IMPORTANT DISTINCTION
 
@@ -116,7 +189,10 @@ an English auction. The artist-facing review should identify:
 - bidder custody and refunds;
 - extension rules;
 - cancellation boundaries;
-- the revenue profile selected at settlement;
+- the Drop-local or Auction-local proceeds split used by the current native
+  sale;
+- any future resolver profile, clearly marked as a separate foundation or
+  target;
 - every fee or curator allocation;
 - what occurs if no bid is received.
 
@@ -127,11 +203,33 @@ burn-to-mint flows, and other profiles must be labelled **PROPOSED** or
 
 ## Revenue recipients and split profiles
 
-### IMPLEMENTED
+### CURRENTLY WIRED BASELINE
 
-Primary-sale settlement can resolve revenue configuration at token,
-collection, or default level. Split wallets account for recipients and allow
-pull withdrawals. ERC-2981 exposes royalty information.
+Current native fixed-price and auction sales each select a local proceeds split
+at token, collection, or contract-default level. They keep their own poster,
+protocol, curator, and bidder credits. They do not call the revenue resolver or
+split wallets.
+
+Current ERC-2981 royalty information is also separate. Core reports one fixed
+receiver and 690 basis points for every token. It does not use a token or
+collection resolver profile.
+
+See the current
+[`Drop proceeds lookup`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L542-L558),
+[`Auction proceeds credits`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L471-L508),
+and
+[`Core royalty read`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L1013-L1027).
+
+### SEPARATELY DEPLOYED FOUNDATION
+
+The repository also contains a revenue resolver, split-wallet factory, split
+wallet, asset policy registry, and primary-sale settlement contract. The
+rehearsal deploys them, but no current signed sale calls them.
+
+### ACCEPTED TARGET - NOT IMPLEMENTED
+
+Resolver-backed royalty policy and its bounded validation adapter are accepted
+for pre-genesis work. Payer-bound ERC-20 sale orchestration remains proposed.
 
 ### WHAT THE ARTIST SHOULD VERIFY
 
@@ -225,4 +323,3 @@ deployment.
    knowledge?
 5. What preservation evidence would make you comfortable freezing a work?
 6. Which sale and royalty settings must become permanent, and when?
-

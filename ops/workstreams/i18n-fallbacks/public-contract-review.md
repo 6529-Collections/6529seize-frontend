@@ -1,16 +1,41 @@
-# Public contract review localization fallback debt
+# Public Contract Review
 
-- Route/components: reusable public contract review pages;
-  `PublicReviewFeedbackComposer` and `PublicReviewLedger`.
-- Untranslated surface: all public-review feedback fields, validation and
-  connection states, ledger filters, status messages, record labels, and
-  accessible names.
-- Current fallback: the complete `en-US` messages under `publicReview.*` are
-  resolved through `t()`. The supported `en-GB`, `fr-FR`, `es-ES`, and `de-DE`
-  locales fall back to `en-US` for these new keys.
-- User impact: users of non-source locales can use the full review and feedback
-  workflow, but see English copy until reviewed translations are added.
-- Owner/follow-up: frontend public-review localization follow-up.
-- Remediation path: add reviewed `publicReview.*` entries to each supported
-  locale dictionary, verify responsive wrapping and accessible announcements,
-  then remove this debt record.
+Status verified against current source on 2026-07-26.
+
+## Current fallback
+
+The reusable review shell, feedback composer, and feedback ledger route
+interface copy through `publicReview.*` message keys. The current route resolves
+those messages with `DEFAULT_LOCALE`; supported `en-GB`, `fr-FR`, `es-ES`, and
+`de-DE` locales fall back to `en-US`.
+
+The immutable Stream editorial Markdown is also maintained as source-locale
+English and does not yet have translated content snapshots.
+
+## User impact
+
+Non-source-locale users can use the complete review and feedback workflow, but
+see English interface and editorial copy until reviewed translations exist.
+
+## Source evidence
+
+- `components/public-review/`
+- `lib/public-review/streamReviewDefinition.ts`
+- `services/api/public-review/`
+- `content/public-reviews/6529-stream/versions/`
+
+## Completion criteria
+
+- Resolve the shell, composer, and ledger from the request or selected
+  supported locale.
+- Add reviewed `publicReview.*` entries to each supported locale dictionary.
+- Define and implement an explicit locale/version strategy for immutable
+  editorial snapshots.
+- Verify responsive wrapping, metadata, navigation, evidence labels, feedback
+  fields, ledger filters, number/date formatting, heading anchors, accessible
+  names, and live announcements.
+
+Owner/follow-up: frontend public-review localization follow-up.
+
+Do not remove this record merely because the English source messages have been
+moved out of components.
