@@ -18,18 +18,17 @@ describe("createEtherscanHandler", () => {
   });
 
   it("matches only approved HTTPS Etherscan URLs", () => {
-    const handler = createEtherscanHandler();
-    const matches = (href: string) => handler.match(href);
+    const { match: isMatch } = createEtherscanHandler();
 
     expect(
-      matches(
+      isMatch(
         "https://etherscan.io/address/0x0000000000000000000000000000000000000001"
       )
     ).toBe(true);
-    expect(matches("https://sepolia.etherscan.io/txs")).toBe(true);
-    expect(matches("https://foo.etherscan.io/txs")).toBe(false);
-    expect(matches("http://etherscan.io/txs")).toBe(false);
-    expect(matches("vitalik.eth")).toBe(false);
+    expect(isMatch("https://sepolia.etherscan.io/txs")).toBe(true);
+    expect(isMatch("https://foo.etherscan.io/txs")).toBe(false);
+    expect(isMatch("http://etherscan.io/txs")).toBe(false);
+    expect(isMatch("vitalik.eth")).toBe(false);
   });
 
   it("renders the Etherscan preview boundary", () => {
