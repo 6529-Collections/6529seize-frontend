@@ -26,12 +26,14 @@ jobs:
       contents: read
 
     steps:
-      - name: Check out trusted base
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          fetch-depth: 0
-          persist-credentials: false
+      - name: Materialize trusted base from hardcoded origin
+        env:
+          SNAPSHOT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git init .
+          git remote add origin https://github.com/6529-Collections/6529seize-frontend.git
+          git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
+          git checkout --detach "$SNAPSHOT_BASE_SHA"
 
       - name: Install trusted Node.js runtime
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0

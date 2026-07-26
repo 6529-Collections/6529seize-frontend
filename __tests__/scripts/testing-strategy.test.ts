@@ -668,12 +668,12 @@ describe("testing strategy CI security checks", () => {
         "permissions:\n  contents: write"
       ),
       source.replace(
-        "ref: ${{ github.event.pull_request.base.sha }}",
-        "ref: ${{ github.event.pull_request.head.sha }}"
+        '          git checkout --detach "$SNAPSHOT_BASE_SHA"',
+        '          git checkout --detach "$SNAPSHOT_HEAD_SHA"'
       ),
       source.replace(
-        "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5",
-        "actions/checkout@v4"
+        "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "actions/setup-node@v4"
       ),
       source.replace(
         "      - name: Verify candidate snapshot from Git objects",
