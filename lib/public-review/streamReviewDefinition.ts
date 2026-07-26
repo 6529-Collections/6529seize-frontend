@@ -10,7 +10,7 @@ import type {
 export const STREAM_REVIEW_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
 export const STREAM_REVIEW_SOURCE_COMMIT =
-  "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8";
+  "018c8788750980e143c38ace0666684bf641ec4f";
 
 type PageMessageStem =
   | "overview"
