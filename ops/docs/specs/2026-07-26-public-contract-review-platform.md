@@ -192,24 +192,26 @@ The reusable platform owns a parameterized review route and configuration
 lookup. The Stream public path may remain concise, but it must resolve through
 the shared review implementation rather than a Stream-only component tree.
 
-Recommended routes:
+Canonical routes:
 
 ```text
-/stream
-/stream/[page]
-/stream/reference
-/stream/reference/contracts/[contract]
-/stream/feedback
+/reviews/6529-stream
+/reviews/6529-stream/[page]
+/reviews/6529-stream/reference
+/reviews/6529-stream/reference/contracts/[contract]
+/reviews/6529-stream/feedback
 ```
 
-The reusable implementation may internally use a route adapter or shared page
-factory so future reviews can choose an appropriate public base path without
-copying components.
+`/stream` redirects to `/reviews/6529-stream`. The reusable route family owns
+static review/page/contract parameter generation, not-found behavior, metadata,
+and the shared page shell. Pages and layouts remain Server Components;
+feedback, filters, and source-line selection are narrow Client Components.
 
-The NFT/collections navigation adds **6529 Stream** after the live collection
-links and before utility destinations such as NFT Activity. While review is
-open, the item carries a visible **Review** status treatment where the menu
-format supports it.
+The NFT/collections navigation adds **6529 Stream - Review** after the live
+collection links and before utility destinations such as NFT Activity. It does
+not add Stream to a component whose meaning is strictly live collections. While
+review is open, the item carries a visible **Review** status treatment where
+the menu format supports it.
 
 The route must provide app-consistent metadata, social sharing metadata, sitemap
 coverage, canonical paths, and Help Bot records.
@@ -365,21 +367,29 @@ fails. It does not silently fall back to a partial inventory.
 
 The production contract catalog is not treated as the complete source universe.
 The generator enumerates every top-level contract, abstract contract, interface,
-and library in the pinned Solidity source closure, then classifies each record
-as:
+and library under the pinned repository's protocol, test, and deployment-script
+source roots, then classifies each record as:
 
 - production release contract
 - published interface
+- genesis-target component
+- first-party candidate not yet in the release catalog
 - production support library
 - deployment or operational source
 - test or harness source
 - vendored dependency
+- legacy non-production source
 - excluded source with an explicit reason
 
 The existing production catalog and protocol surface report define the intended
 release set, while exhaustive source enumeration proves which definitions sit
 outside it. A newly added Solidity module cannot disappear merely because a
 manual release catalog was not updated.
+
+Release-catalog membership, genesis-target membership, and actual deployment
+are separate fields. The UI may say that a contract is release-tracked or
+planned for genesis, but it may say deployed only when retained deployment
+evidence identifies an actual address.
 
 ### Generated Bundle
 
@@ -435,6 +445,15 @@ pages may default to production contracts and published interfaces, but the
 technical reference exposes the excluded and support classifications so
 reviewers can inspect the full source boundary.
 
+Record identifiers are semantic and stable: source path, declaring definition,
+declaration kind, and canonical signature. They never use transient compiler AST
+identifiers or line numbers. Inherited ABI entries link to their declaring
+definition and state whether they are declared locally.
+
+Source ranges come from compiler AST byte offsets mapped against the exact Git
+blob. Every range retains the source-blob checksum and declaration-snippet
+checksum in addition to its immutable GitHub link.
+
 ### Completeness Gates
 
 Generation fails when:
@@ -470,6 +489,19 @@ it requires:
 
 CI runs the generator in `--check` mode. A source pin cannot change without the
 corresponding generated and editorial update.
+
+An update creates a new immutable source snapshot and semantic diff; it never
+rewrites the previous bundle. Existing feedback remains attached to the source
+and snippet checksum that its author reviewed. When a stable declaration still
+exists in a later version, the UI may show the new location; when its snippet
+changed or disappeared, the feedback is marked **source changed** and continues
+to link to the original snapshot.
+
+Generated files use canonical ordering, LF line endings, final newlines,
+content-derived timestamps where needed, and no absolute local paths or
+wall-clock generation values. Ordinary application builds validate the
+checked-in bundle offline and do not require GitHub, Foundry, or the Stream
+repository.
 
 ## Feedback Experience
 
@@ -537,37 +569,42 @@ page filters provide organization without fragmenting discussion.
 Staging and production discussion destinations are environment-specific.
 Staging work must not create or post to the production review subwave.
 
+The destination is a Chat subwave. Each feedback item is a top-level Chat drop,
+with normal Wave replies and reactions beneath it. The initial review does not
+introduce ranking, winner, threshold, or competition semantics.
+
 ### Submission Record
 
-Every feedback drop contains readable Markdown and structured metadata.
+Every feedback drop contains readable Markdown and structured metadata. The
+initial schema keeps independently useful filter keys small and places the
+versioned source/page payload in one context object.
 
 Stable metadata fields:
 
 ```text
-review.schema_version
-review.id
-review.version
-review.feedback_type
-review.page_id
-review.section_id
-review.source_repository
-review.source_commit
-review.source_path
-review.source_contract
-review.source_function
-review.source_line_start
-review.source_line_end
-review.suspected_severity
+review_schema
+review_type
+review_severity
+review_context
 ```
 
+`review_context` contains a client submission UUID, review ID and version, page
+and section IDs, and the optional discriminated documentation/code reference.
 Optional values are omitted rather than populated with placeholder text.
-Metadata names and value limits must be validated against the live Wave API.
-If Wave metadata limits require compact keys, the schema owns a versioned
-mapping rather than scattering abbreviations through components.
+Metadata keys are unique. The current API limits ordinary metadata values to
+5,000 characters and drop content to 25,000 characters; the reusable schema
+validator enforces these and the current key/title/description limits before
+submission.
 
 The drop body remains understandable without metadata rendering. It includes
 the feedback type, comment, optional reasoning/change, and links back to the
 exact review and source.
+
+The reusable form posts through a small review feedback transport over the
+existing authenticated `POST /drops` path. It does not embed or thread
+review-only fields through the full Wave composer. The form awaits the returned
+drop before clearing state, prevents concurrent repeat submission, and links to
+the created drop's stable Wave serial route.
 
 ### Authentication and Eligibility
 
@@ -583,6 +620,11 @@ The panel displays:
 The implementation reuses the existing wallet/profile authentication,
 signature, Wave eligibility, submission, toast, cache, and drop-link behavior.
 It does not introduce a second authentication or signing system.
+
+The destination Wave is resolved by exact configured ID, never by display name.
+The form fetches its current chat eligibility before submission. Chat feedback
+does not opt into participation-ranking signatures or terms merely because the
+Wave model also supports participatory drops.
 
 ### Review Ledger
 
@@ -603,6 +645,12 @@ The Community Review page reads structured review drops and provides:
 Filters include category, page, contract, severity, disposition, and text
 search. Reaction count may indicate attention but never determines technical
 severity.
+
+For the staging release, this ledger is explicitly a frontend projection over
+paginated Wave Chat drops and hydrated metadata. The current API cannot
+server-filter by review metadata and may require per-drop metadata hydration.
+This is acceptable for the first bounded community-review week but is not
+presented as a gapless, server-enforced audit database.
 
 ### Dispositions
 
@@ -626,6 +674,10 @@ record.
 The initial staging release may display `NEW` plus official threaded responses
 if mutable/indexed disposition support is not yet available. It must not fake
 workflow states that cannot be persisted.
+
+The drop API does not currently provide an idempotency key. The client UUID
+supports duplicate detection in projections, but the staging UI must not claim
+exactly-once submission or gapless sequential review identifiers.
 
 ## Exports and Auditor Support
 
@@ -743,8 +795,10 @@ navigation, code selection, filters, and the feedback composer.
 
 ## Backend and API Boundary
 
-The initial implementation should reuse existing Wave reads and drop creation
-where the current API supports the required behavior.
+The initial implementation reuses existing Wave reads and authenticated Chat
+drop creation. Current frontend/API evidence shows no backend blocker for
+staging submission, replies, reactions, deep links, or a bounded client-side
+ledger.
 
 Backend work is required only if frontend evidence proves one of these is
 missing:
@@ -757,6 +811,12 @@ missing:
 Any required backend change must use a separate coupled PR and declare its
 deployment dependency before staging. The frontend must not silently simulate a
 persisted ledger with browser-local state.
+
+Later auditor-grade hardening may add server-enforced review schemas,
+metadata-filtered review queries, authoritative disposition events, idempotent
+submission, trusted reviewer roles, and gapless review IDs. Those enhancements
+are not prerequisites for the staging demonstration, and their absence remains
+visible in the initial ledger description.
 
 ## Documentation and Help
 
@@ -909,4 +969,3 @@ during implementation and do not block the specification:
 - final Stream review source commit for the staging demonstration
 - staging Follow the Wave parent and Stream review subwave identifiers
 - public review open/close timestamps
-- final short public route if a route other than `/stream` is preferred

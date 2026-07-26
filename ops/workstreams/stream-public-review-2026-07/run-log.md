@@ -21,3 +21,14 @@
 - Started three read-only parallel discovery reviews covering frontend
   architecture/navigation, Wave feedback integration, and Solidity artifact
   generation.
+- Opened frontend PR #3462 for the specification.
+- Incorporated the independent reviews:
+  - canonical reusable `/reviews/6529-stream` routing with `/stream` redirect
+  - staging-only environment activation
+  - a focused authenticated Chat-drop feedback transport with compact,
+    versioned context metadata
+  - explicit first-week ledger limitations for metadata queries,
+    dispositions, idempotency, and sequential IDs
+  - exact-commit exhaustive AST enumeration across protocol/test/script roots
+    with release/genesis/candidate/support/vendor/deployment classifications
+  - immutable prior snapshots and snippet-bound source references

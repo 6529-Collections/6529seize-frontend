@@ -49,12 +49,23 @@ Specification review and validation.
   blocks, deep links, replies, reactions, and independent subwave activity.
 - 6529Stream already publishes deterministic release artifacts including a
   protocol surface report and ABI/release evidence.
+- Independent Wave review confirmed that staging feedback can use the existing
+  authenticated Chat-drop API without backend changes. The first ledger must be
+  described as a bounded frontend projection because the API cannot filter by
+  review metadata or enforce idempotency/dispositions.
+- Independent Solidity review found 107 protocol, 90 test, and 5 deployment
+  script Solidity files at the reviewed current main, while the current release
+  catalog covers 20 contracts and 33 interfaces. The generator must enumerate
+  and classify the full source universe and set-cross-check the release ABI.
+- Independent frontend review recommended canonical
+  `/reviews/6529-stream` routes with `/stream` redirect, server-rendered static
+  pages, narrow client interaction islands, and a navigation item outside
+  strictly live-collection-only components.
 
 ## Next Actions
 
-1. Complete focused architecture discovery.
-2. Resolve independent review findings against the draft specification.
-3. Validate and open the specification PR.
-4. Iterate with available review bots and CI.
-5. Merge the approved specification.
-6. Start disjoint feature branches from the merged specification.
+1. Validate and push the independent-review follow-up.
+2. Iterate PR #3462 with available review bots and CI.
+3. Bring the branch current with `main`.
+4. Obtain the required latest-head maintainer approval and merge.
+5. Start disjoint feature branches from the merged specification.
