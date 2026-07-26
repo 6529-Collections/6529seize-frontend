@@ -2257,6 +2257,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_VOTE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
+  ...PUBLIC_REVIEW_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;
