@@ -29,6 +29,7 @@ const REPOSITORY_ROOT = path.resolve(__dirname, "..", "..");
 const DEFAULT_CONFIG_PATH = "config/public-reviews/6529-stream.reference.json";
 const MAX_PROCESS_BUFFER = 512 * 1024 * 1024;
 const COMPILER_TIMEOUT_MS = 180_000;
+const MAX_DATE_MILLISECONDS = 8_640_000_000_000_000;
 
 function parseArgs(argv) {
   const args = {};
@@ -224,6 +225,10 @@ function commitTimestampFromUnixSeconds(value) {
   invariant(
     Number.isSafeInteger(milliseconds),
     `Git commit timestamp is outside the supported range: ${value}`
+  );
+  invariant(
+    milliseconds <= MAX_DATE_MILLISECONDS,
+    `Git commit timestamp is outside the supported date range: ${value}`
   );
   const timestamp = new Date(milliseconds).toISOString();
   return timestamp.endsWith(".000Z") ? `${timestamp.slice(0, -5)}Z` : timestamp;

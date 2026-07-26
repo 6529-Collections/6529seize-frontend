@@ -186,8 +186,19 @@ describe("Solidity public-review generator trust boundaries", () => {
     expect(commitTimestampFromUnixSeconds("1785081895")).toBe(
       "2026-07-26T16:04:55Z"
     );
-    expect(() => commitTimestampFromUnixSeconds("1785081895+00:00")).toThrow(
-      "Git commit timestamp must be Unix seconds"
+    expect(commitTimestampFromUnixSeconds("8640000000000")).toBe(
+      "+275760-09-13T00:00:00Z"
+    );
+    for (const invalid of ["", "01", "-1", "+1", "1.5", "1e3"]) {
+      expect(() => commitTimestampFromUnixSeconds(invalid)).toThrow(
+        "Git commit timestamp must be Unix seconds"
+      );
+    }
+    expect(() => commitTimestampFromUnixSeconds("9007199254741")).toThrow(
+      "Git commit timestamp is outside the supported range"
+    );
+    expect(() => commitTimestampFromUnixSeconds("8640000000001")).toThrow(
+      "Git commit timestamp is outside the supported date range"
     );
   });
 
