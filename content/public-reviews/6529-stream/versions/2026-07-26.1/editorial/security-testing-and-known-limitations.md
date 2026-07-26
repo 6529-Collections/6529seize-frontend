@@ -4,7 +4,7 @@ Stream is pre-audit and is not production-ready. This page records the evidence
 that exists and the evidence that does not. It is not a security certification.
 
 The candidate under review is the exact Git commit
-[`018c8788750980e143c38ace0666684bf641ec4f`](https://github.com/6529-Collections/6529Stream/tree/018c8788750980e143c38ace0666684bf641ec4f).
+[`2c666e16294401ab8f874a23d784dac074ecab73`](https://github.com/6529-Collections/6529Stream/tree/2c666e16294401ab8f874a23d784dac074ecab73).
 Claims about a later commit require a new review version.
 
 ## Threat model
@@ -80,7 +80,7 @@ absence of:
 ### KNOWN LIMITATION
 
 The pinned
-[`SLITHER_BASELINE.json`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/ops/SLITHER_BASELINE.json)
+[`SLITHER_BASELINE.json`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/ops/SLITHER_BASELINE.json)
 contains 30 open High or Medium findings: 3 High and 27 Medium. A count alone
 does not establish severity or exploitability, and tools can produce false
 positives. It does establish that the release cannot honestly be described as
@@ -101,7 +101,7 @@ normalization rules, source commit, and disposition evidence.
 ### KNOWN LIMITATION
 
 The pinned
-[`bytecode release proof`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/release-artifacts/latest/bytecode-release-proof.json)
+[`bytecode release proof`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/latest/bytecode-release-proof.json)
 records `StreamCore` deployed bytecode at 24,152 bytes. That is 424 bytes below
 the EIP-170 maximum of 24,576 bytes.
 
@@ -151,7 +151,7 @@ not resolve them unless every effective path is covered.
 
 The current risk-register title for RISK-GOV-002 still describes the historical
 whole-module problem. Reviewers should use the
-[`record-family source catalog`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/release-artifacts/record-family-authorization-source-catalog.json)
+[`record-family source catalog`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/record-family-authorization-source-catalog.json)
 for current source behavior and the risk register for the still-open release
 gate.
 

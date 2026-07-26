@@ -8,7 +8,7 @@ that remain outside Solidity.
 
 ### IMPLEMENTED
 
-[`StreamAdmins.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamAdmins.sol)
+[`StreamAdmins.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamAdmins.sol)
 supports:
 
 - an owner;
@@ -99,8 +99,8 @@ identities.
 
 Relevant sources:
 
-- [`StreamRoleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRoleRegistry.sol)
-- [`StreamGovernanceExecutor.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamGovernanceExecutor.sol)
+- [`StreamRoleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol)
+- [`StreamGovernanceExecutor.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernanceExecutor.sol)
 
 ### AUDIT PENDING
 
@@ -156,16 +156,23 @@ families reject admin grants. An exact record type is admitted once and cannot
 be remapped.
 
 The implementation is in
-[`StreamRecordFamilyRegistry`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L285).
+[`StreamRecordFamilyRegistry`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L285).
 Live providers are code-hash pinned and fail closed on a failed call, malformed
 return, or changed runtime code
-([`_providerAuthorizes`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRecordFamilyRegistry.sol#L298-L323)).
+([`_providerAuthorizes`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRecordFamilyRegistry.sol#L298-L323)).
 
 `RISK-GOV-002` remains open for a different reason: the exact candidate,
 production record-type admission set, live providers, grant map, deployed
 runtime bindings, non-local rotation/revocation evidence, and independent
 review are unavailable. The source catalog names those blockers explicitly
-([`remaining_blockers`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/release-artifacts/record-family-authorization-source-catalog.json#L197-L205)).
+([`remaining_blockers`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/record-family-authorization-source-catalog.json#L197-L205)).
+
+The catalog published at the reviewed head intentionally declares
+`018c8788750980e143c38ace0666684bf641ec4f` as its own semantic
+[`source_commit`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/record-family-authorization-source-catalog.json#L1-L13).
+That value binds its unchanged Solidity sources. The later reviewed head changes
+artifact and provenance tooling and release artifacts, not those Solidity
+blobs.
 
 ## Module and successor authority
 

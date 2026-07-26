@@ -9,7 +9,7 @@ all current contract behavior.
 ### IMPLEMENTED
 
 Both sale paths begin with a
-[`DropAuthorization`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L24-L61).
+[`DropAuthorization`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol#L24-L61).
 Its EIP-712 domain binds the chain and verifying contract. Its payload binds the
 intended collection, participant values, price, pricing or auction mode,
 deadline, signer epoch, and replay identifier.
@@ -26,7 +26,7 @@ checks still apply.
 The signed paths use the legacy `StreamMinter`, not `StreamMintManager`. The
 rehearsal passes that legacy minter to both Drops and Auctions while separately
 installing the newer manager in Core. See
-[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/script/RehearseDeployment.s.sol#L218-L269).
+[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/script/RehearseDeployment.s.sol#L218-L269).
 
 ## Fixed-price mint
 
@@ -43,9 +43,9 @@ The current Drop contract does not call `StreamRevenueResolver` or
 order: token, collection, then contract default. It creates separate poster,
 protocol, and curator-reserve credits instead of pushing arbitrary recipients
 during mint. See
-[`proceedsSplitFor`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L542-L558)
+[`proceedsSplitFor`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol#L542-L558)
 and
-[`_creditFixedPriceProceeds`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L635-L680).
+[`_creditFixedPriceProceeds`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol#L635-L680).
 
 ### FREE PATH
 
@@ -66,7 +66,7 @@ auction contract owns its bidding and custody state. Registration should happen
 once for the authorized item and cannot be replayed as another auction.
 
 Relevant source:
-[`AuctionContract.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol).
+[`AuctionContract.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol).
 
 ## Custody and bids
 
@@ -139,7 +139,7 @@ In the current baseline, the auction token is minted into auction custody during
 registration. Winner settlement credits the Auction contract's local balances
 and transfers the held token. It does not call the revenue resolver or split
 wallets. The exact credit path is
-[`_creditAuctionProceeds`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L471-L508).
+[`_creditAuctionProceeds`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L471-L508).
 
 ## No-bid settlement
 

@@ -15,13 +15,13 @@ one end-to-end pipeline.
 | Resolver-backed royalty architecture            | **ACCEPTED TARGET - NOT IMPLEMENTED** | The accepted target keeps royalty policy in a replaceable resolver with a bounded validation adapter.                                                   |
 
 The rehearsal construction and wiring are visible in
-[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/script/RehearseDeployment.s.sol#L218-L269).
+[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/script/RehearseDeployment.s.sol#L218-L269).
 
 ## Primary-sale settlement
 
 ### SEPARATELY DEPLOYED FOUNDATION
 
-[`StreamPrimarySaleSettlement.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamPrimarySaleSettlement.sol#L96-L145)
+[`StreamPrimarySaleSettlement.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamPrimarySaleSettlement.sol#L96-L145)
 records and settles primary-sale value. Settlement uses replay protection so one
 sale cannot be credited twice.
 
@@ -38,7 +38,7 @@ collector-to-mint flow.
 
 ### SEPARATELY DEPLOYED FOUNDATION
 
-[`StreamRevenueResolver.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRevenueResolver.sol#L170-L279)
+[`StreamRevenueResolver.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRevenueResolver.sol#L170-L279)
 can resolve configuration at several levels. A token-specific rule can take
 precedence over collection configuration, which can take precedence over
 defaults.
@@ -75,8 +75,8 @@ do not route their native proceeds through them.
 
 Relevant sources:
 
-- [`StreamSplitFactory.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamSplitFactory.sol)
-- [`StreamSplitWallet.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamSplitWallet.sol)
+- [`StreamSplitFactory.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamSplitFactory.sol)
+- [`StreamSplitWallet.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamSplitWallet.sol)
 
 ### REVIEW REQUIREMENTS
 
@@ -121,7 +121,7 @@ For native ETH, reviewers should check:
 
 The standalone settlement foundation accepts only contract addresses whose
 deployment-wide onchain
-[`StreamAssetPolicyRegistry`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamAssetPolicyRegistry.sol#L7-L83)
+[`StreamAssetPolicyRegistry`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamAssetPolicyRegistry.sol#L7-L83)
 status is `ACTIVE`. Unknown, inactive, deprecated, and unsupported assets fail
 closed. The registry stores an evidence hash and effective timestamp for each
 policy decision, and its owner controls status changes.
@@ -129,10 +129,10 @@ policy decision, and its owner controls status changes.
 Settlement then requires a successful boolean-returning transfer and verifies
 exact before-and-after balance changes for the payer, settlement adapter, and
 split wallet. The
-[`StreamPrimarySaleSettlement`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamPrimarySaleSettlement.sol#L124-L145)
+[`StreamPrimarySaleSettlement`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamPrimarySaleSettlement.sol#L124-L145)
 path rejects a missing or false return value, fee-on-transfer behavior, no-op
 transfers, failed balance reads, and wrong balance deltas. The pinned
-[`settlement tests`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/test/StreamPrimarySaleSettlement.t.sol#L778-L1043)
+[`settlement tests`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamPrimarySaleSettlement.t.sol#L778-L1043)
 exercise the active standard-token path and those rejection cases.
 
 The accepted token set is deployment configuration, not a hardcoded list.
@@ -154,7 +154,7 @@ No contract 20 implementation exists. The foundation also lacks PaymentIntent
 signature verification, signer-scoped replay, revocation, revenue-escrow
 fallback, and top-level sale-adapter orchestration. This is a proposed design,
 not a supported token-denominated sale. See
-[`ADR 0019`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/docs/adr/0019-payment-intent-orchestration.md#L3-L82).
+[`ADR 0019`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/adr/0019-payment-intent-orchestration.md#L3-L82).
 
 ## Rounding and dust
 
@@ -207,7 +207,7 @@ commit it ignores token-specific revenue profiles and returns:
 - no runtime royalty setter and no per-token override.
 
 The exact implementation is
-[`StreamCore.royaltyInfo`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L1013-L1027).
+[`StreamCore.royaltyInfo`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol#L1013-L1027).
 The current Core does not call `StreamRevenueResolver` for this read.
 
 ### IMPORTANT LIMITATION

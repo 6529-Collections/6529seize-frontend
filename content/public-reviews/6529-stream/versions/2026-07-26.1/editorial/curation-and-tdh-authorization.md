@@ -28,7 +28,7 @@ cryptographic and contractual.
 ### IMPLEMENTED
 
 The signed drop path in
-[`StreamDrops.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L24-L60)
+[`StreamDrops.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol#L24-L60)
 uses EIP-712 typed data. Its domain binds the chain ID and verifying contract.
 The signed `DropAuthorization` has exactly these fields:
 

@@ -26,7 +26,7 @@ evidence and there is no dormant per-collection facade in this launch Core.
 ### IMPLEMENTED
 
 The current mechanism in
-[`StreamArtistApprovals.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamArtistApprovals.sol#L8-L21)
+[`StreamArtistApprovals.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L8-L21)
 computes a collection-state hash and verifies an artist signature over that
 state. The EIP-712 domain binds the chain and Core contract. The signed state
 binds exactly:
@@ -78,9 +78,9 @@ record in that family. It is evidence from that address, not endorsement by the
 artist, 6529, or the protocol.
 
 See the
-[`family/class matrix`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L143)
+[`family/class matrix`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L143)
 and
-[`remaining candidate blockers`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/release-artifacts/record-family-authorization-source-catalog.json#L197-L205).
+[`remaining candidate blockers`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/record-family-authorization-source-catalog.json#L197-L205).
 
 ## Artwork files, scripts, and token data
 
@@ -185,10 +185,10 @@ receiver and 690 basis points for every token. It does not use a token or
 collection resolver profile.
 
 See the current
-[`Drop proceeds lookup`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L542-L558),
-[`Auction proceeds credits`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/AuctionContract.sol#L471-L508),
+[`Drop proceeds lookup`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol#L542-L558),
+[`Auction proceeds credits`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L471-L508),
 and
-[`Core royalty read`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCore.sol#L1013-L1027).
+[`Core royalty read`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol#L1013-L1027).
 
 ### SEPARATELY DEPLOYED FOUNDATION
 

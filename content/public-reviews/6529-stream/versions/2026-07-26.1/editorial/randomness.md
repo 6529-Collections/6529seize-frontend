@@ -5,12 +5,12 @@ number. A token can need randomness for its artwork, a provider can be delayed
 or fail, and the protocol still needs an auditable route to a final seed.
 
 The main orchestration is in
-[`StreamRandomizerLifecycle.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRandomizerLifecycle.sol).
+[`StreamRandomizerLifecycle.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol).
 Provider implementations include
-[`RandomizerVRF.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/RandomizerVRF.sol),
-[`RandomizerRNG.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/RandomizerRNG.sol),
+[`RandomizerVRF.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/RandomizerVRF.sol),
+[`RandomizerRNG.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/RandomizerRNG.sol),
 and
-[`RandomizerNXT.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/RandomizerNXT.sol).
+[`RandomizerNXT.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/RandomizerNXT.sol).
 
 ## Choosing a provider
 

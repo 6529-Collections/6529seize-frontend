@@ -30,9 +30,9 @@ support remains an external launch gate. This launch Core has no dormant facade
 that can later turn each collection into a separate ERC-721 address.
 
 See the accepted
-[`collection identity decision`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/docs/adr/0015-collection-identity-and-facade-readiness.md#L21-L66)
+[`collection identity decision`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/adr/0015-collection-identity-and-facade-readiness.md#L21-L66)
 and
-[`Core-native-only decision`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/docs/adr/0016-core-native-only-erc721.md#L27-L50).
+[`Core-native-only decision`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/adr/0016-core-native-only-erc721.md#L27-L50).
 
 ## Collection supply
 
@@ -64,17 +64,17 @@ legacy minter and the manager in Core, but gives the legacy minter to
 `StreamDrops`.
 
 The exact distinction is visible in
-[`StreamDrops._executeFixedPriceDrop`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamDrops.sol#L609-L632),
-[`StreamMinter.mint`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMinter.sol#L130-L175),
-[`StreamMintManager.mintPrepared`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMintManager.sol#L241-L299),
+[`StreamDrops._executeFixedPriceDrop`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol#L609-L632),
+[`StreamMinter.mint`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamMinter.sol#L130-L175),
+[`StreamMintManager.mintPrepared`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamMintManager.sol#L241-L299),
 and the
-[`rehearsal wiring`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/script/RehearseDeployment.s.sol#L218-L269).
+[`rehearsal wiring`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/script/RehearseDeployment.s.sol#L218-L269).
 
 ## Mint phases
 
 ### SOURCE IMPLEMENTED
 
-[`StreamMintManager.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMintManager.sol)
+[`StreamMintManager.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamMintManager.sol)
 supports collection mint phases. A phase can bind timing, executor, gate, and
 counter behavior.
 
@@ -115,9 +115,9 @@ returns an authorization ID, nullifiers, authorizer, maximum quantity, and gate
 hash. Those values are security inputs, not descriptive metadata.
 
 See
-[`StreamMintModuleRegistry`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMintModuleRegistry.sol#L9-L100)
+[`StreamMintModuleRegistry`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamMintModuleRegistry.sol#L9-L100)
 and
-[`IStreamMintGate`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/IStreamMintGate.sol#L6-L29).
+[`IStreamMintGate`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintGate.sol#L6-L29).
 
 These extensions should not be assumed safe because they are “outside the
 Core.” Reviewers should trace every external call, return value, reentrancy
@@ -127,7 +127,7 @@ boundary, and rollback rule.
 
 ### SOURCE IMPLEMENTED
 
-[`StreamMintLedger.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMintLedger.sol)
+[`StreamMintLedger.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamMintLedger.sol)
 stores durable usage counters. Depending on policy, counters can apply to
 wallets, recipients, tokens, contexts, or other keys.
 
@@ -181,7 +181,7 @@ an unbounded lifetime mapping of prepared token operation IDs.
 The proposed repair is not accepted or implemented. It would make the ledger
 the durable batch replay owner and provide an exact join between ledger
 accounting and prepared-token events. See
-[`ADR 0018`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/docs/adr/0018-batch-operation-root-and-token-identity.md#L3-L33).
+[`ADR 0018`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/adr/0018-batch-operation-root-and-token-identity.md#L3-L33).
 
 Typed primary-settlement and repeated-sale replay work is also still recorded as
 future design work. The review should not describe those draft protections as

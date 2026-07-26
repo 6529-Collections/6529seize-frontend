@@ -6,13 +6,13 @@ and versioned dependencies. These are different preservation models. The UI
 should not collapse them into one “onchain” badge.
 
 The principal renderer is
-[`StreamMetadataRenderer.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamMetadataRenderer.sol).
+[`StreamMetadataRenderer.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamMetadataRenderer.sol).
 Collection-level metadata is in
-[`StreamCollectionMetadata.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCollectionMetadata.sol),
+[`StreamCollectionMetadata.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCollectionMetadata.sol),
 contract-level metadata is in
-[`StreamContractMetadata.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamContractMetadata.sol),
+[`StreamContractMetadata.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamContractMetadata.sol),
 and reusable library records are in
-[`DependencyRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/DependencyRegistry.sol).
+[`DependencyRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/DependencyRegistry.sol).
 
 ## Token metadata modes
 
@@ -137,7 +137,7 @@ Artist, owner, independent, and institution families reject admin grants. An
 independent-attestor write is permissionless and self-attributed; it is not a
 protocol endorsement. Exact record types are admitted once and cannot later be
 remapped. The implementation is in
-[`StreamRecordFamilyRegistry`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamRecordFamilyRegistry.sol#L85-L228).
+[`StreamRecordFamilyRegistry`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRecordFamilyRegistry.sol#L85-L228).
 
 The candidate's actual record-type admission set, live artist/owner/institution
 providers, grants, runtime code hashes, and rotation/revocation evidence are not
@@ -168,9 +168,9 @@ set after Core freeze. These are narrower post-freeze metadata actions than
 revising a record, but they must be included in the freeze explanation.
 
 See
-[`publishCollectionSnapshot`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCollectionMetadata.sol#L124-L180)
+[`publishCollectionSnapshot`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCollectionMetadata.sol#L124-L180)
 and
-[`_requireSnapshotFamilyIntersection`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamCollectionMetadata.sol#L504-L524).
+[`_requireSnapshotFamilyIntersection`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCollectionMetadata.sol#L504-L524).
 
 ## Contract metadata
 
@@ -183,7 +183,7 @@ The current `StreamContractMetadata.updateContractURI` path checks metadata
 pause and function-admin authority, but it does not consult an individual
 collection's Core freeze. A frozen artwork collection and the shared
 marketplace-facing contract description are therefore different states. See
-[`updateContractURI`](https://github.com/6529-Collections/6529Stream/blob/018c8788750980e143c38ace0666684bf641ec4f/smart-contracts/StreamContractMetadata.sol#L109-L145).
+[`updateContractURI`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamContractMetadata.sol#L109-L145).
 
 Reviewers should distinguish display metadata from ERC-721 identity. A website
 label may change without changing token ownership or collection identity, but
