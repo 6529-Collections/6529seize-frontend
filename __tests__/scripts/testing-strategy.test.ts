@@ -349,9 +349,9 @@ describe("testing strategy CI plan", () => {
   ])("treats public review reference input %s as build-sensitive", (file) => {
     const plan = createCiPlan([file]);
 
-    expect(plan.checks.build.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(true);
-    expect(plan.checks.build.reason).toContain("build-sensitive");
+    expect(plan.checks["build"]!.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
+    expect(plan.checks["build"]!.reason).toContain("build-sensitive");
   });
 
   it("requires build coverage for deleted runtime source", () => {

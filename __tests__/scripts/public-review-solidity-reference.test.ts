@@ -173,16 +173,20 @@ describe("Solidity public-review reference generator", () => {
     };
 
     const surface = abiSurface(new Map([[1, definition]]), definition, output);
+    const generatedGetter = definition.members.functions[0];
+    if (!generatedGetter) {
+      throw new Error("Expected the public state variable getter.");
+    }
 
     expect(definition.members.functions).toHaveLength(1);
-    expect(definition.members.functions[0]).toMatchObject({
+    expect(generatedGetter).toMatchObject({
       id: `contracts/T.sol:T#function:${selector}`,
       canonicalSignature: "value()",
       selector,
       syntheticGetter: true,
     });
     expect(surface.functions[0]).toMatchObject({
-      declarationId: definition.members.functions[0].id,
+      declarationId: generatedGetter.id,
       selector,
       signature: "value()",
     });
@@ -294,7 +298,7 @@ describe("Solidity public-review reference generator", () => {
     );
 
     const drifted = Buffer.from(buffer);
-    drifted[drifted.length - 2] ^= 1;
+    drifted[drifted.length - 2] = drifted[drifted.length - 2]! ^ 1;
     expect(() =>
       validateDefinitionShards(
         bundle,
