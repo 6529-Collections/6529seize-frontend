@@ -357,9 +357,7 @@ function ensureImmutableSnapshot(config, expected) {
 function writeExpectedFiles(expected) {
   for (const [filePath, buffer] of expected) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    if (!fs.existsSync(filePath) || !fs.readFileSync(filePath).equals(buffer)) {
-      fs.writeFileSync(filePath, buffer);
-    }
+    fs.writeFileSync(filePath, buffer);
   }
 }
 
