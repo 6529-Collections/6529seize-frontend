@@ -138,6 +138,7 @@ describe("PublicReviewShell", () => {
           ...STREAM_REVIEW_DEFINITION,
           id: "another-contract",
           slug: "another-contract",
+          contractName: "Another Contract",
           title: "Another Contract Review",
         }}
         reviewVersion={ACTIVE_REVIEW_VERSION}
@@ -155,6 +156,12 @@ describe("PublicReviewShell", () => {
       "href",
       "/reviews/another-contract/versions/candidate-2/feedback"
     );
+    expect(screen.getByText("Another Contract contract")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: `Open the exact Another Contract source commit ${ACTIVE_REVIEW_VERSION.source.commit}`,
+      })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Start the Artists path" })
     ).toHaveAttribute(

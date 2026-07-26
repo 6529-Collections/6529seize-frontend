@@ -122,7 +122,9 @@ export function PublicReviewShell({
       <div className="tw-mx-auto tw-w-full tw-max-w-[88rem] tw-px-4 tw-pb-20 tw-pt-8 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-12">
         <header className="tw-max-w-4xl">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-amber-300">
-            {t(DEFAULT_LOCALE, "publicReview.eyebrow")}
+            {t(DEFAULT_LOCALE, "publicReview.eyebrow", {
+              contract: review.contractName,
+            })}
           </p>
           <p className="tw-mb-0 tw-mt-4 tw-font-mono tw-text-xs tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {

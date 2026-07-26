@@ -19,7 +19,7 @@ const STREAM_VERSIONS_ROOT = path.resolve(
   "versions"
 );
 
-export class PublicReviewEditorialContentError extends Error {
+class PublicReviewEditorialContentError extends Error {
   public constructor(message: string, options?: ErrorOptions) {
     super(message, options);
     this.name = "PublicReviewEditorialContentError";

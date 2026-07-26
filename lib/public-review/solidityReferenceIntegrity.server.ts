@@ -6,6 +6,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function compareOrdinal(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function canonicalizeJson(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(canonicalizeJson);
@@ -13,7 +17,7 @@ function canonicalizeJson(value: unknown): unknown {
   if (isRecord(value)) {
     return Object.fromEntries(
       Object.keys(value)
-        .sort()
+        .sort(compareOrdinal)
         .map((key) => [key, canonicalizeJson(value[key])])
     );
   }

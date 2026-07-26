@@ -30,7 +30,7 @@ import {
   type PublicReviewPageOption,
 } from "@/services/api/public-review/types";
 
-export const STREAM_REVIEW_FEEDBACK_DESTINATION_KEY = "stream-review";
+const STREAM_REVIEW_FEEDBACK_DESTINATION_KEY = "stream-review";
 
 export const STREAM_REVIEW_TECHNICAL_FEEDBACK_PAGES = [
   {

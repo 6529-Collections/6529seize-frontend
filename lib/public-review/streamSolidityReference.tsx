@@ -77,6 +77,12 @@ const STREAM_SOLIDITY_REFERENCE_IDENTITY: SolidityReferenceReviewIdentity = {
     (candidate) => candidate.version
   ),
   reviewId: STREAM_REVIEW_SLUG,
+  sourceCommits: Object.fromEntries(
+    STREAM_REVIEW_DEFINITION.versions.map((candidate) => [
+      candidate.version,
+      candidate.source.commit,
+    ])
+  ),
   sourceRepository: activeStreamReviewVersion.source.repository,
 };
 

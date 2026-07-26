@@ -429,7 +429,7 @@ export interface SolidityParameter {
   readonly type: string;
 }
 
-export interface SolidityDeclarationBase {
+interface SolidityDeclarationBase {
   readonly id: string;
   readonly key: string;
   readonly kind: "function" | "event" | "error";
@@ -667,5 +667,6 @@ export interface SolidityReferenceReviewIdentity {
   readonly activeVersion: string;
   readonly availableVersions: readonly string[];
   readonly reviewId: string;
+  readonly sourceCommits: Readonly<Record<string, string>>;
   readonly sourceRepository: string;
 }

@@ -42,6 +42,9 @@ const IDENTITY: SolidityReferenceReviewIdentity = {
   activeVersion: STREAM_REVIEW_VERSION,
   availableVersions: [STREAM_REVIEW_VERSION],
   reviewId: STREAM_REVIEW_SLUG,
+  sourceCommits: {
+    [STREAM_REVIEW_VERSION]: REVIEW_VERSION.source.commit,
+  },
   sourceRepository: REVIEW_VERSION.source.repository,
 };
 

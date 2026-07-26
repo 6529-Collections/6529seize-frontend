@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { formatInteger } from "@/i18n/format";
+import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { SolidityReadinessRequirement } from "@/lib/public-review/solidityReferenceTypes";
@@ -35,7 +35,10 @@ export function SolidityReadinessExplorer({
   const [phase, setPhase] = useState("");
   const [status, setStatus] = useState("");
   const statuses = useMemo(
-    () => Array.from(new Set(items.map((item) => item.status))).sort(),
+    () =>
+      Array.from(new Set(items.map((item) => item.status))).sort(
+        (left, right) => compareLocalized(DEFAULT_LOCALE, left, right)
+      ),
     [items]
   );
   const normalizedQuery = query.trim().toLocaleLowerCase(DEFAULT_LOCALE);

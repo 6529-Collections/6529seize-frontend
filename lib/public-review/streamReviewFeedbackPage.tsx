@@ -22,8 +22,6 @@ import {
 import type { SolidityReferenceManifest } from "@/lib/public-review/solidityReferenceTypes";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
 
-export const STREAM_REVIEW_FEEDBACK_PATH = getStreamReviewFeedbackHref();
-
 export function getStreamReviewFeedbackMetadata({
   baseEndpoint,
   review,

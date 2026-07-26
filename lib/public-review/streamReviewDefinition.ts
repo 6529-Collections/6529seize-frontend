@@ -234,6 +234,7 @@ export const STREAM_REVIEW_PAGES = [
 export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   id: "stream",
   slug: STREAM_REVIEW_SLUG,
+  contractName: "6529 Stream",
   title: "6529 Stream Contract Review",
   description:
     "A source-grounded public review of the proposed 6529 Stream protocol before finalization and deployment.",

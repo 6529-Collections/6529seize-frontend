@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { formatInteger } from "@/i18n/format";
+import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -55,7 +55,10 @@ export function SolidityGlobalDeclarationExplorer({
   const [location, setLocation] = useState("");
   const [resultLimit, setResultLimit] = useState(INITIAL_RESULT_LIMIT);
   const scopes = useMemo(
-    () => Array.from(new Set(items.map((item) => item.scope))).sort(),
+    () =>
+      Array.from(new Set(items.map((item) => item.scope))).sort((left, right) =>
+        compareLocalized(DEFAULT_LOCALE, left, right)
+      ),
     [items]
   );
   const normalizedQuery = query.trim().toLocaleLowerCase(DEFAULT_LOCALE);

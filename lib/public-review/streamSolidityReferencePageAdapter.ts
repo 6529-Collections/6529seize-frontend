@@ -18,7 +18,7 @@ import {
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
 
-export interface ResolvedStreamReferenceRoute {
+interface ResolvedStreamReferenceRoute {
   readonly routeVersion?: string | undefined;
   readonly version: string;
 }

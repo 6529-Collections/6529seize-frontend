@@ -1,7 +1,7 @@
 import {
   createPublicReviewLedgerCsv,
   createPublicReviewLedgerMarkdown,
-} from "@/components/public-review/PublicReviewLedger";
+} from "@/lib/public-review/publicReviewLedgerExport";
 import type { PublicReviewFeedbackRecord } from "@/services/api/public-review/types";
 
 const record: PublicReviewFeedbackRecord = {

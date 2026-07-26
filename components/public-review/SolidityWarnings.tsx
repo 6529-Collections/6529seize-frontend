@@ -52,11 +52,9 @@ function WarningRecords({
         {formatInteger(DEFAULT_LOCALE, warnings.length)})
       </summary>
       <ul className="tw-mb-0 tw-mt-3 tw-list-none tw-space-y-2 tw-p-0">
-        {warnings.map((warning, index) => (
+        {warnings.map((warning) => (
           <li
-            key={`${warning.code}:${
-              warning.declarationId ?? warning.definitionId
-            }:${index}`}
+            key={`${warning.code}:${warning.category}:${warning.severity}:${warning.definitionId}:${warning.declarationId ?? ""}`}
             className="tw-rounded-lg tw-bg-iron-900 tw-p-3"
           >
             <div className="tw-flex tw-flex-wrap tw-gap-2">

@@ -140,5 +140,13 @@ export function assertSafeSourcePath(sourcePath: string): void {
 }
 
 export function isSafeSourceRoot(root: string): boolean {
-  return SAFE_SOURCE_PATH_PATTERN.test(`${root}/root.sol`);
+  return (
+    SAFE_SOURCE_PATH_PATTERN.test(root) &&
+    !root.startsWith("/") &&
+    !root.includes("//") &&
+    !root.includes("\\") &&
+    !root
+      .split("/")
+      .some((segment) => segment === "" || segment === "." || segment === "..")
+  );
 }

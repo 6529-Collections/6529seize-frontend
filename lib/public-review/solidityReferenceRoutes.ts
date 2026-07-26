@@ -137,7 +137,7 @@ export interface SolidityReferenceRouteInventory {
   }[];
 }
 
-export function isSafeSoliditySourceSegments(
+function isSafeSoliditySourceSegments(
   segments: readonly string[]
 ): boolean {
   return (

@@ -15,7 +15,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { PublicReviewCodeSelection } from "@/services/api/public-review/types";
 
-export type PublicReviewCodeSelectionIntegrityStatus =
+type PublicReviewCodeSelectionIntegrityStatus =
   | "pending"
   | "ready"
   | "unavailable";

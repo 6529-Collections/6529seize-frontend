@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { formatInteger } from "@/i18n/format";
+import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { SolidityNatSpecGap } from "@/lib/public-review/solidityReferenceTypes";
@@ -47,11 +47,17 @@ export function SolidityNatSpecGapExplorer({
   const [status, setStatus] = useState("");
   const [resultLimit, setResultLimit] = useState(INITIAL_RESULT_LIMIT);
   const gapTypes = useMemo(
-    () => Array.from(new Set(items.map((item) => item.gapType))).sort(),
+    () =>
+      Array.from(new Set(items.map((item) => item.gapType))).sort(
+        (left, right) => compareLocalized(DEFAULT_LOCALE, left, right)
+      ),
     [items]
   );
   const statuses = useMemo(
-    () => Array.from(new Set(items.map((item) => item.status))).sort(),
+    () =>
+      Array.from(new Set(items.map((item) => item.status))).sort(
+        (left, right) => compareLocalized(DEFAULT_LOCALE, left, right)
+      ),
     [items]
   );
   const normalizedQuery = query.trim().toLocaleLowerCase(DEFAULT_LOCALE);

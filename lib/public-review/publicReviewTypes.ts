@@ -52,6 +52,7 @@ export interface PublicReviewVersionDefinition {
 export interface PublicReviewDefinition {
   readonly id: string;
   readonly slug: string;
+  readonly contractName: string;
   readonly title: string;
   readonly description: string;
   readonly activeVersion: string;

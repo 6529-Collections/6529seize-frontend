@@ -1,27 +1,37 @@
-import { Children, type ReactNode } from "react";
+import { Children, isValidElement, type ReactNode } from "react";
 import Markdown, { type Components } from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getPublicReviewHeadingId } from "@/lib/public-review/editorialSections";
+import { getUniquePublicReviewHeadingId } from "@/lib/public-review/editorialSections";
 
 function getHeadingText(children: ReactNode): string {
   return Children.toArray(children)
-    .map((child) => (typeof child === "string" ? child : ""))
+    .map((child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        return String(child);
+      }
+      if (isValidElement<{ children?: ReactNode }>(child)) {
+        return getHeadingText(child.props.children);
+      }
+      return "";
+    })
     .join("");
 }
 
-function getHeadingId(children: ReactNode): string {
-  return getPublicReviewHeadingId(getHeadingText(children));
-}
+function createMarkdownComponents(): Components {
+  const headingCounts = new Map<string, number>();
 
-const MARKDOWN_COMPONENTS: Components = {
+  return {
   h1: () => null,
   h2: ({ children }) => (
     <h2
-      id={getHeadingId(children)}
+      id={getUniquePublicReviewHeadingId(
+        getHeadingText(children),
+        headingCounts
+      )}
       className="tw-mb-0 tw-mt-12 tw-scroll-mt-24 tw-border-b tw-border-solid tw-border-iron-700 tw-pb-3 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white">
       {children}
     </h2>
@@ -81,7 +91,10 @@ const MARKDOWN_COMPONENTS: Components = {
     </code>
   ),
   pre: ({ children }) => (
-    <pre className="tw-my-6 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-100">
+    <pre
+      aria-label={t(DEFAULT_LOCALE, "publicReview.markdown.codeRegion")}
+      className="tw-my-6 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+      tabIndex={0}>
       {children}
     </pre>
   ),
@@ -109,7 +122,8 @@ const MARKDOWN_COMPONENTS: Components = {
   hr: () => (
     <hr className="tw-my-10 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700" />
   ),
-};
+  };
+}
 
 export function PublicReviewMarkdown({
   markdown,
@@ -121,7 +135,7 @@ export function PublicReviewMarkdown({
       <Markdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSanitize]}
-        components={MARKDOWN_COMPONENTS}>
+        components={createMarkdownComponents()}>
         {markdown}
       </Markdown>
     </div>

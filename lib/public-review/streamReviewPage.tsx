@@ -27,9 +27,7 @@ import {
 } from "@/lib/public-review/streamReviewDefinition";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
 
-export { resolveStreamReviewRoute };
-
-export function getStreamReviewMetadata({
+function getStreamReviewMetadata({
   baseEndpoint,
   params,
 }: {
@@ -61,7 +59,7 @@ export function getStreamReviewMetadata({
   };
 }
 
-export async function renderStreamReviewRoute(
+async function renderStreamReviewRoute(
   route: StreamReviewRouteModel
 ) {
   const contentVersion =

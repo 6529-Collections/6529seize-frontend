@@ -1,9 +1,16 @@
 export const PUBLIC_REVIEW_MESSAGES = {
+  "navigation.nfts.theMemes": "The Memes",
+  "navigation.nfts.gradient": "6529 Gradient",
+  "navigation.nfts.nextGen": "NextGen",
+  "navigation.nfts.memeLab": "Meme Lab",
+  "navigation.nfts.rememes": "ReMemes",
   "navigation.nfts.streamReview": "6529 Stream — Review",
+  "navigation.nfts.activity": "NFT Activity",
+  "navigation.nfts.memesCalendar": "Memes Calendar",
   "publicReview.metadata.title": "{page} | 6529 Stream Contract Review",
   "publicReview.metadata.description":
     "Review the proposed 6529 Stream contract before finalization and deployment.",
-  "publicReview.eyebrow": "6529 Stream contract",
+  "publicReview.eyebrow": "{contract} contract",
   "publicReview.status.heading": "Review status",
   "publicReview.status.lifecycle.draft": "Draft",
   "publicReview.status.lifecycle.scheduled": "Scheduled",
@@ -22,7 +29,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.status.version": "Review version {version}",
   "publicReview.status.source": "Source {commit}",
   "publicReview.status.sourceAriaLabel":
-    "Open the exact 6529 Stream source commit {commit}",
+    "Open the exact {contract} source commit {commit}",
   "publicReview.status.explanations.draft":
     "This review is being prepared and its public routes are not available.",
   "publicReview.status.explanations.scheduled":
@@ -142,6 +149,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.evidence.knownLimitation":
     "Known limitation: a recorded constraint, gap, or unresolved risk.",
   "publicReview.markdown.externalLink": "Opens in a new tab",
+  "publicReview.markdown.codeRegion": "Scrollable code example",
   "publicReview.markdown.tableRegion":
     "Scrollable table in the contract review",
   "publicReview.reference.eyebrow": "Generated technical reference",

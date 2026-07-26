@@ -423,6 +423,7 @@ export function assertSolidityReferenceIndex(
       !isRecord(entry) ||
       typeof entry["version"] !== "string" ||
       !identity.availableVersions.includes(entry["version"]) ||
+      entry["commit"] !== identity.sourceCommits[entry["version"]] ||
       typeof entry["bundlePath"] !== "string" ||
       !isSha256(entry["bundleSha256"]) ||
       typeof entry["tree"] !== "string" ||

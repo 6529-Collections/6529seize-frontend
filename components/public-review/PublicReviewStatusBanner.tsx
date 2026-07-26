@@ -131,7 +131,10 @@ export function PublicReviewStatusBanner({
             aria-label={t(
               DEFAULT_LOCALE,
               "publicReview.status.sourceAriaLabel",
-              { commit: resolvedSource.commit }
+              {
+                commit: resolvedSource.commit,
+                contract: review.contractName,
+              }
             )}
             className={`${STATUS_CHIP} tw-border-iron-600 tw-text-iron-100 tw-no-underline hover:tw-border-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}>
             {t(DEFAULT_LOCALE, "publicReview.status.source", {

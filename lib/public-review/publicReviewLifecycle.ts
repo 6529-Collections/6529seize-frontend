@@ -13,18 +13,18 @@ export const PUBLIC_REVIEW_LIFECYCLE_STATES = [
 export type PublicReviewLifecycleState =
   (typeof PUBLIC_REVIEW_LIFECYCLE_STATES)[number];
 
-export type PublicReviewSecurityFindingPolicy =
+type PublicReviewSecurityFindingPolicy =
   | "CLOSED"
   | "PUBLIC_REVIEW_WAVE"
   | "POST_DEPLOYMENT_POLICY";
 
-export interface PublicReviewLifecycleCapabilities {
+interface PublicReviewLifecycleCapabilities {
   readonly publicRoutesAvailable: boolean;
   readonly feedbackSubmissionsOpen: boolean;
   readonly securityFindingPolicy: PublicReviewSecurityFindingPolicy;
 }
 
-export const PUBLIC_REVIEW_LIFECYCLE_CAPABILITIES = {
+const PUBLIC_REVIEW_LIFECYCLE_CAPABILITIES = {
   DRAFT: {
     publicRoutesAvailable: false,
     feedbackSubmissionsOpen: false,
