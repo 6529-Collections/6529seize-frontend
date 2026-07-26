@@ -31,10 +31,9 @@ const ensModule = require("@/app/api/open-graph/ens");
 
 const { getAddress } = jest.requireActual("viem");
 
-const { detectEnsTarget, fetchEnsPreview, EnsPreviewError } = ensModule as {
+const { detectEnsTarget, fetchEnsPreview } = ensModule as {
   detectEnsTarget: (raw: string | null) => any;
   fetchEnsPreview: (target: { kind: string; input: string }) => Promise<any>;
-  EnsPreviewError: new (status: number, message: string) => Error;
 };
 
 describe("ENS utilities", () => {

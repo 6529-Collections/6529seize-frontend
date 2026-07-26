@@ -76,3 +76,7 @@
 - Removed those exports and the obsolete Compound transaction-target helper.
   Knip, changed-file lint, changed-file TypeScript, and 148 focused provider
   assertions pass for the follow-up.
+- Addressed all three first-pass inline findings: removed an unused ENS test
+  binding and routed hostname examples through a typed test helper so CodeQL
+  does not misclassify object-method calls as `String.match` regular
+  expressions. Both affected suites (7 assertions) and targeted lint pass.

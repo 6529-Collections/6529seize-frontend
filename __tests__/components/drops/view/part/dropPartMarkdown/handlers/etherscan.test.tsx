@@ -19,16 +19,17 @@ describe("createEtherscanHandler", () => {
 
   it("matches only approved HTTPS Etherscan URLs", () => {
     const handler = createEtherscanHandler();
+    const matches = (href: string) => handler.match(href);
 
     expect(
-      handler.match(
+      matches(
         "https://etherscan.io/address/0x0000000000000000000000000000000000000001"
       )
     ).toBe(true);
-    expect(handler.match("https://sepolia.etherscan.io/txs")).toBe(true);
-    expect(handler.match("https://foo.etherscan.io/txs")).toBe(false);
-    expect(handler.match("http://etherscan.io/txs")).toBe(false);
-    expect(handler.match("vitalik.eth")).toBe(false);
+    expect(matches("https://sepolia.etherscan.io/txs")).toBe(true);
+    expect(matches("https://foo.etherscan.io/txs")).toBe(false);
+    expect(matches("http://etherscan.io/txs")).toBe(false);
+    expect(matches("vitalik.eth")).toBe(false);
   });
 
   it("renders the Etherscan preview boundary", () => {
