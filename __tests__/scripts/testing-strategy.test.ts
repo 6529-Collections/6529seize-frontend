@@ -561,6 +561,145 @@ describe("testing strategy CI security checks", () => {
     });
   });
 
+  it("flags ordinary pull_request_target workflows", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "target.yml"),
+      [
+        "name: Unsafe target",
+        "on:",
+        "  pull_request_target:",
+        "permissions:",
+        "  contents: read",
+        "jobs:",
+        "  inspect:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - run: echo ok",
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/target.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toContain(
+      "pull_request_target"
+    );
+  });
+
+  it.each([
+    "on: { pull_request_target: {} }",
+    "on:\n  'pull_request_target':",
+    'on: "pull_request_target"',
+  ])("flags alternate pull_request_target syntax: %s", (trigger) => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "alternate-target.yml"),
+      [
+        "name: Alternate target",
+        trigger,
+        "permissions:",
+        "  contents: write",
+        "jobs:",
+        "  inspect:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        '      - run: echo "${{ secrets.STAGING_AUTH }}"',
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/alternate-target.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining([
+        "pull_request_target",
+        "pull_request-secrets",
+        "pull_request-write-permission",
+      ])
+    );
+  });
+
+  it("accepts only the exact base-owned public-review trust workflow", () => {
+    const workflowPath = path.join(
+      ".github",
+      "workflows",
+      "public-review-snapshot-trust.yml"
+    );
+    const source = fs
+      .readFileSync(path.join(process.cwd(), workflowPath), "utf8")
+      .replaceAll("\r\n", "\n");
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(path.join(tempDir, workflowPath), source);
+
+    const result = validateWorkflowSecurityFiles(
+      [workflowPath.replaceAll("\\", "/")],
+      tempDir
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.findings).toEqual([]);
+  });
+
+  it("rejects any privilege or candidate-execution drift in the trusted workflow", () => {
+    const workflowPath = path.join(
+      ".github",
+      "workflows",
+      "public-review-snapshot-trust.yml"
+    );
+    const source = fs
+      .readFileSync(path.join(process.cwd(), workflowPath), "utf8")
+      .replaceAll("\r\n", "\n");
+    const mutations = [
+      source.replace(
+        "permissions:\n  contents: read",
+        "permissions:\n  contents: write"
+      ),
+      source.replace(
+        "ref: ${{ github.event.pull_request.base.sha }}",
+        "ref: ${{ github.event.pull_request.head.sha }}"
+      ),
+      source.replace(
+        "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5",
+        "actions/checkout@v4"
+      ),
+      source.replace(
+        "      - name: Verify candidate snapshot from Git objects",
+        [
+          '      - run: echo "${{ secrets.STAGING_AUTH }}"',
+          "      - name: Verify candidate snapshot from Git objects",
+        ].join("\n")
+      ),
+    ];
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+
+    for (const mutation of mutations) {
+      fs.writeFileSync(path.join(tempDir, workflowPath), mutation);
+      const result = validateWorkflowSecurityFiles(
+        [workflowPath.replaceAll("\\", "/")],
+        tempDir
+      );
+      expect(result.ok).toBe(false);
+      expect(result.findings.map((finding) => finding.pattern)).toContain(
+        "pull_request_target"
+      );
+    }
+  });
+
   it("flags pull_request workflows that expose secrets or write permissions", () => {
     fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
       recursive: true,
