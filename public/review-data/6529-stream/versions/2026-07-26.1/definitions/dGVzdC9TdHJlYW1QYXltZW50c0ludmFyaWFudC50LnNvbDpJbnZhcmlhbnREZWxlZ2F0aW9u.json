@@ -1,0 +1,183 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPaymentsInvariant.t.sol:InvariantDelegation#function:0xd986ff6d",
+          "declaringDefinitionId": "test/StreamPaymentsInvariant.t.sol:InvariantDelegation",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveGlobalStatusOfDelegation",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd986ff6d",
+          "signature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "displaySignature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPaymentsInvariant.t.sol:InvariantDelegation#function:0xd986ff6d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpJbnZhcmlhbnREZWxlZ2F0aW9uI2Z1bmN0aW9uOjB4ZDk4NmZmNmQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveGlobalStatusOfDelegation",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 164,
+            "byteStart": 31013,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamPaymentsInvariant.t.sol#L741-L747",
+            "lineEnd": 747,
+            "lineStart": 741,
+            "snippetSha256": "sha256:6bdbe0db12b350b1c0ff6dec586989dd9e2485174518018df05d6213abb0e235",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": "0xd986ff6d",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPaymentsInvariant.t.sol:InvariantDelegation",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpJbnZhcmlhbnREZWxlZ2F0aW9u",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPaymentsInvariant.t.sol:InvariantDelegation"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "InvariantDelegation",
+    "natspec": "",
+    "range": {
+      "byteLength": 201,
+      "byteStart": 30978,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamPaymentsInvariant.t.sol#L740-L748",
+      "lineEnd": 748,
+      "lineStart": 740,
+      "snippetSha256": "sha256:0b911f56692a391957e5a18dbb7da09740788906a3b5b9dc852e8059436ffae3",
+      "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPaymentsInvariant.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:InvariantDelegation",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPaymentsInvariant.t.sol:InvariantDelegation#function:0xd986ff6d",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:InvariantDelegation",
+      "severity": "advisory"
+    }
+  ]
+}

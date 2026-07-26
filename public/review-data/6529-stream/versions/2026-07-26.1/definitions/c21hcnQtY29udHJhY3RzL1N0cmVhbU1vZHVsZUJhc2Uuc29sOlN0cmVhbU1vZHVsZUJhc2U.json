@@ -1,0 +1,725 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x331c288c",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleCodeHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x331c288c",
+          "signature": "streamModuleCodeHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x665e0a0b",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleDeploymentManifestHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x665e0a0b",
+          "signature": "streamModuleDeploymentManifestHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x1e414a33",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleInterfaceId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x1e414a33",
+          "signature": "streamModuleInterfaceId()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x0294a858",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleManifest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "hash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x0294a858",
+          "signature": "streamModuleManifest()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0xdbff3398",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleSchemaHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xdbff3398",
+          "signature": "streamModuleSchemaHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x28746186",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleSupersedes",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x28746186",
+          "signature": "streamModuleSupersedes()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x3cc00767",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleType",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x3cc00767",
+          "signature": "streamModuleType()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x99d8b2df",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x99d8b2df",
+          "signature": "streamModuleVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": true,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(bytes32,address,bytes32,string,bytes32)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:constructor(bytes32,address,bytes32,string,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaHash_",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "supersedes_",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "deploymentManifestHash_",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "manifestURI_",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 4,
+              "name": "manifestHash_",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246Y29uc3RydWN0b3IoYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIsc3RyaW5nLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "@param schemaHash_ Schema commitment for the module's data shapes.\n @param supersedes_ Immediate predecessor in the same family, or zero.\n @param deploymentManifestHash_ Deployment manifest commitment.\n @param manifestURI_ Module manifest display URI.\n @param manifestHash_ Module manifest content commitment.",
+          "outputs": [],
+          "range": {
+            "byteLength": 396,
+            "byteStart": 1252,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L26-L38",
+            "lineEnd": 38,
+            "lineStart": 26,
+            "snippetSha256": "sha256:b7c24a31fa0e8c7e26f3a58b8caca3677b05871bf8209ba9a6fc70ceacfd4296",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": "streamModuleType()",
+          "displaySignature": "streamModuleType()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x3cc00767",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHgzY2MwMDc2Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleType",
+          "natspec": "@inheritdoc IStreamModule",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 75,
+            "byteStart": 1688,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L41",
+            "lineEnd": 41,
+            "lineStart": 41,
+            "snippetSha256": "sha256:786812493884267609618084a40d5717a2e75cbf13a8176a4d1faf7cf3f742b1",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0x3cc00767",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleVersion()",
+          "displaySignature": "streamModuleVersion()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x99d8b2df",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHg5OWQ4YjJkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleVersion",
+          "natspec": "@inheritdoc IStreamModule",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 78,
+            "byteStart": 1803,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L44",
+            "lineEnd": 44,
+            "lineStart": 44,
+            "snippetSha256": "sha256:91169b6e5c4ea397f4ea6566579578522dab2e5f2d66fc6dca9d75f0785d278d",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0x99d8b2df",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleInterfaceId()",
+          "displaySignature": "streamModuleInterfaceId()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x1e414a33",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHgxZTQxNGEzMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleInterfaceId",
+          "natspec": "@inheritdoc IStreamModule",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 81,
+            "byteStart": 1921,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L47",
+            "lineEnd": 47,
+            "lineStart": 47,
+            "snippetSha256": "sha256:af78b4c7ee4ec5fc3cd15c97c83455c69433fd5cf31f0bd22b2308382e9f095d",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0x1e414a33",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleSchemaHash()",
+          "displaySignature": "streamModuleSchemaHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0xdbff3398",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHhkYmZmMzM5OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleSchemaHash",
+          "natspec": "@inheritdoc IStreamModule",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 2042,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L50-L52",
+            "lineEnd": 52,
+            "lineStart": 50,
+            "snippetSha256": "sha256:72b2c6a681ec6d0de8674bf8a3eefcd91c843c811be77fb0dfaa5786ecbfbd66",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0xdbff3398",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleSupersedes()",
+          "displaySignature": "streamModuleSupersedes()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x28746186",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHgyODc0NjE4Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleSupersedes",
+          "natspec": "@inheritdoc IStreamModule",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 2198,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L55-L57",
+            "lineEnd": 57,
+            "lineStart": 55,
+            "snippetSha256": "sha256:8ef073b746e575ce4f7003235c5b1d9a316d835aceee87764c50f8d7d97a302d",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0x28746186",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleCodeHash()",
+          "displaySignature": "streamModuleCodeHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x331c288c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHgzMzFjMjg4Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleCodeHash",
+          "natspec": "@inheritdoc IStreamModule",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 125,
+            "byteStart": 2354,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L60-L62",
+            "lineEnd": 62,
+            "lineStart": 60,
+            "snippetSha256": "sha256:20bf145e8d77e77e24f1bdfd1e80706d7a99ad05ca38591be5e4ec456a39db23",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0x331c288c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleDeploymentManifestHash()",
+          "displaySignature": "streamModuleDeploymentManifestHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x665e0a0b",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHg2NjVlMGEwYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleDeploymentManifestHash",
+          "natspec": "@inheritdoc IStreamModule",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 140,
+            "byteStart": 2519,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L65-L67",
+            "lineEnd": 67,
+            "lineStart": 65,
+            "snippetSha256": "sha256:6194a8ed0235bf3a3596f21e64f35a143ff029b2ec8c3ec534cf1b61274f70c1",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0x665e0a0b",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleManifest()",
+          "displaySignature": "streamModuleManifest()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x0294a858",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHgwMjk0YTg1OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleManifest",
+          "natspec": "@inheritdoc IStreamModule",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "uri",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "hash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 200,
+            "byteStart": 2699,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L70-L78",
+            "lineEnd": 78,
+            "lineStart": 70,
+            "snippetSha256": "sha256:f6cfcbae2980fdec4d5ef3a0b611906f963fa762e9f59268e64fb00c9311fec8",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0x0294a858",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2UjZnVuY3Rpb246MHgwMWZmYzlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 213,
+            "byteStart": 2905,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L80-L83",
+            "lineEnd": 83,
+            "lineStart": 80,
+            "snippetSha256": "sha256:8f231ff164135575e9ad3c191adb19954accccdec221bfa3b53d6bb86736716c",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_schemaHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 686,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:ccb45500f24be22da0baff165ee7e610944e8675b4a469ad648ad5957a3d5dd8",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_supersedes",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:94508d6fd1e42693bb1223dfba312f44d273933ae1b13eb893e6735a21935a49",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_deploymentManifestHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 772,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:9666773aa96d3761f575d308c8965a5c82c88706436a85df2f4bf1be239865f8",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_manifestHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 39,
+            "byteStart": 827,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:24aeac4bc9f865f3b0212accebd53d9353c22ed70ca51a94525d624ccdc3b2c6",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_manifestURI",
+          "natspec": "",
+          "range": {
+            "byteLength": 27,
+            "byteStart": 872,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:f794d1e41724515977a0c9e064e60b8324413d1a4921f565cb390b84ab7222c2",
+            "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+          },
+          "selector": null,
+          "type": "string",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      },
+      {
+        "definitionId": "smart-contracts/IStreamModule.sol:IStreamModule",
+        "name": "IStreamModule"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbU1vZHVsZUJhc2Uuc29sOlN0cmVhbU1vZHVsZUJhc2U",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+      "smart-contracts/IStreamModule.sol:IStreamModule",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamModuleBase",
+    "natspec": "@notice Abstract adoption base for the canonical [LTA-MODULE-ID] module\n         identity surface (`docs/stream-long-term-architecture.md`).\n @dev Satellites adopt this base and override the three pure identity\n     functions (`streamModuleType`, `streamModuleVersion`,\n     `streamModuleInterfaceId`) with their pinned constants; the remaining\n     five reads are served from construction-time facts. `supportsInterface`\n     advertises `IStreamModule` alongside inherited interfaces.",
+    "range": {
+      "byteLength": 2500,
+      "byteStart": 620,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamModuleBase.sol#L14-L84",
+      "lineEnd": 84,
+      "lineStart": 14,
+      "snippetSha256": "sha256:633f849139b9be4429488f328183f408538668fa8e777ca1aee5b6f0b82736a9",
+      "sourceSha256": "sha256:c4e5bb6bb935ba203f3c249945f2ea022f99311c2bd864b6f40c0d688efec7ea"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamModuleBase.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x01ffc9a7",
+      "definitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+      "severity": "advisory"
+    }
+  ]
+}

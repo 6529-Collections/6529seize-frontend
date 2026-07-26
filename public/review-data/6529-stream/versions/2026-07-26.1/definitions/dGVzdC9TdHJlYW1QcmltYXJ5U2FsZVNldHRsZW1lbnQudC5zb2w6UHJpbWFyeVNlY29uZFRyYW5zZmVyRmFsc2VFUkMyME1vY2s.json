@@ -1,0 +1,315 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xdd62ed3e",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "allowance",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xdd62ed3e",
+          "signature": "allowance(address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x095ea7b3",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x095ea7b3",
+          "signature": "approve(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x70a08231",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x40c10f19",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "mint",
+          "outputs": [],
+          "selector": "0x40c10f19",
+          "signature": "mint(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySecondTransferFalseERC20Mock#function:0xa9059cbb",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySecondTransferFalseERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa9059cbb",
+          "signature": "transfer(address,uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x23b872dd",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x23b872dd",
+          "signature": "transferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "transfer(address,uint256)",
+          "displaySignature": "transfer(address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySecondTransferFalseERC20Mock#function:0xa9059cbb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNlY29uZFRyYW5zZmVyRmFsc2VFUkMyME1vY2sjZnVuY3Rpb246MHhhOTA1OWNiYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transfer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 103,
+            "byteStart": 73485,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamPrimarySaleSettlement.t.sol#L1598-L1600",
+            "lineEnd": 1600,
+            "lineStart": 1598,
+            "snippetSha256": "sha256:68db8ad407ba970b379e7d9d628a336e81ad7100ab3a6d5a26c8d814844c1b4c",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xa9059cbb",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySecondTransferFalseERC20Mock",
+    "inheritance": [
+      {
+        "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+        "name": "PrimarySettlementERC20Mock"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNlY29uZFRyYW5zZmVyRmFsc2VFUkMyME1vY2s",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPrimarySaleSettlement.t.sol:PrimarySecondTransferFalseERC20Mock",
+      "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "PrimarySecondTransferFalseERC20Mock",
+    "natspec": "",
+    "range": {
+      "byteLength": 186,
+      "byteStart": 73404,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamPrimarySaleSettlement.t.sol#L1597-L1601",
+      "lineEnd": 1601,
+      "lineStart": 1597,
+      "snippetSha256": "sha256:74ed9dfcada619600862e8f8eaa280591e12a5ae04b3c11fc8b56650c9b22cf1",
+      "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPrimarySaleSettlement.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySecondTransferFalseERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySecondTransferFalseERC20Mock#function:0xa9059cbb",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySecondTransferFalseERC20Mock",
+      "severity": "advisory"
+    }
+  ]
+}

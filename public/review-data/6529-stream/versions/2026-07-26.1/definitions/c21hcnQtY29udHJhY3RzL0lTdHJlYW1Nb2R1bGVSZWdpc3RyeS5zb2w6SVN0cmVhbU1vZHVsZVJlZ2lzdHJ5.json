@@ -1,0 +1,786 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#event:StreamModuleRegistered(uint16,address,bytes32,bytes4,bytes32,uint32,bytes32,bytes32,bytes32,string,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "moduleVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "moduleGasLimit",
+              "type": "uint32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "internalType": "string",
+              "name": "moduleManifestURI",
+              "type": "string"
+            },
+            {
+              "index": 10,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "recordChainHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamModuleRegistered",
+          "signature": "StreamModuleRegistered(uint16,address,bytes32,bytes4,bytes32,uint32,bytes32,bytes32,bytes32,string,bytes32)",
+          "topic0": "0x67c428b6b4301b178ee6e1eb0aa10bf141d91b060de2ba30a8a48d5a30c148dc"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#event:StreamModuleStatusChanged(uint16,address,bytes32,uint8,bytes32,string)",
+          "declaringDefinitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "enum ModuleRegistryStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "string",
+              "name": "reasonURI",
+              "type": "string"
+            }
+          ],
+          "name": "StreamModuleStatusChanged",
+          "signature": "StreamModuleStatusChanged(uint16,address,bytes32,uint8,bytes32,string)",
+          "topic0": "0xb1490d6692c28578c63246ec2b183af70c175f77fd6adafc657d558417aa2056"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x5ffaf3d7",
+          "declaringDefinitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "expectedModuleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes4",
+              "name": "expectedInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "isModuleEligible",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x5ffaf3d7",
+          "signature": "isModuleEligible(address,bytes32,bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0xd216d296",
+          "declaringDefinitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "moduleAt",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "selector": "0xd216d296",
+          "signature": "moduleAt(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x334f7ac5",
+          "declaringDefinitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "moduleCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x334f7ac5",
+          "signature": "moduleCount()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x2a6a8074",
+          "declaringDefinitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "moduleRecord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamModuleRecord",
+              "name": "",
+              "type": "(uint8,bytes32,bytes32,bytes4,uint32,bytes32,bytes32,bytes32,string,uint64,uint64,uint64)"
+            }
+          ],
+          "selector": "0x2a6a8074",
+          "signature": "moduleRecord(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x056c746f",
+          "declaringDefinitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "moduleRegistryManifest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x056c746f",
+          "signature": "moduleRegistryManifest()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x7e669031",
+          "declaringDefinitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "registrationChainHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "recordCount",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x7e669031",
+          "signature": "registrationChainHash()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 15374,
+          "canonicalSignature": "StreamModuleRegistered(uint16,address,bytes32,bytes4,bytes32,uint32,bytes32,bytes32,bytes32,string,bytes32)",
+          "displaySignature": "StreamModuleRegistered(uint16,address,bytes32,bytes4,bytes32,uint32,bytes32,bytes32,bytes32,string,bytes32)",
+          "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#event:StreamModuleRegistered(uint16,address,bytes32,bytes4,bytes32,uint32,bytes32,bytes32,bytes32,string,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "moduleVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "moduleGasLimit",
+              "type": "uint32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "name": "moduleManifestURI",
+              "type": "string"
+            },
+            {
+              "index": 10,
+              "indexed": false,
+              "name": "recordChainHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5I2V2ZW50OlN0cmVhbU1vZHVsZVJlZ2lzdGVyZWQodWludDE2LGFkZHJlc3MsYnl0ZXMzMixieXRlczQsYnl0ZXMzMix1aW50MzIsYnl0ZXMzMixieXRlczMyLGJ5dGVzMzIsc3RyaW5nLGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "StreamModuleRegistered",
+          "natspec": "",
+          "range": {
+            "byteLength": 407,
+            "byteStart": 2101,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L57-L69",
+            "lineEnd": 69,
+            "lineStart": 57,
+            "snippetSha256": "sha256:8ef00efbd61ca8713bb0a9f92acbbd3f86ece0a4d3b83a556f74805495555a0a",
+            "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+          },
+          "topic0": "0x67c428b6b4301b178ee6e1eb0aa10bf141d91b060de2ba30a8a48d5a30c148dc"
+        },
+        {
+          "anonymous": false,
+          "astId": 15389,
+          "canonicalSignature": "StreamModuleStatusChanged(uint16,address,bytes32,uint8,bytes32,string)",
+          "displaySignature": "StreamModuleStatusChanged(uint16,address,bytes32,ModuleRegistryStatus,bytes32,string)",
+          "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#event:StreamModuleStatusChanged(uint16,address,bytes32,uint8,bytes32,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "status",
+              "type": "ModuleRegistryStatus"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "reasonURI",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5I2V2ZW50OlN0cmVhbU1vZHVsZVN0YXR1c0NoYW5nZWQodWludDE2LGFkZHJlc3MsYnl0ZXMzMix1aW50OCxieXRlczMyLHN0cmluZyk",
+          "kind": "event",
+          "name": "StreamModuleStatusChanged",
+          "natspec": "",
+          "range": {
+            "byteLength": 227,
+            "byteStart": 2514,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L71-L78",
+            "lineEnd": 78,
+            "lineStart": 71,
+            "snippetSha256": "sha256:d98733ce0a0b322ca516eaa9a11817b2eebab19df807d275dd9ebe66ff72b817",
+            "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+          },
+          "topic0": "0xb1490d6692c28578c63246ec2b183af70c175f77fd6adafc657d558417aa2056"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "moduleRecord(address)",
+          "displaySignature": "moduleRecord(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x2a6a8074",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MmE2YTgwNzQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "moduleRecord",
+          "natspec": "@notice Returns the stored record for `module` (zero record when unknown).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "StreamModuleRecord"
+            }
+          ],
+          "range": {
+            "byteLength": 88,
+            "byteStart": 2830,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L81",
+            "lineEnd": 81,
+            "lineStart": 81,
+            "snippetSha256": "sha256:97d9ba3a4a8e4189e429b9a96482fcf1cdfd6998a5089a99c04833eedc049f99",
+            "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+          },
+          "selector": "0x2a6a8074",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isModuleEligible(address,bytes32,bytes4)",
+          "displaySignature": "isModuleEligible(address,bytes32,bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x5ffaf3d7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "expectedModuleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "expectedInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NWZmYWYzZDc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isModuleEligible",
+          "natspec": "@notice Returns true when `module` is `ACTIVE`, matches the expected\n         module type and interface ID, and its live codehash still\n         matches the registered runtime code hash.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 157,
+            "byteStart": 3133,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L86-L90",
+            "lineEnd": 90,
+            "lineStart": 86,
+            "snippetSha256": "sha256:2b176564d684f015a0d8915842d0f61848ab785996ff937d29ba954ef307d644",
+            "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+          },
+          "selector": "0x5ffaf3d7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "moduleRegistryManifest()",
+          "displaySignature": "moduleRegistryManifest()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x056c746f",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MDU2Yzc0NmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "moduleRegistryManifest",
+          "natspec": "@notice Returns the registry's own manifest commitment.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "manifestURI",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 147,
+            "byteStart": 3360,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L93-L96",
+            "lineEnd": 96,
+            "lineStart": 93,
+            "snippetSha256": "sha256:d0f5e26d14aef1cc897f8c5e8691337fa8ef2753efc78a1f03e39a96ff9bb278",
+            "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+          },
+          "selector": "0x056c746f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "moduleCount()",
+          "displaySignature": "moduleCount()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x334f7ac5",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MzM0ZjdhYzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "moduleCount",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 55,
+            "byteStart": 3603,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L100",
+            "lineEnd": 100,
+            "lineStart": 100,
+            "snippetSha256": "sha256:f859d6df727a6b7fd0b77d0a1484944db63f9cef28b62be55c86cf11daeaa506",
+            "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+          },
+          "selector": "0x334f7ac5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "moduleAt(uint256)",
+          "displaySignature": "moduleAt(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0xd216d296",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZDIxNmQyOTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "moduleAt",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 72,
+            "byteStart": 3664,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L102",
+            "lineEnd": 102,
+            "lineStart": 102,
+            "snippetSha256": "sha256:4af506218da7491413ba6c756f55154ecf84f21e8ecdc8b22e0933ddedd20013",
+            "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+          },
+          "selector": "0xd216d296",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registrationChainHash()",
+          "displaySignature": "registrationChainHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x7e669031",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4N2U2NjkwMzE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registrationChainHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "recordCount",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 95,
+            "byteStart": 3833,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L106",
+            "lineEnd": 106,
+            "lineStart": 106,
+            "snippetSha256": "sha256:4c9ebe92d8b2992dbcef0a2110b3579023b1444f85e27fba4880e52fd25da2ca",
+            "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+          },
+          "selector": "0x7e669031",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Nb2R1bGVSZWdpc3RyeS5zb2w6SVN0cmVhbU1vZHVsZVJlZ2lzdHJ5",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamModuleRegistry",
+    "natspec": "@notice The single canonical module-registry surface of protocol v1\n         ([LTA-REGISTRY] requirement 1). Draft mint-layer names\n         (`IStreamMintModuleRegistry`, `MintModuleInfo`, `ModuleStatus`,\n         `isModuleActive`) are superseded aliases.",
+    "range": {
+      "byteLength": 1867,
+      "byteStart": 2063,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamModuleRegistry.sol#L56-L107",
+      "lineEnd": 107,
+      "lineStart": 56,
+      "snippetSha256": "sha256:d9fc025155a02c492e24aee5f662a6d2beed01b9e217b74986d7acbe64de48c4",
+      "sourceSha256": "sha256:1b5a2c48c8beff2a9ee031a3ab9407bd92ebb6b7826928b534844731d1b9fca7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamModuleRegistry.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x334f7ac5",
+      "definitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0x7e669031",
+      "definitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry#function:0xd216d296",
+      "definitionId": "smart-contracts/IStreamModuleRegistry.sol:IStreamModuleRegistry",
+      "severity": "advisory"
+    }
+  ]
+}

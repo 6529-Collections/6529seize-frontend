@@ -1,0 +1,1434 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x3329492a",
+          "declaringDefinitionId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAdminBridgeLogsReconstructPhaseAndReferenceUpdates",
+          "outputs": [],
+          "selector": "0x3329492a",
+          "signature": "testAdminBridgeLogsReconstructPhaseAndReferenceUpdates()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x3d6eabad",
+          "declaringDefinitionId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionLogsReconstructRegistrationBidExtensionAndSettlement",
+          "outputs": [],
+          "selector": "0x3d6eabad",
+          "signature": "testAuctionLogsReconstructRegistrationBidExtensionAndSettlement()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x7fb143b3",
+          "declaringDefinitionId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFixedPriceDropLogsReconstructMintAndCredits",
+          "outputs": [],
+          "selector": "0x7fb143b3",
+          "signature": "testFixedPriceDropLogsReconstructMintAndCredits()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testFixedPriceDropLogsReconstructMintAndCredits()",
+          "displaySignature": "testFixedPriceDropLogsReconstructMintAndCredits()",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x7fb143b3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246MHg3ZmIxNDNiMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFixedPriceDropLogsReconstructMintAndCredits",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3583,
+            "byteStart": 5582,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L141-L203",
+            "lineEnd": 203,
+            "lineStart": 141,
+            "snippetSha256": "sha256:d64e49a562f07afd653e71004536c2d5c356c33488cc6cd94648ea3a9378b148",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": "0x7fb143b3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionLogsReconstructRegistrationBidExtensionAndSettlement()",
+          "displaySignature": "testAuctionLogsReconstructRegistrationBidExtensionAndSettlement()",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x3d6eabad",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246MHgzZDZlYWJhZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionLogsReconstructRegistrationBidExtensionAndSettlement",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 4571,
+            "byteStart": 9171,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L205-L288",
+            "lineEnd": 288,
+            "lineStart": 205,
+            "snippetSha256": "sha256:8b5f85884d03c25e7ae37b38d961651b394147e816d1041174f8eedd06bc5ce9",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": "0x3d6eabad",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAdminBridgeLogsReconstructPhaseAndReferenceUpdates()",
+          "displaySignature": "testAdminBridgeLogsReconstructPhaseAndReferenceUpdates()",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x3329492a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246MHgzMzI5NDkyYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAdminBridgeLogsReconstructPhaseAndReferenceUpdates",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2107,
+            "byteStart": 13748,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L290-L329",
+            "lineEnd": 329,
+            "lineStart": 290,
+            "snippetSha256": "sha256:83107dc7a041be4e02f6c522bf061b9bebaa34014e0e765abb3cc8692d4aeba4",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": "0x3329492a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_reconstructFixedPrice(Vm.Log[],DeployedStream)",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:_reconstructFixedPrice(Vm.Log[],DeployedStream)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246X3JlY29uc3RydWN0Rml4ZWRQcmljZShWbS5Mb2dbXSxEZXBsb3llZFN0cmVhbSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_reconstructFixedPrice",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "model",
+              "storageLocation": "memory",
+              "type": "FixedPriceReadModel"
+            }
+          ],
+          "range": {
+            "byteLength": 3735,
+            "byteStart": 15861,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L331-L404",
+            "lineEnd": 404,
+            "lineStart": 331,
+            "snippetSha256": "sha256:34444394e55b907c4e78a3448d4da25828b6e271d9ee5d6ee7cc348187b82d4e",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_reconstructAuction(Vm.Log[],DeployedStream,address)",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:_reconstructAuction(Vm.Log[],DeployedStream,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 2,
+              "name": "auctions",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246X3JlY29uc3RydWN0QXVjdGlvbihWbS5Mb2dbXSxEZXBsb3llZFN0cmVhbSxhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_reconstructAuction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "model",
+              "storageLocation": "memory",
+              "type": "AuctionReadModel"
+            }
+          ],
+          "range": {
+            "byteLength": 1194,
+            "byteStart": 19602,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L406-L433",
+            "lineEnd": 433,
+            "lineStart": 406,
+            "snippetSha256": "sha256:f78606f51e8afb299042506bc764f529eb521e96eada11ec4fcff0849d110db8",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_applyAuctionLog(AuctionReadModel,Vm.Log)",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:_applyAuctionLog(AuctionReadModel,Vm.Log)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "model",
+              "storageLocation": "memory",
+              "type": "AuctionReadModel"
+            },
+            {
+              "index": 1,
+              "name": "log",
+              "storageLocation": "memory",
+              "type": "Vm.Log"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246X2FwcGx5QXVjdGlvbkxvZyhBdWN0aW9uUmVhZE1vZGVsLFZtLkxvZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_applyAuctionLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2445,
+            "byteStart": 20802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L435-L477",
+            "lineEnd": 477,
+            "lineStart": 435,
+            "snippetSha256": "sha256:6355407b0205096db07ee1c07efeed20e6785b7fcbcdfe0fdc611cfd75eb61ef",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_reconstructAdminBridge(Vm.Log[],address)",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:_reconstructAdminBridge(Vm.Log[],address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "minter",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246X3JlY29uc3RydWN0QWRtaW5CcmlkZ2UoVm0uTG9nW10sYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_reconstructAdminBridge",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "model",
+              "storageLocation": "memory",
+              "type": "AdminReadModel"
+            }
+          ],
+          "range": {
+            "byteLength": 1142,
+            "byteStart": 23253,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L479-L503",
+            "lineEnd": 503,
+            "lineStart": 479,
+            "snippetSha256": "sha256:25d06249b22c9e122bde0cbf613b5a0efa6a0edf2b88020b6e8ac65c918e0fca",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_matches(Vm.Log,bytes32,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:_matches(Vm.Log,bytes32,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "log",
+              "storageLocation": "memory",
+              "type": "Vm.Log"
+            },
+            {
+              "index": 1,
+              "name": "topic",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "topicCount",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "dataLength",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246X21hdGNoZXMoVm0uTG9nLGJ5dGVzMzIsdWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_matches",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 290,
+            "byteStart": 24401,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L505-L513",
+            "lineEnd": 513,
+            "lineStart": 505,
+            "snippetSha256": "sha256:bdb5a360e413f6af2eee01a445412b8ef325d45f6f73159ec07de8cbafcab749",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_topicAddress(bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:_topicAddress(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "topic",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3QjZnVuY3Rpb246X3RvcGljQWRkcmVzcyhieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_topicAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 125,
+            "byteStart": 24697,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L515-L517",
+            "lineEnd": 517,
+            "lineStart": 515,
+            "snippetSha256": "sha256:8ee3300b1cf3909e1927193b0a597765e03e7cad27f7426125be0c7aa0f88be0",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "DROP_AUTHORIZATION_CONSUMED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 192,
+            "byteStart": 579,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L18-L20",
+            "lineEnd": 20,
+            "lineStart": 18,
+            "snippetSha256": "sha256:433942927c5053f8d2bb009d55e13e9a5195cfcfaac0d3719c9c160b0ab26317",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FIXED_PRICE_CREDIT_CREATED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 135,
+            "byteStart": 777,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L21-L22",
+            "lineEnd": 22,
+            "lineStart": 21,
+            "snippetSha256": "sha256:1071d773b33e8eb5b87fc5acf627fa5f7cd2ae5da613cedca88be12feaf4d6b9",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TRANSFER_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 88,
+            "byteStart": 918,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:6f9adb72a69408ba856038d4573e590eca9b692bf2788d4284bfb209b547e2dc",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_COLLECTION_REGISTERED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 139,
+            "byteStart": 1012,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L24-L25",
+            "lineEnd": 25,
+            "lineStart": 24,
+            "snippetSha256": "sha256:f9baa3edd6a06ca0d76abd0172b924186271f04f9bf2b1ee15ea264e4105c5dc",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINTER_TOKENS_MINTED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 134,
+            "byteStart": 1157,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L26-L27",
+            "lineEnd": 27,
+            "lineStart": 26,
+            "snippetSha256": "sha256:5e68f7909d73b9ba5542032a4f3e40bdc69f7270d167b49d653adef1403d83d3",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINTER_AUCTION_MINTED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 128,
+            "byteStart": 1297,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L28-L29",
+            "lineEnd": 29,
+            "lineStart": 28,
+            "snippetSha256": "sha256:7c908946ebfe0484f184c64cae59fb71d970ef3aed31330ac9b5bf958462cca2",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_PHASES_UPDATED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 152,
+            "byteStart": 1431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L30-L31",
+            "lineEnd": 31,
+            "lineStart": 30,
+            "snippetSha256": "sha256:8f07bd62f010bf1e9df1355c57a2adaf71f99d5f9b6e5d0a7984514193dd858c",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINTER_CONTRACT_REFERENCE_UPDATED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 149,
+            "byteStart": 1589,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L32-L33",
+            "lineEnd": 33,
+            "lineStart": 32,
+            "snippetSha256": "sha256:c4aec0288cf2fa3f2794f54302a978c57a51d7b747327221e1de888081420e44",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUCTION_REGISTERED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 147,
+            "byteStart": 1744,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L34-L35",
+            "lineEnd": 35,
+            "lineStart": 34,
+            "snippetSha256": "sha256:1c8fb9b2424995b7b1500dfd190d466315afe3a089acd2b642f542067015ebaf",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUCTION_CUSTODY_CONFIRMED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 120,
+            "byteStart": 1897,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L36-L37",
+            "lineEnd": 37,
+            "lineStart": 36,
+            "snippetSha256": "sha256:fcd5b935aed067811b1604a7f8771ca68f4be97ea48cef9a1fa1c5e100fc50e1",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUCTION_STATUS_CHANGED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 112,
+            "byteStart": 2023,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L38-L39",
+            "lineEnd": 39,
+            "lineStart": 38,
+            "snippetSha256": "sha256:9ef241bc070c69fcac9b766a40d500b2bfa5057ccab81e977be880bf39332a62",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUCTION_EXTENDED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 111,
+            "byteStart": 2141,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L40-L41",
+            "lineEnd": 41,
+            "lineStart": 40,
+            "snippetSha256": "sha256:e5fd8baf0897d1a5f7f9a758d6beebe6c4aff25c15663d848d51783ccab0dcb0",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PARTICIPATE_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 94,
+            "byteStart": 2258,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:41978872ab555687bb34edc8439d9d9c4dee4fa8e4b5730479ff4dfb2bcfe4c2",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OUTBID_CREDIT_CREATED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 120,
+            "byteStart": 2358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L43-L44",
+            "lineEnd": 44,
+            "lineStart": 43,
+            "snippetSha256": "sha256:e2484e94e45279b55c786b0b94ea4b5cdb1cf969fd7df117bddcb3d78f49c5c6",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUCTION_PROCEEDS_CREDIT_CREATED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 145,
+            "byteStart": 2484,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L45-L46",
+            "lineEnd": 46,
+            "lineStart": 45,
+            "snippetSha256": "sha256:74f81d9a9523147d4fd42c57e6c578164bba600f75f94d6d0a82989572347c28",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CLAIM_AUCTION_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 89,
+            "byteStart": 2635,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L47",
+            "lineEnd": 47,
+            "lineStart": 47,
+            "snippetSha256": "sha256:035d50d4f6af68c21d66e47fc99d668c1eb243155ae788fb44e85be6321a7728",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 2731,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FIRST_TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 2779,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:5e9842250b43db62b5740aa93331babcc5864e21094ba83ed99f30a2024f008c",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 2828,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L51",
+            "lineEnd": 51,
+            "lineStart": 51,
+            "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 2883,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 2945,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:4a463f7f7961cd4628f644b5bc4124f1f9b2fdb0915cc574ee7b784357faa377",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 3000,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:3e651fdfebdcfe0dd0fdc57a7c7e95dcc88555bb618ed67eaaae88bb2f03bb11",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYER",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 3058,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:2c8cfd02cfc3a513a42bbd0c7250232d92b1d663d0b2a74693bbcdff2e5470a0",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 3112,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:1ad75f92ec92862f2d23475bc2e041941914e4a6c7748b917254cf7d2284b872",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 3167,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:ff3f57dc4d7656ca70b035168e15ca128476eb81a284328bd7e5d1a96383c286",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FIXED_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 3229,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:421a2cb4993ccc5b399a7f94cc5b99932c42d119afa28165066afc3a829b06b0",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RESERVE_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 3281,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:5d220cdbd734b87afbb29e781ce1a0927c3f4a7259c1d16b10ddb926f6ededa1",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BID",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 3335,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:d6e7e28579e1cfed0eb06d7e93683d0533231202e1e1dc27df10fc976d030145",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "consumed",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "transferMinted",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "minterRange",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "name": "dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 7,
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 8,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "saleMode",
+              "type": "uint256"
+            },
+            {
+              "index": 10,
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 11,
+              "name": "deadline",
+              "type": "uint256"
+            },
+            {
+              "index": 12,
+              "name": "signerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 13,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 14,
+              "name": "transferRecipient",
+              "type": "address"
+            },
+            {
+              "index": 15,
+              "name": "identityRegistered",
+              "type": "bool"
+            },
+            {
+              "index": 16,
+              "name": "identityTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 17,
+              "name": "identityCollectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 18,
+              "name": "identitySerial",
+              "type": "uint256"
+            },
+            {
+              "index": 19,
+              "name": "identitySchemaVersion",
+              "type": "uint256"
+            },
+            {
+              "index": 20,
+              "name": "minterCollectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 21,
+              "name": "minterTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 22,
+              "name": "minterRecipient",
+              "type": "address"
+            },
+            {
+              "index": 23,
+              "name": "lastTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 24,
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "index": 25,
+              "name": "posterCredit",
+              "type": "uint256"
+            },
+            {
+              "index": 26,
+              "name": "protocolCredit",
+              "type": "uint256"
+            },
+            {
+              "index": 27,
+              "name": "curatorReserveCredit",
+              "type": "uint256"
+            },
+            {
+              "index": 28,
+              "name": "fixedPriceCreditEvents",
+              "type": "uint256"
+            }
+          ],
+          "name": "FixedPriceReadModel",
+          "natspec": "",
+          "range": {
+            "byteLength": 906,
+            "byteStart": 3387,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L62-L92",
+            "lineEnd": 92,
+            "lineStart": 62,
+            "snippetSha256": "sha256:114fe1479fe60df3fd80ef7f01a46310f573b0c4e1644a723154644d61e779f0",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "consumed",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "bridgeMinted",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "registered",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "name": "custodyConfirmed",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "name": "active",
+              "type": "bool"
+            },
+            {
+              "index": 5,
+              "name": "settledWithBid",
+              "type": "bool"
+            },
+            {
+              "index": 6,
+              "name": "claimed",
+              "type": "bool"
+            },
+            {
+              "index": 7,
+              "name": "dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 9,
+              "name": "bridgeCustody",
+              "type": "address"
+            },
+            {
+              "index": 10,
+              "name": "registeredCustody",
+              "type": "address"
+            },
+            {
+              "index": 11,
+              "name": "confirmedCustody",
+              "type": "address"
+            },
+            {
+              "index": 12,
+              "name": "bridgeTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 13,
+              "name": "registeredTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 14,
+              "name": "confirmedTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 15,
+              "name": "bridgeCollectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 16,
+              "name": "registeredCollectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 17,
+              "name": "reservePrice",
+              "type": "uint256"
+            },
+            {
+              "index": 18,
+              "name": "bridgeEndTime",
+              "type": "uint256"
+            },
+            {
+              "index": 19,
+              "name": "registeredEndTime",
+              "type": "uint256"
+            },
+            {
+              "index": 20,
+              "name": "extendedEndTime",
+              "type": "uint256"
+            },
+            {
+              "index": 21,
+              "name": "highestBidder",
+              "type": "address"
+            },
+            {
+              "index": 22,
+              "name": "highestBid",
+              "type": "uint256"
+            },
+            {
+              "index": 23,
+              "name": "outbidBidder",
+              "type": "address"
+            },
+            {
+              "index": 24,
+              "name": "outbidCredit",
+              "type": "uint256"
+            },
+            {
+              "index": 25,
+              "name": "claimAmount",
+              "type": "uint256"
+            },
+            {
+              "index": 26,
+              "name": "posterProceeds",
+              "type": "uint256"
+            },
+            {
+              "index": 27,
+              "name": "protocolProceeds",
+              "type": "uint256"
+            },
+            {
+              "index": 28,
+              "name": "curatorProceeds",
+              "type": "uint256"
+            }
+          ],
+          "name": "AuctionReadModel",
+          "natspec": "",
+          "range": {
+            "byteLength": 909,
+            "byteStart": 4299,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L94-L124",
+            "lineEnd": 124,
+            "lineStart": 94,
+            "snippetSha256": "sha256:e701bd1e2bb6b84523eb891a661aa826dd0947d68bc5563f92785720e4edc8ec",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "phaseUpdated",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "oldStart",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "oldEnd",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "newStart",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "newEnd",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "phaseAdmin",
+              "type": "address"
+            },
+            {
+              "index": 7,
+              "name": "referenceUpdates",
+              "type": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "option",
+              "type": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "oldContract",
+              "type": "address"
+            },
+            {
+              "index": 10,
+              "name": "newContract",
+              "type": "address"
+            },
+            {
+              "index": 11,
+              "name": "referenceAdmin",
+              "type": "address"
+            }
+          ],
+          "name": "AdminReadModel",
+          "natspec": "",
+          "range": {
+            "byteLength": 362,
+            "byteStart": 5214,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L126-L139",
+            "lineEnd": 139,
+            "lineStart": 126,
+            "snippetSha256": "sha256:08964b7e5058c26a7fc48874e1ecde7acecf57230b89812e000f9a507cce26ce",
+            "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eS50LnNvbDpTdHJlYW1FdmVudFJlY29uc3RydWN0YWJpbGl0eVRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamEventReconstructabilityTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 24465,
+      "byteStart": 359,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamEventReconstructability.t.sol#L12-L518",
+      "lineEnd": 518,
+      "lineStart": 12,
+      "snippetSha256": "sha256:760351476df932264306a833bb1c3a86f2d0ab292a5268e0524ff8a65ee5a158",
+      "sourceSha256": "sha256:2b92e63ce936ae813fa426e144118e84154fce143631b03b7abc5c4494a609f0"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamEventReconstructability.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x3329492a",
+      "definitionId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x3d6eabad",
+      "definitionId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest#function:0x7fb143b3",
+      "definitionId": "test/StreamEventReconstructability.t.sol:StreamEventReconstructabilityTest",
+      "severity": "advisory"
+    }
+  ]
+}

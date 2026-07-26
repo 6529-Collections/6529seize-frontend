@@ -1,0 +1,400 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0x93e53141",
+          "declaringDefinitionId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "allowedDelegations",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x93e53141",
+          "signature": "allowedDelegations(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0xd986ff6d",
+          "declaringDefinitionId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "delegator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "delegate",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveGlobalStatusOfDelegation",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd986ff6d",
+          "signature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0x407d79c2",
+          "declaringDefinitionId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "delegator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "delegate",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bool",
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "name": "setDelegation",
+          "outputs": [],
+          "selector": "0x407d79c2",
+          "signature": "setDelegation(address,address,bool)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "allowedDelegations(bytes32)",
+          "displaySignature": "allowedDelegations(bytes32)",
+          "functionKind": "getter",
+          "id": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0x93e53141",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6TW9ja0RlbGVnYXRpb25NYW5hZ2VtZW50I2Z1bmN0aW9uOjB4OTNlNTMxNDE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "allowedDelegations",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 50,
+            "byteStart": 20487,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamCuratorsPool.t.sol#L466",
+            "lineEnd": 466,
+            "lineStart": 466,
+            "snippetSha256": "sha256:18c2b95308d0f2b25d1d8364b80df39505785e7b1e2863a55b6a6afa25365408",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x93e53141",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setDelegation(address,address,bool)",
+          "displaySignature": "setDelegation(address,address,bool)",
+          "functionKind": "function",
+          "id": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0x407d79c2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "delegator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "delegate",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6TW9ja0RlbGVnYXRpb25NYW5hZ2VtZW50I2Z1bmN0aW9uOjB4NDA3ZDc5YzI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setDelegation",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 165,
+            "byteStart": 20544,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamCuratorsPool.t.sol#L468-L470",
+            "lineEnd": 470,
+            "lineStart": 468,
+            "snippetSha256": "sha256:1bc2b8e55a0be37a0c5eb46a6446397c79e28dfa020b6ccf3450ef4f252bbc57",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x407d79c2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "displaySignature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0xd986ff6d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "delegator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "delegate",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6TW9ja0RlbGVnYXRpb25NYW5hZ2VtZW50I2Z1bmN0aW9uOjB4ZDk4NmZmNmQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveGlobalStatusOfDelegation",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 233,
+            "byteStart": 20715,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamCuratorsPool.t.sol#L472-L478",
+            "lineEnd": 478,
+            "lineStart": 472,
+            "snippetSha256": "sha256:0d22a0f8f8c3f0adb92bb9d2c106781035653b1fcf7701ee383e45819f3f304f",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0xd986ff6d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_delegationKey(address,address)",
+          "functionKind": "function",
+          "id": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:_delegationKey(address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "delegator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "delegate",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6TW9ja0RlbGVnYXRpb25NYW5hZ2VtZW50I2Z1bmN0aW9uOl9kZWxlZ2F0aW9uS2V5KGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_delegationKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 158,
+            "byteStart": 20954,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamCuratorsPool.t.sol#L480-L482",
+            "lineEnd": 482,
+            "lineStart": 480,
+            "snippetSha256": "sha256:6fe514bb5616b6a67d05f61f4d4368859d5a9e7c7b2166d6dd8db751c82ac13c",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0x93e53141",
+          "immutable": false,
+          "name": "allowedDelegations",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 20487,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamCuratorsPool.t.sol#L466",
+            "lineEnd": 466,
+            "lineStart": 466,
+            "snippetSha256": "sha256:18c2b95308d0f2b25d1d8364b80df39505785e7b1e2863a55b6a6afa25365408",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x93e53141",
+          "type": "mapping(bytes32 => bool)",
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCuratorsPool.t.sol:MockDelegationManagement",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6TW9ja0RlbGVnYXRpb25NYW5hZ2VtZW50",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCuratorsPool.t.sol:MockDelegationManagement"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockDelegationManagement",
+    "natspec": "",
+    "range": {
+      "byteLength": 667,
+      "byteStart": 20447,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamCuratorsPool.t.sol#L465-L483",
+      "lineEnd": 483,
+      "lineStart": 465,
+      "snippetSha256": "sha256:cad6c5da49a7b7cdc43a507b24652a4032ec95cd19ee14167a28b84fb07cc05d",
+      "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCuratorsPool.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0x407d79c2",
+      "definitionId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0x93e53141",
+      "definitionId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement#function:0xd986ff6d",
+      "definitionId": "test/StreamCuratorsPool.t.sol:MockDelegationManagement",
+      "severity": "advisory"
+    }
+  ]
+}

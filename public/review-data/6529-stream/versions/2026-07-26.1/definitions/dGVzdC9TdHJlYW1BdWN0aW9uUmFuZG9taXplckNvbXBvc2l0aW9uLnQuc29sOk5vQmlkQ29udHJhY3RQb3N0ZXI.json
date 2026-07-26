@@ -1,0 +1,159 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:NoBidContractPoster#function:0x49e000f4",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:NoBidContractPoster",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamAuctions",
+              "name": "auctions",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            }
+          ],
+          "name": "claimNoBid",
+          "outputs": [],
+          "selector": "0x49e000f4",
+          "signature": "claimNoBid(address,uint256,address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "claimNoBid(address,uint256,address)",
+          "displaySignature": "claimNoBid(StreamAuctions,uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:NoBidContractPoster#function:0x49e000f4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "auctions",
+              "type": "StreamAuctions"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "recipient",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOk5vQmlkQ29udHJhY3RQb3N0ZXIjZnVuY3Rpb246MHg0OWUwMDBmNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "claimNoBid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 158,
+            "byteStart": 49951,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionRandomizerComposition.t.sol#L1022-L1024",
+            "lineEnd": 1024,
+            "lineStart": 1022,
+            "snippetSha256": "sha256:7ec9ea4118b6297d3b31379d46e5ce0fa427ff1a665f3d607379244d942ea9d7",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0x49e000f4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAuctionRandomizerComposition.t.sol:NoBidContractPoster",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOk5vQmlkQ29udHJhY3RQb3N0ZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAuctionRandomizerComposition.t.sol:NoBidContractPoster"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "NoBidContractPoster",
+    "natspec": "",
+    "range": {
+      "byteLength": 195,
+      "byteStart": 49916,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionRandomizerComposition.t.sol#L1021-L1025",
+      "lineEnd": 1025,
+      "lineStart": 1021,
+      "snippetSha256": "sha256:f48c109032c47c85229f2ebeaaa8c63d4353fb2fa1470ffa39a2f2ad5aff490d",
+      "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAuctionRandomizerComposition.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:NoBidContractPoster",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:NoBidContractPoster#function:0x49e000f4",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:NoBidContractPoster",
+      "severity": "advisory"
+    }
+  ]
+}

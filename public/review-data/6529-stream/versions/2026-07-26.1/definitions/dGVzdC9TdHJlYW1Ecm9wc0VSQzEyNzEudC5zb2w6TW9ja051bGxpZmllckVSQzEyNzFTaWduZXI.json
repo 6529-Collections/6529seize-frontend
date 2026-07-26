@@ -1,0 +1,220 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamDropsERC1271.t.sol:MockNullifierERC1271Signer#function:0x1626ba7e",
+          "declaringDefinitionId": "test/StreamDropsERC1271.t.sol:MockNullifierERC1271Signer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "_signature",
+              "type": "bytes"
+            }
+          ],
+          "name": "isValidSignature",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x1626ba7e",
+          "signature": "isValidSignature(bytes32,bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isValidSignature(bytes32,bytes)",
+          "displaySignature": "isValidSignature(bytes32,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamDropsERC1271.t.sol:MockNullifierERC1271Signer#function:0x1626ba7e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_signature",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0VSQzEyNzEudC5zb2w6TW9ja051bGxpZmllckVSQzEyNzFTaWduZXIjZnVuY3Rpb246MHgxNjI2YmE3ZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isValidSignature",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 685,
+            "byteStart": 17163,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamDropsERC1271.t.sol#L434-L455",
+            "lineEnd": 455,
+            "lineStart": 434,
+            "snippetSha256": "sha256:0116aaf27245fc768a55a00ba7468cecd32537e1c02a32af272c853a4b80439d",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": "0x1626ba7e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MAGIC_VALUE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 16912,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamDropsERC1271.t.sol#L429",
+            "lineEnd": 429,
+            "lineStart": 429,
+            "snippetSha256": "sha256:a0d05acc74e0bf1c539e7dc0466e5715b207a4e7e042679137d34c03533ef0d7",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "INVALID_VALUE",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 16966,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamDropsERC1271.t.sol#L430",
+            "lineEnd": 430,
+            "lineStart": 430,
+            "snippetSha256": "sha256:73b263fa82a578bf21c1a365c99a80b73682f1a643a44c81771ff282f93ef374",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "DROP_ID_TYPEHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 134,
+            "byteStart": 17022,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamDropsERC1271.t.sol#L431-L432",
+            "lineEnd": 432,
+            "lineStart": 431,
+            "snippetSha256": "sha256:2f530e2a74ae0038a618798b4c951d654c5683249e911761cdd31d9c7e723628",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamDropsERC1271.t.sol:MockNullifierERC1271Signer",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Ecm9wc0VSQzEyNzEudC5zb2w6TW9ja051bGxpZmllckVSQzEyNzFTaWduZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamDropsERC1271.t.sol:MockNullifierERC1271Signer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockNullifierERC1271Signer",
+    "natspec": "",
+    "range": {
+      "byteLength": 980,
+      "byteStart": 16870,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamDropsERC1271.t.sol#L428-L456",
+      "lineEnd": 456,
+      "lineStart": 428,
+      "snippetSha256": "sha256:04046219b4043eac84629be104125bb6d0e302df16dbda756a0c127f5ff7c282",
+      "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamDropsERC1271.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamDropsERC1271.t.sol:MockNullifierERC1271Signer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsERC1271.t.sol:MockNullifierERC1271Signer#function:0x1626ba7e",
+      "definitionId": "test/StreamDropsERC1271.t.sol:MockNullifierERC1271Signer",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/SSTORE2.sol:SSTORE2#error:0xc5cd3084",
+          "declaringDefinitionId": "smart-contracts/SSTORE2.sol:SSTORE2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "length",
+              "type": "uint256"
+            }
+          ],
+          "name": "SSTORE2DataTooLarge",
+          "selector": "0xc5cd3084",
+          "signature": "SSTORE2DataTooLarge(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/SSTORE2.sol:SSTORE2#error:0xd8415944",
+          "declaringDefinitionId": "smart-contracts/SSTORE2.sol:SSTORE2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "pointer",
+              "type": "address"
+            }
+          ],
+          "name": "SSTORE2InvalidPointer",
+          "selector": "0xd8415944",
+          "signature": "SSTORE2InvalidPointer(address)"
+        },
+        {
+          "declarationId": "smart-contracts/SSTORE2.sol:SSTORE2#error:0xfbad885d",
+          "declaringDefinitionId": "smart-contracts/SSTORE2.sol:SSTORE2",
+          "inherited": false,
+          "inputs": [],
+          "name": "SSTORE2WriteFailed",
+          "selector": "0xfbad885d",
+          "signature": "SSTORE2WriteFailed()"
+        }
+      ],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 24921,
+          "canonicalSignature": "SSTORE2WriteFailed()",
+          "displaySignature": "SSTORE2WriteFailed()",
+          "id": "smart-contracts/SSTORE2.sol:SSTORE2#error:0xfbad885d",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1NTVE9SRTIuc29sOlNTVE9SRTIjZXJyb3I6MHhmYmFkODg1ZA",
+          "kind": "error",
+          "name": "SSTORE2WriteFailed",
+          "natspec": "@notice Reverts when the data-contract deployment fails.",
+          "range": {
+            "byteLength": 27,
+            "byteStart": 928,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/SSTORE2.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:0e719341ce4b80938815f060870b0bb3980eac486e508a8157776393902c4a53",
+            "sourceSha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb"
+          },
+          "selector": "0xfbad885d"
+        },
+        {
+          "astId": 24926,
+          "canonicalSignature": "SSTORE2InvalidPointer(address)",
+          "displaySignature": "SSTORE2InvalidPointer(address)",
+          "id": "smart-contracts/SSTORE2.sol:SSTORE2#error:0xd8415944",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointer",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1NTVE9SRTIuc29sOlNTVE9SRTIjZXJyb3I6MHhkODQxNTk0NA",
+          "kind": "error",
+          "name": "SSTORE2InvalidPointer",
+          "natspec": "@notice Reverts when a pointer does not hold a readable payload.",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1033,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/SSTORE2.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:a0882c6299ff94ba2a2a1034e9e0c6d03566ed118828ccf0bf1097625f992dd0",
+            "sourceSha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb"
+          },
+          "selector": "0xd8415944"
+        },
+        {
+          "astId": 24931,
+          "canonicalSignature": "SSTORE2DataTooLarge(uint256)",
+          "displaySignature": "SSTORE2DataTooLarge(uint256)",
+          "id": "smart-contracts/SSTORE2.sol:SSTORE2#error:0xc5cd3084",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "length",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1NTVE9SRTIuc29sOlNTVE9SRTIjZXJyb3I6MHhjNWNkMzA4NA",
+          "kind": "error",
+          "name": "SSTORE2DataTooLarge",
+          "natspec": "@notice Reverts when STOP plus payload would exceed EIP-170.",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 1152,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/SSTORE2.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:c43f98fe0a49b3c746934154bf2f317d2cd24520613402800cc0962e339684d1",
+            "sourceSha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb"
+          },
+          "selector": "0xc5cd3084"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "write(bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/SSTORE2.sol:SSTORE2#function:write(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1NTVE9SRTIuc29sOlNTVE9SRTIjZnVuY3Rpb246d3JpdGUoYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "write",
+          "natspec": "@notice Deploys `data` as the runtime code of a new data contract.\n @param data Payload bytes to persist.\n @return pointer Address of the deployed data contract.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "pointer",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 968,
+            "byteStart": 1384,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/SSTORE2.sol#L27-L50",
+            "lineEnd": 50,
+            "lineStart": 27,
+            "snippetSha256": "sha256:641a224134c24c7474b3bf4f92ca721561e301a6a0d331778f2f266a65adf020",
+            "sourceSha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "read(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/SSTORE2.sol:SSTORE2#function:read(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointer",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1NTVE9SRTIuc29sOlNTVE9SRTIjZnVuY3Rpb246cmVhZChhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "read",
+          "natspec": "@notice Reads the full payload stored at `pointer`.\n @param pointer Address of a data contract created by {write}.\n @return data The stored payload bytes.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 717,
+            "byteStart": 2535,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/SSTORE2.sol#L55-L76",
+            "lineEnd": 76,
+            "lineStart": 55,
+            "snippetSha256": "sha256:d5480e648debf5eca8633d2f2f02a2546861b43e02d5bc1a989f81ce946938f7",
+            "sourceSha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "DATA_OFFSET",
+          "natspec": "@notice Offset that skips the `STOP` guard byte at the head of the data contract.",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 685,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/SSTORE2.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:9ec2262806d732cb6f02a441fd00bcdef4713c3ad7aa90058a52e85fd02d5c6b",
+            "sourceSha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MAX_DATA_LENGTH",
+          "natspec": "@notice Maximum payload whose STOP-prefixed runtime fits EIP-170.",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 806,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/SSTORE2.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:cedadf044675e53a5e46b08771ede28afea5ab743c9213ac604c4323e3875aac",
+            "sourceSha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/SSTORE2.sol:SSTORE2",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1NTVE9SRTIuc29sOlNTVE9SRTI",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/SSTORE2.sol:SSTORE2"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "SSTORE2",
+    "natspec": "@notice Minimal SSTORE2-style bytecode storage: writes bytes as the runtime\n         code of a data contract and reads them back with `extcodecopy`.\n @dev Stored payloads are prefixed with a `STOP` byte so the data contract\n     can never be executed. Used for the onchain scheduled-calldata preimage\n     publication required by ADR 0004 [GOV-BATCH] rule 5 (ADR 0013\n     decision U5) and the onchain-bytes payload class of\n     `docs/stream-long-term-architecture.md` [LTA-CATALOGS] rule 6.",
+    "range": {
+      "byteLength": 2681,
+      "byteStart": 573,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/SSTORE2.sol#L11-L77",
+      "lineEnd": 77,
+      "lineStart": 11,
+      "snippetSha256": "sha256:b32f5b9c9fe2fa857bffc69b210d01253bbd6db0fc048c512784a36ce3aeb37b",
+      "sourceSha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/SSTORE2.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

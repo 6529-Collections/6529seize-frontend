@@ -1,0 +1,1655 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x32f74e98",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "CollectionDoesNotExist",
+          "selector": "0x32f74e98",
+          "signature": "CollectionDoesNotExist(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x37610c08",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CollectionRecordAlreadyExists",
+          "selector": "0x37610c08",
+          "signature": "CollectionRecordAlreadyExists(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xc5e92023",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "FunctionAdminUnauthorized",
+          "selector": "0xc5e92023",
+          "signature": "FunctionAdminUnauthorized(address,bytes4)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x313ee3c2",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "InvalidAdminContract",
+          "selector": "0x313ee3c2",
+          "signature": "InvalidAdminContract()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xa9359e59",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "schemaId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidCollectionRecord",
+          "selector": "0xa9359e59",
+          "signature": "InvalidCollectionRecord(bytes32,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xf48e6f72",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "InvalidCoreContract",
+          "selector": "0xf48e6f72",
+          "signature": "InvalidCoreContract()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x60a92160",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "algorithm",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "digestLength",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidHashRef",
+          "selector": "0x60a92160",
+          "signature": "InvalidHashRef(uint16,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x1c9aebc3",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "MetadataMutationPaused",
+          "selector": "0x1c9aebc3",
+          "signature": "MetadataMutationPaused()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x502ad1b0",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "actual",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "maximum",
+              "type": "uint256"
+            }
+          ],
+          "name": "PreservationURITooLarge",
+          "selector": "0x502ad1b0",
+          "signature": "PreservationURITooLarge(uint256,uint256)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#event:CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecord",
+              "name": "record",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "recorder",
+              "type": "address"
+            }
+          ],
+          "name": "CollectionRecordRecorded",
+          "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+          "topic0": "0x699d8af8514c4abc46b269575774769601ee506c7623256d1243352353674a72"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#event:PreservationAdminContractUpdated(address,address,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "oldAdminContract",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "newAdminContract",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "PreservationAdminContractUpdated",
+          "signature": "PreservationAdminContractUpdated(address,address,address)",
+          "topic0": "0xdad559b0337ff66a6992e5c580b7bce04ca0aff3293062dab723e68c1fc1f478"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x7e3c9be7",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "adminsContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x7e3c9be7",
+          "signature": "adminsContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x59e28051",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "collectionRecord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecord",
+              "name": "",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)"
+            }
+          ],
+          "selector": "0x59e28051",
+          "signature": "collectionRecord(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x2cf021cb",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "collectionRecordSummary",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecordSummary",
+              "name": "",
+              "type": "(uint256,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,string,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,address,uint64)"
+            }
+          ],
+          "selector": "0x2cf021cb",
+          "signature": "collectionRecordSummary(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x18cd4aad",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecord",
+              "name": "record",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)"
+            }
+          ],
+          "name": "deriveCollectionRecordHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x18cd4aad",
+          "signature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x3efe1a5d",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamPreservationRecords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x3efe1a5d",
+          "signature": "isStreamPreservationRecords()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x8b1d1ed9",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "subjectId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "latestCollectionRecordHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x8b1d1ed9",
+          "signature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0xc3434532",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecord",
+              "name": "record",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)"
+            }
+          ],
+          "name": "recordCollectionRecord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xc3434532",
+          "signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x5f59b4d2",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamCore",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x5f59b4d2",
+          "signature": "streamCore()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0xc4628276",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleFamily",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xc4628276",
+          "signature": "streamModuleFamily()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0xdbff3398",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleSchemaHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xdbff3398",
+          "signature": "streamModuleSchemaHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x28746186",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleSupersedes",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x28746186",
+          "signature": "streamModuleSupersedes()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x99d8b2df",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x99d8b2df",
+          "signature": "streamModuleVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x388d2c24",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "newAdminsContract",
+              "type": "address"
+            }
+          ],
+          "name": "updateAdminContract",
+          "outputs": [],
+          "selector": "0x388d2c24",
+          "signature": "updateAdminContract(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 15510,
+          "canonicalSignature": "InvalidCoreContract()",
+          "displaySignature": "InvalidCoreContract()",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xf48e6f72",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweGY0OGU2Zjcy",
+          "kind": "error",
+          "name": "InvalidCoreContract",
+          "natspec": "@notice Reverts when Core is not a deployed 6529Stream Core.",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 1775,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:bf756ef3755156b40fc99c5c0b2e9ce74f1a8bc22faed2e188147ba3b1827781",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0xf48e6f72"
+        },
+        {
+          "astId": 15513,
+          "canonicalSignature": "InvalidAdminContract()",
+          "displaySignature": "InvalidAdminContract()",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x313ee3c2",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweDMxM2VlM2My",
+          "kind": "error",
+          "name": "InvalidAdminContract",
+          "natspec": "@notice Reverts when the admin dependency is not a StreamAdmins contract.",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 1890,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:3c84e45d7c236c2ad5e7baa5072f06d3edabf77fc183014ab69e05e6192051aa",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x313ee3c2"
+        },
+        {
+          "astId": 15520,
+          "canonicalSignature": "FunctionAdminUnauthorized(address,bytes4)",
+          "displaySignature": "FunctionAdminUnauthorized(address,bytes4)",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xc5e92023",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweGM1ZTkyMDIz",
+          "kind": "error",
+          "name": "FunctionAdminUnauthorized",
+          "natspec": "@notice Reverts when caller lacks global or target-scoped function authority.",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 2010,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:7bccac7c5de8b9d4f6cb916ef0691ecce26ca46ca00c6016ad3db87b88cdf7fc",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0xc5e92023"
+        },
+        {
+          "astId": 15523,
+          "canonicalSignature": "MetadataMutationPaused()",
+          "displaySignature": "MetadataMutationPaused()",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x1c9aebc3",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweDFjOWFlYmMz",
+          "kind": "error",
+          "name": "MetadataMutationPaused",
+          "natspec": "@notice Reverts when preservation mutation pause is active.",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 2148,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:6bd7aa1f0e5c2248bf5bfb6699f55c3860845be84b7b598eb1e64d9d748d692f",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x1c9aebc3"
+        },
+        {
+          "astId": 15528,
+          "canonicalSignature": "CollectionDoesNotExist(uint256)",
+          "displaySignature": "CollectionDoesNotExist(uint256)",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x32f74e98",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweDMyZjc0ZTk4",
+          "kind": "error",
+          "name": "CollectionDoesNotExist",
+          "natspec": "@notice Reverts when the collection has not been created in Core.",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 2258,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:439b9b382ea75c3cc43eedd9d1f96a9cd860c23209346d505bcf856a3b5ea662",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x32f74e98"
+        },
+        {
+          "astId": 15537,
+          "canonicalSignature": "InvalidCollectionRecord(bytes32,bytes32,bytes32)",
+          "displaySignature": "InvalidCollectionRecord(bytes32,bytes32,bytes32)",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xa9359e59",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "schemaId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweGE5MzU5ZTU5",
+          "kind": "error",
+          "name": "InvalidCollectionRecord",
+          "natspec": "@notice Reverts when required record identity fields are zero.",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 2385,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:a9984f668d2eb444ed079a35d773c917283155d536424bfe922ff1bcee96543b",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0xa9359e59"
+        },
+        {
+          "astId": 15544,
+          "canonicalSignature": "InvalidHashRef(uint16,uint256)",
+          "displaySignature": "InvalidHashRef(uint16,uint256)",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x60a92160",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "algorithm",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "digestLength",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweDYwYTkyMTYw",
+          "kind": "error",
+          "name": "InvalidHashRef",
+          "natspec": "@notice Reverts when a hash reference is malformed or uses an unsupported algorithm.",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 2570,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L64",
+            "lineEnd": 64,
+            "lineStart": 64,
+            "snippetSha256": "sha256:ea64fad394a8d35051ba43e1beb897b97e5b97bf71d0a9170bcd72354ac7b8da",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x60a92160"
+        },
+        {
+          "astId": 15551,
+          "canonicalSignature": "PreservationURITooLarge(uint256,uint256)",
+          "displaySignature": "PreservationURITooLarge(uint256,uint256)",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x502ad1b0",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actual",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "maximum",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweDUwMmFkMWIw",
+          "kind": "error",
+          "name": "PreservationURITooLarge",
+          "natspec": "@notice Reverts when a preservation URI exceeds launch limits.",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 2707,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L66",
+            "lineEnd": 66,
+            "lineStart": 66,
+            "snippetSha256": "sha256:d5cea2541ba48541619e4f776b1972582596c8c863957ca6f6071fe42d9b66a5",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x502ad1b0"
+        },
+        {
+          "astId": 15556,
+          "canonicalSignature": "CollectionRecordAlreadyExists(bytes32)",
+          "displaySignature": "CollectionRecordAlreadyExists(bytes32)",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x37610c08",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNlcnJvcjoweDM3NjEwYzA4",
+          "kind": "error",
+          "name": "CollectionRecordAlreadyExists",
+          "natspec": "@notice Reverts when the same record hash has already been stored.",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 2850,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L68",
+            "lineEnd": 68,
+            "lineStart": 68,
+            "snippetSha256": "sha256:d19ddaaf41dc36e33e70d5f59cb4a45428e751637da7dd26b402e4812256a481",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x37610c08"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 15565,
+          "canonicalSignature": "PreservationAdminContractUpdated(address,address,address)",
+          "displaySignature": "PreservationAdminContractUpdated(address,address,address)",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#event:PreservationAdminContractUpdated(address,address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "oldAdminContract",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "newAdminContract",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNldmVudDpQcmVzZXJ2YXRpb25BZG1pbkNvbnRyYWN0VXBkYXRlZChhZGRyZXNzLGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "PreservationAdminContractUpdated",
+          "natspec": "@notice Emitted when the admin dependency changes.",
+          "range": {
+            "byteLength": 144,
+            "byteStart": 2971,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L71-L73",
+            "lineEnd": 73,
+            "lineStart": 71,
+            "snippetSha256": "sha256:bd93fe4cd50d041910710e1c9607bb0eafbd683192673f7a1ff97cb9ceb971d6",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "topic0": "0xdad559b0337ff66a6992e5c580b7bce04ca0aff3293062dab723e68c1fc1f478"
+        },
+        {
+          "anonymous": false,
+          "astId": 15581,
+          "canonicalSignature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+          "displaySignature": "CollectionRecordRecorded(uint256,bytes32,bytes32,CollectionRecord,bytes32,address)",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#event:CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "record",
+              "type": "CollectionRecord"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "recordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "recorder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNldmVudDpDb2xsZWN0aW9uUmVjb3JkUmVjb3JkZWQodWludDI1NixieXRlczMyLGJ5dGVzMzIsKGJ5dGVzMzIsYnl0ZXMzMiwodWludDE2LGJ5dGVzLGJ5dGVzMzIpLHN0cmluZyxieXRlczMyLGJ5dGVzMzIsKHVpbnQxNixieXRlcyxieXRlczMyKSx1aW50NjQpLGJ5dGVzMzIsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "CollectionRecordRecorded",
+          "natspec": "@notice Emitted when a generic collection preservation record is stored.",
+          "range": {
+            "byteLength": 233,
+            "byteStart": 3201,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L75-L82",
+            "lineEnd": 82,
+            "lineStart": 75,
+            "snippetSha256": "sha256:13895f37e361b9598a159290754fb2654a4972f9f6d1a6f7f344b5d7f1860336",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "topic0": "0x699d8af8514c4abc46b269575774769601ee506c7623256d1243352353674a72"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "streamCore()",
+          "displaySignature": "streamCore()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x5f59b4d2",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDVmNTliNGQy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamCore",
+          "natspec": "@notice Returns the Core contract this preservation module extends.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 3516,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L85",
+            "lineEnd": 85,
+            "lineStart": 85,
+            "snippetSha256": "sha256:6f8eb9137f81e5fa1ba2ff487d62190bf005bbeb1e89ffb2d91116b3e3f49e95",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x5f59b4d2",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "adminsContract()",
+          "displaySignature": "adminsContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x7e3c9be7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDdlM2M5YmU3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "adminsContract",
+          "natspec": "@notice Returns the active StreamAdmins dependency.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 58,
+            "byteStart": 3635,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L87",
+            "lineEnd": 87,
+            "lineStart": 87,
+            "snippetSha256": "sha256:9bf6e74d594fc93809b3900ac85db4f0ebc745a7f8272097b75a8c1c39c6cfca",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x7e3c9be7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isStreamPreservationRecords()",
+          "displaySignature": "isStreamPreservationRecords()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x3efe1a5d",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDNlZmUxYTVk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamPreservationRecords",
+          "natspec": "@notice Returns true for deployment validation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 68,
+            "byteStart": 3754,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L89",
+            "lineEnd": 89,
+            "lineStart": 89,
+            "snippetSha256": "sha256:3ccdd7a01ae12ed0efabe7bccab786e76dddf75ed672a7cd480fce46b9f6afeb",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x3efe1a5d",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamModuleFamily()",
+          "displaySignature": "streamModuleFamily()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0xc4628276",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweGM0NjI4Mjc2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleFamily",
+          "natspec": "@notice Returns the module family beacon.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 3877,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L91",
+            "lineEnd": 91,
+            "lineStart": 91,
+            "snippetSha256": "sha256:b00bc0e7c91bbb68cf956499b327fc161dadf0d802d4d0ef92775557a96f22e3",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0xc4628276",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamModuleVersion()",
+          "displaySignature": "streamModuleVersion()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x99d8b2df",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDk5ZDhiMmRm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleVersion",
+          "natspec": "@notice Returns the module version beacon.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 63,
+            "byteStart": 3995,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L93",
+            "lineEnd": 93,
+            "lineStart": 93,
+            "snippetSha256": "sha256:64e5bf70dfd32f47fade073a6d849720b426330abafb211d9d778bf41a54d025",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x99d8b2df",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamModuleSchemaHash()",
+          "displaySignature": "streamModuleSchemaHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0xdbff3398",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweGRiZmYzMzk4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleSchemaHash",
+          "natspec": "@notice Returns the launch schema hash for this module.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 66,
+            "byteStart": 4127,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L95",
+            "lineEnd": 95,
+            "lineStart": 95,
+            "snippetSha256": "sha256:369923ea5ab0e285de48ec9f47e6cf339a0974958a5abc3dc0f63ad0e6a504a0",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0xdbff3398",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamModuleSupersedes()",
+          "displaySignature": "streamModuleSupersedes()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x28746186",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDI4NzQ2MTg2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleSupersedes",
+          "natspec": "@notice Returns the immediate predecessor module, or zero for the first version.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 66,
+            "byteStart": 4287,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L97",
+            "lineEnd": 97,
+            "lineStart": 97,
+            "snippetSha256": "sha256:240b41dd969c5c3bb69efeebf9b47c2ad3d1cad022fe56a312e57d1f6d0a9de0",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x28746186",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "updateAdminContract(address)",
+          "displaySignature": "updateAdminContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x388d2c24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newAdminsContract",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDM4OGQyYzI0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "updateAdminContract",
+          "natspec": "@notice Updates the active admin contract.",
+          "outputs": [],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 4409,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L99",
+            "lineEnd": 99,
+            "lineStart": 99,
+            "snippetSha256": "sha256:8c2fc40605798905ff12d279b4258b4d2df1afcaa7e123f83c5b1e40deee50e0",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x388d2c24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "displaySignature": "recordCollectionRecord(uint256,CollectionRecord)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0xc3434532",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "record",
+              "storageLocation": "calldata",
+              "type": "CollectionRecord"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweGMzNDM0NTMy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "recordCollectionRecord",
+          "natspec": "@notice Stores a generic preservation record and updates the latest subject pointer.\n @dev Intentionally omits Core freeze checks so append-only preservation records can\n document frozen collections. Re-recording the exact same collection payload reverts\n because the derived record hash is already present.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 4816,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L104-L106",
+            "lineEnd": 106,
+            "lineStart": 104,
+            "snippetSha256": "sha256:30e8ea90ce0aa62f76bb45994271bcc829e62739be0b7858f0444e9512d508db",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0xc3434532",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+          "displaySignature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x8b1d1ed9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "subjectId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDhiMWQxZWQ5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "latestCollectionRecordHash",
+          "natspec": "@notice Returns the latest recorded hash for one collection/type/subject key.\n @dev Latest is last-write-wins by record time, not max `effectiveAt`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 153,
+            "byteStart": 5127,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L109-L112",
+            "lineEnd": 112,
+            "lineStart": 109,
+            "snippetSha256": "sha256:1dbcc5b7e454de963b3c3c5893bedd380cadcffc9d8f0a17536b419509b79ba4",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x8b1d1ed9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionRecordSummary(bytes32)",
+          "displaySignature": "collectionRecordSummary(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x2cf021cb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDJjZjAyMWNi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionRecordSummary",
+          "natspec": "@notice Returns the stored summary for a record hash.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "CollectionRecordSummary"
+            }
+          ],
+          "range": {
+            "byteLength": 132,
+            "byteStart": 5347,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L114-L117",
+            "lineEnd": 117,
+            "lineStart": 114,
+            "snippetSha256": "sha256:3c7034bf3696611057a1b462234088e12844a4f1299d3811566a2330ea5c12e3",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x2cf021cb",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionRecord(bytes32)",
+          "displaySignature": "collectionRecord(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x59e28051",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDU5ZTI4MDUx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionRecord",
+          "natspec": "@notice Returns the full stored payload for a record hash.\n @dev Signature fields are hash commitments only; this contract does not verify signatures.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "CollectionRecord"
+            }
+          ],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 5650,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L120",
+            "lineEnd": 120,
+            "lineStart": 120,
+            "snippetSha256": "sha256:2873c2c7cd09d10f970ab87442dcedcc368007a76acdc9a1889fef3575646fdb",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x59e28051",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "displaySignature": "deriveCollectionRecordHash(uint256,CollectionRecord)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#function:0x18cd4aad",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "record",
+              "storageLocation": "calldata",
+              "type": "CollectionRecord"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3JkcyNmdW5jdGlvbjoweDE4Y2Q0YWFk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deriveCollectionRecordHash",
+          "natspec": "@notice Computes the domain-separated record hash without writing.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 148,
+            "byteStart": 5824,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L122-L125",
+            "lineEnd": 125,
+            "lineStart": 122,
+            "snippetSha256": "sha256:57ee2717994fd66368383c47d49183aaf247bc4a5fc95b96704bb1834d6fd4b9",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          },
+          "selector": "0x18cd4aad",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "algorithm",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "digest",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "canonicalizationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "HashRef",
+          "natspec": "",
+          "range": {
+            "byteLength": 106,
+            "byteStart": 553,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L12-L16",
+            "lineEnd": 16,
+            "lineStart": 12,
+            "snippetSha256": "sha256:8875481ffb391232f8d94dc6526fd04ca6bb11dd1bd9dddf3e3fa39c8e55bd2b",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "contentHash",
+              "type": "HashRef"
+            },
+            {
+              "index": 3,
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "index": 4,
+              "name": "schemaId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "signatureScheme",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "signatureHash",
+              "type": "HashRef"
+            },
+            {
+              "index": 7,
+              "name": "effectiveAt",
+              "type": "uint64"
+            }
+          ],
+          "name": "CollectionRecord",
+          "natspec": "",
+          "range": {
+            "byteLength": 253,
+            "byteStart": 764,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L19-L28",
+            "lineEnd": 28,
+            "lineStart": 19,
+            "snippetSha256": "sha256:c8419a55c902de8032ee19eb9a5cdad5b49a11057fe1fbc34aa6fecc80a5f73d",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "recordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "contentHashAlgorithm",
+              "type": "uint16"
+            },
+            {
+              "index": 5,
+              "name": "contentHashDigestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "contentHashCanonicalizationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "index": 8,
+              "name": "uriHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "name": "schemaId",
+              "type": "bytes32"
+            },
+            {
+              "index": 10,
+              "name": "signatureScheme",
+              "type": "bytes32"
+            },
+            {
+              "index": 11,
+              "name": "signatureHashAlgorithm",
+              "type": "uint16"
+            },
+            {
+              "index": 12,
+              "name": "signatureHashDigestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 13,
+              "name": "signatureHashCanonicalizationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 14,
+              "name": "effectiveAt",
+              "type": "uint64"
+            },
+            {
+              "index": 15,
+              "name": "recorder",
+              "type": "address"
+            },
+            {
+              "index": 16,
+              "name": "recordedAt",
+              "type": "uint64"
+            }
+          ],
+          "name": "CollectionRecordSummary",
+          "natspec": "",
+          "range": {
+            "byteLength": 588,
+            "byteStart": 1112,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L31-L49",
+            "lineEnd": 49,
+            "lineStart": 31,
+            "snippetSha256": "sha256:3f24196ed9dac248d039efb68768417ef755ceaac94a17b6429943b7a5864f74",
+            "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:cb7d4208b6eec8dc934c494c46837e55a7719c2ac260b83a7458fc1ada6227ab",
+      "interfaceId": "0xad590280",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnNvbDpJU3RyZWFtUHJlc2VydmF0aW9uUmVjb3Jkcw",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamPreservationRecords",
+    "natspec": "@notice Interface for outside-Core collection preservation and provenance records.",
+    "range": {
+      "byteLength": 5804,
+      "byteStart": 170,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamPreservationRecords.sol#L7-L126",
+      "lineEnd": 126,
+      "lineStart": 7,
+      "snippetSha256": "sha256:2cdc5cbb9a3b72ee029b7c2dd0817ce964cbe4a0d557c189025913175058e7f7",
+      "sourceSha256": "sha256:e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamPreservationRecords.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

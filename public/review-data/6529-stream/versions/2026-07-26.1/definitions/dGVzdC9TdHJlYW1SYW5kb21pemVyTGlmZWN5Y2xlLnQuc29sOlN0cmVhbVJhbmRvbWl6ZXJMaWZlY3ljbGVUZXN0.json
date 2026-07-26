@@ -1,0 +1,1878 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x6ea50c7b",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArrngControllerCannotReenterFulfillmentDuringRequest",
+          "outputs": [],
+          "selector": "0x6ea50c7b",
+          "signature": "testArrngControllerCannotReenterFulfillmentDuringRequest()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x31f98bff",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArrngPendingRequestBlocksMigration",
+          "outputs": [],
+          "selector": "0x31f98bff",
+          "signature": "testArrngPendingRequestBlocksMigration()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x1ee36e28",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArrngPostProcessingFailureRecordsFailedState",
+          "outputs": [],
+          "selector": "0x1ee36e28",
+          "signature": "testArrngPostProcessingFailureRecordsFailedState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xdf72de17",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArrngRequestAndFulfillmentUseSameLifecycle",
+          "outputs": [],
+          "selector": "0xdf72de17",
+          "signature": "testArrngRequestAndFulfillmentUseSameLifecycle()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x5f766cf8",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArrngWrongCollectionBindingFailsClosed",
+          "outputs": [],
+          "selector": "0x5f766cf8",
+          "signature": "testArrngWrongCollectionBindingFailsClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xc0e39d2b",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArrngZeroRequestIdFailsBeforeRecordingLifecycle",
+          "outputs": [],
+          "selector": "0xc0e39d2b",
+          "signature": "testArrngZeroRequestIdFailsBeforeRecordingLifecycle()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xf7aaf8e3",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFulfilledRequestUnblocksMigrationAndOldDuplicateCannotOverwrite",
+          "outputs": [],
+          "selector": "0xf7aaf8e3",
+          "signature": "testFulfilledRequestUnblocksMigrationAndOldDuplicateCannotOverwrite()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xe7b44e42",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMarkedStaleRequestIsObservableAndCannotFulfill",
+          "outputs": [],
+          "selector": "0xe7b44e42",
+          "signature": "testMarkedStaleRequestIsObservableAndCannotFulfill()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x0ce2276c",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMarkedStaleRequestUnblocksMigrationAndNewProviderFulfillment",
+          "outputs": [],
+          "selector": "0x0ce2276c",
+          "signature": "testMarkedStaleRequestUnblocksMigrationAndNewProviderFulfillment()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x88e07cd4",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNxtRandomizerCannotBeConfiguredForProductionCollections",
+          "outputs": [],
+          "selector": "0x88e07cd4",
+          "signature": "testNxtRandomizerCannotBeConfiguredForProductionCollections()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xcc325685",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRandomizerMigrationWithNoPendingRequestsSucceedsAndEmitsEpoch",
+          "outputs": [],
+          "selector": "0xcc325685",
+          "signature": "testRandomizerMigrationWithNoPendingRequestsSucceedsAndEmitsEpoch()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x04c0ab76",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRandomizerMigrationWithPendingRequestIsBlocked",
+          "outputs": [],
+          "selector": "0x04c0ab76",
+          "signature": "testRandomizerMigrationWithPendingRequestIsBlocked()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xdb03ece5",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRandomnessRequestPauseDoesNotBlockVrfFulfillment",
+          "outputs": [],
+          "selector": "0xdb03ece5",
+          "signature": "testRandomnessRequestPauseDoesNotBlockVrfFulfillment()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x6e547ad7",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSupportedLifecyclePendingProbeFailureBlocksMigration",
+          "outputs": [],
+          "selector": "0x6e547ad7",
+          "signature": "testSupportedLifecyclePendingProbeFailureBlocksMigration()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xa6722a90",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTokenLevelViewsExposeEmptyPendingAndFulfilledState",
+          "outputs": [],
+          "selector": "0xa6722a90",
+          "signature": "testTokenLevelViewsExposeEmptyPendingAndFulfilledState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x276c3fe2",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUnsupportedLifecycleRandomizerDoesNotBlockMigration",
+          "outputs": [],
+          "selector": "0x276c3fe2",
+          "signature": "testUnsupportedLifecycleRandomizerDoesNotBlockMigration()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xfc68de5e",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVrfPostProcessingFailureRecordsFailedState",
+          "outputs": [],
+          "selector": "0xfc68de5e",
+          "signature": "testVrfPostProcessingFailureRecordsFailedState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x12161324",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce",
+          "outputs": [],
+          "selector": "0x12161324",
+          "signature": "testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x0d706c7c",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVrfSeedIgnoresMutableTokenDataChangedAfterRequest",
+          "outputs": [],
+          "selector": "0x0d706c7c",
+          "signature": "testVrfSeedIgnoresMutableTokenDataChangedAfterRequest()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xf32f4195",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVrfStaleEpochOrProviderFulfillmentFails",
+          "outputs": [],
+          "selector": "0xf32f4195",
+          "signature": "testVrfStaleEpochOrProviderFulfillmentFails()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xe688bb30",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVrfUnknownAndEmptyFulfillmentsFailClosed",
+          "outputs": [],
+          "selector": "0xe688bb30",
+          "signature": "testVrfUnknownAndEmptyFulfillmentsFailClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xc6d862e2",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVrfWrongCollectionBindingFailsClosed",
+          "outputs": [],
+          "selector": "0xc6d862e2",
+          "signature": "testVrfWrongCollectionBindingFailsClosed()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce()",
+          "displaySignature": "testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x12161324",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4MTIxNjEzMjQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVrfRequestRecordsLifecycleAndFulfillmentSetsHashOnce",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3267,
+            "byteStart": 3075,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L75-L135",
+            "lineEnd": 135,
+            "lineStart": 75,
+            "snippetSha256": "sha256:ab266de077c96ab2bf53c28132f2517c5e3a1809289bdf415711215bd0cd2208",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x12161324",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTokenLevelViewsExposeEmptyPendingAndFulfilledState()",
+          "displaySignature": "testTokenLevelViewsExposeEmptyPendingAndFulfilledState()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xa6722a90",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4YTY3MjJhOTA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTokenLevelViewsExposeEmptyPendingAndFulfilledState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2292,
+            "byteStart": 6348,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L137-L179",
+            "lineEnd": 179,
+            "lineStart": 137,
+            "snippetSha256": "sha256:3503490073b88c8770cda958418e9623e046ec57fec557b871d0e9cca59ce910",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xa6722a90",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVrfSeedIgnoresMutableTokenDataChangedAfterRequest()",
+          "displaySignature": "testVrfSeedIgnoresMutableTokenDataChangedAfterRequest()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x0d706c7c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4MGQ3MDZjN2M",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVrfSeedIgnoresMutableTokenDataChangedAfterRequest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 944,
+            "byteStart": 8646,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L181-L199",
+            "lineEnd": 199,
+            "lineStart": 181,
+            "snippetSha256": "sha256:4c8fe4f5c627a15102b9fb344f55a6137018a47826384ac31e3493a27852eb91",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x0d706c7c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVrfUnknownAndEmptyFulfillmentsFailClosed()",
+          "displaySignature": "testVrfUnknownAndEmptyFulfillmentsFailClosed()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xe688bb30",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4ZTY4OGJiMzA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVrfUnknownAndEmptyFulfillmentsFailClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 657,
+            "byteStart": 9596,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L201-L218",
+            "lineEnd": 218,
+            "lineStart": 201,
+            "snippetSha256": "sha256:12064a4152d50ca029bd38fd50f1fe0be27aafc3292423cc381cdd8771464d3a",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xe688bb30",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVrfPostProcessingFailureRecordsFailedState()",
+          "displaySignature": "testVrfPostProcessingFailureRecordsFailedState()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xfc68de5e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4ZmM2OGRlNWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVrfPostProcessingFailureRecordsFailedState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2916,
+            "byteStart": 10259,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L220-L288",
+            "lineEnd": 288,
+            "lineStart": 220,
+            "snippetSha256": "sha256:236eddcf5cbfc0558ed6c0dbe674bb78118c1955872f3fd8d4ae34389b391d44",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xfc68de5e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVrfStaleEpochOrProviderFulfillmentFails()",
+          "displaySignature": "testVrfStaleEpochOrProviderFulfillmentFails()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xf32f4195",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4ZjMyZjQxOTU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVrfStaleEpochOrProviderFulfillmentFails",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1128,
+            "byteStart": 13181,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L290-L317",
+            "lineEnd": 317,
+            "lineStart": 290,
+            "snippetSha256": "sha256:39ae6e1fe14c8f9874a8739ec4cc6bba63223e3032d7a14227fb91865ab1247b",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xf32f4195",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMarkedStaleRequestIsObservableAndCannotFulfill()",
+          "displaySignature": "testMarkedStaleRequestIsObservableAndCannotFulfill()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xe7b44e42",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4ZTdiNDRlNDI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMarkedStaleRequestIsObservableAndCannotFulfill",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1968,
+            "byteStart": 14315,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L319-L355",
+            "lineEnd": 355,
+            "lineStart": 319,
+            "snippetSha256": "sha256:322a0890082f5016bfd98479584f507ea097a3515511a9052fcae4ebc85e8520",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xe7b44e42",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomizerMigrationWithNoPendingRequestsSucceedsAndEmitsEpoch()",
+          "displaySignature": "testRandomizerMigrationWithNoPendingRequestsSucceedsAndEmitsEpoch()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xcc325685",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4Y2MzMjU2ODU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomizerMigrationWithNoPendingRequestsSucceedsAndEmitsEpoch",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 793,
+            "byteStart": 16289,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L357-L371",
+            "lineEnd": 371,
+            "lineStart": 357,
+            "snippetSha256": "sha256:06ce7b36c9d3ede1624fa3068978975be839fc0d18b9657b8222a86a546fba75",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xcc325685",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUnsupportedLifecycleRandomizerDoesNotBlockMigration()",
+          "displaySignature": "testUnsupportedLifecycleRandomizerDoesNotBlockMigration()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x276c3fe2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4Mjc2YzNmZTI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUnsupportedLifecycleRandomizerDoesNotBlockMigration",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1141,
+            "byteStart": 17088,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L373-L401",
+            "lineEnd": 401,
+            "lineStart": 373,
+            "snippetSha256": "sha256:12493dd6f9badcb74d017a97aa00b3d80d46f072fb80029abdc1a0b66d700002",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x276c3fe2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSupportedLifecyclePendingProbeFailureBlocksMigration()",
+          "displaySignature": "testSupportedLifecyclePendingProbeFailureBlocksMigration()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x6e547ad7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4NmU1NDdhZDc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSupportedLifecyclePendingProbeFailureBlocksMigration",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 802,
+            "byteStart": 18235,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L403-L417",
+            "lineEnd": 417,
+            "lineStart": 403,
+            "snippetSha256": "sha256:ed01fce119eea2e789018ec684a22ea0e6bd720a803a9968ed8a858a7b26fd86",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x6e547ad7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomizerMigrationWithPendingRequestIsBlocked()",
+          "displaySignature": "testRandomizerMigrationWithPendingRequestIsBlocked()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x04c0ab76",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4MDRjMGFiNzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomizerMigrationWithPendingRequestIsBlocked",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 966,
+            "byteStart": 19043,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L419-L440",
+            "lineEnd": 440,
+            "lineStart": 419,
+            "snippetSha256": "sha256:efa26a78bdb0e736aafc943eda3a1289c5ffb22455a8fb68080c71f316ba9419",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x04c0ab76",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFulfilledRequestUnblocksMigrationAndOldDuplicateCannotOverwrite()",
+          "displaySignature": "testFulfilledRequestUnblocksMigrationAndOldDuplicateCannotOverwrite()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xf7aaf8e3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4ZjdhYWY4ZTM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFulfilledRequestUnblocksMigrationAndOldDuplicateCannotOverwrite",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1121,
+            "byteStart": 20015,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L442-L468",
+            "lineEnd": 468,
+            "lineStart": 442,
+            "snippetSha256": "sha256:2fb8cfc46fd41e940bd2bb911630ccf76c8b23349da8ac4f691d62510540fb37",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xf7aaf8e3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMarkedStaleRequestUnblocksMigrationAndNewProviderFulfillment()",
+          "displaySignature": "testMarkedStaleRequestUnblocksMigrationAndNewProviderFulfillment()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x0ce2276c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4MGNlMjI3NmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMarkedStaleRequestUnblocksMigrationAndNewProviderFulfillment",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2065,
+            "byteStart": 21142,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L470-L515",
+            "lineEnd": 515,
+            "lineStart": 470,
+            "snippetSha256": "sha256:f63ddc4625a9d44d5a65c8256b69573ae7e2a5d5dffc664b94f45de00caf8f23",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x0ce2276c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testArrngPendingRequestBlocksMigration()",
+          "displaySignature": "testArrngPendingRequestBlocksMigration()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x31f98bff",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4MzFmOThiZmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArrngPendingRequestBlocksMigration",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1146,
+            "byteStart": 23213,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L517-L542",
+            "lineEnd": 542,
+            "lineStart": 517,
+            "snippetSha256": "sha256:f84bab60c4f09fb94ce9fcf9e9c5c6b122f935d59a3f70eaad808bbc096bf98c",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x31f98bff",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomnessRequestPauseDoesNotBlockVrfFulfillment()",
+          "displaySignature": "testRandomnessRequestPauseDoesNotBlockVrfFulfillment()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xdb03ece5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4ZGIwM2VjZTU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomnessRequestPauseDoesNotBlockVrfFulfillment",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 518,
+            "byteStart": 24365,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L544-L555",
+            "lineEnd": 555,
+            "lineStart": 544,
+            "snippetSha256": "sha256:b2dea7a5ebbd316425f76b6104b7a192aa7baad04b3bc3fbd21d2207bb449b55",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xdb03ece5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testArrngRequestAndFulfillmentUseSameLifecycle()",
+          "displaySignature": "testArrngRequestAndFulfillmentUseSameLifecycle()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xdf72de17",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4ZGY3MmRlMTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArrngRequestAndFulfillmentUseSameLifecycle",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1783,
+            "byteStart": 24889,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L557-L591",
+            "lineEnd": 591,
+            "lineStart": 557,
+            "snippetSha256": "sha256:c8537aa9801ac1af1ffa34702e5fd4811579cb3f9bb3d66b915244b057461e3f",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xdf72de17",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testArrngPostProcessingFailureRecordsFailedState()",
+          "displaySignature": "testArrngPostProcessingFailureRecordsFailedState()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x1ee36e28",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4MWVlMzZlMjg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArrngPostProcessingFailureRecordsFailedState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2494,
+            "byteStart": 26678,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L593-L650",
+            "lineEnd": 650,
+            "lineStart": 593,
+            "snippetSha256": "sha256:8f48ba3ac8c885f34f4ef392410e8d175d5511c2eb797a4a931405acb5069854",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x1ee36e28",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testArrngControllerCannotReenterFulfillmentDuringRequest()",
+          "displaySignature": "testArrngControllerCannotReenterFulfillmentDuringRequest()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x6ea50c7b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4NmVhNTBjN2I",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArrngControllerCannotReenterFulfillmentDuringRequest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 736,
+            "byteStart": 29178,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L652-L666",
+            "lineEnd": 666,
+            "lineStart": 652,
+            "snippetSha256": "sha256:4ebadfbf693664821c3018ba0367ca35403a4120141131fca0d228bee5777a09",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x6ea50c7b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testArrngZeroRequestIdFailsBeforeRecordingLifecycle()",
+          "displaySignature": "testArrngZeroRequestIdFailsBeforeRecordingLifecycle()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xc0e39d2b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4YzBlMzlkMmI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArrngZeroRequestIdFailsBeforeRecordingLifecycle",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1009,
+            "byteStart": 29920,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L668-L688",
+            "lineEnd": 688,
+            "lineStart": 668,
+            "snippetSha256": "sha256:2116a383a8f6c2bb259b69c721907410af5302f12ccd25d1d96315efa539897a",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xc0e39d2b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNxtRandomizerCannotBeConfiguredForProductionCollections()",
+          "displaySignature": "testNxtRandomizerCannotBeConfiguredForProductionCollections()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x88e07cd4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4ODhlMDdjZDQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNxtRandomizerCannotBeConfiguredForProductionCollections",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 715,
+            "byteStart": 30935,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L690-L706",
+            "lineEnd": 706,
+            "lineStart": 690,
+            "snippetSha256": "sha256:0fe3218950f694b47869b2e39ab05f344890c18e5a3d2dbb948d24f0ee3d7fe3",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x88e07cd4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVrfWrongCollectionBindingFailsClosed()",
+          "displaySignature": "testVrfWrongCollectionBindingFailsClosed()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xc6d862e2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4YzZkODYyZTI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVrfWrongCollectionBindingFailsClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1049,
+            "byteStart": 31656,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L708-L734",
+            "lineEnd": 734,
+            "lineStart": 708,
+            "snippetSha256": "sha256:b3ec1e7ddea310d80e52ad887e12120d06b3bbdde743dd5efed1461cfe49269a",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xc6d862e2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testArrngWrongCollectionBindingFailsClosed()",
+          "displaySignature": "testArrngWrongCollectionBindingFailsClosed()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x5f766cf8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOjB4NWY3NjZjZjg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArrngWrongCollectionBindingFailsClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1055,
+            "byteStart": 32711,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L736-L761",
+            "lineEnd": 761,
+            "lineStart": 736,
+            "snippetSha256": "sha256:500a076db73abda8cec7a4f6c69542b4bfef1e4e107f1b8e0aa3dda2a0359a23",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x5f766cf8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployVrfRandomizer()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_deployVrfRandomizer()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9kZXBsb3lWcmZSYW5kb21pemVyKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployVrfRandomizer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "coordinator",
+              "type": "MockVrfCoordinator"
+            },
+            {
+              "index": 2,
+              "name": "vrf",
+              "type": "NextGenRandomizerVRF"
+            }
+          ],
+          "range": {
+            "byteLength": 519,
+            "byteStart": 33772,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L763-L777",
+            "lineEnd": 777,
+            "lineStart": 763,
+            "snippetSha256": "sha256:7951d84897acdfb510b21b9660a336ea784e0593f41d4d057c4a444d00b4c190",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_mintToken(DeployedStream)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9taW50VG9rZW4oRGVwbG95ZWRTdHJlYW0p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 107,
+            "byteStart": 34297,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L779-L781",
+            "lineEnd": 781,
+            "lineStart": 779,
+            "snippetSha256": "sha256:f1884aab94dcc770fbaaf7fd6025328b63ababa0e6155a6a543d06621b4fe295",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_mintToken(DeployedStream,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9taW50VG9rZW4oRGVwbG95ZWRTdHJlYW0sdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 210,
+            "byteStart": 34410,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L783-L786",
+            "lineEnd": 786,
+            "lineStart": 783,
+            "snippetSha256": "sha256:69e72c45a83538bcc16f47dd2991dd29ba88ecbcbaa32e4ffbd75c3414295f5c",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_words(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_words(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "word",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl93b3Jkcyh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_words",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 34626,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L788-L791",
+            "lineEnd": 791,
+            "lineStart": 788,
+            "snippetSha256": "sha256:d6af2cee67be55b91c46afe15a3baa95954c87ee2bc75d3203858594f9faf5ad",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_rawOutputHash(uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_rawOutputHash(uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9yYXdPdXRwdXRIYXNoKHVpbnQyNTZbXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_rawOutputHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 131,
+            "byteStart": 34774,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L793-L795",
+            "lineEnd": 795,
+            "lineStart": 793,
+            "snippetSha256": "sha256:fe56b88581c468f84ff84f3c434ffee91ca460ba812c6bed83b142287154547c",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectedSeed(address,uint256,uint256,uint256,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_expectedSeed(address,uint256,uint256,uint256,uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9leHBlY3RlZFNlZWQoYWRkcmVzcyx1aW50MjU2LHVpbnQyNTYsdWludDI1Nix1aW50MjU2LHVpbnQyNTZbXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectedSeed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 536,
+            "byteStart": 34911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L797-L816",
+            "lineEnd": 816,
+            "lineStart": 797,
+            "snippetSha256": "sha256:d79c2cdbeacbb6ceab1aef827adcd7f1c8bb82ead7c5e72b4942d2652994d288",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRandomnessFulfilled(Vm.Log[],address,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_assertRandomnessFulfilled(Vm.Log[],address,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "emitter",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "expectedProvider",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "name": "expectedRandomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "expectedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "expectedRawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9hc3NlcnRSYW5kb21uZXNzRnVsZmlsbGVkKFZtLkxvZ1tdLGFkZHJlc3MsdWludDI1Nix1aW50MjU2LGFkZHJlc3MsdWludDI1NixieXRlczMyLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRandomnessFulfilled",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1394,
+            "byteStart": 35453,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L818-L850",
+            "lineEnd": 850,
+            "lineStart": 818,
+            "snippetSha256": "sha256:604d536b57b450f1821a425f1df8fefa6bf9590ecf624a11eed9c42dd1d4194e",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertProviderRequestFulfilled(Vm.Log[],address,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_assertProviderRequestFulfilled(Vm.Log[],address,uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "emitter",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "expectedWords",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9hc3NlcnRQcm92aWRlclJlcXVlc3RGdWxmaWxsZWQoVm0uTG9nW10sYWRkcmVzcyx1aW50MjU2LHVpbnQyNTZbXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertProviderRequestFulfilled",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 838,
+            "byteStart": 36853,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L852-L872",
+            "lineEnd": 872,
+            "lineStart": 852,
+            "snippetSha256": "sha256:09c2b6da191c2cc487b80c75984ba8b78b4eac1659353ec43113828a3d9e7817",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_wordsMatch(uint256[],uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_wordsMatch(uint256[],uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actualWords",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            },
+            {
+              "index": 1,
+              "name": "expectedWords",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl93b3Jkc01hdGNoKHVpbnQyNTZbXSx1aW50MjU2W10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_wordsMatch",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 428,
+            "byteStart": 37697,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L874-L888",
+            "lineEnd": 888,
+            "lineStart": 874,
+            "snippetSha256": "sha256:e3ed6ae6521989e97cfb03923e704a6817cecccbf46fe89c74fbbaf0381fe75c",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertCollectionRandomizerUpdated(Vm.Log[],address,address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_assertCollectionRandomizerUpdated(Vm.Log[],address,address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "emitter",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "oldRandomizer",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "newRandomizer",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "epoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9hc3NlcnRDb2xsZWN0aW9uUmFuZG9taXplclVwZGF0ZWQoVm0uTG9nW10sYWRkcmVzcyxhZGRyZXNzLGFkZHJlc3MsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertCollectionRandomizerUpdated",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 881,
+            "byteStart": 38131,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L890-L911",
+            "lineEnd": 911,
+            "lineStart": 890,
+            "snippetSha256": "sha256:6a82c95f565ccd2c83a7ff78652c5ea784544ec3a7c7cf362b3ba70b8bc12946",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRandomnessPostProcessingFailed(Vm.Log[],address,uint256,uint256,uint256,bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_assertRandomnessPostProcessingFailed(Vm.Log[],address,uint256,uint256,uint256,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "emitter",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "expectedEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "expectedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "expectedRawOutputHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "expectedFailureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9hc3NlcnRSYW5kb21uZXNzUG9zdFByb2Nlc3NpbmdGYWlsZWQoVm0uTG9nW10sYWRkcmVzcyx1aW50MjU2LHVpbnQyNTYsdWludDI1NixieXRlczMyLGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRandomnessPostProcessingFailed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1485,
+            "byteStart": 39018,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L913-L946",
+            "lineEnd": 946,
+            "lineStart": 913,
+            "snippetSha256": "sha256:1c6765bb084894871c3820d6668c2f1f7ba27761029ae36dacbf98bf8d459281",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertWrongCollectionFulfillmentPreservedPending(MockRandomizerCore,StreamRandomizerLifecycle)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:_assertWrongCollectionFulfillmentPreservedPending(MockRandomizerCore,StreamRandomizerLifecycle)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "MockRandomizerCore"
+            },
+            {
+              "index": 1,
+              "name": "randomizer",
+              "type": "StreamRandomizerLifecycle"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0I2Z1bmN0aW9uOl9hc3NlcnRXcm9uZ0NvbGxlY3Rpb25GdWxmaWxsbWVudFByZXNlcnZlZFBlbmRpbmcoTW9ja1JhbmRvbWl6ZXJDb3JlLFN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertWrongCollectionFulfillmentPreservedPending",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1340,
+            "byteStart": 40509,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L948-L969",
+            "lineEnd": 969,
+            "lineStart": 948,
+            "snippetSha256": "sha256:647f5105c946b194d4184478444db8df593c26d7db579f8e918cfc8b3b476a9c",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1875,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1930,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 1992,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 2035,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:6b92bf7948147a132b436e128c51d47ffabce6b40ed8627dae768f5e98e95d34",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 2096,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAUSE_REASON",
+          "natspec": "",
+          "range": {
+            "byteLength": 72,
+            "byteStart": 2144,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L61",
+            "lineEnd": 61,
+            "lineStart": 61,
+            "snippetSha256": "sha256:51369eb4d425eea8b625015912f6dd977d93e1a2139e6a19ab53293b376b0924",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_SEED_TYPEHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 222,
+            "byteStart": 2222,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L62-L64",
+            "lineEnd": 64,
+            "lineStart": 62,
+            "snippetSha256": "sha256:4b8afb9e13e39343c91a17ac2d52a6c8cd68207384bfddc9f4a82ed25084df86",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_RANDOMIZER_UPDATED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 144,
+            "byteStart": 2450,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L65-L66",
+            "lineEnd": 66,
+            "lineStart": 65,
+            "snippetSha256": "sha256:b15fe5bae388f514256aeff2605dedd43f2fe16ce77db42b0cabc06ceaf1cf2d",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_FULFILLED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 151,
+            "byteStart": 2600,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L67-L68",
+            "lineEnd": 68,
+            "lineStart": 67,
+            "snippetSha256": "sha256:5df8556d4e8437be4633a9674c410b83b2f1cb1a5d70c0edc1d460ffe370cb3e",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROVIDER_REQUEST_FULFILLED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 116,
+            "byteStart": 2757,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L69-L70",
+            "lineEnd": 70,
+            "lineStart": 69,
+            "snippetSha256": "sha256:78a3cc86e8da282444f73a9d0e7ce072294e6c4d7174ec42963cfd2ce3eae18e",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_POST_PROCESSING_FAILED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 189,
+            "byteStart": 2879,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L71-L73",
+            "lineEnd": 73,
+            "lineStart": 71,
+            "snippetSha256": "sha256:cca9c80faad327b4585b9fa2cb7befb6651d18bbdf25e742ec216bcdf5ebf408",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGVUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRandomizerLifecycleTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 40198,
+      "byteStart": 1653,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerLifecycle.t.sol#L50-L970",
+      "lineEnd": 970,
+      "lineStart": 50,
+      "snippetSha256": "sha256:13f43aab3aaa424c5acd9c29d9b9d156c792ec1bb795985805c262cebc1e2469",
+      "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRandomizerLifecycle.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 23
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 22
+    },
+    "totalCount": 23
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x04c0ab76",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x0ce2276c",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x0d706c7c",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x12161324",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x1ee36e28",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x276c3fe2",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x31f98bff",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x5f766cf8",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x6e547ad7",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x6ea50c7b",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0x88e07cd4",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xa6722a90",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xc0e39d2b",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xc6d862e2",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xcc325685",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xdb03ece5",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xdf72de17",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xe688bb30",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xe7b44e42",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xf32f4195",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xf7aaf8e3",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest#function:0xfc68de5e",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:StreamRandomizerLifecycleTest",
+      "severity": "advisory"
+    }
+  ]
+}

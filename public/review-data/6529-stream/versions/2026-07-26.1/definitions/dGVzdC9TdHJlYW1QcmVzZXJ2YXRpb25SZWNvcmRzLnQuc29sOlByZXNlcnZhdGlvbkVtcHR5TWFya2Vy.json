@@ -1,0 +1,76 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPreservationRecords.t.sol:PreservationEmptyMarker",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QcmVzZXJ2YXRpb25SZWNvcmRzLnQuc29sOlByZXNlcnZhdGlvbkVtcHR5TWFya2Vy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPreservationRecords.t.sol:PreservationEmptyMarker"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "PreservationEmptyMarker",
+    "natspec": "",
+    "range": {
+      "byteLength": 36,
+      "byteStart": 22848,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamPreservationRecords.t.sol#L501",
+      "lineEnd": 501,
+      "lineStart": 501,
+      "snippetSha256": "sha256:d22592550ffcbf77e560d5b76b3ff471da495ac6adbb3a6aebe5a91bd8d91bf5",
+      "sourceSha256": "sha256:4991e4a8c1a2ec9b17443dbafd5498e50a299ea5ccffeee1eb34fc2e45cb7b09"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPreservationRecords.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPreservationRecords.t.sol:PreservationEmptyMarker",
+      "severity": "advisory"
+    }
+  ]
+}

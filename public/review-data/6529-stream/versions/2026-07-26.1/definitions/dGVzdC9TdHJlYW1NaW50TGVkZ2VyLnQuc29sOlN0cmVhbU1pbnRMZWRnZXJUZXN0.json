@@ -1,0 +1,2554 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x6f5ca52f",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuthorizationIdsAreManagerScoped",
+          "outputs": [],
+          "selector": "0x6f5ca52f",
+          "signature": "testAuthorizationIdsAreManagerScoped()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x402ffcef",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuthorizationNotConsumedAndCountersRollBackOnMidBatchFailure",
+          "outputs": [],
+          "selector": "0x402ffcef",
+          "signature": "testAuthorizationNotConsumedAndCountersRollBackOnMidBatchFailure()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x00fad69f",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuthorizationReplayAndNullifierRevertDoNotMutateCounters",
+          "outputs": [],
+          "selector": "0x00fad69f",
+          "signature": "testAuthorizationReplayAndNullifierRevertDoNotMutateCounters()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x695f38d5",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuthorizedOtherManagerCannotConsumeManagerPolicyState",
+          "outputs": [],
+          "selector": "0x695f38d5",
+          "signature": "testAuthorizedOtherManagerCannotConsumeManagerPolicyState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x50b719de",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConsumeAllowsExactCapAndRejectsNextIncrement",
+          "outputs": [],
+          "selector": "0x50b719de",
+          "signature": "testConsumeAllowsExactCapAndRejectsNextIncrement()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xdeb02019",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConsumeCountersAndAuthorizationEmitsReconstructableLogs",
+          "outputs": [],
+          "selector": "0xdeb02019",
+          "signature": "testConsumeCountersAndAuthorizationEmitsReconstructableLogs()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xc455c381",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConsumeRejectsEmptyCounterBatch",
+          "outputs": [],
+          "selector": "0xc455c381",
+          "signature": "testConsumeRejectsEmptyCounterBatch()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xf5ee704d",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConsumeRejectsMismatchedIncrementCapAndOverflow",
+          "outputs": [],
+          "selector": "0xf5ee704d",
+          "signature": "testConsumeRejectsMismatchedIncrementCapAndOverflow()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xa8d02fda",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConsumeRejectsNonCanonicalValueKey",
+          "outputs": [],
+          "selector": "0xa8d02fda",
+          "signature": "testConsumeRejectsNonCanonicalValueKey()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x8f9a459c",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConsumeRejectsPolicyMismatchAndUnknownCounter",
+          "outputs": [],
+          "selector": "0x8f9a459c",
+          "signature": "testConsumeRejectsPolicyMismatchAndUnknownCounter()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x99e5ca2f",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConsumeRejectsZeroValueKeyAndSubjectKey",
+          "outputs": [],
+          "selector": "0x99e5ca2f",
+          "signature": "testConsumeRejectsZeroValueKeyAndSubjectKey()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x2c27673a",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCounterCapModeNoneSupportsUncappedStaticIncrements",
+          "outputs": [],
+          "selector": "0x2c27673a",
+          "signature": "testCounterCapModeNoneSupportsUncappedStaticIncrements()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xc4fb5576",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCounterDropAndReAddPreservesDurableValue",
+          "outputs": [],
+          "selector": "0xc4fb5576",
+          "signature": "testCounterDropAndReAddPreservesDurableValue()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x3ea3477a",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCounterValueKeysAreManagerScoped",
+          "outputs": [],
+          "selector": "0x3ea3477a",
+          "signature": "testCounterValueKeysAreManagerScoped()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x002b1726",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDeriveCounterValueKeySeparatesManagerCounterAndSubject",
+          "outputs": [],
+          "selector": "0x002b1726",
+          "signature": "testDeriveCounterValueKeySeparatesManagerCounterAndSubject()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xd529b7b0",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDuplicateValueKeysCannotBypassCaps",
+          "outputs": [],
+          "selector": "0xd529b7b0",
+          "signature": "testDuplicateValueKeysCannotBypassCaps()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x41ca4fd5",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMultiCounterBatchConsumesIndependentValueKeys",
+          "outputs": [],
+          "selector": "0x41ca4fd5",
+          "signature": "testMultiCounterBatchConsumesIndependentValueKeys()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x3d62484b",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOnlyLedgerWriterCanRegisterAndConsume",
+          "outputs": [],
+          "selector": "0x3d62484b",
+          "signature": "testOnlyLedgerWriterCanRegisterAndConsume()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x13c795c7",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegisterPhasePolicyRejectsBadInputs",
+          "outputs": [],
+          "selector": "0x13c795c7",
+          "signature": "testRegisterPhasePolicyRejectsBadInputs()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x657d1001",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegisterPhasePolicyRejectsInvalidCounterPolicyInputs",
+          "outputs": [],
+          "selector": "0x657d1001",
+          "signature": "testRegisterPhasePolicyRejectsInvalidCounterPolicyInputs()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x96e6d9d9",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegisterPhasePolicyRejectsInvalidSecondCounterAndRollsBackPolicy",
+          "outputs": [],
+          "selector": "0x96e6d9d9",
+          "signature": "testRegisterPhasePolicyRejectsInvalidSecondCounterAndRollsBackPolicy()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x182a6014",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegisterPhasePolicyRejectsUnsupportedFutureModes",
+          "outputs": [],
+          "selector": "0x182a6014",
+          "signature": "testRegisterPhasePolicyRejectsUnsupportedFutureModes()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xf1a16894",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegisterPhasePolicyStoresStaticCounterPolicy",
+          "outputs": [],
+          "selector": "0xf1a16894",
+          "signature": "testRegisterPhasePolicyStoresStaticCounterPolicy()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x657625da",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testReRegisterInvalidatesStaleCounterPolicies",
+          "outputs": [],
+          "selector": "0x657625da",
+          "signature": "testReRegisterInvalidatesStaleCounterPolicies()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x7fbd4700",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testReRegisterSamePolicyHashInvalidatesStaleCounterPolicies",
+          "outputs": [],
+          "selector": "0x7fbd4700",
+          "signature": "testReRegisterSamePolicyHashInvalidatesStaleCounterPolicies()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x83d591bc",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testReRegisterWithLowerCapPreservesCounterValue",
+          "outputs": [],
+          "selector": "0x83d591bc",
+          "signature": "testReRegisterWithLowerCapPreservesCounterValue()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xfa573448",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRevokedLedgerWriterCannotRegisterOrConsume",
+          "outputs": [],
+          "selector": "0xfa573448",
+          "signature": "testRevokedLedgerWriterCannotRegisterOrConsume()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xe9ce92df",
+          "declaringDefinitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSetLedgerWriterEmitsAndRejectsInvalidWriters",
+          "outputs": [],
+          "selector": "0xe9ce92df",
+          "signature": "testSetLedgerWriterEmitsAndRejectsInvalidWriters()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4MGE5MjU0ZTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 193,
+            "byteStart": 2814,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L54-L59",
+            "lineEnd": 59,
+            "lineStart": 54,
+            "snippetSha256": "sha256:8b3ccc4c4a418ceb1e5b60cd8edf266ffe5d626fd6087b4332421f38d353fff2",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSetLedgerWriterEmitsAndRejectsInvalidWriters()",
+          "displaySignature": "testSetLedgerWriterEmitsAndRejectsInvalidWriters()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xe9ce92df",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4ZTljZTkyZGY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSetLedgerWriterEmitsAndRejectsInvalidWriters",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1479,
+            "byteStart": 3013,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L61-L93",
+            "lineEnd": 93,
+            "lineStart": 61,
+            "snippetSha256": "sha256:81ef1bbf66c00cd3e8dbdf68a8572be8502cbfebe443604c56eb48ec4b26699f",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xe9ce92df",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOnlyLedgerWriterCanRegisterAndConsume()",
+          "displaySignature": "testOnlyLedgerWriterCanRegisterAndConsume()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x3d62484b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4M2Q2MjQ4NGI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOnlyLedgerWriterCanRegisterAndConsume",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1065,
+            "byteStart": 4498,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L95-L120",
+            "lineEnd": 120,
+            "lineStart": 95,
+            "snippetSha256": "sha256:0a71445bcc230092987ec8e1c25af58421a21c47ffe28f89a6f34d5e8a08cb95",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x3d62484b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRevokedLedgerWriterCannotRegisterOrConsume()",
+          "displaySignature": "testRevokedLedgerWriterCannotRegisterOrConsume()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xfa573448",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4ZmE1NzM0NDg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRevokedLedgerWriterCannotRegisterOrConsume",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1237,
+            "byteStart": 5569,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L122-L149",
+            "lineEnd": 149,
+            "lineStart": 122,
+            "snippetSha256": "sha256:65cf8c1f200e1e61bd39a260cce8b342bea432aa0e7c8e09948040a449112163",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xfa573448",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegisterPhasePolicyStoresStaticCounterPolicy()",
+          "displaySignature": "testRegisterPhasePolicyStoresStaticCounterPolicy()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xf1a16894",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4ZjFhMTY4OTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegisterPhasePolicyStoresStaticCounterPolicy",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3039,
+            "byteStart": 6812,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L151-L210",
+            "lineEnd": 210,
+            "lineStart": 151,
+            "snippetSha256": "sha256:97410353b60e0e4cbb11b401078409d21a264230ff604fb88643b91bc7301d68",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xf1a16894",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDeriveCounterValueKeySeparatesManagerCounterAndSubject()",
+          "displaySignature": "testDeriveCounterValueKeySeparatesManagerCounterAndSubject()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x002b1726",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4MDAyYjE3MjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDeriveCounterValueKeySeparatesManagerCounterAndSubject",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 930,
+            "byteStart": 9857,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L212-L231",
+            "lineEnd": 231,
+            "lineStart": 212,
+            "snippetSha256": "sha256:77f82992684be412993b839656e7740a41cf83cae7dc710c12d6f0f7ed68d062",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x002b1726",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegisterPhasePolicyRejectsBadInputs()",
+          "displaySignature": "testRegisterPhasePolicyRejectsBadInputs()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x13c795c7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4MTNjNzk1Yzc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegisterPhasePolicyRejectsBadInputs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3595,
+            "byteStart": 10793,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L233-L326",
+            "lineEnd": 326,
+            "lineStart": 233,
+            "snippetSha256": "sha256:b3639f9d80498dc0c6cf81ca1d511d8e728f2959cf1b905de76a1ddb90641a6e",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x13c795c7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegisterPhasePolicyRejectsInvalidSecondCounterAndRollsBackPolicy()",
+          "displaySignature": "testRegisterPhasePolicyRejectsInvalidSecondCounterAndRollsBackPolicy()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x96e6d9d9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4OTZlNmQ5ZDk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegisterPhasePolicyRejectsInvalidSecondCounterAndRollsBackPolicy",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1122,
+            "byteStart": 14394,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L328-L352",
+            "lineEnd": 352,
+            "lineStart": 328,
+            "snippetSha256": "sha256:e542504b86f91899784c896c3bae279164dc33d3a2392dc4cb24b50b38f13327",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x96e6d9d9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegisterPhasePolicyRejectsUnsupportedFutureModes()",
+          "displaySignature": "testRegisterPhasePolicyRejectsUnsupportedFutureModes()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x182a6014",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4MTgyYTYwMTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegisterPhasePolicyRejectsUnsupportedFutureModes",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1550,
+            "byteStart": 15522,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L354-L391",
+            "lineEnd": 391,
+            "lineStart": 354,
+            "snippetSha256": "sha256:6a7339f1dafa6e84816b1ff2aa2159b5ca53f8cf8c24f15b644100bdc98beee9",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x182a6014",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegisterPhasePolicyRejectsInvalidCounterPolicyInputs()",
+          "displaySignature": "testRegisterPhasePolicyRejectsInvalidCounterPolicyInputs()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x657d1001",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4NjU3ZDEwMDE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegisterPhasePolicyRejectsInvalidCounterPolicyInputs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1172,
+            "byteStart": 17078,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L393-L415",
+            "lineEnd": 415,
+            "lineStart": 393,
+            "snippetSha256": "sha256:73961fc17be614d5f0aaea9d8501ad44410f7ca8c756fe373e3bee7cc82e47c3",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x657d1001",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConsumeCountersAndAuthorizationEmitsReconstructableLogs()",
+          "displaySignature": "testConsumeCountersAndAuthorizationEmitsReconstructableLogs()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xdeb02019",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4ZGViMDIwMTk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConsumeCountersAndAuthorizationEmitsReconstructableLogs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3724,
+            "byteStart": 18256,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L417-L487",
+            "lineEnd": 487,
+            "lineStart": 417,
+            "snippetSha256": "sha256:cb5226db66e4c4690f99c1cb4a506eb1f155dad8bd2cc15b7a8e7b49e7d9d0fc",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xdeb02019",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testReRegisterInvalidatesStaleCounterPolicies()",
+          "displaySignature": "testReRegisterInvalidatesStaleCounterPolicies()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x657625da",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4NjU3NjI1ZGE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testReRegisterInvalidatesStaleCounterPolicies",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1610,
+            "byteStart": 21986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L489-L522",
+            "lineEnd": 522,
+            "lineStart": 489,
+            "snippetSha256": "sha256:6280edbc806dacbd45c33ed6e44d90e6df3d889080a5d30d29b3a78214ce2d73",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x657625da",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testReRegisterSamePolicyHashInvalidatesStaleCounterPolicies()",
+          "displaySignature": "testReRegisterSamePolicyHashInvalidatesStaleCounterPolicies()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x7fbd4700",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4N2ZiZDQ3MDA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testReRegisterSamePolicyHashInvalidatesStaleCounterPolicies",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1397,
+            "byteStart": 23602,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L524-L553",
+            "lineEnd": 553,
+            "lineStart": 524,
+            "snippetSha256": "sha256:d892bdfbf775d615a0ddc8fd039f0dd7c76dace9f4ecab948004f2356f718fd4",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x7fbd4700",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuthorizedOtherManagerCannotConsumeManagerPolicyState()",
+          "displaySignature": "testAuthorizedOtherManagerCannotConsumeManagerPolicyState()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x695f38d5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4Njk1ZjM4ZDU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuthorizedOtherManagerCannotConsumeManagerPolicyState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 622,
+            "byteStart": 25005,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L555-L570",
+            "lineEnd": 570,
+            "lineStart": 555,
+            "snippetSha256": "sha256:829df249538e18217b7b57aebe9ced3b5b54197ab2331c3bf0816061d0cbe5f0",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x695f38d5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCounterValueKeysAreManagerScoped()",
+          "displaySignature": "testCounterValueKeysAreManagerScoped()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x3ea3477a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4M2VhMzQ3N2E",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCounterValueKeysAreManagerScoped",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1193,
+            "byteStart": 25633,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L572-L592",
+            "lineEnd": 592,
+            "lineStart": 572,
+            "snippetSha256": "sha256:805bb753910a4217c54a3a94ccc21aa7b183f0c65c143a638a8f5cbaefa06bb1",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x3ea3477a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuthorizationIdsAreManagerScoped()",
+          "displaySignature": "testAuthorizationIdsAreManagerScoped()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x6f5ca52f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4NmY1Y2E1MmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuthorizationIdsAreManagerScoped",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1035,
+            "byteStart": 26832,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L594-L612",
+            "lineEnd": 612,
+            "lineStart": 594,
+            "snippetSha256": "sha256:7d1c7bb9a24d4a6b846ff1ca7a8c367b75e827ed292ae993555086e98ef2cc2e",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x6f5ca52f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConsumeRejectsNonCanonicalValueKey()",
+          "displaySignature": "testConsumeRejectsNonCanonicalValueKey()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xa8d02fda",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4YThkMDJmZGE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConsumeRejectsNonCanonicalValueKey",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 740,
+            "byteStart": 27873,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L614-L630",
+            "lineEnd": 630,
+            "lineStart": 614,
+            "snippetSha256": "sha256:186dc333db57d1608e917837e10256abc0601b7fec2b735cb68e843dae41269c",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xa8d02fda",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMultiCounterBatchConsumesIndependentValueKeys()",
+          "displaySignature": "testMultiCounterBatchConsumesIndependentValueKeys()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x41ca4fd5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4NDFjYTRmZDU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMultiCounterBatchConsumesIndependentValueKeys",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1303,
+            "byteStart": 28619,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L632-L658",
+            "lineEnd": 658,
+            "lineStart": 632,
+            "snippetSha256": "sha256:22f0315bc6201822c02abc6686ebd83a5d93a19127110065c861336bbf37d061",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x41ca4fd5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuthorizationNotConsumedAndCountersRollBackOnMidBatchFailure()",
+          "displaySignature": "testAuthorizationNotConsumedAndCountersRollBackOnMidBatchFailure()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x402ffcef",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4NDAyZmZjZWY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuthorizationNotConsumedAndCountersRollBackOnMidBatchFailure",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1868,
+            "byteStart": 29928,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L660-L697",
+            "lineEnd": 697,
+            "lineStart": 660,
+            "snippetSha256": "sha256:53006dea6906e8abd76271496633045a577d4b32511165def67fb2a4250ef6e2",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x402ffcef",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCounterCapModeNoneSupportsUncappedStaticIncrements()",
+          "displaySignature": "testCounterCapModeNoneSupportsUncappedStaticIncrements()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x2c27673a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4MmMyNzY3M2E",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCounterCapModeNoneSupportsUncappedStaticIncrements",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1225,
+            "byteStart": 31802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L699-L723",
+            "lineEnd": 723,
+            "lineStart": 699,
+            "snippetSha256": "sha256:607eed1e2c7b6b430c311a21c751f8d45d0e25ac7782923a07da25a5f624886f",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x2c27673a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConsumeRejectsPolicyMismatchAndUnknownCounter()",
+          "displaySignature": "testConsumeRejectsPolicyMismatchAndUnknownCounter()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x8f9a459c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4OGY5YTQ1OWM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConsumeRejectsPolicyMismatchAndUnknownCounter",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 944,
+            "byteStart": 33033,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L725-L749",
+            "lineEnd": 749,
+            "lineStart": 725,
+            "snippetSha256": "sha256:49908b3ef95f3b6841bca834724e1aecf3fa698524cd1c63ee3df80c0dc7fe6d",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x8f9a459c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDuplicateValueKeysCannotBypassCaps()",
+          "displaySignature": "testDuplicateValueKeysCannotBypassCaps()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xd529b7b0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4ZDUyOWI3YjA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDuplicateValueKeysCannotBypassCaps",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 776,
+            "byteStart": 33983,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L751-L768",
+            "lineEnd": 768,
+            "lineStart": 751,
+            "snippetSha256": "sha256:50d7b2264dd90bad639c43173cd26fef0623babafd14f9e68eb9cd862197e4d2",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xd529b7b0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConsumeAllowsExactCapAndRejectsNextIncrement()",
+          "displaySignature": "testConsumeAllowsExactCapAndRejectsNextIncrement()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x50b719de",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4NTBiNzE5ZGU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConsumeAllowsExactCapAndRejectsNextIncrement",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 806,
+            "byteStart": 34765,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L770-L787",
+            "lineEnd": 787,
+            "lineStart": 770,
+            "snippetSha256": "sha256:09f6660442760baa93b85bbc6220927bfd6b5a3c887542434f7dbc2c75563d0b",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x50b719de",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConsumeRejectsZeroValueKeyAndSubjectKey()",
+          "displaySignature": "testConsumeRejectsZeroValueKeyAndSubjectKey()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x99e5ca2f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4OTllNWNhMmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConsumeRejectsZeroValueKeyAndSubjectKey",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1024,
+            "byteStart": 35577,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L789-L809",
+            "lineEnd": 809,
+            "lineStart": 789,
+            "snippetSha256": "sha256:b172034f86a49240289b5d5ca35afb68659d7636deeff6caba9328ef9329cefa",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x99e5ca2f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConsumeRejectsMismatchedIncrementCapAndOverflow()",
+          "displaySignature": "testConsumeRejectsMismatchedIncrementCapAndOverflow()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xf5ee704d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4ZjVlZTcwNGQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConsumeRejectsMismatchedIncrementCapAndOverflow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1315,
+            "byteStart": 36607,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L811-L838",
+            "lineEnd": 838,
+            "lineStart": 811,
+            "snippetSha256": "sha256:ef008f48b73fbc89aeb8d2bdb873646aaa596c3f30b32e9b9b3c09cc56a8be56",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xf5ee704d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testReRegisterWithLowerCapPreservesCounterValue()",
+          "displaySignature": "testReRegisterWithLowerCapPreservesCounterValue()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x83d591bc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4ODNkNTkxYmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testReRegisterWithLowerCapPreservesCounterValue",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1109,
+            "byteStart": 37928,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L840-L862",
+            "lineEnd": 862,
+            "lineStart": 840,
+            "snippetSha256": "sha256:bcaa74d124c29ec7f7293aad1e04feab5925403d1838096b8bd7dba1b9a81095",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x83d591bc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCounterDropAndReAddPreservesDurableValue()",
+          "displaySignature": "testCounterDropAndReAddPreservesDurableValue()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xc4fb5576",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4YzRmYjU1NzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCounterDropAndReAddPreservesDurableValue",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1176,
+            "byteStart": 39043,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L864-L889",
+            "lineEnd": 889,
+            "lineStart": 864,
+            "snippetSha256": "sha256:60a3389dd97417bfe7fa09e68ec2693d35bac2ed677b9e079d51f176caf571e1",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xc4fb5576",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuthorizationReplayAndNullifierRevertDoNotMutateCounters()",
+          "displaySignature": "testAuthorizationReplayAndNullifierRevertDoNotMutateCounters()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x00fad69f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4MDBmYWQ2OWY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuthorizationReplayAndNullifierRevertDoNotMutateCounters",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1631,
+            "byteStart": 40225,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L891-L921",
+            "lineEnd": 921,
+            "lineStart": 891,
+            "snippetSha256": "sha256:c371cffd162e7a8faf5d270ba42754c300e674832757edef6316c47f320bf33e",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0x00fad69f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConsumeRejectsEmptyCounterBatch()",
+          "displaySignature": "testConsumeRejectsEmptyCounterBatch()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xc455c381",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOjB4YzQ1NWMzODE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConsumeRejectsEmptyCounterBatch",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 537,
+            "byteStart": 41862,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L923-L931",
+            "lineEnd": 931,
+            "lineStart": 923,
+            "snippetSha256": "sha256:afdf0dcdbefdcb03441c5e39bcf2bf226f624a6c4704f572862cc0712d0cb686",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": "0xc455c381",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_registerDefaultPolicy(uint64,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_registerDefaultPolicy(uint64,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "increment",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9yZWdpc3RlckRlZmF1bHRQb2xpY3kodWludDY0LHVpbnQ2NCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_registerDefaultPolicy",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 150,
+            "byteStart": 42405,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L933-L935",
+            "lineEnd": 935,
+            "lineStart": 933,
+            "snippetSha256": "sha256:f34563bf36fdba26d348dcd48d7dacef47dc93ce04ebe405077a67cf4e484984",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_registerPolicyForManager(address,bytes32,uint64,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_registerPolicyForManager(address,bytes32,uint64,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "index": 3,
+              "name": "increment",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9yZWdpc3RlclBvbGljeUZvck1hbmFnZXIoYWRkcmVzcyxieXRlczMyLHVpbnQ2NCx1aW50NjQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_registerPolicyForManager",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 455,
+            "byteStart": 42561,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L937-L949",
+            "lineEnd": 949,
+            "lineStart": 937,
+            "snippetSha256": "sha256:d0abf18f7ffdccc341cc95a45312f838dfa39a2da2142531c89af9cd890719f9",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_singleCounterPolicy(uint64,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_singleCounterPolicy(uint64,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "increment",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9zaW5nbGVDb3VudGVyUG9saWN5KHVpbnQ2NCx1aW50NjQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_singleCounterPolicy",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "counterIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "policies",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.LedgerCounterPolicy[]"
+            }
+          ],
+          "range": {
+            "byteLength": 308,
+            "byteStart": 43022,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L951-L960",
+            "lineEnd": 960,
+            "lineStart": 951,
+            "snippetSha256": "sha256:d5cb5cdaec11bcdb0064c5c2582f2af51f38fd878def6ae2dc105ac32192fe72",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_singleCounterPolicyWithId(bytes32,uint64,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_singleCounterPolicyWithId(bytes32,uint64,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "increment",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9zaW5nbGVDb3VudGVyUG9saWN5V2l0aElkKGJ5dGVzMzIsdWludDY0LHVpbnQ2NCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_singleCounterPolicyWithId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "counterIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "policies",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.LedgerCounterPolicy[]"
+            }
+          ],
+          "range": {
+            "byteLength": 450,
+            "byteStart": 43336,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L962-L974",
+            "lineEnd": 974,
+            "lineStart": 962,
+            "snippetSha256": "sha256:7396c07ad64f2f88c3ddd002d43e5e9b2f31cae6d4b40d228aefa08019d02f81",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_policy(uint64,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_policy(uint64,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "increment",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9wb2xpY3kodWludDY0LHVpbnQ2NCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_policy",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.LedgerCounterPolicy"
+            }
+          ],
+          "range": {
+            "byteLength": 491,
+            "byteStart": 43792,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L976-L989",
+            "lineEnd": 989,
+            "lineStart": 976,
+            "snippetSha256": "sha256:105ad4742a5214f66ee6c78b462324d1762187182ed45320401c99b3c7cf219b",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_uncappedPolicy(uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_uncappedPolicy(uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "increment",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl91bmNhcHBlZFBvbGljeSh1aW50NjQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_uncappedPolicy",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.LedgerCounterPolicy"
+            }
+          ],
+          "range": {
+            "byteLength": 483,
+            "byteStart": 44289,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L991-L1004",
+            "lineEnd": 1004,
+            "lineStart": 991,
+            "snippetSha256": "sha256:36146eb3ebbd1026b63261ea64da67a575e34132b3616ea7ee594fecc6855784",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectInvalidSinglePolicy(bytes32,IStreamMintLedger.LedgerCounterPolicy,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_expectInvalidSinglePolicy(bytes32,IStreamMintLedger.LedgerCounterPolicy,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "policy",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.LedgerCounterPolicy"
+            },
+            {
+              "index": 2,
+              "name": "expectedCounterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9leHBlY3RJbnZhbGlkU2luZ2xlUG9saWN5KGJ5dGVzMzIsSVN0cmVhbU1pbnRMZWRnZXIuTGVkZ2VyQ291bnRlclBvbGljeSxieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectInvalidSinglePolicy",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 750,
+            "byteStart": 44778,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L1006-L1025",
+            "lineEnd": 1025,
+            "lineStart": 1006,
+            "snippetSha256": "sha256:23a66e20a4434e94842871830da672c87ac8ab99195da107ca64bf9635541157",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_singleConsumption(uint64,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_singleConsumption(uint64,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "increment",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "cap",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9zaW5nbGVDb25zdW1wdGlvbih1aW50NjQsdWludDY0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_singleConsumption",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "consumptions",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.CounterConsumption[]"
+            }
+          ],
+          "range": {
+            "byteLength": 326,
+            "byteStart": 45534,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L1027-L1034",
+            "lineEnd": 1034,
+            "lineStart": 1027,
+            "snippetSha256": "sha256:c26a62142e383d69f49961de526c17f5f898b78e4fb5f2394f5d0abf953d76e6",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_consumption(bytes32,bytes32,uint64,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_consumption(bytes32,bytes32,uint64,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "increment",
+              "type": "uint64"
+            },
+            {
+              "index": 3,
+              "name": "cap",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9jb25zdW1wdGlvbihieXRlczMyLGJ5dGVzMzIsdWludDY0LHVpbnQ2NCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_consumption",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.CounterConsumption"
+            }
+          ],
+          "range": {
+            "byteLength": 280,
+            "byteStart": 45866,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L1036-L1042",
+            "lineEnd": 1042,
+            "lineStart": 1036,
+            "snippetSha256": "sha256:7e9b492acce91d4645899a2aac8a3e9d3310cbc095b4ded938e1bbe070f69830",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_consumptionForManager(address,bytes32,bytes32,uint64,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_consumptionForManager(address,bytes32,bytes32,uint64,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "increment",
+              "type": "uint64"
+            },
+            {
+              "index": 4,
+              "name": "cap",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9jb25zdW1wdGlvbkZvck1hbmFnZXIoYWRkcmVzcyxieXRlczMyLGJ5dGVzMzIsdWludDY0LHVpbnQ2NCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_consumptionForManager",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.CounterConsumption"
+            }
+          ],
+          "range": {
+            "byteLength": 778,
+            "byteStart": 46152,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L1044-L1066",
+            "lineEnd": 1066,
+            "lineStart": 1044,
+            "snippetSha256": "sha256:eb589f4d345887a13538011cbf6dde4bbded0d72455ebc74a720d78ae0b11de1",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_emptyNullifiers()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_emptyNullifiers()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9lbXB0eU51bGxpZmllcnMoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_emptyNullifiers",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "nullifiers",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 125,
+            "byteStart": 46936,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L1068-L1070",
+            "lineEnd": 1070,
+            "lineStart": 1068,
+            "snippetSha256": "sha256:fa9bb77ce59029c7bdc17ef825e14cb597b08c2284e22b70e6b5092d307fd7cb",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_markAsContract(address)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_markAsContract(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9tYXJrQXNDb250cmFjdChhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_markAsContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 92,
+            "byteStart": 47067,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L1072-L1074",
+            "lineEnd": 1074,
+            "lineStart": 1072,
+            "snippetSha256": "sha256:ef706aa16fa4a2f0c96c0b7146c3c1e5f2e883c903d924dd48cb8e321743de5a",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_defaultValueKey()",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_defaultValueKey()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl9kZWZhdWx0VmFsdWVLZXkoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_defaultValueKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 126,
+            "byteStart": 47165,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L1076-L1078",
+            "lineEnd": 1078,
+            "lineStart": 1076,
+            "snippetSha256": "sha256:79e165b7e637f0c037db95f4fd215b29b8127519701a71c6def4797eb11165ea",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_valueKey(address,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:_valueKey(address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "subjectKey",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0I2Z1bmN0aW9uOl92YWx1ZUtleShhZGRyZXNzLGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_valueKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 236,
+            "byteStart": 47297,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L1080-L1086",
+            "lineEnd": 1086,
+            "lineStart": 1080,
+            "snippetSha256": "sha256:4d7cddfc69383d65c598f3cfc9e9169142b085ac7e0056532b34e521b5056a34",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MANAGER",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 408,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:76bc861eea3e369bb0294c01399fcf858688c95ce2db2d7b7466432622e6d0c6",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OTHER_MANAGER",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 465,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:018a587fb692b1d2b0efe064995b32308b54b7a84907c3eca83bf77c5b88e8dc",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "UNAUTHORIZED",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 526,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:3f79eed727fcca59b0cd8f66c3c45b70cf3f6f8a5d18d93a88bbe6a0e15e6f61",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EOA_WRITER",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 586,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:0d28e6fcb7a93d153c7951ae97cc3eae8a3ca53cd77c43bc102df1393c9a8c10",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYER",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 644,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:165866ce9544190e450ff21aadf7cbeac6340ae69479feb5df66e22a24c00b9f",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 698,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:bd0bd6fd464fe47a5d23992b07108af11e43490aa08ff74608e41855b8fec3c1",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUTHORIZER",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 755,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:11baba62edf496aab82eef9e3c6122b6f4e3454b3788a77c2095270f7ebbad38",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EXECUTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 814,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:0823a86190809722b9d1137b07abb2a67a1ecaa646beaa8cf95ead2d41a51c33",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 871,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:8d5bf63ee960844ebef505838bac259f3b14def40218f647cf83020f512895c0",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PHASE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 920,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:c88a719daca50c06bb138a4cc995a0722ba2b10916104b4a07ee9b515d6f1b9c",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POLICY_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 987,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:968504db8c6e1ab03a3583d4ad03c60cad4c6428260f63e94cc9dcb5765952f6",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OTHER_POLICY_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 70,
+            "byteStart": 1051,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:471e8660cd7ece4eecc2e5acbc9d212c45b018f67cf409b2897aa7d1ed2e9a72",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COUNTER_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 1127,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:aa309c12c40fc038018e6b72cc5ed63eac0483dc4fd8071defe865b8ef8595e1",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OTHER_COUNTER_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 76,
+            "byteStart": 1196,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:60646d9c212222e6ff29f005b92881ba3c851741c442d3958a4c000ee128d944",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SUBJECT_KEY",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1278,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:cabed2cdbd07b4ae7489af782584e541dcdb3863d1335aee44c511953c326546",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OTHER_SUBJECT_KEY",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 1343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:9c1ca808044d8be49da6294b6e3e4cf990935d0b5e3a887ef277635edc7662eb",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CONTEXT_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1420,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:e46777e699be981b1189707a3b7a96dfd2552ab683bcbd93b477fd4755ee3bb5",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RESOLUTION_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 1491,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:92dd1db89c8f17650c1a910512281673371848a7dc838a08a3946ef00230c80f",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COUNTER_CONFIG_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 74,
+            "byteStart": 1570,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:331243809a1823580bdb15b914c37cae85a9ff46d7446db1ee73a5c0b02de976",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUTHORIZATION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 70,
+            "byteStart": 1650,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:af851592c92d3f607611b2a19701e0b6a6340c465807c5681a5c806816def4c4",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "NULLIFIER",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1726,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:10d1e7530250fa035597c9587be0c45511d3b8b4b636fdbbe818cf45f5f76e92",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "WRITER_UPDATED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 106,
+            "byteStart": 1792,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L36-L37",
+            "lineEnd": 37,
+            "lineStart": 36,
+            "snippetSha256": "sha256:13e9b13ef362711db136ab520ed539767817741d5d1543b3f1f9f13bdf63f8d1",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PHASE_POLICY_REGISTERED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 142,
+            "byteStart": 1904,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L38-L39",
+            "lineEnd": 39,
+            "lineStart": 38,
+            "snippetSha256": "sha256:9d4f9bdd500c70366923aac64c9224a3ac684fc0efd2a42f0a89995e143de821",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COUNTER_POLICY_REGISTERED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 194,
+            "byteStart": 2052,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L40-L42",
+            "lineEnd": 42,
+            "lineStart": 40,
+            "snippetSha256": "sha256:d4c81aa18448dec57955647c67937d7d4d4ad3ee3afa8c076309b27a0e017d82",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COUNTER_CONSUMED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 180,
+            "byteStart": 2252,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L43-L45",
+            "lineEnd": 45,
+            "lineStart": 43,
+            "snippetSha256": "sha256:8aa39e1d267c73779ccfa2ecf5c26d2dadc6daffe9bd3c0a953795244c198a69",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COUNTER_CONTEXT_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 192,
+            "byteStart": 2438,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L46-L48",
+            "lineEnd": 48,
+            "lineStart": 46,
+            "snippetSha256": "sha256:9216e41d887946a284ad7dd88eb472d67e0a482364f7399a3859e2aa4b6aa896",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUTHORIZATION_CONSUMED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 133,
+            "byteStart": 2636,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L49-L50",
+            "lineEnd": 50,
+            "lineStart": 49,
+            "snippetSha256": "sha256:4c5eab7cbedfdd92a65d05866890ecf9c542c9baf013dc05af0dd8270d4b2aa5",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ledger",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 2776,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:ab8cd128b7d2522bd1c651a67673311b341a9b31af2f9d00eb29cb2930caa179",
+            "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+          },
+          "selector": null,
+          "type": "StreamMintLedger",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TGVkZ2VyLnQuc29sOlN0cmVhbU1pbnRMZWRnZXJUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMintLedgerTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 47291,
+      "byteStart": 244,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintLedger.t.sol#L9-L1087",
+      "lineEnd": 1087,
+      "lineStart": 9,
+      "snippetSha256": "sha256:d11f194746a97a719d64f01ade1299e216d9d409d7d3d3fb4d3b879cb5bb390c",
+      "sourceSha256": "sha256:0356bc292ce24aeaa45c460a97457d5b9d58b99abc6cd9ad3f5e19ed97acf413"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintLedger.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 30
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 29
+    },
+    "totalCount": 30
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x002b1726",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x00fad69f",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x0a9254e4",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x13c795c7",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x182a6014",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x2c27673a",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x3d62484b",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x3ea3477a",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x402ffcef",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x41ca4fd5",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x50b719de",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x657625da",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x657d1001",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x695f38d5",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x6f5ca52f",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x7fbd4700",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x83d591bc",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x8f9a459c",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x96e6d9d9",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0x99e5ca2f",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xa8d02fda",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xc455c381",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xc4fb5576",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xd529b7b0",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xdeb02019",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xe9ce92df",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xf1a16894",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xf5ee704d",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest#function:0xfa573448",
+      "definitionId": "test/StreamMintLedger.t.sol:StreamMintLedgerTest",
+      "severity": "advisory"
+    }
+  ]
+}

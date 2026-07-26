@@ -1,0 +1,1539 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0x9fcc7185",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "EmptyContractURI",
+          "selector": "0x9fcc7185",
+          "signature": "EmptyContractURI()"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0x9a763740",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "FunctionAdminUnauthorized",
+          "selector": "0x9a763740",
+          "signature": "FunctionAdminUnauthorized()"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0x313ee3c2",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "InvalidAdminContract",
+          "selector": "0x313ee3c2",
+          "signature": "InvalidAdminContract()"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0xf48e6f72",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "InvalidCoreContract",
+          "selector": "0xf48e6f72",
+          "signature": "InvalidCoreContract()"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0x1c9aebc3",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "MetadataMutationPaused",
+          "selector": "0x1c9aebc3",
+          "signature": "MetadataMutationPaused()"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC7572.sol:IERC7572#event:ContractURIUpdated()",
+          "declaringDefinitionId": "smart-contracts/IERC7572.sol:IERC7572",
+          "inherited": true,
+          "inputs": [],
+          "name": "ContractURIUpdated",
+          "signature": "ContractURIUpdated()",
+          "topic0": "0xa5d4097edda6d87cb9329af83fb3712ef77eeb13738ffe43cc35a4ce305ad962"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x7e3c9be7",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "adminsContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x7e3c9be7",
+          "signature": "adminsContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xe8a3d485",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "contractURI",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xe8a3d485",
+          "signature": "contractURI()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xc4217932",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "contractURIHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xc4217932",
+          "signature": "contractURIHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x0bc9af69",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamCompatibility",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x0bc9af69",
+          "signature": "isStreamCompatibility()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xc3072dc6",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamContractMetadata",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xc3072dc6",
+          "signature": "isStreamContractMetadata()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xa654477b",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_CONTRACT_URI_BYTES",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xa654477b",
+          "signature": "MAX_CONTRACT_URI_BYTES()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x5f59b4d2",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamCore",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x5f59b4d2",
+          "signature": "streamCore()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xe601af13",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamMetadataSchemaVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xe601af13",
+          "signature": "streamMetadataSchemaVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x8b560515",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamProtocolName",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x8b560515",
+          "signature": "streamProtocolName()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x95dc3981",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamProtocolVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x95dc3981",
+          "signature": "streamProtocolVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x3749a20c",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamReleaseHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x3749a20c",
+          "signature": "streamReleaseHash()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x73f2859e",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamReleaseTag",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x73f2859e",
+          "signature": "streamReleaseTag()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x97a6b721",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsStreamInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x97a6b721",
+          "signature": "supportsStreamInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x388d2c24",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "newAdminsContract",
+              "type": "address"
+            }
+          ],
+          "name": "updateAdminContract",
+          "outputs": [],
+          "selector": "0x388d2c24",
+          "signature": "updateAdminContract(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x7e5b1e24",
+          "declaringDefinitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "newContractURI",
+              "type": "string"
+            }
+          ],
+          "name": "updateContractURI",
+          "outputs": [],
+          "selector": "0x7e5b1e24",
+          "signature": "updateContractURI(string)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 36054,
+          "canonicalSignature": "EmptyContractURI()",
+          "displaySignature": "EmptyContractURI()",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0x9fcc7185",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZXJyb3I6MHg5ZmNjNzE4NQ",
+          "kind": "error",
+          "name": "EmptyContractURI",
+          "natspec": "",
+          "range": {
+            "byteLength": 25,
+            "byteStart": 961,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:4bc72e752e19c00a0143ecd899f3b1865d9a641c2d7456e108650c1ef528b66e",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x9fcc7185"
+        },
+        {
+          "astId": 36056,
+          "canonicalSignature": "FunctionAdminUnauthorized()",
+          "displaySignature": "FunctionAdminUnauthorized()",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0x9a763740",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZXJyb3I6MHg5YTc2Mzc0MA",
+          "kind": "error",
+          "name": "FunctionAdminUnauthorized",
+          "natspec": "",
+          "range": {
+            "byteLength": 34,
+            "byteStart": 991,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:f3bdd6042a00f5bbb2536d4f3ff8e08cc2ac2554dca42df70add24e033411aa9",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x9a763740"
+        },
+        {
+          "astId": 36058,
+          "canonicalSignature": "InvalidAdminContract()",
+          "displaySignature": "InvalidAdminContract()",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0x313ee3c2",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZXJyb3I6MHgzMTNlZTNjMg",
+          "kind": "error",
+          "name": "InvalidAdminContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 1030,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:3c84e45d7c236c2ad5e7baa5072f06d3edabf77fc183014ab69e05e6192051aa",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x313ee3c2"
+        },
+        {
+          "astId": 36060,
+          "canonicalSignature": "InvalidCoreContract()",
+          "displaySignature": "InvalidCoreContract()",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0xf48e6f72",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZXJyb3I6MHhmNDhlNmY3Mg",
+          "kind": "error",
+          "name": "InvalidCoreContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 1064,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:bf756ef3755156b40fc99c5c0b2e9ce74f1a8bc22faed2e188147ba3b1827781",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0xf48e6f72"
+        },
+        {
+          "astId": 36062,
+          "canonicalSignature": "MetadataMutationPaused()",
+          "displaySignature": "MetadataMutationPaused()",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#error:0x1c9aebc3",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZXJyb3I6MHgxYzlhZWJjMw",
+          "kind": "error",
+          "name": "MetadataMutationPaused",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 1097,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:6bd7aa1f0e5c2248bf5bfb6699f55c3860845be84b7b598eb1e64d9d748d692f",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x1c9aebc3"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "MAX_CONTRACT_URI_BYTES()",
+          "displaySignature": "MAX_CONTRACT_URI_BYTES()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xa654477b",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHhhNjU0NDc3Yg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_CONTRACT_URI_BYTES",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 408,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:1833b0edee0cca050b2e795cd6aa7b402b6a1a9d6b2bc0695a6b70264ae23e65",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0xa654477b",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamCore()",
+          "displaySignature": "streamCore()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x5f59b4d2",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHg1ZjU5YjRkMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamCore",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 35,
+            "byteStart": 805,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:a75c6323106185a1d1f5ca3972191888ff580c2e2258c7401e1a9c5e33efb1f2",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x5f59b4d2",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address,address,string)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:constructor(address,address,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "admins",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "initialContractURI",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246Y29uc3RydWN0b3IoYWRkcmVzcyxhZGRyZXNzLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 255,
+            "byteStart": 1445,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L44-L49",
+            "lineEnd": 49,
+            "lineStart": 44,
+            "snippetSha256": "sha256:a1963a5fce9f73cdf5546832112276c10958d0efe2b2adf38be869450cc6d5d5",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "adminsContract()",
+          "displaySignature": "adminsContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x7e3c9be7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHg3ZTNjOWJlNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "adminsContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 106,
+            "byteStart": 1706,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L51-L53",
+            "lineEnd": 53,
+            "lineStart": 51,
+            "snippetSha256": "sha256:bd59f05f0d23a345584f7cc18f5ef122df047b9b8540ec574954bfdb5e31e985",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x7e3c9be7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "contractURI()",
+          "displaySignature": "contractURI()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xe8a3d485",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHhlOGEzZDQ4NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "contractURI",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 97,
+            "byteStart": 1818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L55-L57",
+            "lineEnd": 57,
+            "lineStart": 55,
+            "snippetSha256": "sha256:320edbcf883d08ea4486c956cae25f7bfe29a03424447a2c641d30a8a4b9fb40",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0xe8a3d485",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "contractURIHash()",
+          "displaySignature": "contractURIHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xc4217932",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHhjNDIxNzkzMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "contractURIHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 99,
+            "byteStart": 1921,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L59-L61",
+            "lineEnd": 61,
+            "lineStart": 59,
+            "snippetSha256": "sha256:31b629b503207425e6df2b40a097c89238a800c7044915d6f42f768f1f200d0e",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0xc4217932",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isStreamContractMetadata()",
+          "displaySignature": "isStreamContractMetadata()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xc3072dc6",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHhjMzA3MmRjNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamContractMetadata",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 93,
+            "byteStart": 2026,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L63-L65",
+            "lineEnd": 65,
+            "lineStart": 63,
+            "snippetSha256": "sha256:c188b12a0d86fde30d71cfe598de0d094741d9d8e6982cad2598be3051543509",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0xc3072dc6",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isStreamCompatibility()",
+          "displaySignature": "isStreamCompatibility()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x0bc9af69",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHgwYmM5YWY2OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamCompatibility",
+          "natspec": "@notice Returns true for deployed 6529Stream compatibility adapters.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 90,
+            "byteStart": 2202,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L68-L70",
+            "lineEnd": 70,
+            "lineStart": 68,
+            "snippetSha256": "sha256:8b17c742209ca19328959dfa25c7d9fd950c18d125d94a94bf69ebc0860c7074",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x0bc9af69",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamProtocolName()",
+          "displaySignature": "streamProtocolName()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x8b560515",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHg4YjU2MDUxNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamProtocolName",
+          "natspec": "@notice Returns the canonical protocol family name for integration checks.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 113,
+            "byteStart": 2381,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L73-L75",
+            "lineEnd": 75,
+            "lineStart": 73,
+            "snippetSha256": "sha256:ae0f98d778f1608ffc8a32f1645c5c9f6c5c194efd5d992e10476c05c7410e2e",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x8b560515",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamProtocolVersion()",
+          "displaySignature": "streamProtocolVersion()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x95dc3981",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHg5NWRjMzk4MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamProtocolVersion",
+          "natspec": "@notice Returns the protocol version used by release artifacts and docs.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 119,
+            "byteStart": 2581,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L78-L80",
+            "lineEnd": 80,
+            "lineStart": 78,
+            "snippetSha256": "sha256:aaeac920759343a0077508cd0fc4eb6835ebcfadaae5d82ac48f573fdaac6ae5",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x95dc3981",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamMetadataSchemaVersion()",
+          "displaySignature": "streamMetadataSchemaVersion()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xe601af13",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHhlNjAxYWYxMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamMetadataSchemaVersion",
+          "natspec": "@notice Returns the JSON metadata schema version emitted by tokenURI.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 132,
+            "byteStart": 2784,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L83-L85",
+            "lineEnd": 85,
+            "lineStart": 83,
+            "snippetSha256": "sha256:4ae765e93d31618952873f9c6fda20c5e60c089d89e42ee7d1ec84ef3e0b31bb",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0xe601af13",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamReleaseTag()",
+          "displaySignature": "streamReleaseTag()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x73f2859e",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHg3M2YyODU5ZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamReleaseTag",
+          "natspec": "@notice Returns the release artifact tag expected for ABI and event decoding.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 109,
+            "byteStart": 3008,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L88-L90",
+            "lineEnd": 90,
+            "lineStart": 88,
+            "snippetSha256": "sha256:385b53960505546b4aa2cd01a60f77b19c77df015260369cbe9225e08a4620b8",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x73f2859e",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamReleaseHash()",
+          "displaySignature": "streamReleaseHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x3749a20c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHgzNzQ5YTIwYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamReleaseHash",
+          "natspec": "@notice Returns keccak256(bytes(streamReleaseTag())) for compact comparisons.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 122,
+            "byteStart": 3209,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L93-L95",
+            "lineEnd": 95,
+            "lineStart": 93,
+            "snippetSha256": "sha256:17a07ed23d26ec273ee89e8d25d9d060613ad57cd4aeca3ac13c810ed015b572",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x3749a20c",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "supportsStreamInterface(bytes4)",
+          "displaySignature": "supportsStreamInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x97a6b721",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHg5N2E2YjcyMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsStreamInterface",
+          "natspec": "@notice Returns whether this adapter or its core contract supports an interface.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 344,
+            "byteStart": 3426,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L98-L107",
+            "lineEnd": 107,
+            "lineStart": 98,
+            "snippetSha256": "sha256:cbcfd8df813c7000d4bde3811a4bf5ea75c2eff373a2d0c51ba9c32bf51fc290",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x97a6b721",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "updateAdminContract(address)",
+          "displaySignature": "updateAdminContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x388d2c24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newAdminsContract",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHgzODhkMmMyNA",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateAdminContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 240,
+            "byteStart": 3776,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L109-L115",
+            "lineEnd": 115,
+            "lineStart": 109,
+            "snippetSha256": "sha256:8026edc8b2a1dec92481f613d90659c2bd901e2598d6f02733fcdd0db7c373a3",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x388d2c24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "updateContractURI(string)",
+          "displaySignature": "updateContractURI(string)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x7e5b1e24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newContractURI",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHg3ZTViMWUyNA",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateContractURI",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 234,
+            "byteStart": 4022,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L117-L123",
+            "lineEnd": 123,
+            "lineStart": 117,
+            "snippetSha256": "sha256:accb68f09ddd5568ecd52e76a433b9a4b835e5beba2318af82143cd2aaadd879",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x7e5b1e24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246MHgwMWZmYzlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 349,
+            "byteStart": 4262,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L125-L130",
+            "lineEnd": 130,
+            "lineStart": 125,
+            "snippetSha256": "sha256:f46ceedc0e6ec2450823142ffe75e72232f2d0bfd7a5f3a9bcca79753928840e",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setAdminContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:_setAdminContract(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "admins",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246X3NldEFkbWluQ29udHJhY3QoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setAdminContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 262,
+            "byteStart": 4617,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L132-L137",
+            "lineEnd": 137,
+            "lineStart": 132,
+            "snippetSha256": "sha256:cb7630491fc435f97b7c8750674ba0b34564856af64e688a8e0133485d531a37",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setContractURI(string)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:_setContractURI(string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newContractURI",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246X3NldENvbnRyYWN0VVJJKHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setContractURI",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 428,
+            "byteStart": 4885,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L139-L147",
+            "lineEnd": 147,
+            "lineStart": 139,
+            "snippetSha256": "sha256:019ed1ba37ffc7ba9b1d4a9db28558075626fb50bd57a6e9125baa7ecdc4add2",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireMetadataMutationNotPaused()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:_requireMetadataMutationNotPaused()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGEjZnVuY3Rpb246X3JlcXVpcmVNZXRhZGF0YU11dGF0aW9uTm90UGF1c2VkKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireMetadataMutationNotPaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 257,
+            "byteStart": 5319,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L149-L155",
+            "lineEnd": 155,
+            "lineStart": 149,
+            "snippetSha256": "sha256:586880b0e2dddc6a1c55e6d9baada1e02d4ccd7d28a3c82f5dee64d1fae85fa6",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [
+        {
+          "name": "FunctionAdminRequired",
+          "natspec": "",
+          "range": {
+            "byteLength": 305,
+            "byteStart": 1134,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L34-L42",
+            "lineEnd": 42,
+            "lineStart": 34,
+            "snippetSha256": "sha256:8c66da068ec570de2ce385ab830a1fd7fbc1da858a1fdb533a32cbc31bf32be9",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          }
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xa654477b",
+          "immutable": false,
+          "name": "MAX_CONTRACT_URI_BYTES",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 408,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:1833b0edee0cca050b2e795cd6aa7b402b6a1a9d6b2bc0695a6b70264ae23e65",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0xa654477b",
+          "type": "uint256",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_FIELD_CONTRACT_URI",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 469,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:577a6ca2106744c23c91c66f33e003ab3170e54908f1972691478498ae6a2d28",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STREAM_PROTOCOL_NAME",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 535,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:3930371b694382931fc683d4f5390f5cb0a662bcdce9375598a9418b6f15770f",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "type": "string",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STREAM_PROTOCOL_VERSION",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:44806ba94091fe8f90c16f79f1002dec972441dd15e9903daaeea35dbd8ad682",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "type": "string",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STREAM_METADATA_SCHEMA_VERSION",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:381fcd4737ae88f6816a3ec33c5362d47c437a9a19f6ec23b89a3e1bbe2c2344",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "type": "string",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STREAM_RELEASE_TAG",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 744,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:20500c6962c500c2fbd42051a4f5176b7909d5f327d9de6a21d2049685a72096",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "type": "string",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x5f59b4d2",
+          "immutable": true,
+          "name": "streamCore",
+          "natspec": "",
+          "range": {
+            "byteLength": 35,
+            "byteStart": 805,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:a75c6323106185a1d1f5ca3972191888ff580c2e2258c7401e1a9c5e33efb1f2",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": "0x5f59b4d2",
+          "type": "address",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_adminsContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 846,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:7aeb5efe9490d5a367583fa47115a8b04bbb9d3bca509b04829ad4f96dbedee3",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "type": "IStreamAdmins",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_contractURI",
+          "natspec": "",
+          "range": {
+            "byteLength": 27,
+            "byteStart": 889,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:609d08ed982e6690e7b8f174bf86f356fa1fff58b845fa2e5427df03a12d691d",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "type": "string",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_contractURIHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 922,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:22f232e25ef390f137e2beb87adb58a86aa213488edbba7aa2f6d305f2ae27d8",
+            "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      },
+      {
+        "definitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+        "name": "IStreamCompatibility"
+      },
+      {
+        "definitionId": "smart-contracts/IStreamContractMetadata.sol:IStreamContractMetadata",
+        "name": "IStreamContractMetadata"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUNvbnRyYWN0TWV0YWRhdGEuc29sOlN0cmVhbUNvbnRyYWN0TWV0YWRhdGE",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "smart-contracts/IStreamContractMetadata.sol:IStreamContractMetadata",
+      "smart-contracts/IERC7572.sol:IERC7572",
+      "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "StreamContractMetadata",
+    "natspec": "",
+    "range": {
+      "byteLength": 5265,
+      "byteStart": 313,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamContractMetadata.sol#L14-L156",
+      "lineEnd": 156,
+      "lineStart": 14,
+      "snippetSha256": "sha256:164e7425ad529aef449a64400f33ce13357e52446207f0032fbf6acd05ef5482",
+      "sourceSha256": "sha256:e539544f0a0a6819caf7a5abd4f77f0c46c7c405263dc4cbe5925abdce3239bd"
+    },
+    "release": {
+      "abiSha256": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
+      "bytecodeSha256": "sha256:0a42017e1111fec726ca72a9ee4bb7a1790286228076b7e44f804b4878676e1a",
+      "deployedBytecodeSha256": "sha256:0e4b480f04190514ce6e9c3272ec5a8f7358d5e7c8b521fc0a6f5d8ec1b5ab76",
+      "deployedBytecodeSizeBytes": 3136,
+      "summary": {
+        "custom_error_count": 5,
+        "event_count": 1,
+        "function_count": 16,
+        "payable_function_count": 0,
+        "read_function_count": 14,
+        "write_function_count": 2
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamContractMetadata.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 11
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 10
+    },
+    "totalCount": 11
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x01ffc9a7",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x388d2c24",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x5f59b4d2",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x7e3c9be7",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0x7e5b1e24",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xa654477b",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xc3072dc6",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xc4217932",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:0xe8a3d485",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata#function:constructor(address,address,string)",
+      "definitionId": "smart-contracts/StreamContractMetadata.sol:StreamContractMetadata",
+      "severity": "advisory"
+    }
+  ]
+}

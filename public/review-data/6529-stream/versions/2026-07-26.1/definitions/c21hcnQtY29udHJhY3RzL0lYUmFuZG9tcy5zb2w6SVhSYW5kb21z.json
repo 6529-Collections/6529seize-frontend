@@ -1,0 +1,196 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IXRandoms.sol:IXRandoms#function:0xccbac9f5",
+          "declaringDefinitionId": "smart-contracts/IXRandoms.sol:IXRandoms",
+          "inherited": false,
+          "inputs": [],
+          "name": "randomNumber",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xccbac9f5",
+          "signature": "randomNumber()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IXRandoms.sol:IXRandoms#function:0xf5684183",
+          "declaringDefinitionId": "smart-contracts/IXRandoms.sol:IXRandoms",
+          "inherited": false,
+          "inputs": [],
+          "name": "randomWord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xf5684183",
+          "signature": "randomWord()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "randomNumber()",
+          "displaySignature": "randomNumber()",
+          "functionKind": "function",
+          "id": "smart-contracts/IXRandoms.sol:IXRandoms#function:0xccbac9f5",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lYUmFuZG9tcy5zb2w6SVhSYW5kb21zI2Z1bmN0aW9uOjB4Y2NiYWM5ZjU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randomNumber",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 56,
+            "byteStart": 85,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IXRandoms.sol#L6",
+            "lineEnd": 6,
+            "lineStart": 6,
+            "snippetSha256": "sha256:4e05d5e153f48021064c51bd70641e1e82b175e10249368f5c14c0bff319a5f5",
+            "sourceSha256": "sha256:c3243ae7df387efd978c5683d53e8c0c9665634c41ed2dcf27103e6d16d4349e"
+          },
+          "selector": "0xccbac9f5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "randomWord()",
+          "displaySignature": "randomWord()",
+          "functionKind": "function",
+          "id": "smart-contracts/IXRandoms.sol:IXRandoms#function:0xf5684183",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lYUmFuZG9tcy5zb2w6SVhSYW5kb21zI2Z1bmN0aW9uOjB4ZjU2ODQxODM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randomWord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 60,
+            "byteStart": 147,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IXRandoms.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:4fef49ee824e0aac9662c0def881e47bdb096fc09c200f9240a3361eac0fe4c7",
+            "sourceSha256": "sha256:c3243ae7df387efd978c5683d53e8c0c9665634c41ed2dcf27103e6d16d4349e"
+          },
+          "selector": "0xf5684183",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IXRandoms.sol:IXRandoms",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lYUmFuZG9tcy5zb2w6SVhSYW5kb21z",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IXRandoms.sol:IXRandoms"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IXRandoms",
+    "natspec": "",
+    "range": {
+      "byteLength": 150,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IXRandoms.sol#L5-L9",
+      "lineEnd": 9,
+      "lineStart": 5,
+      "snippetSha256": "sha256:12d11dfad3d40cd28a744e89483195cb6a9f914a0db5ab82fc8e29b8ae04955b",
+      "sourceSha256": "sha256:c3243ae7df387efd978c5683d53e8c0c9665634c41ed2dcf27103e6d16d4349e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IXRandoms.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IXRandoms.sol:IXRandoms",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IXRandoms.sol:IXRandoms#function:0xccbac9f5",
+      "definitionId": "smart-contracts/IXRandoms.sol:IXRandoms",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IXRandoms.sol:IXRandoms#function:0xf5684183",
+      "definitionId": "smart-contracts/IXRandoms.sol:IXRandoms",
+      "severity": "advisory"
+    }
+  ]
+}

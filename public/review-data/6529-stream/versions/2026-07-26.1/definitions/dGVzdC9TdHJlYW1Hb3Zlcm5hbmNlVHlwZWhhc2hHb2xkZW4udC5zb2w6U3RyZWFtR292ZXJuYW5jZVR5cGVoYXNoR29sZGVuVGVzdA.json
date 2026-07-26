@@ -1,0 +1,1520 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xf89678a7",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testActionClassNumericPins",
+          "outputs": [],
+          "selector": "0xf89678a7",
+          "signature": "testActionClassNumericPins()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x419438c5",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceActionScheduledTopicGolden",
+          "outputs": [],
+          "selector": "0x419438c5",
+          "signature": "testGovernanceActionScheduledTopicGolden()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x18a87503",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceActionStatusOrderPins",
+          "outputs": [],
+          "selector": "0x18a87503",
+          "signature": "testGovernanceActionStatusOrderPins()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x60aac859",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceActionTypehashGolden",
+          "outputs": [],
+          "selector": "0x60aac859",
+          "signature": "testGovernanceActionTypehashGolden()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x647d5557",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceCallsTypehashGolden",
+          "outputs": [],
+          "selector": "0x647d5557",
+          "signature": "testGovernanceCallsTypehashGolden()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x0d222a29",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceConfigAndTerminalGuardianDomainGoldens",
+          "outputs": [],
+          "selector": "0x0d222a29",
+          "signature": "testGovernanceConfigAndTerminalGuardianDomainGoldens()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x42b11291",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceV2DomainsAreNotContractGetters",
+          "outputs": [],
+          "selector": "0x42b11291",
+          "signature": "testGovernanceV2DomainsAreNotContractGetters()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xa1c4e8be",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceV2ErrorSelectorGoldens",
+          "outputs": [],
+          "selector": "0xa1c4e8be",
+          "signature": "testGovernanceV2ErrorSelectorGoldens()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x8155709b",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceV2EventTopicGoldens",
+          "outputs": [],
+          "selector": "0x8155709b",
+          "signature": "testGovernanceV2EventTopicGoldens()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xe4728665",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceV2SelectorGoldens",
+          "outputs": [],
+          "selector": "0xe4728665",
+          "signature": "testGovernanceV2SelectorGoldens()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xd41ec868",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGovernanceWindowFloorConstants",
+          "outputs": [],
+          "selector": "0xd41ec868",
+          "signature": "testGovernanceWindowFloorConstants()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x2a1945b1",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testManifestSelectorGoldens",
+          "outputs": [],
+          "selector": "0x2a1945b1",
+          "signature": "testManifestSelectorGoldens()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x673fc689",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testModuleRegistrationLaneConstants",
+          "outputs": [],
+          "selector": "0x673fc689",
+          "signature": "testModuleRegistrationLaneConstants()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xb16c84ae",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testModuleRegistrationRecordTypehashGolden",
+          "outputs": [],
+          "selector": "0xb16c84ae",
+          "signature": "testModuleRegistrationRecordTypehashGolden()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xc273ae79",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testModuleRegistryStatusNumericPins",
+          "outputs": [],
+          "selector": "0xc273ae79",
+          "signature": "testModuleRegistryStatusNumericPins()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7b9ff524",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRecordChainTypehashGolden",
+          "outputs": [],
+          "selector": "0x7b9ff524",
+          "signature": "testRecordChainTypehashGolden()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x13f8d8d9",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRetiredEmergencyEligibilitySelectorsAreAbsent",
+          "outputs": [],
+          "selector": "0x13f8d8d9",
+          "signature": "testRetiredEmergencyEligibilitySelectorsAreAbsent()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xe28936aa",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoleConstantsAreKeccakOfOwnName",
+          "outputs": [],
+          "selector": "0xe28936aa",
+          "signature": "testRoleConstantsAreKeccakOfOwnName()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xaf94a7c6",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoleRegistryDomainGoldens",
+          "outputs": [],
+          "selector": "0xaf94a7c6",
+          "signature": "testRoleRegistryDomainGoldens()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x2aadb2bd",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testStreamModuleSelectorGolden",
+          "outputs": [],
+          "selector": "0x2aadb2bd",
+          "signature": "testStreamModuleSelectorGolden()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7f60aebd",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTerminalFreezeCapacityPins",
+          "outputs": [],
+          "selector": "0x7f60aebd",
+          "signature": "testTerminalFreezeCapacityPins()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7079a5fe",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testV1BatchEntryPointSelectorsAreRetired",
+          "outputs": [],
+          "selector": "0x7079a5fe",
+          "signature": "testV1BatchEntryPointSelectorsAreRetired()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x5eda9188",
+          "declaringDefinitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testV1DomainGettersAreRetired",
+          "outputs": [],
+          "selector": "0x5eda9188",
+          "signature": "testV1DomainGettersAreRetired()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 213,
+            "byteStart": 3751,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L70-L74",
+            "lineEnd": 74,
+            "lineStart": 70,
+            "snippetSha256": "sha256:5bd9be4bc7ea51b3e4b6dc72a5778f17cb892d3072aa54ed8016e1f36f818edb",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceActionTypehashGolden()",
+          "displaySignature": "testGovernanceActionTypehashGolden()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x60aac859",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDYwYWFjODU5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceActionTypehashGolden",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 194,
+            "byteStart": 3970,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L76-L79",
+            "lineEnd": 79,
+            "lineStart": 76,
+            "snippetSha256": "sha256:7a1ece4893a513bd65632252b1b1b6bee224b81df3830be26fc1d1a898c83665",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x60aac859",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceCallsTypehashGolden()",
+          "displaySignature": "testGovernanceCallsTypehashGolden()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x647d5557",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDY0N2Q1NTU3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceCallsTypehashGolden",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 190,
+            "byteStart": 4170,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L81-L84",
+            "lineEnd": 84,
+            "lineStart": 81,
+            "snippetSha256": "sha256:875221530fbbc9376dc7b1f05acf2d5d9523d43f4e83a076e7fe787cd3880293",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x647d5557",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceV2DomainsAreNotContractGetters()",
+          "displaySignature": "testGovernanceV2DomainsAreNotContractGetters()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x42b11291",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDQyYjExMjkx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceV2DomainsAreNotContractGetters",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 532,
+            "byteStart": 4366,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L86-L98",
+            "lineEnd": 98,
+            "lineStart": 86,
+            "snippetSha256": "sha256:2102524b9ffc5d494f459727a00a8c54ddacc4599fd0f76a494205ed7d364fa5",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x42b11291",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceV2SelectorGoldens()",
+          "displaySignature": "testGovernanceV2SelectorGoldens()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xe4728665",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweGU0NzI4NjY1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceV2SelectorGoldens",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2870,
+            "byteStart": 4904,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L100-L137",
+            "lineEnd": 137,
+            "lineStart": 100,
+            "snippetSha256": "sha256:20cea2108d613b9ff2106ae5892463c1899328e285fe1699b9ccfb8048ae606d",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0xe4728665",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceV2ErrorSelectorGoldens()",
+          "displaySignature": "testGovernanceV2ErrorSelectorGoldens()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xa1c4e8be",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweGExYzRlOGJl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceV2ErrorSelectorGoldens",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3127,
+            "byteStart": 7780,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L139-L176",
+            "lineEnd": 176,
+            "lineStart": 139,
+            "snippetSha256": "sha256:309b8229e4983ec13cecc88ae410cd2291e727ea8529ff41ed9e1c59806ee7cb",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0xa1c4e8be",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testManifestSelectorGoldens()",
+          "displaySignature": "testManifestSelectorGoldens()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x2a1945b1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDJhMTk0NWIx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testManifestSelectorGoldens",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1480,
+            "byteStart": 10913,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L178-L197",
+            "lineEnd": 197,
+            "lineStart": 178,
+            "snippetSha256": "sha256:7381e3430b3410b3a441f82d4416d658f25e44bd808d9cdcd6455ec65bac1ecc",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x2a1945b1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRetiredEmergencyEligibilitySelectorsAreAbsent()",
+          "displaySignature": "testRetiredEmergencyEligibilitySelectorsAreAbsent()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x13f8d8d9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDEzZjhkOGQ5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRetiredEmergencyEligibilitySelectorsAreAbsent",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1044,
+            "byteStart": 12399,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L199-L217",
+            "lineEnd": 217,
+            "lineStart": 199,
+            "snippetSha256": "sha256:69d3b53dff1d628ed46b27fa9ec321ca7312292e977c203a3772fcbaa10f1a3d",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x13f8d8d9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testV1DomainGettersAreRetired()",
+          "displaySignature": "testV1DomainGettersAreRetired()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x5eda9188",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDVlZGE5MTg4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testV1DomainGettersAreRetired",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 312,
+            "byteStart": 13449,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L219-L224",
+            "lineEnd": 224,
+            "lineStart": 219,
+            "snippetSha256": "sha256:640c1ced5bff6972938e1560da06bda8f7c0f6494aa501e7e2e66b30d20eced6",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x5eda9188",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testV1BatchEntryPointSelectorsAreRetired()",
+          "displaySignature": "testV1BatchEntryPointSelectorsAreRetired()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7079a5fe",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDcwNzlhNWZl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testV1BatchEntryPointSelectorsAreRetired",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2521,
+            "byteStart": 13767,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L226-L278",
+            "lineEnd": 278,
+            "lineStart": 226,
+            "snippetSha256": "sha256:229f22f932d4d5afb8a6abdd0e18f7710db6e3ecab79b6792dfa4fe9557686e7",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x7079a5fe",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testModuleRegistrationRecordTypehashGolden()",
+          "displaySignature": "testModuleRegistrationRecordTypehashGolden()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xb16c84ae",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweGIxNmM4NGFl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testModuleRegistrationRecordTypehashGolden",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 453,
+            "byteStart": 16294,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L280-L289",
+            "lineEnd": 289,
+            "lineStart": 280,
+            "snippetSha256": "sha256:4e034e7ab7928c557b11c9e4de9b7c6355df08b59b6801a3c394409eebf89251",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0xb16c84ae",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRecordChainTypehashGolden()",
+          "displaySignature": "testRecordChainTypehashGolden()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7b9ff524",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDdiOWZmNTI0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRecordChainTypehashGolden",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 310,
+            "byteStart": 16753,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L291-L296",
+            "lineEnd": 296,
+            "lineStart": 291,
+            "snippetSha256": "sha256:16986731f8e2104810242a501a7a3eb9f3b0a9457c3a29ca73a0b2c5a44e61a2",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x7b9ff524",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoleRegistryDomainGoldens()",
+          "displaySignature": "testRoleRegistryDomainGoldens()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xaf94a7c6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweGFmOTRhN2M2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoleRegistryDomainGoldens",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1137,
+            "byteStart": 17069,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L298-L315",
+            "lineEnd": 315,
+            "lineStart": 298,
+            "snippetSha256": "sha256:74257fb2e196bf97ca686fb1a4ed3c223d168109242cb048c9b3f18cc73651fe",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0xaf94a7c6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceConfigAndTerminalGuardianDomainGoldens()",
+          "displaySignature": "testGovernanceConfigAndTerminalGuardianDomainGoldens()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x0d222a29",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDBkMjIyYTI5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceConfigAndTerminalGuardianDomainGoldens",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2788,
+            "byteStart": 18212,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L317-L373",
+            "lineEnd": 373,
+            "lineStart": 317,
+            "snippetSha256": "sha256:d05e0d267556cb9f0dc6297ec0f1e9856c4d6c4263b3bbf2ff72ed05aa49cf66",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x0d222a29",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceV2EventTopicGoldens()",
+          "displaySignature": "testGovernanceV2EventTopicGoldens()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x8155709b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDgxNTU3MDli",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceV2EventTopicGoldens",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3444,
+            "byteStart": 21006,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L375-L445",
+            "lineEnd": 445,
+            "lineStart": 375,
+            "snippetSha256": "sha256:73e621e0ab7f949a565a0f8196e5897b9e1c23a22597fedca38802e274738ab6",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x8155709b",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTerminalFreezeCapacityPins()",
+          "displaySignature": "testTerminalFreezeCapacityPins()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7f60aebd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDdmNjBhZWJk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTerminalFreezeCapacityPins",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 353,
+            "byteStart": 24456,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L447-L453",
+            "lineEnd": 453,
+            "lineStart": 447,
+            "snippetSha256": "sha256:cc4117ce1eeb705ef31356dff3653ca4aca633d332635a9f55577b868cb27017",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x7f60aebd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testModuleRegistrationLaneConstants()",
+          "displaySignature": "testModuleRegistrationLaneConstants()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x673fc689",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDY3M2ZjNjg5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testModuleRegistrationLaneConstants",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 295,
+            "byteStart": 24815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L455-L459",
+            "lineEnd": 459,
+            "lineStart": 455,
+            "snippetSha256": "sha256:c9ad9cfa9c26c53289cabf4dc344e5c73eda36856f540526ab70144303404b99",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x673fc689",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceActionScheduledTopicGolden()",
+          "displaySignature": "testGovernanceActionScheduledTopicGolden()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x419438c5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDQxOTQzOGM1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceActionScheduledTopicGolden",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 597,
+            "byteStart": 25116,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L461-L475",
+            "lineEnd": 475,
+            "lineStart": 461,
+            "snippetSha256": "sha256:c82f3e780fe0eec58c12548cd96ada3d9592a384d19debb1b4cbbdd2db2d5fbf",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x419438c5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoleConstantsAreKeccakOfOwnName()",
+          "displaySignature": "testRoleConstantsAreKeccakOfOwnName()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xe28936aa",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweGUyODkzNmFh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoleConstantsAreKeccakOfOwnName",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2129,
+            "byteStart": 25719,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L477-L508",
+            "lineEnd": 508,
+            "lineStart": 477,
+            "snippetSha256": "sha256:584e33db6fa63f1d216e951368e7a4bfe01dff7b70f1a6c977ba81b4d5368d71",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0xe28936aa",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testModuleRegistryStatusNumericPins()",
+          "displaySignature": "testModuleRegistryStatusNumericPins()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xc273ae79",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweGMyNzNhZTc5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testModuleRegistryStatusNumericPins",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 483,
+            "byteStart": 27854,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L510-L516",
+            "lineEnd": 516,
+            "lineStart": 510,
+            "snippetSha256": "sha256:c21c929d284bef95f3517aae8b0ead04ff42f05bc36774f6153e9e85d1caf4a7",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0xc273ae79",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceActionStatusOrderPins()",
+          "displaySignature": "testGovernanceActionStatusOrderPins()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x18a87503",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDE4YTg3NTAz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceActionStatusOrderPins",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 561,
+            "byteStart": 28343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L518-L525",
+            "lineEnd": 525,
+            "lineStart": 518,
+            "snippetSha256": "sha256:8f77c18b1b257a10dd483388e9a559588d5ce7b134e217a70f5e1a97126ee91a",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x18a87503",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testActionClassNumericPins()",
+          "displaySignature": "testActionClassNumericPins()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xf89678a7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweGY4OTY3OGE3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testActionClassNumericPins",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1025,
+            "byteStart": 28910,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L527-L542",
+            "lineEnd": 542,
+            "lineStart": 527,
+            "snippetSha256": "sha256:bc122c18616a605e1aceaad8ec38036d512537379be037ff5946e530653906bd",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0xf89678a7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGovernanceWindowFloorConstants()",
+          "displaySignature": "testGovernanceWindowFloorConstants()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xd41ec868",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweGQ0MWVjODY4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGovernanceWindowFloorConstants",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1195,
+            "byteStart": 29941,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L544-L562",
+            "lineEnd": 562,
+            "lineStart": 544,
+            "snippetSha256": "sha256:171af6c5911ce6f1f49e4a21e57850e88be929e9f75e5a0d104439f6c71c8879",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0xd41ec868",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testStreamModuleSelectorGolden()",
+          "displaySignature": "testStreamModuleSelectorGolden()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x2aadb2bd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdCNmdW5jdGlvbjoweDJhYWRiMmJk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testStreamModuleSelectorGolden",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1855,
+            "byteStart": 31142,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L564-L602",
+            "lineEnd": 602,
+            "lineStart": 564,
+            "snippetSha256": "sha256:fad1c48bfdfe1f0e98ca0eeef8625443fe18285321844e869a1041169fbd06f2",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": "0x2aadb2bd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_GOVERNANCE_ACTION_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 129,
+            "byteStart": 1430,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L34-L35",
+            "lineEnd": 35,
+            "lineStart": 34,
+            "snippetSha256": "sha256:8ec54ef81e3b98929a574d80586536ae52f368033ea550c5b9d8b09b1a4d1281",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_GOVERNANCE_CALLS_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 128,
+            "byteStart": 1565,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L36-L37",
+            "lineEnd": 37,
+            "lineStart": 36,
+            "snippetSha256": "sha256:8b013b36304f893600855df83de5347d604876c2de59daff2139645d69a07496",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_MODULE_REGISTRATION_RECORD_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 138,
+            "byteStart": 1699,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L38-L39",
+            "lineEnd": 39,
+            "lineStart": 38,
+            "snippetSha256": "sha256:ce72cac78f49bd6f4c509367c3c3be058e73fddcd352efa1db4c682979705bba",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_RECORD_CHAIN_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 124,
+            "byteStart": 1843,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L40-L41",
+            "lineEnd": 41,
+            "lineStart": 40,
+            "snippetSha256": "sha256:f0d550022dbdc929d9bf9db0b4607dfafdb9c5f62ab6453a6eb383cb0e3e919b",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_ROLE_MUTATION_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 125,
+            "byteStart": 1973,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L42-L43",
+            "lineEnd": 43,
+            "lineStart": 42,
+            "snippetSha256": "sha256:2bc921d2de866bc84b76c3e731055928c71c1eec4f1d1c93d51df00cda64211c",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_GLOBAL_ROLE_MUTATION_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 2104,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L44-L45",
+            "lineEnd": 45,
+            "lineStart": 44,
+            "snippetSha256": "sha256:bb0f79d9129505a65e8018a7b224d9d39361500e05d582ea4bacafb3194533e0",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_ROLE_MUTATION_SCOPE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 131,
+            "byteStart": 2242,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L46-L47",
+            "lineEnd": 47,
+            "lineStart": 46,
+            "snippetSha256": "sha256:0c8f561183c32d70499d9977cb18d867d70d5bb61f637f1dd3cd9255a6555d0f",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_ROLE_MUTATION_STATE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 131,
+            "byteStart": 2379,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L48-L49",
+            "lineEnd": 49,
+            "lineStart": 48,
+            "snippetSha256": "sha256:a8d55ea2b674a205ba7a5732145f136b738770036816503c9b012b578aa36a99",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_ROLE_MANAGER_CONFIG_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 131,
+            "byteStart": 2516,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L50-L51",
+            "lineEnd": 51,
+            "lineStart": 50,
+            "snippetSha256": "sha256:afd5ddd83853ce331c7dbf545856bfcc4b98f755f43fd14e1357634880ccddd7",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_ROLE_MANAGER_CONFIG_STATE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 137,
+            "byteStart": 2653,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L52-L53",
+            "lineEnd": 53,
+            "lineStart": 52,
+            "snippetSha256": "sha256:02296de7fb2a2671b7df7ffe9a4de4b3e2a6fc462f4e9be453451eb693606229",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_ROLE_MANAGER_CONFIG_MUTATION_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 140,
+            "byteStart": 2796,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L54-L55",
+            "lineEnd": 55,
+            "lineStart": 54,
+            "snippetSha256": "sha256:43a7cfe4ff55195479eb5a5ee17e82d2de1447eb96f58e6510cd59e81549f151",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_TERMINAL_GUARDIAN_CONFIG_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 136,
+            "byteStart": 2942,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L56-L57",
+            "lineEnd": 57,
+            "lineStart": 56,
+            "snippetSha256": "sha256:818a3bc3e114d253d750a5b7f95add16bb3883d685675f6da05c73329eb3ff58",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_TERMINAL_GUARDIAN_SCOPE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 135,
+            "byteStart": 3084,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L58-L59",
+            "lineEnd": 59,
+            "lineStart": 58,
+            "snippetSha256": "sha256:82b62655b2cce2e28898269ff76d0e08cfb75eac228b85ede6289b92b88f56f0",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_INITIAL_TERMINAL_GUARDIAN_SET_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 141,
+            "byteStart": 3225,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L60-L61",
+            "lineEnd": 61,
+            "lineStart": 60,
+            "snippetSha256": "sha256:f6b87ae9e26c038c782995012cef5a9019693bf2ec4df553b36aad7886391a3a",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PINNED_TERMINAL_GUARDIAN_HOLDER_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 136,
+            "byteStart": 3372,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L62-L63",
+            "lineEnd": 63,
+            "lineStart": 62,
+            "snippetSha256": "sha256:480e11392317716c79f823c51b0268557c0f97499f628b83a0c364b9591ba811",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LEGACY_SCHEDULE_BATCH_SELECTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 67,
+            "byteStart": 3514,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L64",
+            "lineEnd": 64,
+            "lineStart": 64,
+            "snippetSha256": "sha256:48f51ccc5891de552c33b897e6fe34c6aba60cb3e420b2b81646c1ce9d6a8261",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LEGACY_EXECUTE_BATCH_SELECTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 66,
+            "byteStart": 3587,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:06cbbe6c7cbcf76055894983ca04465ab342559a31166f9659cbae571877fee1",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "executor",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 3660,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L67",
+            "lineEnd": 67,
+            "lineStart": 67,
+            "snippetSha256": "sha256:94739fd46acc1815898d44ae7b2db9287fb6a4461c4a69276ac3f38ba3b8a7e8",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "StreamGovernanceExecutor",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "registry",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 3707,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L68",
+            "lineEnd": 68,
+            "lineStart": 68,
+            "snippetSha256": "sha256:722aa97f6e7d851860879c5767061c9dbcd7a8ab28c059c05c40811c87110da7",
+            "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+          },
+          "selector": null,
+          "type": "StreamModuleRegistry",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVHlwZWhhc2hHb2xkZW4udC5zb2w6U3RyZWFtR292ZXJuYW5jZVR5cGVoYXNoR29sZGVuVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceTypehashGoldenTest",
+    "natspec": "@notice Golden equality tests for every doc-pinned governance and registry\n         hash domain, the [GOV-ROLES] keccak-of-own-name rule, the pinned\n         enum numeric IDs, and the [LTA-MODULE-ID] selector surface.\n @dev Pinned 0x literals are copied from `docs/adr/0004-admin-governance.md`\n     [GOV-ACTION-ID], `docs/stream-long-term-architecture.md` [LTA-DOMAINS],\n     and `docs/collection-metadata-contract.md` [CMC-RECORD-CHAIN]; each is\n     asserted against a live keccak recomputation of the exact string\n     preimage. These domains are catalog-pinned rather than contract ABI.",
+    "range": {
+      "byteLength": 31747,
+      "byteStart": 1252,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceTypehashGolden.t.sol#L29-L603",
+      "lineEnd": 603,
+      "lineStart": 29,
+      "snippetSha256": "sha256:42d14db5be96708feb3c2b90ad89696d164f40f2335a653b9280bdd5050aff9f",
+      "sourceSha256": "sha256:e5a770874b220fdf1be3d3ceda9e20a10903e79da949873830d6a2600ec5b5b5"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceTypehashGolden.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 24
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 24
+    },
+    "totalCount": 24
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x0a9254e4",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x0d222a29",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x13f8d8d9",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x18a87503",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x2a1945b1",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x2aadb2bd",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x419438c5",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x42b11291",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x5eda9188",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x60aac859",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x647d5557",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x673fc689",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7079a5fe",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7b9ff524",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x7f60aebd",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0x8155709b",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xa1c4e8be",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xaf94a7c6",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xb16c84ae",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xc273ae79",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xd41ec868",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xe28936aa",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xe4728665",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest#function:0xf89678a7",
+      "definitionId": "test/StreamGovernanceTypehashGolden.t.sol:StreamGovernanceTypehashGoldenTest",
+      "severity": "advisory"
+    }
+  ]
+}

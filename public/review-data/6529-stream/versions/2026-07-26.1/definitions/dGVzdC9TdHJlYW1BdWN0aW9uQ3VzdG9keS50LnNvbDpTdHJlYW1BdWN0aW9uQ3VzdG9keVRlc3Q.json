@@ -1,0 +1,801 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xc08b90e9",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBidNearEndExtendsAuctionRecord",
+          "outputs": [],
+          "selector": "0xc08b90e9",
+          "signature": "testBidNearEndExtendsAuctionRecord()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0x319cfbe2",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCancelAfterFirstBidFailsAndPreservesEscrow",
+          "outputs": [],
+          "selector": "0x319cfbe2",
+          "signature": "testCancelAfterFirstBidFailsAndPreservesEscrow()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xc4328222",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCancelBeforeBidReturnsCustodyAndBlocksBids",
+          "outputs": [],
+          "selector": "0xc4328222",
+          "signature": "testCancelBeforeBidReturnsCustodyAndBlocksBids()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xa1049e37",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNoBidContractPosterClaimFailureRollsBack",
+          "outputs": [],
+          "selector": "0xa1049e37",
+          "signature": "testNoBidContractPosterClaimFailureRollsBack()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xedd485a8",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNoBidContractPosterCreatesPendingClaimAndCanCompleteToReceiver",
+          "outputs": [],
+          "selector": "0xedd485a8",
+          "signature": "testNoBidContractPosterCreatesPendingClaimAndCanCompleteToReceiver()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xfe1106f2",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNoBidSettlementIsPermissionlessAndTerminal",
+          "outputs": [],
+          "selector": "0xfe1106f2",
+          "signature": "testNoBidSettlementIsPermissionlessAndTerminal()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xa5ffae97",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegisteredAuctionStartsActiveWithEscrowCustody",
+          "outputs": [],
+          "selector": "0xa5ffae97",
+          "signature": "testRegisteredAuctionStartsActiveWithEscrowCustody()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0x6b3c07f2",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testStatusDerivesEndedNoBidAndRejectsLateBid",
+          "outputs": [],
+          "selector": "0x6b3c07f2",
+          "signature": "testStatusDerivesEndedNoBidAndRejectsLateBid()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xd82fb6df",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUnregisteredAuctionCannotReceiveBid",
+          "outputs": [],
+          "selector": "0xd82fb6df",
+          "signature": "testUnregisteredAuctionCannotReceiveBid()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xccc60252",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testWithBidSettlementFailureLeavesEscrowAndCreditsUnchanged",
+          "outputs": [],
+          "selector": "0xccc60252",
+          "signature": "testWithBidSettlementFailureLeavesEscrowAndCreditsUnchanged()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testRegisteredAuctionStartsActiveWithEscrowCustody()",
+          "displaySignature": "testRegisteredAuctionStartsActiveWithEscrowCustody()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xa5ffae97",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHhhNWZmYWU5Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegisteredAuctionStartsActiveWithEscrowCustody",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 549,
+            "byteStart": 849,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L24-L33",
+            "lineEnd": 33,
+            "lineStart": 24,
+            "snippetSha256": "sha256:0e30bfcda495d08bc2cee8dafc86477071567eec80706141c3b88f52b5d223d9",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0xa5ffae97",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUnregisteredAuctionCannotReceiveBid()",
+          "displaySignature": "testUnregisteredAuctionCannotReceiveBid()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xd82fb6df",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHhkODJmYjZkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUnregisteredAuctionCannotReceiveBid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 726,
+            "byteStart": 1404,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L35-L54",
+            "lineEnd": 54,
+            "lineStart": 35,
+            "snippetSha256": "sha256:ffc87da6169e4a842cd7ec9712d7007fb832f8762af0c0275f2e6ff91f5c02ff",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0xd82fb6df",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testStatusDerivesEndedNoBidAndRejectsLateBid()",
+          "displaySignature": "testStatusDerivesEndedNoBidAndRejectsLateBid()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0x6b3c07f2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHg2YjNjMDdmMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testStatusDerivesEndedNoBidAndRejectsLateBid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 654,
+            "byteStart": 2136,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L56-L69",
+            "lineEnd": 69,
+            "lineStart": 56,
+            "snippetSha256": "sha256:c0ad8e4526ef9008776acc8faf0bf76b88df84618bea311f4c4e8b3d2643f3c6",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0x6b3c07f2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNoBidSettlementIsPermissionlessAndTerminal()",
+          "displaySignature": "testNoBidSettlementIsPermissionlessAndTerminal()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xfe1106f2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHhmZTExMDZmMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNoBidSettlementIsPermissionlessAndTerminal",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1088,
+            "byteStart": 2796,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L71-L92",
+            "lineEnd": 92,
+            "lineStart": 71,
+            "snippetSha256": "sha256:c057f58d7de67041f0ab2af9939bcdcb8fb0e6441d79ec836b8726c3c39e531f",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0xfe1106f2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNoBidContractPosterCreatesPendingClaimAndCanCompleteToReceiver()",
+          "displaySignature": "testNoBidContractPosterCreatesPendingClaimAndCanCompleteToReceiver()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xedd485a8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHhlZGQ0ODVhOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNoBidContractPosterCreatesPendingClaimAndCanCompleteToReceiver",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1769,
+            "byteStart": 3890,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L94-L127",
+            "lineEnd": 127,
+            "lineStart": 94,
+            "snippetSha256": "sha256:502f154f632eebb3f609fc3e813df531cc2b3e2bda702ef9f872bd18703d3023",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0xedd485a8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNoBidContractPosterClaimFailureRollsBack()",
+          "displaySignature": "testNoBidContractPosterClaimFailureRollsBack()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xa1049e37",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHhhMTA0OWUzNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNoBidContractPosterClaimFailureRollsBack",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1310,
+            "byteStart": 5665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L129-L155",
+            "lineEnd": 155,
+            "lineStart": 129,
+            "snippetSha256": "sha256:6674002db8c7c517b8da779ad01c57c39b049f5039f06a2d13571ef59d2ef5aa",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0xa1049e37",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testWithBidSettlementFailureLeavesEscrowAndCreditsUnchanged()",
+          "displaySignature": "testWithBidSettlementFailureLeavesEscrowAndCreditsUnchanged()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xccc60252",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHhjY2M2MDI1Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testWithBidSettlementFailureLeavesEscrowAndCreditsUnchanged",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1056,
+            "byteStart": 6981,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L157-L175",
+            "lineEnd": 175,
+            "lineStart": 157,
+            "snippetSha256": "sha256:7e1057676edd7909e3100232bc0356097f15064847bd2cb239850cccee1e6c61",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0xccc60252",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCancelBeforeBidReturnsCustodyAndBlocksBids()",
+          "displaySignature": "testCancelBeforeBidReturnsCustodyAndBlocksBids()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xc4328222",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHhjNDMyODIyMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCancelBeforeBidReturnsCustodyAndBlocksBids",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 791,
+            "byteStart": 8043,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L177-L193",
+            "lineEnd": 193,
+            "lineStart": 177,
+            "snippetSha256": "sha256:8800d5b0ba200f5c9e90efaf73a6796d5211a8d051014f66996993e4dbdf925e",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0xc4328222",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCancelAfterFirstBidFailsAndPreservesEscrow()",
+          "displaySignature": "testCancelAfterFirstBidFailsAndPreservesEscrow()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0x319cfbe2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHgzMTljZmJlMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCancelAfterFirstBidFailsAndPreservesEscrow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 912,
+            "byteStart": 8840,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L195-L212",
+            "lineEnd": 212,
+            "lineStart": 195,
+            "snippetSha256": "sha256:fb235fda074de424a3077b5898451d18bc5f3060bfed56d8d1ce736ff3b777cc",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0x319cfbe2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testBidNearEndExtendsAuctionRecord()",
+          "displaySignature": "testBidNearEndExtendsAuctionRecord()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xc08b90e9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246MHhjMDhiOTBlOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBidNearEndExtendsAuctionRecord",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 551,
+            "byteStart": 9758,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L214-L225",
+            "lineEnd": 225,
+            "lineStart": 214,
+            "snippetSha256": "sha256:b19928438e3a02fc49eba30161060c6847707b1edb455f1c040f8b50c95ea27f",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0xc08b90e9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createAuction(address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:_createAuction(address,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "saltSeed",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246X2NyZWF0ZUF1Y3Rpb24oYWRkcmVzcyx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createAuction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 1207,
+            "byteStart": 10471,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L234-L265",
+            "lineEnd": 265,
+            "lineStart": 234,
+            "snippetSha256": "sha256:c99d99adcb30d3f64120d1a2df26db708d8625c92034feebaa98620de230eb9e",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "deployedMinterEnd(AuctionSetup)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:deployedMinterEnd(AuctionSetup)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3QjZnVuY3Rpb246ZGVwbG95ZWRNaW50ZXJFbmQoQXVjdGlvblNldHVwKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deployedMinterEnd",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 163,
+            "byteStart": 11684,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L267-L269",
+            "lineEnd": 269,
+            "lineStart": 267,
+            "snippetSha256": "sha256:ce428a0e101c46c9fa7f0281e1bb43bcfcbfdaecda321d5c649b60da584b7bb0",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 446,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 556,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 618,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:e7ef27b835061eb97387ed119765068c5e8eafa4cf930470e119fdf02da08a7b",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 673,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:ea197a9fdd4761ad3e8409bac2b9912d3361c826be11a7c44042b605af8c987f",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 735,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:23317cd29e4897244fb503d3d13429bb5e2b481b1597a6de8d965deb81aa302c",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RESERVE_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 794,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:5d220cdbd734b87afbb29e781ce1a0927c3f4a7259c1d16b10ddb926f6ededa1",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "auctions",
+              "type": "StreamAuctions"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "name": "AuctionSetup",
+          "natspec": "",
+          "range": {
+            "byteLength": 150,
+            "byteStart": 10315,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L227-L232",
+            "lineEnd": 232,
+            "lineStart": 227,
+            "snippetSha256": "sha256:c4bcb4287cf51d85cdf655b08adbd4f82ee50931a0929a9925b19811a90ce222",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpTdHJlYW1BdWN0aW9uQ3VzdG9keVRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamAuctionCustodyTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 11580,
+      "byteStart": 269,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamAuctionCustody.t.sol#L10-L270",
+      "lineEnd": 270,
+      "lineStart": 10,
+      "snippetSha256": "sha256:bd297a7361eb865a9c9a37809957821a1ca0ec1b22fee15edbe6c3677564c434",
+      "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAuctionCustody.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 11
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 10
+    },
+    "totalCount": 11
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0x319cfbe2",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0x6b3c07f2",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xa1049e37",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xa5ffae97",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xc08b90e9",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xc4328222",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xccc60252",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xd82fb6df",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xedd485a8",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest#function:0xfe1106f2",
+      "definitionId": "test/StreamAuctionCustody.t.sol:StreamAuctionCustodyTest",
+      "severity": "advisory"
+    }
+  ]
+}

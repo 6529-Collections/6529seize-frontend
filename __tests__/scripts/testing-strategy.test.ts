@@ -342,6 +342,18 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.playwright_critical_shell.required).toBe(true);
   });
 
+  it.each([
+    "config/public-reviews/6529-stream.reference.json",
+    "public/review-data/6529-stream/index.json",
+    "scripts/public-reviews/solidity-reference.cjs",
+  ])("treats public review reference input %s as build-sensitive", (file) => {
+    const plan = createCiPlan([file]);
+
+    expect(plan.checks.build.required).toBe(true);
+    expect(plan.checks.playwright_critical_shell.required).toBe(true);
+    expect(plan.checks.build.reason).toContain("build-sensitive");
+  });
+
   it("requires build coverage for deleted runtime source", () => {
     const plan = createCiPlan(["components/example/DeletedWidget.tsx"]);
 

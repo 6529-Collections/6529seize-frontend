@@ -1,0 +1,133 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": true,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_msgSender()",
+          "functionKind": "function",
+          "id": "smart-contracts/Context.sol:Context#function:_msgSender()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0NvbnRleHQuc29sOkNvbnRleHQjZnVuY3Rpb246X21zZ1NlbmRlcigp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_msgSender",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 96,
+            "byteStart": 640,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/Context.sol#L17-L19",
+            "lineEnd": 19,
+            "lineStart": 17,
+            "snippetSha256": "sha256:cfe54f971210021b6a82432c7f49ce2cfbafcc9508121caa1684251defd8034f",
+            "sourceSha256": "sha256:6de5302543723d32c8eaf17becc4525936e16d9c4551455c93d306b9b72c0799"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_msgData()",
+          "functionKind": "function",
+          "id": "smart-contracts/Context.sol:Context#function:_msgData()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0NvbnRleHQuc29sOkNvbnRleHQjZnVuY3Rpb246X21zZ0RhdGEoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_msgData",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 99,
+            "byteStart": 742,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/Context.sol#L21-L23",
+            "lineEnd": 23,
+            "lineStart": 21,
+            "snippetSha256": "sha256:132206083653d91e53c5e8f805e2ac10f743355d1b44e3eec0d53658348f8b48",
+            "sourceSha256": "sha256:6de5302543723d32c8eaf17becc4525936e16d9c4551455c93d306b9b72c0799"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/Context.sol:Context",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0NvbnRleHQuc29sOkNvbnRleHQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/Context.sol:Context"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "Context",
+    "natspec": "@dev Provides information about the current execution context, including the\n sender of the transaction and its data. While these are generally available\n via msg.sender and msg.data, they should not be accessed in such a direct\n manner, since when dealing with meta-transactions the account sending and\n paying for execution may not be the actual sender (as far as an application\n is concerned).\n This contract is only required for intermediate, library-like contracts.",
+    "range": {
+      "byteLength": 235,
+      "byteStart": 608,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/Context.sol#L16-L24",
+      "lineEnd": 24,
+      "lineStart": 16,
+      "snippetSha256": "sha256:d768b8759414656c663aeb3fbd3a41425636ce8e7272e939eb780c36b0989a1e",
+      "sourceSha256": "sha256:6de5302543723d32c8eaf17becc4525936e16d9c4551455c93d306b9b72c0799"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/Context.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

@@ -1,0 +1,3339 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x35fe9633",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "AmbiguousRoleResolution",
+          "selector": "0x35fe9633",
+          "signature": "AmbiguousRoleResolution(bytes32,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x4c141527",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "DirectRoleRegistryOwnershipMutationDisabled",
+          "selector": "0x4c141527",
+          "signature": "DirectRoleRegistryOwnershipMutationDisabled()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x53f79efe",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "conflictingRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "DisjointRoleConflict",
+          "selector": "0x53f79efe",
+          "signature": "DisjointRoleConflict(bytes32,bytes32,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xdf34fb5b",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GovernanceIdentityRoleOverlap",
+          "selector": "0xdf34fb5b",
+          "signature": "GovernanceIdentityRoleOverlap(address,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x3f87b3a3",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "governanceExecutor",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidGovernanceExecutor",
+          "selector": "0x3f87b3a3",
+          "signature": "InvalidGovernanceExecutor(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xd3ffba4e",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            }
+          ],
+          "name": "RoleActorNotAuthorized",
+          "selector": "0xd3ffba4e",
+          "signature": "RoleActorNotAuthorized(bytes32,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x6dd4f06c",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "RoleAlreadyGranted",
+          "selector": "0x6dd4f06c",
+          "signature": "RoleAlreadyGranted(bytes32,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xa8108d85",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "expectedClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "actualClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "RoleGovernanceActionClassMismatch",
+          "selector": "0xa8108d85",
+          "signature": "RoleGovernanceActionClassMismatch(uint8,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xe165f7f0",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "RoleGovernanceActionIdZero",
+          "selector": "0xe165f7f0",
+          "signature": "RoleGovernanceActionIdZero()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x8758d52c",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "RoleGovernanceActionNotExecuting",
+          "selector": "0x8758d52c",
+          "signature": "RoleGovernanceActionNotExecuting()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x9c173a18",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleGovernanceNewStateHashMismatch",
+          "selector": "0x9c173a18",
+          "signature": "RoleGovernanceNewStateHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x82379f9c",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleGovernanceOldStateHashMismatch",
+          "selector": "0x82379f9c",
+          "signature": "RoleGovernanceOldStateHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xb194ce4d",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleGovernanceScopeHashMismatch",
+          "selector": "0xb194ce4d",
+          "signature": "RoleGovernanceScopeHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x65831ed4",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "RoleHolderIndexOutOfBounds",
+          "selector": "0x65831ed4",
+          "signature": "RoleHolderIndexOutOfBounds(bytes32,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xbf6c713a",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "RoleManagerConfigNoOp",
+          "selector": "0xbf6c713a",
+          "signature": "RoleManagerConfigNoOp(address,bool)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x54d256aa",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleMutationRevisionOverflow",
+          "selector": "0x54d256aa",
+          "signature": "RoleMutationRevisionOverflow(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xe9007bcc",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "RoleNotGranted",
+          "selector": "0xe9007bcc",
+          "signature": "RoleNotGranted(bytes32,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xd6b3fa27",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleUnresolved",
+          "selector": "0xd6b3fa27",
+          "signature": "RoleUnresolved(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xace97381",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "TerminalFreezeVetoGuardianCap",
+          "selector": "0xace97381",
+          "signature": "TerminalFreezeVetoGuardianCap(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x644e5840",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "TerminalFreezeVetoGuardianDelegatedEOA",
+          "selector": "0x644e5840",
+          "signature": "TerminalFreezeVetoGuardianDelegatedEOA(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x9eb945e6",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "TerminalFreezeVetoGuardianFloor",
+          "selector": "0x9eb945e6",
+          "signature": "TerminalFreezeVetoGuardianFloor(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xda88e003",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "TerminalFreezeVetoGuardianMustHaveCode",
+          "selector": "0xda88e003",
+          "signature": "TerminalFreezeVetoGuardianMustHaveCode(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x74cc4fed",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnknownRole",
+          "selector": "0x74cc4fed",
+          "signature": "UnknownRole(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xb8a2d47b",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ZeroRoleHolder",
+          "selector": "0xb8a2d47b",
+          "signature": "ZeroRoleHolder(bytes32)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#event:RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "configChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "configRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleManagerUpdated",
+          "signature": "RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "topic0": "0xb08dd46dd5caf79cdfd7060f42cebba12dc707c2d25f0646753c6c240ea5b627"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#event:RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "granted",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "roleChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "roleRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "globalChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "globalRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 8,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleMutationCommitted",
+          "signature": "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "topic0": "0xe7db8fc830e4a9ad4e109992e6cf9d48e383ea6b7b37cf64be502d2ad4143666"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#event:StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamRoleGranted",
+          "signature": "StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "topic0": "0x9b9b410e01df674848a6af9c4677f982bcd5957194cd51eb34ed04532bc7a2aa"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#event:StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamRoleRevoked",
+          "signature": "StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "topic0": "0x674124c7fd9b40a7e8da58914611e15b27e8f0645cae8abf147adb7eb68d841f"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xbe9ee11f",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "emergencyRecipient",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xbe9ee11f",
+          "signature": "emergencyRecipient()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xb101db25",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "globalRoleMutationState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xb101db25",
+          "signature": "globalRoleMutationState()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x2f2ff15d",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "grantRole",
+          "outputs": [],
+          "selector": "0x2f2ff15d",
+          "signature": "grantRole(bytes32,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x4c5ceedb",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "grantScopedRole",
+          "outputs": [],
+          "selector": "0x4c5ceedb",
+          "signature": "grantScopedRole(bytes32,bytes32,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x3d8e51dc",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "hasAnyTerminalFreezeVetoRole",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x3d8e51dc",
+          "signature": "hasAnyTerminalFreezeVetoRole(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x91d14854",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "hasRole",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x91d14854",
+          "signature": "hasRole(bytes32,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x1ace0f58",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isKnownRole",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x1ace0f58",
+          "signature": "isKnownRole(bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x2d524393",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "isRoleManager",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x2d524393",
+          "signature": "isRoleManager(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x858295eb",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isRoleRedundant",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x858295eb",
+          "signature": "isRoleRedundant(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xcaddbbcd",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isScopableRole",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xcaddbbcd",
+          "signature": "isScopableRole(bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x148fed8e",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "registerRoleManager",
+          "outputs": [],
+          "selector": "0x148fed8e",
+          "signature": "registerRoleManager(address,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xac4da548",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "resolveRole",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "selector": "0xac4da548",
+          "signature": "resolveRole(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xd547741f",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "revokeRole",
+          "outputs": [],
+          "selector": "0xd547741f",
+          "signature": "revokeRole(bytes32,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x2862c0f1",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "revokeScopedRole",
+          "outputs": [],
+          "selector": "0x2862c0f1",
+          "signature": "revokeScopedRole(bytes32,bytes32,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xc9b94660",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "roleGrantClass",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xc9b94660",
+          "signature": "roleGrantClass(bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xeef41635",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "roleHolderAt",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xeef41635",
+          "signature": "roleHolderAt(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xc4e1d117",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "roleHolderCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xc4e1d117",
+          "signature": "roleHolderCount(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x903c49a7",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "roleManagerConfigMutationState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x903c49a7",
+          "signature": "roleManagerConfigMutationState(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xcdd5744a",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "roleMutationState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xcdd5744a",
+          "signature": "roleMutationState(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xd5aa1650",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "roleRedundancy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "holderCount",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "contractHolderCount",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd5aa1650",
+          "signature": "roleRedundancy(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x8a28138f",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "scopedRole",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x8a28138f",
+          "signature": "scopedRole(bytes32,bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x36333342",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "scopedRoleMutationState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x36333342",
+          "signature": "scopedRoleMutationState(bytes32,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xfce20261",
+          "declaringDefinitionId": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "terminalFreezeVetoMembershipCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xfce20261",
+          "signature": "terminalFreezeVetoMembershipCount(address)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 16436,
+          "canonicalSignature": "UnknownRole(bytes32)",
+          "displaySignature": "UnknownRole(bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x74cc4fed",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg3NGNjNGZlZA",
+          "kind": "error",
+          "name": "UnknownRole",
+          "natspec": "@notice Reverts when a role constant is outside the pinned [GOV-ROLES] vocabulary.",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 784,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:de3bdf373a4816b611fd9d37e7940619e940ee90887443a475ac93d5e5827aa2",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x74cc4fed"
+        },
+        {
+          "astId": 16443,
+          "canonicalSignature": "RoleActorNotAuthorized(bytes32,address)",
+          "displaySignature": "RoleActorNotAuthorized(bytes32,address)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xd3ffba4e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "actor",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhkM2ZmYmE0ZQ",
+          "kind": "error",
+          "name": "RoleActorNotAuthorized",
+          "natspec": "@notice Reverts when the caller may not grant or revoke the role class.",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 901,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:b9ea7a2294701e329a5de458958d676360c2f9ef7ec52f1d92e5cb563f4c36f9",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xd3ffba4e"
+        },
+        {
+          "astId": 16450,
+          "canonicalSignature": "RoleAlreadyGranted(bytes32,address)",
+          "displaySignature": "RoleAlreadyGranted(bytes32,address)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x6dd4f06c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg2ZGQ0ZjA2Yw",
+          "kind": "error",
+          "name": "RoleAlreadyGranted",
+          "natspec": "@notice Reverts when granting a role the holder already has.",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 1033,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:b057a87229d7469320f26757191e2896312fcbbc18bd85a3ca1f45e627b87c96",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x6dd4f06c"
+        },
+        {
+          "astId": 16457,
+          "canonicalSignature": "RoleNotGranted(bytes32,address)",
+          "displaySignature": "RoleNotGranted(bytes32,address)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xe9007bcc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhlOTAwN2JjYw",
+          "kind": "error",
+          "name": "RoleNotGranted",
+          "natspec": "@notice Reverts when revoking a role the holder does not have.",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 1164,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:9657ceb46279ea056654e85f40017f642548d0c7b61e3dec208231ca84e8c014",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xe9007bcc"
+        },
+        {
+          "astId": 16462,
+          "canonicalSignature": "ZeroRoleHolder(bytes32)",
+          "displaySignature": "ZeroRoleHolder(bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xb8a2d47b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhiOGEyZDQ3Yg",
+          "kind": "error",
+          "name": "ZeroRoleHolder",
+          "natspec": "@notice Reverts on zero-address holders and role managers.",
+          "range": {
+            "byteLength": 35,
+            "byteStart": 1287,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:43b79db89796e05850ef54e617428e907ecf8ae35e2ac0f46e28b88e4743a83f",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xb8a2d47b"
+        },
+        {
+          "astId": 16467,
+          "canonicalSignature": "RoleUnresolved(bytes32)",
+          "displaySignature": "RoleUnresolved(bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xd6b3fa27",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhkNmIzZmEyNw",
+          "kind": "error",
+          "name": "RoleUnresolved",
+          "natspec": "@notice Reverts when resolving a role with no current holder.",
+          "range": {
+            "byteLength": 35,
+            "byteStart": 1397,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:3691a5263926313382bfb0b0cb80dc496ef99b2f30c0c5cd9f3972e46d36ec77",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xd6b3fa27"
+        },
+        {
+          "astId": 16474,
+          "canonicalSignature": "AmbiguousRoleResolution(bytes32,uint256)",
+          "displaySignature": "AmbiguousRoleResolution(bytes32,uint256)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x35fe9633",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHgzNWZlOTYzMw",
+          "kind": "error",
+          "name": "AmbiguousRoleResolution",
+          "natspec": "@notice Reverts when single-address resolution meets multiple holders.",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1516,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:627d57199f7aa99dc6d2fe53641d0192d7f8bca8fe41901e1ce20260165ed9e6",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x35fe9633"
+        },
+        {
+          "astId": 16483,
+          "canonicalSignature": "DisjointRoleConflict(bytes32,bytes32,address)",
+          "displaySignature": "DisjointRoleConflict(bytes32,bytes32,address)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x53f79efe",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "conflictingRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg1M2Y3OWVmZQ",
+          "kind": "error",
+          "name": "DisjointRoleConflict",
+          "natspec": "@notice Reverts when a grant would violate a pinned role-disjointness rule\n         ([GOV-WINDOWS] rule 3: pause guardians cannot unpause and\n         unpause holders cannot pause).",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 1790,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:70a8834c40cf6eb5cd98d83ec26bce27da26e55ddb1b5ee838f8d456003544a7",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x53f79efe"
+        },
+        {
+          "astId": 16490,
+          "canonicalSignature": "RoleHolderIndexOutOfBounds(bytes32,uint256)",
+          "displaySignature": "RoleHolderIndexOutOfBounds(bytes32,uint256)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x65831ed4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg2NTgzMWVkNA",
+          "kind": "error",
+          "name": "RoleHolderIndexOutOfBounds",
+          "natspec": "@notice Reverts when a holder enumeration index is out of bounds.",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 1951,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:f6a0f33ee794b0239fcf4ed1784da08e2f946090f3e671dfb0832415a901a63a",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x65831ed4"
+        },
+        {
+          "astId": 16495,
+          "canonicalSignature": "RoleMutationRevisionOverflow(bytes32)",
+          "displaySignature": "RoleMutationRevisionOverflow(bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x54d256aa",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg1NGQyNTZhYQ",
+          "kind": "error",
+          "name": "RoleMutationRevisionOverflow",
+          "natspec": "@notice Reverts if a role's append-only mutation counter can no longer advance.",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 2106,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:6c87bebdab06df918555f531f73a2d6f70fc1001b5016a05afb684b65625d0b5",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x54d256aa"
+        },
+        {
+          "astId": 16499,
+          "canonicalSignature": "InvalidGovernanceExecutor(address)",
+          "displaySignature": "InvalidGovernanceExecutor(address)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x3f87b3a3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "governanceExecutor",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHgzZjg3YjNhMw",
+          "kind": "error",
+          "name": "InvalidGovernanceExecutor",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 2160,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:25daedae3ef1d32b61bdd8ed89cb861908e05268f82cf405344aa7dd1ad82e81",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x3f87b3a3"
+        },
+        {
+          "astId": 16501,
+          "canonicalSignature": "DirectRoleRegistryOwnershipMutationDisabled()",
+          "displaySignature": "DirectRoleRegistryOwnershipMutationDisabled()",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x4c141527",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg0YzE0MTUyNw",
+          "kind": "error",
+          "name": "DirectRoleRegistryOwnershipMutationDisabled",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 2225,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:d4ed7326f47144cb02de10f9c1f04643e9056cb06efb83d7238f0ea7839f14c5",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x4c141527"
+        },
+        {
+          "astId": 16505,
+          "canonicalSignature": "TerminalFreezeVetoGuardianFloor(uint256)",
+          "displaySignature": "TerminalFreezeVetoGuardianFloor(uint256)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x9eb945e6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg5ZWI5NDVlNg",
+          "kind": "error",
+          "name": "TerminalFreezeVetoGuardianFloor",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 2282,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:96a8ac3fe6c0390692f35b16a6938548db104e346e6264b1d0203485e9479772",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x9eb945e6"
+        },
+        {
+          "astId": 16509,
+          "canonicalSignature": "TerminalFreezeVetoGuardianMustHaveCode(address)",
+          "displaySignature": "TerminalFreezeVetoGuardianMustHaveCode(address)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xda88e003",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhkYTg4ZTAwMw",
+          "kind": "error",
+          "name": "TerminalFreezeVetoGuardianMustHaveCode",
+          "natspec": "",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 2346,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:8da8bbf4a23754bdee870b13d2033e2ed65b568d8c078fbefece1f6fb1d2e019",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xda88e003"
+        },
+        {
+          "astId": 16513,
+          "canonicalSignature": "TerminalFreezeVetoGuardianDelegatedEOA(address)",
+          "displaySignature": "TerminalFreezeVetoGuardianDelegatedEOA(address)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x644e5840",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg2NDRlNTg0MA",
+          "kind": "error",
+          "name": "TerminalFreezeVetoGuardianDelegatedEOA",
+          "natspec": "",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 2412,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:5f4fe1391d55d9203205344c5f56a9cb4bbf427289f8bc2daece44e443a9d88d",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x644e5840"
+        },
+        {
+          "astId": 16517,
+          "canonicalSignature": "TerminalFreezeVetoGuardianCap(uint256)",
+          "displaySignature": "TerminalFreezeVetoGuardianCap(uint256)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xace97381",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhhY2U5NzM4MQ",
+          "kind": "error",
+          "name": "TerminalFreezeVetoGuardianCap",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 2478,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:1b61d938f54a834906d7832f6354ef1eb121082bbe921c86165d91ca77f707fd",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xace97381"
+        },
+        {
+          "astId": 16523,
+          "canonicalSignature": "GovernanceIdentityRoleOverlap(address,bytes32)",
+          "displaySignature": "GovernanceIdentityRoleOverlap(address,bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xdf34fb5b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhkZjM0ZmI1Yg",
+          "kind": "error",
+          "name": "GovernanceIdentityRoleOverlap",
+          "natspec": "",
+          "range": {
+            "byteLength": 67,
+            "byteStart": 2540,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L41",
+            "lineEnd": 41,
+            "lineStart": 41,
+            "snippetSha256": "sha256:9f08b2f31613c4e2f3eb3879311f9e89e63aff09240b1c2cc97bfe44d04daebe",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xdf34fb5b"
+        },
+        {
+          "astId": 16526,
+          "canonicalSignature": "RoleGovernanceActionNotExecuting()",
+          "displaySignature": "RoleGovernanceActionNotExecuting()",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x8758d52c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg4NzU4ZDUyYw",
+          "kind": "error",
+          "name": "RoleGovernanceActionNotExecuting",
+          "natspec": "@notice Reverts when an Executor-owned mutation is not the active\n         target call of a Governance V2 batch.",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 2740,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L44",
+            "lineEnd": 44,
+            "lineStart": 44,
+            "snippetSha256": "sha256:9900671ff08d86602f31f46789d744469973c8e12efdb25653ec1d0b2bc17e12",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x8758d52c"
+        },
+        {
+          "astId": 16529,
+          "canonicalSignature": "RoleGovernanceActionIdZero()",
+          "displaySignature": "RoleGovernanceActionIdZero()",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xe165f7f0",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhlMTY1ZjdmMA",
+          "kind": "error",
+          "name": "RoleGovernanceActionIdZero",
+          "natspec": "@notice Reverts when the active Executor context exposes no action id.",
+          "range": {
+            "byteLength": 35,
+            "byteStart": 2865,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L46",
+            "lineEnd": 46,
+            "lineStart": 46,
+            "snippetSha256": "sha256:3452c7d566c70bcd38d7593debc56997a64996696334aa4f89ff2f66e224a3fa",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xe165f7f0"
+        },
+        {
+          "astId": 16536,
+          "canonicalSignature": "RoleGovernanceActionClassMismatch(uint8,uint8)",
+          "displaySignature": "RoleGovernanceActionClassMismatch(uint8,uint8)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xa8108d85",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "actualClass",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhhODEwOGQ4NQ",
+          "kind": "error",
+          "name": "RoleGovernanceActionClassMismatch",
+          "natspec": "@notice Reverts when an Executor-owned mutation is not delayed class 1.",
+          "range": {
+            "byteLength": 80,
+            "byteStart": 2985,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L48",
+            "lineEnd": 48,
+            "lineStart": 48,
+            "snippetSha256": "sha256:6307987c9aa5f1687b51399ab174d741ae68d73861b6090ba1168dcb3967f429",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xa8108d85"
+        },
+        {
+          "astId": 16543,
+          "canonicalSignature": "RoleGovernanceScopeHashMismatch(bytes32,bytes32)",
+          "displaySignature": "RoleGovernanceScopeHashMismatch(bytes32,bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xb194ce4d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhiMTk0Y2U0ZA",
+          "kind": "error",
+          "name": "RoleGovernanceScopeHashMismatch",
+          "natspec": "@notice Reverts when the per-call role/config scope is not exact.",
+          "range": {
+            "byteLength": 80,
+            "byteStart": 3144,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:11421e19fe5efbe0e89098047d3929103f8caa8da711ec171eb04ba28a7692a5",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xb194ce4d"
+        },
+        {
+          "astId": 16550,
+          "canonicalSignature": "RoleGovernanceOldStateHashMismatch(bytes32,bytes32)",
+          "displaySignature": "RoleGovernanceOldStateHashMismatch(bytes32,bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x82379f9c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg4MjM3OWY5Yw",
+          "kind": "error",
+          "name": "RoleGovernanceOldStateHashMismatch",
+          "natspec": "@notice Reverts when the live pre-mutation role state is not committed.",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 3309,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:a618925ae165fe129e7bfa26bfc4456afc18e9bf04a5c27fdd468e2723b8b659",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x82379f9c"
+        },
+        {
+          "astId": 16557,
+          "canonicalSignature": "RoleGovernanceNewStateHashMismatch(bytes32,bytes32)",
+          "displaySignature": "RoleGovernanceNewStateHashMismatch(bytes32,bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0x9c173a18",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHg5YzE3M2ExOA",
+          "kind": "error",
+          "name": "RoleGovernanceNewStateHashMismatch",
+          "natspec": "@notice Reverts when the complete post-mutation role state is not committed.",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 3482,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:2c9120ffb50562e171610f4f9083c2e17bc6635cd0406fc8ebee6a7f830e0af1",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x9c173a18"
+        },
+        {
+          "astId": 16564,
+          "canonicalSignature": "RoleManagerConfigNoOp(address,bool)",
+          "displaySignature": "RoleManagerConfigNoOp(address,bool)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#error:0xbf6c713a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXJyb3I6MHhiZjZjNzEzYQ",
+          "kind": "error",
+          "name": "RoleManagerConfigNoOp",
+          "natspec": "@notice Reverts when a RoleManager configuration write changes nothing.",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 3650,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:4a3114524f61ed731007919043b455586f4a9c48312d990525386d3b80bab314",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xbf6c713a"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 16578,
+          "canonicalSignature": "StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "displaySignature": "StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#event:StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXZlbnQ6U3RyZWFtUm9sZUdyYW50ZWQodWludDE2LGJ5dGVzMzIsYWRkcmVzcyx1aW50OCxhZGRyZXNzLGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "StreamRoleGranted",
+          "natspec": "",
+          "range": {
+            "byteLength": 205,
+            "byteStart": 3715,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L58-L65",
+            "lineEnd": 65,
+            "lineStart": 58,
+            "snippetSha256": "sha256:2ae30cb62c6d8e1d9498116c3b67785bbb6ae548599dff804173a665e71b670e",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "topic0": "0x9b9b410e01df674848a6af9c4677f982bcd5957194cd51eb34ed04532bc7a2aa"
+        },
+        {
+          "anonymous": false,
+          "astId": 16592,
+          "canonicalSignature": "StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "displaySignature": "StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#event:StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXZlbnQ6U3RyZWFtUm9sZVJldm9rZWQodWludDE2LGJ5dGVzMzIsYWRkcmVzcyx1aW50OCxhZGRyZXNzLGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "StreamRoleRevoked",
+          "natspec": "",
+          "range": {
+            "byteLength": 205,
+            "byteStart": 3926,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L67-L74",
+            "lineEnd": 74,
+            "lineStart": 67,
+            "snippetSha256": "sha256:024cd1d0c15044ff139c5f9fdef8cbc415d52de6733fde8b93ffe8119f6b4342",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "topic0": "0x674124c7fd9b40a7e8da58914611e15b27e8f0645cae8abf147adb7eb68d841f"
+        },
+        {
+          "anonymous": false,
+          "astId": 16608,
+          "canonicalSignature": "RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "displaySignature": "RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#event:RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "configChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "configRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXZlbnQ6Um9sZU1hbmFnZXJVcGRhdGVkKHVpbnQxNixhZGRyZXNzLGJvb2wsYWRkcmVzcyxieXRlczMyLHVpbnQ2NCxieXRlczMyKQ",
+          "kind": "event",
+          "name": "RoleManagerUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 245,
+            "byteStart": 4137,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L76-L84",
+            "lineEnd": 84,
+            "lineStart": 76,
+            "snippetSha256": "sha256:911148f7259e5b71d8e86045f93274afdc419f451aed5088ab5ea0a54eba194c",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "topic0": "0xb08dd46dd5caf79cdfd7060f42cebba12dc707c2d25f0646753c6c240ea5b627"
+        },
+        {
+          "anonymous": false,
+          "astId": 16629,
+          "canonicalSignature": "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "displaySignature": "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#event:RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "granted",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "roleChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "roleRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "globalChainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "globalRevision",
+              "type": "uint64"
+            },
+            {
+              "index": 8,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZXZlbnQ6Um9sZU11dGF0aW9uQ29tbWl0dGVkKHVpbnQxNixieXRlczMyLGFkZHJlc3MsYm9vbCxieXRlczMyLHVpbnQ2NCxieXRlczMyLHVpbnQ2NCxieXRlczMyKQ",
+          "kind": "event",
+          "name": "RoleMutationCommitted",
+          "natspec": "@notice Emitted for every successful role-holder mutation.\n @dev `roleChainHash` is scoped to `role`; `globalChainHash` commits to\n      every grant/revoke across the registry. Both counters are\n      monotonic, so a holder set that returns A -> B -> A remains\n      distinguishable from the original A state.",
+          "range": {
+            "byteLength": 306,
+            "byteStart": 4734,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L91-L101",
+            "lineEnd": 101,
+            "lineStart": 91,
+            "snippetSha256": "sha256:ebeccc922caa733f240d9e49273bc8a27a89f35687d530e50223fb387da73579",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "topic0": "0xe7db8fc830e4a9ad4e109992e6cf9d48e383ea6b7b37cf64be502d2ad4143666"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHgwMWZmYzlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "@notice ERC-165 identity used by executor-first bootstrap binding.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 76,
+            "byteStart": 5121,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L104",
+            "lineEnd": 104,
+            "lineStart": 104,
+            "snippetSha256": "sha256:5aa830a49fc39bb3d8a80ff9550c46940c066eabd7cbc19d62ac1038e069a65f",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "grantRole(bytes32,address)",
+          "displaySignature": "grantRole(bytes32,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x2f2ff15d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHgyZjJmZjE1ZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "grantRole",
+          "natspec": "@notice Grants `role` to `holder` under the role's grant class rules.",
+          "outputs": [],
+          "range": {
+            "byteLength": 58,
+            "byteStart": 5281,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L107",
+            "lineEnd": 107,
+            "lineStart": 107,
+            "snippetSha256": "sha256:7543ef7a3ed67000424b16ac4798ef6f934be18f4f2508daf772dcda6c044cec",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x2f2ff15d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "revokeRole(bytes32,address)",
+          "displaySignature": "revokeRole(bytes32,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xd547741f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhkNTQ3NzQxZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "revokeRole",
+          "natspec": "@notice Revokes `role` from `holder` under the role's grant class rules.",
+          "outputs": [],
+          "range": {
+            "byteLength": 59,
+            "byteStart": 5426,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L110",
+            "lineEnd": 110,
+            "lineStart": 110,
+            "snippetSha256": "sha256:079351556771993e25744c09fa8e95f40979a33142733391a8d6be9a0b20866d",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xd547741f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "grantScopedRole(bytes32,bytes32,address)",
+          "displaySignature": "grantScopedRole(bytes32,bytes32,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x4c5ceedb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHg0YzVjZWVkYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "grantScopedRole",
+          "natspec": "@notice Grants a per-scope instance of a scopable base role\n         (`scopedRole(baseRole, scopeHash)`) to `holder`.\n @dev Keeps the vocabulary closed at the base level while supporting the\n     additive per-scope designation of ADR 0004 [GOV-WINDOWS] (for\n     example per-scope terminal-freeze veto guardians). Authority follows\n     the base role's grant class. Reverts `UnknownRole` when `baseRole`\n     is not scopable.",
+          "outputs": [],
+          "range": {
+            "byteLength": 87,
+            "byteStart": 5967,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L119",
+            "lineEnd": 119,
+            "lineStart": 119,
+            "snippetSha256": "sha256:dd7c92186bf9d05200ece1c9a4b08f0ee40964e5f0688f34404b6037efabe7b9",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x4c5ceedb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "revokeScopedRole(bytes32,bytes32,address)",
+          "displaySignature": "revokeScopedRole(bytes32,bytes32,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x2862c0f1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHgyODYyYzBmMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "revokeScopedRole",
+          "natspec": "@notice Revokes a per-scope instance of a scopable base role from `holder`.",
+          "outputs": [],
+          "range": {
+            "byteLength": 88,
+            "byteStart": 6144,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L122",
+            "lineEnd": 122,
+            "lineStart": 122,
+            "snippetSha256": "sha256:099d243dd282cd0fc9ad9e7970fdda167ada08f77bb387656cef17e1930f5931",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x2862c0f1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "scopedRole(bytes32,bytes32)",
+          "displaySignature": "scopedRole(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x8a28138f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHg4YTI4MTM4Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "scopedRole",
+          "natspec": "@notice Returns the derived per-scope role key\n         `keccak256(abi.encode(baseRole, scopeHash))`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 6355,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L126",
+            "lineEnd": 126,
+            "lineStart": 126,
+            "snippetSha256": "sha256:7dcb298b8a0dfa6c66c973edd9c8298c1af6656180ac4b4643ddc374524df254",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x8a28138f",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isScopableRole(bytes32)",
+          "displaySignature": "isScopableRole(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xcaddbbcd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "baseRole",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhjYWRkYmJjZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isScopableRole",
+          "natspec": "@notice Returns true when `baseRole` may be granted per-scope.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 71,
+            "byteStart": 6521,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L129",
+            "lineEnd": 129,
+            "lineStart": 129,
+            "snippetSha256": "sha256:f320800acfb2778558353e22be39b9efe5bacfbb33a06d8f7f2e844c496c360d",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xcaddbbcd",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "hasRole(bytes32,address)",
+          "displaySignature": "hasRole(bytes32,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x91d14854",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHg5MWQxNDg1NA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "hasRole",
+          "natspec": "@notice Returns true when `account` currently holds `role`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 77,
+            "byteStart": 6666,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L132",
+            "lineEnd": 132,
+            "lineStart": 132,
+            "snippetSha256": "sha256:d8443afedc28bda31466c3c53eb1031847d5a014afeed97f4fb4ab3ef972d4ae",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x91d14854",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "hasAnyTerminalFreezeVetoRole(address)",
+          "displaySignature": "hasAnyTerminalFreezeVetoRole(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x3d8e51dc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHgzZDhlNTFkYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "hasAnyTerminalFreezeVetoRole",
+          "natspec": "@notice Returns true when `account` holds the global terminal-veto role\n         or any derived per-scope instance of it.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 84,
+            "byteStart": 6886,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L136",
+            "lineEnd": 136,
+            "lineStart": 136,
+            "snippetSha256": "sha256:4cab0fb62e2bab0bfbc05d9ada68ef17f6df4fca9416c739975a9a81a7064947",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x3d8e51dc",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "terminalFreezeVetoMembershipCount(address)",
+          "displaySignature": "terminalFreezeVetoMembershipCount(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xfce20261",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhmY2UyMDI2MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "terminalFreezeVetoMembershipCount",
+          "natspec": "@notice Returns the exact number of global plus scoped terminal-veto\n         memberships currently held by `account`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 92,
+            "byteStart": 7110,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L140",
+            "lineEnd": 140,
+            "lineStart": 140,
+            "snippetSha256": "sha256:d5838cf11be6efc6c91f9e2f1599c107116ff0a9ba00bfe575f5730268c84f67",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xfce20261",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "roleHolderCount(bytes32)",
+          "displaySignature": "roleHolderCount(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xc4e1d117",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhjNGUxZDExNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "roleHolderCount",
+          "natspec": "@notice Returns the number of current holders of `role`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 71,
+            "byteStart": 7273,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L143",
+            "lineEnd": 143,
+            "lineStart": 143,
+            "snippetSha256": "sha256:47c8bb1a50d5ea5dcb5a7a4e6610a3aae57dc81a037c24ff0e9ecc67d1b1d90d",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xc4e1d117",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "roleHolderAt(bytes32,uint256)",
+          "displaySignature": "roleHolderAt(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xeef41635",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhlZWY0MTYzNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "roleHolderAt",
+          "natspec": "@notice Returns the holder of `role` at `index` (unordered enumeration).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 7431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L146",
+            "lineEnd": 146,
+            "lineStart": 146,
+            "snippetSha256": "sha256:e8139d9fe445c21089eecc466e719840ddcfbb2999afffe6183a4b8773c679ef",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xeef41635",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "roleMutationState(bytes32)",
+          "displaySignature": "roleMutationState(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xcdd5744a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhjZGQ1NzQ0YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "roleMutationState",
+          "natspec": "@notice Returns the append-only mutation chain and revision for an\n         exact role key. The role key may be either a base role or a\n         derived scoped role returned by `scopedRole`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 124,
+            "byteStart": 7733,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L151-L154",
+            "lineEnd": 154,
+            "lineStart": 151,
+            "snippetSha256": "sha256:917dbeac7c058f486ac6f8fd8319eae4516735098a861610a53a9438d97ea048",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xcdd5744a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "scopedRoleMutationState(bytes32,bytes32)",
+          "displaySignature": "scopedRoleMutationState(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x36333342",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHgzNjMzMzM0Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "scopedRoleMutationState",
+          "natspec": "@notice Returns the append-only mutation state for a derived scoped role.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 167,
+            "byteStart": 7945,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L157-L160",
+            "lineEnd": 160,
+            "lineStart": 157,
+            "snippetSha256": "sha256:ab57d259990559d7c12bb62cc045741e2cc60ad4efbbbde98b7e97868965e938",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x36333342",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "globalRoleMutationState()",
+          "displaySignature": "globalRoleMutationState()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xb101db25",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhiMTAxZGIyNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "globalRoleMutationState",
+          "natspec": "@notice Returns the append-only aggregate of every role grant/revoke.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 8196,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L163",
+            "lineEnd": 163,
+            "lineStart": 163,
+            "snippetSha256": "sha256:be52cb7a16b5899c78994a66bcdc8c3164688390eb3b74cbb5bd62e3892c1885",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xb101db25",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "resolveRole(bytes32)",
+          "displaySignature": "resolveRole(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xac4da548",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhhYzRkYTU0OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "resolveRole",
+          "natspec": "@notice Resolves `role` to its single current holder; reverts when the\n         role has zero or multiple holders.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 74,
+            "byteStart": 8426,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L167",
+            "lineEnd": 167,
+            "lineStart": 167,
+            "snippetSha256": "sha256:ce0774742e5a9dd5ca511007fe411b1b9159717a46131ba877d8b2568f232f7e",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xac4da548",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "emergencyRecipient()",
+          "displaySignature": "emergencyRecipient()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xbe9ee11f",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhiZTllZTExZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "emergencyRecipient",
+          "natspec": "@notice Resolves `ROLE_EMERGENCY_RECIPIENT` through the registry.\n @dev Never a stored raw address (ADR 0004 [GOV-ROLES]; ADR 0013 decision U5).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 8666,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L171",
+            "lineEnd": 171,
+            "lineStart": 171,
+            "snippetSha256": "sha256:ff5963394ef935bd20b429668c583b5efe34179b270774345d1fdb34fb17a180",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xbe9ee11f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "roleGrantClass(bytes32)",
+          "displaySignature": "roleGrantClass(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xc9b94660",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhjOWI5NDY2MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "roleGrantClass",
+          "natspec": "@notice Returns the pinned grant class for `role`\n         (1 = root, 2 = operational); reverts for unknown roles.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 68,
+            "byteStart": 8864,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L175",
+            "lineEnd": 175,
+            "lineStart": 175,
+            "snippetSha256": "sha256:9dc9425010cd9ca8547544d3e2a39e2bd9c22c416b35d65a5c79b8caa368e00c",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xc9b94660",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isKnownRole(bytes32)",
+          "displaySignature": "isKnownRole(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x1ace0f58",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHgxYWNlMGY1OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isKnownRole",
+          "natspec": "@notice Returns true when `role` is in the pinned [GOV-ROLES] vocabulary.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 9020,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L178",
+            "lineEnd": 178,
+            "lineStart": 178,
+            "snippetSha256": "sha256:80aeaa5b4f92d73495f4eba6de5c83a6f194f7d7f0e97537626308a24bddfe4e",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x1ace0f58",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "roleRedundancy(bytes32)",
+          "displaySignature": "roleRedundancy(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0xd5aa1650",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHhkNWFhMTY1MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "roleRedundancy",
+          "natspec": "@notice Returns the holder count and the count of non-EIP-7702 holders\n         with deployed code observed at call time, for [GOV-WINDOWS]\n         rule 2 redundancy gates.\n @dev The contract-holder count is a necessary-but-insufficient onchain\n     proxy for redundancy: it cannot prove the holders are independently\n     controlled. The exact EIP-7702 designation is rejected on grant and\n     excluded if observed later, while true independent control remains a\n     ceremony/off-chain governance obligation ([GOV-MATERIAL];\n     [LTA-GUARDIAN] rule 8).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "holderCount",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "contractHolderCount",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 135,
+            "byteStart": 9712,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L189-L192",
+            "lineEnd": 192,
+            "lineStart": 189,
+            "snippetSha256": "sha256:d17ab521daef980d8424dab09d18f3bd182713dbb3b058256be43a5ff3864d4c",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0xd5aa1650",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isRoleRedundant(bytes32)",
+          "displaySignature": "isRoleRedundant(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x858295eb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHg4NTgyOTVlYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRoleRedundant",
+          "natspec": "@notice Returns true when `role` satisfies the onchain proxy for the\n         [GOV-WINDOWS] rule 2 emergency-holder floor: at least two\n         holders, all of which expose deployed code at observation time\n         and none of which carries the exact EIP-7702 delegation\n         designation.\n @dev Necessary but not sufficient. This gate cannot establish that the\n     holders are independently controlled; that remains a ceremony/\n     off-chain obligation ([GOV-MATERIAL]; [LTA-GUARDIAN] rule 8). A\n     `true` result is a floor, not a proof of redundancy.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 68,
+            "byteStart": 10479,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L203",
+            "lineEnd": 203,
+            "lineStart": 203,
+            "snippetSha256": "sha256:9e581668a11d0ce18a464aa551869ea67be64ed321156726715284b6de5d5c19",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x858295eb",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isRoleManager(address)",
+          "displaySignature": "isRoleManager(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x2d524393",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHgyZDUyNDM5Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRoleManager",
+          "natspec": "@notice Returns true when `account` is a registered role manager.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 69,
+            "byteStart": 10627,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L206",
+            "lineEnd": 206,
+            "lineStart": 206,
+            "snippetSha256": "sha256:e0f5ac53fbbd0442602fd67a1db444cf764dc05bac845985ca814423ec59d371",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x2d524393",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registerRoleManager(address,bool)",
+          "displaySignature": "registerRoleManager(address,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x148fed8e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHgxNDhmZWQ4ZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registerRoleManager",
+          "natspec": "@notice Enables or disables an operational-role manager through the\n         exact Governance V2 transition committed for `account`.\n @dev Enablement is delayed class 1. Disabling an existing manager is\n      immediate tightening class 0 and uses the account-scoped config\n      chain so the manager cannot censor its own removal.",
+          "outputs": [],
+          "range": {
+            "byteLength": 69,
+            "byteStart": 11069,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L213",
+            "lineEnd": 213,
+            "lineStart": 213,
+            "snippetSha256": "sha256:f42676bf4214aa4f859e9358418732c7a3637cbcbc6193678071fa6a57b3c663",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x148fed8e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "roleManagerConfigMutationState(address)",
+          "displaySignature": "roleManagerConfigMutationState(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry#function:0x903c49a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnkjZnVuY3Rpb246MHg5MDNjNDlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "roleManagerConfigMutationState",
+          "natspec": "@notice Returns the manager-address-scoped exact governance mutation\n         chain and revision used to schedule manager enable/disable.\n @dev This state is intentionally independent from manager-controlled\n      operational-role and global audit mutations, so a compromised\n      manager cannot stale its own root-initiated removal.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 140,
+            "byteStart": 11515,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L220-L223",
+            "lineEnd": 223,
+            "lineStart": 220,
+            "snippetSha256": "sha256:eccdc1a1a475e7ff6b74782258d49028447a36cecc8c28b2d668bb42b2116189",
+            "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+          },
+          "selector": "0x903c49a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Sb2xlUmVnaXN0cnkuc29sOklTdHJlYW1Sb2xlUmVnaXN0cnk",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamRoleRegistry.sol:IStreamRoleRegistry"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamRoleRegistry",
+    "natspec": "@notice Role-resolution registry for the ADR 0004 [GOV-ROLES] vocabulary.\n @dev Long-lived authorities are `bytes32` role references resolved through\n     this registry at call time, never raw stored addresses (ADR 0013\n     decision U5). Root-class roles are granted and revoked only by the\n     permanently owning governance Executor; operational-class roles are also\n     grantable by registered role managers. Role-redundancy semantics for\n     the [GOV-WINDOWS] rule 2 emergency assumption are exposed as views so\n     conformance-matrix gates can verify them onchain.",
+    "range": {
+      "byteLength": 11000,
+      "byteStart": 657,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/IStreamRoleRegistry.sol#L12-L224",
+      "lineEnd": 224,
+      "lineStart": 12,
+      "snippetSha256": "sha256:d5ae4f354c1e1d809bd7d2b229035b05b249be1fbb9bd1ba0aef2803d66bfc08",
+      "sourceSha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamRoleRegistry.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

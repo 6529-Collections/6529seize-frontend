@@ -1,0 +1,444 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0x8683ca94",
+          "declaringDefinitionId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFrozenDependencyPinSurvivesVersionDeprecationAndRegistryChurn",
+          "outputs": [],
+          "selector": "0x8683ca94",
+          "signature": "testFrozenDependencyPinSurvivesVersionDeprecationAndRegistryChurn()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0xd62e1ee9",
+          "declaringDefinitionId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFrozenLiveTokenRejectsLateRandomnessAndPreservesDependencyManifest",
+          "outputs": [],
+          "selector": "0xd62e1ee9",
+          "signature": "testFrozenLiveTokenRejectsLateRandomnessAndPreservesDependencyManifest()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0x1f0085de",
+          "declaringDefinitionId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPostFreezeBurnedPendingCallbackCannotMoveFrozenLiveMetadata",
+          "outputs": [],
+          "selector": "0x1f0085de",
+          "signature": "testPostFreezeBurnedPendingCallbackCannotMoveFrozenLiveMetadata()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testFrozenDependencyPinSurvivesVersionDeprecationAndRegistryChurn()",
+          "displaySignature": "testFrozenDependencyPinSurvivesVersionDeprecationAndRegistryChurn()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0x8683ca94",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50c1Rlc3QjZnVuY3Rpb246MHg4NjgzY2E5NA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFrozenDependencyPinSurvivesVersionDeprecationAndRegistryChurn",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3064,
+            "byteStart": 795,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L27-L81",
+            "lineEnd": 81,
+            "lineStart": 27,
+            "snippetSha256": "sha256:d95cbf3de15febb7c95b4fc6141cbd3190ebef0fbad2f6439c2a03fa4cbf52ba",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": "0x8683ca94",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFrozenLiveTokenRejectsLateRandomnessAndPreservesDependencyManifest()",
+          "displaySignature": "testFrozenLiveTokenRejectsLateRandomnessAndPreservesDependencyManifest()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0xd62e1ee9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50c1Rlc3QjZnVuY3Rpb246MHhkNjJlMWVlOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFrozenLiveTokenRejectsLateRandomnessAndPreservesDependencyManifest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1930,
+            "byteStart": 3865,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L83-L113",
+            "lineEnd": 113,
+            "lineStart": 83,
+            "snippetSha256": "sha256:96941f75c39bfe12bfa8a636db7420c04d6c04427e30f116ccc06484fc4ff5f9",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": "0xd62e1ee9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPostFreezeBurnedPendingCallbackCannotMoveFrozenLiveMetadata()",
+          "displaySignature": "testPostFreezeBurnedPendingCallbackCannotMoveFrozenLiveMetadata()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0x1f0085de",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50c1Rlc3QjZnVuY3Rpb246MHgxZjAwODVkZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPostFreezeBurnedPendingCallbackCannotMoveFrozenLiveMetadata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2474,
+            "byteStart": 5801,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L115-L158",
+            "lineEnd": 158,
+            "lineStart": 115,
+            "snippetSha256": "sha256:5e82db9a4618dae977031f79934a78f328ac0ccfd31641d7853117ed1b0bb611",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": "0x1f0085de",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:_mintToken(DeployedStream,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50c1Rlc3QjZnVuY3Rpb246X21pbnRUb2tlbihEZXBsb3llZFN0cmVhbSx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 220,
+            "byteStart": 8281,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L160-L163",
+            "lineEnd": 163,
+            "lineStart": 160,
+            "snippetSha256": "sha256:06e172aaf5abfc47b8a90c8c309b9e6961fc0e5508c4d8b3398fa91e39519366",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:_warpPastFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50c1Rlc3QjZnVuY3Rpb246X3dhcnBQYXN0RmluYWxTdXBwbHlXaW5kb3coKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 8507,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L165-L167",
+            "lineEnd": 167,
+            "lineStart": 165,
+            "snippetSha256": "sha256:82a6688bff813f04a0b4678165717eac2ee27e3657eac19a004bc225f1440737",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_singleChunk(string)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:_singleChunk(string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "chunk",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50c1Rlc3QjZnVuY3Rpb246X3NpbmdsZUNodW5rKHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_singleChunk",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "chunks",
+              "storageLocation": "memory",
+              "type": "string[]"
+            }
+          ],
+          "range": {
+            "byteLength": 157,
+            "byteStart": 8614,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L169-L172",
+            "lineEnd": 172,
+            "lineStart": 169,
+            "snippetSha256": "sha256:0aa74b1f0c2b487024f71865a2a249d6a763163c9b07117dd4eadc56e7b6276c",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertFrozenDependencyState(DeployedStream,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:_assertFrozenDependencyState(DeployedStream,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "dependencyKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "dependencyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50c1Rlc3QjZnVuY3Rpb246X2Fzc2VydEZyb3plbkRlcGVuZGVuY3lTdGF0ZShEZXBsb3llZFN0cmVhbSxieXRlczMyLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertFrozenDependencyState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 719,
+            "byteStart": 8777,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L174-L187",
+            "lineEnd": 187,
+            "lineStart": 174,
+            "snippetSha256": "sha256:47299408cbff033b8efd6f2477e5680d8704964019994481e270919eb7e64005",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 644,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 692,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 735,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
+            "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      },
+      {
+        "definitionId": "test/helpers/TestHashingUtils.sol:TestHashingUtils",
+        "name": "TestHashingUtils"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUNyb3NzSW52YXJpYW50c1Rlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+      "test/helpers/TestHashingUtils.sol:TestHashingUtils",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMetadataCrossInvariantsTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 9143,
+      "byteStart": 355,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMetadataCrossInvariants.t.sol#L12-L188",
+      "lineEnd": 188,
+      "lineStart": 12,
+      "snippetSha256": "sha256:120bc1909d8d2e401f77b445b9b82698eb4ef83f7852a390565dc434cd3c2778",
+      "sourceSha256": "sha256:05b62d7d35fe1385172e902c468f74c3ec95234d4ecb80b7acc88afcc81304e8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMetadataCrossInvariants.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0x1f0085de",
+      "definitionId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0x8683ca94",
+      "definitionId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest#function:0xd62e1ee9",
+      "definitionId": "test/StreamMetadataCrossInvariants.t.sol:StreamMetadataCrossInvariantsTest",
+      "severity": "advisory"
+    }
+  ]
+}

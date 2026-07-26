@@ -1,0 +1,252 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest#function:0xf25d4bc7",
+          "declaringDefinitionId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256[32]",
+              "name": "actionSeeds",
+              "type": "uint256[32]"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256[32]",
+              "name": "firstArgs",
+              "type": "uint256[32]"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256[32]",
+              "name": "secondArgs",
+              "type": "uint256[32]"
+            }
+          ],
+          "name": "testRandomizerAdminStatefulInvariantsHoldAcrossBoundedSequences",
+          "outputs": [],
+          "selector": "0xf25d4bc7",
+          "signature": "testRandomizerAdminStatefulInvariantsHoldAcrossBoundedSequences(uint256[32],uint256[32],uint256[32])",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyU3RhdGVmdWxJbnZhcmlhbnQudC5zb2w6U3RyZWFtUmFuZG9taXplclN0YXRlZnVsSW52YXJpYW50VGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 91,
+            "byteStart": 526,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerStatefulInvariant.t.sol#L16-L18",
+            "lineEnd": 18,
+            "lineStart": 16,
+            "snippetSha256": "sha256:716a58b5cbf89c0c7c71df833192ffc6bad8dcc1d62542d6a796d8b302e72851",
+            "sourceSha256": "sha256:d48c2becfdfa311526a35fee2bdc6d4311c6780968847f37781306df4f992650"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomizerAdminStatefulInvariantsHoldAcrossBoundedSequences(uint256[32],uint256[32],uint256[32])",
+          "displaySignature": "testRandomizerAdminStatefulInvariantsHoldAcrossBoundedSequences(uint256[SEQUENCE_LENGTH],uint256[SEQUENCE_LENGTH],uint256[SEQUENCE_LENGTH])",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest#function:0xf25d4bc7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionSeeds",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            },
+            {
+              "index": 1,
+              "name": "firstArgs",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            },
+            {
+              "index": 2,
+              "name": "secondArgs",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyU3RhdGVmdWxJbnZhcmlhbnQudC5zb2w6U3RyZWFtUmFuZG9taXplclN0YXRlZnVsSW52YXJpYW50VGVzdCNmdW5jdGlvbjoweGYyNWQ0YmM3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomizerAdminStatefulInvariantsHoldAcrossBoundedSequences",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 572,
+            "byteStart": 623,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerStatefulInvariant.t.sol#L20-L33",
+            "lineEnd": 33,
+            "lineStart": 20,
+            "snippetSha256": "sha256:00075c50de7d1f14486427950f3e2d82dd554d85816d62f670b6d842bc5d8315",
+            "sourceSha256": "sha256:d48c2becfdfa311526a35fee2bdc6d4311c6780968847f37781306df4f992650"
+          },
+          "selector": "0xf25d4bc7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SEQUENCE_LENGTH",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 417,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerStatefulInvariant.t.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:c5bb194749be8969c2785343d0a45e04ebad6e94b1db3b8d69343651b7f87f9b",
+            "sourceSha256": "sha256:d48c2becfdfa311526a35fee2bdc6d4311c6780968847f37781306df4f992650"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "handler",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 469,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerStatefulInvariant.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:e85aaf27d71c549f82afffb0680c15e9e359399284c3e40c34f616f8c820ea14",
+            "sourceSha256": "sha256:d48c2becfdfa311526a35fee2bdc6d4311c6780968847f37781306df4f992650"
+          },
+          "selector": null,
+          "type": "RandomizerStatefulInvariantHandler",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyU3RhdGVmdWxJbnZhcmlhbnQudC5zb2w6U3RyZWFtUmFuZG9taXplclN0YXRlZnVsSW52YXJpYW50VGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRandomizerStatefulInvariantTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 861,
+      "byteStart": 336,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRandomizerStatefulInvariant.t.sol#L11-L34",
+      "lineEnd": 34,
+      "lineStart": 11,
+      "snippetSha256": "sha256:8fbdf797fffa9ba21759b34b37a683e0eaac64099d0be30caae4f285a5b0a275",
+      "sourceSha256": "sha256:d48c2becfdfa311526a35fee2bdc6d4311c6780968847f37781306df4f992650"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRandomizerStatefulInvariant.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest#function:0x0a9254e4",
+      "definitionId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest#function:0xf25d4bc7",
+      "definitionId": "test/StreamRandomizerStatefulInvariant.t.sol:StreamRandomizerStatefulInvariantTest",
+      "severity": "advisory"
+    }
+  ]
+}

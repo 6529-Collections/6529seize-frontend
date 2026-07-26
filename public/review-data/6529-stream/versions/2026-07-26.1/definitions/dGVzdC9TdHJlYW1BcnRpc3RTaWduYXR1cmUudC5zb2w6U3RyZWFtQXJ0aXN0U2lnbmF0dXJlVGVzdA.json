@@ -1,0 +1,1127 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x1f733ab0",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testApprovedCollectionMutationStalesArtistSignature",
+          "outputs": [],
+          "selector": "0x1f733ab0",
+          "signature": "testApprovedCollectionMutationStalesArtistSignature()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x4ec6ff4b",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArtistApprovalHashTracksCollectionStateChanges",
+          "outputs": [],
+          "selector": "0x4ec6ff4b",
+          "signature": "testArtistApprovalHashTracksCollectionStateChanges()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x13cb3d59",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArtistSignatureStillRequiresConfiguredArtistAndSingleUse",
+          "outputs": [],
+          "selector": "0x13cb3d59",
+          "signature": "testArtistSignatureStillRequiresConfiguredArtistAndSingleUse()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xf22b5911",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testArtistSignatureStoresStateBoundApprovalHash",
+          "outputs": [],
+          "selector": "0xf22b5911",
+          "signature": "testArtistSignatureStoresStateBoundApprovalHash()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x7f5d9987",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEIP712ArtistSignatureAcceptsCompactSignature",
+          "outputs": [],
+          "selector": "0x7f5d9987",
+          "signature": "testEIP712ArtistSignatureAcceptsCompactSignature()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x9a96f866",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEIP712ArtistSignatureRejectsStaleCollectionState",
+          "outputs": [],
+          "selector": "0x9a96f866",
+          "signature": "testEIP712ArtistSignatureRejectsStaleCollectionState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x0daed803",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEIP712ArtistSignatureRejectsWrongSigner",
+          "outputs": [],
+          "selector": "0x0daed803",
+          "signature": "testEIP712ArtistSignatureRejectsWrongSigner()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x69070172",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEIP712ArtistSignatureStoresApprovalFromRelayer",
+          "outputs": [],
+          "selector": "0x69070172",
+          "signature": "testEIP712ArtistSignatureStoresApprovalFromRelayer()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x61f74159",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC1271ArtistSignatureRejectsBadContractWalletApproval",
+          "outputs": [],
+          "selector": "0x61f74159",
+          "signature": "testERC1271ArtistSignatureRejectsBadContractWalletApproval()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6daf740d",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC1271ArtistSignatureRejectsEmptyContractWalletApprovalReturn",
+          "outputs": [],
+          "selector": "0x6daf740d",
+          "signature": "testERC1271ArtistSignatureRejectsEmptyContractWalletApprovalReturn()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x2d30751b",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC1271ArtistSignatureRejectsExtraContractWalletApprovalReturn",
+          "outputs": [],
+          "selector": "0x2d30751b",
+          "signature": "testERC1271ArtistSignatureRejectsExtraContractWalletApprovalReturn()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6e128ce9",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC1271ArtistSignatureRejectsRevertingContractWalletApproval",
+          "outputs": [],
+          "selector": "0x6e128ce9",
+          "signature": "testERC1271ArtistSignatureRejectsRevertingContractWalletApproval()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xf2a57562",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC1271ArtistSignatureRejectsShortContractWalletApprovalReturn",
+          "outputs": [],
+          "selector": "0xf2a57562",
+          "signature": "testERC1271ArtistSignatureRejectsShortContractWalletApprovalReturn()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xa80cb275",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC1271ArtistSignatureRejectsStaleContractWalletApproval",
+          "outputs": [],
+          "selector": "0xa80cb275",
+          "signature": "testERC1271ArtistSignatureRejectsStaleContractWalletApproval()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6c6f8c60",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC1271ArtistSignatureRejectsWrongContractWalletProof",
+          "outputs": [],
+          "selector": "0x6c6f8c60",
+          "signature": "testERC1271ArtistSignatureRejectsWrongContractWalletProof()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x02d6efd9",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC1271ArtistSignatureStoresContractWalletApproval",
+          "outputs": [],
+          "selector": "0x02d6efd9",
+          "signature": "testERC1271ArtistSignatureStoresContractWalletApproval()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xc1a23918",
+          "declaringDefinitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFrozenCollectionRejectsFinalArtistReapproval",
+          "outputs": [],
+          "selector": "0xc1a23918",
+          "signature": "testFrozenCollectionRejectsFinalArtistReapproval()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testArtistSignatureStoresStateBoundApprovalHash()",
+          "displaySignature": "testArtistSignatureStoresStateBoundApprovalHash()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xf22b5911",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweGYyMmI1OTEx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArtistSignatureStoresStateBoundApprovalHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 891,
+            "byteStart": 670,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L20-L34",
+            "lineEnd": 34,
+            "lineStart": 20,
+            "snippetSha256": "sha256:daffd143091dd26cf5a0c07dc2f0e43b17c2ef2b6a861ef5bd84035c3e2460c4",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0xf22b5911",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testArtistApprovalHashTracksCollectionStateChanges()",
+          "displaySignature": "testArtistApprovalHashTracksCollectionStateChanges()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x4ec6ff4b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDRlYzZmZjRi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArtistApprovalHashTracksCollectionStateChanges",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1269,
+            "byteStart": 1567,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L36-L64",
+            "lineEnd": 64,
+            "lineStart": 36,
+            "snippetSha256": "sha256:530ac21779b9e26de02a32471e93f5d0eb87e6035dd37f219471db6c1d3f5894",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x4ec6ff4b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testArtistSignatureStillRequiresConfiguredArtistAndSingleUse()",
+          "displaySignature": "testArtistSignatureStillRequiresConfiguredArtistAndSingleUse()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x13cb3d59",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDEzY2IzZDU5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testArtistSignatureStillRequiresConfiguredArtistAndSingleUse",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 653,
+            "byteStart": 2842,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L66-L78",
+            "lineEnd": 78,
+            "lineStart": 66,
+            "snippetSha256": "sha256:6d6556db5d04124993a5ae1c1d0c90070e7210683a0502a1d2313307d6e74c6c",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x13cb3d59",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEIP712ArtistSignatureStoresApprovalFromRelayer()",
+          "displaySignature": "testEIP712ArtistSignatureStoresApprovalFromRelayer()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x69070172",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDY5MDcwMTcy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEIP712ArtistSignatureStoresApprovalFromRelayer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 824,
+            "byteStart": 3501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L80-L92",
+            "lineEnd": 92,
+            "lineStart": 80,
+            "snippetSha256": "sha256:42791a9e56b39ea21ac5ea07316dcd56a7af667a2f1a3848fa6d4ef232990761",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x69070172",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEIP712ArtistSignatureAcceptsCompactSignature()",
+          "displaySignature": "testEIP712ArtistSignatureAcceptsCompactSignature()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x7f5d9987",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDdmNWQ5OTg3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEIP712ArtistSignatureAcceptsCompactSignature",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 736,
+            "byteStart": 4331,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L94-L105",
+            "lineEnd": 105,
+            "lineStart": 94,
+            "snippetSha256": "sha256:e53d7b2dc15ea763d5a7646eb0ed9a99fdc12a27e095a295e0ff4f597f227bad",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x7f5d9987",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEIP712ArtistSignatureRejectsWrongSigner()",
+          "displaySignature": "testEIP712ArtistSignatureRejectsWrongSigner()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x0daed803",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDBkYWVkODAz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEIP712ArtistSignatureRejectsWrongSigner",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 600,
+            "byteStart": 5073,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L107-L117",
+            "lineEnd": 117,
+            "lineStart": 107,
+            "snippetSha256": "sha256:d175a68c3f675ad5ade08df3f7bd00591faa702062b63d1933522626cbc5ab0a",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x0daed803",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEIP712ArtistSignatureRejectsStaleCollectionState()",
+          "displaySignature": "testEIP712ArtistSignatureRejectsStaleCollectionState()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x9a96f866",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDlhOTZmODY2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEIP712ArtistSignatureRejectsStaleCollectionState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 709,
+            "byteStart": 5679,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L119-L131",
+            "lineEnd": 131,
+            "lineStart": 119,
+            "snippetSha256": "sha256:71204107fb0097e6bf95fe3d375b4bf9a746b814a07233a97d9e655bf597e34d",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x9a96f866",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC1271ArtistSignatureStoresContractWalletApproval()",
+          "displaySignature": "testERC1271ArtistSignatureStoresContractWalletApproval()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x02d6efd9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDAyZDZlZmQ5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC1271ArtistSignatureStoresContractWalletApproval",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 935,
+            "byteStart": 6394,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L133-L148",
+            "lineEnd": 148,
+            "lineStart": 133,
+            "snippetSha256": "sha256:786b4c40b5973dc9d088dcf2e12f2e6cf138718480f3bd6281824e4940e4db59",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x02d6efd9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC1271ArtistSignatureRejectsBadContractWalletApproval()",
+          "displaySignature": "testERC1271ArtistSignatureRejectsBadContractWalletApproval()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x61f74159",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDYxZjc0MTU5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC1271ArtistSignatureRejectsBadContractWalletApproval",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 603,
+            "byteStart": 7335,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L150-L161",
+            "lineEnd": 161,
+            "lineStart": 150,
+            "snippetSha256": "sha256:220fedbd3bab7f9ea23a9c31380b5ebfdb4289c31bb76ba4f828ca6e8c20a503",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x61f74159",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC1271ArtistSignatureRejectsRevertingContractWalletApproval()",
+          "displaySignature": "testERC1271ArtistSignatureRejectsRevertingContractWalletApproval()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6e128ce9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDZlMTI4Y2U5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC1271ArtistSignatureRejectsRevertingContractWalletApproval",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 610,
+            "byteStart": 7944,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L163-L174",
+            "lineEnd": 174,
+            "lineStart": 163,
+            "snippetSha256": "sha256:015cf568c6d956aa1ef1521bd1feff97ac8f0949910d2b9a397f7a6aaf26cfa3",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x6e128ce9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC1271ArtistSignatureRejectsEmptyContractWalletApprovalReturn()",
+          "displaySignature": "testERC1271ArtistSignatureRejectsEmptyContractWalletApprovalReturn()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6daf740d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDZkYWY3NDBk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC1271ArtistSignatureRejectsEmptyContractWalletApprovalReturn",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 605,
+            "byteStart": 8560,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L176-L187",
+            "lineEnd": 187,
+            "lineStart": 176,
+            "snippetSha256": "sha256:5c61824e647be5db74f67be2e3582128257c67fd21b16a577cfbf6559b22baab",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x6daf740d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC1271ArtistSignatureRejectsShortContractWalletApprovalReturn()",
+          "displaySignature": "testERC1271ArtistSignatureRejectsShortContractWalletApprovalReturn()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xf2a57562",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweGYyYTU3NTYy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC1271ArtistSignatureRejectsShortContractWalletApprovalReturn",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 605,
+            "byteStart": 9171,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L189-L200",
+            "lineEnd": 200,
+            "lineStart": 189,
+            "snippetSha256": "sha256:cc6629b680e3e16aaa1bfc5bedd2886e4110fdabc6db8247dc882269a242db41",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0xf2a57562",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC1271ArtistSignatureRejectsExtraContractWalletApprovalReturn()",
+          "displaySignature": "testERC1271ArtistSignatureRejectsExtraContractWalletApprovalReturn()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x2d30751b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDJkMzA3NTFi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC1271ArtistSignatureRejectsExtraContractWalletApprovalReturn",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 605,
+            "byteStart": 9782,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L202-L213",
+            "lineEnd": 213,
+            "lineStart": 202,
+            "snippetSha256": "sha256:116c418f4180c631990537558df661f26f8014528bf92a8ff1256c5f59c0f0ff",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x2d30751b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC1271ArtistSignatureRejectsWrongContractWalletProof()",
+          "displaySignature": "testERC1271ArtistSignatureRejectsWrongContractWalletProof()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6c6f8c60",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDZjNmY4YzYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC1271ArtistSignatureRejectsWrongContractWalletProof",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 734,
+            "byteStart": 10393,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L215-L228",
+            "lineEnd": 228,
+            "lineStart": 215,
+            "snippetSha256": "sha256:b988f56da7bddba94863c59e787215a5f6cfac96e957ccf3cd4afe4d789abe78",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x6c6f8c60",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC1271ArtistSignatureRejectsStaleContractWalletApproval()",
+          "displaySignature": "testERC1271ArtistSignatureRejectsStaleContractWalletApproval()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xa80cb275",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweGE4MGNiMjc1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC1271ArtistSignatureRejectsStaleContractWalletApproval",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 830,
+            "byteStart": 11133,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L230-L245",
+            "lineEnd": 245,
+            "lineStart": 230,
+            "snippetSha256": "sha256:b4ed9726ec02a25ef75275fce97c4b52fdfb4461e54adbc5c8d266792875a00e",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0xa80cb275",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testApprovedCollectionMutationStalesArtistSignature()",
+          "displaySignature": "testApprovedCollectionMutationStalesArtistSignature()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x1f733ab0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweDFmNzMzYWIw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testApprovedCollectionMutationStalesArtistSignature",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1387,
+            "byteStart": 11969,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L247-L272",
+            "lineEnd": 272,
+            "lineStart": 247,
+            "snippetSha256": "sha256:4bf5f7b012e5ef29a904761d1601433fb613e75a77686c0778f0e0ed495239c1",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0x1f733ab0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFrozenCollectionRejectsFinalArtistReapproval()",
+          "displaySignature": "testFrozenCollectionRejectsFinalArtistReapproval()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xc1a23918",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjoweGMxYTIzOTE4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFrozenCollectionRejectsFinalArtistReapproval",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1147,
+            "byteStart": 13362,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L274-L295",
+            "lineEnd": 295,
+            "lineStart": 274,
+            "snippetSha256": "sha256:fda476d6ccf633e6cfbc7d3a8adcd9e2e403fc7695f0d5f6649cf542afb7d8ac",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": "0xc1a23918",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_signArtistApproval(StreamCore,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:_signArtistApproval(StreamCore,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "StreamCore"
+            },
+            {
+              "index": 1,
+              "name": "privateKey",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjpfc2lnbkFydGlzdEFwcHJvdmFsKFN0cmVhbUNvcmUsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_signArtistApproval",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 285,
+            "byteStart": 14515,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L297-L304",
+            "lineEnd": 304,
+            "lineStart": 297,
+            "snippetSha256": "sha256:afbde2207ceb581baea7c754fe5135d9840e78d61c73450adbe06fd026723683",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_signCompactArtistApproval(StreamCore,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:_signCompactArtistApproval(StreamCore,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "StreamCore"
+            },
+            {
+              "index": 1,
+              "name": "privateKey",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjpfc2lnbkNvbXBhY3RBcnRpc3RBcHByb3ZhbChTdHJlYW1Db3JlLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_signCompactArtistApproval",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 394,
+            "byteStart": 14806,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L306-L315",
+            "lineEnd": 315,
+            "lineStart": 306,
+            "snippetSha256": "sha256:a589b4f01b5a878059ed3c5288cff84a7229fb910a42b0b89d9ee722b9322ede",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream)",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:_mintToken(DeployedStream)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjpfbWludFRva2VuKERlcGxveWVkU3RyZWFtKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 184,
+            "byteStart": 15206,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L317-L320",
+            "lineEnd": 320,
+            "lineStart": 317,
+            "snippetSha256": "sha256:345059e569c134a38876371c60d3cbb189974d16908d1250f389f0e17317494c",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:_warpPastFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjpfd2FycFBhc3RGaW5hbFN1cHBseVdpbmRvdygp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 15396,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L322-L324",
+            "lineEnd": 324,
+            "lineStart": 322,
+            "snippetSha256": "sha256:bb05a0910537e66a8e8dfe7395e4489fa8902cc9f9ddfb2f47219a7c47a786e1",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_artistApprovalDigest(StreamCore,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:_artistApprovalDigest(StreamCore,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "StreamCore"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdCNmdW5jdGlvbjpfYXJ0aXN0QXBwcm92YWxEaWdlc3QoU3RyZWFtQ29yZSx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_artistApprovalDigest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 675,
+            "byteStart": 15503,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L326-L346",
+            "lineEnd": 346,
+            "lineStart": 326,
+            "snippetSha256": "sha256:5d92047cd178c6ea52caca0c0c3551bcd40b6404ebf2667604e31be1ae27e839",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 463,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 511,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ARTIST",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 554,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:d06398b6eb65be12e6cbd17867769d94cec2877889e5e4de49b81ca3c817793c",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ARTIST_PRIVATE_KEY",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 610,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:96c726584fc699faeea5a322867b8d38f15fb5dec834c2c9b81fc5464815652d",
+            "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BcnRpc3RTaWduYXR1cmUudC5zb2w6U3RyZWFtQXJ0aXN0U2lnbmF0dXJlVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamArtistSignatureTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 15901,
+      "byteStart": 280,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamArtistSignature.t.sol#L10-L348",
+      "lineEnd": 348,
+      "lineStart": 10,
+      "snippetSha256": "sha256:2f0391fd9d1dfdf9137633099beb2a8c4bc069b0876bf2ddc8a2329f8f11cabc",
+      "sourceSha256": "sha256:d87dccde825cf182045dc33e614b533657eba7ef623193eca9f35a8cbe51c6ac"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamArtistSignature.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 18
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 17
+    },
+    "totalCount": 18
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x02d6efd9",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x0daed803",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x13cb3d59",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x1f733ab0",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x2d30751b",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x4ec6ff4b",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x61f74159",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x69070172",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6c6f8c60",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6daf740d",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x6e128ce9",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x7f5d9987",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0x9a96f866",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xa80cb275",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xc1a23918",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xf22b5911",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest#function:0xf2a57562",
+      "definitionId": "test/StreamArtistSignature.t.sol:StreamArtistSignatureTest",
+      "severity": "advisory"
+    }
+  ]
+}

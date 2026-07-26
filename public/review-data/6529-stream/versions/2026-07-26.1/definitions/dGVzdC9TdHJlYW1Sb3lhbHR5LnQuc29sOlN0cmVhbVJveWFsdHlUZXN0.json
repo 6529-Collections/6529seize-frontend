@@ -1,0 +1,577 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x379f352c",
+          "declaringDefinitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDefaultRoyaltyAppliesToArbitraryTokenIds",
+          "outputs": [],
+          "selector": "0x379f352c",
+          "signature": "testDefaultRoyaltyAppliesToArbitraryTokenIds()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x36060646",
+          "declaringDefinitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDefaultRoyaltyIsFixedAt690BasisPoints",
+          "outputs": [],
+          "selector": "0x36060646",
+          "signature": "testDefaultRoyaltyIsFixedAt690BasisPoints()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0xe2c6a915",
+          "declaringDefinitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testLargeSalePriceMatchesCheckedOZStyleRoyaltyMath",
+          "outputs": [],
+          "selector": "0xe2c6a915",
+          "signature": "testLargeSalePriceMatchesCheckedOZStyleRoyaltyMath()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x0e1e01af",
+          "declaringDefinitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoyaltyMathUsesCheckedOverflowSemantics",
+          "outputs": [],
+          "selector": "0x0e1e01af",
+          "signature": "testRoyaltyMathUsesCheckedOverflowSemantics()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x3836c2c6",
+          "declaringDefinitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoyaltyRefactorKeepsRetainedInterfaceSupport",
+          "outputs": [],
+          "selector": "0x3836c2c6",
+          "signature": "testRoyaltyRefactorKeepsRetainedInterfaceSupport()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x4edfee63",
+          "declaringDefinitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSupportsErc2981Interface",
+          "outputs": [],
+          "selector": "0x4edfee63",
+          "signature": "testSupportsErc2981Interface()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x7a7df4fd",
+          "declaringDefinitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testZeroSalePriceHasZeroRoyaltyAmount",
+          "outputs": [],
+          "selector": "0x7a7df4fd",
+          "signature": "testZeroSalePriceHasZeroRoyaltyAmount()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testSupportsErc2981Interface()",
+          "displaySignature": "testSupportsErc2981Interface()",
+          "functionKind": "function",
+          "id": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x4edfee63",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5LnQuc29sOlN0cmVhbVJveWFsdHlUZXN0I2Z1bmN0aW9uOjB4NGVkZmVlNjM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSupportsErc2981Interface",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 238,
+            "byteStart": 951,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L23-L27",
+            "lineEnd": 27,
+            "lineStart": 23,
+            "snippetSha256": "sha256:cdd0b5325b8f6c77b5997e2d3a13ad5aa015cdee3788c48db9d6e921baded8a5",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": "0x4edfee63",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoyaltyRefactorKeepsRetainedInterfaceSupport()",
+          "displaySignature": "testRoyaltyRefactorKeepsRetainedInterfaceSupport()",
+          "functionKind": "function",
+          "id": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x3836c2c6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5LnQuc29sOlN0cmVhbVJveWFsdHlUZXN0I2Z1bmN0aW9uOjB4MzgzNmMyYzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoyaltyRefactorKeepsRetainedInterfaceSupport",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 798,
+            "byteStart": 1195,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L29-L40",
+            "lineEnd": 40,
+            "lineStart": 29,
+            "snippetSha256": "sha256:9095253963b232302bf03cef6380ff1e5c3182072a9e58ae4baa86f1b5655d7e",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": "0x3836c2c6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDefaultRoyaltyIsFixedAt690BasisPoints()",
+          "displaySignature": "testDefaultRoyaltyIsFixedAt690BasisPoints()",
+          "functionKind": "function",
+          "id": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x36060646",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5LnQuc29sOlN0cmVhbVJveWFsdHlUZXN0I2Z1bmN0aW9uOjB4MzYwNjA2NDY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDefaultRoyaltyIsFixedAt690BasisPoints",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 389,
+            "byteStart": 1999,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L42-L50",
+            "lineEnd": 50,
+            "lineStart": 42,
+            "snippetSha256": "sha256:d1f42d02a8838208d684a519bbb9606d5e32f323016f02be990a264b5c7178c1",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": "0x36060646",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testLargeSalePriceMatchesCheckedOZStyleRoyaltyMath()",
+          "displaySignature": "testLargeSalePriceMatchesCheckedOZStyleRoyaltyMath()",
+          "functionKind": "function",
+          "id": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0xe2c6a915",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5LnQuc29sOlN0cmVhbVJveWFsdHlUZXN0I2Z1bmN0aW9uOjB4ZTJjNmE5MTU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testLargeSalePriceMatchesCheckedOZStyleRoyaltyMath",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 487,
+            "byteStart": 2394,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L52-L60",
+            "lineEnd": 60,
+            "lineStart": 52,
+            "snippetSha256": "sha256:f400828ad94928d0eb44174560d68448e7e5b62eed268248af9bad9870e06f7d",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": "0xe2c6a915",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoyaltyMathUsesCheckedOverflowSemantics()",
+          "displaySignature": "testRoyaltyMathUsesCheckedOverflowSemantics()",
+          "functionKind": "function",
+          "id": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x0e1e01af",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5LnQuc29sOlN0cmVhbVJveWFsdHlUZXN0I2Z1bmN0aW9uOjB4MGUxZTAxYWY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoyaltyMathUsesCheckedOverflowSemantics",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 261,
+            "byteStart": 2887,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L62-L67",
+            "lineEnd": 67,
+            "lineStart": 62,
+            "snippetSha256": "sha256:50e686ccdf13d2e28f75876eca4910be167aa66535c785059840a564e3d3f2fe",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": "0x0e1e01af",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDefaultRoyaltyAppliesToArbitraryTokenIds()",
+          "displaySignature": "testDefaultRoyaltyAppliesToArbitraryTokenIds()",
+          "functionKind": "function",
+          "id": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x379f352c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5LnQuc29sOlN0cmVhbVJveWFsdHlUZXN0I2Z1bmN0aW9uOjB4Mzc5ZjM1MmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDefaultRoyaltyAppliesToArbitraryTokenIds",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 597,
+            "byteStart": 3154,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L69-L79",
+            "lineEnd": 79,
+            "lineStart": 69,
+            "snippetSha256": "sha256:f93413df91581ea80b00bd7a329162e9f2216286d0174399354651b0b4896a9c",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": "0x379f352c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testZeroSalePriceHasZeroRoyaltyAmount()",
+          "displaySignature": "testZeroSalePriceHasZeroRoyaltyAmount()",
+          "functionKind": "function",
+          "id": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x7a7df4fd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5LnQuc29sOlN0cmVhbVJveWFsdHlUZXN0I2Z1bmN0aW9uOjB4N2E3ZGY0ZmQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testZeroSalePriceHasZeroRoyaltyAmount",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 360,
+            "byteStart": 3757,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L81-L88",
+            "lineEnd": 88,
+            "lineStart": 81,
+            "snippetSha256": "sha256:e2e0484b7f7e5181816f5811e05fb1dc904d91cb0c187881e8c0d80e5d0e9d66",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": "0x7a7df4fd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC165_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 357,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:38caef72142d22c4a2e3ea57b333b67421caf8e66c2ed065cf3f87a2412696dd",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC721_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 419,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:3100883ae9a95c7473881f864f5bc88e4e8bd20c9e4b990ba739c2eb521bc082",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC721_METADATA_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 481,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:44d22d9e1b6fadc0275014052d3cd01cbe80662aaf5269d2f7855a903bfaf754",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC2981_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 552,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:928e69789f8afc4ce7687ecb45bf8a753d08122bbe0440140e07a46634d868da",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC4906_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 615,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:78fb19cd249e32df9a689cb7596efacb159d791e7853c0e363d08b9a7f39cf35",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC721_ENUMERABLE_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 67,
+            "byteStart": 678,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:d67184a911f399471d6821f2865bab3623f67681ae2f4c673858b05de7cf9408",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROYALTY_RECEIVER",
+          "natspec": "",
+          "range": {
+            "byteLength": 86,
+            "byteStart": 751,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:74f78c931d441a295204e8c9e7059756534999b20d2c48069016f9cd0e5c66cf",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROYALTY_BPS",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 843,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:18f57226da4175d171875d0f2f2837e8db2c6307fdc82bf52636b85a65f322f7",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROYALTY_DENOMINATOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 891,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:b90639d4a840600509f04bba6868ab3bd60a9ddb8b2dc5a9141009a039133234",
+            "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Sb3lhbHR5LnQuc29sOlN0cmVhbVJveWFsdHlUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRoyaltyTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 3938,
+      "byteStart": 181,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoyalty.t.sol#L8-L89",
+      "lineEnd": 89,
+      "lineStart": 8,
+      "snippetSha256": "sha256:781796e2fe56ae03ba2116a78e6ef341a93f85f5197fcfcc956aa3370028a9fb",
+      "sourceSha256": "sha256:656f797da4c8fd8303b45064fbee688f9f8ce4c6b6a299479eb2e368b655f7d6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRoyalty.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 8
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 7
+    },
+    "totalCount": 8
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x0e1e01af",
+      "definitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x36060646",
+      "definitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x379f352c",
+      "definitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x3836c2c6",
+      "definitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x4edfee63",
+      "definitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0x7a7df4fd",
+      "definitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest#function:0xe2c6a915",
+      "definitionId": "test/StreamRoyalty.t.sol:StreamRoyaltyTest",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -585,6 +585,9 @@ function isBuildSensitiveFile(filePath) {
     normalized === "openapi.yaml" ||
     normalized.startsWith(".github/workflows/") ||
     normalized.startsWith("generated/") ||
+    normalized.startsWith("config/public-reviews/") ||
+    normalized.startsWith("public/review-data/") ||
+    normalized.startsWith("scripts/public-reviews/") ||
     normalized.startsWith("scripts/build") ||
     normalized.startsWith("scripts/start") ||
     normalized.startsWith("scripts/run-secure") ||

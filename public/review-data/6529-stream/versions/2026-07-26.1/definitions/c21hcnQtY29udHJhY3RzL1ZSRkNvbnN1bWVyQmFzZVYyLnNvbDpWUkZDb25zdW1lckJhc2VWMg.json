@@ -1,0 +1,290 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2#error:0x1cf993f4",
+          "declaringDefinitionId": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "have",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "want",
+              "type": "address"
+            }
+          ],
+          "name": "OnlyCoordinatorCanFulfill",
+          "selector": "0x1cf993f4",
+          "signature": "OnlyCoordinatorCanFulfill(address,address)"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2#function:0x1fe543e3",
+          "declaringDefinitionId": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256[]",
+              "name": "randomWords",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "rawFulfillRandomWords",
+          "outputs": [],
+          "selector": "0x1fe543e3",
+          "signature": "rawFulfillRandomWords(uint256,uint256[])",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": true,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 86657,
+          "canonicalSignature": "OnlyCoordinatorCanFulfill(address,address)",
+          "displaySignature": "OnlyCoordinatorCanFulfill(address,address)",
+          "id": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2#error:0x1cf993f4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "have",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "want",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvbnN1bWVyQmFzZVYyLnNvbDpWUkZDb25zdW1lckJhc2VWMiNlcnJvcjoweDFjZjk5M2Y0",
+          "kind": "error",
+          "name": "OnlyCoordinatorCanFulfill",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 5376,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/VRFConsumerBaseV2.sol#L99",
+            "lineEnd": 99,
+            "lineStart": 99,
+            "snippetSha256": "sha256:93a504fb78f931751de89d9b3c3495159a8226167e3a9a36ddb582c059704991",
+            "sourceSha256": "sha256:dd96749e1dac5eafda15af9dd009616554683ca955dad8f51fe2e22679878a59"
+          },
+          "selector": "0x1cf993f4"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2#function:constructor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_vrfCoordinator",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvbnN1bWVyQmFzZVYyLnNvbDpWUkZDb25zdW1lckJhc2VWMiNmdW5jdGlvbjpjb25zdHJ1Y3RvcihhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "@param _vrfCoordinator address of VRFCoordinator contract",
+          "outputs": [],
+          "range": {
+            "byteLength": 86,
+            "byteStart": 5569,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/VRFConsumerBaseV2.sol#L105-L107",
+            "lineEnd": 107,
+            "lineStart": 105,
+            "snippetSha256": "sha256:b1754eebd8e410112ccc6e3187a846885ca0ec02e51142458e09e170c6bcac62",
+            "sourceSha256": "sha256:dd96749e1dac5eafda15af9dd009616554683ca955dad8f51fe2e22679878a59"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fulfillRandomWords(uint256,uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2#function:fulfillRandomWords(uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "randomWords",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvbnN1bWVyQmFzZVYyLnNvbDpWUkZDb25zdW1lckJhc2VWMiNmdW5jdGlvbjpmdWxmaWxsUmFuZG9tV29yZHModWludDI1Nix1aW50MjU2W10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fulfillRandomWords",
+          "natspec": "@notice fulfillRandomness handles the VRF response. Your contract must\n @notice implement it. See \"SECURITY CONSIDERATIONS\" above for important\n @notice principles to keep in mind when implementing your fulfillRandomness\n @notice method.\n @dev VRFConsumerBaseV2 expects its subcontracts to have a method with this\n @dev signature, and will call it once it has verified the proof\n @dev associated with the randomness. (It is triggered via a call to\n @dev rawFulfillRandomness, below.)\n @param requestId The Id initially returned by requestRandomness\n @param randomWords the VRF output expanded to the requested number of words",
+          "outputs": [],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 6378,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/VRFConsumerBaseV2.sol#L123",
+            "lineEnd": 123,
+            "lineStart": 123,
+            "snippetSha256": "sha256:da35fbb75145e57e9e180c955ace3ae1ed0593a72df9e36750a72b37810d46d5",
+            "sourceSha256": "sha256:dd96749e1dac5eafda15af9dd009616554683ca955dad8f51fe2e22679878a59"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": "rawFulfillRandomWords(uint256,uint256[])",
+          "displaySignature": "rawFulfillRandomWords(uint256,uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2#function:0x1fe543e3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "randomWords",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvbnN1bWVyQmFzZVYyLnNvbDpWUkZDb25zdW1lckJhc2VWMiNmdW5jdGlvbjoweDFmZTU0M2Uz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "rawFulfillRandomWords",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 276,
+            "byteStart": 6675,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/VRFConsumerBaseV2.sol#L128-L133",
+            "lineEnd": 133,
+            "lineStart": 128,
+            "snippetSha256": "sha256:e80dae8ef43febb56f76acd08bb7d34c56934f2ca34cdfe73591738f8e9bfd7d",
+            "sourceSha256": "sha256:dd96749e1dac5eafda15af9dd009616554683ca955dad8f51fe2e22679878a59"
+          },
+          "selector": "0x1fe543e3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "vrfCoordinator",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 5441,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/VRFConsumerBaseV2.sol#L100",
+            "lineEnd": 100,
+            "lineStart": 100,
+            "snippetSha256": "sha256:884459a589c67610fd4ec546e797a99954dd185ff50734f9c00b46c941b94158",
+            "sourceSha256": "sha256:dd96749e1dac5eafda15af9dd009616554683ca955dad8f51fe2e22679878a59"
+          },
+          "selector": null,
+          "type": "address",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvbnN1bWVyQmFzZVYyLnNvbDpWUkZDb25zdW1lckJhc2VWMg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "VRFConsumerBaseV2",
+    "natspec": "****************************************************************************\n @notice Interface for contracts using VRF randomness\n *****************************************************************************\n @dev PURPOSE\n @dev Reggie the Random Oracle (not his real job) wants to provide randomness\n @dev to Vera the verifier in such a way that Vera can be sure he's not\n @dev making his output up to suit himself. Reggie provides Vera a public key\n @dev to which he knows the secret key. Each time Vera provides a seed to\n @dev Reggie, he gives back a value which is computed completely\n @dev deterministically from the seed and the secret key.\n @dev Reggie provides a proof by which Vera can verify that the output was\n @dev correctly computed once Reggie tells it to her, but without that proof,\n @dev the output is indistinguishable to her from a uniform random sample\n @dev from the output space.\n @dev The purpose of this contract is to make it easy for unrelated contracts\n @dev to talk to Vera the verifier about the work Reggie is doing, to provide\n @dev simple access to a verifiable source of randomness. It ensures 2 things:\n @dev 1. The fulfillment came from the VRFCoordinator\n @dev 2. The consumer contract implements fulfillRandomWords.\n *****************************************************************************\n @dev USAGE\n @dev Calling contracts must inherit from VRFConsumerBase, and can\n @dev initialize VRFConsumerBase's attributes in their constructor as\n @dev shown:\n @dev   contract VRFConsumer {\n @dev     constructor(<other arguments>, address _vrfCoordinator, address _link)\n @dev       VRFConsumerBase(_vrfCoordinator) public {\n @dev         <initialization with other arguments goes here>\n @dev       }\n @dev   }\n @dev The oracle will have given you an ID for the VRF keypair they have\n @dev committed to (let's call it keyHash). Create subscription, fund it\n @dev and your consumer contract as a consumer of it (see VRFCoordinatorInterface\n @dev subscription management functions).\n @dev Call requestRandomWords(keyHash, subId, minimumRequestConfirmations,\n @dev callbackGasLimit, numWords),\n @dev see (VRFCoordinatorInterface for a description of the arguments).\n @dev Once the VRFCoordinator has received and validated the oracle's response\n @dev to your request, it will call your contract's fulfillRandomWords method.\n @dev The randomness argument to fulfillRandomWords is a set of random words\n @dev generated from your requestId and the blockHash of the request.\n @dev If your contract could have concurrent requests open, you can use the\n @dev requestId returned from requestRandomWords to track which response is associated\n @dev with which randomness request.\n @dev See \"SECURITY CONSIDERATIONS\" for principles to keep in mind,\n @dev if your contract could have multiple requests in flight simultaneously.\n @dev Colliding `requestId`s are cryptographically impossible as long as seeds\n @dev differ.\n *****************************************************************************\n @dev SECURITY CONSIDERATIONS\n @dev A method with the ability to call your fulfillRandomness method directly\n @dev could spoof a VRF response with any random value, so it's critical that\n @dev it cannot be directly called by anything other than this base contract\n @dev (specifically, by the VRFConsumerBase.rawFulfillRandomness method).\n @dev For your users to trust that your contract's random behavior is free\n @dev from malicious interference, it's best if you can write it so that all\n @dev behaviors implied by a VRF response are executed *during* your\n @dev fulfillRandomness method. If your contract must store the response (or\n @dev anything derived from it) and use it later, you must ensure that any\n @dev user-significant behavior which depends on that stored value cannot be\n @dev manipulated by a subsequent VRF request.\n @dev Similarly, both miners and the VRF oracle itself have some influence\n @dev over the order in which VRF responses appear on the blockchain, so if\n @dev your contract could have multiple VRF requests in flight simultaneously,\n @dev you must ensure that the order in which the VRF responses arrive cannot\n @dev be used to manipulate your contract's user-significant behavior.\n @dev Since the block hash of the block which contains the requestRandomness\n @dev call is mixed into the input to the VRF *last*, a sufficiently powerful\n @dev miner could, in principle, fork the blockchain to evict the block\n @dev containing the request, forcing the request to be included in a\n @dev different block with a different hash, and therefore a different input\n @dev to the VRF. However, such an attack would incur a substantial economic\n @dev cost. This cost scales with the number of blocks the VRF oracle waits\n @dev until it calls responds to a request. It is for this reason that\n @dev that you can signal to an oracle you'd like them to wait longer before\n @dev responding to the request (however this is not enforced in the contract\n @dev and so remains effective only in the case of unmodified oracle software).",
+    "range": {
+      "byteLength": 1619,
+      "byteStart": 5334,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/VRFConsumerBaseV2.sol#L98-L134",
+      "lineEnd": 134,
+      "lineStart": 98,
+      "snippetSha256": "sha256:3a3bc03268e4153dcab71331773a8c3814565be993a71c2c0cee16e605d8a842",
+      "sourceSha256": "sha256:dd96749e1dac5eafda15af9dd009616554683ca955dad8f51fe2e22679878a59"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/VRFConsumerBaseV2.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2#function:0x1fe543e3",
+      "definitionId": "smart-contracts/VRFConsumerBaseV2.sol:VRFConsumerBaseV2",
+      "severity": "advisory"
+    }
+  ]
+}

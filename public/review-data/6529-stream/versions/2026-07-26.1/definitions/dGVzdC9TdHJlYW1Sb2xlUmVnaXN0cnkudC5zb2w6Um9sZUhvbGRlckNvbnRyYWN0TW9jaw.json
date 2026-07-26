@@ -1,0 +1,137 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRoleRegistry.t.sol:RoleHolderContractMock#function:0x5c36b186",
+          "declaringDefinitionId": "test/StreamRoleRegistry.t.sol:RoleHolderContractMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "ping",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x5c36b186",
+          "signature": "ping()",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "ping()",
+          "displaySignature": "ping()",
+          "functionKind": "function",
+          "id": "test/StreamRoleRegistry.t.sol:RoleHolderContractMock#function:0x5c36b186",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6Um9sZUhvbGRlckNvbnRyYWN0TW9jayNmdW5jdGlvbjoweDVjMzZiMTg2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ping",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 73,
+            "byteStart": 410,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoleRegistry.t.sol#L12-L14",
+            "lineEnd": 14,
+            "lineStart": 12,
+            "snippetSha256": "sha256:f956ba0c3497a0a0e41762661e80d3781947228a521d9204ef6621eebbbe69c3",
+            "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+          },
+          "selector": "0x5c36b186",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRoleRegistry.t.sol:RoleHolderContractMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Sb2xlUmVnaXN0cnkudC5zb2w6Um9sZUhvbGRlckNvbnRyYWN0TW9jaw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRoleRegistry.t.sol:RoleHolderContractMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RoleHolderContractMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 192,
+      "byteStart": 293,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamRoleRegistry.t.sol#L10-L15",
+      "lineEnd": 15,
+      "lineStart": 10,
+      "snippetSha256": "sha256:f5aba96dd6ba69f35c59f782aa22a19a4b34470c16cd8c4f39b4e6facbe6e45c",
+      "sourceSha256": "sha256:7401bb253654df3bf07cbcdc15511b04630d9d213a626611cb580f7061814ea9"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRoleRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRoleRegistry.t.sol:RoleHolderContractMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoleRegistry.t.sol:RoleHolderContractMock#function:0x5c36b186",
+      "definitionId": "test/StreamRoleRegistry.t.sol:RoleHolderContractMock",
+      "severity": "advisory"
+    }
+  ]
+}

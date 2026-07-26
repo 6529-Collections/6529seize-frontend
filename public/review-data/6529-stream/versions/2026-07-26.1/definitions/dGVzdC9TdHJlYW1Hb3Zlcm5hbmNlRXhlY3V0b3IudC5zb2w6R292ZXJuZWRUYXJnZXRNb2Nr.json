@@ -1,0 +1,508 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x20394735",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastPaidValue",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x20394735",
+          "signature": "lastPaidValue()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x256fec88",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastSender",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x256fec88",
+          "signature": "lastSender()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x6813d787",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "shouldRevert_",
+              "type": "bool"
+            }
+          ],
+          "name": "setShouldRevert",
+          "outputs": [],
+          "selector": "0x6813d787",
+          "signature": "setShouldRevert(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x55241077",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "setValue",
+          "outputs": [],
+          "selector": "0x55241077",
+          "signature": "setValue(uint256)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0xd3072d82",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "shouldRevert",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd3072d82",
+          "signature": "shouldRevert()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x3fa4f245",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "value",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x3fa4f245",
+          "signature": "value()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "value()",
+          "displaySignature": "value()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x3fa4f245",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRUYXJnZXRNb2NrI2Z1bmN0aW9uOjB4M2ZhNGYyNDU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "value",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 20,
+            "byteStart": 510,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:ec1356aef35340df24002c94ff74f90611b6c6e2083f68599d1065b18471d4b5",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x3fa4f245",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastPaidValue()",
+          "displaySignature": "lastPaidValue()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x20394735",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRUYXJnZXRNb2NrI2Z1bmN0aW9uOjB4MjAzOTQ3MzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastPaidValue",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 28,
+            "byteStart": 536,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:2696c669914433ac26323341a31833ae6ed900dcc3696c6c1a6d06878bc219f5",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x20394735",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastSender()",
+          "displaySignature": "lastSender()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x256fec88",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRUYXJnZXRNb2NrI2Z1bmN0aW9uOjB4MjU2ZmVjODg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastSender",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 25,
+            "byteStart": 570,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:35382f9f35944773351b96dee48a672b1ef2c6d8bfd8396036abb6c40ec4e163",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x256fec88",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "shouldRevert()",
+          "displaySignature": "shouldRevert()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0xd3072d82",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRUYXJnZXRNb2NrI2Z1bmN0aW9uOjB4ZDMwNzJkODI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "shouldRevert",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 24,
+            "byteStart": 601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:029b3bad31e18f08d8ac1a030d8f0c8e8ba98b3fc0dd6aff6f05195c1876e860",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xd3072d82",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setShouldRevert(bool)",
+          "displaySignature": "setShouldRevert(bool)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x6813d787",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "shouldRevert_",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRUYXJnZXRNb2NrI2Z1bmN0aW9uOjB4NjgxM2Q3ODc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setShouldRevert",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 99,
+            "byteStart": 632,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L19-L21",
+            "lineEnd": 21,
+            "lineStart": 19,
+            "snippetSha256": "sha256:95e71fb5e9fdaf2584d3234042182fa69c2e728441a68322bfe4233e89fd59c7",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x6813d787",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setValue(uint256)",
+          "displaySignature": "setValue(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x55241077",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRUYXJnZXRNb2NrI2Z1bmN0aW9uOjB4NTUyNDEwNzc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setValue",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 229,
+            "byteStart": 737,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L23-L30",
+            "lineEnd": 30,
+            "lineStart": 23,
+            "snippetSha256": "sha256:a7fc6ebd3d5dc7598a6e2caf76a021f13873e10ed60e201be20972921ea4db8a",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x55241077",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x3fa4f245",
+          "immutable": false,
+          "name": "value",
+          "natspec": "",
+          "range": {
+            "byteLength": 20,
+            "byteStart": 510,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:ec1356aef35340df24002c94ff74f90611b6c6e2083f68599d1065b18471d4b5",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x3fa4f245",
+          "type": "uint256",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x20394735",
+          "immutable": false,
+          "name": "lastPaidValue",
+          "natspec": "",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 536,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:2696c669914433ac26323341a31833ae6ed900dcc3696c6c1a6d06878bc219f5",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x20394735",
+          "type": "uint256",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x256fec88",
+          "immutable": false,
+          "name": "lastSender",
+          "natspec": "",
+          "range": {
+            "byteLength": 25,
+            "byteStart": 570,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:35382f9f35944773351b96dee48a672b1ef2c6d8bfd8396036abb6c40ec4e163",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x256fec88",
+          "type": "address",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0xd3072d82",
+          "immutable": false,
+          "name": "shouldRevert",
+          "natspec": "",
+          "range": {
+            "byteLength": 24,
+            "byteStart": 601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:029b3bad31e18f08d8ac1a030d8f0c8e8ba98b3fc0dd6aff6f05195c1876e860",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xd3072d82",
+          "type": "bool",
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRUYXJnZXRNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "GovernedTargetMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 492,
+      "byteStart": 476,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamGovernanceExecutor.t.sol#L13-L31",
+      "lineEnd": 31,
+      "lineStart": 13,
+      "snippetSha256": "sha256:eae329819b8c8b86a34ebf60a648a1342c8652111ab2f8383a5ee7e1c9020100",
+      "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceExecutor.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x20394735",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x256fec88",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x3fa4f245",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x55241077",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0x6813d787",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock#function:0xd3072d82",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedTargetMock",
+      "severity": "advisory"
+    }
+  ]
+}

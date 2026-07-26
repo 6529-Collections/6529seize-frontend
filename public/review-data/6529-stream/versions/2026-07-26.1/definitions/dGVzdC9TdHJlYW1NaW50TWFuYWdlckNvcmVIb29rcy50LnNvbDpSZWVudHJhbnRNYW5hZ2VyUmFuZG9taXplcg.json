@@ -1,0 +1,503 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0xbf1b89d3",
+          "declaringDefinitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "saltfunO",
+              "type": "uint256"
+            }
+          ],
+          "name": "calculateTokenHash",
+          "outputs": [],
+          "selector": "0xbf1b89d3",
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0x4cf0c697",
+          "declaringDefinitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "isRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x4cf0c697",
+          "signature": "isRandomizerContract()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0xfad0e201",
+          "declaringDefinitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "managerMintRejected",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xfad0e201",
+          "signature": "managerMintRejected()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0x8651732c",
+          "declaringDefinitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "managerMintRevertSelector",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x8651732c",
+          "signature": "managerMintRevertSelector()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "managerMintRejected()",
+          "displaySignature": "managerMintRejected()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0xfad0e201",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlckNvcmVIb29rcy50LnNvbDpSZWVudHJhbnRNYW5hZ2VyUmFuZG9taXplciNmdW5jdGlvbjoweGZhZDBlMjAx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "managerMintRejected",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 31,
+            "byteStart": 6053,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L203",
+            "lineEnd": 203,
+            "lineStart": 203,
+            "snippetSha256": "sha256:029a7fed30df1d54b2c9550a23f4cef3b97b70bba19d32fbd234c4c241805edf",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": "0xfad0e201",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "managerMintRevertSelector()",
+          "displaySignature": "managerMintRevertSelector()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0x8651732c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlckNvcmVIb29rcy50LnNvbDpSZWVudHJhbnRNYW5hZ2VyUmFuZG9taXplciNmdW5jdGlvbjoweDg2NTE3MzJj",
+          "kind": "function",
+          "modifiers": [],
+          "name": "managerMintRevertSelector",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 39,
+            "byteStart": 6090,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L204",
+            "lineEnd": 204,
+            "lineStart": 204,
+            "snippetSha256": "sha256:1909216d01f8184b452469eb52ed3bd771d77b59d47897f141ded1dd1e0adc6f",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": "0x8651732c",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(StreamCore,MockMintManager)",
+          "functionKind": "constructor",
+          "id": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:constructor(StreamCore,MockMintManager)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core_",
+              "type": "StreamCore"
+            },
+            {
+              "index": 1,
+              "name": "manager_",
+              "type": "MockMintManager"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlckNvcmVIb29rcy50LnNvbDpSZWVudHJhbnRNYW5hZ2VyUmFuZG9taXplciNmdW5jdGlvbjpjb25zdHJ1Y3RvcihTdHJlYW1Db3JlLE1vY2tNaW50TWFuYWdlcik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 113,
+            "byteStart": 6136,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L206-L209",
+            "lineEnd": 209,
+            "lineStart": 206,
+            "snippetSha256": "sha256:10a8b9a6dd2a2fbe15d8bc02ff5c42e2400d552974217953dc789be90c00ce74",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "displaySignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0xbf1b89d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "saltfunO",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlckNvcmVIb29rcy50LnNvbDpSZWVudHJhbnRNYW5hZ2VyUmFuZG9taXplciNmdW5jdGlvbjoweGJmMWI4OWQz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "calculateTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 621,
+            "byteStart": 6255,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L211-L228",
+            "lineEnd": 228,
+            "lineStart": 211,
+            "snippetSha256": "sha256:daf63f1bb30b858671ef670fc1ae70b97da175b89fc1b3e6b51101e8fcd0b64c",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": "0xbf1b89d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isRandomizerContract()",
+          "displaySignature": "isRandomizerContract()",
+          "functionKind": "function",
+          "id": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0x4cf0c697",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlckNvcmVIb29rcy50LnNvbDpSZWVudHJhbnRNYW5hZ2VyUmFuZG9taXplciNmdW5jdGlvbjoweDRjZjBjNjk3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 6882,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L230-L232",
+            "lineEnd": 232,
+            "lineStart": 230,
+            "snippetSha256": "sha256:daac779faad038f7e020f880d90a485c144831fcda6e8d6215dd3aa976335c75",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": "0x4cf0c697",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_selectorFrom(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:_selectorFrom(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revertData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlckNvcmVIb29rcy50LnNvbDpSZWVudHJhbnRNYW5hZ2VyUmFuZG9taXplciNmdW5jdGlvbjpfc2VsZWN0b3JGcm9tKGJ5dGVzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_selectorFrom",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 234,
+            "byteStart": 6977,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L234-L240",
+            "lineEnd": 240,
+            "lineStart": 234,
+            "snippetSha256": "sha256:f347272966de80926f10d6aca2919d2400d72e58e4943aa53105133f9019a064",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "core",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 5966,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L200",
+            "lineEnd": 200,
+            "lineStart": 200,
+            "snippetSha256": "sha256:2b14220f29190203ab179f5428596ea06c839e1f1cb4201c23b16a14c8c52d2d",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": null,
+          "type": "StreamCore",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "manager",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 6005,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L201",
+            "lineEnd": 201,
+            "lineStart": 201,
+            "snippetSha256": "sha256:5f630f569ae34e442d9b6cf7df6316f0d564d13c27d58c4d19330e06e45c1fad",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": null,
+          "type": "MockMintManager",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0xfad0e201",
+          "immutable": false,
+          "name": "managerMintRejected",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 6053,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L203",
+            "lineEnd": 203,
+            "lineStart": 203,
+            "snippetSha256": "sha256:029a7fed30df1d54b2c9550a23f4cef3b97b70bba19d32fbd234c4c241805edf",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": "0xfad0e201",
+          "type": "bool",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0x8651732c",
+          "immutable": false,
+          "name": "managerMintRevertSelector",
+          "natspec": "",
+          "range": {
+            "byteLength": 39,
+            "byteStart": 6090,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L204",
+            "lineEnd": 204,
+            "lineStart": 204,
+            "snippetSha256": "sha256:1909216d01f8184b452469eb52ed3bd771d77b59d47897f141ded1dd1e0adc6f",
+            "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+          },
+          "selector": "0x8651732c",
+          "type": "bytes4",
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IRandomizer.sol:IRandomizer",
+        "name": "IRandomizer"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlckNvcmVIb29rcy50LnNvbDpSZWVudHJhbnRNYW5hZ2VyUmFuZG9taXplcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+      "smart-contracts/IRandomizer.sol:IRandomizer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ReentrantManagerRandomizer",
+    "natspec": "",
+    "range": {
+      "byteLength": 1304,
+      "byteStart": 5909,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamMintManagerCoreHooks.t.sol#L199-L241",
+      "lineEnd": 241,
+      "lineStart": 199,
+      "snippetSha256": "sha256:ef9b7505edae8e8815c45e48128bc9e7181444ebca1101c38dc87dfba846c238",
+      "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManagerCoreHooks.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0x4cf0c697",
+      "definitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0x8651732c",
+      "definitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0xbf1b89d3",
+      "definitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:0xfad0e201",
+      "definitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer#function:constructor(StreamCore,MockMintManager)",
+      "definitionId": "test/StreamMintManagerCoreHooks.t.sol:ReentrantManagerRandomizer",
+      "severity": "advisory"
+    }
+  ]
+}

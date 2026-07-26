@@ -1,0 +1,76 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCollectionMetadata.t.sol:CollectionMetadataEmptyMarker",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db2xsZWN0aW9uTWV0YWRhdGEudC5zb2w6Q29sbGVjdGlvbk1ldGFkYXRhRW1wdHlNYXJrZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCollectionMetadata.t.sol:CollectionMetadataEmptyMarker"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "CollectionMetadataEmptyMarker",
+    "natspec": "",
+    "range": {
+      "byteLength": 42,
+      "byteStart": 28724,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/test/StreamCollectionMetadata.t.sol#L644",
+      "lineEnd": 644,
+      "lineStart": 644,
+      "snippetSha256": "sha256:fe196f9af1239abaa1b6e48d69f6e2e1caa61a0c1a515ed2652316e8417b1903",
+      "sourceSha256": "sha256:41976f748366c3854cef81f9dd9d4f4f6dbe51a248e9ef0ae40f643b39e1eab4"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCollectionMetadata.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCollectionMetadata.t.sol:CollectionMetadataEmptyMarker",
+      "severity": "advisory"
+    }
+  ]
+}

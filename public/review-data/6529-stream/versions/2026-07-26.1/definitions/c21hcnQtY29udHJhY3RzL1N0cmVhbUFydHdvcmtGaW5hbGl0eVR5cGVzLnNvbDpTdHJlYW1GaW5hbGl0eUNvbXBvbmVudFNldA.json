@@ -1,0 +1,1192 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalAbiSelector": "0x894b1401",
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0xe900fb31",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentExpectation",
+              "name": "expectation",
+              "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "componentCallData",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "gasCap",
+              "type": "uint256"
+            }
+          ],
+          "name": "componentStillMatches",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xe900fb31",
+          "selectorSource": "compiler_ast_library",
+          "signature": "componentStillMatches((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),bytes,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "canonicalAbiSelector": "0xca4e7927",
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x9fa47e28",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentExpectation[]",
+              "name": "expectedSlice",
+              "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "componentCallData",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "gasCap",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "componentsDomain",
+              "type": "bytes32"
+            }
+          ],
+          "name": "diagnoseRange",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "matches",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "observedHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x9fa47e28",
+          "selectorSource": "compiler_ast_library",
+          "signature": "diagnoseRange((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes,uint256,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "canonicalAbiSelector": "0x3622c0c6",
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x130c09b4",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentExpectation[]",
+              "name": "components",
+              "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "metadataMode",
+              "type": "uint8"
+            }
+          ],
+          "name": "firstMissingMandatory",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x130c09b4",
+          "selectorSource": "compiler_ast_library",
+          "signature": "firstMissingMandatory((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],uint8)",
+          "stateMutability": "pure"
+        },
+        {
+          "canonicalAbiSelector": "0x9b381f53",
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x87716252",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentExpectation[]",
+              "name": "components",
+              "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "metadataMode",
+              "type": "uint8"
+            }
+          ],
+          "name": "hasAllMandatory",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x87716252",
+          "selectorSource": "compiler_ast_library",
+          "signature": "hasAllMandatory((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],uint8)",
+          "stateMutability": "pure"
+        },
+        {
+          "canonicalAbiSelector": "0xe7d57ab0",
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x2505d516",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentExpectation[]",
+              "name": "components",
+              "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]"
+            }
+          ],
+          "name": "locateSanctionSlot",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "occurrences",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x2505d516",
+          "selectorSource": "compiler_ast_library",
+          "signature": "locateSanctionSlot((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[])",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0xa4fe7eba",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "component",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "componentCallData",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "gasCap",
+              "type": "uint256"
+            }
+          ],
+          "name": "observeComponent",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "readable",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamFinalityComponentState",
+              "name": "state",
+              "type": "(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0xa4fe7eba",
+          "signature": "observeComponent(address,bytes,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x7ff8e1c8",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "discovery",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "gasCap",
+              "type": "uint256"
+            }
+          ],
+          "name": "observeDiscoveryComponent",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "readable",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamFinalityComponentExpectation",
+              "name": "component",
+              "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x7ff8e1c8",
+          "signature": "observeDiscoveryComponent(address,bytes,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x17411dfa",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "discovery",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "gasCap",
+              "type": "uint256"
+            }
+          ],
+          "name": "observeDiscoveryWord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "readable",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "value",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x17411dfa",
+          "signature": "observeDiscoveryWord(address,bytes,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "canonicalAbiSelector": "0xa1013ae2",
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0xc8bfdf85",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentState",
+              "name": "state",
+              "type": "(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamFinalityComponentExpectation",
+              "name": "expectation",
+              "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "name": "stateMatchesExpectation",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xc8bfdf85",
+          "selectorSource": "compiler_ast_library",
+          "signature": "stateMatchesExpectation((bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32))",
+          "stateMutability": "pure"
+        },
+        {
+          "canonicalAbiSelector": "0xd99183e6",
+          "declarationId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0xbd0a8597",
+          "declaringDefinitionId": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentExpectation[]",
+              "name": "components",
+              "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "componentCallData",
+              "type": "bytes"
+            }
+          ],
+          "name": "verifyComponentsStrict",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "failCode",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "failIndex",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xbd0a8597",
+          "selectorSource": "compiler_ast_library",
+          "signature": "verifyComponentsStrict((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "firstMissingMandatory((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],uint8)",
+          "displaySignature": "firstMissingMandatory(StreamFinalityComponentExpectation[],uint8)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x130c09b4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "components",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation[]"
+            },
+            {
+              "index": 1,
+              "name": "metadataMode",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweDEzMGMwOWI0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "firstMissingMandatory",
+          "natspec": "@notice Returns the first mandatory componentType missing from `components` for the\n         collection's `metadataMode`, or `bytes32(0)` when all are present.\n @dev Base floor (every mode): COLLECTION_METADATA, METADATA_ROUTER, RENDERER,\n      RENDER_CONTEXT, MEDIA_MANIFEST, ENTROPY_COORDINATOR ([LTA-FINALITY] \"Required\n      component types include at least\"). Script-work modes (ONCHAIN/HYBRID) additionally\n      require SCRIPT_SOURCE, DEPENDENCY_SOURCE, and REFERENCE_RENDER (MRR-FINALITY rule 9,\n      [CMC-FINALITY-INPUTS] rule 5). The sorted-unique list guarantee makes each present\n      type a distinct entry; live frozen state is verified separately by the caller.\n      Invalid future/unrecognized mode IDs fail closed with a nonzero sentinel rather than\n      inheriting the less restrictive OFFCHAIN floor.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1453,
+            "byteStart": 15492,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L360-L384",
+            "lineEnd": 384,
+            "lineStart": 360,
+            "snippetSha256": "sha256:ae6dc4bad370c394e3dd1dfa1ddbd7e3ced118c9528815a92027eb9e4c1c3466",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0x130c09b4",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "hasAllMandatory((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],uint8)",
+          "displaySignature": "hasAllMandatory(StreamFinalityComponentExpectation[],uint8)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x87716252",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "components",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation[]"
+            },
+            {
+              "index": 1,
+              "name": "metadataMode",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweDg3NzE2MjUy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "hasAllMandatory",
+          "natspec": "@notice True when every mandatory componentType for `metadataMode` is present.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 235,
+            "byteStart": 17038,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L387-L392",
+            "lineEnd": 392,
+            "lineStart": 387,
+            "snippetSha256": "sha256:1a9938c244badf6bffbd30eea58377937fd54870e63b02dd0537bfb10ef47210",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0x87716252",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "locateSanctionSlot((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[])",
+          "displaySignature": "locateSanctionSlot(StreamFinalityComponentExpectation[])",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x2505d516",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "components",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweDI1MDVkNTE2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "locateSanctionSlot",
+          "natspec": "@notice Locates the single artist-sanction / platform-works declaration slot\n         ([LTA-FINALITY] requirement 9, [AA-SANCTION] requirement 3: exactly one applies).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "occurrences",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 558,
+            "byteStart": 17462,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L396-L411",
+            "lineEnd": 411,
+            "lineStart": 396,
+            "snippetSha256": "sha256:d1641ee3620b1e7dd2b237695a9a222c8122301f6d3cd995eb9880ac9f02448c",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0x2505d516",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "observeComponent(address,bytes,uint256)",
+          "displaySignature": "observeComponent(address,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0xa4fe7eba",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "component",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "componentCallData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "gasCap",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweGE0ZmU3ZWJh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "observeComponent",
+          "natspec": "@notice Bounded staticcall to a component's finality read plus a fixed-size returndata\n         decode; never reverts on component misbehavior ([LTA-FINALITY] diagnostic-read\n         semantics). `gasCap == 0` forwards available gas less a fixed reserve (execution\n         and preview); nonzero caps forwarded gas (diagnostic, FINALITY_COMPONENT_READ_GAS).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "readable",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "state",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentState"
+            }
+          ],
+          "range": {
+            "byteLength": 2518,
+            "byteStart": 18413,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L417-L482",
+            "lineEnd": 482,
+            "lineStart": 417,
+            "snippetSha256": "sha256:9e41bf3e76edf8fbf16eeb6a998237980f0c2ccd040387d2d356613d4a689877",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0xa4fe7eba",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "observeDiscoveryWord(address,bytes,uint256)",
+          "displaySignature": "observeDiscoveryWord(address,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x17411dfa",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "discovery",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "callData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "gasCap",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweDE3NDExZGZh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "observeDiscoveryWord",
+          "natspec": "@notice Bounded exact-word discovery read. Rejects codeless targets, failed calls, and\n         short or oversized returndata without copying attacker-controlled returndata.\n @dev `gasCap == 0` forwards the available gas less a fixed parent-frame reserve for strict\n      execution/preview. A nonzero cap is the governed post-finality diagnostic budget.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "readable",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1050,
+            "byteStart": 21320,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L488-L516",
+            "lineEnd": 516,
+            "lineStart": 488,
+            "snippetSha256": "sha256:f6145ca04e512ab65a74e55a324907eb24e162b8fe602360fed61d5a82dc7813",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0x17411dfa",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "observeDiscoveryComponent(address,bytes,uint256)",
+          "displaySignature": "observeDiscoveryComponent(address,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x7ff8e1c8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "discovery",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "callData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "gasCap",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweDdmZjhlMWM4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "observeDiscoveryComponent",
+          "natspec": "@notice Bounded exact-seven-word discovery enumeration read. Noncanonical addresses or\n         bytes4 words and any non-224-byte response fail closed without an ABI-decode revert.\n @dev Gas semantics match `observeDiscoveryWord`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "readable",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "component",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation"
+            }
+          ],
+          "range": {
+            "byteLength": 1603,
+            "byteStart": 22629,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L521-L562",
+            "lineEnd": 562,
+            "lineStart": 521,
+            "snippetSha256": "sha256:d6ab1806814d6b86974970b30b6afc46e82ab832dcb1afca659f089e1cd1cbc7",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0x7ff8e1c8",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "stateMatchesExpectation((bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32))",
+          "displaySignature": "stateMatchesExpectation(StreamFinalityComponentState,StreamFinalityComponentExpectation)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0xc8bfdf85",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "state",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentState"
+            },
+            {
+              "index": 1,
+              "name": "expectation",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweGM4YmZkZjg1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "stateMatchesExpectation",
+          "natspec": "@notice True when a live component `state` exactly matches the submitted `expectation`\n         and reports `frozen = true`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 618,
+            "byteStart": 24378,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L566-L577",
+            "lineEnd": 577,
+            "lineStart": 566,
+            "snippetSha256": "sha256:28666d5ab35f66b43b10817e90e8da42b7d8a75320dab37e20b80b2e25226385",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0xc8bfdf85",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "componentStillMatches((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),bytes,uint256)",
+          "displaySignature": "componentStillMatches(StreamFinalityComponentExpectation,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0xe900fb31",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectation",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation"
+            },
+            {
+              "index": 1,
+              "name": "componentCallData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "gasCap",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweGU5MDBmYjMx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "componentStillMatches",
+          "natspec": "@notice Live-match check for a stored expectation under an optional gas cap: false when\n         the component has no code, its codehash drifted, the read failed, or state\n         diverged. Used by the diagnostic reads.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 582,
+            "byteStart": 25245,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L582-L594",
+            "lineEnd": 594,
+            "lineStart": 582,
+            "snippetSha256": "sha256:afa6c2b90510c03068448e88a66fdaebfe0c640a591bf1d1e01a1d68c77022cc",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0xe900fb31",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "diagnoseRange((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes,uint256,bytes32)",
+          "displaySignature": "diagnoseRange(StreamFinalityComponentExpectation[],bytes,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0x9fa47e28",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedSlice",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation[]"
+            },
+            {
+              "index": 1,
+              "name": "componentCallData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "gasCap",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "componentsDomain",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweDlmYTQ3ZTI4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "diagnoseRange",
+          "natspec": "@notice Batch diagnostic over a stored expectation slice under a per-read gas cap:\n         returns whether every entry still matches live state, plus the components hash of\n         the expected slice and of the observed slice. Never reverts on component\n         misbehavior ([LTA-FINALITY] diagnostic-read semantics); one library call covers\n         the whole slice.\n @dev `expectedSlice` is the pre-sliced stored expectations; `componentsDomain` is\n      STREAM_FINALITY_COMPONENTS_V1 so the observed hash uses the identical domain/order\n      as the expected hash. An unreadable, code-drifted, or diverged entry sets\n      matches=false and leaves its observed entry zeroed.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "matches",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "observedHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1677,
+            "byteStart": 26852,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L611-L644",
+            "lineEnd": 644,
+            "lineStart": 611,
+            "snippetSha256": "sha256:0c9013afa08601630489492bad619e3305bf1a8d54579168f7eec90625682e0c",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0x9fa47e28",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "verifyComponentsStrict((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes)",
+          "displaySignature": "verifyComponentsStrict(StreamFinalityComponentExpectation[],bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:0xbd0a8597",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "components",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation[]"
+            },
+            {
+              "index": 1,
+              "name": "componentCallData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjoweGJkMGE4NTk3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "verifyComponentsStrict",
+          "natspec": "@notice Strict all-gas verification of the full submitted component list against live\n         reads ([LTA-FINALITY] recording semantics: revert if any component read fails,\n         returns malformed data, reports frozen=false, or differs from the expectation).\n @dev One library call verifies every component so the registry incurs a single\n      delegatecall for the whole list. `componentCallData` is the ABI-encoded\n      finalityState/finalityStateForScope call. Returns STRICT_OK with failIndex 0 on\n      success, else the first failing index and its failure code.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "failCode",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "failIndex",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 961,
+            "byteStart": 29158,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L653-L675",
+            "lineEnd": 675,
+            "lineStart": 653,
+            "snippetSha256": "sha256:2c6812a288f33ca6a08b5a4a63cbfabc8cbee23d567efb6ac2302cfae75d8c44",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": "0xbd0a8597",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requiredMask(uint8)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:_requiredMask(uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "metadataMode",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjpfcmVxdWlyZWRNYXNrKHVpbnQ4KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requiredMask",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 440,
+            "byteStart": 30125,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L677-L686",
+            "lineEnd": 686,
+            "lineStart": 677,
+            "snippetSha256": "sha256:50e01d17ded2b08c9aaecd846234911c904d2dbc3f673eed961883cd022b9d87",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_presenceMask(StreamFinalityComponentExpectation[])",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet#function:_presenceMask(StreamFinalityComponentExpectation[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "components",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldCNmdW5jdGlvbjpfcHJlc2VuY2VNYXNrKFN0cmVhbUZpbmFsaXR5Q29tcG9uZW50RXhwZWN0YXRpb25bXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_presenceMask",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "seen",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1076,
+            "byteStart": 30571,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L688-L705",
+            "lineEnd": 705,
+            "lineStart": 688,
+            "snippetSha256": "sha256:c61bd0069fefd70235421f1491f8d9273c1bd1ed320e283921822f0363ff7e61",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STRICT_READ_PARENT_GAS_RESERVE",
+          "natspec": "@dev Strict/preview reads need enough gas to decode or emit a typed failure after a target\n      exhausts its forwarded gas. Capped diagnostics need only their compact false path.",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 14362,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L346",
+            "lineEnd": 346,
+            "lineStart": 346,
+            "snippetSha256": "sha256:6dcf08f1ea72aa1963276bc3a2b0ee9cc8318600f4fb58de9ed222f051a3c270",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "DIAGNOSTIC_READ_PARENT_GAS_RESERVE",
+          "natspec": "",
+          "range": {
+            "byteLength": 68,
+            "byteStart": 14433,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L347",
+            "lineEnd": 347,
+            "lineStart": 347,
+            "snippetSha256": "sha256:746dcc8eee3266146e58b07779565e150f5efb3eee019958a69948bf1f31c029",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint256",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "INVALID_METADATA_MODE_SENTINEL",
+          "natspec": "",
+          "range": {
+            "byteLength": 84,
+            "byteStart": 14507,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L348",
+            "lineEnd": 348,
+            "lineStart": 348,
+            "snippetSha256": "sha256:235c8e38dde098d7d390bae2bf6815320b2e9b7509e88ecfbd960f099154bd3d",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STRICT_OK",
+          "natspec": "@notice Failure codes returned by verifyComponentsStrict.",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 25899,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L597",
+            "lineEnd": 597,
+            "lineStart": 597,
+            "snippetSha256": "sha256:e0c00c93fd491c7f9bd357d5c6fa1c7ad04e8ed846252ffcffe2fad9ddcfd98c",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STRICT_UNREADABLE",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 25942,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L598",
+            "lineEnd": 598,
+            "lineStart": 598,
+            "snippetSha256": "sha256:e7c41959cd32e0b8a0144ceabd6e844cad8f07dbd31cd2cfbadce53371438ad1",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STRICT_CODEHASH_MISMATCH",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 25993,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L599",
+            "lineEnd": 599,
+            "lineStart": 599,
+            "snippetSha256": "sha256:fbac73900889e7d003c8e14faac8b59c2c0110f241b779c98415f6515f831020",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STRICT_STATE_MISMATCH",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 26051,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L600",
+            "lineEnd": 600,
+            "lineStart": 600,
+            "snippetSha256": "sha256:46f073bb9c7a29aae396ec5cd205e3cf742ba3bf6f9227f8c18b8e3377ccde3b",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eUNvbXBvbmVudFNldA",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityComponentSet"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamFinalityComponentSet",
+    "natspec": "@notice Mandatory finality component-set logic ([LTA-FINALITY] requirement 1, MRR-FINALITY\n         rules 6-9, [CMC-FINALITY-INPUTS]).\n @dev Hosted as a library so the mandatory-floor check is shared byte-for-byte between the\n      registry (execution) and the preview periphery, and does not inflate either contract's\n      own bytecode. The floor is enforced onchain independently from the mandatory\n      discovery module's exact-route check.",
+    "range": {
+      "byteLength": 17523,
+      "byteStart": 14126,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityTypes.sol#L343-L706",
+      "lineEnd": 706,
+      "lineStart": 343,
+      "snippetSha256": "sha256:8568f212db56302f947151c872d02485aa25db64b3b40478e68eae52a11b743d",
+      "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamArtworkFinalityTypes.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}
