@@ -201,6 +201,57 @@ describe("public review ledger projection", () => {
     expect(page.records[0]!.discussionPath).toContain("serialNo=100");
   });
 
+  it("treats a null reply marker as top-level and excludes actual replies", async () => {
+    const topLevelDrop = {
+      ...makeDrop(100),
+      reply_to_drop: null,
+    } as unknown as ApiDropV2;
+    const replyDrop = {
+      ...makeDrop(99),
+      reply_to_drop: { drop_id: "drop-100" },
+    } as unknown as ApiDropV2;
+    const api = makeApi({
+      drops: [topLevelDrop, replyDrop],
+      metadata: async () => makeMetadata(),
+    });
+
+    const page = await fetchPublicReviewLedgerPage({
+      api,
+      config,
+      destination,
+    });
+
+    expect(page.records.map((record) => record.serialNo)).toEqual([100]);
+    expect(api.fetchMetadata).toHaveBeenCalledTimes(1);
+    expect(api.fetchMetadata).toHaveBeenCalledWith(
+      expect.objectContaining({ dropId: "drop-100" })
+    );
+  });
+
+  it("ignores malformed reaction counts", async () => {
+    const drop = {
+      ...makeDrop(100),
+      reactions: [
+        { reaction: "valid", count: 4 },
+        { reaction: "negative", count: -3 },
+        { reaction: "fractional", count: 1.5 },
+        { reaction: "not-a-number", count: Number.NaN },
+      ],
+    } as ApiDropV2;
+    const api = makeApi({
+      drops: [drop],
+      metadata: async () => makeMetadata(),
+    });
+
+    const page = await fetchPublicReviewLedgerPage({
+      api,
+      config,
+      destination,
+    });
+
+    expect(page.records[0]?.reactionsCount).toBe(4);
+  });
+
   it("rejects a raw feed from a different Wave", async () => {
     const api = makeApi({
       drops: [],

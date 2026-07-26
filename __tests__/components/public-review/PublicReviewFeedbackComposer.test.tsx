@@ -1,6 +1,7 @@
 import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { fetchWaveById } from "@/services/api/waves-v2-api";
@@ -75,7 +76,7 @@ function renderComposer(submitter: PublicReviewFeedbackSubmitter) {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  return render(
+  const result = render(
     <PublicReviewFeedbackComposer
       locale="en-US"
       config={config}
@@ -89,6 +90,7 @@ function renderComposer(submitter: PublicReviewFeedbackSubmitter) {
     />,
     { wrapper: Wrapper }
   );
+  return { ...result, queryClient };
 }
 
 describe("PublicReviewFeedbackComposer", () => {
@@ -143,7 +145,8 @@ describe("PublicReviewFeedbackComposer", () => {
           resolveDrop = resolve;
         })
     ) as PublicReviewFeedbackSubmitter;
-    renderComposer(submitter);
+    const { queryClient } = renderComposer(submitter);
+    const invalidateQueries = jest.spyOn(queryClient, "invalidateQueries");
 
     const comment = await screen.findByLabelText("Comment", {
       selector: "textarea",
@@ -165,6 +168,15 @@ describe("PublicReviewFeedbackComposer", () => {
     });
 
     await waitFor(() => expect(comment).toHaveValue(""));
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [
+        QueryKey.PUBLIC_REVIEW_LEDGER,
+        expect.objectContaining({
+          environment: destination.environment,
+          waveId: destination.waveId,
+        }),
+      ],
+    });
     const successLink = screen.getByRole("link", {
       name: "Open your feedback in the Wave",
     });

@@ -701,5 +701,7 @@ export function decodePublicReviewFeedbackMetadata({
 export function hasPublicReviewMetadata(
   metadata: readonly { readonly data_key: string }[]
 ): boolean {
-  return metadata.some((item) => item.data_key.startsWith("review_"));
+  return metadata.some((item) =>
+    PUBLIC_REVIEW_METADATA_KEYS.some((key) => key === item.data_key)
+  );
 }

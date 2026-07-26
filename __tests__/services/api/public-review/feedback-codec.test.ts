@@ -1,6 +1,7 @@
 import {
   decodePublicReviewFeedbackMetadata,
   encodePublicReviewFeedback,
+  hasPublicReviewMetadata,
   PUBLIC_REVIEW_METADATA_KEYS,
   PublicReviewFeedbackValidationError,
   validatePublicReviewFeedbackConfig,
@@ -104,7 +105,7 @@ function encode(lineStart: string | number = "42") {
 }
 
 describe("public review feedback codec", () => {
-  it("accepts the full schema-v1 type and severity allowlists", () => {
+  it("accepts the configured Stream type and severity vocabularies", () => {
     expect(() =>
       validatePublicReviewFeedbackConfig({
         ...config,
@@ -129,6 +130,15 @@ describe("public review feedback codec", () => {
         ].map((value) => ({ value, label: value })),
       })
     ).not.toThrow();
+  });
+
+  it("recognizes only canonical public-review metadata keys", () => {
+    expect(
+      hasPublicReviewMetadata([{ data_key: PUBLIC_REVIEW_METADATA_KEYS[2] }])
+    ).toBe(true);
+    expect(hasPublicReviewMetadata([{ data_key: "review_future" }])).toBe(
+      false
+    );
   });
 
   it("encodes one top-level Chat drop with exactly four canonical fields", () => {
