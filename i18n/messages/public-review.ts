@@ -274,6 +274,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.noDefinitions":
     "No definitions match the selected filters.",
   "publicReview.reference.resultsCount": "{visible} of {total} definitions",
+  "publicReview.reference.showMoreDefinitions": "Show more definitions",
   "publicReview.reference.declarationResultsCount":
     "{visible} of {total} declarations",
   "publicReview.reference.openDefinition": "Open {name}",

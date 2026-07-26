@@ -87,7 +87,7 @@ export function PublicReviewNavigation({
   return (
     <>
       <details className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 lg:tw-hidden">
-        <summary className="tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white marker:tw-text-iron-400">
+        <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-semibold tw-text-white marker:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
           {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}
         </summary>
         <nav

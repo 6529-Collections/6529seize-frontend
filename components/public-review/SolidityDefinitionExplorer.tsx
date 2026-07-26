@@ -24,6 +24,7 @@ export interface SolidityDefinitionListItem {
 
 const INPUT_CLASSES =
   "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
+const INITIAL_RESULT_LIMIT = 50;
 
 function getDistinctValues(
   items: readonly SolidityDefinitionListItem[],
@@ -102,6 +103,7 @@ export function SolidityDefinitionExplorer({
   const [classification, setClassification] = useState("");
   const [kind, setKind] = useState("");
   const [scope, setScope] = useState("");
+  const [resultLimit, setResultLimit] = useState(INITIAL_RESULT_LIMIT);
   const filterOptions = useMemo(
     () => ({
       classifications: getDistinctValues(items, "classification"),
@@ -114,9 +116,10 @@ export function SolidityDefinitionExplorer({
     () =>
       items.filter((item) =>
         matchesFilter(item, { classification, kind, query, scope })
-      ),
+    ),
     [classification, items, kind, query, scope]
   );
+  const visibleItems = filteredItems.slice(0, resultLimit);
 
   return (
     <section aria-labelledby="solidity-definition-inventory">
@@ -167,7 +170,7 @@ export function SolidityDefinitionExplorer({
 
       <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400" role="status">
         {t(DEFAULT_LOCALE, "publicReview.reference.resultsCount", {
-          visible: formatInteger(DEFAULT_LOCALE, filteredItems.length),
+          visible: formatInteger(DEFAULT_LOCALE, visibleItems.length),
           total: formatInteger(DEFAULT_LOCALE, items.length),
         })}
       </p>
@@ -178,7 +181,7 @@ export function SolidityDefinitionExplorer({
         </p>
       ) : (
         <ul className="tw-mb-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 lg:tw-grid-cols-2">
-          {filteredItems.map((item) => (
+          {visibleItems.map((item) => (
             <li key={item.key}>
               <Link
                 href={item.href}
@@ -263,6 +266,17 @@ export function SolidityDefinitionExplorer({
           ))}
         </ul>
       )}
+      {visibleItems.length < filteredItems.length ? (
+        <button
+          className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+          onClick={() =>
+            setResultLimit((current) => current + INITIAL_RESULT_LIMIT)
+          }
+          type="button"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.reference.showMoreDefinitions")}
+        </button>
+      ) : null}
     </section>
   );
 }

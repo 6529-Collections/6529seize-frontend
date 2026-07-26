@@ -465,13 +465,6 @@ export function SoliditySourceReview({
         selectedSource={selectedSource}
         showCommentAction={feedbackSlot !== undefined}
       />
-      {feedbackSlot !== undefined ? (
-        <a
-          href="#public-review-feedback"
-          className="tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-4 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-          {t(DEFAULT_LOCALE, "publicReview.reference.skipCode")}
-        </a>
-      ) : null}
       <SourceLines
         firstLineNumber={firstLineNumber}
         lineEnd={lineEnd}

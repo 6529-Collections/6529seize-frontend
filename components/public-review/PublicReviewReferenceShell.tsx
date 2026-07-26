@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import type {
   PublicReviewDefinition,
   PublicReviewSource,
@@ -30,6 +31,10 @@ export function PublicReviewReferenceShell({
   readonly source: PublicReviewSource;
   readonly title: string;
 }) {
+  const feedbackSubmissionsAvailable =
+    review.feedbackAvailable &&
+    getPublicReviewLifecycleCapabilities(review.status).feedbackSubmissionsOpen;
+
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
       <PublicReviewStatusBanner
@@ -49,7 +54,6 @@ export function PublicReviewReferenceShell({
             {t(DEFAULT_LOCALE, "publicReview.reference.backToReview")}
           </Link>
           <Link
-            aria-current="page"
             className="tw-text-primary-200 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/50 tw-bg-primary-400/10 tw-px-3 tw-py-2 tw-font-semibold tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
             href={referenceHref}
           >
@@ -61,12 +65,14 @@ export function PublicReviewReferenceShell({
           >
             {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
           </Link>
-          <a
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-3 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-            href="#public-review-feedback"
-          >
-            {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
-          </a>
+          {feedbackSubmissionsAvailable ? (
+            <a
+              className="tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-3 tw-py-2 tw-font-semibold tw-text-amber-100 tw-no-underline hover:tw-border-amber-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+              href="#public-review-feedback"
+            >
+              {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
+            </a>
+          ) : null}
         </nav>
 
         <header className="tw-mt-8 tw-max-w-5xl">

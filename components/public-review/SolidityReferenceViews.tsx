@@ -16,6 +16,7 @@ import {
 } from "@/components/public-review/SolidityGlobalDeclarationExplorer";
 import { SolidityInheritance } from "@/components/public-review/SolidityInheritance";
 import { SolidityOtherDeclarationGroup } from "@/components/public-review/SolidityOtherDeclarationGroup";
+import { SolidityReferenceSectionNavigation } from "@/components/public-review/SolidityReferenceSectionNavigation";
 import { SoliditySemanticIdentity } from "@/components/public-review/SoliditySemanticIdentity";
 import { SolidityWarnings } from "@/components/public-review/SolidityWarnings";
 import { formatDate, formatInteger } from "@/i18n/format";
@@ -297,6 +298,8 @@ export function SolidityReferenceOverview({
           value={manifest.summary.warningCount}
         />
       </dl>
+
+      <SolidityReferenceSectionNavigation />
 
       <section
         aria-labelledby="solidity-generation-provenance"
