@@ -9,6 +9,7 @@ import {
   SolidityDefinitionExplorer,
   type SolidityDefinitionListItem,
 } from "@/components/public-review/SolidityDefinitionExplorer";
+import { SolidityInheritance } from "@/components/public-review/SolidityInheritance";
 import { SolidityOtherDeclarationGroup } from "@/components/public-review/SolidityOtherDeclarationGroup";
 import { SoliditySemanticIdentity } from "@/components/public-review/SoliditySemanticIdentity";
 import { SolidityWarnings } from "@/components/public-review/SolidityWarnings";
@@ -655,49 +656,11 @@ export function SolidityDefinitionView({
         />
       </div>
 
-      <section
-        aria-labelledby="definition-inheritance"
-        className={CARD_CLASSES}
-      >
-        <h2
-          id="definition-inheritance"
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.reference.inheritance")}
-        </h2>
-        {shard.definition.inheritance.length === 0 ? (
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
-            {t(DEFAULT_LOCALE, "publicReview.reference.noInheritance")}
-          </p>
-        ) : (
-          <ul className="tw-mb-0 tw-mt-4 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
-            {shard.definition.inheritance.map((parent) => {
-              const indexedParent = manifest.definitionIndex.find(
-                (definition) => definition.id === parent.definitionId
-              );
-              return (
-                <li key={parent.definitionId}>
-                  {indexedParent ? (
-                    <Link
-                      className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-font-mono tw-text-sm tw-text-iron-100 tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-                      href={getSolidityDefinitionHref({
-                        ...hrefContext,
-                        definitionKey: indexedParent.key,
-                      })}
-                    >
-                      {parent.name}
-                    </Link>
-                  ) : (
-                    <code className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-300">
-                      {parent.name}
-                    </code>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
+      <SolidityInheritance
+        hrefContext={hrefContext}
+        manifest={manifest}
+        shard={shard}
+      />
 
       <SolidityDeclarationExplorer
         items={getDeclarationItems({ hrefContext, shard })}

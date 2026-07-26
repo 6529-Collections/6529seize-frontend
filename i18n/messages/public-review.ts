@@ -134,6 +134,11 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.deployedBytecodeChecksum":
     "Deployed bytecode checksum",
   "publicReview.reference.inheritance": "Inheritance",
+  "publicReview.reference.directInheritance": "Direct bases",
+  "publicReview.reference.linearizedInheritance":
+    "Compiler linearization order",
+  "publicReview.reference.linearizedInheritanceDescription":
+    "The exact C3 linearized definition order recorded by the compiler, beginning with this definition.",
   "publicReview.reference.noInheritance": "No inherited definitions recorded.",
   "publicReview.reference.declarations": "Local declarations",
   "publicReview.reference.abiSurface": "Compiled ABI surface",
