@@ -1,6 +1,5 @@
-import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
-import { decodeEventLog, getAddress, type Address, type Hash } from "viem";
+import { decodeEventLog, getAddress, type Address } from "viem";
 
 import { cTokenAbi, cometAbi, comptrollerAbi } from "./abis";
 import { publicClient } from "./client";
@@ -20,7 +19,6 @@ import {
   fetchV3MarketState,
   formatUnitsWithPrecision,
   getExchangeRateScale,
-  isPossibleTxHash,
   normalizeAddress,
   pow10BigInt,
   type CompoundTarget,
@@ -31,8 +29,6 @@ export type { PreviewPlan } from "./markets";
 const V2_MARKET_TTL_MS = 90_000;
 const V3_MARKET_TTL_MS = 90_000;
 const ACCOUNT_TTL_MS = 45_000;
-const TX_TTL_SUCCESS_MS = 24 * 60 * 60 * 1000;
-const TX_TTL_PENDING_MS = 30_000;
 
 async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
   const markets = Array.from(v2MarketsByAddress.values());
@@ -351,40 +347,7 @@ function decodeV3Event(log: {
   }
 }
 
-async function decodeCompoundTx(hash: Hash): Promise<LinkPreviewResponse> {
-  const transaction = await publicClient.getTransaction({ hash });
-  const { receipt, status, blockNumber } =
-    await getTransactionReceiptDetails(hash);
-  const participants = extractTransactionParticipants(transaction);
-  const summary = buildCompoundSummaryFromLogs(
-    receipt?.logs ?? [],
-    participants
-  );
-
-  return {
-    type: "compound.tx",
-    chainId: 1,
-    hash,
-    status,
-    blockNumber: blockNumber ?? undefined,
-    summary: summary ?? undefined,
-    links: {
-      etherscan: `https://etherscan.io/tx/${hash}`,
-    },
-  } as LinkPreviewResponse;
-}
-
-type PublicClientReceipt = Awaited<
-  ReturnType<typeof publicClient.getTransactionReceipt>
->;
-
-type ReceiptDetails = {
-  readonly receipt: PublicClientReceipt | null;
-  readonly status: "success" | "reverted" | "pending";
-  readonly blockNumber: number | null;
-};
-
-type CompoundTransactionSummary = {
+export type CompoundTransactionSummary = {
   readonly version: "v2" | "v3";
   readonly action: CompoundSummaryAction;
   readonly market: {
@@ -410,36 +373,7 @@ type TxParticipants = {
   readonly to?: Address | undefined;
 };
 
-async function getTransactionReceiptDetails(
-  hash: Hash
-): Promise<ReceiptDetails> {
-  try {
-    const receipt = await publicClient.getTransactionReceipt({ hash });
-    return {
-      receipt,
-      status: receipt.status,
-      blockNumber: Number(receipt.blockNumber ?? BIGINT_ZERO),
-    };
-  } catch {
-    return {
-      receipt: null,
-      status: "pending",
-      blockNumber: null,
-    };
-  }
-}
-
-function extractTransactionParticipants(transaction: {
-  readonly from?: string | null | undefined;
-  readonly to?: string | null | undefined;
-}): TxParticipants {
-  return {
-    from: transaction.from ? getAddress(transaction.from) : undefined,
-    to: transaction.to ? getAddress(transaction.to) : undefined,
-  };
-}
-
-function buildCompoundSummaryFromLogs(
+export function buildCompoundSummaryFromLogs(
   logs: readonly {
     readonly address: Address;
     readonly data: `0x${string}`;
@@ -620,65 +554,12 @@ function detectAppCompoundTarget(
   return detectAppCompoundMarket(pathname);
 }
 
-function detectEtherscanTx(pathname: string): CompoundTarget | null {
-  if (!pathname.startsWith("/tx/")) {
-    return null;
-  }
-
-  const hash = pathname.split("/")[2];
-  if (!hash || !isPossibleTxHash(hash)) {
-    return null;
-  }
-
-  return { kind: "tx", hash: hash as Address };
-}
-
-function detectEtherscanMarket(pathname: string): CompoundTarget | null {
-  if (!pathname.startsWith("/address/")) {
-    return null;
-  }
-
-  const raw = pathname.split("/")[2];
-  const normalized = raw ? normalizeAddress(raw) : null;
-  if (!normalized) {
-    return null;
-  }
-
-  const lower = normalized.toLowerCase() as Address;
-  const v2 = v2MarketsByAddress.get(lower);
-  if (v2) {
-    return { kind: "market", version: "v2", market: v2 };
-  }
-
-  const v3 = v3MarketsByAddress.get(lower);
-  if (v3) {
-    return { kind: "market", version: "v3", market: v3 };
-  }
-
-  return null;
-}
-
-function detectEtherscanCompoundTarget(
-  pathname: string
-): CompoundTarget | null {
-  const txTarget = detectEtherscanTx(pathname);
-  if (txTarget) {
-    return txTarget;
-  }
-
-  return detectEtherscanMarket(pathname);
-}
-
 function detectCompoundTarget(url: URL): CompoundTarget | null {
   const hostname = url.hostname.toLowerCase();
   const pathname = url.pathname.replace(/\/+$/, "").toLowerCase() || "/";
 
-  if (matchesDomainOrSubdomain(hostname, "app.compound.finance")) {
+  if (hostname === "app.compound.finance") {
     return detectAppCompoundTarget(url, pathname);
-  }
-
-  if (matchesDomainOrSubdomain(hostname, "etherscan.io")) {
-    return detectEtherscanCompoundTarget(pathname);
   }
 
   return null;
@@ -716,18 +597,6 @@ export function createCompoundPlan(url: URL): PreviewPlan | null {
       execute: async () => {
         const data = await fetchCompoundAccount(target.address);
         return { data, ttl: ACCOUNT_TTL_MS };
-      },
-    };
-  }
-
-  if (target.kind === "tx") {
-    return {
-      cacheKey: `compound:tx:${target.hash.toLowerCase()}`,
-      execute: async () => {
-        const data = await decodeCompoundTx(target.hash);
-        const ttl =
-          data["status"] === "pending" ? TX_TTL_PENDING_MS : TX_TTL_SUCCESS_MS;
-        return { data, ttl };
       },
     };
   }

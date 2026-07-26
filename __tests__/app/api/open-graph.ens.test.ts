@@ -18,20 +18,20 @@ jest.mock("viem", () => {
 });
 
 jest.mock("viem/chains", () => ({ mainnet: { id: 1 } }));
-jest.mock("@ensdomains/content-hash", () => ({
-  getCodec: jest.fn(() => undefined),
-  decode: jest.fn(() => ""),
-}), { virtual: true });
+jest.mock(
+  "@ensdomains/content-hash",
+  () => ({
+    getCodec: jest.fn(() => undefined),
+    decode: jest.fn(() => ""),
+  }),
+  { virtual: true }
+);
 
 const ensModule = require("@/app/api/open-graph/ens");
 
 const { getAddress } = jest.requireActual("viem");
 
-const {
-  detectEnsTarget,
-  fetchEnsPreview,
-  EnsPreviewError,
-} = ensModule as {
+const { detectEnsTarget, fetchEnsPreview, EnsPreviewError } = ensModule as {
   detectEnsTarget: (raw: string | null) => any;
   fetchEnsPreview: (target: { kind: string; input: string }) => Promise<any>;
   EnsPreviewError: new (status: number, message: string) => Error;
@@ -53,7 +53,7 @@ describe("ENS utilities", () => {
     });
   });
 
-  it("detects ENS addresses", () => {
+  it("detects bare and ENS-app addresses without claiming Etherscan URLs", () => {
     expect(
       detectEnsTarget("0x1234567890abcdef1234567890abcdef12345678")
     ).toEqual({
@@ -62,12 +62,17 @@ describe("ENS utilities", () => {
     });
     expect(
       detectEnsTarget(
-        "https://etherscan.io/address/0x0000000000000000000000000000000000000001"
+        "https://app.ens.domains/address/0x0000000000000000000000000000000000000001"
       )
     ).toEqual({
       kind: "address",
       input: getAddress("0x0000000000000000000000000000000000000001"),
     });
+    expect(
+      detectEnsTarget(
+        "https://etherscan.io/address/0x0000000000000000000000000000000000000001"
+      )
+    ).toBeNull();
   });
 
   it("fetches ENS name previews", async () => {

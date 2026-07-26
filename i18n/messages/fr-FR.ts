@@ -60,6 +60,37 @@ export const FR_FR_MESSAGES = {
   "linkPreview.github.fact.mime": "MIME",
   "linkPreview.github.fact.type": "Type",
   "linkPreview.github.fileKind": "Fichier {kind}",
+  "linkPreview.etherscan.provider": "Etherscan",
+  "linkPreview.etherscan.previewLabel": "Aperçu Etherscan {kind} sur {network}",
+  "linkPreview.etherscan.open": "Ouvrir sur Etherscan",
+  "linkPreview.etherscan.copy": "Copier {kind}",
+  "linkPreview.etherscan.copied": "{kind} copié",
+  "linkPreview.etherscan.retry": "Réessayer",
+  "linkPreview.etherscan.loading": "Chargement de l’aperçu Etherscan",
+  "linkPreview.etherscan.partial":
+    "Certaines données en direct sont indisponibles",
+  "linkPreview.etherscan.liveUnavailable": "Données en direct indisponibles",
+  "linkPreview.etherscan.legacy":
+    "Réseau historique — les données en direct ne sont pas disponibles pour cet explorateur archivé.",
+  "linkPreview.etherscan.status.success": "Réussie",
+  "linkPreview.etherscan.status.pending": "En attente",
+  "linkPreview.etherscan.status.reverted": "Annulée",
+  "linkPreview.etherscan.status.finalized": "Finalisé",
+  "linkPreview.etherscan.status.proposed": "Proposé",
+  "linkPreview.etherscan.status.future": "Bloc futur",
+  "linkPreview.etherscan.status.unknown": "Statut indisponible",
+  "linkPreview.etherscan.action.nativeTransfer": "{value} ETH envoyés",
+  "linkPreview.etherscan.action.tokenTransfer": "Transfert de jeton",
+  "linkPreview.etherscan.action.contractCreation": "Contrat créé",
+  "linkPreview.etherscan.action.contractInteraction":
+    "Interaction avec un contrat",
+  "linkPreview.etherscan.action.transaction": "Transaction Ethereum",
+  "linkPreview.etherscan.action.compound":
+    "Compound {action} : {amount} {token}",
+  "linkPreview.etherscan.description.tool":
+    "Lien en lecture seule vers un outil Etherscan. 6529 n’envoie pas son formulaire.",
+  "linkPreview.etherscan.description.unknown":
+    "Une page Etherscan. Ouvrez-la pour consulter la route complète.",
   "profileCms.block.audioUnavailable": "Audio indisponible",
   "profileCms.block.collectionFallback": "Collection",
   "profileCms.block.galleryUnavailable": "Galerie indisponible",

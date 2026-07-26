@@ -2,6 +2,7 @@ import type { LinkHandler } from "../linkTypes";
 import { createArtBlocksHandler } from "./artBlocks";
 import { createCompoundHandler } from "./compound";
 import { createEnsHandler } from "./ens";
+import { createEtherscanHandler } from "./etherscan";
 import { createFarcasterHandler } from "./farcaster";
 import { createGifHandler } from "./gif";
 import { createGithubHandler } from "./github";
@@ -21,6 +22,7 @@ export const createLinkHandlers = (options?: {
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
   createNftMarketplacesHandler(),
+  createEtherscanHandler(),
   createEnsHandler(),
   createCompoundHandler(),
   createTwitterHandler({
