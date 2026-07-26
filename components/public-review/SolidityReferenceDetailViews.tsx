@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { SolidityFileScopeDeclarations } from "@/components/public-review/SolidityFileScopeDeclarations";
 import { SoliditySourceReview } from "@/components/public-review/SoliditySourceReview";
 import { SolidityDefinitionView } from "@/components/public-review/SolidityReferenceViews";
 import { formatInteger } from "@/i18n/format";
@@ -59,6 +60,17 @@ function ParameterTable({
   readonly parameters: readonly SolidityParameter[];
 }) {
   const headingId = `declaration-${label.toLowerCase().replaceAll(" ", "-")}`;
+  const showIndexed = parameters.some(
+    (parameter) => parameter.indexed !== undefined
+  );
+  const showInternalType = parameters.some(
+    (parameter) =>
+      parameter.internalType !== undefined &&
+      parameter.internalType !== parameter.type
+  );
+  const showStorage = parameters.some(
+    (parameter) => parameter.storageLocation !== undefined
+  );
   return (
     <section aria-labelledby={headingId}>
       <h2
@@ -82,9 +94,27 @@ function ParameterTable({
                 <th className="tw-p-3 tw-font-semibold">
                   {t(DEFAULT_LOCALE, "publicReview.reference.type")}
                 </th>
-                <th className="tw-p-3 tw-font-semibold">
-                  {t(DEFAULT_LOCALE, "publicReview.reference.indexed")}
-                </th>
+                {showInternalType ? (
+                  <th className="tw-p-3 tw-font-semibold">
+                    {t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.internalType"
+                    )}
+                  </th>
+                ) : null}
+                {showStorage ? (
+                  <th className="tw-p-3 tw-font-semibold">
+                    {t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.storageLocation"
+                    )}
+                  </th>
+                ) : null}
+                {showIndexed ? (
+                  <th className="tw-p-3 tw-font-semibold">
+                    {t(DEFAULT_LOCALE, "publicReview.reference.indexed")}
+                  </th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -99,9 +129,21 @@ function ParameterTable({
                   <td className="tw-p-3 tw-font-mono tw-text-sky-200">
                     {parameter.type}
                   </td>
-                  <td className="tw-p-3 tw-text-iron-300">
-                    {getIndexedLabel(parameter.indexed)}
-                  </td>
+                  {showInternalType ? (
+                    <td className="tw-p-3 tw-font-mono tw-text-iron-300">
+                      {parameter.internalType ?? "—"}
+                    </td>
+                  ) : null}
+                  {showStorage ? (
+                    <td className="tw-p-3 tw-text-iron-300">
+                      {parameter.storageLocation ?? "—"}
+                    </td>
+                  ) : null}
+                  {showIndexed ? (
+                    <td className="tw-p-3 tw-text-iron-300">
+                      {getIndexedLabel(parameter.indexed)}
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>
@@ -323,6 +365,9 @@ export function SoliditySourceView({
           </KeyValue>
         </dl>
       </section>
+      <SolidityFileScopeDeclarations
+        declarations={document.file.topLevelDeclarations}
+      />
       <SoliditySourceReview
         feedbackSlot={feedbackSlot}
         source={{

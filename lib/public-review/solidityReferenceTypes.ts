@@ -98,7 +98,7 @@ export interface SoliditySourceFileReference {
   readonly publicPath: string;
   readonly scope: SolidityReferenceScope;
   readonly sha256: string;
-  readonly topLevelDeclarations: readonly string[];
+  readonly topLevelDeclarations: readonly SolidityTopLevelDeclaration[];
 }
 
 export interface SolidityReferenceManifest {
@@ -167,6 +167,7 @@ export interface SolidityParameter {
   readonly indexed?: boolean | undefined;
   readonly internalType?: string | undefined;
   readonly name: string;
+  readonly storageLocation?: string | undefined;
   readonly type: string;
 }
 
@@ -215,6 +216,101 @@ export type SolidityRoutedDeclaration =
   | SolidityFunctionDeclaration
   | SolidityEventDeclaration
   | SolidityErrorDeclaration;
+
+interface SolidityTopLevelDeclarationBase {
+  readonly id: string;
+  readonly key: string;
+  readonly kind:
+    | "struct"
+    | "enum"
+    | "userDefinedValueType"
+    | "function"
+    | "event"
+    | "error"
+    | "variable";
+  readonly name: string;
+  readonly natspec: string;
+  readonly nodeType: string;
+  readonly range: SoliditySourceRange;
+}
+
+export interface SolidityTopLevelStruct
+  extends SolidityTopLevelDeclarationBase {
+  readonly canonicalName: string;
+  readonly kind: "struct";
+  readonly members: readonly SolidityParameter[];
+  readonly visibility: string | null;
+}
+
+export interface SolidityTopLevelEnum
+  extends SolidityTopLevelDeclarationBase {
+  readonly canonicalName: string;
+  readonly kind: "enum";
+  readonly members: readonly string[];
+}
+
+export interface SolidityTopLevelUserDefinedValueType
+  extends SolidityTopLevelDeclarationBase {
+  readonly canonicalName: string;
+  readonly kind: "userDefinedValueType";
+  readonly underlyingType: string;
+}
+
+export interface SolidityTopLevelFunction
+  extends SolidityTopLevelDeclarationBase {
+  readonly canonicalSignature: string | null;
+  readonly displaySignature: string;
+  readonly functionKind: string;
+  readonly inputs: readonly SolidityParameter[];
+  readonly kind: "function";
+  readonly modifiers: readonly string[];
+  readonly outputs: readonly SolidityParameter[];
+  readonly selector: string | null;
+  readonly stateMutability: string;
+  readonly virtual: boolean;
+  readonly visibility: string;
+}
+
+export interface SolidityTopLevelEvent
+  extends SolidityTopLevelDeclarationBase {
+  readonly anonymous: boolean;
+  readonly canonicalSignature: string | null;
+  readonly displaySignature: string;
+  readonly inputs: readonly SolidityParameter[];
+  readonly kind: "event";
+  readonly topic0: string | null;
+}
+
+export interface SolidityTopLevelError
+  extends SolidityTopLevelDeclarationBase {
+  readonly canonicalSignature: string | null;
+  readonly displaySignature: string;
+  readonly inputs: readonly SolidityParameter[];
+  readonly kind: "error";
+  readonly selector: string;
+}
+
+export interface SolidityTopLevelVariable
+  extends SolidityTopLevelDeclarationBase {
+  readonly constant: boolean;
+  readonly immutable: boolean;
+  readonly kind: "variable";
+  readonly storageLocation: string | null;
+  readonly type: string;
+  readonly typeString: string | null;
+  readonly valueRange: SoliditySourceRange | null;
+  readonly valueSource: string | null;
+  readonly visibility: string | null;
+}
+
+export type SolidityTopLevelDeclaration =
+  | SolidityTopLevelStruct
+  | SolidityTopLevelEnum
+  | SolidityTopLevelUserDefinedValueType
+  | SolidityTopLevelFunction
+  | SolidityTopLevelEvent
+  | SolidityTopLevelError
+  | SolidityTopLevelVariable;
 
 export interface SolidityOtherDeclaration {
   readonly constant?: boolean | undefined;
