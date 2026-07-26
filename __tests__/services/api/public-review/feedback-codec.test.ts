@@ -109,22 +109,24 @@ describe("public review feedback codec", () => {
       validatePublicReviewFeedbackConfig({
         ...config,
         categories: [
-          "artist-experience-and-approvals",
-          "curation-and-tdh-authorization",
-          "minting-and-supply",
-          "fixed-price-sales-and-auctions",
-          "revenue-splits-and-royalties",
-          "randomness",
-          "metadata-scripts-and-dependencies",
-          "freezing-preservation-and-finality",
-          "governance-roles-pausing-and-successors",
-          "security-testing-and-release-evidence",
-          "documentation-product-accessibility-and-localization",
+          "question",
+          "documentation",
+          "artist-workflow",
+          "product-or-ux",
+          "protocol-design",
+          "implementation-bug",
           PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
+          "testing-or-evidence-gap",
+          "accessibility-or-localization",
         ].map((value) => ({ value, label: value })),
-        severityOptions: ["note", "low", "medium", "high", "critical"].map(
-          (value) => ({ value, label: value })
-        ),
+        severityOptions: [
+          "critical",
+          "high",
+          "medium",
+          "low",
+          "informational",
+          "not-assessed",
+        ].map((value) => ({ value, label: value })),
       })
     ).not.toThrow();
   });
