@@ -74,4 +74,13 @@ describe("PublicReviewMarkdown", () => {
     expect(tableRegion).toHaveAttribute("tabindex", "0");
     expect(tableRegion.querySelector("table")).toBeInTheDocument();
   });
+
+  it("allows long inline source identities to wrap on narrow screens", () => {
+    const sourceCommit = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
+    render(
+      <PublicReviewMarkdown markdown={`## Source\n\n\`${sourceCommit}\``} />
+    );
+
+    expect(screen.getByText(sourceCommit)).toHaveClass("tw-break-all");
+  });
 });

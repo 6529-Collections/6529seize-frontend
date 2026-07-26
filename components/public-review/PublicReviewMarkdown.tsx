@@ -86,7 +86,7 @@ function createMarkdownComponents(): Components {
     );
   },
   code: ({ children }) => (
-    <code className="tw-rounded tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-font-mono tw-text-[0.9em] tw-text-iron-100">
+    <code className="tw-break-all tw-rounded tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-font-mono tw-text-[0.9em] tw-text-iron-100">
       {children}
     </code>
   ),
