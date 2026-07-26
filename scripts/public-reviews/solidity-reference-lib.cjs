@@ -1844,9 +1844,23 @@ function validateReleaseManifest(artifacts) {
       "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
     ],
   ];
+  const recordFamilyArtifactPath =
+    "release-artifacts/record-family-authorization-source-catalog.json";
+  if (artifacts[recordFamilyArtifactPath]) {
+    bindings.splice(3, 0, [
+      ["record_family_authorization", "source_catalog"],
+      recordFamilyArtifactPath,
+    ]);
+  }
   const boundArtifactDigests = {};
   for (const [manifestKey, artifactPath] of bindings) {
-    const record = manifest.release_artifacts?.[manifestKey];
+    const manifestPath = Array.isArray(manifestKey)
+      ? manifestKey
+      : [manifestKey];
+    const record = manifestPath.reduce(
+      (value, key) => value?.[key],
+      manifest.release_artifacts
+    );
     const artifact = artifacts[artifactPath];
     invariant(
       record?.path === artifactPath &&
@@ -1984,9 +1998,106 @@ function validateReleaseManifest(artifacts) {
     },
     riskRegister,
     governedParameterInventory: governedParameters,
+    ...(artifacts[recordFamilyArtifactPath]
+      ? {
+          recordFamilyAuthorizationSourceCatalog:
+            artifacts[recordFamilyArtifactPath].json,
+        }
+      : {}),
     boundArtifactDigests,
     checksumBundle: manifest.checksum_bundle,
     unavailableReleaseCeremony: manifest.unavailable_release_ceremony,
+  };
+}
+
+function validateRecordFamilyAuthorizationSourceCatalog(sources, artifacts) {
+  const artifact =
+    artifacts[
+      "release-artifacts/record-family-authorization-source-catalog.json"
+    ];
+  const catalog = artifact?.json;
+  invariant(
+    catalog?.schema_version ===
+      "6529stream.record-family-authorization-source-catalog.v1",
+    "Record-family authorization source catalog identity drifted."
+  );
+  invariant(
+    catalog.status === "source_implemented_candidate_unbound" &&
+      catalog.classifier?.candidate_binding_status === "not_available",
+    "Record-family authorization source/candidate status drifted."
+  );
+  invariant(
+    Array.isArray(catalog.source_bindings) &&
+      catalog.source_bindings.length > 0,
+    "Record-family authorization source catalog has no source bindings."
+  );
+  const seenSourcePaths = new Set();
+  for (const binding of catalog.source_bindings) {
+    invariant(
+      typeof binding?.path === "string" &&
+        /^[0-9a-f]{64}$/.test(binding?.sha256),
+      "Record-family authorization source binding is malformed."
+    );
+    invariant(
+      !seenSourcePaths.has(binding.path),
+      `${binding.path}: duplicate record-family authorization source binding.`
+    );
+    seenSourcePaths.add(binding.path);
+    const source = sources.get(binding.path);
+    invariant(
+      source,
+      `${binding.path}: record-family authorization source binding is not in the pinned source set.`
+    );
+    invariant(
+      source.sha256 === `sha256:${binding.sha256}`,
+      `${binding.path}: record-family authorization source binding checksum drifted.`
+    );
+  }
+  for (const key of [
+    "authorization_classes",
+    "family_groups",
+    "host_bindings",
+    "source_tests",
+    "remaining_blockers",
+  ]) {
+    invariant(
+      Array.isArray(catalog[key]) && catalog[key].length > 0,
+      `Record-family authorization ${key} evidence is empty.`
+    );
+  }
+  const uniqueIds = (records, label) => {
+    const ids = records.map((record) => record.id);
+    invariant(
+      ids.every((id) => Number.isSafeInteger(id) && id > 0) &&
+        new Set(ids).size === ids.length,
+      `Record-family authorization ${label} identifiers are invalid.`
+    );
+  };
+  uniqueIds(catalog.authorization_classes, "class");
+  invariant(
+    catalog.family_groups.every(
+      (family) =>
+        typeof family?.name === "string" &&
+        /^0x[0-9a-f]{64}$/.test(family?.id) &&
+        Array.isArray(family?.allowed_authorization_class_ids) &&
+        family.allowed_authorization_class_ids.length > 0
+    ),
+    "Record-family authorization family evidence is malformed."
+  );
+  const familyIds = catalog.family_groups.map((family) => family.id);
+  invariant(
+    new Set(familyIds).size === familyIds.length,
+    "Record-family authorization family identifiers are duplicated."
+  );
+  return {
+    path: "release-artifacts/record-family-authorization-source-catalog.json",
+    sha256: artifact.sha256,
+    status: catalog.status,
+    sourceBindingCount: catalog.source_bindings.length,
+    authorizationClassCount: catalog.authorization_classes.length,
+    familyGroupCount: catalog.family_groups.length,
+    hostBindingCount: catalog.host_bindings.length,
+    remainingBlockerCount: catalog.remaining_blockers.length,
   };
 }
 
@@ -3258,6 +3369,14 @@ function buildBundle({
       )
     );
   }
+  if (
+    artifacts[
+      "release-artifacts/record-family-authorization-source-catalog.json"
+    ]
+  ) {
+    auditorEvidence.recordFamilyAuthorizationValidation =
+      validateRecordFamilyAuthorizationSourceCatalog(sources, artifacts);
+  }
   validateSourceVerification(sources, artifacts, config);
   const { rawDefinitions, classificationContext } = prepareDefinitions(
     config,
@@ -4095,5 +4214,6 @@ module.exports = {
   validateRetainedSourceRanges,
   validateReleaseArtifactManifest,
   validateReleaseManifest,
+  validateRecordFamilyAuthorizationSourceCatalog,
   assertCanonicalSurfaceEqual,
 };
