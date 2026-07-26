@@ -400,6 +400,7 @@ jobs:
         if: needs.plan.outputs.build_required == 'true'
         env:
           NODE_ENV: "production"
+          BASE_ENDPOINT: "https://6529.io"
         run: ./bin/6529 run build
 
       - name: Package exact PR merge-tree production profile
@@ -437,6 +438,8 @@ jobs:
         run: |
           unset ANNOUNCED_VERSION_ENDPOINT
           rm -rf .next
+          ./bin/6529 run help-index:sync
+          ./bin/6529 run agent-files:sync
           ./bin/6529 run base-build
 
       - name: Package exact PR merge-tree staging profile
