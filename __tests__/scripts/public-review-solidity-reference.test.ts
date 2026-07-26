@@ -958,6 +958,53 @@ describe("Solidity public-review reference generator", () => {
         },
       })
     ).toThrow("duplicate record-family authorization source binding");
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            authorization_classes: [
+              ...catalogArtifact.json.authorization_classes,
+              ...catalogArtifact.json.authorization_classes,
+            ],
+          },
+        },
+      })
+    ).toThrow("class identifiers are invalid");
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            family_groups: [
+              ...catalogArtifact.json.family_groups,
+              ...catalogArtifact.json.family_groups,
+            ],
+          },
+        },
+      })
+    ).toThrow("family identifiers are duplicated");
+
+    expect(() =>
+      validateRecordFamilyAuthorizationSourceCatalog(sources, {
+        "release-artifacts/record-family-authorization-source-catalog.json": {
+          ...catalogArtifact,
+          json: {
+            ...catalogArtifact.json,
+            family_groups: [
+              {
+                ...catalogArtifact.json.family_groups[0],
+                id: "0x01",
+              },
+            ],
+          },
+        },
+      })
+    ).toThrow("family evidence is malformed");
   });
 
   it("rejects a same-count custom-error catalog mutation", () => {
