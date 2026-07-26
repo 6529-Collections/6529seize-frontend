@@ -1,7 +1,7 @@
 const LOCAL_REVIEW_HOSTNAMES = new Set(["localhost", "127.0.0.1"]);
 const STAGING_REVIEW_HOSTNAMES = new Set(["staging.6529.io"]);
 
-export type PublicReviewEnvironment = "local" | "staging" | "disabled";
+type PublicReviewEnvironment = "local" | "staging" | "disabled";
 
 export function getPublicReviewEnvironment(
   baseEndpoint: string

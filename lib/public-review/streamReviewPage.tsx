@@ -1,21 +1,24 @@
 import "next/dist/compiled/server-only";
 
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
+import {
+  loadStreamEditorialContent,
+  PublicReviewEditorialContentError,
+} from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
 import {
   resolveStreamReviewRoute,
   type StreamReviewRouteModel,
   type StreamReviewRouteParams,
 } from "@/lib/public-review/streamReviewRoutes";
-import {
-  STREAM_REVIEW_DEFINITION,
-} from "@/lib/public-review/streamReviewDefinition";
+import { STREAM_REVIEW_DEFINITION } from "@/lib/public-review/streamReviewDefinition";
 
 export { resolveStreamReviewRoute };
 
@@ -34,12 +37,9 @@ export function getStreamReviewMetadata({
   return {
     ...getAppMetadata({
       title: t(DEFAULT_LOCALE, "publicReview.metadata.title", {
-        page: route.page.title,
+        page: t(DEFAULT_LOCALE, route.page.titleKey),
       }),
-      description: t(
-        DEFAULT_LOCALE,
-        "publicReview.metadata.description"
-      ),
+      description: t(DEFAULT_LOCALE, "publicReview.metadata.description"),
     }),
     alternates: {
       canonical: new URL(route.canonicalPath, baseEndpoint).toString(),
@@ -51,25 +51,63 @@ export function getStreamReviewMetadata({
   };
 }
 
-export async function renderStreamReviewRoute(
-  route: StreamReviewRouteModel
-) {
+export async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
-  const editorialMarkdown = await loadStreamEditorialContent(
-    route.page,
-    contentVersion
-  );
+  let editorialMarkdown: string | undefined;
+  try {
+    editorialMarkdown = await loadStreamEditorialContent(
+      route.page,
+      contentVersion
+    );
+  } catch (error) {
+    if (!(error instanceof PublicReviewEditorialContentError)) {
+      throw error;
+    }
+  }
+  if (editorialMarkdown === undefined) {
+    notFound();
+  }
   const sections = extractPublicReviewSections(editorialMarkdown);
 
   return (
     <PublicReviewShell
       editorialMarkdown={editorialMarkdown}
       page={route.page}
-      review={STREAM_REVIEW_DEFINITION}
+      reviewVersion={route.reviewVersion}
       sections={sections}
       routeVersion={route.version}
       displayedVersion={contentVersion}
     />
   );
+}
+
+export async function generateStreamReviewRouteMetadata({
+  params,
+}: {
+  readonly params: Promise<StreamReviewRouteParams>;
+}): Promise<Metadata> {
+  const metadata = getStreamReviewMetadata({
+    baseEndpoint: publicEnv.BASE_ENDPOINT,
+    params: await params,
+  });
+  if (!metadata) {
+    notFound();
+  }
+  return metadata;
+}
+
+export async function renderStreamReviewRoutePage({
+  params,
+}: {
+  readonly params: Promise<StreamReviewRouteParams>;
+}) {
+  const route = resolveStreamReviewRoute({
+    baseEndpoint: publicEnv.BASE_ENDPOINT,
+    params: await params,
+  });
+  if (!route) {
+    notFound();
+  }
+  return renderStreamReviewRoute(route);
 }

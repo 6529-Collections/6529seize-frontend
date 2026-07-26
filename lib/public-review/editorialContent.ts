@@ -5,7 +5,7 @@ import path from "node:path";
 
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
-  STREAM_REVIEW_DEFINITION,
+  getStreamReviewVersion,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
 
@@ -17,12 +17,22 @@ const STREAM_VERSIONS_ROOT = path.resolve(
   "versions"
 );
 
+export class PublicReviewEditorialContentError extends Error {
+  public constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = "PublicReviewEditorialContentError";
+  }
+}
+
 export async function loadStreamEditorialContent(
   page: PublicReviewPageDefinition,
   version: string
 ): Promise<string> {
-  if (!STREAM_REVIEW_DEFINITION.availableVersions.includes(version)) {
-    throw new Error(`Unknown Stream review version: ${version}`);
+  const reviewVersion = getStreamReviewVersion(version);
+  if (!reviewVersion) {
+    throw new PublicReviewEditorialContentError(
+      `Unknown Stream review version: ${version}`
+    );
   }
 
   const editorialRoot = path.resolve(
@@ -39,30 +49,45 @@ export async function loadStreamEditorialContent(
     path.isAbsolute(relativePath) ||
     !contentPath.endsWith(".md")
   ) {
-    throw new Error(`Invalid Stream editorial path: ${page.editorialFile}`);
+    throw new PublicReviewEditorialContentError(
+      `Invalid Stream editorial path: ${page.editorialFile}`
+    );
   }
 
-  const [manifestSource, markdown] = await Promise.all([
-    // Version and page are allowlisted above, and containment is checked.
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    readFile(manifestPath, "utf8"),
-    // Version and page are allowlisted above, and containment is checked.
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    readFile(contentPath, "utf8"),
-  ]);
-  const manifest: unknown = JSON.parse(manifestSource);
+  try {
+    const [manifestSource, markdown] = await Promise.all([
+      // Version and page are allowlisted above, and containment is checked.
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      readFile(manifestPath, "utf8"),
+      // Version and page are allowlisted above, and containment is checked.
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      readFile(contentPath, "utf8"),
+    ]);
+    const manifest: unknown = JSON.parse(manifestSource);
 
-  assertStreamEditorialManifest(manifest, version, page);
-  return markdown;
+    assertStreamEditorialManifest(manifest, reviewVersion, page);
+    return markdown;
+  } catch (error) {
+    if (error instanceof PublicReviewEditorialContentError) {
+      throw error;
+    }
+    throw new PublicReviewEditorialContentError(
+      `Stream editorial content is unavailable for ${version}/${page.id}`,
+      { cause: error }
+    );
+  }
 }
 
 function assertStreamEditorialManifest(
   manifest: unknown,
-  version: string,
+  reviewVersion: NonNullable<ReturnType<typeof getStreamReviewVersion>>,
   page: PublicReviewPageDefinition
 ): void {
+  const { version } = reviewVersion;
   if (!isRecord(manifest)) {
-    throw new Error(`Invalid Stream editorial manifest for ${version}`);
+    throw new PublicReviewEditorialContentError(
+      `Invalid Stream editorial manifest for ${version}`
+    );
   }
 
   const manifestPages = manifest["pages"];
@@ -70,10 +95,12 @@ function assertStreamEditorialManifest(
     manifest["schema_version"] !== 1 ||
     manifest["review_id"] !== STREAM_REVIEW_SLUG ||
     manifest["review_version"] !== version ||
-    manifest["source_commit"] !== STREAM_REVIEW_DEFINITION.source.commit ||
+    manifest["source_commit"] !== reviewVersion.source.commit ||
     !Array.isArray(manifestPages)
   ) {
-    throw new Error(`Invalid Stream editorial manifest for ${version}`);
+    throw new PublicReviewEditorialContentError(
+      `Invalid Stream editorial manifest for ${version}`
+    );
   }
 
   const manifestPage = (manifestPages as unknown[]).find(
@@ -85,7 +112,7 @@ function assertStreamEditorialManifest(
     manifestPage?.title !== page.title ||
     manifestPage.file !== page.editorialFile
   ) {
-    throw new Error(
+    throw new PublicReviewEditorialContentError(
       `Stream editorial manifest does not match page ${page.id} for ${version}`
     );
   }

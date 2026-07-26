@@ -17,10 +17,9 @@ describe("PublicReviewMarkdown", () => {
     );
 
     expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "First section" })).toHaveAttribute(
-      "id",
-      "first-section"
-    );
+    expect(
+      screen.getByRole("heading", { name: "First section" })
+    ).toHaveAttribute("id", "first-section");
     expect(
       screen.getByRole("heading", { name: "Second section" })
     ).toHaveAttribute("id", "second-section");
@@ -53,5 +52,21 @@ describe("PublicReviewMarkdown", () => {
       "href",
       "https://example.com/source"
     );
+  });
+
+  it("gives repeated headings unique IDs and names scrollable tables", () => {
+    const { container } = render(
+      <PublicReviewMarkdown
+        markdown={
+          "## Repeated\n\n## Repeated\n\n| Name | Value |\n| --- | --- |\n| A | B |"
+        }
+      />
+    );
+
+    expect(container.querySelectorAll("#repeated")).toHaveLength(1);
+    expect(container.querySelectorAll("#repeated-2")).toHaveLength(1);
+    expect(
+      screen.getByRole("region", { name: "Scrollable review data table" })
+    ).toHaveAttribute("tabindex", "0");
   });
 });

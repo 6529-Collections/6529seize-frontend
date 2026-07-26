@@ -28,10 +28,12 @@ export function PublicReviewAudiencePaths() {
   return (
     <section
       aria-labelledby="review-audiences-heading"
-      className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-5 sm:tw-p-6">
+      className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-5 sm:tw-p-6"
+    >
       <h2
         id="review-audiences-heading"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
+        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
+      >
         {t(DEFAULT_LOCALE, "publicReview.audiences.heading")}
       </h2>
       <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -41,7 +43,8 @@ export function PublicReviewAudiencePaths() {
         {Object.entries(AUDIENCE_COPY).map(([audience, copy]) => (
           <article
             key={audience}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black/30 tw-p-4">
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black/30 tw-p-4"
+          >
             <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
               {t(DEFAULT_LOCALE, copy.title)}
             </h3>

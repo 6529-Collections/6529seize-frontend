@@ -78,33 +78,39 @@ function getNftsSection(publicReviewsEnabled: boolean): SidebarSection {
     icon: CollectionsMenuIcon,
     items: [
       {
-        name: "The Memes",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.theMemes"),
         href: "/the-memes",
         activePathPrefixes: ["/the-memes/"],
       },
       {
-        name: "6529 Gradient",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.gradient"),
         href: "/6529-gradient",
         activePathPrefixes: ["/6529-gradient/"],
       },
       {
-        name: "NextGen",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.nextGen"),
         href: "/nextgen",
         activePathPrefixes: ["/nextgen/"],
       },
       {
-        name: "Meme Lab",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.memeLab"),
         href: "/meme-lab",
         activePathPrefixes: ["/meme-lab/"],
       },
       {
-        name: "ReMemes",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.rememes"),
         href: "/rememes",
         activePathPrefixes: ["/rememes/"],
       },
       ...streamReviewItem,
-      { name: "NFT Activity", href: "/nft-activity" },
-      { name: "Memes Calendar", href: "/meme-calendar" },
+      {
+        name: t(DEFAULT_LOCALE, "navigation.nfts.activity"),
+        href: "/nft-activity",
+      },
+      {
+        name: t(DEFAULT_LOCALE, "navigation.nfts.memesCalendar"),
+        href: "/meme-calendar",
+      },
     ],
     subsections: [],
   };

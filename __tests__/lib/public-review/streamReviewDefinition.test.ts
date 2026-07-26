@@ -26,8 +26,14 @@ describe("6529 Stream public review definition", () => {
   it("pins the initial review version and exact source commit", () => {
     expect(STREAM_REVIEW_VERSION).toBe("2026-07-26.1");
     expect(STREAM_REVIEW_SOURCE_COMMIT).toMatch(/^[a-f0-9]{40}$/);
-    expect(STREAM_REVIEW_DEFINITION.source.commit).toBe(
+    expect(STREAM_REVIEW_DEFINITION.versions[0]?.source.commit).toBe(
       STREAM_REVIEW_SOURCE_COMMIT
+    );
+    expect(STREAM_REVIEW_DEFINITION.versions[0]?.version).toBe(
+      STREAM_REVIEW_VERSION
+    );
+    expect(STREAM_REVIEW_DEFINITION.versions[0]?.pages).toBe(
+      STREAM_REVIEW_PAGES
     );
   });
 

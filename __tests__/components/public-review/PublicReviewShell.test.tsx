@@ -4,12 +4,14 @@ import { PublicReviewShell } from "@/components/public-review/PublicReviewShell"
 import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SOURCE_COMMIT,
+  getStreamReviewVersion,
 } from "@/lib/public-review/streamReviewDefinition";
 
 describe("PublicReviewShell", () => {
   it("renders a source-pinned, audience-aware fourteen-page review shell", () => {
-    const overview = STREAM_REVIEW_DEFINITION.pages[0];
-    if (!overview) {
+    const reviewVersion = getStreamReviewVersion();
+    const overview = reviewVersion?.pages[0];
+    if (!overview || !reviewVersion) {
       throw new Error("Stream review overview is missing");
     }
 
@@ -17,7 +19,7 @@ describe("PublicReviewShell", () => {
       <PublicReviewShell
         editorialMarkdown={"# Editorial title\n\n## The short answer\n\nBody."}
         page={overview}
-        review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={reviewVersion}
         sections={[{ id: "the-short-answer", title: "The short answer" }]}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
       />
@@ -45,7 +47,9 @@ describe("PublicReviewShell", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: `Open the exact 6529 Stream source commit ${STREAM_REVIEW_SOURCE_COMMIT}`,
+        name: new RegExp(
+          `^Source ${STREAM_REVIEW_SOURCE_COMMIT.slice(0, 10)}.*${STREAM_REVIEW_SOURCE_COMMIT}`
+        ),
       })
     ).toHaveAttribute(
       "href",

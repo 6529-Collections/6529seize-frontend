@@ -30,4 +30,13 @@ describe("public review editorial sections", () => {
     );
     expect(getPublicReviewHeadingId("  ")).toBe("");
   });
+
+  it("suffixes repeated section titles deterministically", () => {
+    expect(
+      extractPublicReviewSections("## Same title\n\n## Same title\n")
+    ).toEqual([
+      { id: "same-title", title: "Same title" },
+      { id: "same-title-2", title: "Same title" },
+    ]);
+  });
 });

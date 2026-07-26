@@ -8,12 +8,13 @@ import {
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
 import { PublicReviewNavigation } from "@/components/public-review/PublicReviewNavigation";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
-  PublicReviewDefinition,
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
+  PublicReviewVersionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
 import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinition";
 
@@ -33,15 +34,14 @@ function PublicReviewPageStepper({
 
   return (
     <nav
-      aria-label={t(
-        DEFAULT_LOCALE,
-        "publicReview.navigation.sequenceLabel"
-      )}
-      className="tw-mt-12 tw-grid tw-gap-3 sm:tw-grid-cols-2">
+      aria-label={t(DEFAULT_LOCALE, "publicReview.navigation.sequenceLabel")}
+      className="tw-mt-12 tw-grid tw-gap-3 sm:tw-grid-cols-2"
+    >
       {previousPage ? (
         <Link
           href={getStreamReviewPageHref({ page: previousPage, version })}
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        >
           <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.previous")}
           </span>
@@ -55,7 +55,8 @@ function PublicReviewPageStepper({
       {nextPage && (
         <Link
           href={getStreamReviewPageHref({ page: nextPage, version })}
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white sm:tw-text-right">
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-no-underline hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white sm:tw-text-right"
+        >
           <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.next")}
           </span>
@@ -71,26 +72,27 @@ function PublicReviewPageStepper({
 export function PublicReviewShell({
   editorialMarkdown,
   page,
-  review,
+  reviewVersion,
   sections,
   routeVersion,
   displayedVersion,
 }: {
   readonly editorialMarkdown: string;
   readonly page: PublicReviewPageDefinition;
-  readonly review: PublicReviewDefinition;
+  readonly reviewVersion: PublicReviewVersionDefinition;
   readonly sections: readonly PublicReviewSectionDefinition[];
   readonly routeVersion?: string | undefined;
   readonly displayedVersion: string;
 }) {
-  const pageIndex = review.pages.findIndex(
+  const pageIndex = reviewVersion.pages.findIndex(
     (candidate) => candidate.id === page.id
   );
+  const currentPageNumber = pageIndex >= 0 ? pageIndex + 1 : 1;
 
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
+    <div className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
       <PublicReviewStatusBanner
-        review={review}
+        reviewVersion={reviewVersion}
         displayedVersion={displayedVersion}
       />
       <div className="tw-mx-auto tw-w-full tw-max-w-[88rem] tw-px-4 tw-pb-20 tw-pt-8 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-12">
@@ -100,19 +102,20 @@ export function PublicReviewShell({
           </p>
           <p className="tw-mb-0 tw-mt-4 tw-font-mono tw-text-xs tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
-              current: pageIndex + 1,
-              total: review.pages.length,
+              current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
+              total: formatInteger(DEFAULT_LOCALE, reviewVersion.pages.length),
             })}
           </p>
           <h1 className="tw-mb-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-5xl">
-            {page.title}
+            {t(DEFAULT_LOCALE, page.titleKey)}
           </h1>
           <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-lg tw-leading-8 tw-text-iron-300">
-            {page.summary}
+            {t(DEFAULT_LOCALE, page.summaryKey)}
           </p>
           <div
             aria-label={t(DEFAULT_LOCALE, "publicReview.evidence.heading")}
-            className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2">
+            className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2"
+          >
             {page.evidenceStates.map((state) => (
               <PublicReviewEvidenceBadge key={state} state={state} />
             ))}
@@ -128,7 +131,7 @@ export function PublicReviewShell({
         <div className="tw-mt-8 tw-grid tw-gap-8 lg:tw-grid-cols-[18rem_minmax(0,1fr)] lg:tw-items-start">
           <PublicReviewNavigation
             currentPage={page}
-            pages={review.pages}
+            pages={reviewVersion.pages}
             sections={sections}
             version={routeVersion}
           />
@@ -140,10 +143,12 @@ export function PublicReviewShell({
 
             <section
               aria-labelledby="feedback-status-heading"
-              className="tw-mt-8 tw-rounded-2xl tw-border tw-border-solid tw-border-amber-400/30 tw-bg-amber-400/5 tw-p-5 sm:tw-p-6">
+              className="tw-mt-8 tw-rounded-2xl tw-border tw-border-solid tw-border-amber-400/30 tw-bg-amber-400/5 tw-p-5 sm:tw-p-6"
+            >
               <h2
                 id="feedback-status-heading"
-                className="tw-m-0 tw-text-lg tw-font-semibold tw-text-amber-100">
+                className="tw-m-0 tw-text-lg tw-font-semibold tw-text-amber-100"
+              >
                 {t(DEFAULT_LOCALE, "publicReview.feedback.pendingTitle")}
               </h2>
               <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-200">
@@ -157,12 +162,12 @@ export function PublicReviewShell({
 
             <PublicReviewPageStepper
               currentPage={page}
-              pages={review.pages}
+              pages={reviewVersion.pages}
               version={routeVersion}
             />
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

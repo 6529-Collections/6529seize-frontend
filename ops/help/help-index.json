@@ -64,7 +64,6 @@
         "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
-        "On local development and shared staging, NFTs includes 6529 Stream — Review after ReMemes and before NFT Activity; the entry and its routes are absent on production.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
@@ -90,6 +89,7 @@
     },
     {
       "id": "public-reviews.stream",
+      "environments": ["local", "staging"],
       "kind": "route",
       "title": "6529 Stream contract review",
       "aliases": [
@@ -145,6 +145,7 @@
     },
     {
       "id": "public-reviews.stream.feedback-status",
+      "environments": ["local", "staging"],
       "kind": "ui_affordance",
       "title": "Stream review feedback status",
       "aliases": [
