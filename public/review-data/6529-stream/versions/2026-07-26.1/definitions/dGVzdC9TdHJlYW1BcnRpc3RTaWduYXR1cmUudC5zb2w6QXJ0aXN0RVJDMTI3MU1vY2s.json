@@ -129,7 +129,7 @@
               "range": {
                 "byteLength": 6,
                 "byteStart": 16244,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L352",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L352",
                 "lineEnd": 352,
                 "lineStart": 352,
                 "snippetSha256": "sha256:2e1a4c07ce94cb0ceb769cc5fd0edc0e53ec37feebeb36b53fa7fed72d619a5b",
@@ -142,7 +142,7 @@
               "range": {
                 "byteLength": 12,
                 "byteStart": 16260,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L353",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L353",
                 "lineEnd": 353,
                 "lineStart": 353,
                 "snippetSha256": "sha256:28e1535efc0ff8462a611aaf715b21249ba03ba6b578fcfff758a6e5bbc133e4",
@@ -155,7 +155,7 @@
               "range": {
                 "byteLength": 6,
                 "byteStart": 16282,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L354",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L354",
                 "lineEnd": 354,
                 "lineStart": 354,
                 "snippetSha256": "sha256:0026c505347863ae188a99df6946e16ac83262585044660440699346d24784e7",
@@ -168,7 +168,7 @@
               "range": {
                 "byteLength": 11,
                 "byteStart": 16298,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L355",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L355",
                 "lineEnd": 355,
                 "lineStart": 355,
                 "snippetSha256": "sha256:9103b18c025b4dd7c2a66044127007486fbda0954a859d1767a5f9825396413e",
@@ -181,7 +181,7 @@
               "range": {
                 "byteLength": 11,
                 "byteStart": 16319,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L356",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L356",
                 "lineEnd": 356,
                 "lineStart": 356,
                 "snippetSha256": "sha256:0035e32f1f41753aca235d8c70027052ce55f9e3df6be911d1fbd5927320d19f",
@@ -194,7 +194,7 @@
               "range": {
                 "byteLength": 11,
                 "byteStart": 16340,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L357",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L357",
                 "lineEnd": 357,
                 "lineStart": 357,
                 "snippetSha256": "sha256:d491c39b6126b8038481c72a3640ed1a1e443fcb3e67379bc6d90f5d6bd4b34b",
@@ -215,7 +215,7 @@
           "range": {
             "byteLength": 141,
             "byteStart": 16216,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L351-L358",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L351-L358",
             "lineEnd": 358,
             "lineStart": 351,
             "snippetSha256": "sha256:d278a2252684b94a817de1117a877fc210e9748dad9a675e972f9b0716a56d98",
@@ -253,7 +253,7 @@
           "range": {
             "byteLength": 193,
             "byteStart": 16586,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L366-L370",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L366-L370",
             "lineEnd": 370,
             "lineStart": 366,
             "snippetSha256": "sha256:656461c3f9bfb1a2bb142c964e979126a323d3a59f6d71a86dc32665dd7d7e3e",
@@ -280,7 +280,7 @@
           "range": {
             "byteLength": 98,
             "byteStart": 16785,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L372-L374",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L372-L374",
             "lineEnd": 374,
             "lineStart": 372,
             "snippetSha256": "sha256:2f5c7f455de60032be7611d307eef3972fdf1b9dcf83214dbd546e8f17151432",
@@ -307,7 +307,7 @@
           "range": {
             "byteLength": 93,
             "byteStart": 16889,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L376-L378",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L376-L378",
             "lineEnd": 378,
             "lineStart": 376,
             "snippetSha256": "sha256:b5d500868ed16ebc0a573fdc481e7598b72c38bf886df353f4ca0fc8e6123cf9",
@@ -334,7 +334,7 @@
           "range": {
             "byteLength": 91,
             "byteStart": 16988,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L380-L382",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L380-L382",
             "lineEnd": 382,
             "lineStart": 380,
             "snippetSha256": "sha256:702eef093a83ec49b9e7278ffc281ad31fd4d1f615e0e8ac9541e62e03beeb4d",
@@ -361,7 +361,7 @@
           "range": {
             "byteLength": 91,
             "byteStart": 17085,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L384-L386",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L384-L386",
             "lineEnd": 386,
             "lineStart": 384,
             "snippetSha256": "sha256:f5f4c897ddbcca519742b42addb002b08b3af8fdf039ac4eb5099bec13c61f05",
@@ -388,7 +388,7 @@
           "range": {
             "byteLength": 91,
             "byteStart": 17182,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L388-L390",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L388-L390",
             "lineEnd": 390,
             "lineStart": 388,
             "snippetSha256": "sha256:4b4138d3019a6cf83b32578b952d65cfbae6e7705da7aa296e6f5f5ecba8cbb3",
@@ -433,7 +433,7 @@
           "range": {
             "byteLength": 1220,
             "byteStart": 17279,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L392-L429",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L392-L429",
             "lineEnd": 429,
             "lineStart": 392,
             "snippetSha256": "sha256:14cf5daab7f1f34a336dc33652f3995535eb5a29a839b545084dc5ff6244a5ce",
@@ -457,7 +457,7 @@
           "range": {
             "byteLength": 48,
             "byteStart": 16363,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L360",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L360",
             "lineEnd": 360,
             "lineStart": 360,
             "snippetSha256": "sha256:a0d05acc74e0bf1c539e7dc0466e5715b207a4e7e042679137d34c03533ef0d7",
@@ -469,7 +469,7 @@
           "valueRange": {
             "byteLength": 10,
             "byteStart": 16401,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L360",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L360",
             "lineEnd": 360,
             "lineStart": 360,
             "snippetSha256": "sha256:fb6e13219ed30abf119c1841ffe1905c566a0ef304a840cf5607d48f1c44df97",
@@ -487,7 +487,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 16417,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L361",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L361",
             "lineEnd": 361,
             "lineStart": 361,
             "snippetSha256": "sha256:fee6c10754573964cb06288a9870dfff46409a0a6cba9441d6ba0161d21e803a",
@@ -499,7 +499,7 @@
           "valueRange": {
             "byteLength": 10,
             "byteStart": 16463,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L361",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L361",
             "lineEnd": 361,
             "lineStart": 361,
             "snippetSha256": "sha256:8755cf766a3d431df2cd81685dbc6ad36f546b29c7c0cda14377cdf5083d5546",
@@ -517,7 +517,7 @@
           "range": {
             "byteLength": 27,
             "byteStart": 16479,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L362",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L362",
             "lineEnd": 362,
             "lineStart": 362,
             "snippetSha256": "sha256:c50cc82c25c6cd5e264a99f2699fb670b96dd095d78057592b99a70a350f9cf8",
@@ -539,7 +539,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 16512,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L363",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L363",
             "lineEnd": 363,
             "lineStart": 363,
             "snippetSha256": "sha256:1920c80be4bef1e5d02bc2fdb2011314e04129de21825b1ce2951dc9e5053bf8",
@@ -561,7 +561,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 16546,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L364",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L364",
             "lineEnd": 364,
             "lineStart": 364,
             "snippetSha256": "sha256:0c911cb2f96ba675119e7619a9896780ae9c45eb642ec492a5ef4a379637777b",
@@ -601,7 +601,7 @@
     "range": {
       "byteLength": 2318,
       "byteStart": 16183,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamArtistSignature.t.sol#L350-L430",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtistSignature.t.sol#L350-L430",
       "lineEnd": 430,
       "lineStart": 350,
       "snippetSha256": "sha256:666c26bd7a575fdf264054fbee2e23a4715a279d6d99f61fa71e7e7bb73d4251",

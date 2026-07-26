@@ -816,7 +816,7 @@
           "range": {
             "byteLength": 176,
             "byteStart": 8194,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L246-L252",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L246-L252",
             "lineEnd": 252,
             "lineStart": 246,
             "snippetSha256": "sha256:128ff01c9374b96266b8cf625381574d3699ad3202de2cca54564278402d7858",
@@ -875,7 +875,7 @@
           "range": {
             "byteLength": 215,
             "byteStart": 8375,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L253-L260",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L253-L260",
             "lineEnd": 260,
             "lineStart": 253,
             "snippetSha256": "sha256:cb4408d42bf006dc25a5778c15d6212935954f4ca8039caa87c460d5ba12bd9a",
@@ -952,7 +952,7 @@
           "range": {
             "byteLength": 301,
             "byteStart": 8595,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L261-L271",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L261-L271",
             "lineEnd": 271,
             "lineStart": 261,
             "snippetSha256": "sha256:ef850cb4389e63d1f951df86cafd5e0de00b684a9ca09c3ab00c06d4ff809767",
@@ -1023,7 +1023,7 @@
           "range": {
             "byteLength": 290,
             "byteStart": 8901,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L272-L281",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L272-L281",
             "lineEnd": 281,
             "lineStart": 272,
             "snippetSha256": "sha256:e12b62c944e204cf588a68670d86d124564454b8ff49eac4117240b3b41cba1f",
@@ -1048,7 +1048,7 @@
           "range": {
             "byteLength": 508,
             "byteStart": 12204,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L335-L344",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L335-L344",
             "lineEnd": 344,
             "lineStart": 335,
             "snippetSha256": "sha256:702093d5cd260a16e378c45c5ea9f33a33246b48c5319408dfe17acb5ef629bc",
@@ -1075,7 +1075,7 @@
           "range": {
             "byteLength": 1093,
             "byteStart": 12718,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L346-L372",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L346-L372",
             "lineEnd": 372,
             "lineStart": 346,
             "snippetSha256": "sha256:51d69e7b063ac163adcfd7739500616ccf71b927e9028ea62cf039410e66898b",
@@ -1102,7 +1102,7 @@
           "range": {
             "byteLength": 1289,
             "byteStart": 13817,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L374-L398",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L374-L398",
             "lineEnd": 398,
             "lineStart": 374,
             "snippetSha256": "sha256:9fad0d68ef5c7b4d0954a080a08afe336ba1ffc6a45d7b31c05d5f012e56d2b6",
@@ -1129,7 +1129,7 @@
           "range": {
             "byteLength": 960,
             "byteStart": 15112,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L400-L421",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L400-L421",
             "lineEnd": 421,
             "lineStart": 400,
             "snippetSha256": "sha256:34efd7750a21ee695964aec003b0038f0d8121eab0bbef4f07ecbd95b747041b",
@@ -1156,7 +1156,7 @@
           "range": {
             "byteLength": 1322,
             "byteStart": 16078,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L423-L450",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L423-L450",
             "lineEnd": 450,
             "lineStart": 423,
             "snippetSha256": "sha256:00dc4e618c5a673786842cf5f6c7bcbd5845c28ea2d6f526802ccce74f8b175a",
@@ -1183,7 +1183,7 @@
           "range": {
             "byteLength": 1927,
             "byteStart": 17406,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L452-L507",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L452-L507",
             "lineEnd": 507,
             "lineStart": 452,
             "snippetSha256": "sha256:5c3f9c855fdde4e6652a340a4f49de1868a0a2d5b416764bacb16eb59ab6aa8c",
@@ -1210,7 +1210,7 @@
           "range": {
             "byteLength": 2361,
             "byteStart": 19339,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L509-L572",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L509-L572",
             "lineEnd": 572,
             "lineStart": 509,
             "snippetSha256": "sha256:167e97ead8f75c3acf3d40f9b2941154cd9c241a5f92a5222c60e6fe84ca3d32",
@@ -1237,7 +1237,7 @@
           "range": {
             "byteLength": 1536,
             "byteStart": 21706,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L574-L606",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L574-L606",
             "lineEnd": 606,
             "lineStart": 574,
             "snippetSha256": "sha256:d68bcbf54e2afb5874c40f16f0fb69eb38552aec6748bb584504e2e848abf192",
@@ -1264,7 +1264,7 @@
           "range": {
             "byteLength": 1765,
             "byteStart": 23248,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L608-L652",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L608-L652",
             "lineEnd": 652,
             "lineStart": 608,
             "snippetSha256": "sha256:22498b8c8ab2ff0aa13c9620290da8b51313ee30b58f45f4da2e04aae0f1f4b5",
@@ -1291,7 +1291,7 @@
           "range": {
             "byteLength": 2709,
             "byteStart": 25019,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L654-L730",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L654-L730",
             "lineEnd": 730,
             "lineStart": 654,
             "snippetSha256": "sha256:b94d31975d1c8888545d61953349f2ec4c38df4188544bf2abc13bf6f6fb2724",
@@ -1318,7 +1318,7 @@
           "range": {
             "byteLength": 1071,
             "byteStart": 27734,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L732-L758",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L732-L758",
             "lineEnd": 758,
             "lineStart": 732,
             "snippetSha256": "sha256:5b4eb7fe4fe9c7539f9b2c3c67fc99fff6bc092c991a8b5a66d3b58d90711d71",
@@ -1345,7 +1345,7 @@
           "range": {
             "byteLength": 886,
             "byteStart": 28811,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L760-L780",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L760-L780",
             "lineEnd": 780,
             "lineStart": 760,
             "snippetSha256": "sha256:87cbf1be6ff6437a18959480a2e39198fa58ca372ccabfc9858a2abb2fba1778",
@@ -1372,7 +1372,7 @@
           "range": {
             "byteLength": 824,
             "byteStart": 29703,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L782-L799",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L782-L799",
             "lineEnd": 799,
             "lineStart": 782,
             "snippetSha256": "sha256:1446b66b543958012ec991fb35af15ddbeca987ab63fdd2b2c068162509a3126",
@@ -1399,7 +1399,7 @@
           "range": {
             "byteLength": 996,
             "byteStart": 30533,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L801-L824",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L801-L824",
             "lineEnd": 824,
             "lineStart": 801,
             "snippetSha256": "sha256:5c2d2e40dc0a83288bfc1995fbf3ac0e65f28165c10ce4376dea6f2726703105",
@@ -1426,7 +1426,7 @@
           "range": {
             "byteLength": 925,
             "byteStart": 31535,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L826-L846",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L826-L846",
             "lineEnd": 846,
             "lineStart": 826,
             "snippetSha256": "sha256:092cfcf8b275352951a333583125bf11601da15c7bd117a4354f6320966d4f0a",
@@ -1453,7 +1453,7 @@
           "range": {
             "byteLength": 796,
             "byteStart": 32466,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L848-L865",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L848-L865",
             "lineEnd": 865,
             "lineStart": 848,
             "snippetSha256": "sha256:5baf23549a17d0693cd48a18288c203b7b8f78116fcafe3834642b414a105429",
@@ -1480,7 +1480,7 @@
           "range": {
             "byteLength": 1986,
             "byteStart": 33268,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L867-L906",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L867-L906",
             "lineEnd": 906,
             "lineStart": 867,
             "snippetSha256": "sha256:bf83ca876a1f3e24e43fae74c06dfa79bd40d454d2c2f35a564b3ff698dd7440",
@@ -1507,7 +1507,7 @@
           "range": {
             "byteLength": 1114,
             "byteStart": 35260,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L908-L927",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L908-L927",
             "lineEnd": 927,
             "lineStart": 908,
             "snippetSha256": "sha256:1bff78cf9bde2637ab7cd7a2f40c1c3c71f4bd36f3502c20157c01db1a087c45",
@@ -1534,7 +1534,7 @@
           "range": {
             "byteLength": 3833,
             "byteStart": 36380,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L929-L1031",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L929-L1031",
             "lineEnd": 1031,
             "lineStart": 929,
             "snippetSha256": "sha256:bb24410e197302f5d4bec0ece60c60447ac36a1bf9dd714285e1e53ae07b81a4",
@@ -1561,7 +1561,7 @@
           "range": {
             "byteLength": 1235,
             "byteStart": 40219,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1033-L1053",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1033-L1053",
             "lineEnd": 1053,
             "lineStart": 1033,
             "snippetSha256": "sha256:d4db49a01200e4f6e20710d10c01bcc224235d532f2d4f95e64373b597dea463",
@@ -1588,7 +1588,7 @@
           "range": {
             "byteLength": 2972,
             "byteStart": 41460,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1055-L1134",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1055-L1134",
             "lineEnd": 1134,
             "lineStart": 1055,
             "snippetSha256": "sha256:2fe6579570d1b12f810ef830a38aee26c2d445a14701c3a2d5548562d10bc498",
@@ -1615,7 +1615,7 @@
           "range": {
             "byteLength": 1433,
             "byteStart": 44438,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1136-L1170",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1136-L1170",
             "lineEnd": 1170,
             "lineStart": 1136,
             "snippetSha256": "sha256:e834e53b9c23ad1b01de5ccd28e109d9f39d0d317f881ccd01a0a68702bca5f6",
@@ -1642,7 +1642,7 @@
           "range": {
             "byteLength": 1799,
             "byteStart": 45877,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1172-L1214",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1172-L1214",
             "lineEnd": 1214,
             "lineStart": 1172,
             "snippetSha256": "sha256:ba12c043a8d8cfd5b8373b8c3646993a115742854f4b8e071958e8d490940177",
@@ -1669,7 +1669,7 @@
           "range": {
             "byteLength": 1134,
             "byteStart": 47682,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1216-L1237",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1216-L1237",
             "lineEnd": 1237,
             "lineStart": 1216,
             "snippetSha256": "sha256:1c5f967efce082ff2e77c508d297d3cf10493d257d09a31d4783eae13f810c74",
@@ -1696,7 +1696,7 @@
           "range": {
             "byteLength": 827,
             "byteStart": 48822,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1239-L1257",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1239-L1257",
             "lineEnd": 1257,
             "lineStart": 1239,
             "snippetSha256": "sha256:a3383cd2ffdf37c30a681138393c05d8401261152610a534a39b8695c9ae05da",
@@ -1723,7 +1723,7 @@
           "range": {
             "byteLength": 1296,
             "byteStart": 49655,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1259-L1289",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1259-L1289",
             "lineEnd": 1289,
             "lineStart": 1259,
             "snippetSha256": "sha256:db2d9eff43c9eb0abdbd07d464dbe4c67aecd7824d234614968beec56c5dc4cf",
@@ -1750,7 +1750,7 @@
           "range": {
             "byteLength": 1224,
             "byteStart": 50957,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1291-L1318",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1291-L1318",
             "lineEnd": 1318,
             "lineStart": 1291,
             "snippetSha256": "sha256:eef96a21842ea4c046531bbd9c7b8c86b10f941398cb18d4d23a05b371927d3f",
@@ -1777,7 +1777,7 @@
           "range": {
             "byteLength": 957,
             "byteStart": 52187,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1320-L1340",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1320-L1340",
             "lineEnd": 1340,
             "lineStart": 1320,
             "snippetSha256": "sha256:74b8aac78fcc09f340498ad627e3b624366aabe15407c5ba623c4a6a64cee073",
@@ -1804,7 +1804,7 @@
           "range": {
             "byteLength": 806,
             "byteStart": 53150,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1342-L1356",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1342-L1356",
             "lineEnd": 1356,
             "lineStart": 1342,
             "snippetSha256": "sha256:66f711b4c52a3138bfbd040befc22c3ed3e219387525de675d016bb7eee9387a",
@@ -1831,7 +1831,7 @@
           "range": {
             "byteLength": 969,
             "byteStart": 53962,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1358-L1373",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1358-L1373",
             "lineEnd": 1373,
             "lineStart": 1358,
             "snippetSha256": "sha256:81b8577a0bb0669dbb36bc704d1f28776fff1fbd6dce4055a63184320606611d",
@@ -1858,7 +1858,7 @@
           "range": {
             "byteLength": 842,
             "byteStart": 54937,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1375-L1392",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1375-L1392",
             "lineEnd": 1392,
             "lineStart": 1375,
             "snippetSha256": "sha256:676ef2fbcfd232daf2686522f4cd97ad89127e14d6e6ff3c38766853fecfc910",
@@ -1885,7 +1885,7 @@
           "range": {
             "byteLength": 2039,
             "byteStart": 55785,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1394-L1452",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1394-L1452",
             "lineEnd": 1452,
             "lineStart": 1394,
             "snippetSha256": "sha256:1d6504ceb25d0b329506e95d3a6a034c238aa7bfaa121aab725a6ee371778275",
@@ -1912,7 +1912,7 @@
           "range": {
             "byteLength": 2680,
             "byteStart": 57830,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1454-L1507",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1454-L1507",
             "lineEnd": 1507,
             "lineStart": 1454,
             "snippetSha256": "sha256:ce2d8287827bbc9344fbf1b3827fb6242536ff04a90b8b2e1ed0a513508d3b15",
@@ -1939,7 +1939,7 @@
           "range": {
             "byteLength": 2267,
             "byteStart": 60516,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1509-L1552",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1509-L1552",
             "lineEnd": 1552,
             "lineStart": 1509,
             "snippetSha256": "sha256:bd64020500035785ce4d4878b92799dae3f22e1157b15cfe0e09313a1f4d01f9",
@@ -1966,7 +1966,7 @@
           "range": {
             "byteLength": 1709,
             "byteStart": 62789,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1554-L1587",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1554-L1587",
             "lineEnd": 1587,
             "lineStart": 1554,
             "snippetSha256": "sha256:7db5d0d882b0c7278f05306c263234261a615cb455592f83cbcc83a580855459",
@@ -1993,7 +1993,7 @@
           "range": {
             "byteLength": 1187,
             "byteStart": 64504,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1589-L1614",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1589-L1614",
             "lineEnd": 1614,
             "lineStart": 1589,
             "snippetSha256": "sha256:8eee5a12105750cbda96ba2750509769038a009e71b5e8655771ac6caf1b96c1",
@@ -2020,7 +2020,7 @@
           "range": {
             "byteLength": 1495,
             "byteStart": 65697,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1616-L1650",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1616-L1650",
             "lineEnd": 1650,
             "lineStart": 1616,
             "snippetSha256": "sha256:b14502f82a22b2af571624d5532e3744147452c21d917cceaab0e3aa42cd7709",
@@ -2047,7 +2047,7 @@
           "range": {
             "byteLength": 1512,
             "byteStart": 67198,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1652-L1693",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1652-L1693",
             "lineEnd": 1693,
             "lineStart": 1652,
             "snippetSha256": "sha256:9dc8b1d8c18ae4d8af14cb636a7d62c0a0b3d8d35b93c24c2397ce4d77620962",
@@ -2074,7 +2074,7 @@
           "range": {
             "byteLength": 698,
             "byteStart": 68716,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1695-L1709",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1695-L1709",
             "lineEnd": 1709,
             "lineStart": 1695,
             "snippetSha256": "sha256:2b235e6f1550ec8f70fc2e3942cd416a9fbb5d2617a23b03ca5e0617123e6528",
@@ -2101,7 +2101,7 @@
           "range": {
             "byteLength": 761,
             "byteStart": 69420,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1711-L1730",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1711-L1730",
             "lineEnd": 1730,
             "lineStart": 1711,
             "snippetSha256": "sha256:c46038d2c4a038018154c3b7ae81f012aded6deb5d5e07d7ef663f6fb87fc5a8",
@@ -2128,7 +2128,7 @@
           "range": {
             "byteLength": 1323,
             "byteStart": 70187,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1732-L1760",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1732-L1760",
             "lineEnd": 1760,
             "lineStart": 1732,
             "snippetSha256": "sha256:9e12e63c36c843624dc168e7a3eba77c785fce6c59f7c3110f7c83ef08dc3920",
@@ -2155,7 +2155,7 @@
           "range": {
             "byteLength": 1114,
             "byteStart": 71516,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1762-L1782",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1762-L1782",
             "lineEnd": 1782,
             "lineStart": 1762,
             "snippetSha256": "sha256:4e79229e517852416a76b995b702c339f2a36841545b45974a28d62c489f7fcd",
@@ -2182,7 +2182,7 @@
           "range": {
             "byteLength": 1409,
             "byteStart": 72636,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1784-L1808",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1784-L1808",
             "lineEnd": 1808,
             "lineStart": 1784,
             "snippetSha256": "sha256:56366d5e8a2c24009160006c78c5f248b29e552b25ef9d431989777dd39c218c",
@@ -2209,7 +2209,7 @@
           "range": {
             "byteLength": 1249,
             "byteStart": 74051,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1810-L1836",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1810-L1836",
             "lineEnd": 1836,
             "lineStart": 1810,
             "snippetSha256": "sha256:008c7dd3b4c56bc42c198f8339ed22e6467a743bbc67e9308de542ef5f354520",
@@ -2236,7 +2236,7 @@
           "range": {
             "byteLength": 925,
             "byteStart": 75306,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1838-L1856",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1838-L1856",
             "lineEnd": 1856,
             "lineStart": 1838,
             "snippetSha256": "sha256:50ae27e8316a180ff23f03f955d912e585e930c186ef499ebe3b0a737af0c1d3",
@@ -2263,7 +2263,7 @@
           "range": {
             "byteLength": 1278,
             "byteStart": 76237,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1858-L1881",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1858-L1881",
             "lineEnd": 1881,
             "lineStart": 1858,
             "snippetSha256": "sha256:5b0af54daac58b896adefabcfc209e98d5c9861865d75e029daefa72f782e53d",
@@ -2290,7 +2290,7 @@
           "range": {
             "byteLength": 1440,
             "byteStart": 77521,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1883-L1911",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1883-L1911",
             "lineEnd": 1911,
             "lineStart": 1883,
             "snippetSha256": "sha256:da49cd717c41c0e2e88b8d43d11ded1b7aedab122de68be3aa4eb600961f466d",
@@ -2333,7 +2333,7 @@
           "range": {
             "byteLength": 590,
             "byteStart": 78967,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1913-L1929",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1913-L1929",
             "lineEnd": 1929,
             "lineStart": 1913,
             "snippetSha256": "sha256:5a516022796ded60e54f694e9c6e91c7f6def4ce7b637f506f100613eb5c4d2c",
@@ -2381,7 +2381,7 @@
           "range": {
             "byteLength": 715,
             "byteStart": 79563,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1931-L1951",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1931-L1951",
             "lineEnd": 1951,
             "lineStart": 1931,
             "snippetSha256": "sha256:7eff5703ad6f545ffb44200ff3e220854a5966bf81ab56e05f61f2185f3221f8",
@@ -2414,7 +2414,7 @@
           "range": {
             "byteLength": 1312,
             "byteStart": 80284,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1953-L1983",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1953-L1983",
             "lineEnd": 1983,
             "lineStart": 1953,
             "snippetSha256": "sha256:01a9edcaa88f02049d1ac020170aa65f1c79014e52e7e15cd4dd8237673c1d2b",
@@ -2454,7 +2454,7 @@
           "range": {
             "byteLength": 603,
             "byteStart": 81602,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L1985-L2002",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L1985-L2002",
             "lineEnd": 2002,
             "lineStart": 1985,
             "snippetSha256": "sha256:0336d6ff182cf86bf41550e9d75d2716df9b14fc6569df6d9d605bd027003a3c",
@@ -2499,7 +2499,7 @@
           "range": {
             "byteLength": 516,
             "byteStart": 82211,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2004-L2017",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2004-L2017",
             "lineEnd": 2017,
             "lineStart": 2004,
             "snippetSha256": "sha256:f65457540e5a534f6788f95f76f5d3d19026c9bbf41493726efe49dfa971d47c",
@@ -2532,7 +2532,7 @@
           "range": {
             "byteLength": 135,
             "byteStart": 82733,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2019-L2021",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2019-L2021",
             "lineEnd": 2021,
             "lineStart": 2019,
             "snippetSha256": "sha256:a6173a6025d830cc681b6ecb512175f1b7816cef85322bf0fab54096081417f3",
@@ -2571,7 +2571,7 @@
           "range": {
             "byteLength": 698,
             "byteStart": 82874,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2023-L2043",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2023-L2043",
             "lineEnd": 2043,
             "lineStart": 2023,
             "snippetSha256": "sha256:4764b64e70043ecb662d829ce51bab71839cfe33b9ff0aa5da38f5b21208c4bf",
@@ -2629,7 +2629,7 @@
           "range": {
             "byteLength": 395,
             "byteStart": 83578,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2045-L2056",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2045-L2056",
             "lineEnd": 2056,
             "lineStart": 2045,
             "snippetSha256": "sha256:23c687a9ef446f4b9dc7e8a2bb68259487062368cab95c5c9ab997028b67a574",
@@ -2692,7 +2692,7 @@
           "range": {
             "byteLength": 915,
             "byteStart": 83979,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2058-L2083",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2058-L2083",
             "lineEnd": 2083,
             "lineStart": 2058,
             "snippetSha256": "sha256:02e2cfeab29bfcfe970701107be1a2fd8e5c0ebe7a742312df875a90f3a34a00",
@@ -2741,7 +2741,7 @@
           "range": {
             "byteLength": 432,
             "byteStart": 84900,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2085-L2097",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2085-L2097",
             "lineEnd": 2097,
             "lineStart": 2085,
             "snippetSha256": "sha256:75b0d69d60dcc556c0e5ef6cedaf6206b2931a0e0553b90391ca17c9524236e2",
@@ -2792,7 +2792,7 @@
           "range": {
             "byteLength": 357,
             "byteStart": 85338,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2099-L2107",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2099-L2107",
             "lineEnd": 2107,
             "lineStart": 2099,
             "snippetSha256": "sha256:5390a960b844a8315824558fa0bfa32c280d95bcd218b73f3622da9096f16fd8",
@@ -2848,7 +2848,7 @@
           "range": {
             "byteLength": 780,
             "byteStart": 85701,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2109-L2131",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2109-L2131",
             "lineEnd": 2131,
             "lineStart": 2109,
             "snippetSha256": "sha256:db2a2fa13e0a6554241b5736dabe1a6efcd60a47174efedb715c5cf6c4b2a2d2",
@@ -2888,7 +2888,7 @@
           "range": {
             "byteLength": 481,
             "byteStart": 86487,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2133-L2149",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2133-L2149",
             "lineEnd": 2149,
             "lineStart": 2133,
             "snippetSha256": "sha256:c6d4b6551c9091cb1eef07e4eabf0175f85cc38e1033c379c9c580ed5d124189",
@@ -2928,7 +2928,7 @@
           "range": {
             "byteLength": 523,
             "byteStart": 86974,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2151-L2167",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2151-L2167",
             "lineEnd": 2167,
             "lineStart": 2151,
             "snippetSha256": "sha256:d9de650f78c3e39ecae1a3a2932b7872edecf7976becd36bf16faf422d4845f5",
@@ -2972,7 +2972,7 @@
           "range": {
             "byteLength": 684,
             "byteStart": 87503,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2169-L2188",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2169-L2188",
             "lineEnd": 2188,
             "lineStart": 2169,
             "snippetSha256": "sha256:e1de91c6124844dc4b933d65376e6c9524fc5feb4c076c635573512aa6acfbb6",
@@ -3026,7 +3026,7 @@
           "range": {
             "byteLength": 595,
             "byteStart": 88193,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2190-L2209",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2190-L2209",
             "lineEnd": 2209,
             "lineStart": 2190,
             "snippetSha256": "sha256:e944dd775f51c7d66e395ef9214ae58e6ea00491e28b53f8f8934a3056f7efa2",
@@ -3066,7 +3066,7 @@
           "range": {
             "byteLength": 180,
             "byteStart": 88794,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2211-L2213",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2211-L2213",
             "lineEnd": 2213,
             "lineStart": 2211,
             "snippetSha256": "sha256:d5c3112f6db0335eb377a843f38d8515c7604e8c671fa2feae7f4be660fe5487",
@@ -3104,7 +3104,7 @@
           "range": {
             "byteLength": 613,
             "byteStart": 88980,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2215-L2227",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2215-L2227",
             "lineEnd": 2227,
             "lineStart": 2215,
             "snippetSha256": "sha256:e119ce404706d3e4b2a8705c4e02fcaf85e60a0f7d2e059ef6b1b65ba25e1bef",
@@ -3131,7 +3131,7 @@
           "range": {
             "byteLength": 84,
             "byteStart": 89599,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2229-L2231",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2229-L2231",
             "lineEnd": 2231,
             "lineStart": 2229,
             "snippetSha256": "sha256:56e0a85bac434c6c6f6415500978dc870ef3956ef45a733577858ac9d46a9143",
@@ -3164,7 +3164,7 @@
           "range": {
             "byteLength": 800,
             "byteStart": 89689,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2233-L2253",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2233-L2253",
             "lineEnd": 2253,
             "lineStart": 2233,
             "snippetSha256": "sha256:e6b5be39f913811e0741bb92f05ee503b167d43e81180ba5a6aeb3aa82dd4853",
@@ -3215,7 +3215,7 @@
           "range": {
             "byteLength": 879,
             "byteStart": 90495,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2255-L2279",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2255-L2279",
             "lineEnd": 2279,
             "lineStart": 2255,
             "snippetSha256": "sha256:16d5c3230a9adbbb47069b551b111b447c62629781fda9282ff8fe3f3d7df1c5",
@@ -3270,7 +3270,7 @@
           "range": {
             "byteLength": 600,
             "byteStart": 91380,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2281-L2296",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2281-L2296",
             "lineEnd": 2296,
             "lineStart": 2281,
             "snippetSha256": "sha256:7acb0cba27745a8aec892968f241a8d9a7b5be47f62d2541aa1ad870aacb5847",
@@ -3304,7 +3304,7 @@
           "range": {
             "byteLength": 376,
             "byteStart": 91986,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2298-L2307",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2298-L2307",
             "lineEnd": 2307,
             "lineStart": 2298,
             "snippetSha256": "sha256:6f6e42c5be858f3ac88e24dabbfa09431e2dd254c7c998df05a10ff18793ad3f",
@@ -3344,7 +3344,7 @@
           "range": {
             "byteLength": 413,
             "byteStart": 92368,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2309-L2322",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2309-L2322",
             "lineEnd": 2322,
             "lineStart": 2309,
             "snippetSha256": "sha256:a916b8c3cec536e52103dc33604c9c8cd9c70253cd13d49ca7c0b81b64da6a74",
@@ -3394,7 +3394,7 @@
           "range": {
             "byteLength": 275,
             "byteStart": 92787,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2324-L2330",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2324-L2330",
             "lineEnd": 2330,
             "lineStart": 2324,
             "snippetSha256": "sha256:8061a2179ca61b78320c3f236277c1bcdcd6781148b4dc8002e6479c53f1d5f3",
@@ -3449,7 +3449,7 @@
           "range": {
             "byteLength": 375,
             "byteStart": 93068,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2332-L2341",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2332-L2341",
             "lineEnd": 2341,
             "lineStart": 2332,
             "snippetSha256": "sha256:fb0fb4a87e17f24df19a56e436f760bed699194a9d318de57623ccf635143dc3",
@@ -3509,7 +3509,7 @@
           "range": {
             "byteLength": 1177,
             "byteStart": 93449,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2343-L2372",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2343-L2372",
             "lineEnd": 2372,
             "lineStart": 2343,
             "snippetSha256": "sha256:1698544147e4e0b8e5537beb1302f14338f96a9b09ad391b1de5605c95577ce2",
@@ -3559,7 +3559,7 @@
           "range": {
             "byteLength": 1289,
             "byteStart": 94632,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2374-L2405",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2374-L2405",
             "lineEnd": 2405,
             "lineStart": 2374,
             "snippetSha256": "sha256:ba18ffe71915f18c8cd9b7ebb8183c0db9752b6f3e3583b546872235760d9de3",
@@ -3604,7 +3604,7 @@
           "range": {
             "byteLength": 1387,
             "byteStart": 95927,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2407-L2442",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2407-L2442",
             "lineEnd": 2442,
             "lineStart": 2407,
             "snippetSha256": "sha256:5b4ddaac508630d2005d47829d4ba182b1eeecc1f32b8bbdc4d121192b5e6710",
@@ -3654,7 +3654,7 @@
           "range": {
             "byteLength": 325,
             "byteStart": 97320,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2444-L2452",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2444-L2452",
             "lineEnd": 2452,
             "lineStart": 2444,
             "snippetSha256": "sha256:0991b023d9f58961d1c9ce253e9f1d9f87e932a461c431c652ca755d7bab72d5",
@@ -3714,7 +3714,7 @@
           "range": {
             "byteLength": 1279,
             "byteStart": 97651,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2454-L2485",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2454-L2485",
             "lineEnd": 2485,
             "lineStart": 2454,
             "snippetSha256": "sha256:4a8f56c0277a2ea41ebafa25d9a2fee046b80837c7bc58fa1ce201563e83f5ff",
@@ -3755,7 +3755,7 @@
           "range": {
             "byteLength": 2875,
             "byteStart": 98936,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2487-L2547",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2487-L2547",
             "lineEnd": 2547,
             "lineStart": 2487,
             "snippetSha256": "sha256:594f23840ccb80cc1c432ca1be958eb74ffcdcf24e1ebac04876a275b8050624",
@@ -3788,7 +3788,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 101817,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2549-L2551",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2549-L2551",
             "lineEnd": 2551,
             "lineStart": 2549,
             "snippetSha256": "sha256:2f2ceb6e27386d787e9ed26eac659773b09e4ae6bca20bb1e6c0ff8078e13e40",
@@ -3832,7 +3832,7 @@
           "range": {
             "byteLength": 564,
             "byteStart": 101966,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2553-L2570",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2553-L2570",
             "lineEnd": 2570,
             "lineStart": 2553,
             "snippetSha256": "sha256:ccd231d30d9144e875b6b7472a27ea7970319290f9b2786dbcc334b7cb3af3f1",
@@ -3871,7 +3871,7 @@
           "range": {
             "byteLength": 149,
             "byteStart": 102536,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2572-L2574",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2572-L2574",
             "lineEnd": 2574,
             "lineStart": 2572,
             "snippetSha256": "sha256:1a1f3ba85e1758ca782bb62f9f67a10b8fe8edc648b0945675f51a52fd810a41",
@@ -3915,7 +3915,7 @@
           "range": {
             "byteLength": 229,
             "byteStart": 102691,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2576-L2582",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2576-L2582",
             "lineEnd": 2582,
             "lineStart": 2576,
             "snippetSha256": "sha256:f52c2c5e62a47396b8de4688fe07fdb8cd45c055edececbabfc26bf81e60938a",
@@ -3964,7 +3964,7 @@
           "range": {
             "byteLength": 607,
             "byteStart": 102926,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2584-L2602",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2584-L2602",
             "lineEnd": 2602,
             "lineStart": 2584,
             "snippetSha256": "sha256:cfc8eff47e37518c29c0fa91a86734e0c5a0536b6599becbeaef5505c026cd9c",
@@ -4003,7 +4003,7 @@
           "range": {
             "byteLength": 516,
             "byteStart": 103539,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2604-L2618",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2604-L2618",
             "lineEnd": 2618,
             "lineStart": 2604,
             "snippetSha256": "sha256:15213efb2d0065474f3f5d77814c0f77a7e7fa02bb69f97ac4edb400b7d41003",
@@ -4077,7 +4077,7 @@
           "range": {
             "byteLength": 672,
             "byteStart": 104061,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2620-L2642",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2620-L2642",
             "lineEnd": 2642,
             "lineStart": 2620,
             "snippetSha256": "sha256:faae9e68c3bcb25fdf0cbd81de90a867b151827fc4ceb0519f79ce95071f85a7",
@@ -4117,7 +4117,7 @@
           "range": {
             "byteLength": 242,
             "byteStart": 104739,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2644-L2650",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2644-L2650",
             "lineEnd": 2650,
             "lineStart": 2644,
             "snippetSha256": "sha256:f434b68669dbe914e950d5117688895460c8df90666af3e786db2865d3dc98d0",
@@ -4177,7 +4177,7 @@
           "range": {
             "byteLength": 813,
             "byteStart": 104987,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2652-L2677",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2652-L2677",
             "lineEnd": 2677,
             "lineStart": 2652,
             "snippetSha256": "sha256:b72e797e1b9dbaa3ed72027e39e8ad7908903a6c9429c37c69424cda964add57",
@@ -4217,7 +4217,7 @@
           "range": {
             "byteLength": 530,
             "byteStart": 105806,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L2679-L2694",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L2679-L2694",
             "lineEnd": 2694,
             "lineStart": 2679,
             "snippetSha256": "sha256:52083b1d8ae2395d7714b88b03b207b5317a2e6c07eb26b99cfa44ffba39a9ec",
@@ -4241,7 +4241,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 9197,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L283",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L283",
             "lineEnd": 283,
             "lineStart": 283,
             "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
@@ -4253,7 +4253,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 9238,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L283",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L283",
             "lineEnd": 283,
             "lineStart": 283,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -4271,7 +4271,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 9245,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L284",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L284",
             "lineEnd": 284,
             "lineStart": 284,
             "snippetSha256": "sha256:adbaf0b3fbbdc41af33e7837857d61ebabae5fbf2c3faf5e87bf5c42069c01e3",
@@ -4283,7 +4283,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 9293,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L284",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L284",
             "lineEnd": 284,
             "lineStart": 284,
             "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
@@ -4301,7 +4301,7 @@
           "range": {
             "byteLength": 43,
             "byteStart": 9300,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L285",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L285",
             "lineEnd": 285,
             "lineStart": 285,
             "snippetSha256": "sha256:5e9842250b43db62b5740aa93331babcc5864e21094ba83ed99f30a2024f008c",
@@ -4313,7 +4313,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 9342,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L285",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L285",
             "lineEnd": 285,
             "lineStart": 285,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -4331,7 +4331,7 @@
           "range": {
             "byteLength": 67,
             "byteStart": 9349,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L286",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L286",
             "lineEnd": 286,
             "lineStart": 286,
             "snippetSha256": "sha256:716a813b47a2f2f1be5039468d1a7a5cb792679c81ad0d1664c8b740547feea1",
@@ -4343,7 +4343,7 @@
           "valueRange": {
             "byteLength": 18,
             "byteStart": 9398,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L286",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L286",
             "lineEnd": 286,
             "lineStart": 286,
             "snippetSha256": "sha256:27885ca7dbaa7731846ecea092ad3dc7c7ec66cbc2b68823e5f35a7c0d0d79ab",
@@ -4361,7 +4361,7 @@
           "range": {
             "byteLength": 48,
             "byteStart": 9422,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L287",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L287",
             "lineEnd": 287,
             "lineStart": 287,
             "snippetSha256": "sha256:165866ce9544190e450ff21aadf7cbeac6340ae69479feb5df66e22a24c00b9f",
@@ -4373,7 +4373,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 9455,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L287",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L287",
             "lineEnd": 287,
             "lineStart": 287,
             "snippetSha256": "sha256:2d44ddd299cd1c2368b014c114a488c6dca935a0acb614242b1b7e8aef907fff",
@@ -4391,7 +4391,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 9476,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L288",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L288",
             "lineEnd": 288,
             "lineStart": 288,
             "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
@@ -4403,7 +4403,7 @@
           "valueRange": {
             "byteLength": 16,
             "byteStart": 9513,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L288",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L288",
             "lineEnd": 288,
             "lineStart": 288,
             "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
@@ -4421,7 +4421,7 @@
           "range": {
             "byteLength": 57,
             "byteStart": 9535,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L289",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L289",
             "lineEnd": 289,
             "lineStart": 289,
             "snippetSha256": "sha256:1107443157ab2d515fd8471429f027f05969fadcedcb6d28768155bebce41555",
@@ -4433,7 +4433,7 @@
           "valueRange": {
             "byteLength": 14,
             "byteStart": 9578,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L289",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L289",
             "lineEnd": 289,
             "lineStart": 289,
             "snippetSha256": "sha256:709352300061ce078029f9ba1b4b1f3253093f688f2a601206cfbad2795a3d6a",
@@ -4451,7 +4451,7 @@
           "range": {
             "byteLength": 51,
             "byteStart": 9598,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L290",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L290",
             "lineEnd": 290,
             "lineStart": 290,
             "snippetSha256": "sha256:0823a86190809722b9d1137b07abb2a67a1ecaa646beaa8cf95ead2d41a51c33",
@@ -4463,7 +4463,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 9634,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L290",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L290",
             "lineEnd": 290,
             "lineStart": 290,
             "snippetSha256": "sha256:3ddee88202e9787b92dce2bf566dad39344d902697e2c59a4c305cae9ffb1b45",
@@ -4481,7 +4481,7 @@
           "range": {
             "byteLength": 57,
             "byteStart": 9655,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L291",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L291",
             "lineEnd": 291,
             "lineStart": 291,
             "snippetSha256": "sha256:6d98346458b51480609e88ff7ec2a104871d08f010059f50f834a9494c1902da",
@@ -4493,7 +4493,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 9697,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L291",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L291",
             "lineEnd": 291,
             "lineStart": 291,
             "snippetSha256": "sha256:63b1df6bd48b7def3f46984f89ce3fd8c419300467ce60f4545b7fff6b54a61a",
@@ -4511,7 +4511,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 9718,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L292",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L292",
             "lineEnd": 292,
             "lineStart": 292,
             "snippetSha256": "sha256:7ac50fb070458bedeafb17eb773531d970fc0ad60e4eee04d401439e9250ef9e",
@@ -4523,7 +4523,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 9756,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L292",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L292",
             "lineEnd": 292,
             "lineStart": 292,
             "snippetSha256": "sha256:fe972ca552d5258a04f9d72d533ce432d01b3e0976914626a1fd09c9845a458a",
@@ -4541,7 +4541,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 9777,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L293",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L293",
             "lineEnd": 293,
             "lineStart": 293,
             "snippetSha256": "sha256:c88a719daca50c06bb138a4cc995a0722ba2b10916104b4a07ee9b515d6f1b9c",
@@ -4553,7 +4553,7 @@
           "valueRange": {
             "byteLength": 25,
             "byteStart": 9813,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L293",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L293",
             "lineEnd": 293,
             "lineStart": 293,
             "snippetSha256": "sha256:4e664b5ea01d2a5e7d50b9b20f861c6c9be8a8279aac685edb497c2d6ba82f9d",
@@ -4571,7 +4571,7 @@
           "range": {
             "byteLength": 70,
             "byteStart": 9844,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L294",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L294",
             "lineEnd": 294,
             "lineStart": 294,
             "snippetSha256": "sha256:a8eb9d02f82dcdde450d268bdd51525559df34ce359d7b969a4ff11bef4efd62",
@@ -4583,7 +4583,7 @@
           "valueRange": {
             "byteLength": 28,
             "byteStart": 9886,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L294",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L294",
             "lineEnd": 294,
             "lineStart": 294,
             "snippetSha256": "sha256:5b7a350212b22fc5268a4805b4e543539c4bcbd1379c35fffb6f854712523641",
@@ -4601,7 +4601,7 @@
           "range": {
             "byteLength": 70,
             "byteStart": 9920,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L295",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L295",
             "lineEnd": 295,
             "lineStart": 295,
             "snippetSha256": "sha256:3ebba01bd593616b1475ee04bddea3e314d28fbdff88a89a7d7ea733a9e99a09",
@@ -4613,7 +4613,7 @@
           "valueRange": {
             "byteLength": 25,
             "byteStart": 9965,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L295",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L295",
             "lineEnd": 295,
             "lineStart": 295,
             "snippetSha256": "sha256:ac969de562eb4c97aa31985a98866af7c0041b0f7c5c8d75406926bb601634c1",
@@ -4631,7 +4631,7 @@
           "range": {
             "byteLength": 76,
             "byteStart": 9996,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L296",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L296",
             "lineEnd": 296,
             "lineStart": 296,
             "snippetSha256": "sha256:50eaadb31e9b53b3479b29d974c84e1e174e1af520eb7e3a8303b0e5e285b226",
@@ -4643,7 +4643,7 @@
           "valueRange": {
             "byteLength": 28,
             "byteStart": 10044,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L296",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L296",
             "lineEnd": 296,
             "lineStart": 296,
             "snippetSha256": "sha256:61026ee4ee199797fa9a0daad010a12f3421ee4e08c567efc9b4e843035de298",
@@ -4661,7 +4661,7 @@
           "range": {
             "byteLength": 68,
             "byteStart": 10078,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L297",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L297",
             "lineEnd": 297,
             "lineStart": 297,
             "snippetSha256": "sha256:d75c579385cfd6e7a28b001318951af1c16aa0df7e722ac9d15906c9a3807072",
@@ -4673,7 +4673,7 @@
           "valueRange": {
             "byteLength": 24,
             "byteStart": 10122,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L297",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L297",
             "lineEnd": 297,
             "lineStart": 297,
             "snippetSha256": "sha256:bed3240a22b0faa70a6653632c10127c1ca7f2f62dfda07fb0905f0a721b6ba1",
@@ -4691,7 +4691,7 @@
           "range": {
             "byteLength": 74,
             "byteStart": 10152,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L298",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L298",
             "lineEnd": 298,
             "lineStart": 298,
             "snippetSha256": "sha256:a70a1c518b7344a3890536a290fdd51141dd6ec2fc397efc1aff0dc0d7cfc8a3",
@@ -4703,7 +4703,7 @@
           "valueRange": {
             "byteLength": 27,
             "byteStart": 10199,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L298",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L298",
             "lineEnd": 298,
             "lineStart": 298,
             "snippetSha256": "sha256:c67ba36a230e1f02638e8948e9c0d971bb09708af45fae0ae6cc75a9dc7a78fa",
@@ -4721,7 +4721,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 10232,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L299",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L299",
             "lineEnd": 299,
             "lineStart": 299,
             "snippetSha256": "sha256:f4aa65896061050463dde3a9200cc1e7b3bef44b3466a1c31c6699ba5e7045be",
@@ -4733,7 +4733,7 @@
           "valueRange": {
             "byteLength": 29,
             "byteStart": 10281,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L299",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L299",
             "lineEnd": 299,
             "lineStart": 299,
             "snippetSha256": "sha256:7a59212d7ef6798e12a6ccb41db4ea06e232339104e1ee1e1d08e4e836fd4c52",
@@ -4751,7 +4751,7 @@
           "range": {
             "byteLength": 72,
             "byteStart": 10316,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L300",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L300",
             "lineEnd": 300,
             "lineStart": 300,
             "snippetSha256": "sha256:a498dd16da06430d005f281558f508f806be55407b856d3cd115b4bd244a95e4",
@@ -4763,7 +4763,7 @@
           "valueRange": {
             "byteLength": 26,
             "byteStart": 10362,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L300",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L300",
             "lineEnd": 300,
             "lineStart": 300,
             "snippetSha256": "sha256:7c5efed151eb42c382cb0ec656e1e28d87a9ad587ac1b42272b667b4a2ca96fa",
@@ -4781,7 +4781,7 @@
           "range": {
             "byteLength": 64,
             "byteStart": 10394,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L301",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L301",
             "lineEnd": 301,
             "lineStart": 301,
             "snippetSha256": "sha256:3bcec4f9e28b5854cfb172e09b3278a6f61d49a390ed5ae916df2061d37038aa",
@@ -4793,7 +4793,7 @@
           "valueRange": {
             "byteLength": 25,
             "byteStart": 10433,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L301",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L301",
             "lineEnd": 301,
             "lineStart": 301,
             "snippetSha256": "sha256:b6394482c4c0caffee4b95d338c75dd0d09cc5e749a1ad484f4f668a1afa931f",
@@ -4811,7 +4811,7 @@
           "range": {
             "byteLength": 68,
             "byteStart": 10464,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L302",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L302",
             "lineEnd": 302,
             "lineStart": 302,
             "snippetSha256": "sha256:3490d2321143730a9ecde392188ec302085a64844d4d81db43e507383ea8c24e",
@@ -4823,7 +4823,7 @@
           "valueRange": {
             "byteLength": 27,
             "byteStart": 10505,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L302",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L302",
             "lineEnd": 302,
             "lineStart": 302,
             "snippetSha256": "sha256:58bd2968ff798cf4897fa7dd8643c582427e492b23c98e05ffeb5935278bcbc4",
@@ -4841,7 +4841,7 @@
           "range": {
             "byteLength": 80,
             "byteStart": 10538,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L303",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L303",
             "lineEnd": 303,
             "lineStart": 303,
             "snippetSha256": "sha256:aed390e5c8024505589faf8a071c56be0a717e560b7c0f75966429ffcaa6a715",
@@ -4853,7 +4853,7 @@
           "valueRange": {
             "byteLength": 34,
             "byteStart": 10584,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L303",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L303",
             "lineEnd": 303,
             "lineStart": 303,
             "snippetSha256": "sha256:1367d5ccf9a31ed10289b976f587778e85f09592600bb40eb0fe50190b9d4150",
@@ -4871,7 +4871,7 @@
           "range": {
             "byteLength": 86,
             "byteStart": 10624,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L304",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L304",
             "lineEnd": 304,
             "lineStart": 304,
             "snippetSha256": "sha256:93fefca01cf6f98957f021bdb20616dbbca070c77b41941004545e48bdbadaf3",
@@ -4883,7 +4883,7 @@
           "valueRange": {
             "byteLength": 37,
             "byteStart": 10673,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L304",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L304",
             "lineEnd": 304,
             "lineStart": 304,
             "snippetSha256": "sha256:085e1b4bee19b8a590a355d34c484557b6d3e7c13c7495d3287c11f967b7e9bd",
@@ -4901,7 +4901,7 @@
           "range": {
             "byteLength": 106,
             "byteStart": 10716,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L305-L306",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L305-L306",
             "lineEnd": 306,
             "lineStart": 305,
             "snippetSha256": "sha256:55315aa2161111ba516c8e64c28a1d9a56dd36e0496fa13357b50bc94754ee98",
@@ -4913,7 +4913,7 @@
           "valueRange": {
             "byteLength": 43,
             "byteStart": 10779,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L306",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L306",
             "lineEnd": 306,
             "lineStart": 306,
             "snippetSha256": "sha256:351b956be5f8428ec8abcee67a635b97ab7167ec3ba9ebef33fda8c2df07360f",
@@ -4931,7 +4931,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 10828,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L307",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L307",
             "lineEnd": 307,
             "lineStart": 307,
             "snippetSha256": "sha256:97f466a6b85a538b1424c919b283dbcecd6ab265a8c0d83c04cd5622df939ce8",
@@ -4943,7 +4943,7 @@
           "valueRange": {
             "byteLength": 33,
             "byteStart": 10873,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L307",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L307",
             "lineEnd": 307,
             "lineStart": 307,
             "snippetSha256": "sha256:7e1275de949045860b0ab0d01f3dbba2944564733520fbc9093c5745247d631d",
@@ -4961,7 +4961,7 @@
           "range": {
             "byteLength": 84,
             "byteStart": 10912,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L308",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L308",
             "lineEnd": 308,
             "lineStart": 308,
             "snippetSha256": "sha256:f6f3c8ab233f3d72aca416a1abeb767f2b7764ec55834369301958ebe9bffb19",
@@ -4973,7 +4973,7 @@
           "valueRange": {
             "byteLength": 36,
             "byteStart": 10960,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L308",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L308",
             "lineEnd": 308,
             "lineStart": 308,
             "snippetSha256": "sha256:01cd52d5cbe25de90a360f17bf5ba58827028265ead2c348dee79d6c7d3db785",
@@ -4991,7 +4991,7 @@
           "range": {
             "byteLength": 88,
             "byteStart": 11002,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L309",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L309",
             "lineEnd": 309,
             "lineStart": 309,
             "snippetSha256": "sha256:3580a788b9e57709a79a9edd2934bedc0c729856a0aacf13dbe5639e52fa3b84",
@@ -5003,7 +5003,7 @@
           "valueRange": {
             "byteLength": 38,
             "byteStart": 11052,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L309",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L309",
             "lineEnd": 309,
             "lineStart": 309,
             "snippetSha256": "sha256:706e449977b013e0bfd1752a74338aeb48f040f33cff59044c36baf04c2fabb3",
@@ -5021,7 +5021,7 @@
           "range": {
             "byteLength": 82,
             "byteStart": 11096,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L310",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L310",
             "lineEnd": 310,
             "lineStart": 310,
             "snippetSha256": "sha256:43ba2a0035517565ef2d31bd0d916dcd18355acadafc43de5b3140cc91fa182b",
@@ -5033,7 +5033,7 @@
           "valueRange": {
             "byteLength": 35,
             "byteStart": 11143,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L310",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L310",
             "lineEnd": 310,
             "lineStart": 310,
             "snippetSha256": "sha256:55d1096adbe720421b2ca1d43b21b9c8c71e24c79b52647c4bb3cfff77c21e85",
@@ -5051,7 +5051,7 @@
           "range": {
             "byteLength": 74,
             "byteStart": 11184,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L311",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L311",
             "lineEnd": 311,
             "lineStart": 311,
             "snippetSha256": "sha256:8876f287d36bbc051baa5c206878e8bdcfa1f88a5e7a1ff4321897a478ed5b04",
@@ -5063,7 +5063,7 @@
           "valueRange": {
             "byteLength": 30,
             "byteStart": 11228,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L311",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L311",
             "lineEnd": 311,
             "lineStart": 311,
             "snippetSha256": "sha256:69297fbc0deb0c2e21a2bb640f5307efe626b0e0b2555f8d781697e973b18dab",
@@ -5081,7 +5081,7 @@
           "range": {
             "byteLength": 81,
             "byteStart": 11264,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L312",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L312",
             "lineEnd": 312,
             "lineStart": 312,
             "snippetSha256": "sha256:f49fbe3d3886c1f9681f0b523e24179b7740e3da428ca672959b4b61ce4b87ef",
@@ -5093,7 +5093,7 @@
           "valueRange": {
             "byteLength": 30,
             "byteStart": 11315,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L312",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L312",
             "lineEnd": 312,
             "lineStart": 312,
             "snippetSha256": "sha256:9cf904b0bca01edabd3ac2cdacb36f55adad71dcf717cddcae2f5e0c6df115ba",
@@ -5111,7 +5111,7 @@
           "range": {
             "byteLength": 65,
             "byteStart": 11351,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L313",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L313",
             "lineEnd": 313,
             "lineStart": 313,
             "snippetSha256": "sha256:e46777e699be981b1189707a3b7a96dfd2552ab683bcbd93b477fd4755ee3bb5",
@@ -5123,7 +5123,7 @@
           "valueRange": {
             "byteLength": 25,
             "byteStart": 11391,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L313",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L313",
             "lineEnd": 313,
             "lineStart": 313,
             "snippetSha256": "sha256:87f78e65935d795862e65949a6aba937b5dfc11613e819b1ea9bc0bdd4e956bd",
@@ -5141,7 +5141,7 @@
           "range": {
             "byteLength": 68,
             "byteStart": 11422,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L314",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L314",
             "lineEnd": 314,
             "lineStart": 314,
             "snippetSha256": "sha256:75e131fa0bc9ce9bcc727a97e13bcd045edf1dab0c38c48c141bf3adf0587e5b",
@@ -5153,7 +5153,7 @@
           "valueRange": {
             "byteLength": 24,
             "byteStart": 11466,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L314",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L314",
             "lineEnd": 314,
             "lineStart": 314,
             "snippetSha256": "sha256:849b308698de4a273af5cd6dd7ad44eb6563adfd93739a08187922b53f25c9b8",
@@ -5171,7 +5171,7 @@
           "range": {
             "byteLength": 72,
             "byteStart": 11496,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L315",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L315",
             "lineEnd": 315,
             "lineStart": 315,
             "snippetSha256": "sha256:3abca58897cd583f35f189104f8dc67ceb38a29a114f0fbba1cdd723d25ed0e4",
@@ -5183,7 +5183,7 @@
           "valueRange": {
             "byteLength": 26,
             "byteStart": 11542,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L315",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L315",
             "lineEnd": 315,
             "lineStart": 315,
             "snippetSha256": "sha256:34bef627075a091939ad4a87e81fab52b82d458a6bc42bc367c73bf0e3accf66",
@@ -5201,7 +5201,7 @@
           "range": {
             "byteLength": 80,
             "byteStart": 11574,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L316",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L316",
             "lineEnd": 316,
             "lineStart": 316,
             "snippetSha256": "sha256:4f509468283c5a55ef996bf26fb8fbe127d2ba2647a152656ff3015d7bca85ea",
@@ -5213,7 +5213,7 @@
           "valueRange": {
             "byteLength": 31,
             "byteStart": 11623,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L316",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L316",
             "lineEnd": 316,
             "lineStart": 316,
             "snippetSha256": "sha256:a72f76c45ee2e39770c47978a0cfd4dbeb353e0a25911b30ed0ad438bb6d742c",
@@ -5231,7 +5231,7 @@
           "range": {
             "byteLength": 63,
             "byteStart": 11660,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L317",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L317",
             "lineEnd": 317,
             "lineStart": 317,
             "snippetSha256": "sha256:f3d6338b39bf5fa38dfc27469167179f1e4105e6fd9137ce9acf2d53b3f7f56e",
@@ -5243,7 +5243,7 @@
           "valueRange": {
             "byteLength": 26,
             "byteStart": 11697,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L317",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L317",
             "lineEnd": 317,
             "lineStart": 317,
             "snippetSha256": "sha256:b5732540a5409cac5f72fc6b0140cb6063d0c8863220dd371189e19c89f479a8",
@@ -5261,7 +5261,7 @@
           "range": {
             "byteLength": 48,
             "byteStart": 11729,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L318",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L318",
             "lineEnd": 318,
             "lineStart": 318,
             "snippetSha256": "sha256:39fa872f3c76650f17f0368100c81ff09460109b1337c3d5d003a662c8714314",
@@ -5273,7 +5273,7 @@
           "valueRange": {
             "byteLength": 7,
             "byteStart": 11770,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L318",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L318",
             "lineEnd": 318,
             "lineStart": 318,
             "snippetSha256": "sha256:fe110bd7b0c840b7562bd095c92582b59a3bd75358d7c58c902334a4594703ad",
@@ -5291,7 +5291,7 @@
           "range": {
             "byteLength": 23,
             "byteStart": 11784,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L320",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L320",
             "lineEnd": 320,
             "lineStart": 320,
             "snippetSha256": "sha256:42ce31d026100e5e2a7feaa73910e0bb778a5dedebfb25a22f22005a72d130c7",
@@ -5313,7 +5313,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 11813,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L321",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L321",
             "lineEnd": 321,
             "lineStart": 321,
             "snippetSha256": "sha256:ab8cd128b7d2522bd1c651a67673311b341a9b31af2f9d00eb29cb2930caa179",
@@ -5335,7 +5335,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 11850,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L322",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L322",
             "lineEnd": 322,
             "lineStart": 322,
             "snippetSha256": "sha256:09bb4fc608c52d000d3ff88df126c6f0878567bbb52dcdd306d10ee2c6eaf28f",
@@ -5357,7 +5357,7 @@
           "range": {
             "byteLength": 47,
             "byteStart": 11889,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L323",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L323",
             "lineEnd": 323,
             "lineStart": 323,
             "snippetSha256": "sha256:8663214bec7a35e7f77dfdd7c1a1cbbe964e17a9e3142b9376b5ccce15b2fb69",
@@ -5379,7 +5379,7 @@
           "range": {
             "byteLength": 26,
             "byteStart": 11942,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L324",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L324",
             "lineEnd": 324,
             "lineStart": 324,
             "snippetSha256": "sha256:e858b9ea458d6e6c65d62d8530e3a10c5a3ba2d9dfe7fbb0f3d281001fc19ee2",
@@ -5403,7 +5403,7 @@
               "range": {
                 "byteLength": 21,
                 "byteStart": 12011,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L327",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L327",
                 "lineEnd": 327,
                 "lineStart": 327,
                 "snippetSha256": "sha256:c5b59b2df981656b220268dfdf648bc22dee3c42faa4014472f458d0a6ec3944",
@@ -5419,7 +5419,7 @@
               "range": {
                 "byteLength": 19,
                 "byteStart": 12042,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L328",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L328",
                 "lineEnd": 328,
                 "lineStart": 328,
                 "snippetSha256": "sha256:8138db78a947581066a750633643addc89e7fda5e7323d97f5d32a11c945836e",
@@ -5435,7 +5435,7 @@
               "range": {
                 "byteLength": 31,
                 "byteStart": 12071,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L329",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L329",
                 "lineEnd": 329,
                 "lineStart": 329,
                 "snippetSha256": "sha256:a55c7a5f63213b64a0c852200d3401a5e813923019dcee7bd0f8357975e9ad59",
@@ -5451,7 +5451,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 12112,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L330",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L330",
                 "lineEnd": 330,
                 "lineStart": 330,
                 "snippetSha256": "sha256:83818a81d36658fb69a5a879b2b7643fd7cef823e87376aecb103d2cf011ccf0",
@@ -5467,7 +5467,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 12137,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L331",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L331",
                 "lineEnd": 331,
                 "lineStart": 331,
                 "snippetSha256": "sha256:9110d6dac279f08a0ec3a5c31c2beaa1ba894f9f254841a4c817870356a64f6c",
@@ -5483,7 +5483,7 @@
               "range": {
                 "byteLength": 29,
                 "byteStart": 12162,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L332",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L332",
                 "lineEnd": 332,
                 "lineStart": 332,
                 "snippetSha256": "sha256:64f3c509a66b31efde833493938a7704494484ce84f37f340743fbc6228eab58",
@@ -5498,7 +5498,7 @@
           "range": {
             "byteLength": 223,
             "byteStart": 11975,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L326-L333",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L326-L333",
             "lineEnd": 333,
             "lineStart": 326,
             "snippetSha256": "sha256:1a94c92dafc3a43eeca6322947d850fd8be2a4d6585b2798b78fc61c73b1a20e",
@@ -5542,7 +5542,7 @@
     "range": {
       "byteLength": 98358,
       "byteStart": 7980,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintManager.t.sol#L240-L2695",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L240-L2695",
       "lineEnd": 2695,
       "lineStart": 240,
       "snippetSha256": "sha256:d973ed8b88c10c2f94a8d08f3132cf89ee1f031a8c4cd86ab420f5b9c1ef7570",

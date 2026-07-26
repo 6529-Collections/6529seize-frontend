@@ -1808,7 +1808,7 @@
           "range": {
             "byteLength": 222,
             "byteStart": 1653,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L52-L59",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L52-L59",
             "lineEnd": 59,
             "lineStart": 52,
             "snippetSha256": "sha256:707e5e21fd3c87b6e49c3c86eff969c8fe8a2a949e18784f0ae9433ccbcb9da2",
@@ -1873,7 +1873,7 @@
           "range": {
             "byteLength": 267,
             "byteStart": 1880,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L60-L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L60-L68",
             "lineEnd": 68,
             "lineStart": 60,
             "snippetSha256": "sha256:ef3ef5fd3b37e06249e6f1d97877721b87c0b2febd7117c665a5aa8edb1d025c",
@@ -1920,7 +1920,7 @@
           "range": {
             "byteLength": 170,
             "byteStart": 2152,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L69-L74",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L69-L74",
             "lineEnd": 74,
             "lineStart": 69,
             "snippetSha256": "sha256:8291dc6c78c2217d85ce68babe1967a6d65b89409e2a39eec317b0a4d8e51ad1",
@@ -1973,7 +1973,7 @@
           "range": {
             "byteLength": 215,
             "byteStart": 2327,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L75-L81",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L75-L81",
             "lineEnd": 81,
             "lineStart": 75,
             "snippetSha256": "sha256:b0a3fe366a52770695ac5a9d4cebcac975d73e3b3e11f2c8be8ffa1ae0b5a6df",
@@ -2038,7 +2038,7 @@
           "range": {
             "byteLength": 261,
             "byteStart": 2547,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L82-L90",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L82-L90",
             "lineEnd": 90,
             "lineStart": 82,
             "snippetSha256": "sha256:86ec25609b6b764ff47554bb658353e3147b904bb9d9fd0768a4ef61610248f9",
@@ -2070,7 +2070,7 @@
           "range": {
             "byteLength": 29,
             "byteStart": 1113,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L33",
             "lineEnd": 33,
             "lineStart": 33,
             "snippetSha256": "sha256:85932c2eb9402a96f93c6f9e5e0cc32c75fbe50732970f11da50eba478a2f460",
@@ -2117,7 +2117,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 1177,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:c6e1e570eff280a577bf11b87df921e9f50fcc1a6cae9273927fb33e363aae53",
@@ -2164,7 +2164,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 1235,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L37",
             "lineEnd": 37,
             "lineStart": 37,
             "snippetSha256": "sha256:2377b090908e9765aeeb530160270f7260604c032afab8bc9d37b686b6ed60f8",
@@ -2241,7 +2241,7 @@
           "range": {
             "byteLength": 62,
             "byteStart": 1558,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L49",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L49",
             "lineEnd": 49,
             "lineStart": 49,
             "snippetSha256": "sha256:d77461a45a18d6bb75c7d3fa8db4f6f1a940a11b5ce76ccd9a90d5330b4026b6",
@@ -2282,7 +2282,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 2840,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L93",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L93",
             "lineEnd": 93,
             "lineStart": 93,
             "snippetSha256": "sha256:1dccd2402fb8086f990dc2aaed8365a471f0c9fe781a557d85a97f2490d26c65",
@@ -2323,7 +2323,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 2888,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L94",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L94",
             "lineEnd": 94,
             "lineStart": 94,
             "snippetSha256": "sha256:e99776b3e7e20c23396bf3652a3f99379de7daf1e5a567c2ee1869bacb733322",
@@ -2364,7 +2364,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 2940,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L95",
             "lineEnd": 95,
             "lineStart": 95,
             "snippetSha256": "sha256:4788f2f9a6f9ad00e323c691a1496cff5e80a062580c9be2093589b3b4036b69",
@@ -2391,7 +2391,7 @@
           "range": {
             "byteLength": 51,
             "byteStart": 3019,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L98-L100",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L98-L100",
             "lineEnd": 100,
             "lineStart": 98,
             "snippetSha256": "sha256:14fe4dcb7a35be41a0573c610320ae71ad9ab0b12d980ca824fdd2e1a0c8bf30",
@@ -2449,7 +2449,7 @@
           "range": {
             "byteLength": 2571,
             "byteStart": 3394,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L108-L158",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L108-L158",
             "lineEnd": 158,
             "lineStart": 108,
             "snippetSha256": "sha256:d8dcd43e81435b40aa07f4901d6ceda72f3a2cd686bad2aedce22b88ae0200b4",
@@ -2512,7 +2512,7 @@
           "range": {
             "byteLength": 4285,
             "byteStart": 6179,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L165-L260",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L165-L260",
             "lineEnd": 260,
             "lineStart": 165,
             "snippetSha256": "sha256:c43cced0750757acd39c88ecceeb6b7163f1ce9d34023485378262c3e1fded50",
@@ -2555,7 +2555,7 @@
           "range": {
             "byteLength": 3964,
             "byteStart": 10772,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L267-L363",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L267-L363",
             "lineEnd": 363,
             "lineStart": 267,
             "snippetSha256": "sha256:2f373046721dd33c1d355c07e22046f57b1a398baa7668cd205e20a7bad7612f",
@@ -2603,7 +2603,7 @@
           "range": {
             "byteLength": 5478,
             "byteStart": 14877,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L369-L501",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L369-L501",
             "lineEnd": 501,
             "lineStart": 369,
             "snippetSha256": "sha256:5fa2b6f5ed7b8b07313710f789904eb25090660d759ef45c25a44d9f629c7914",
@@ -2649,7 +2649,7 @@
           "range": {
             "byteLength": 461,
             "byteStart": 20439,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L507-L520",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L507-L520",
             "lineEnd": 520,
             "lineStart": 507,
             "snippetSha256": "sha256:daf317bd0567540e91d93f6a0af72a7f4ed7e2500d7158be713a719df38d9c7f",
@@ -2712,7 +2712,7 @@
           "range": {
             "byteLength": 739,
             "byteStart": 21053,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L526-L548",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L526-L548",
             "lineEnd": 548,
             "lineStart": 526,
             "snippetSha256": "sha256:733ed75a8717944f3f41d4df78f07149b37f1781cefa5db2b40585b3d69a5374",
@@ -2776,7 +2776,7 @@
           "range": {
             "byteLength": 728,
             "byteStart": 21890,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L554-L577",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L554-L577",
             "lineEnd": 577,
             "lineStart": 554,
             "snippetSha256": "sha256:e111c9687408282e404568f13c683f0d8fe00ba5d806a25b004c633e1bc54eb4",
@@ -2809,7 +2809,7 @@
           "range": {
             "byteLength": 93,
             "byteStart": 22692,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L583-L585",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L583-L585",
             "lineEnd": 585,
             "lineStart": 583,
             "snippetSha256": "sha256:026f6c0082aa9c1edd3d30c5394f081be7f8a615d252a97acad1a5a297953d95",
@@ -2847,7 +2847,7 @@
           "range": {
             "byteLength": 359,
             "byteStart": 22863,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L591-L598",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L591-L598",
             "lineEnd": 598,
             "lineStart": 591,
             "snippetSha256": "sha256:6d733fb3a2526d336eb3cc3d4b6728f52e82c4af82411e7b368c2ae07a67cd8d",
@@ -2890,7 +2890,7 @@
           "range": {
             "byteLength": 443,
             "byteStart": 23308,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L604-L614",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L604-L614",
             "lineEnd": 614,
             "lineStart": 604,
             "snippetSha256": "sha256:e74d66c36d297600ad43264a15cdd63f6e533d6bfc426950b18206ace1ae83d5",
@@ -2917,7 +2917,7 @@
           "range": {
             "byteLength": 91,
             "byteStart": 23868,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L620-L622",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L620-L622",
             "lineEnd": 622,
             "lineStart": 620,
             "snippetSha256": "sha256:797628462bf4219b14ce284bf1fb8935a586412f36eee382002da3e055337c38",
@@ -2956,7 +2956,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 24075,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L630-L632",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L630-L632",
             "lineEnd": 632,
             "lineStart": 630,
             "snippetSha256": "sha256:adf6f696101daf041d424aca6c7c36188cf8eedc76a13af401d8bdd72322911e",
@@ -3000,7 +3000,7 @@
           "range": {
             "byteLength": 498,
             "byteStart": 24288,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L638-L650",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L638-L650",
             "lineEnd": 650,
             "lineStart": 638,
             "snippetSha256": "sha256:77baceef7e633862a9460eeac96891e17653a6b0f6229a4a489eeccc493e2c1a",
@@ -3049,7 +3049,7 @@
           "range": {
             "byteLength": 579,
             "byteStart": 24865,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L656-L669",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L656-L669",
             "lineEnd": 669,
             "lineStart": 656,
             "snippetSha256": "sha256:9b9bf51e6be6013c93e63acda8b36969fcbb76e84803f981dedb4e948859ea1b",
@@ -3098,7 +3098,7 @@
           "range": {
             "byteLength": 557,
             "byteStart": 25572,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L675-L687",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L675-L687",
             "lineEnd": 687,
             "lineStart": 675,
             "snippetSha256": "sha256:170602c7d35462baa2fbcaaaefcfde9f28ac79cfd22629269b7080e2d11ce15d",
@@ -3147,7 +3147,7 @@
           "range": {
             "byteLength": 297,
             "byteStart": 26231,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L693-L701",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L693-L701",
             "lineEnd": 701,
             "lineStart": 693,
             "snippetSha256": "sha256:36d706b0a952df3b1f37e53d95732ae838eb2ae084a1ba0af96cb85e94c15062",
@@ -3201,7 +3201,7 @@
           "range": {
             "byteLength": 402,
             "byteStart": 26637,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L707-L718",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L707-L718",
             "lineEnd": 718,
             "lineStart": 707,
             "snippetSha256": "sha256:3cd5ddb6a2fa779912580662e47c0302bbc1a45143d79902d3c0b1b93afdb7b6",
@@ -3251,7 +3251,7 @@
           "range": {
             "byteLength": 341,
             "byteStart": 27221,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L724-L732",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L724-L732",
             "lineEnd": 732,
             "lineStart": 724,
             "snippetSha256": "sha256:20b92782a58679478a3cc74210dfea3df846f102191662a7c9e10c1b2cfff5bb",
@@ -3301,7 +3301,7 @@
           "range": {
             "byteLength": 342,
             "byteStart": 27748,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L738-L746",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L738-L746",
             "lineEnd": 746,
             "lineStart": 738,
             "snippetSha256": "sha256:a941c987a4785e66e3cc182c8f52de71ca9d8a9ec3293ac6ee8f2a786c7fb77b",
@@ -3350,7 +3350,7 @@
           "range": {
             "byteLength": 346,
             "byteStart": 28345,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L753-L761",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L753-L761",
             "lineEnd": 761,
             "lineStart": 753,
             "snippetSha256": "sha256:cadde6c87067d93453c2b6fb3400f151c92524a014dae34b3f9e1d73cb592cbb",
@@ -3399,7 +3399,7 @@
           "range": {
             "byteLength": 364,
             "byteStart": 28945,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L768-L776",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L768-L776",
             "lineEnd": 776,
             "lineStart": 768,
             "snippetSha256": "sha256:48b4a5ba0c408811812f0a43525268b170564065699edbdeb05ce7c1072e79cd",
@@ -3453,7 +3453,7 @@
           "range": {
             "byteLength": 428,
             "byteStart": 29444,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L782-L793",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L782-L793",
             "lineEnd": 793,
             "lineStart": 782,
             "snippetSha256": "sha256:32bc5ad65abc8d3ba3926f33867728385b3c48ee22af8a3a9226377f439ba738",
@@ -3512,7 +3512,7 @@
           "range": {
             "byteLength": 1046,
             "byteStart": 30052,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L799-L831",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L799-L831",
             "lineEnd": 831,
             "lineStart": 799,
             "snippetSha256": "sha256:572e5883ebadb2486e28ca12fc8312e1a58ea3ba322f0f33c2f40604686f2578",
@@ -3566,7 +3566,7 @@
           "range": {
             "byteLength": 347,
             "byteStart": 31243,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L837-L845",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L837-L845",
             "lineEnd": 845,
             "lineStart": 837,
             "snippetSha256": "sha256:3d5617fd7bd0b70f1b13fd48f042ee544204996b7ce72a49cd76f624e2560fba",
@@ -3615,7 +3615,7 @@
           "range": {
             "byteLength": 840,
             "byteStart": 31693,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L851-L876",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L851-L876",
             "lineEnd": 876,
             "lineStart": 851,
             "snippetSha256": "sha256:5fdf7b46273891fedc0589e175679c4cd69f3996becd14f616bcb7534eb0f5d6",
@@ -3674,7 +3674,7 @@
           "range": {
             "byteLength": 905,
             "byteStart": 32637,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L882-L910",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L882-L910",
             "lineEnd": 910,
             "lineStart": 882,
             "snippetSha256": "sha256:a117c15c902b9bb0f8a363b45a1b1c520edb0b0bc02921d4148bb81d87c94b47",
@@ -3742,7 +3742,7 @@
           "range": {
             "byteLength": 3465,
             "byteStart": 33687,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L915-L998",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L915-L998",
             "lineEnd": 998,
             "lineStart": 915,
             "snippetSha256": "sha256:2969085b445ba658b120374dec0d7ba71131ab5715ce32f73c41c799ba4c7e63",
@@ -3797,7 +3797,7 @@
           "range": {
             "byteLength": 3242,
             "byteStart": 37340,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L1004-L1094",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L1004-L1094",
             "lineEnd": 1094,
             "lineStart": 1004,
             "snippetSha256": "sha256:4c21f10f568384ec6a525750c54f9e122a5e39ae17ab45f1ca4f4bb162e87a5e",
@@ -3846,7 +3846,7 @@
           "range": {
             "byteLength": 3267,
             "byteStart": 40726,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L1100-L1188",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L1100-L1188",
             "lineEnd": 1188,
             "lineStart": 1100,
             "snippetSha256": "sha256:3a2fa74df232f953c7509b483846cf6ce14bcb65dd1728b56ef3e41073c5f9a8",
@@ -3914,7 +3914,7 @@
           "range": {
             "byteLength": 3444,
             "byteStart": 44288,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L1197-L1280",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L1197-L1280",
             "lineEnd": 1280,
             "lineStart": 1197,
             "snippetSha256": "sha256:c7d2fcccd1dc251cc56f6dbe389ac322a69fdf0d88b4cd53d0f48acb4dc479ec",
@@ -3969,7 +3969,7 @@
           "range": {
             "byteLength": 3219,
             "byteStart": 47910,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L1286-L1375",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L1286-L1375",
             "lineEnd": 1375,
             "lineStart": 1286,
             "snippetSha256": "sha256:806411e92959a927d1db981700263f356d0ae1d095d7f82f4f265da5caef99ac",
@@ -4018,7 +4018,7 @@
           "range": {
             "byteLength": 3251,
             "byteStart": 51281,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L1381-L1469",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L1381-L1469",
             "lineEnd": 1469,
             "lineStart": 1381,
             "snippetSha256": "sha256:eefe22c45c79a9ca9582f8953eb53c640c03b341439f1a282858c1007f83589c",
@@ -4067,7 +4067,7 @@
           "range": {
             "byteLength": 1482,
             "byteStart": 54636,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L1475-L1510",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L1475-L1510",
             "lineEnd": 1510,
             "lineStart": 1475,
             "snippetSha256": "sha256:e7c1b249f94de6c84f24e5896c39d28970c8e1de35c8797dd49a2d66940b4295",
@@ -4091,7 +4091,7 @@
           "range": {
             "byteLength": 77,
             "byteStart": 897,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L28",
             "lineEnd": 28,
             "lineStart": 28,
             "snippetSha256": "sha256:5a7b280aad8a80f37ef4006185a0da105a66f69c45043c7812f481b753054a2c",
@@ -4103,7 +4103,7 @@
           "valueRange": {
             "byteLength": 42,
             "byteStart": 932,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L28",
             "lineEnd": 28,
             "lineStart": 28,
             "snippetSha256": "sha256:c5ccdaf285f572c251d3c54346575723255ce78e119af161b3c76792a078879e",
@@ -4121,7 +4121,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 980,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L29",
             "lineEnd": 29,
             "lineStart": 29,
             "snippetSha256": "sha256:d36153adb771d2b01f9920908e28a386f3ebe5cb42a150bf0a22628007e5d700",
@@ -4133,7 +4133,7 @@
           "valueRange": {
             "byteLength": 3,
             "byteStart": 1023,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L29",
             "lineEnd": 29,
             "lineStart": 29,
             "snippetSha256": "sha256:462c39f8e9bbf461369150222f7493055e67079106a1a721824544b113519bf3",
@@ -4151,7 +4151,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 1032,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L30",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L30",
             "lineEnd": 30,
             "lineStart": 30,
             "snippetSha256": "sha256:4813df7038afae4ef05ba6935a88328d3bfb6625275123c0b97f600f2cd47a82",
@@ -4163,7 +4163,7 @@
           "valueRange": {
             "byteLength": 3,
             "byteStart": 1074,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L30",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L30",
             "lineEnd": 30,
             "lineStart": 30,
             "snippetSha256": "sha256:83cf8b609de60036a8277bd0e96135751bbc07eb234256d4b65b893360651bf2",
@@ -4181,7 +4181,7 @@
           "range": {
             "byteLength": 29,
             "byteStart": 1113,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L33",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L33",
             "lineEnd": 33,
             "lineStart": 33,
             "snippetSha256": "sha256:85932c2eb9402a96f93c6f9e5e0cc32c75fbe50732970f11da50eba478a2f460",
@@ -4203,7 +4203,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 1177,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L36",
             "lineEnd": 36,
             "lineStart": 36,
             "snippetSha256": "sha256:c6e1e570eff280a577bf11b87df921e9f50fcc1a6cae9273927fb33e363aae53",
@@ -4225,7 +4225,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 1235,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L37",
             "lineEnd": 37,
             "lineStart": 37,
             "snippetSha256": "sha256:2377b090908e9765aeeb530160270f7260604c032afab8bc9d37b686b6ed60f8",
@@ -4247,7 +4247,7 @@
           "range": {
             "byteLength": 62,
             "byteStart": 1558,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L49",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L49",
             "lineEnd": 49,
             "lineStart": 49,
             "snippetSha256": "sha256:d77461a45a18d6bb75c7d3fa8db4f6f1a940a11b5ce76ccd9a90d5330b4026b6",
@@ -4269,7 +4269,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 2840,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L93",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L93",
             "lineEnd": 93,
             "lineStart": 93,
             "snippetSha256": "sha256:1dccd2402fb8086f990dc2aaed8365a471f0c9fe781a557d85a97f2490d26c65",
@@ -4291,7 +4291,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 2888,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L94",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L94",
             "lineEnd": 94,
             "lineStart": 94,
             "snippetSha256": "sha256:e99776b3e7e20c23396bf3652a3f99379de7daf1e5a567c2ee1869bacb733322",
@@ -4313,7 +4313,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 2940,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L95",
             "lineEnd": 95,
             "lineStart": 95,
             "snippetSha256": "sha256:4788f2f9a6f9ad00e323c691a1496cff5e80a062580c9be2093589b3b4036b69",
@@ -4337,7 +4337,7 @@
               "range": {
                 "byteLength": 24,
                 "byteStart": 1330,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L40",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L40",
                 "lineEnd": 40,
                 "lineStart": 40,
                 "snippetSha256": "sha256:a1b7c1d704928f4cab395eb1b4f8d6474ea168656e404d739fa2b4b4a1216afa",
@@ -4353,7 +4353,7 @@
               "range": {
                 "byteLength": 25,
                 "byteStart": 1364,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L41",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L41",
                 "lineEnd": 41,
                 "lineStart": 41,
                 "snippetSha256": "sha256:4e91f280dad3d71fb1ce690c54b0271cf896f6068d40fda241bf24ca7178cf34",
@@ -4369,7 +4369,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 1399,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L42",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L42",
                 "lineEnd": 42,
                 "lineStart": 42,
                 "snippetSha256": "sha256:06903ad540192f47eea9f74637cf2f6de921b36d90fd3dcd31ccd430f45389c0",
@@ -4385,7 +4385,7 @@
               "range": {
                 "byteLength": 18,
                 "byteStart": 1431,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L43",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L43",
                 "lineEnd": 43,
                 "lineStart": 43,
                 "snippetSha256": "sha256:c36cf185b8522716cb8477682a4b8cab2a87bae7892e1bc7ccdbb025bfd4a1f5",
@@ -4401,7 +4401,7 @@
               "range": {
                 "byteLength": 14,
                 "byteStart": 1459,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L44",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L44",
                 "lineEnd": 44,
                 "lineStart": 44,
                 "snippetSha256": "sha256:8b76f7e11daabf5ba5c7d6ed9096fb2ca770e53b7ab83118996e9ef83434358c",
@@ -4417,7 +4417,7 @@
               "range": {
                 "byteLength": 14,
                 "byteStart": 1483,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L45",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L45",
                 "lineEnd": 45,
                 "lineStart": 45,
                 "snippetSha256": "sha256:98731c32d3812fcf424f2a4ded36a9ba45a4894c2656ba5a34075104820315e3",
@@ -4432,7 +4432,7 @@
           "range": {
             "byteLength": 202,
             "byteStart": 1302,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L39-L46",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L39-L46",
             "lineEnd": 46,
             "lineStart": 39,
             "snippetSha256": "sha256:e226e75d078d560e7db07f039f1a1b79ffd1973b098d5599da9dfc3c19efd5b7",
@@ -4465,7 +4465,7 @@
     "range": {
       "byteLength": 55296,
       "byteStart": 824,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/NFTdelegation.sol#L26-L1511",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/NFTdelegation.sol#L26-L1511",
       "lineEnd": 1511,
       "lineStart": 26,
       "snippetSha256": "sha256:19b81a4abd07f171c93f0b1ab921ddeccebb8b1c9fbbe20915b7a62e3752ff07",

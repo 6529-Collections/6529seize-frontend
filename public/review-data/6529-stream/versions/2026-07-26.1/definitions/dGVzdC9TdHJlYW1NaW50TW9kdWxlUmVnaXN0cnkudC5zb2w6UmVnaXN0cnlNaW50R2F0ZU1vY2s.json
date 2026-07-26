@@ -66,7 +66,7 @@
           "range": {
             "byteLength": 207,
             "byteStart": 436,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintModuleRegistry.t.sol#L13-L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintModuleRegistry.t.sol#L13-L16",
             "lineEnd": 16,
             "lineStart": 13,
             "snippetSha256": "sha256:117e239c92f4fe4b02deb9fc0d0b797e28089b51f318d5b895068798ac1f5d6f",
@@ -114,7 +114,7 @@
     "range": {
       "byteLength": 255,
       "byteStart": 390,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMintModuleRegistry.t.sol#L12-L17",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintModuleRegistry.t.sol#L12-L17",
       "lineEnd": 17,
       "lineStart": 12,
       "snippetSha256": "sha256:4934c30a2e3d846830ea2046e9d70da1846d04db01bb9b3f1fecbaa7e8e0ce96",

@@ -113,7 +113,7 @@
           "range": {
             "byteLength": 84,
             "byteStart": 720,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:5d249fb7c98f7f27a2f564462cd73da0775a932df964bb1201c8fc01b08c0696",
@@ -138,7 +138,7 @@
           "range": {
             "byteLength": 63,
             "byteStart": 906,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L29-L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L29-L31",
             "lineEnd": 31,
             "lineStart": 29,
             "snippetSha256": "sha256:957df14ec51e8bd6674bd523ae6a6e315c3cc261a455caabffca8b8726860122",
@@ -171,7 +171,7 @@
           "range": {
             "byteLength": 85,
             "byteStart": 1195,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L44-L46",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L44-L46",
             "lineEnd": 46,
             "lineStart": 44,
             "snippetSha256": "sha256:6cd16f069545b8f2ce8d658f6ec62e9f9f1a60a836c28fbbdad60350059f77a9",
@@ -198,7 +198,7 @@
           "range": {
             "byteLength": 130,
             "byteStart": 1353,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L51-L53",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L51-L53",
             "lineEnd": 53,
             "lineStart": 51,
             "snippetSha256": "sha256:7aeca32f6f01bdb0ed9b0d1826c8c380cd47454064dc6946ff16df5ee380be97",
@@ -227,7 +227,7 @@
           "range": {
             "byteLength": 101,
             "byteStart": 1818,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L62-L64",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L62-L64",
             "lineEnd": 64,
             "lineStart": 62,
             "snippetSha256": "sha256:50b7131bb07c9fa6fa407737ac9f9ca9c46456b9f4e3ce0809d59b4973557b76",
@@ -262,7 +262,7 @@
           "range": {
             "byteLength": 198,
             "byteStart": 2068,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L70-L73",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L70-L73",
             "lineEnd": 73,
             "lineStart": 70,
             "snippetSha256": "sha256:058af558cb288763a78e2037874bd743b10a5d8fdc49a0a285911474e179cfdf",
@@ -295,7 +295,7 @@
           "range": {
             "byteLength": 187,
             "byteStart": 2420,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L79-L83",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L79-L83",
             "lineEnd": 83,
             "lineStart": 79,
             "snippetSha256": "sha256:ffc71dc1366aaa20ed08a23bb11aa2481dc52fa8a9a716474ad27f85833492a5",
@@ -317,7 +317,7 @@
           "range": {
             "byteLength": 62,
             "byteStart": 1057,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L36-L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L36-L39",
             "lineEnd": 39,
             "lineStart": 36,
             "snippetSha256": "sha256:52daaf9a4e12654ba133c4d22d80f6a68ebd382ad6667e4513dbf374c6dcc055",
@@ -336,7 +336,7 @@
           "range": {
             "byteLength": 22,
             "byteStart": 691,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:b6a0bf5f1958d374760eb6f4083566fb5e165c52e64b40c4574f9cd5993be382",
@@ -382,7 +382,7 @@
     "range": {
       "byteLength": 1961,
       "byteStart": 648,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/Ownable.sol#L21-L84",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L21-L84",
       "lineEnd": 84,
       "lineStart": 21,
       "snippetSha256": "sha256:1708e271bb9b03f601d3fded0843efea6fa7b055d3802f0a9ce816f3ed5f8e47",

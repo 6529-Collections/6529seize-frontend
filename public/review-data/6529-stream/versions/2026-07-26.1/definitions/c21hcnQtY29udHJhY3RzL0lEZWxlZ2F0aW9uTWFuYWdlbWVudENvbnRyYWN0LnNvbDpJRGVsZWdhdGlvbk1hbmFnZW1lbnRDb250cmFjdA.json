@@ -501,7 +501,7 @@
           "range": {
             "byteLength": 181,
             "byteStart": 399,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L13-L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L13-L17",
             "lineEnd": 17,
             "lineStart": 13,
             "snippetSha256": "sha256:5539bc3bd1b49c121e1387f7013c5374182bc20593aebd64931de8b6700e6a9c",
@@ -551,7 +551,7 @@
           "range": {
             "byteLength": 173,
             "byteStart": 766,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L23-L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L23-L27",
             "lineEnd": 27,
             "lineStart": 23,
             "snippetSha256": "sha256:f3325c92d6f98ecb76e9b775f76020edddb0d80b3aac1bf095ce3d32cdeb10d2",
@@ -606,7 +606,7 @@
           "range": {
             "byteLength": 202,
             "byteStart": 1117,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L33-L38",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L33-L38",
             "lineEnd": 38,
             "lineStart": 33,
             "snippetSha256": "sha256:602f06fb4b29a496861d32b4c7fb9afa5d7cd8f2cdcdbe241a09e979c57d109b",
@@ -655,7 +655,7 @@
           "range": {
             "byteLength": 173,
             "byteStart": 1463,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L44-L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L44-L48",
             "lineEnd": 48,
             "lineStart": 44,
             "snippetSha256": "sha256:28f541b102b1922f69d8b7cefe0dbaed18a3c23dfea148dd8a1c6fa9954246ba",
@@ -704,7 +704,7 @@
           "range": {
             "byteLength": 173,
             "byteStart": 1788,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L54-L58",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L54-L58",
             "lineEnd": 58,
             "lineStart": 54,
             "snippetSha256": "sha256:f684eca0e8b23a9d9cac171a59e61075e670b01a277c9935f71e04c09cd45df5",
@@ -758,7 +758,7 @@
           "range": {
             "byteLength": 210,
             "byteStart": 2096,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L64-L69",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L64-L69",
             "lineEnd": 69,
             "lineStart": 64,
             "snippetSha256": "sha256:7be36545436a85419b59aec2e1df7c468cd169783efee4678ad475dd4cd225fb",
@@ -817,7 +817,7 @@
           "range": {
             "byteLength": 223,
             "byteStart": 2486,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L75-L81",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L75-L81",
             "lineEnd": 81,
             "lineStart": 75,
             "snippetSha256": "sha256:a7d3de7ffa11f7acfe1ee61ff6da7bf52868cbd888ccaa6567bcf519b3647cd4",
@@ -871,7 +871,7 @@
           "range": {
             "byteLength": 214,
             "byteStart": 2854,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L87-L92",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L87-L92",
             "lineEnd": 92,
             "lineStart": 87,
             "snippetSha256": "sha256:042590ff0ad1604f311013af0f76599edfb66cb3273ac091161cb1db12e9259c",
@@ -920,7 +920,7 @@
           "range": {
             "byteLength": 179,
             "byteStart": 3171,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L98-L102",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L98-L102",
             "lineEnd": 102,
             "lineStart": 98,
             "snippetSha256": "sha256:55c63d7091547603f4ed7d569c0cc51b6290c349d00f3cb3725dbe692a4a3757",
@@ -979,7 +979,7 @@
           "range": {
             "byteLength": 232,
             "byteStart": 3454,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L108-L114",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L108-L114",
             "lineEnd": 114,
             "lineStart": 108,
             "snippetSha256": "sha256:9af97085f8e36b0b7e9376c5885526b6744fcb84c28e84d7af6dfb463dee1084",
@@ -1028,7 +1028,7 @@
           "range": {
             "byteLength": 157,
             "byteStart": 3790,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L120-L124",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L120-L124",
             "lineEnd": 124,
             "lineStart": 120,
             "snippetSha256": "sha256:2428f80630e57d6481f522c8082a5731874679ae64e17d7c2b3840720f80ecdc",
@@ -1069,7 +1069,7 @@
     "range": {
       "byteLength": 3771,
       "byteStart": 178,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IDelegationManagementContract.sol#L9-L125",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L9-L125",
       "lineEnd": 125,
       "lineStart": 9,
       "snippetSha256": "sha256:bf7a7007c6a188fdff630ecb9d94431879a7a0dc18876210d8edeb56744b1c95",

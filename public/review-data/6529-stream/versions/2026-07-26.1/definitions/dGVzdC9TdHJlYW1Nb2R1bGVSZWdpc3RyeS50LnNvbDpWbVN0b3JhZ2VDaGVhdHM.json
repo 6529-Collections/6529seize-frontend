@@ -107,7 +107,7 @@
           "range": {
             "byteLength": 82,
             "byteStart": 591,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:5808c96135d38be41d99a819d8a68daef1ff2cadfdb0bbd9ac7bb12e9ca7d8f7",
@@ -150,7 +150,7 @@
           "range": {
             "byteLength": 69,
             "byteStart": 678,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:6700fedac7f3f26b65e29c4c798a27845f040e33d9c11508bb079de0b74629ba",
@@ -191,7 +191,7 @@
     "range": {
       "byteLength": 190,
       "byteStart": 559,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamModuleRegistry.t.sol#L15-L18",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L15-L18",
       "lineEnd": 18,
       "lineStart": 15,
       "snippetSha256": "sha256:aaf329ecab11f296864af4e4f3eafe4a3044b5d36a06623ecb587e6d5f3ce948",

@@ -1753,7 +1753,7 @@
               "range": {
                 "byteLength": 7,
                 "byteStart": 343,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L12",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L12",
                 "lineEnd": 12,
                 "lineStart": 12,
                 "snippetSha256": "sha256:23759997b3c59884dc4c0ff5320d6301b0e7f63bf0f6483a7b54d7d43bc5ccd1",
@@ -1766,7 +1766,7 @@
               "range": {
                 "byteLength": 8,
                 "byteStart": 360,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L13",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L13",
                 "lineEnd": 13,
                 "lineStart": 13,
                 "snippetSha256": "sha256:94311a9841a5dbaa5c651c270be1106cbfda31d734df5154fa10553b101574ac",
@@ -1779,7 +1779,7 @@
               "range": {
                 "byteLength": 5,
                 "byteStart": 378,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L14",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L14",
                 "lineEnd": 14,
                 "lineStart": 14,
                 "snippetSha256": "sha256:7a8003693019a1dc1455970b863d574046dc818fb9383aa680a29868d0dd6bec",
@@ -1792,7 +1792,7 @@
               "range": {
                 "byteLength": 9,
                 "byteStart": 393,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L15",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L15",
                 "lineEnd": 15,
                 "lineStart": 15,
                 "snippetSha256": "sha256:1c10f5ffc2bdadfecbd6a01630ff5d3aaec83b986ab20e04f73714a68e24bab5",
@@ -1805,7 +1805,7 @@
               "range": {
                 "byteLength": 8,
                 "byteStart": 412,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L16",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L16",
                 "lineEnd": 16,
                 "lineStart": 16,
                 "snippetSha256": "sha256:0bb01d394990acbc5d55ba4bf1fffb5bcb627686823abeed4cfb9884c3d7570c",
@@ -1818,7 +1818,7 @@
               "range": {
                 "byteLength": 10,
                 "byteStart": 430,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L17",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L17",
                 "lineEnd": 17,
                 "lineStart": 17,
                 "snippetSha256": "sha256:0aa4ba325ac8500db0686c0a160ad53e835e5aabdfa7213e492ac497e9c060f5",
@@ -1831,7 +1831,7 @@
               "range": {
                 "byteLength": 7,
                 "byteStart": 450,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L18",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L18",
                 "lineEnd": 18,
                 "lineStart": 18,
                 "snippetSha256": "sha256:a8bf80b5ebf39d4f55a2a7e0df94a97914882ee561abe523a334215f1228ccfe",
@@ -1853,7 +1853,7 @@
           "range": {
             "byteLength": 150,
             "byteStart": 313,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L11-L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L11-L19",
             "lineEnd": 19,
             "lineStart": 11,
             "snippetSha256": "sha256:23d964266c9689c83a96387de709044b39dec84c8e0388a38a63cf7019d9a96e",
@@ -1881,7 +1881,7 @@
           "range": {
             "byteLength": 40,
             "byteStart": 1942,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L69",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L69",
             "lineEnd": 69,
             "lineStart": 69,
             "snippetSha256": "sha256:523b4c5763048ed8d7bcd78b44996e02f5a09c30b4a177e438c0cc7a17209976",
@@ -1908,7 +1908,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 2071,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L71",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L71",
             "lineEnd": 71,
             "lineStart": 71,
             "snippetSha256": "sha256:c468d0dac61795af61e66aaad5087a335a5adb837b33736a9406362529094ad2",
@@ -1940,7 +1940,7 @@
           "range": {
             "byteLength": 62,
             "byteStart": 2186,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L73",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L73",
             "lineEnd": 73,
             "lineStart": 73,
             "snippetSha256": "sha256:6aaa66461f03b194f73fa4346ae681a059713a1dda4fe5ae4f852c9e1767291e",
@@ -1972,7 +1972,7 @@
           "range": {
             "byteLength": 67,
             "byteStart": 2315,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L75",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L75",
             "lineEnd": 75,
             "lineStart": 75,
             "snippetSha256": "sha256:fe63b27642d94e0e93d3fd80c67c362c3d30cfb27ae9d7f9fbd9c1a970922774",
@@ -2004,7 +2004,7 @@
           "range": {
             "byteLength": 72,
             "byteStart": 2474,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L77",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L77",
             "lineEnd": 77,
             "lineStart": 77,
             "snippetSha256": "sha256:2aba45b5eb967e62f0e5fa272a2773b1323c42d7e2cbbb941c9b9a34d94b743e",
@@ -2036,7 +2036,7 @@
           "range": {
             "byteLength": 61,
             "byteStart": 2610,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L79",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L79",
             "lineEnd": 79,
             "lineStart": 79,
             "snippetSha256": "sha256:265ca718c3ce2c044eaa852a8df77f0a88965bf9b0cf9db3cb4f0977721f3f6e",
@@ -2073,7 +2073,7 @@
           "range": {
             "byteLength": 84,
             "byteStart": 2730,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L81",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L81",
             "lineEnd": 81,
             "lineStart": 81,
             "snippetSha256": "sha256:16cc650700ce05868f828ce5501e888a4861032a9cc7e8097d5444b8199e1b89",
@@ -2110,7 +2110,7 @@
           "range": {
             "byteLength": 79,
             "byteStart": 2867,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L83",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L83",
             "lineEnd": 83,
             "lineStart": 83,
             "snippetSha256": "sha256:26ed39638ba03dab5849c640ae526e73ce569c06514adb0465d413b5628b32bf",
@@ -2147,7 +2147,7 @@
           "range": {
             "byteLength": 88,
             "byteStart": 3016,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L85",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L85",
             "lineEnd": 85,
             "lineStart": 85,
             "snippetSha256": "sha256:16c58fd4cf79529721f10063a691361f8bc434062c8f9caef29c7258f752df3b",
@@ -2174,7 +2174,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 3170,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L87",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L87",
             "lineEnd": 87,
             "lineStart": 87,
             "snippetSha256": "sha256:6d35155744f428aefc308397da65fc80630a481c3e8649e94ad28bc42449cdc5",
@@ -2206,7 +2206,7 @@
           "range": {
             "byteLength": 86,
             "byteStart": 3299,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L89",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L89",
             "lineEnd": 89,
             "lineStart": 89,
             "snippetSha256": "sha256:115602bebe4580f4341e1cdf291ac73e4a96424325ea49176c47e76acac500f2",
@@ -2227,7 +2227,7 @@
           "range": {
             "byteLength": 32,
             "byteStart": 3455,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L91",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L91",
             "lineEnd": 91,
             "lineStart": 91,
             "snippetSha256": "sha256:3a9f68dc7f6b2abc2b10df5a14669ecb5930c3cde987fd0b3a9bf64295012970",
@@ -2259,7 +2259,7 @@
           "range": {
             "byteLength": 81,
             "byteStart": 3570,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L93",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L93",
             "lineEnd": 93,
             "lineStart": 93,
             "snippetSha256": "sha256:ac72848f598e7d7c7d3262d17bd2d98dbfde9a2c41baf5b53cefa4e5f2c35ab6",
@@ -2291,7 +2291,7 @@
           "range": {
             "byteLength": 81,
             "byteStart": 3743,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L95",
             "lineEnd": 95,
             "lineStart": 95,
             "snippetSha256": "sha256:df2cd5060e90a833b0ce007d8fd264d9547a0a2c48554913828d3f58165c19dc",
@@ -2323,7 +2323,7 @@
           "range": {
             "byteLength": 83,
             "byteStart": 3911,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L97",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L97",
             "lineEnd": 97,
             "lineStart": 97,
             "snippetSha256": "sha256:fc7d5a8495a0b72438ba3dca92e1d06c626e80510f5b66513bd027edf4b69a5d",
@@ -2360,7 +2360,7 @@
           "range": {
             "byteLength": 84,
             "byteStart": 4100,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L99",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L99",
             "lineEnd": 99,
             "lineStart": 99,
             "snippetSha256": "sha256:c50299e180b36c0fd45a0870473056ab2179f77b2bee3e4c59e1adc77f2c479f",
@@ -2397,7 +2397,7 @@
           "range": {
             "byteLength": 89,
             "byteStart": 4260,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L101",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L101",
             "lineEnd": 101,
             "lineStart": 101,
             "snippetSha256": "sha256:3a0b2dcfb2c7521e4ac461466d8315b57ae71f366c0c41959881929e5d90ae36",
@@ -2424,7 +2424,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 4446,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L103",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L103",
             "lineEnd": 103,
             "lineStart": 103,
             "snippetSha256": "sha256:96164a05f38672d75e4f5f29a152f39fd963889091ef9fd47bf992aa32930c8b",
@@ -2451,7 +2451,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 4572,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L105",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L105",
             "lineEnd": 105,
             "lineStart": 105,
             "snippetSha256": "sha256:a014289d9c4f3eb989ad4f13d5f469c69334e96c978601587305df8826708bd5",
@@ -2478,7 +2478,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 4701,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L107",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L107",
             "lineEnd": 107,
             "lineStart": 107,
             "snippetSha256": "sha256:77b006685cb8af9f1293ca59b55b5e46834820643cab35697886851dd2a6f9f9",
@@ -2510,7 +2510,7 @@
           "range": {
             "byteLength": 75,
             "byteStart": 4824,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L109",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L109",
             "lineEnd": 109,
             "lineStart": 109,
             "snippetSha256": "sha256:b09b3aa8847171377c05d957823a1365f96cc3022efce1876d4a3b64be99a0c5",
@@ -2542,7 +2542,7 @@
           "range": {
             "byteLength": 68,
             "byteStart": 4993,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L111",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L111",
             "lineEnd": 111,
             "lineStart": 111,
             "snippetSha256": "sha256:72a9e486239a840636e7d94bf800f27878305884b2ae5dfd61fbf529829edd5d",
@@ -2574,7 +2574,7 @@
           "range": {
             "byteLength": 83,
             "byteStart": 5154,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L113",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L113",
             "lineEnd": 113,
             "lineStart": 113,
             "snippetSha256": "sha256:5eedb8716fbb5aada9fea9bc035ffc2c97d4b4a25351243f6bd1307113b419bd",
@@ -2606,7 +2606,7 @@
           "range": {
             "byteLength": 71,
             "byteStart": 5334,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L115",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L115",
             "lineEnd": 115,
             "lineStart": 115,
             "snippetSha256": "sha256:5b1d4833461d0319e3530514707c8f5744ac061e51a9c8c682f8ced3210624d0",
@@ -2633,7 +2633,7 @@
           "range": {
             "byteLength": 50,
             "byteStart": 5482,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L117",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L117",
             "lineEnd": 117,
             "lineStart": 117,
             "snippetSha256": "sha256:9f4e4d427c1dc4beef38d80a42c3839412e04019be195f8a21ad2946109cc20b",
@@ -2660,7 +2660,7 @@
           "range": {
             "byteLength": 36,
             "byteStart": 5614,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L119",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L119",
             "lineEnd": 119,
             "lineStart": 119,
             "snippetSha256": "sha256:6eec1f2530d351e8fc4c2b166b72722fb0e0994ae90bfe55876e2a24c8686ab3",
@@ -2687,7 +2687,7 @@
           "range": {
             "byteLength": 38,
             "byteStart": 5733,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L121",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L121",
             "lineEnd": 121,
             "lineStart": 121,
             "snippetSha256": "sha256:497cd47925e56e3960d2703ced86ee06ece242050b6f58013a2093427c33a3f9",
@@ -2724,7 +2724,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 5856,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L123",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L123",
             "lineEnd": 123,
             "lineStart": 123,
             "snippetSha256": "sha256:480ead6b058639413978e8f892cb844ac1973bfb1f31e925ceebd66c8c6dce55",
@@ -2751,7 +2751,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 5991,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L125",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L125",
             "lineEnd": 125,
             "lineStart": 125,
             "snippetSha256": "sha256:dea18b93cfa524c698768f520e96fb5656e091d54086acfadd92ff1a53ec0f1d",
@@ -2778,7 +2778,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 6109,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L127",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L127",
             "lineEnd": 127,
             "lineStart": 127,
             "snippetSha256": "sha256:4ddebef1e53542e848f33db6a6bbe6d71e9258cc5f918bcb29bb90ae25b2f129",
@@ -2810,7 +2810,7 @@
           "range": {
             "byteLength": 70,
             "byteStart": 6241,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L129",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L129",
             "lineEnd": 129,
             "lineStart": 129,
             "snippetSha256": "sha256:0cffbc9af6ef668cf6f3e876c8c3415ce7fad715e962213842f9561bcc3e5e1e",
@@ -2842,7 +2842,7 @@
           "range": {
             "byteLength": 111,
             "byteStart": 6390,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L131-L133",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L131-L133",
             "lineEnd": 133,
             "lineStart": 131,
             "snippetSha256": "sha256:dd4592f95ab7b4e094422c5ec994b9427e56ea0c2bbc0ad2ec4891c1e9e1e86b",
@@ -2874,7 +2874,7 @@
           "range": {
             "byteLength": 84,
             "byteStart": 6574,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L135",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L135",
             "lineEnd": 135,
             "lineStart": 135,
             "snippetSha256": "sha256:abd380c8a739d09ce33aa056df6157f2d878064beba580a948def9663a29436f",
@@ -2901,7 +2901,7 @@
           "range": {
             "byteLength": 41,
             "byteStart": 6733,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L137",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L137",
             "lineEnd": 137,
             "lineStart": 137,
             "snippetSha256": "sha256:f99578513a80bd796f3fdccf1975a51bef40a33678931d9e2143beefd821b6b2",
@@ -2980,7 +2980,7 @@
           "range": {
             "byteLength": 303,
             "byteStart": 6861,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L140-L150",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L140-L150",
             "lineEnd": 150,
             "lineStart": 140,
             "snippetSha256": "sha256:bbc830de739419249b6414232455b376beba6e703eaac6acc7ed6cb14ded2aaa",
@@ -3033,7 +3033,7 @@
           "range": {
             "byteLength": 176,
             "byteStart": 7226,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L152-L158",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L152-L158",
             "lineEnd": 158,
             "lineStart": 152,
             "snippetSha256": "sha256:128ff01c9374b96266b8cf625381574d3699ad3202de2cca54564278402d7858",
@@ -3092,7 +3092,7 @@
           "range": {
             "byteLength": 215,
             "byteStart": 7484,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L160-L167",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L160-L167",
             "lineEnd": 167,
             "lineStart": 160,
             "snippetSha256": "sha256:cb4408d42bf006dc25a5778c15d6212935954f4ca8039caa87c460d5ba12bd9a",
@@ -3175,7 +3175,7 @@
           "range": {
             "byteLength": 397,
             "byteStart": 7778,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L169-L180",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L169-L180",
             "lineEnd": 180,
             "lineStart": 169,
             "snippetSha256": "sha256:aabaf062de24a1e833961384bdce0fdca73280beccc868c4de56631eba7d7c60",
@@ -3252,7 +3252,7 @@
           "range": {
             "byteLength": 326,
             "byteStart": 8248,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L182-L192",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L182-L192",
             "lineEnd": 192,
             "lineStart": 182,
             "snippetSha256": "sha256:37e618c2f2bb3ca1ba85be5e150e37d8bcdc47bd2bc5ded294b0c5934cf9dbad",
@@ -3329,7 +3329,7 @@
           "range": {
             "byteLength": 301,
             "byteStart": 8651,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L194-L204",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L194-L204",
             "lineEnd": 204,
             "lineStart": 194,
             "snippetSha256": "sha256:ef850cb4389e63d1f951df86cafd5e0de00b684a9ca09c3ab00c06d4ff809767",
@@ -3400,7 +3400,7 @@
           "range": {
             "byteLength": 290,
             "byteStart": 9032,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L206-L215",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L206-L215",
             "lineEnd": 215,
             "lineStart": 206,
             "snippetSha256": "sha256:e12b62c944e204cf588a68670d86d124564454b8ff49eac4117240b3b41cba1f",
@@ -3477,7 +3477,7 @@
           "range": {
             "byteLength": 327,
             "byteStart": 9401,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L217-L227",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L217-L227",
             "lineEnd": 227,
             "lineStart": 217,
             "snippetSha256": "sha256:f61fb7f26f5cad9c188812ac19c01581770c40f9e627a6937b4b8920fbdcbda8",
@@ -3508,7 +3508,7 @@
           "range": {
             "byteLength": 60,
             "byteStart": 9790,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L230",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L230",
             "lineEnd": 230,
             "lineStart": 230,
             "snippetSha256": "sha256:00275f4449abdde09d6acf43405be8114f6e310d5f07a8e3db0236a4f0f9ee8d",
@@ -3576,7 +3576,7 @@
           "range": {
             "byteLength": 300,
             "byteStart": 9926,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L232-L239",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L232-L239",
             "lineEnd": 239,
             "lineStart": 232,
             "snippetSha256": "sha256:68dc390b31c22b4d59bbd5c13bcf273a83fe0d64a5999284ad218e913dd16496",
@@ -3624,7 +3624,7 @@
           "range": {
             "byteLength": 114,
             "byteStart": 10300,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L241-L242",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L241-L242",
             "lineEnd": 242,
             "lineStart": 241,
             "snippetSha256": "sha256:2b2d06f84a73ce2ed1b184e50cccea7eb37e05750810e49b5664010d4dbad94a",
@@ -3667,7 +3667,7 @@
           "range": {
             "byteLength": 85,
             "byteStart": 10474,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L244",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L244",
             "lineEnd": 244,
             "lineStart": 244,
             "snippetSha256": "sha256:efe4baed4413ad26be2505156c7ca7409c0ebba545af6b588ceac9e41d09c989",
@@ -3712,7 +3712,7 @@
           "range": {
             "byteLength": 129,
             "byteStart": 10655,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L246-L248",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L246-L248",
             "lineEnd": 248,
             "lineStart": 246,
             "snippetSha256": "sha256:4ce637c8ce769d8bbaa7b9188e322a5e4d25af2fd3f4fd0559044c405fe2ff9f",
@@ -3762,7 +3762,7 @@
           "range": {
             "byteLength": 145,
             "byteStart": 10852,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L250-L253",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L250-L253",
             "lineEnd": 253,
             "lineStart": 250,
             "snippetSha256": "sha256:1100637540d21cb89025de222e5b3c00b1e52c38dd2ae3e35dbeb5dc042e76bf",
@@ -3806,7 +3806,7 @@
           "range": {
             "byteLength": 96,
             "byteStart": 11070,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L255",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L255",
             "lineEnd": 255,
             "lineStart": 255,
             "snippetSha256": "sha256:8f743973983e03db4cfc0a2f343fcbf1b53891fd0d77c846893d2e21d6ba2b75",
@@ -3855,7 +3855,7 @@
           "range": {
             "byteLength": 133,
             "byteStart": 11233,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L257-L260",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L257-L260",
             "lineEnd": 260,
             "lineStart": 257,
             "snippetSha256": "sha256:7aa5fff38749c57174b763c01d5f7ca64485013e34ecce07eb39fbebb9e97217",
@@ -3900,7 +3900,7 @@
           "range": {
             "byteLength": 129,
             "byteStart": 11432,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L262-L265",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L262-L265",
             "lineEnd": 265,
             "lineStart": 262,
             "snippetSha256": "sha256:1f77851be3f5ddf41f04506c53e24d2bf2cfd23f88db68901857d9685c8befc0",
@@ -3950,7 +3950,7 @@
           "range": {
             "byteLength": 154,
             "byteStart": 11623,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L267-L270",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L267-L270",
             "lineEnd": 270,
             "lineStart": 267,
             "snippetSha256": "sha256:0dc2d7ef0157360499cbd1df9c20980ab50c951f5cb19451c023cdd39b839c4f",
@@ -3995,7 +3995,7 @@
           "range": {
             "byteLength": 128,
             "byteStart": 11840,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L272-L275",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L272-L275",
             "lineEnd": 275,
             "lineStart": 272,
             "snippetSha256": "sha256:30a31459e1b1d6c336f262fe84569f86c9af0f5c66f7f03b4063e40917923b2b",
@@ -4074,7 +4074,7 @@
           "range": {
             "byteLength": 312,
             "byteStart": 12061,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L277-L287",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L277-L287",
             "lineEnd": 287,
             "lineStart": 277,
             "snippetSha256": "sha256:8c3e99060ffa1552d2ce78cf550ac0ca6f6a61d10fbbd5951578bee13ab5beaa",
@@ -4128,7 +4128,7 @@
           "range": {
             "byteLength": 180,
             "byteStart": 12457,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L289-L294",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L289-L294",
             "lineEnd": 294,
             "lineStart": 289,
             "snippetSha256": "sha256:e4852ab00286c4edd307832891f247fe86c2d4c163fb5eb8b49a109f449ba5b4",
@@ -4153,7 +4153,7 @@
               "range": {
                 "byteLength": 11,
                 "byteStart": 570,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L23",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L23",
                 "lineEnd": 23,
                 "lineStart": 23,
                 "snippetSha256": "sha256:2fb202db9c7a3a9f0c11ddb44b73809f1647c5f2e2fc7aeabd6992227d37ef5a",
@@ -4169,7 +4169,7 @@
               "range": {
                 "byteLength": 16,
                 "byteStart": 591,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L24",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L24",
                 "lineEnd": 24,
                 "lineStart": 24,
                 "snippetSha256": "sha256:1e935f379bf450fa4ee3bcb2a231a791a3e61261eff645a3d261d411b32490b4",
@@ -4185,7 +4185,7 @@
               "range": {
                 "byteLength": 14,
                 "byteStart": 617,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L25",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L25",
                 "lineEnd": 25,
                 "lineStart": 25,
                 "snippetSha256": "sha256:ec8786553055dce19a7255d9ef811ff793abfac682c292280d13734e3bdbaeb6",
@@ -4201,7 +4201,7 @@
               "range": {
                 "byteLength": 23,
                 "byteStart": 641,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L26",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L26",
                 "lineEnd": 26,
                 "lineStart": 26,
                 "snippetSha256": "sha256:428ac33875871ffd15d5a16b16794c6c27c9c6befa44f7cd4200b42d80549df0",
@@ -4217,7 +4217,7 @@
               "range": {
                 "byteLength": 18,
                 "byteStart": 674,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L27",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L27",
                 "lineEnd": 27,
                 "lineStart": 27,
                 "snippetSha256": "sha256:0fe28e2ff6589a5ac2aedf81aa63bf299af8658e08f9e184be22747e44b949f5",
@@ -4233,7 +4233,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 702,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L28",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L28",
                 "lineEnd": 28,
                 "lineStart": 28,
                 "snippetSha256": "sha256:5a61db0041806f35701214028e0983f8a5a6814d8d757a27819d0b1fc11fa65b",
@@ -4248,7 +4248,7 @@
           "range": {
             "byteLength": 192,
             "byteStart": 537,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L22-L29",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L22-L29",
             "lineEnd": 29,
             "lineStart": 22,
             "snippetSha256": "sha256:9bb34343c91750ddff77a2155f7a90f89e0cef32e7109297b368b459002d5df4",
@@ -4264,7 +4264,7 @@
               "range": {
                 "byteLength": 12,
                 "byteStart": 855,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L33",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L33",
                 "lineEnd": 33,
                 "lineStart": 33,
                 "snippetSha256": "sha256:615fa9e7e391617ec09b175769dd2e411df843553b10c24c0eae68f96fbaf462",
@@ -4280,7 +4280,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 877,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L34",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L34",
                 "lineEnd": 34,
                 "lineStart": 34,
                 "snippetSha256": "sha256:a16d2ae8fac2dc657952e66e801842554c6e3c5cd96d801f0aa4e2c501814fc7",
@@ -4296,7 +4296,7 @@
               "range": {
                 "byteLength": 40,
                 "byteStart": 909,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L35",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L35",
                 "lineEnd": 35,
                 "lineStart": 35,
                 "snippetSha256": "sha256:ca0c4206c6917103674d00a8d5d541efbed9355d0b8539b794750981506a8803",
@@ -4312,7 +4312,7 @@
               "range": {
                 "byteLength": 44,
                 "byteStart": 959,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L36",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L36",
                 "lineEnd": 36,
                 "lineStart": 36,
                 "snippetSha256": "sha256:405b12819547a552f7f3fc523877b4b75305e93ee02948cf398959d977c94fa6",
@@ -4328,7 +4328,7 @@
               "range": {
                 "byteLength": 16,
                 "byteStart": 1013,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L37",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L37",
                 "lineEnd": 37,
                 "lineStart": 37,
                 "snippetSha256": "sha256:f19cb6532ff58e32f1ad177e9b6891c2c9c5f50745584bfc1637914e17157ad7",
@@ -4344,7 +4344,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 1039,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L38",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L38",
                 "lineEnd": 38,
                 "lineStart": 38,
                 "snippetSha256": "sha256:e187621144268b35122db4eb5f6ca5fd0fa02649db2c2ff714454ea82fea3971",
@@ -4360,7 +4360,7 @@
               "range": {
                 "byteLength": 25,
                 "byteStart": 1071,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L39",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L39",
                 "lineEnd": 39,
                 "lineStart": 39,
                 "snippetSha256": "sha256:367856afc0cc7a9767416af90a04edefe140e699eecdedfd5b470becbcdd2056",
@@ -4375,7 +4375,7 @@
           "range": {
             "byteLength": 283,
             "byteStart": 820,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L32-L40",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L32-L40",
             "lineEnd": 40,
             "lineStart": 32,
             "snippetSha256": "sha256:cfa392c317208fd15552e19779e35eb9b531e881470ee3ca86318a3286bd1cb7",
@@ -4391,7 +4391,7 @@
               "range": {
                 "byteLength": 12,
                 "byteStart": 1213,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L44",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L44",
                 "lineEnd": 44,
                 "lineStart": 44,
                 "snippetSha256": "sha256:68c8f50908c1efde0b8e1d4d29a9e655cfcab08d07faf6b06b91789f1223ce05",
@@ -4407,7 +4407,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 1235,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L45",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L45",
                 "lineEnd": 45,
                 "lineStart": 45,
                 "snippetSha256": "sha256:665c4262bed22626fad0b734034a01de242d5e4cd3f1c806969ba9ba5b3a2f9b",
@@ -4423,7 +4423,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 1267,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L46",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L46",
                 "lineEnd": 46,
                 "lineStart": 46,
                 "snippetSha256": "sha256:99b7455dc74ab5edadcb1cdfbe0f756882be1a0ed636e410a10c7bb32830a31c",
@@ -4439,7 +4439,7 @@
               "range": {
                 "byteLength": 24,
                 "byteStart": 1297,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L47",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L47",
                 "lineEnd": 47,
                 "lineStart": 47,
                 "snippetSha256": "sha256:b09f079700b4d623d0c87e9360aed02259885da0fb1639b05f9942f9a413416d",
@@ -4455,7 +4455,7 @@
               "range": {
                 "byteLength": 26,
                 "byteStart": 1331,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L48",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L48",
                 "lineEnd": 48,
                 "lineStart": 48,
                 "snippetSha256": "sha256:7d5a4f4593851e922b28d5b88d7ea6637b27e46aa820cbe053751f8c4b7688fb",
@@ -4471,7 +4471,7 @@
               "range": {
                 "byteLength": 19,
                 "byteStart": 1367,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L49",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L49",
                 "lineEnd": 49,
                 "lineStart": 49,
                 "snippetSha256": "sha256:d82a9ff5b28bf1f1ce56aa0f6a2b4111f57b04862be55f195ad589a1f3fef6f4",
@@ -4486,7 +4486,7 @@
           "range": {
             "byteLength": 212,
             "byteStart": 1181,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L43-L50",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L43-L50",
             "lineEnd": 50,
             "lineStart": 43,
             "snippetSha256": "sha256:8704664c8209a985aaaa2a8e580c111a87d9d9f39035d1967e6a327539282b4d",
@@ -4502,7 +4502,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 1512,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L54",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L54",
                 "lineEnd": 54,
                 "lineStart": 54,
                 "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
@@ -4518,7 +4518,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 1542,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L55",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L55",
                 "lineEnd": 55,
                 "lineStart": 55,
                 "snippetSha256": "sha256:3978b5acb6899597c4a6f59b9f64917317d63766942cfcb68a340a1ce6c0586d",
@@ -4534,7 +4534,7 @@
               "range": {
                 "byteLength": 13,
                 "byteStart": 1567,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L56",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L56",
                 "lineEnd": 56,
                 "lineStart": 56,
                 "snippetSha256": "sha256:8564827c1f7f42fa027684a6c3b150798262726908409a46935c582691c56eaa",
@@ -4550,7 +4550,7 @@
               "range": {
                 "byteLength": 18,
                 "byteStart": 1590,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L57",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L57",
                 "lineEnd": 57,
                 "lineStart": 57,
                 "snippetSha256": "sha256:2fcb69f90b0960b3247543f1382dfcc7e6395c130aaa2841dbd0d0c4ebf7e65b",
@@ -4566,7 +4566,7 @@
               "range": {
                 "byteLength": 27,
                 "byteStart": 1618,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L58",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L58",
                 "lineEnd": 58,
                 "lineStart": 58,
                 "snippetSha256": "sha256:36f1eea28a8a19c441f6867d59a84671d839e568ff65aff38a16d8c1c7c74d8a",
@@ -4582,7 +4582,7 @@
               "range": {
                 "byteLength": 23,
                 "byteStart": 1655,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L59",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L59",
                 "lineEnd": 59,
                 "lineStart": 59,
                 "snippetSha256": "sha256:52ea963e55d230158ea363ae666ba8e3b0da42e90e73d4f9f7a837206c3276c8",
@@ -4598,7 +4598,7 @@
               "range": {
                 "byteLength": 18,
                 "byteStart": 1688,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L60",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L60",
                 "lineEnd": 60,
                 "lineStart": 60,
                 "snippetSha256": "sha256:8b8d0a42b2665dda55eb1a50a178b4117a4d2128fdefdb38e7cf3b6714aa117a",
@@ -4614,7 +4614,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 1716,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L61",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L61",
                 "lineEnd": 61,
                 "lineStart": 61,
                 "snippetSha256": "sha256:1e6bc9985a06dbc427003f0893db68da2be9e213e2b049b6f8d27b21a8d82578",
@@ -4630,7 +4630,7 @@
               "range": {
                 "byteLength": 23,
                 "byteStart": 1741,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L62",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L62",
                 "lineEnd": 62,
                 "lineStart": 62,
                 "snippetSha256": "sha256:2724af7d714a42ce733b5be373a7289bb68c79953ec32980d2671c3a4cf10b6f",
@@ -4646,7 +4646,7 @@
               "range": {
                 "byteLength": 19,
                 "byteStart": 1774,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L63",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L63",
                 "lineEnd": 63,
                 "lineStart": 63,
                 "snippetSha256": "sha256:e081491bff05923c57957798809b7c61694209f4d3007db647c3db912f60eb8a",
@@ -4662,7 +4662,7 @@
               "range": {
                 "byteLength": 26,
                 "byteStart": 1803,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L64",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L64",
                 "lineEnd": 64,
                 "lineStart": 64,
                 "snippetSha256": "sha256:d395ef5d3abb89e5c9e3619e431f7eefc27afdec222950306be9849777b01ce1",
@@ -4678,7 +4678,7 @@
               "range": {
                 "byteLength": 14,
                 "byteStart": 1839,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L65",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L65",
                 "lineEnd": 65,
                 "lineStart": 65,
                 "snippetSha256": "sha256:e4833e5619cacc35c47c81b7623e259a6bbfec683f0385324a17234129a831ce",
@@ -4693,7 +4693,7 @@
           "range": {
             "byteLength": 377,
             "byteStart": 1483,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L53-L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L53-L66",
             "lineEnd": 66,
             "lineStart": 53,
             "snippetSha256": "sha256:b00b21cc63a8f3bff29bbb56b3459fdf747a48016416b82dbab1a94f339975ff",
@@ -4729,7 +4729,7 @@
     "range": {
       "byteLength": 12431,
       "byteStart": 208,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamMintManager.sol#L9-L295",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintManager.sol#L9-L295",
       "lineEnd": 295,
       "lineStart": 9,
       "snippetSha256": "sha256:3cff1a2c1d735d87dcd5c7fd23dfb595c12f42dfccfd222b107a4cf95abdc7fb",

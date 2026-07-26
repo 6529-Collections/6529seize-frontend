@@ -84,7 +84,7 @@
           "range": {
             "byteLength": 909,
             "byteStart": 802,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L20-L34",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L20-L34",
             "lineEnd": 34,
             "lineStart": 20,
             "snippetSha256": "sha256:26ba1fd17b5f2d01397229620abbefaed36c22ac7816a281afbd2e6b91f34536",
@@ -111,7 +111,7 @@
           "range": {
             "byteLength": 1214,
             "byteStart": 1717,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L36-L70",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L36-L70",
             "lineEnd": 70,
             "lineStart": 36,
             "snippetSha256": "sha256:9f5ead875bc66cf796cf32cc0f1a0f0eb9a61262490c8ea2c5c72f7ac493f691",
@@ -138,7 +138,7 @@
           "range": {
             "byteLength": 862,
             "byteStart": 2937,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L72-L96",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L72-L96",
             "lineEnd": 96,
             "lineStart": 72,
             "snippetSha256": "sha256:3321f5921f03ecef6bd009adbc1f46c8898b4bd48da94c2c62e2da3a987dc9e1",
@@ -165,7 +165,7 @@
           "range": {
             "byteLength": 357,
             "byteStart": 3805,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L98-L103",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L98-L103",
             "lineEnd": 103,
             "lineStart": 98,
             "snippetSha256": "sha256:81a97a88b2de3ff759b98c9bdfa3ad025f4e0d69d48e2c981638bd1ed6ce766f",
@@ -192,7 +192,7 @@
           "range": {
             "byteLength": 1231,
             "byteStart": 4168,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L105-L134",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L105-L134",
             "lineEnd": 134,
             "lineStart": 105,
             "snippetSha256": "sha256:a8c918bf2d2fd1a08b419a728121e891af53d695f6c89409a371ab6ac6079ec2",
@@ -230,7 +230,7 @@
           "range": {
             "byteLength": 132,
             "byteStart": 5405,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L136-L138",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L136-L138",
             "lineEnd": 138,
             "lineStart": 136,
             "snippetSha256": "sha256:c47975bbb0b64fada4896ed4a1bea321189a5c1b427dad7df8a6440626e7d6e6",
@@ -279,7 +279,7 @@
           "range": {
             "byteLength": 481,
             "byteStart": 5543,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L140-L151",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L140-L151",
             "lineEnd": 151,
             "lineStart": 140,
             "snippetSha256": "sha256:bdac8eb96a027edc46dac91c92f05fa1864918cdd7b2c8f07b447630a314ea15",
@@ -319,7 +319,7 @@
           "range": {
             "byteLength": 240,
             "byteStart": 6030,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L153-L158",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L153-L158",
             "lineEnd": 158,
             "lineStart": 153,
             "snippetSha256": "sha256:42c30597dfca1c5cdfec5c2f3544a0b203a3f1a1d21a9abe1a05805db04d6ee8",
@@ -360,7 +360,7 @@
           "range": {
             "byteLength": 157,
             "byteStart": 6276,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L160-L163",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L160-L163",
             "lineEnd": 163,
             "lineStart": 160,
             "snippetSha256": "sha256:600f6d416e5f5432fc6d4901e9bf277257d0a551f262eb7d2ef5ce5642d96384",
@@ -406,7 +406,7 @@
           "range": {
             "byteLength": 370,
             "byteStart": 6439,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L165-L173",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L165-L173",
             "lineEnd": 173,
             "lineStart": 165,
             "snippetSha256": "sha256:d60840bde8bf416a784b4f455574109150c45837db0633a3b6081a9316ea66b2",
@@ -446,7 +446,7 @@
           "range": {
             "byteLength": 142,
             "byteStart": 6815,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L175-L178",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L175-L178",
             "lineEnd": 178,
             "lineStart": 175,
             "snippetSha256": "sha256:d6af2cee67be55b91c46afe15a3baa95954c87ee2bc75d3203858594f9faf5ad",
@@ -470,7 +470,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 533,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L14",
             "lineEnd": 14,
             "lineStart": 14,
             "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
@@ -482,7 +482,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 574,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L14",
             "lineEnd": 14,
             "lineStart": 14,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -500,7 +500,7 @@
           "range": {
             "byteLength": 37,
             "byteStart": 581,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
@@ -512,7 +512,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 617,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -530,7 +530,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 624,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
@@ -542,7 +542,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 658,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
@@ -560,7 +560,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 679,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
@@ -572,7 +572,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 720,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
@@ -590,7 +590,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 741,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:3f79eed727fcca59b0cd8f66c3c45b70cf3f6f8a5d18d93a88bbe6a0e15e6f61",
@@ -602,7 +602,7 @@
           "valueRange": {
             "byteLength": 14,
             "byteStart": 781,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:5fe29a76e2629947948415ecda7d1487fdc88957163265742345ce64f7515e5f",
@@ -649,7 +649,7 @@
     "range": {
       "byteLength": 6514,
       "byteStart": 445,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamCustomErrorNegative.t.sol#L13-L179",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCustomErrorNegative.t.sol#L13-L179",
       "lineEnd": 179,
       "lineStart": 13,
       "snippetSha256": "sha256:68f1016a30c92fd61316d3a4ca265b98564f6a02e1ee9b7d899c7a3fdced7f37",

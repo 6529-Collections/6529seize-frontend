@@ -475,7 +475,7 @@
           "range": {
             "byteLength": 113,
             "byteStart": 1326,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L45-L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L45-L48",
             "lineEnd": 48,
             "lineStart": 45,
             "snippetSha256": "sha256:358584d95ebece245d234a5407f5552c1c6f100382112fb1f03f7fd1308accfa",
@@ -514,7 +514,7 @@
           "range": {
             "byteLength": 300,
             "byteStart": 1506,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L53-L58",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L53-L58",
             "lineEnd": 58,
             "lineStart": 53,
             "snippetSha256": "sha256:b1d830826416350c26f2d717716de10df59fd1c54b8bc1fb7616661e5efeb3d5",
@@ -553,7 +553,7 @@
           "range": {
             "byteLength": 204,
             "byteStart": 1865,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L63-L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L63-L66",
             "lineEnd": 66,
             "lineStart": 63,
             "snippetSha256": "sha256:addc7490b6a35956008c2a20e90a1f2082825ce38b26f38345f415e5bd8830ee",
@@ -592,7 +592,7 @@
           "range": {
             "byteLength": 219,
             "byteStart": 2126,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L71-L75",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L71-L75",
             "lineEnd": 75,
             "lineStart": 71,
             "snippetSha256": "sha256:b3ce102c2e4893f2b368b9bb0dc28840ed2a1f4f1346cd3a5aad2599148a3845",
@@ -626,7 +626,7 @@
           "range": {
             "byteLength": 98,
             "byteStart": 2407,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L80-L82",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L80-L82",
             "lineEnd": 82,
             "lineStart": 80,
             "snippetSha256": "sha256:b6c0a6f08e1f6b3446ab122464431f007d3461fadd3fa5683bc950df42756904",
@@ -660,7 +660,7 @@
           "range": {
             "byteLength": 102,
             "byteStart": 2569,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L87-L89",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L87-L89",
             "lineEnd": 89,
             "lineStart": 87,
             "snippetSha256": "sha256:239f4ed8512c2974c84069538de3b55ba32bb601a4bef28553fe7727cd258f31",
@@ -700,7 +700,7 @@
           "range": {
             "byteLength": 276,
             "byteStart": 2737,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L94-L99",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L94-L99",
             "lineEnd": 99,
             "lineStart": 94,
             "snippetSha256": "sha256:33ad46f8c61cd801f18d2f900c2fbe0e80c69148b18691ac49392ded2246c46a",
@@ -734,7 +734,7 @@
           "range": {
             "byteLength": 92,
             "byteStart": 3255,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L106-L108",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L106-L108",
             "lineEnd": 108,
             "lineStart": 106,
             "snippetSha256": "sha256:6ea55c83c030f5670de36f17b7a7e3c17045190ecc91246b728ed4210ad8621f",
@@ -772,7 +772,7 @@
           "range": {
             "byteLength": 406,
             "byteStart": 3404,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L113-L123",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L113-L123",
             "lineEnd": 123,
             "lineStart": 113,
             "snippetSha256": "sha256:8b1e89b8cdb5dc234ed0d63b1efa6482b6b81e1ed2142e06bc36eaa4b5c8a85e",
@@ -811,7 +811,7 @@
           "range": {
             "byteLength": 167,
             "byteStart": 3871,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L128-L132",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L128-L132",
             "lineEnd": 132,
             "lineStart": 128,
             "snippetSha256": "sha256:c95b300edc0c588e1d89591561abbe8c922ef9a1c0b7b2b6fdf4dbdf321dadae",
@@ -849,7 +849,7 @@
           "range": {
             "byteLength": 153,
             "byteStart": 4105,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L137-L139",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L137-L139",
             "lineEnd": 139,
             "lineStart": 137,
             "snippetSha256": "sha256:e51422259a3724d476c9837f42949b4e6689b52a439b7338dbe7debfb13802f2",
@@ -893,7 +893,7 @@
           "range": {
             "byteLength": 162,
             "byteStart": 4324,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L144-L146",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L144-L146",
             "lineEnd": 146,
             "lineStart": 144,
             "snippetSha256": "sha256:0ff3930cc24dcdd4517bb8d02cce7ba4aa4cf08f99cc5a4378b3bf3b774dbd8c",
@@ -936,7 +936,7 @@
           "range": {
             "byteLength": 296,
             "byteStart": 4548,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L151-L156",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L151-L156",
             "lineEnd": 156,
             "lineStart": 151,
             "snippetSha256": "sha256:b8b6b8be11255efb142f123f76f2d1ba27158038f5fa9c5ba0e1011240e219e8",
@@ -979,7 +979,7 @@
           "range": {
             "byteLength": 149,
             "byteStart": 4910,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L161-L163",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L161-L163",
             "lineEnd": 163,
             "lineStart": 161,
             "snippetSha256": "sha256:e243b4db49df3c53edbeac3b8104239e4115b028e6ccb2156905d57f7d25b42a",
@@ -1028,7 +1028,7 @@
           "range": {
             "byteLength": 276,
             "byteStart": 5125,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L168-L171",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L168-L171",
             "lineEnd": 171,
             "lineStart": 168,
             "snippetSha256": "sha256:78297cf10904c4206c15f1c2f8320cb24ad6a60e700c21b1c06a040613560921",
@@ -1077,7 +1077,7 @@
           "range": {
             "byteLength": 267,
             "byteStart": 6262,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L191-L194",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L191-L194",
             "lineEnd": 194,
             "lineStart": 191,
             "snippetSha256": "sha256:7f9b524e7a70f201d4f52b1036724ca5188c691a955621d20ab6e3154df4c3d0",
@@ -1116,7 +1116,7 @@
           "range": {
             "byteLength": 115,
             "byteStart": 6638,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L199-L201",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L199-L201",
             "lineEnd": 201,
             "lineStart": 199,
             "snippetSha256": "sha256:f0b32c87960a15f428d0b854ecf6a82709505a0f986d4170e5dcf7136c6e4e44",
@@ -1155,7 +1155,7 @@
           "range": {
             "byteLength": 126,
             "byteStart": 7056,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L211-L213",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L211-L213",
             "lineEnd": 213,
             "lineStart": 211,
             "snippetSha256": "sha256:72365a78c95a435b42b34bb3b562f6b38d1e6500e8efcf59416203cf660cbf97",
@@ -1199,7 +1199,7 @@
           "range": {
             "byteLength": 261,
             "byteStart": 7340,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L222-L225",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L222-L225",
             "lineEnd": 225,
             "lineStart": 222,
             "snippetSha256": "sha256:47b82875c8b0a3c940350e4024c9062a1cbb7ac1ceb0d9599e56062808455872",
@@ -1237,7 +1237,7 @@
           "range": {
             "byteLength": 108,
             "byteStart": 7931,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L237-L239",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L237-L239",
             "lineEnd": 239,
             "lineStart": 237,
             "snippetSha256": "sha256:f92d2a614398e614c1053ba5e09d4a979b7e099ee6c913592f3259fe81046563",
@@ -1281,7 +1281,7 @@
           "range": {
             "byteLength": 279,
             "byteStart": 8260,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L245-L251",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L245-L251",
             "lineEnd": 251,
             "lineStart": 245,
             "snippetSha256": "sha256:f1fffff0abccb075b97c10ca271567a8bc006cc470040dd33ff29adbdbf8ab97",
@@ -1319,7 +1319,7 @@
           "range": {
             "byteLength": 920,
             "byteStart": 8861,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L265-L287",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L265-L287",
             "lineEnd": 287,
             "lineStart": 265,
             "snippetSha256": "sha256:dd4bd8c94cc6fbe9566101ef3edc225dd8870513a781c77e481d3562b9a0f48f",
@@ -1352,7 +1352,7 @@
           "range": {
             "byteLength": 762,
             "byteStart": 10107,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L300-L321",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L300-L321",
             "lineEnd": 321,
             "lineStart": 300,
             "snippetSha256": "sha256:6f2457f8de8e9572508cb454a29bba41ad6fcfc3100d69169c3568ad95f17fd0",
@@ -1395,7 +1395,7 @@
           "range": {
             "byteLength": 1203,
             "byteStart": 11193,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L334-L360",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L334-L360",
             "lineEnd": 360,
             "lineStart": 334,
             "snippetSha256": "sha256:36fc1bba68644500919ccbddf4713f8beea8438bde0b5324684d64630be0486d",
@@ -1433,7 +1433,7 @@
           "range": {
             "byteLength": 171,
             "byteStart": 12508,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L367-L370",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L367-L370",
             "lineEnd": 370,
             "lineStart": 367,
             "snippetSha256": "sha256:c79ce538206260b36a2cbe60578620a3ee21f82d6fde2a3e0b8b37ae8168cf92",
@@ -1476,7 +1476,7 @@
           "range": {
             "byteLength": 277,
             "byteStart": 12815,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L377-L381",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L377-L381",
             "lineEnd": 381,
             "lineStart": 377,
             "snippetSha256": "sha256:39e870cc06e2f3d70a16c8506ddd9b4166cbe442f24294070846d17cd21853d9",
@@ -1509,7 +1509,7 @@
           "range": {
             "byteLength": 133,
             "byteStart": 13176,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L386-L388",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L386-L388",
             "lineEnd": 388,
             "lineStart": 386,
             "snippetSha256": "sha256:62f3eb5b3c18a16f3eef0de84d35611a0e911b8a44eb51003eae64f0da86c0d3",
@@ -1564,7 +1564,7 @@
           "range": {
             "byteLength": 831,
             "byteStart": 13861,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L400-L422",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L400-L422",
             "lineEnd": 422,
             "lineStart": 400,
             "snippetSha256": "sha256:b1f6b2295799d0376139b5b2fc188ddb2415e597c6b97b38c53455e0bcf2b7a5",
@@ -1612,7 +1612,7 @@
           "range": {
             "byteLength": 116,
             "byteStart": 15408,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L438",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L438",
             "lineEnd": 438,
             "lineStart": 438,
             "snippetSha256": "sha256:8f0bd57dfb10c0e64c4727b53d9872318dedbe5fadfb96cc71caea137eef18d0",
@@ -1660,7 +1660,7 @@
           "range": {
             "byteLength": 115,
             "byteStart": 16230,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L454",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L454",
             "lineEnd": 454,
             "lineStart": 454,
             "snippetSha256": "sha256:a9694c44db17a3b28510b2c3c6c510af61e2304e067ea6c5ea175843b45ffc59",
@@ -1698,7 +1698,7 @@
           "range": {
             "byteLength": 121,
             "byteStart": 16818,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L464-L466",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L464-L466",
             "lineEnd": 466,
             "lineStart": 464,
             "snippetSha256": "sha256:4131b2636a04c0b3ffd4589dee44a5c5f43c13de12336ec54c15301b4a7f22fe",
@@ -1722,7 +1722,7 @@
           "range": {
             "byteLength": 20,
             "byteStart": 712,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:ba735044bb6823009002bed6208aa9ee1c391a3de1d5855a9eeaea27b9045a22",
@@ -1744,7 +1744,7 @@
           "range": {
             "byteLength": 22,
             "byteStart": 759,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L28",
             "lineEnd": 28,
             "lineStart": 28,
             "snippetSha256": "sha256:6147e8c309e4abcadd4af780b2ed228861aca43594706738ef4b5709a7e6ecaf",
@@ -1766,7 +1766,7 @@
           "range": {
             "byteLength": 43,
             "byteStart": 834,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L31",
             "lineEnd": 31,
             "lineStart": 31,
             "snippetSha256": "sha256:6213927b02c849eebd4dba3a69093166a3f0f3187573c8d53e6f9ae9489cbc58",
@@ -1788,7 +1788,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 928,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L34",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L34",
             "lineEnd": 34,
             "lineStart": 34,
             "snippetSha256": "sha256:de2a2edad95b876e70ed4e6a863bed608470b7f0bce7f1439d4523860a995db7",
@@ -1810,7 +1810,7 @@
           "range": {
             "byteLength": 51,
             "byteStart": 1029,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L37",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L37",
             "lineEnd": 37,
             "lineStart": 37,
             "snippetSha256": "sha256:e5688b62e15f665617fd12365e4de1edb5f046d5617e31bdc0c53b6c9f6c7477",
@@ -1832,7 +1832,7 @@
           "range": {
             "byteLength": 71,
             "byteStart": 1135,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L40",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L40",
             "lineEnd": 40,
             "lineStart": 40,
             "snippetSha256": "sha256:b030161dfcc7da7a92dcd0413da4a8f7a3242891fd40e83f228314b535c262ff",
@@ -1894,7 +1894,7 @@
     "range": {
       "byteLength": 16377,
       "byteStart": 564,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/ERC721.sol#L20-L467",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L20-L467",
       "lineEnd": 467,
       "lineStart": 20,
       "snippetSha256": "sha256:2c5b7aa7f7dad5afae728d0d0e6068a42b71679d50b4743a28043668e0ba93c0",

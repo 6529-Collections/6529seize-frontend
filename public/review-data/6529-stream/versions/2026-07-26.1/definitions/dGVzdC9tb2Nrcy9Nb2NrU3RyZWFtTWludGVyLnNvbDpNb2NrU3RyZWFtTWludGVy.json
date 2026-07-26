@@ -585,7 +585,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 158,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L7",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L7",
             "lineEnd": 7,
             "lineStart": 7,
             "snippetSha256": "sha256:7c9afc5607992186b9a96e799609c7c23f984499a3fdbde421779c23b1450ba6",
@@ -619,7 +619,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 207,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L9",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L9",
             "lineEnd": 9,
             "lineStart": 9,
             "snippetSha256": "sha256:d2ba9aefdfa74071094b0e799ae572c977b16e63669e43e5d2ccfe7e1d54d2b3",
@@ -653,7 +653,7 @@
           "range": {
             "byteLength": 27,
             "byteStart": 241,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L10",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L10",
             "lineEnd": 10,
             "lineStart": 10,
             "snippetSha256": "sha256:bca52b61680ed5312439ba6746e71085f08fc30571e36c3038275f4f3024f520",
@@ -687,7 +687,7 @@
           "range": {
             "byteLength": 23,
             "byteStart": 274,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L11",
             "lineEnd": 11,
             "lineStart": 11,
             "snippetSha256": "sha256:0d05edfeee0f46980c5f2e8b58be58a14bd236b5d2992576a2245ecef377dec9",
@@ -721,7 +721,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 303,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L12",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L12",
             "lineEnd": 12,
             "lineStart": 12,
             "snippetSha256": "sha256:46fcc045e47acdb78e50990cd159ee39e78a4e3e66bb04d79036c8c5683e3466",
@@ -755,7 +755,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 340,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L13",
             "lineEnd": 13,
             "lineStart": 13,
             "snippetSha256": "sha256:62f47abadb29d7e320b1046423c6dc9cb094d6e0f9e6015e93687902aee39386",
@@ -796,7 +796,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 379,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L14",
             "lineEnd": 14,
             "lineStart": 14,
             "snippetSha256": "sha256:1588fe79f7b27d03b77c4ce0890082606bed05efc1a5b2a486e9aaec867092e5",
@@ -837,7 +837,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 416,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:7bf15b8cfe87eab12f175ff23f51cfcbe324441bb984acccf58d5987e7f56d58",
@@ -878,7 +878,7 @@
           "range": {
             "byteLength": 26,
             "byteStart": 452,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:b21e84c42dabf41bd9f6b4ffeb2c4b8640743bbfb5d31700fcd390fc736994e6",
@@ -919,7 +919,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 484,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:b61221094fcf64929b99b64182f3ca8c9ff84ddf5884f6174838c39793e7e693",
@@ -953,7 +953,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 536,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:8057720948667a4a9c98a7383b7111017f062e7fe4258a7399280cd52e84e799",
@@ -987,7 +987,7 @@
           "range": {
             "byteLength": 38,
             "byteStart": 576,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:71e3b56ddf26028366e5e5e1c8314474f23d6f8507ad947fa8e95f0e3d5e283b",
@@ -1021,7 +1021,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 621,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:98b473a7107e2804a22d7fb4090b5eae4d0bb9862c3c911ab074ebb0a2a27f36",
@@ -1055,7 +1055,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 662,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:00b205fac809b1c4bd2eaf55d32b5fb2692697fa4f0080720a0f79c04613241c",
@@ -1089,7 +1089,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 702,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:24e60b913e99a8778c30256ec4b468c666cc2ce2c0540458d00e7ebb83641d8c",
@@ -1123,7 +1123,7 @@
           "range": {
             "byteLength": 38,
             "byteStart": 738,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:2218fe4868e39439e45a377a9a18ac71863fe28022da7844ca6079c95721b756",
@@ -1157,7 +1157,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 782,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:c1ba8f0c8a9d4c7965cbfefad75eb08c7e48dab56d3279e341bafe9fb900744a",
@@ -1190,7 +1190,7 @@
           "range": {
             "byteLength": 85,
             "byteStart": 934,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L30-L32",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L30-L32",
             "lineEnd": 32,
             "lineStart": 30,
             "snippetSha256": "sha256:f93ce9a1e3d3fca4d03943e665a0b5ebf9dad1bfe4bc6dc0876783f66afe5c4e",
@@ -1229,7 +1229,7 @@
           "range": {
             "byteLength": 102,
             "byteStart": 1025,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L34-L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L34-L36",
             "lineEnd": 36,
             "lineStart": 34,
             "snippetSha256": "sha256:bfce35379e4de55d63ac9388d967dd12364cb2266946ba62cce4d3a7570babc9",
@@ -1268,7 +1268,7 @@
           "range": {
             "byteLength": 124,
             "byteStart": 1133,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L38-L40",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L38-L40",
             "lineEnd": 40,
             "lineStart": 38,
             "snippetSha256": "sha256:6ce13271c95e8d7ff91a9b0c76609e00698c3427eaf5095875621593696b9164",
@@ -1307,7 +1307,7 @@
           "range": {
             "byteLength": 120,
             "byteStart": 1263,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L42-L44",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L42-L44",
             "lineEnd": 44,
             "lineStart": 42,
             "snippetSha256": "sha256:1d1098461452f427a636127200164ab06497adede64dd789b46ad1ab6e1ec085",
@@ -1370,7 +1370,7 @@
           "range": {
             "byteLength": 1429,
             "byteStart": 1389,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L46-L86",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L46-L86",
             "lineEnd": 86,
             "lineStart": 46,
             "snippetSha256": "sha256:355f4c41c7e44f69f85c11f07ca4f25e301bdabdde7f14f6d184e49113d1774f",
@@ -1430,7 +1430,7 @@
           "range": {
             "byteLength": 604,
             "byteStart": 2824,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L88-L106",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L88-L106",
             "lineEnd": 106,
             "lineStart": 88,
             "snippetSha256": "sha256:605da98c1c40f86c0f36fe6d3c810675fd5e975077ce20cf9a08f00713e4aba5",
@@ -1468,7 +1468,7 @@
           "range": {
             "byteLength": 138,
             "byteStart": 3434,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L108-L110",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L108-L110",
             "lineEnd": 110,
             "lineStart": 108,
             "snippetSha256": "sha256:b35fb27b750de61b952672171d134cbf2152a6b2f5473199c9a48032b2d02523",
@@ -1492,7 +1492,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 158,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L7",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L7",
             "lineEnd": 7,
             "lineStart": 7,
             "snippetSha256": "sha256:7c9afc5607992186b9a96e799609c7c23f984499a3fdbde421779c23b1450ba6",
@@ -1504,7 +1504,7 @@
           "valueRange": {
             "byteLength": 13,
             "byteStart": 187,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L7",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L7",
             "lineEnd": 7,
             "lineStart": 7,
             "snippetSha256": "sha256:efdaacb857130c8691f26c770f3e5e381098c59dfd952eeafca78bde7d543b1d",
@@ -1522,7 +1522,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 207,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L9",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L9",
             "lineEnd": 9,
             "lineStart": 9,
             "snippetSha256": "sha256:d2ba9aefdfa74071094b0e799ae572c977b16e63669e43e5d2ccfe7e1d54d2b3",
@@ -1544,7 +1544,7 @@
           "range": {
             "byteLength": 27,
             "byteStart": 241,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L10",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L10",
             "lineEnd": 10,
             "lineStart": 10,
             "snippetSha256": "sha256:bca52b61680ed5312439ba6746e71085f08fc30571e36c3038275f4f3024f520",
@@ -1566,7 +1566,7 @@
           "range": {
             "byteLength": 23,
             "byteStart": 274,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L11",
             "lineEnd": 11,
             "lineStart": 11,
             "snippetSha256": "sha256:0d05edfeee0f46980c5f2e8b58be58a14bd236b5d2992576a2245ecef377dec9",
@@ -1588,7 +1588,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 303,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L12",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L12",
             "lineEnd": 12,
             "lineStart": 12,
             "snippetSha256": "sha256:46fcc045e47acdb78e50990cd159ee39e78a4e3e66bb04d79036c8c5683e3466",
@@ -1610,7 +1610,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 340,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L13",
             "lineEnd": 13,
             "lineStart": 13,
             "snippetSha256": "sha256:62f47abadb29d7e320b1046423c6dc9cb094d6e0f9e6015e93687902aee39386",
@@ -1632,7 +1632,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 379,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L14",
             "lineEnd": 14,
             "lineStart": 14,
             "snippetSha256": "sha256:1588fe79f7b27d03b77c4ce0890082606bed05efc1a5b2a486e9aaec867092e5",
@@ -1654,7 +1654,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 416,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:7bf15b8cfe87eab12f175ff23f51cfcbe324441bb984acccf58d5987e7f56d58",
@@ -1676,7 +1676,7 @@
           "range": {
             "byteLength": 26,
             "byteStart": 452,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:b21e84c42dabf41bd9f6b4ffeb2c4b8640743bbfb5d31700fcd390fc736994e6",
@@ -1698,7 +1698,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 484,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:b61221094fcf64929b99b64182f3ca8c9ff84ddf5884f6174838c39793e7e693",
@@ -1720,7 +1720,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 536,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:8057720948667a4a9c98a7383b7111017f062e7fe4258a7399280cd52e84e799",
@@ -1742,7 +1742,7 @@
           "range": {
             "byteLength": 38,
             "byteStart": 576,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:71e3b56ddf26028366e5e5e1c8314474f23d6f8507ad947fa8e95f0e3d5e283b",
@@ -1764,7 +1764,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 621,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:98b473a7107e2804a22d7fb4090b5eae4d0bb9862c3c911ab074ebb0a2a27f36",
@@ -1786,7 +1786,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 662,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:00b205fac809b1c4bd2eaf55d32b5fb2692697fa4f0080720a0f79c04613241c",
@@ -1808,7 +1808,7 @@
           "range": {
             "byteLength": 30,
             "byteStart": 702,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:24e60b913e99a8778c30256ec4b468c666cc2ce2c0540458d00e7ebb83641d8c",
@@ -1830,7 +1830,7 @@
           "range": {
             "byteLength": 38,
             "byteStart": 738,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L24",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L24",
             "lineEnd": 24,
             "lineStart": 24,
             "snippetSha256": "sha256:2218fe4868e39439e45a377a9a18ac71863fe28022da7844ca6079c95721b756",
@@ -1852,7 +1852,7 @@
           "range": {
             "byteLength": 33,
             "byteStart": 782,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:c1ba8f0c8a9d4c7965cbfefad75eb08c7e48dab56d3279e341bafe9fb900744a",
@@ -1874,7 +1874,7 @@
           "range": {
             "byteLength": 51,
             "byteStart": 822,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L27",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L27",
             "lineEnd": 27,
             "lineStart": 27,
             "snippetSha256": "sha256:4e4ec8bad0156e7561e0373d88671ad313290fed41c27d8a59871a8898a855d3",
@@ -1896,7 +1896,7 @@
           "range": {
             "byteLength": 48,
             "byteStart": 879,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L28",
             "lineEnd": 28,
             "lineStart": 28,
             "snippetSha256": "sha256:59199e3b37755f3b191af0b0007caca047d3643af75fb50f816b3f230ddcc8af",
@@ -1942,7 +1942,7 @@
     "range": {
       "byteLength": 3465,
       "byteStart": 109,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/mocks/MockStreamMinter.sol#L6-L111",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamMinter.sol#L6-L111",
       "lineEnd": 111,
       "lineStart": 6,
       "snippetSha256": "sha256:07220e2f573e042689ffc03c57aee3711eba5057d55ad2d99ec12341498497ae",

@@ -101,7 +101,7 @@
           "range": {
             "byteLength": 75,
             "byteStart": 734,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamGovernedParameterAuthority.sol#L14",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernedParameterAuthority.sol#L14",
             "lineEnd": 14,
             "lineStart": 14,
             "snippetSha256": "sha256:2b4eb6b8800cb6061392e90b2f75b7bf407ac49de83f95ed8468975736c8e19d",
@@ -159,7 +159,7 @@
           "range": {
             "byteLength": 270,
             "byteStart": 1106,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamGovernedParameterAuthority.sol#L20-L30",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernedParameterAuthority.sol#L20-L30",
             "lineEnd": 30,
             "lineStart": 20,
             "snippetSha256": "sha256:973ba550e75edc1db48537588c86f98663f68600c8e36c345820047aaa540440",
@@ -203,7 +203,7 @@
     "range": {
       "byteLength": 762,
       "byteStart": 616,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamGovernedParameterAuthority.sol#L12-L31",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernedParameterAuthority.sol#L12-L31",
       "lineEnd": 31,
       "lineStart": 12,
       "snippetSha256": "sha256:138176b83261ad014c9bc3e68ee1cccc6e14885557f8da3c1e0868a978711644",

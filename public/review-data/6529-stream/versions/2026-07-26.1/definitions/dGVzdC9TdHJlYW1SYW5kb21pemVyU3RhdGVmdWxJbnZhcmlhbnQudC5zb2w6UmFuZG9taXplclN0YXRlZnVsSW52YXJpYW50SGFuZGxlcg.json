@@ -330,7 +330,7 @@
           "range": {
             "byteLength": 1101,
             "byteStart": 2277,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L62-L88",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L62-L88",
             "lineEnd": 88,
             "lineStart": 62,
             "snippetSha256": "sha256:9fef7508135e53f4ffe76de988fafb17e2e3368fff596438b5a3e456162d04a5",
@@ -373,7 +373,7 @@
           "range": {
             "byteLength": 1157,
             "byteStart": 3384,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L90-L121",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L90-L121",
             "lineEnd": 121,
             "lineStart": 90,
             "snippetSha256": "sha256:fb495315d6c6306d3e9f01a46a38fda93adc038894f79c2be5ec9f0f2b421f47",
@@ -406,7 +406,7 @@
           "range": {
             "byteLength": 201,
             "byteStart": 4547,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L123-L129",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L123-L129",
             "lineEnd": 129,
             "lineStart": 123,
             "snippetSha256": "sha256:edf520d6afa988c7c541aaa530c3fb04a74779738991b9ef5e98f10708c1f68a",
@@ -439,7 +439,7 @@
           "range": {
             "byteLength": 240,
             "byteStart": 4754,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L131-L137",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L131-L137",
             "lineEnd": 137,
             "lineStart": 131,
             "snippetSha256": "sha256:3019b639a17dbdf66dfcb547f077f9881065d954c92f300a421124bbbc653953",
@@ -472,7 +472,7 @@
           "range": {
             "byteLength": 148,
             "byteStart": 5000,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L139-L142",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L139-L142",
             "lineEnd": 142,
             "lineStart": 139,
             "snippetSha256": "sha256:2b12a863b7d9fa88a4575ddce3481bc7444f8c5af04ba431c5c924af4c260bef",
@@ -505,7 +505,7 @@
           "range": {
             "byteLength": 93,
             "byteStart": 5154,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L144-L146",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L144-L146",
             "lineEnd": 146,
             "lineStart": 144,
             "snippetSha256": "sha256:1129d141f36765d467bb7030dedb51c6a1dde6b425e4c250a82942470b67d8ac",
@@ -543,7 +543,7 @@
           "range": {
             "byteLength": 251,
             "byteStart": 5253,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L148-L154",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L148-L154",
             "lineEnd": 154,
             "lineStart": 148,
             "snippetSha256": "sha256:48cee93d6d4a6d7b87f6e049bdd65cdcaa0f2f9278a91d8cdc3e2ad1adb5f26f",
@@ -581,7 +581,7 @@
           "range": {
             "byteLength": 351,
             "byteStart": 5510,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L156-L164",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L156-L164",
             "lineEnd": 164,
             "lineStart": 156,
             "snippetSha256": "sha256:12dddc211db91067c9240d9b8616b5fba588214c22e0a28e882c9df8b123d4f3",
@@ -614,7 +614,7 @@
           "range": {
             "byteLength": 290,
             "byteStart": 5867,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L166-L173",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L166-L173",
             "lineEnd": 173,
             "lineStart": 166,
             "snippetSha256": "sha256:55e2c9b5f447819bb7bdafdbe1467399afecc02d4acdd3dd7fde01fc349bdaad",
@@ -647,7 +647,7 @@
           "range": {
             "byteLength": 243,
             "byteStart": 6163,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L175-L181",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L175-L181",
             "lineEnd": 181,
             "lineStart": 175,
             "snippetSha256": "sha256:7103ae81acb58d3e96c0becb53df8f11785eecd376ac2a4b8cac84d391a76a8c",
@@ -685,7 +685,7 @@
           "range": {
             "byteLength": 366,
             "byteStart": 6412,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L183-L191",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L183-L191",
             "lineEnd": 191,
             "lineStart": 183,
             "snippetSha256": "sha256:591dc2991eff679107339b43acac60ea28f469db2aa05db06fc078b277c5bda8",
@@ -712,7 +712,7 @@
           "range": {
             "byteLength": 144,
             "byteStart": 6784,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L193-L196",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L193-L196",
             "lineEnd": 196,
             "lineStart": 193,
             "snippetSha256": "sha256:529be4ed7734b420aea4c998e2f3a1cdfe413d9c7403f421d9d91b90a7a3d13a",
@@ -739,7 +739,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 6934,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L198-L201",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L198-L201",
             "lineEnd": 201,
             "lineStart": 198,
             "snippetSha256": "sha256:30bce5123a4ab03a0d4e9d2e991a1bcf36a07b30f594e28198c6c141a13c4ec3",
@@ -772,7 +772,7 @@
           "range": {
             "byteLength": 143,
             "byteStart": 7083,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L203-L205",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L203-L205",
             "lineEnd": 205,
             "lineStart": 203,
             "snippetSha256": "sha256:b627e31fac09981f26af55f22ab83c76bfc6cc9101d2b843ce7e0963ab538fdb",
@@ -805,7 +805,7 @@
           "range": {
             "byteLength": 773,
             "byteStart": 7232,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L207-L224",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L207-L224",
             "lineEnd": 224,
             "lineStart": 207,
             "snippetSha256": "sha256:4e1fcfe5bc5bebaaa351787b8b87a65850ed8145036948ecbd38a9bdcaa6a6ff",
@@ -832,7 +832,7 @@
           "range": {
             "byteLength": 100,
             "byteStart": 8011,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L226-L228",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L226-L228",
             "lineEnd": 228,
             "lineStart": 226,
             "snippetSha256": "sha256:e75cd65d5a911a4b547bffc96c07bd6ba349d075f3e49d998f03bc5d8c4020d7",
@@ -859,7 +859,7 @@
           "range": {
             "byteLength": 1861,
             "byteStart": 8117,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L230-L277",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L230-L277",
             "lineEnd": 277,
             "lineStart": 230,
             "snippetSha256": "sha256:84a1ec566f9ecdc988c172d81e63d456c09faf29ca88e99a13e6deac5a901f63",
@@ -886,7 +886,7 @@
           "range": {
             "byteLength": 2104,
             "byteStart": 9984,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L279-L319",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L279-L319",
             "lineEnd": 319,
             "lineStart": 279,
             "snippetSha256": "sha256:3a633d20986e4abea3107fa21db27cc339312cfbb8ec36243f5fb4429d54a60b",
@@ -913,7 +913,7 @@
           "range": {
             "byteLength": 463,
             "byteStart": 12094,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L321-L327",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L321-L327",
             "lineEnd": 327,
             "lineStart": 321,
             "snippetSha256": "sha256:bfc4d00b3707dade2eb450d855436c273aa798ed130adbc4353642aa23c73f13",
@@ -947,7 +947,7 @@
           "range": {
             "byteLength": 590,
             "byteStart": 12563,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L329-L339",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L329-L339",
             "lineEnd": 339,
             "lineStart": 329,
             "snippetSha256": "sha256:336b0977735730295be99c8b95a40dde19563934bf3e2dbbe694227d0994597c",
@@ -981,7 +981,7 @@
           "range": {
             "byteLength": 615,
             "byteStart": 13159,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L341-L351",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L341-L351",
             "lineEnd": 351,
             "lineStart": 341,
             "snippetSha256": "sha256:adc6c193418eaa9408c740b02121721b6d4d6a4d449c9a71088d106ed65d67b0",
@@ -1015,7 +1015,7 @@
           "range": {
             "byteLength": 576,
             "byteStart": 13780,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L353-L363",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L353-L363",
             "lineEnd": 363,
             "lineStart": 353,
             "snippetSha256": "sha256:7ea66d5d3df7423823d6f74c67cea46d0fb22fee4b654958f997658463a8c8c7",
@@ -1049,7 +1049,7 @@
           "range": {
             "byteLength": 725,
             "byteStart": 14362,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L365-L377",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L365-L377",
             "lineEnd": 377,
             "lineStart": 365,
             "snippetSha256": "sha256:e7a84990d9efb4a6b17cbf6d6f8b9032803b8454e11594bed4e25194ed1382b6",
@@ -1093,7 +1093,7 @@
           "range": {
             "byteLength": 845,
             "byteStart": 15093,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L379-L399",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L379-L399",
             "lineEnd": 399,
             "lineStart": 379,
             "snippetSha256": "sha256:82a12ae4449420112a1cf743d3fa6d80ac4cf2f03aaa14ee2998ff0d581fb063",
@@ -1132,7 +1132,7 @@
           "range": {
             "byteLength": 154,
             "byteStart": 15944,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L401-L403",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L401-L403",
             "lineEnd": 403,
             "lineStart": 401,
             "snippetSha256": "sha256:fd50805e723a9e06516594878b6ab5c2da69f8d7be70d6663e788810c5266787",
@@ -1181,7 +1181,7 @@
           "range": {
             "byteLength": 338,
             "byteStart": 16104,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L405-L415",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L405-L415",
             "lineEnd": 415,
             "lineStart": 405,
             "snippetSha256": "sha256:f47a779ad109b367114ba419c5cf2551429b1634f4b27dde3b363357622e89f1",
@@ -1214,7 +1214,7 @@
           "range": {
             "byteLength": 455,
             "byteStart": 16448,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L417-L424",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L417-L424",
             "lineEnd": 424,
             "lineStart": 417,
             "snippetSha256": "sha256:c2264c8354afc6d1e6b07df4074290fc174ed8a1973115c05ed057bccf89da7f",
@@ -1253,7 +1253,7 @@
           "range": {
             "byteLength": 126,
             "byteStart": 16909,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L426-L428",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L426-L428",
             "lineEnd": 428,
             "lineStart": 426,
             "snippetSha256": "sha256:de015005f67202a1a7fe907fc07e8294aaf004c27b70482889ca3cd97aa69ee1",
@@ -1292,7 +1292,7 @@
           "range": {
             "byteLength": 263,
             "byteStart": 17041,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L430-L439",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L430-L439",
             "lineEnd": 439,
             "lineStart": 430,
             "snippetSha256": "sha256:cb8408a20b20204daf96798f75749aa213a1efc6944ae48deead6a151726371c",
@@ -1332,7 +1332,7 @@
           "range": {
             "byteLength": 144,
             "byteStart": 17310,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L441-L444",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L441-L444",
             "lineEnd": 444,
             "lineStart": 441,
             "snippetSha256": "sha256:27dee1962bec3d7d8bf194d559c6e7d2da305009e8cd1a78d1c5ef003c7b82f4",
@@ -1356,7 +1356,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 1411,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L42",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L42",
             "lineEnd": 42,
             "lineStart": 42,
             "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
@@ -1368,7 +1368,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 1452,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L42",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L42",
             "lineEnd": 42,
             "lineStart": 42,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -1386,7 +1386,7 @@
           "range": {
             "byteLength": 55,
             "byteStart": 1459,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L43",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L43",
             "lineEnd": 43,
             "lineStart": 43,
             "snippetSha256": "sha256:f16706ce1bfbbdee19ac8dd48d41a5d4ac095a6e5bbde12985bdad921b6e71e6",
@@ -1398,7 +1398,7 @@
           "valueRange": {
             "byteLength": 14,
             "byteStart": 1500,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L43",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L43",
             "lineEnd": 43,
             "lineStart": 43,
             "snippetSha256": "sha256:c19f667b43de83bd3f967393f7fe840d2c4642323a96298bf824157c296dc90f",
@@ -1416,7 +1416,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 1520,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L44",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L44",
             "lineEnd": 44,
             "lineStart": 44,
             "snippetSha256": "sha256:f5e9f6aa41fe94b8fbfd95219e6961a0d7d1cf6c939d010ab17bbcd4862f079b",
@@ -1428,7 +1428,7 @@
           "valueRange": {
             "byteLength": 2,
             "byteStart": 1560,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L44",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L44",
             "lineEnd": 44,
             "lineStart": 44,
             "snippetSha256": "sha256:b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9",
@@ -1446,7 +1446,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 1568,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L45",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L45",
             "lineEnd": 45,
             "lineStart": 45,
             "snippetSha256": "sha256:af18c5dadbd62228f8214d1c8fad02d145d5accb24bf6e8a951772fa917932da",
@@ -1458,7 +1458,7 @@
           "valueRange": {
             "byteLength": 7,
             "byteStart": 1606,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L45",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L45",
             "lineEnd": 45,
             "lineStart": 45,
             "snippetSha256": "sha256:8676928d9f1d7ef12abcd817455b7554e16728300c5bbf8b345d04ffe21b5503",
@@ -1476,7 +1476,7 @@
           "range": {
             "byteLength": 62,
             "byteStart": 1619,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L46",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L46",
             "lineEnd": 46,
             "lineStart": 46,
             "snippetSha256": "sha256:4bf332d32db86270e22e0a5ebc8c644030b0b51adaed2f088ab1212173a3b76c",
@@ -1488,7 +1488,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 1666,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L46",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L46",
             "lineEnd": 46,
             "lineStart": 46,
             "snippetSha256": "sha256:1e369b6d813bb37697341d2bab533dc72a24e58dde2e3df6afd17c5a909d99ee",
@@ -1506,7 +1506,7 @@
           "range": {
             "byteLength": 63,
             "byteStart": 1687,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L47",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L47",
             "lineEnd": 47,
             "lineStart": 47,
             "snippetSha256": "sha256:050edbb7fcf56d814c46ba1b2405e2d5282ac20879fd1b609a24e5574bf1c29d",
@@ -1518,7 +1518,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 1735,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L47",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L47",
             "lineEnd": 47,
             "lineStart": 47,
             "snippetSha256": "sha256:2d44ddd299cd1c2368b014c114a488c6dca935a0acb614242b1b7e8aef907fff",
@@ -1536,7 +1536,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 1756,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L48",
             "lineEnd": 48,
             "lineStart": 48,
             "snippetSha256": "sha256:898dc0fbaab3642dcdb7496e50a5179f8f8b872034f3b4edf63b2af0037e62bb",
@@ -1548,7 +1548,7 @@
           "valueRange": {
             "byteLength": 38,
             "byteStart": 1796,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L48",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L48",
             "lineEnd": 48,
             "lineStart": 48,
             "snippetSha256": "sha256:6c038231b3e4aade08954eedfbd64775a39a7b97c49221ab2fa7c904ea559710",
@@ -1566,7 +1566,7 @@
           "range": {
             "byteLength": 27,
             "byteStart": 1841,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L50",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L50",
             "lineEnd": 50,
             "lineStart": 50,
             "snippetSha256": "sha256:9ea3b23d13919179c1a969ef04040e26266abd6f7fb6d6c4283a93863ee3a212",
@@ -1588,7 +1588,7 @@
           "range": {
             "byteLength": 31,
             "byteStart": 1874,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L51",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L51",
             "lineEnd": 51,
             "lineStart": 51,
             "snippetSha256": "sha256:093eef7b156605d05b0f47d32a777d7345c7148337a4db4ec569c6647e59b1e6",
@@ -1610,7 +1610,7 @@
           "range": {
             "byteLength": 52,
             "byteStart": 1911,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L52",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L52",
             "lineEnd": 52,
             "lineStart": 52,
             "snippetSha256": "sha256:c06545252af9ee4373abbb8b475b15ad5d4177a2e8bc059a7caf2b9fb8796ff1",
@@ -1632,7 +1632,7 @@
           "range": {
             "byteLength": 39,
             "byteStart": 1969,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L53",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L53",
             "lineEnd": 53,
             "lineStart": 53,
             "snippetSha256": "sha256:a8ebcde68abd9d403d5b2f991483440b998d70db776d50ed9343835c7505dbec",
@@ -1654,7 +1654,7 @@
           "range": {
             "byteLength": 32,
             "byteStart": 2015,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L55",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L55",
             "lineEnd": 55,
             "lineStart": 55,
             "snippetSha256": "sha256:3377d608467e6f7ba5b3f7acf061aaf352b3cdc9566d1bf283c162818d179fa8",
@@ -1666,7 +1666,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 2046,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L55",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L55",
             "lineEnd": 55,
             "lineStart": 55,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -1684,7 +1684,7 @@
           "range": {
             "byteLength": 40,
             "byteStart": 2053,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L56",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L56",
             "lineEnd": 56,
             "lineStart": 56,
             "snippetSha256": "sha256:351240390587a2e1a64b93047050a67f7696215881be9eff8babeeb93f8324ea",
@@ -1696,7 +1696,7 @@
           "valueRange": {
             "byteLength": 10,
             "byteStart": 2083,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L56",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L56",
             "lineEnd": 56,
             "lineStart": 56,
             "snippetSha256": "sha256:e3194d1519eec8f368c72c0ec9fcc2f2a70c69c74cb82b85adbb270ee3f01c5e",
@@ -1714,7 +1714,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 2099,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L57",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L57",
             "lineEnd": 57,
             "lineStart": 57,
             "snippetSha256": "sha256:1c373e345fe05e2ef8531b269d0ee70fbfa549404817e984d92bc5124495d6cc",
@@ -1736,7 +1736,7 @@
           "range": {
             "byteLength": 40,
             "byteStart": 2133,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L58",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L58",
             "lineEnd": 58,
             "lineStart": 58,
             "snippetSha256": "sha256:0e49c36af7b4beda2a9cc43f6a405eb1c35ce869f543377984627b872cc5f748",
@@ -1758,7 +1758,7 @@
           "range": {
             "byteLength": 38,
             "byteStart": 2179,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L59",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L59",
             "lineEnd": 59,
             "lineStart": 59,
             "snippetSha256": "sha256:9c113ad5e32d41bca65d45182a42b40918d913baf04c5e49ab666d16b62bfcd8",
@@ -1780,7 +1780,7 @@
           "range": {
             "byteLength": 47,
             "byteStart": 2223,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L60",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L60",
             "lineEnd": 60,
             "lineStart": 60,
             "snippetSha256": "sha256:2a0813d71283acc21bcbb5f78abcf07f84575266f304a34f1754157857637007",
@@ -1826,7 +1826,7 @@
     "range": {
       "byteLength": 16257,
       "byteStart": 1199,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRandomizerStatefulInvariant.t.sol#L36-L445",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerStatefulInvariant.t.sol#L36-L445",
       "lineEnd": 445,
       "lineStart": 36,
       "snippetSha256": "sha256:c3eb3d9dfdec732337cdd6d49f898fc2463f7f74a01b84be416b9292736be899",

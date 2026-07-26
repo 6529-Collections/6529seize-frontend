@@ -194,7 +194,7 @@
           "range": {
             "byteLength": 1048,
             "byteStart": 993,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L25-L50",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L25-L50",
             "lineEnd": 50,
             "lineStart": 25,
             "snippetSha256": "sha256:e75cd2902fcb568c4157d2338982ce5a5381706ff53e7d9fea383251b56ae665",
@@ -221,7 +221,7 @@
           "range": {
             "byteLength": 1282,
             "byteStart": 2047,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L52-L78",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L52-L78",
             "lineEnd": 78,
             "lineStart": 52,
             "snippetSha256": "sha256:eef41cb9eaa34b0e822619e1f77ed8750615a2fd9ab162dded1a4643d0a3fa8d",
@@ -248,7 +248,7 @@
           "range": {
             "byteLength": 1105,
             "byteStart": 3335,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L80-L101",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L80-L101",
             "lineEnd": 101,
             "lineStart": 80,
             "snippetSha256": "sha256:9b0a9c368a18ebcc5922740ac3870a30c47a5ef0c218b27e3ce64bdafac8c574",
@@ -275,7 +275,7 @@
           "range": {
             "byteLength": 977,
             "byteStart": 4446,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L103-L122",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L103-L122",
             "lineEnd": 122,
             "lineStart": 103,
             "snippetSha256": "sha256:3c7583cfc651429aed0f34ce13e9de401c96f9b69b5dc3dbac2178573a0d330e",
@@ -302,7 +302,7 @@
           "range": {
             "byteLength": 1347,
             "byteStart": 5429,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L124-L153",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L124-L153",
             "lineEnd": 153,
             "lineStart": 124,
             "snippetSha256": "sha256:d5cb218f53dd9205ef8ded0e3681f96d219785abb20651cd6c3df4a7baf061dc",
@@ -329,7 +329,7 @@
           "range": {
             "byteLength": 977,
             "byteStart": 6782,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L155-L171",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L155-L171",
             "lineEnd": 171,
             "lineStart": 155,
             "snippetSha256": "sha256:ac2ac3f06bb9047190e7e7d3b702986ce3cc9ee7fef09c8bd5d0d0c746ec28c3",
@@ -356,7 +356,7 @@
           "range": {
             "byteLength": 682,
             "byteStart": 7765,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L173-L186",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L173-L186",
             "lineEnd": 186,
             "lineStart": 173,
             "snippetSha256": "sha256:5a639e8884e19343cfad8d5fb8fa0a230c332f71a07d95018edf1272b63d3094",
@@ -383,7 +383,7 @@
           "range": {
             "byteLength": 734,
             "byteStart": 8453,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L188-L203",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L188-L203",
             "lineEnd": 203,
             "lineStart": 188,
             "snippetSha256": "sha256:e9548724aad7e7b364e274c7b44005857bf1a671a492ac15db6837f71d4240cf",
@@ -410,7 +410,7 @@
           "range": {
             "byteLength": 668,
             "byteStart": 9193,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L205-L218",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L205-L218",
             "lineEnd": 218,
             "lineStart": 205,
             "snippetSha256": "sha256:0c7c9af667d83a172853b0589cb808dd227adb5d4bf528525f1fdabd30379917",
@@ -437,7 +437,7 @@
           "range": {
             "byteLength": 925,
             "byteStart": 9867,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L220-L237",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L220-L237",
             "lineEnd": 237,
             "lineStart": 220,
             "snippetSha256": "sha256:f21304a568fd4827ae5bfc436e69f32e01268717b65a231df062ff9a2ad09a71",
@@ -464,7 +464,7 @@
           "range": {
             "byteLength": 899,
             "byteStart": 10798,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L239-L256",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L239-L256",
             "lineEnd": 256,
             "lineStart": 239,
             "snippetSha256": "sha256:7551de3fb6c02a441d61cb3df3b89cda1ac16c06eaadc201f23f021d7e512997",
@@ -491,7 +491,7 @@
           "range": {
             "byteLength": 744,
             "byteStart": 11703,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L258-L272",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L258-L272",
             "lineEnd": 272,
             "lineStart": 258,
             "snippetSha256": "sha256:0e0f7d9e2549e9d36f8580709ad3563c5c0937b918e37c4c8c5e35640ba82021",
@@ -518,7 +518,7 @@
           "range": {
             "byteLength": 665,
             "byteStart": 12453,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L274-L283",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L274-L283",
             "lineEnd": 283,
             "lineStart": 274,
             "snippetSha256": "sha256:4882d5c988045d2216663a120659cbba9ff9dc3ad392ab41bc88a9ac20b666b6",
@@ -545,7 +545,7 @@
           "range": {
             "byteLength": 577,
             "byteStart": 13124,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L285-L298",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L285-L298",
             "lineEnd": 298,
             "lineStart": 285,
             "snippetSha256": "sha256:ff4865f5f9ecf090a8848d618b8bfa6d679e490c9c83dc8d9a618b56663bf801",
@@ -572,7 +572,7 @@
           "range": {
             "byteLength": 3395,
             "byteStart": 13707,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L300-L370",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L300-L370",
             "lineEnd": 370,
             "lineStart": 300,
             "snippetSha256": "sha256:2c6153bc51c3f8f5b6a47d2bcd3f8e5f939c2118ff0e51510ee4c6bd1c5157ed",
@@ -605,7 +605,7 @@
           "range": {
             "byteLength": 703,
             "byteStart": 17108,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L372-L392",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L372-L392",
             "lineEnd": 392,
             "lineStart": 372,
             "snippetSha256": "sha256:b23d0735b89aeb93d176322bf8b3cc7a4bd6e7c55064e83d050fa674dcea605e",
@@ -639,7 +639,7 @@
           "range": {
             "byteLength": 199,
             "byteStart": 17817,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L394-L397",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L394-L397",
             "lineEnd": 397,
             "lineStart": 394,
             "snippetSha256": "sha256:f4a5330ed1706c87914a13f15968aefb1c17d08bf46c9d538930e976040e6fdb",
@@ -684,7 +684,7 @@
           "range": {
             "byteLength": 461,
             "byteStart": 18022,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L399-L409",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L399-L409",
             "lineEnd": 409,
             "lineStart": 399,
             "snippetSha256": "sha256:a6ebfc65ad650ec3a2821689e003d911518fd5325d3418df703f43a3cc3d6db1",
@@ -723,7 +723,7 @@
           "range": {
             "byteLength": 545,
             "byteStart": 18489,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L411-L420",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L411-L420",
             "lineEnd": 420,
             "lineStart": 411,
             "snippetSha256": "sha256:7956ec78eedf000bd65dd329063a5052734b7eef81cde8145fe856f7d0a79e9b",
@@ -764,7 +764,7 @@
           "range": {
             "byteLength": 159,
             "byteStart": 19040,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L422-L424",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L422-L424",
             "lineEnd": 424,
             "lineStart": 422,
             "snippetSha256": "sha256:227b47f699880283f3ed0c599490f3fa9ca78117f6492804eb8a4d7f04ca0166",
@@ -805,7 +805,7 @@
           "range": {
             "byteLength": 157,
             "byteStart": 19205,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L426-L428",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L426-L428",
             "lineEnd": 428,
             "lineStart": 426,
             "snippetSha256": "sha256:a59483e9af96cd0b584f481551c61ebcc4499ae5052d955cc6f2924bbe380504",
@@ -852,7 +852,7 @@
           "range": {
             "byteLength": 667,
             "byteStart": 19368,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L430-L449",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L430-L449",
             "lineEnd": 449,
             "lineStart": 430,
             "snippetSha256": "sha256:e0fc6516078d52c7c2490ef63c264b170a223c75ce8f329c5998891ba92817c5",
@@ -893,7 +893,7 @@
           "range": {
             "byteLength": 508,
             "byteStart": 20041,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L451-L461",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L451-L461",
             "lineEnd": 461,
             "lineStart": 451,
             "snippetSha256": "sha256:0669d80a89ab057e1c743c567e5c9ad1cf18b7f33757cb399a660538d138e74e",
@@ -939,7 +939,7 @@
           "range": {
             "byteLength": 624,
             "byteStart": 20555,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L463-L478",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L463-L478",
             "lineEnd": 478,
             "lineStart": 463,
             "snippetSha256": "sha256:909ab24b8fb50f08ec7eae1c3273e71c187d0593dd93b9a8edfb81cf7ffb2bf3",
@@ -990,7 +990,7 @@
           "range": {
             "byteLength": 390,
             "byteStart": 21185,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L480-L491",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L480-L491",
             "lineEnd": 491,
             "lineStart": 480,
             "snippetSha256": "sha256:1546c437157fbd0b7b71c1d330ab410c21ac567079b7b626d2e77a62dfe25974",
@@ -1036,7 +1036,7 @@
           "range": {
             "byteLength": 670,
             "byteStart": 21581,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L493-L513",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L493-L513",
             "lineEnd": 513,
             "lineStart": 493,
             "snippetSha256": "sha256:8c71f004d72dcc1d61d3fba0b7741d9088bc90985181703bacfa8f31786e09b2",
@@ -1082,7 +1082,7 @@
           "range": {
             "byteLength": 722,
             "byteStart": 22257,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L515-L539",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L515-L539",
             "lineEnd": 539,
             "lineStart": 515,
             "snippetSha256": "sha256:6d602ff408418952ee5c3dfc0556931105c770388a379474221493cf6aaea65d",
@@ -1116,7 +1116,7 @@
           "range": {
             "byteLength": 188,
             "byteStart": 22985,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L541-L544",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L541-L544",
             "lineEnd": 544,
             "lineStart": 541,
             "snippetSha256": "sha256:504a456400aa1655831fcb205376470f90dec5280569e488d370d3c2b56b40fd",
@@ -1157,7 +1157,7 @@
           "range": {
             "byteLength": 1326,
             "byteStart": 23179,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L546-L583",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L546-L583",
             "lineEnd": 583,
             "lineStart": 546,
             "snippetSha256": "sha256:fe385a15837fcc014629dd61a4fb19dd8c86708d16a36790db1cd67a96ea52ba",
@@ -1196,7 +1196,7 @@
           "range": {
             "byteLength": 551,
             "byteStart": 24511,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L585-L603",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L585-L603",
             "lineEnd": 603,
             "lineStart": 585,
             "snippetSha256": "sha256:e4a8f68c870d20b006feb90d948b26e417eba6b495dd6436990e6891e7449c4e",
@@ -1220,7 +1220,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 586,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
@@ -1232,7 +1232,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 627,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -1250,7 +1250,7 @@
           "range": {
             "byteLength": 37,
             "byteStart": 634,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
@@ -1262,7 +1262,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 670,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L18",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L18",
             "lineEnd": 18,
             "lineStart": 18,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -1280,7 +1280,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 677,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
@@ -1292,7 +1292,7 @@
           "valueRange": {
             "byteLength": 16,
             "byteStart": 714,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L19",
             "lineEnd": 19,
             "lineStart": 19,
             "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
@@ -1310,7 +1310,7 @@
           "range": {
             "byteLength": 44,
             "byteStart": 736,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:70947943409309264566b2277b1265f3459bde9fde62c15cdfe44a5e45f293b9",
@@ -1322,7 +1322,7 @@
           "valueRange": {
             "byteLength": 7,
             "byteStart": 773,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L20",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L20",
             "lineEnd": 20,
             "lineStart": 20,
             "snippetSha256": "sha256:deb770b8fe099d61e261486e1ef8abf969e2054fabbeeee558db6a0075d455d3",
@@ -1340,7 +1340,7 @@
           "range": {
             "byteLength": 39,
             "byteStart": 786,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:71a244228e5964b385399895dba37df2eebd2456812ce27e46bffe4a9335739a",
@@ -1352,7 +1352,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 824,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L21",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L21",
             "lineEnd": 21,
             "lineStart": 21,
             "snippetSha256": "sha256:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451",
@@ -1370,7 +1370,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 831,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:148750880bbae413a1115279930e58da640b76815c4ff094e832be9869461fb4",
@@ -1382,7 +1382,7 @@
           "valueRange": {
             "byteLength": 31,
             "byteStart": 878,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:141a877fcb89a48432849ea47630116cc6d67d22ec5376f823e93b05c0296596",
@@ -1400,7 +1400,7 @@
           "range": {
             "byteLength": 71,
             "byteStart": 915,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:52938c7a3ac9c74bec75b198abae93ff7236eefea3c37cf875c44bae41448aaa",
@@ -1412,7 +1412,7 @@
           "valueRange": {
             "byteLength": 24,
             "byteStart": 962,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L23",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L23",
             "lineEnd": 23,
             "lineStart": 23,
             "snippetSha256": "sha256:6a83f56acf8b1e544318aefd3734c2337f0f27e80fa967152b92ecb2fc6a48ce",
@@ -1459,7 +1459,7 @@
     "range": {
       "byteLength": 24662,
       "byteStart": 402,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataEscaping.t.sol#L12-L604",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEscaping.t.sol#L12-L604",
       "lineEnd": 604,
       "lineStart": 12,
       "snippetSha256": "sha256:5c3573ee4411fc2822ff66359970a6743ee4748f3d5f33a7d2d8e8e6991e6d78",

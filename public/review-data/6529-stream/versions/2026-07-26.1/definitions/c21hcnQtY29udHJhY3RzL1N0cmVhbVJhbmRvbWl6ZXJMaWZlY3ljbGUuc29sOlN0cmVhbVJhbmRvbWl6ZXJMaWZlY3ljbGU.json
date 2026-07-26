@@ -995,7 +995,7 @@
               "range": {
                 "byteLength": 4,
                 "byteStart": 476,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L14",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L14",
                 "lineEnd": 14,
                 "lineStart": 14,
                 "snippetSha256": "sha256:dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
@@ -1008,7 +1008,7 @@
               "range": {
                 "byteLength": 7,
                 "byteStart": 490,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L15",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L15",
                 "lineEnd": 15,
                 "lineStart": 15,
                 "snippetSha256": "sha256:331551b0de4157c9abc7b72b61b96a2a928fd6db3cdf029c1fc44b08ad633aa6",
@@ -1021,7 +1021,7 @@
               "range": {
                 "byteLength": 9,
                 "byteStart": 507,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L16",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L16",
                 "lineEnd": 16,
                 "lineStart": 16,
                 "snippetSha256": "sha256:b7c6220ada3d1bc4d2365d306a468e5ad4f5df7cc2d432284d9bbb3d8dad0003",
@@ -1034,7 +1034,7 @@
               "range": {
                 "byteLength": 5,
                 "byteStart": 526,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L17",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L17",
                 "lineEnd": 17,
                 "lineStart": 17,
                 "snippetSha256": "sha256:40c9e59c5e152b0ae9affc84d8461c29b75a7709e4506307eeedf246b526014e",
@@ -1047,7 +1047,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 541,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L18",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L18",
                 "lineEnd": 18,
                 "lineStart": 18,
                 "snippetSha256": "sha256:4e666d2d012a54e911a639222c806704fb13333540c7bdac3c9e6973c1f43be0",
@@ -1067,7 +1067,7 @@
           "range": {
             "byteLength": 129,
             "byteStart": 438,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L13-L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L13-L19",
             "lineEnd": 19,
             "lineStart": 13,
             "snippetSha256": "sha256:7c1ad50c5962dfe191948c1240d11967eb5d07ee4920d9a4604e3d450795dbd7",
@@ -1095,7 +1095,7 @@
           "range": {
             "byteLength": 50,
             "byteStart": 1069,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L38",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L38",
             "lineEnd": 38,
             "lineStart": 38,
             "snippetSha256": "sha256:0eec5d50d69bfb445b1fba191d45272eca9db0cd17f8c60c189a569637942f8e",
@@ -1122,7 +1122,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 1124,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L39",
             "lineEnd": 39,
             "lineStart": 39,
             "snippetSha256": "sha256:d0ad2bca144e377243e429b5e207ae1cf143636a75570eea2935fb1b67e8f7a0",
@@ -1154,7 +1154,7 @@
           "range": {
             "byteLength": 78,
             "byteStart": 1185,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L40",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L40",
             "lineEnd": 40,
             "lineStart": 40,
             "snippetSha256": "sha256:0e2b84af39461dd6a0d498a0208c0186c4c31c3fdf2bbd18fe92c3cfebfbc7a1",
@@ -1186,7 +1186,7 @@
           "range": {
             "byteLength": 83,
             "byteStart": 1268,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L41",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L41",
             "lineEnd": 41,
             "lineStart": 41,
             "snippetSha256": "sha256:32d8ee07b3a7bbb32e3f4037ca88c3bebd19928eac2ae4ba07ddfab8bd847cae",
@@ -1223,7 +1223,7 @@
           "range": {
             "byteLength": 113,
             "byteStart": 1356,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L42-L44",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L42-L44",
             "lineEnd": 44,
             "lineStart": 42,
             "snippetSha256": "sha256:8eb82c7363be37bbb6a4c9f377d754247b34e4b701754c53611dab8a202de459",
@@ -1265,7 +1265,7 @@
           "range": {
             "byteLength": 145,
             "byteStart": 1474,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L45-L47",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L45-L47",
             "lineEnd": 47,
             "lineStart": 45,
             "snippetSha256": "sha256:6069516f487508afa27bf8cb061e79a03bbbd373e3c1886bdfdb00f4921e157d",
@@ -1312,7 +1312,7 @@
           "range": {
             "byteLength": 188,
             "byteStart": 1624,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L48-L54",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L48-L54",
             "lineEnd": 54,
             "lineStart": 48,
             "snippetSha256": "sha256:2847dc6c8966e9de5249ddf80849ad272fd8b52be0c57059dd8a779dd047ea8e",
@@ -1339,7 +1339,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 1817,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L55",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L55",
             "lineEnd": 55,
             "lineStart": 55,
             "snippetSha256": "sha256:8e82c7478b0ee3415fecac9c78d7c48b061920181404ad939ee7f27cb7758e13",
@@ -1366,7 +1366,7 @@
           "range": {
             "byteLength": 41,
             "byteStart": 1864,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L56",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L56",
             "lineEnd": 56,
             "lineStart": 56,
             "snippetSha256": "sha256:109d101efcde47068666beac436b7aab7f05fe57707657631074ba9232b8871d",
@@ -1398,7 +1398,7 @@
           "range": {
             "byteLength": 85,
             "byteStart": 1910,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L57",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L57",
             "lineEnd": 57,
             "lineStart": 57,
             "snippetSha256": "sha256:5b0f6ead7fb4f9cd0d03cae961c5b6ca1a62d48c21795327c6dffc623e99b469",
@@ -1430,7 +1430,7 @@
           "range": {
             "byteLength": 96,
             "byteStart": 2000,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L58",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L58",
             "lineEnd": 58,
             "lineStart": 58,
             "snippetSha256": "sha256:4afc338f49ab665489b4b48d3a213a31c47e4e835078982b6599d957e32a10eb",
@@ -1467,7 +1467,7 @@
           "range": {
             "byteLength": 124,
             "byteStart": 2101,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L59-L61",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L59-L61",
             "lineEnd": 61,
             "lineStart": 59,
             "snippetSha256": "sha256:3d20526cd03d6532931df74390a0efdc8c9bfff8b4de994cf8099415ea056968",
@@ -1522,7 +1522,7 @@
           "range": {
             "byteLength": 197,
             "byteStart": 2602,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L70-L76",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L70-L76",
             "lineEnd": 76,
             "lineStart": 70,
             "snippetSha256": "sha256:52f2e9bf5a16e259e87f9b7f3c58b661ee161c5466823a36221612e993e5b8b5",
@@ -1587,7 +1587,7 @@
           "range": {
             "byteLength": 257,
             "byteStart": 2804,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L77-L85",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L77-L85",
             "lineEnd": 85,
             "lineStart": 77,
             "snippetSha256": "sha256:57d9714fd22d7c4a53b4ca1abd7db0f042968878ddf44bd7342205a85f2c724c",
@@ -1640,7 +1640,7 @@
           "range": {
             "byteLength": 206,
             "byteStart": 3066,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L86-L92",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L86-L92",
             "lineEnd": 92,
             "lineStart": 86,
             "snippetSha256": "sha256:7901ac5bb2b17aa32920aba7363d99a0089b50c82e7b7c60294274b783518572",
@@ -1711,7 +1711,7 @@
           "range": {
             "byteLength": 301,
             "byteStart": 3277,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L93-L102",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L93-L102",
             "lineEnd": 102,
             "lineStart": 93,
             "snippetSha256": "sha256:8432652a3ac8d2dbd4c74bdb90d321716a9a6397e0eafd34d8abde191cbd1978",
@@ -1782,7 +1782,7 @@
           "range": {
             "byteLength": 297,
             "byteStart": 3583,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L103-L112",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L103-L112",
             "lineEnd": 112,
             "lineStart": 103,
             "snippetSha256": "sha256:035736b7e598c8bc68ab9ff1e539fcea07466eec3a005adda06b30b0ecc6b4df",
@@ -1859,7 +1859,7 @@
           "range": {
             "byteLength": 334,
             "byteStart": 3885,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L113-L123",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L113-L123",
             "lineEnd": 123,
             "lineStart": 113,
             "snippetSha256": "sha256:b9440d68c45775daf873263055280f7e1b042db0cf2ffc061923e97fc6b93873",
@@ -1924,7 +1924,7 @@
           "range": {
             "byteLength": 267,
             "byteStart": 4224,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L124-L132",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L124-L132",
             "lineEnd": 132,
             "lineStart": 124,
             "snippetSha256": "sha256:a188cd14e0f2fb4b66ad012eda694d817ff6cb08a3d22c9d53c9728c7e8eb058",
@@ -1956,7 +1956,7 @@
           "range": {
             "byteLength": 66,
             "byteStart": 138,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L8",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L8",
             "lineEnd": 8,
             "lineStart": 8,
             "snippetSha256": "sha256:2bb937b8b75680f42bb49e7257166e2dd1f2fc43696f63ea13699666a52e019c",
@@ -1990,7 +1990,7 @@
           "range": {
             "byteLength": 221,
             "byteStart": 210,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
             "lineEnd": 11,
             "lineStart": 9,
             "snippetSha256": "sha256:62a96a57d90d0d07d1a65647c71a0d6e0c47e4a07e59da3a869018bb8db4daa5",
@@ -2031,7 +2031,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 2301,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L64",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L64",
             "lineEnd": 64,
             "lineStart": 64,
             "snippetSha256": "sha256:4ee26e856cfd0519bb5a95937b3059ab15fbdf8168d9ad330c55f86b203716b1",
@@ -2072,7 +2072,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 2356,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L65",
             "lineEnd": 65,
             "lineStart": 65,
             "snippetSha256": "sha256:d1e343bd081e6153e0aa52b8f6c4e7222927258c8f579777409f8aa27f968fc1",
@@ -2113,7 +2113,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 2411,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L66",
             "lineEnd": 66,
             "lineStart": 66,
             "snippetSha256": "sha256:c47b04e8a6c13ec218beef4e0f90090b3e57302f9aa0af0fc3311d9f740bfed3",
@@ -2153,7 +2153,7 @@
           "range": {
             "byteLength": 184,
             "byteStart": 4497,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L134-L140",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L134-L140",
             "lineEnd": 140,
             "lineStart": 134,
             "snippetSha256": "sha256:b364ae47c531bef439ddac97a8c5247dad1ffc711d098c5ab3441042223dbbca",
@@ -2192,7 +2192,7 @@
           "range": {
             "byteLength": 185,
             "byteStart": 4687,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L142-L148",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L142-L148",
             "lineEnd": 148,
             "lineStart": 142,
             "snippetSha256": "sha256:e47352c212fe712dc0d3d7691132d26d31ac8f8d98a82ed4f985c9c758a44a51",
@@ -2232,7 +2232,7 @@
           "range": {
             "byteLength": 202,
             "byteStart": 4878,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L150-L156",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L150-L156",
             "lineEnd": 156,
             "lineStart": 150,
             "snippetSha256": "sha256:f550acb286f3a95ac5d821310ce3783db22508ef42afee72eed9ee3190723b3f",
@@ -2271,7 +2271,7 @@
           "range": {
             "byteLength": 203,
             "byteStart": 5086,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L158-L164",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L158-L164",
             "lineEnd": 164,
             "lineStart": 158,
             "snippetSha256": "sha256:7520ce33da7fa6ab728d1f33eb84f7e09f08b93f53f39e3a1c2b6221c391b1ca",
@@ -2304,7 +2304,7 @@
           "range": {
             "byteLength": 96,
             "byteStart": 5295,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L166-L168",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L166-L168",
             "lineEnd": 168,
             "lineStart": 166,
             "snippetSha256": "sha256:d364e4cc91838504f4ec9b3462ae9c71da615a2194a9a444fef6d45532e0064f",
@@ -2343,7 +2343,7 @@
           "range": {
             "byteLength": 162,
             "byteStart": 5397,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L170-L172",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L170-L172",
             "lineEnd": 172,
             "lineStart": 170,
             "snippetSha256": "sha256:67e5a59a24da9f09231b55879ecbee61973a6e56e5d25ddccd1bc87fdac5f244",
@@ -2376,7 +2376,7 @@
           "range": {
             "byteLength": 125,
             "byteStart": 5565,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L174-L176",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L174-L176",
             "lineEnd": 176,
             "lineStart": 174,
             "snippetSha256": "sha256:03bb0fb6018655ae6de045208159bc2f4f3bde3866e0b6e213b869fa396428b3",
@@ -2424,7 +2424,7 @@
           "range": {
             "byteLength": 1867,
             "byteStart": 5696,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L178-L222",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L178-L222",
             "lineEnd": 222,
             "lineStart": 178,
             "snippetSha256": "sha256:02fbd13e6bc7720837b28acd33b80c3fc76061a6c09a0cd6badf24ae9e0b3e33",
@@ -2484,7 +2484,7 @@
           "range": {
             "byteLength": 2559,
             "byteStart": 7569,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L224-L282",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L224-L282",
             "lineEnd": 282,
             "lineStart": 224,
             "snippetSha256": "sha256:6d3d4dbad54a62a5063d610b4e83da95deac4ed07dcab27739e9212222d69b2e",
@@ -2517,7 +2517,7 @@
           "range": {
             "byteLength": 697,
             "byteStart": 10134,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L284-L302",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L284-L302",
             "lineEnd": 302,
             "lineStart": 284,
             "snippetSha256": "sha256:3c770ceb279c03b99c14d9a64f8ed13a9e289996e4c0389d7c29a719a239b64d",
@@ -2550,7 +2550,7 @@
           "range": {
             "byteLength": 715,
             "byteStart": 10837,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L304-L322",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L304-L322",
             "lineEnd": 322,
             "lineStart": 304,
             "snippetSha256": "sha256:c3622e2576c6dcea171c4c20c8f447b7da51b19402f4f6067812298547d16023",
@@ -2595,7 +2595,7 @@
           "range": {
             "byteLength": 636,
             "byteStart": 11558,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L324-L341",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L324-L341",
             "lineEnd": 341,
             "lineStart": 324,
             "snippetSha256": "sha256:c4bc0e2c6c896d2dd9c2e091e29ad2f85d458335d96f49d124a9ed43ec9e1e1f",
@@ -2640,7 +2640,7 @@
           "range": {
             "byteLength": 690,
             "byteStart": 12200,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L343-L358",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L343-L358",
             "lineEnd": 358,
             "lineStart": 343,
             "snippetSha256": "sha256:b97f0951b1fe903531ebca7242c92e8769f8dde75029db5b1566cd2241cb0441",
@@ -2699,7 +2699,7 @@
           "range": {
             "byteLength": 2140,
             "byteStart": 12896,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L360-L405",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L360-L405",
             "lineEnd": 405,
             "lineStart": 360,
             "snippetSha256": "sha256:87474b3c49e0d3a1a223e9eed2c886231b3be73b091548a7678df6e37570d562",
@@ -2737,7 +2737,7 @@
           "range": {
             "byteLength": 926,
             "byteStart": 15042,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L407-L432",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L407-L432",
             "lineEnd": 432,
             "lineStart": 407,
             "snippetSha256": "sha256:e40ca04d25efe1bce93c07b8004b216e094d7534d11068641c9dee5e3e7b413f",
@@ -2781,7 +2781,7 @@
           "range": {
             "byteLength": 673,
             "byteStart": 15974,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L434-L452",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L434-L452",
             "lineEnd": 452,
             "lineStart": 434,
             "snippetSha256": "sha256:270f53166b4017ed0b2ebf317899325dcf838613fdd8c5c9b2e5e8c4dce132aa",
@@ -2814,7 +2814,7 @@
           "range": {
             "byteLength": 752,
             "byteStart": 16653,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L454-L472",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L454-L472",
             "lineEnd": 472,
             "lineStart": 454,
             "snippetSha256": "sha256:b12efce91c1159c39fe660392b276f5e377d2e96c1f6305b4bf37d0a58a2e2cc",
@@ -2847,7 +2847,7 @@
           "range": {
             "byteLength": 287,
             "byteStart": 17411,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L474-L478",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L474-L478",
             "lineEnd": 478,
             "lineStart": 474,
             "snippetSha256": "sha256:06104286744aff77ed32c70e6f3abe0fa0d57656444052f9c0063a43e823a6d8",
@@ -2887,7 +2887,7 @@
           "range": {
             "byteLength": 150,
             "byteStart": 17704,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L480-L482",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L480-L482",
             "lineEnd": 482,
             "lineStart": 480,
             "snippetSha256": "sha256:f01a68e9454cecbc95a97cdf79f9d1e10a0ae5efbe5bb6c11918f1ca56ca8440",
@@ -2951,7 +2951,7 @@
           "range": {
             "byteLength": 535,
             "byteStart": 17860,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L484-L503",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L484-L503",
             "lineEnd": 503,
             "lineStart": 484,
             "snippetSha256": "sha256:f1ac0e595dd5444557151accd6a7da0e7c0a7099902f17aa95cf624e1c318420",
@@ -2975,7 +2975,7 @@
           "range": {
             "byteLength": 66,
             "byteStart": 138,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L8",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L8",
             "lineEnd": 8,
             "lineStart": 8,
             "snippetSha256": "sha256:2bb937b8b75680f42bb49e7257166e2dd1f2fc43696f63ea13699666a52e019c",
@@ -2987,7 +2987,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 203,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L8",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L8",
             "lineEnd": 8,
             "lineStart": 8,
             "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
@@ -3005,7 +3005,7 @@
           "range": {
             "byteLength": 221,
             "byteStart": 210,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
             "lineEnd": 11,
             "lineStart": 9,
             "snippetSha256": "sha256:62a96a57d90d0d07d1a65647c71a0d6e0c47e4a07e59da3a869018bb8db4daa5",
@@ -3017,7 +3017,7 @@
           "valueRange": {
             "byteLength": 170,
             "byteStart": 261,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
             "lineEnd": 11,
             "lineStart": 9,
             "snippetSha256": "sha256:66a4b794c26192e8ab011adf04443fc22cfc01ca8e9468b8313b0430f2c80cca",
@@ -3035,7 +3035,7 @@
           "range": {
             "byteLength": 64,
             "byteStart": 2231,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L63",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L63",
             "lineEnd": 63,
             "lineStart": 63,
             "snippetSha256": "sha256:20ddc4bff8053fab0b0ea02e4f6ee6704ac2197cd978fc9fd6810c7f47c8ec26",
@@ -3057,7 +3057,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 2301,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L64",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L64",
             "lineEnd": 64,
             "lineStart": 64,
             "snippetSha256": "sha256:4ee26e856cfd0519bb5a95937b3059ab15fbdf8168d9ad330c55f86b203716b1",
@@ -3079,7 +3079,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 2356,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L65",
             "lineEnd": 65,
             "lineStart": 65,
             "snippetSha256": "sha256:d1e343bd081e6153e0aa52b8f6c4e7222927258c8f579777409f8aa27f968fc1",
@@ -3101,7 +3101,7 @@
           "range": {
             "byteLength": 54,
             "byteStart": 2411,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L66",
             "lineEnd": 66,
             "lineStart": 66,
             "snippetSha256": "sha256:c47b04e8a6c13ec218beef4e0f90090b3e57302f9aa0af0fc3311d9f740bfed3",
@@ -3123,7 +3123,7 @@
           "range": {
             "byteLength": 73,
             "byteStart": 2471,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L67",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L67",
             "lineEnd": 67,
             "lineStart": 67,
             "snippetSha256": "sha256:4c00458c134e0b2c94ec6ebe934c30e3aa208b01447076d88185cfacc3f0284f",
@@ -3145,7 +3145,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 2550,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L68",
             "lineEnd": 68,
             "lineStart": 68,
             "snippetSha256": "sha256:0240dd523935b9babec3f8362bb0666a9a85146dd6213a76676303e1ca25753d",
@@ -3169,7 +3169,7 @@
               "range": {
                 "byteLength": 20,
                 "byteStart": 608,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L22",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L22",
                 "lineEnd": 22,
                 "lineStart": 22,
                 "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
@@ -3185,7 +3185,7 @@
               "range": {
                 "byteLength": 15,
                 "byteStart": 638,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L23",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L23",
                 "lineEnd": 23,
                 "lineStart": 23,
                 "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
@@ -3201,7 +3201,7 @@
               "range": {
                 "byteLength": 16,
                 "byteStart": 663,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L24",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L24",
                 "lineEnd": 24,
                 "lineStart": 24,
                 "snippetSha256": "sha256:1dcbaabe926a15813b14eebbc6c4550c100d89063c962c55a143c0d628e83fbe",
@@ -3217,7 +3217,7 @@
               "range": {
                 "byteLength": 25,
                 "byteStart": 689,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L25",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L25",
                 "lineEnd": 25,
                 "lineStart": 25,
                 "snippetSha256": "sha256:10c6cbf323ae4ebabac5b690d7ee32a37e5f5cc1dc769be00e11572638f59bd3",
@@ -3233,7 +3233,7 @@
               "range": {
                 "byteLength": 23,
                 "byteStart": 724,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L26",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L26",
                 "lineEnd": 26,
                 "lineStart": 26,
                 "snippetSha256": "sha256:550552d2f417f7119e59fc932efdc40f17c847ec31e8b5a1cc1f0c4617540359",
@@ -3249,7 +3249,7 @@
               "range": {
                 "byteLength": 28,
                 "byteStart": 757,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L27",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L27",
                 "lineEnd": 27,
                 "lineStart": 27,
                 "snippetSha256": "sha256:dee8395eaeb74aaa6063a3eb14d03f360a4f64baf85a9912b159f79df2a11dc1",
@@ -3265,7 +3265,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 795,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L28",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L28",
                 "lineEnd": 28,
                 "lineStart": 28,
                 "snippetSha256": "sha256:91df698084a53564de989f3d82bb23082b85b8f5064c353ae6b9e4f70a3c117f",
@@ -3281,7 +3281,7 @@
               "range": {
                 "byteLength": 26,
                 "byteStart": 827,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L29",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L29",
                 "lineEnd": 29,
                 "lineStart": 29,
                 "snippetSha256": "sha256:a0d2a2ac5d36b40d4a3d6e5443851c4f2365685594071183f387991413067d82",
@@ -3297,7 +3297,7 @@
               "range": {
                 "byteLength": 22,
                 "byteStart": 863,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L30",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L30",
                 "lineEnd": 30,
                 "lineStart": 30,
                 "snippetSha256": "sha256:15a5c5441350127c6731dc7d7bd20a5e5f044af040d95ade01218a029ae14e58",
@@ -3313,7 +3313,7 @@
               "range": {
                 "byteLength": 26,
                 "byteStart": 895,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L31",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L31",
                 "lineEnd": 31,
                 "lineStart": 31,
                 "snippetSha256": "sha256:f9d0fe4cc02f544dd2f10261712241f87e905b88db6f1043b2afaa9b84cf2bc8",
@@ -3329,7 +3329,7 @@
               "range": {
                 "byteLength": 19,
                 "byteStart": 931,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L32",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L32",
                 "lineEnd": 32,
                 "lineStart": 32,
                 "snippetSha256": "sha256:166f576aec3f675c984aa6c7b39a99a47403adb3f97571900c40d01ff862955c",
@@ -3345,7 +3345,7 @@
               "range": {
                 "byteLength": 21,
                 "byteStart": 960,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L33",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L33",
                 "lineEnd": 33,
                 "lineStart": 33,
                 "snippetSha256": "sha256:e8d26a6609bdd16c07ce4525b722d7e16c020142bd4ecb4291e33d928446cfea",
@@ -3361,7 +3361,7 @@
               "range": {
                 "byteLength": 23,
                 "byteStart": 991,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L34",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L34",
                 "lineEnd": 34,
                 "lineStart": 34,
                 "snippetSha256": "sha256:9ee3e627456eea4983cfdd22af9d8cdb2d5c740ebd17bf9f3e6e353cfa77fb1e",
@@ -3377,7 +3377,7 @@
               "range": {
                 "byteLength": 32,
                 "byteStart": 1024,
-                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L35",
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L35",
                 "lineEnd": 35,
                 "lineStart": 35,
                 "snippetSha256": "sha256:3a4b8d0785332f3a95da6b77206ffc0bb439562e26b9f7e6d120a119196c06f6",
@@ -3392,7 +3392,7 @@
           "range": {
             "byteLength": 490,
             "byteStart": 573,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L21-L36",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L21-L36",
             "lineEnd": 36,
             "lineStart": 21,
             "snippetSha256": "sha256:976e36a09704fb5931278aeac283a2df21d566986a410e1b72614f9c1a0a7ffa",
@@ -3425,7 +3425,7 @@
     "range": {
       "byteLength": 18309,
       "byteStart": 88,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRandomizerLifecycle.sol#L7-L504",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L7-L504",
       "lineEnd": 504,
       "lineStart": 7,
       "snippetSha256": "sha256:b91f3a5de23830f5f3a80660c03406700bd3ac8fe382892986ccfa5db77ae52e",

@@ -84,7 +84,7 @@
           "range": {
             "byteLength": 1657,
             "byteStart": 615,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L19-L56",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L19-L56",
             "lineEnd": 56,
             "lineStart": 19,
             "snippetSha256": "sha256:e6e63a0c8179fd32a1eabf77fb4fcb006af7a5f9fa80d69f4eb65dbf586e50d1",
@@ -111,7 +111,7 @@
           "range": {
             "byteLength": 3136,
             "byteStart": 2278,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L58-L154",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L58-L154",
             "lineEnd": 154,
             "lineStart": 58,
             "snippetSha256": "sha256:6c2f7df13697ec06f076b28a06cf671b6ca2d24f46f7b7dc0da0b5519ddb9067",
@@ -138,7 +138,7 @@
           "range": {
             "byteLength": 2010,
             "byteStart": 5420,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L156-L206",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L156-L206",
             "lineEnd": 206,
             "lineStart": 156,
             "snippetSha256": "sha256:3f0040de79b7e504f6f529491b78527c9dfc6a98bec86f8d01aa709a6d684100",
@@ -165,7 +165,7 @@
           "range": {
             "byteLength": 1212,
             "byteStart": 7436,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L208-L236",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L208-L236",
             "lineEnd": 236,
             "lineStart": 208,
             "snippetSha256": "sha256:183c3ad29c6084052afa67230cee830b30100b5898d90f4fef84f1c6d9a791e2",
@@ -192,7 +192,7 @@
           "range": {
             "byteLength": 1747,
             "byteStart": 8654,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L238-L280",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L238-L280",
             "lineEnd": 280,
             "lineStart": 238,
             "snippetSha256": "sha256:3bfeebf5ef869c06e0b127fb9444b8473a04497b34f695e12ed5b31099da42bd",
@@ -236,7 +236,7 @@
           "range": {
             "byteLength": 734,
             "byteStart": 10407,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L282-L300",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L282-L300",
             "lineEnd": 300,
             "lineStart": 282,
             "snippetSha256": "sha256:c1a428bdf6fb3c85579b1843caf83ac0515ab700515481835b357da619c78154",
@@ -276,7 +276,7 @@
           "range": {
             "byteLength": 423,
             "byteStart": 11147,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L302-L309",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L302-L309",
             "lineEnd": 309,
             "lineStart": 302,
             "snippetSha256": "sha256:b8f6d5e0ea62556a76868e06f5637cddf7a0adee7bc93e13cb9a6918872019e3",
@@ -316,7 +316,7 @@
           "range": {
             "byteLength": 271,
             "byteStart": 11576,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L311-L315",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L311-L315",
             "lineEnd": 315,
             "lineStart": 311,
             "snippetSha256": "sha256:a77045e1effe1c1c370a4c90ac103e8bcbb7572ec4c48db6ee5e043bc81f2afb",
@@ -362,7 +362,7 @@
           "range": {
             "byteLength": 295,
             "byteStart": 11853,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L317-L327",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L317-L327",
             "lineEnd": 327,
             "lineStart": 317,
             "snippetSha256": "sha256:f5a331522a022f6831f5fb3eebc6ba600a448c211d6413f33cc6f89dfc8d9f65",
@@ -403,7 +403,7 @@
           "range": {
             "byteLength": 189,
             "byteStart": 12154,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L329-L333",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L329-L333",
             "lineEnd": 333,
             "lineStart": 329,
             "snippetSha256": "sha256:4e3e7dcfc3371f5deb529831fd4a7c4a2ccb9ff30af0be9a9ecc69c8150f7152",
@@ -449,7 +449,7 @@
           "range": {
             "byteLength": 373,
             "byteStart": 12349,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L335-L343",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L335-L343",
             "lineEnd": 343,
             "lineStart": 335,
             "snippetSha256": "sha256:9b10f6aa4d825fa6377a06c744a9faf651209c4efda10b4380f77b42f93fa55c",
@@ -473,7 +473,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 464,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
@@ -485,7 +485,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 505,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L15",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L15",
             "lineEnd": 15,
             "lineStart": 15,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -503,7 +503,7 @@
           "range": {
             "byteLength": 37,
             "byteStart": 512,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
@@ -515,7 +515,7 @@
           "valueRange": {
             "byteLength": 1,
             "byteStart": 548,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L16",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L16",
             "lineEnd": 16,
             "lineStart": 16,
             "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -533,7 +533,7 @@
           "range": {
             "byteLength": 53,
             "byteStart": 555,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
@@ -545,7 +545,7 @@
           "valueRange": {
             "byteLength": 16,
             "byteStart": 592,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L17",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L17",
             "lineEnd": 17,
             "lineStart": 17,
             "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
@@ -592,7 +592,7 @@
     "range": {
       "byteLength": 12447,
       "byteStart": 277,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamMetadataSizeLimits.t.sol#L10-L344",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L10-L344",
       "lineEnd": 344,
       "lineStart": 10,
       "snippetSha256": "sha256:4e24fa354c6f9687c24a8528031bfce079bf59064e2c24fb5d6f395bce9dff93",

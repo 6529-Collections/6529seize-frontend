@@ -213,7 +213,7 @@
           "range": {
             "byteLength": 76,
             "byteStart": 118,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamAdmins.sol#L7",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L7",
             "lineEnd": 7,
             "lineStart": 7,
             "snippetSha256": "sha256:07f591c3e1a888ce9ff80901810fdb2c8c575355758b352b4d21e23a20977134",
@@ -262,7 +262,7 @@
           "range": {
             "byteLength": 137,
             "byteStart": 231,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamAdmins.sol#L10-L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L10-L13",
             "lineEnd": 13,
             "lineStart": 10,
             "snippetSha256": "sha256:7eaf0507ef8e2deb31894ebed80b75f119c9ce4d2c7aab1b645908fc9474c25a",
@@ -306,7 +306,7 @@
           "range": {
             "byteLength": 127,
             "byteStart": 407,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamAdmins.sol#L16-L19",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L16-L19",
             "lineEnd": 19,
             "lineStart": 16,
             "snippetSha256": "sha256:67dbb01799e995fada653ebfe5a0a3c74dad90979906688e518225869c471b75",
@@ -345,7 +345,7 @@
           "range": {
             "byteLength": 64,
             "byteStart": 578,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamAdmins.sol#L22",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L22",
             "lineEnd": 22,
             "lineStart": 22,
             "snippetSha256": "sha256:b4796af5c136e298f9306db82edb60b10346e4a6d1da4df86ff72e333688797c",
@@ -378,7 +378,7 @@
           "range": {
             "byteLength": 62,
             "byteStart": 693,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamAdmins.sol#L25",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L25",
             "lineEnd": 25,
             "lineStart": 25,
             "snippetSha256": "sha256:ff5963394ef935bd20b429668c583b5efe34179b270774345d1fdb34fb17a180",
@@ -411,7 +411,7 @@
           "range": {
             "byteLength": 56,
             "byteStart": 811,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamAdmins.sol#L28",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L28",
             "lineEnd": 28,
             "lineStart": 28,
             "snippetSha256": "sha256:c9c44dadbcc9f0d4efb60c44a6cb9e7c00523b9b56254e608191cd15de7d3f9e",
@@ -444,7 +444,7 @@
           "range": {
             "byteLength": 49,
             "byteStart": 895,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamAdmins.sol#L31",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L31",
             "lineEnd": 31,
             "lineStart": 31,
             "snippetSha256": "sha256:d4fbebb6d19d5553278faf66452c8e2b7337977d6cf2a27f4013381274a12142",
@@ -488,7 +488,7 @@
     "range": {
       "byteLength": 887,
       "byteStart": 59,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamAdmins.sol#L5-L32",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAdmins.sol#L5-L32",
       "lineEnd": 32,
       "lineStart": 5,
       "snippetSha256": "sha256:822cd878e70971be8c8871adc1ed0d28af7eab53fad970ca7c3c0900508e2419",

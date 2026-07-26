@@ -100,7 +100,7 @@
           "range": {
             "byteLength": 160,
             "byteStart": 824,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IERC721Receiver.sol#L21-L26",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721Receiver.sol#L21-L26",
             "lineEnd": 26,
             "lineStart": 21,
             "snippetSha256": "sha256:415e0ccfda42fcb366a4f9bedf68c127aed3adab68323495157b8a8105aec6e3",
@@ -141,7 +141,7 @@
     "range": {
       "byteLength": 692,
       "byteStart": 294,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IERC721Receiver.sol#L11-L27",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721Receiver.sol#L11-L27",
       "lineEnd": 27,
       "lineStart": 11,
       "snippetSha256": "sha256:78781819f61c4954ee36a97dd556ed001971d67a810384f3434dbb87efce0556",

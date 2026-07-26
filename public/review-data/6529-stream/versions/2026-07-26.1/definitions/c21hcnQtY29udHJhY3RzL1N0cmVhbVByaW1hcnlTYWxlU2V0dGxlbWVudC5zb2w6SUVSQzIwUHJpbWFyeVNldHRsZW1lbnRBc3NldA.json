@@ -134,7 +134,7 @@
           "range": {
             "byteLength": 68,
             "byteStart": 284,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamPrimarySaleSettlement.sol#L11",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L11",
             "lineEnd": 11,
             "lineStart": 11,
             "snippetSha256": "sha256:7a9cdf099db2241a909d1a400a56960a5d33ee5889266d5f29c6dfa382355da4",
@@ -178,7 +178,7 @@
           "range": {
             "byteLength": 77,
             "byteStart": 357,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamPrimarySaleSettlement.sol#L12",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L12",
             "lineEnd": 12,
             "lineStart": 12,
             "snippetSha256": "sha256:8c0ba06110ab9168fe01876cfc2b0e5854572193857173d705104f44e848f76e",
@@ -227,7 +227,7 @@
           "range": {
             "byteLength": 97,
             "byteStart": 439,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamPrimarySaleSettlement.sol#L13",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L13",
             "lineEnd": 13,
             "lineStart": 13,
             "snippetSha256": "sha256:14dbeddc3d970550060204479626ba13c5184ab30c0ef09cf0225f96c8e6eb9a",
@@ -268,7 +268,7 @@
     "range": {
       "byteLength": 299,
       "byteStart": 239,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamPrimarySaleSettlement.sol#L10-L14",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L10-L14",
       "lineEnd": 14,
       "lineStart": 10,
       "snippetSha256": "sha256:8caef032ca10e128c8a3a90fc51b8fa8d7bb00dad11cc35dcd85632828ed0498",

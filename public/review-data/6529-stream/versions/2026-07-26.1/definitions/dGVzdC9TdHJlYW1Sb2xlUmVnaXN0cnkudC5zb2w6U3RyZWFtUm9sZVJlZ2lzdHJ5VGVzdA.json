@@ -716,7 +716,7 @@
           "range": {
             "byteLength": 205,
             "byteStart": 687,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L23-L30",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L23-L30",
             "lineEnd": 30,
             "lineStart": 23,
             "snippetSha256": "sha256:2ae30cb62c6d8e1d9498116c3b67785bbb6ae548599dff804173a665e71b670e",
@@ -775,7 +775,7 @@
           "range": {
             "byteLength": 205,
             "byteStart": 898,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L32-L39",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L32-L39",
             "lineEnd": 39,
             "lineStart": 32,
             "snippetSha256": "sha256:024cd1d0c15044ff139c5f9fdef8cbc415d52de6733fde8b93ffe8119f6b4342",
@@ -840,7 +840,7 @@
           "range": {
             "byteLength": 245,
             "byteStart": 1109,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L41-L49",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L41-L49",
             "lineEnd": 49,
             "lineStart": 41,
             "snippetSha256": "sha256:911148f7259e5b71d8e86045f93274afdc419f451aed5088ab5ea0a54eba194c",
@@ -917,7 +917,7 @@
           "range": {
             "byteLength": 306,
             "byteStart": 1360,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L51-L61",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L51-L61",
             "lineEnd": 61,
             "lineStart": 51,
             "snippetSha256": "sha256:ebeccc922caa733f240d9e49273bc8a27a89f35687d530e50223fb387da73579",
@@ -973,7 +973,7 @@
           "range": {
             "byteLength": 477,
             "byteStart": 3697,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L102-L122",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L102-L122",
             "lineEnd": 122,
             "lineStart": 102,
             "snippetSha256": "sha256:a946f33760ca6efe16051d4204c7985b7edd432314db7660dc9a4cf0101a0a9d",
@@ -1012,7 +1012,7 @@
           "range": {
             "byteLength": 112,
             "byteStart": 4180,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L124-L126",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L124-L126",
             "lineEnd": 126,
             "lineStart": 124,
             "snippetSha256": "sha256:0ce91e739aee42131b3d407b70d1950add794d7c5da555e268568f3163b95675",
@@ -1055,7 +1055,7 @@
           "range": {
             "byteLength": 294,
             "byteStart": 4298,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L128-L136",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L128-L136",
             "lineEnd": 136,
             "lineStart": 128,
             "snippetSha256": "sha256:fbc476eccc4241dd258b8b772e292caf39210b7a16d7661dc7a7173f16e9b981",
@@ -1082,7 +1082,7 @@
           "range": {
             "byteLength": 142,
             "byteStart": 4598,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L138-L141",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L138-L141",
             "lineEnd": 141,
             "lineStart": 138,
             "snippetSha256": "sha256:b1951049c08ab14ba21de1e9fd4b9aa3f2eeb578671c81974bd36f847ee46567",
@@ -1109,7 +1109,7 @@
           "range": {
             "byteLength": 646,
             "byteStart": 4746,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L143-L155",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L143-L155",
             "lineEnd": 155,
             "lineStart": 143,
             "snippetSha256": "sha256:96de9819e2761711215f03b37599b1f1693838c00c48b6902329063d3e01455c",
@@ -1136,7 +1136,7 @@
           "range": {
             "byteLength": 1557,
             "byteStart": 5398,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L157-L178",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L157-L178",
             "lineEnd": 178,
             "lineStart": 157,
             "snippetSha256": "sha256:20cd635b44343ae0d728b84950efc809433a736e760a67efbca14824c6f8dd3f",
@@ -1175,7 +1175,7 @@
           "range": {
             "byteLength": 241,
             "byteStart": 6961,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L180-L184",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L180-L184",
             "lineEnd": 184,
             "lineStart": 180,
             "snippetSha256": "sha256:564054432bde5dd1d65844f4835a5f7cba09eca706039e85145ed9d20ad85109",
@@ -1214,7 +1214,7 @@
           "range": {
             "byteLength": 255,
             "byteStart": 7208,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L186-L190",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L186-L190",
             "lineEnd": 190,
             "lineStart": 186,
             "snippetSha256": "sha256:86eea437456db8aa9c4740966a7d99b56e9fed23905545400ef82921fab593ba",
@@ -1241,7 +1241,7 @@
           "range": {
             "byteLength": 463,
             "byteStart": 7469,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L192-L199",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L192-L199",
             "lineEnd": 199,
             "lineStart": 192,
             "snippetSha256": "sha256:66a72d418ef5e809ce1e2730cd2deebd0174a7322b3589482f79f83ba8a10021",
@@ -1268,7 +1268,7 @@
           "range": {
             "byteLength": 1393,
             "byteStart": 7938,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L201-L238",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L201-L238",
             "lineEnd": 238,
             "lineStart": 201,
             "snippetSha256": "sha256:16c0c1ee017df0d1131c509b6ee6dd91b8c871dd737a692445fa78e533f8cf7b",
@@ -1295,7 +1295,7 @@
           "range": {
             "byteLength": 1224,
             "byteStart": 9337,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L240-L271",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L240-L271",
             "lineEnd": 271,
             "lineStart": 240,
             "snippetSha256": "sha256:2a50ab9662f4532ea28fca65b198dc02f1161d6251f924bbe93948c23f0b3801",
@@ -1322,7 +1322,7 @@
           "range": {
             "byteLength": 2954,
             "byteStart": 10567,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L273-L352",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L273-L352",
             "lineEnd": 352,
             "lineStart": 273,
             "snippetSha256": "sha256:f035b0e47b33481f92f7684d6809ab1f2922f7de59dd30dc6ed9df0bce7771bf",
@@ -1349,7 +1349,7 @@
           "range": {
             "byteLength": 937,
             "byteStart": 13527,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L354-L386",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L354-L386",
             "lineEnd": 386,
             "lineStart": 354,
             "snippetSha256": "sha256:da43ed25a77b18684c81a84498c4c41a17c89a5c100ac8de41f5523976ccafa0",
@@ -1376,7 +1376,7 @@
           "range": {
             "byteLength": 662,
             "byteStart": 14470,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L388-L401",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L388-L401",
             "lineEnd": 401,
             "lineStart": 388,
             "snippetSha256": "sha256:a3ddb4f0c565cf538e369569488163106e2c613ad32ce26ac7f835e9039a3fb7",
@@ -1403,7 +1403,7 @@
           "range": {
             "byteLength": 847,
             "byteStart": 15138,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L403-L425",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L403-L425",
             "lineEnd": 425,
             "lineStart": 403,
             "snippetSha256": "sha256:a2acc10f3e8159d44d3084ddbddc736ba7d5fa8ece75405280ab21e722bdf33d",
@@ -1430,7 +1430,7 @@
           "range": {
             "byteLength": 1727,
             "byteStart": 15991,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L427-L457",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L427-L457",
             "lineEnd": 457,
             "lineStart": 427,
             "snippetSha256": "sha256:b0eb57239a7d3182b1ae94fbbf07ac2fa42836ca4dad6a61073b3eaf814c28ea",
@@ -1457,7 +1457,7 @@
           "range": {
             "byteLength": 746,
             "byteStart": 17724,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L459-L477",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L459-L477",
             "lineEnd": 477,
             "lineStart": 459,
             "snippetSha256": "sha256:6af611581123b69eb95369bc84d4d6954d6542004767d281caec28da6788f89f",
@@ -1484,7 +1484,7 @@
           "range": {
             "byteLength": 876,
             "byteStart": 18476,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L479-L496",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L479-L496",
             "lineEnd": 496,
             "lineStart": 479,
             "snippetSha256": "sha256:4c173e6ac3161725777c46d86258bca889107bd95d8bab2f5e1293a34d4d5139",
@@ -1511,7 +1511,7 @@
           "range": {
             "byteLength": 962,
             "byteStart": 19358,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L498-L522",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L498-L522",
             "lineEnd": 522,
             "lineStart": 498,
             "snippetSha256": "sha256:fc0bcfab234d91c153f4753c2ae1678ce389e622d5366bc37bd56d62aa97c657",
@@ -1538,7 +1538,7 @@
           "range": {
             "byteLength": 1661,
             "byteStart": 20326,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L524-L556",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L524-L556",
             "lineEnd": 556,
             "lineStart": 524,
             "snippetSha256": "sha256:f1f26e91ae0cd11e81b76ede0652defcf42115803075a5e14a515f0a40591332",
@@ -1565,7 +1565,7 @@
           "range": {
             "byteLength": 2001,
             "byteStart": 21993,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L558-L599",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L558-L599",
             "lineEnd": 599,
             "lineStart": 558,
             "snippetSha256": "sha256:8196f73b0d9e0a41fe9f4e57b79a22cdd9b018cd4980df9ea01c53be7b40f8b0",
@@ -1592,7 +1592,7 @@
           "range": {
             "byteLength": 748,
             "byteStart": 24000,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L601-L618",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L601-L618",
             "lineEnd": 618,
             "lineStart": 601,
             "snippetSha256": "sha256:7e99ac56e2b68537d3a1d5aa52f081e08b85d227eb7bc5a4223f052fb2a14dce",
@@ -1619,7 +1619,7 @@
           "range": {
             "byteLength": 2358,
             "byteStart": 24754,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L620-L682",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L620-L682",
             "lineEnd": 682,
             "lineStart": 620,
             "snippetSha256": "sha256:39e9af648d81a35505a88dc04993e81efe6b13ab0499211aa9fb4ce8c0f65e5b",
@@ -1646,7 +1646,7 @@
           "range": {
             "byteLength": 935,
             "byteStart": 27118,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L684-L706",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L684-L706",
             "lineEnd": 706,
             "lineStart": 684,
             "snippetSha256": "sha256:fcc841f0dca927370d059c112f0caa35bf39da309e6b8bb9cfb3e9c8cc7abec2",
@@ -1673,7 +1673,7 @@
           "range": {
             "byteLength": 1532,
             "byteStart": 28059,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L708-L734",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L708-L734",
             "lineEnd": 734,
             "lineStart": 708,
             "snippetSha256": "sha256:b42a3ae97ac5d4575e48ddfe155a28bd782f91e903ddd5c8eccfd7ab5ceb822d",
@@ -1700,7 +1700,7 @@
           "range": {
             "byteLength": 1414,
             "byteStart": 29597,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L736-L763",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L736-L763",
             "lineEnd": 763,
             "lineStart": 736,
             "snippetSha256": "sha256:2d242c881e841b4c216b093704ddaf5a2a7cb46269836ca4d5ebe248f1fca4f5",
@@ -1727,7 +1727,7 @@
           "range": {
             "byteLength": 884,
             "byteStart": 31017,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L765-L786",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L765-L786",
             "lineEnd": 786,
             "lineStart": 765,
             "snippetSha256": "sha256:3994fce9fed9b16086be8d8cab7f395f711fd15d4c12f37afc36ff52b0fad84c",
@@ -1754,7 +1754,7 @@
           "range": {
             "byteLength": 1205,
             "byteStart": 31907,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L788-L812",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L788-L812",
             "lineEnd": 812,
             "lineStart": 788,
             "snippetSha256": "sha256:1abcee7279bf0b9df49841112ee37000b91ba892bcdd6eb5a312c0e2d98487df",
@@ -1781,7 +1781,7 @@
           "range": {
             "byteLength": 469,
             "byteStart": 33198,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L816-L823",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L816-L823",
             "lineEnd": 823,
             "lineStart": 816,
             "snippetSha256": "sha256:40e6b3a84e75f29dc6efe63ca5c3e65c625e6747d2918838cd933504f1c1f11b",
@@ -1808,7 +1808,7 @@
           "range": {
             "byteLength": 1646,
             "byteStart": 33673,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L825-L855",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L825-L855",
             "lineEnd": 855,
             "lineStart": 825,
             "snippetSha256": "sha256:48b31fb59f2c30214738a0ef04ef50f013be9cfda210bd3c6dae953c11309051",
@@ -1835,7 +1835,7 @@
           "range": {
             "byteLength": 1384,
             "byteStart": 35325,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L857-L878",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L857-L878",
             "lineEnd": 878,
             "lineStart": 857,
             "snippetSha256": "sha256:be3cd7348e63544991bfe364749a06320f074363b357b6df5a15abf6a7a70c12",
@@ -1862,7 +1862,7 @@
           "range": {
             "byteLength": 1794,
             "byteStart": 36715,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L880-L924",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L880-L924",
             "lineEnd": 924,
             "lineStart": 880,
             "snippetSha256": "sha256:91b8022382d61e9726a911ee5e1549099e1f1e889f134350353579bc5e429fbf",
@@ -1889,7 +1889,7 @@
           "range": {
             "byteLength": 851,
             "byteStart": 38515,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L926-L946",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L926-L946",
             "lineEnd": 946,
             "lineStart": 926,
             "snippetSha256": "sha256:0c045c6c85dc68f34abebf4032e7f12a2d4a69199a7f13b33f47775d231fe892",
@@ -1958,7 +1958,7 @@
           "range": {
             "byteLength": 504,
             "byteStart": 39372,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L948-L961",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L948-L961",
             "lineEnd": 961,
             "lineStart": 948,
             "snippetSha256": "sha256:fe4da48aadcac9c30dfd6af463ef1bed44a0a3b1e7591c3a63cc42285425ce00",
@@ -2012,7 +2012,7 @@
           "range": {
             "byteLength": 1671,
             "byteStart": 39882,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L963-L995",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L963-L995",
             "lineEnd": 995,
             "lineStart": 963,
             "snippetSha256": "sha256:3ecca35bcfbbc3bfec9495e3d30b3fa56d0fa18ea364ea4f772cd733b2e4f5d7",
@@ -2076,7 +2076,7 @@
           "range": {
             "byteLength": 1037,
             "byteStart": 41559,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L997-L1017",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L997-L1017",
             "lineEnd": 1017,
             "lineStart": 997,
             "snippetSha256": "sha256:7f2724a24da953a2a6553888e95acf23ff10e90c0034ee886ee236cc9cf950ea",
@@ -2125,7 +2125,7 @@
           "range": {
             "byteLength": 1216,
             "byteStart": 42602,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1019-L1039",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1019-L1039",
             "lineEnd": 1039,
             "lineStart": 1019,
             "snippetSha256": "sha256:5e9670b8ffa4f12dc6bb212f4a40e8fd38793f189f1ee6668144fb9570ae887b",
@@ -2163,7 +2163,7 @@
           "range": {
             "byteLength": 211,
             "byteStart": 43824,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1041-L1045",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1041-L1045",
             "lineEnd": 1045,
             "lineStart": 1041,
             "snippetSha256": "sha256:ad0ffd85be2ff6cbd978a64251fecf009d821461b0782ff19df11858b5c49d3c",
@@ -2201,7 +2201,7 @@
           "range": {
             "byteLength": 213,
             "byteStart": 44041,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1047-L1051",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1047-L1051",
             "lineEnd": 1051,
             "lineStart": 1047,
             "snippetSha256": "sha256:1d4c75028b44889522f0ad68d164d8e15f75362ff656a50e793181ef4dc28a2e",
@@ -2244,7 +2244,7 @@
           "range": {
             "byteLength": 326,
             "byteStart": 44260,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1053-L1058",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1053-L1058",
             "lineEnd": 1058,
             "lineStart": 1053,
             "snippetSha256": "sha256:f20416b7b9b1558621201fedd6d1875a6b1e6a224a46caff9cbb90a3d35160c5",
@@ -2287,7 +2287,7 @@
           "range": {
             "byteLength": 328,
             "byteStart": 44592,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1060-L1065",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1060-L1065",
             "lineEnd": 1065,
             "lineStart": 1060,
             "snippetSha256": "sha256:868b8c581fff0a9292f96be111a68e68b82b2a690906c6927b3fa8b19a913510",
@@ -2325,7 +2325,7 @@
           "range": {
             "byteLength": 268,
             "byteStart": 44926,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1067-L1071",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1067-L1071",
             "lineEnd": 1071,
             "lineStart": 1067,
             "snippetSha256": "sha256:cd4ce79c9b9c004e1b2f78f5df4118d14d076e809c7e33403f75668c819f8340",
@@ -2368,7 +2368,7 @@
           "range": {
             "byteLength": 1282,
             "byteStart": 45200,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1073-L1106",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1073-L1106",
             "lineEnd": 1106,
             "lineStart": 1073,
             "snippetSha256": "sha256:22787339c8189028eede86c18a2bee1b03bc04cd670999cfce54cfefcafa5cc1",
@@ -2422,7 +2422,7 @@
           "range": {
             "byteLength": 473,
             "byteStart": 46488,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1108-L1125",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1108-L1125",
             "lineEnd": 1125,
             "lineStart": 1108,
             "snippetSha256": "sha256:f8df478065706ce334c6aedfd171c251d780734a63bccda0df91b7506ba13bae",
@@ -2470,7 +2470,7 @@
           "range": {
             "byteLength": 1941,
             "byteStart": 46967,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1127-L1181",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1127-L1181",
             "lineEnd": 1181,
             "lineStart": 1127,
             "snippetSha256": "sha256:ef56852716d98a7228b8334388a93af996e1787e997f479a9a34804e5e1bf5af",
@@ -2534,7 +2534,7 @@
           "range": {
             "byteLength": 607,
             "byteStart": 48914,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1183-L1204",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1183-L1204",
             "lineEnd": 1204,
             "lineStart": 1183,
             "snippetSha256": "sha256:8123fa842203651ac4a35bec3e745923edffabaf638cbffa8ee45c58d82d9c1f",
@@ -2561,7 +2561,7 @@
           "range": {
             "byteLength": 263,
             "byteStart": 49527,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L1206-L1213",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L1206-L1213",
             "lineEnd": 1213,
             "lineStart": 1206,
             "snippetSha256": "sha256:71c013029b197ca0b62627fa1930f919894606bc49529dbc520e5f0d4fa1d6ac",
@@ -2585,7 +2585,7 @@
           "range": {
             "byteLength": 35,
             "byteStart": 1672,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L63",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L63",
             "lineEnd": 63,
             "lineStart": 63,
             "snippetSha256": "sha256:23f571f60a74dddc1375007da4b096b33dc49c8bff66f3d8216f58f0dc50c704",
@@ -2607,7 +2607,7 @@
           "range": {
             "byteLength": 45,
             "byteStart": 1714,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L65",
             "lineEnd": 65,
             "lineStart": 65,
             "snippetSha256": "sha256:c4d3d7e68a8d6fbaa205ea89dbbefe1ad531225935f40c9e142739f2b670a9a3",
@@ -2619,7 +2619,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 1744,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L65",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L65",
             "lineEnd": 65,
             "lineStart": 65,
             "snippetSha256": "sha256:dc978dfe96a7a3bd8762da076c60c44f8a8833090b45544300265f8fd26df092",
@@ -2637,7 +2637,7 @@
           "range": {
             "byteLength": 40,
             "byteStart": 1765,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L66",
             "lineEnd": 66,
             "lineStart": 66,
             "snippetSha256": "sha256:7416db40c6b76876c14b7f8ac8504c91ac696e2771f84965cdb4cbd80b87a041",
@@ -2649,7 +2649,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 1790,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L66",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L66",
             "lineEnd": 66,
             "lineStart": 66,
             "snippetSha256": "sha256:9fca6fc5c4e788009e0a79b758710504f11e7e9d7f7a11e2ec928356a8f2f0a4",
@@ -2667,7 +2667,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 1811,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L67",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L67",
             "lineEnd": 67,
             "lineStart": 67,
             "snippetSha256": "sha256:7d08f201d7a3173dfb6af4da8c477b9140854952a15a24b6bf0b4ea5b4592a43",
@@ -2679,7 +2679,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 1842,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L67",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L67",
             "lineEnd": 67,
             "lineStart": 67,
             "snippetSha256": "sha256:b35a773b88b4d012bdd3abbd94cce2c37a58b47a357442f2b839c7d9065feb5d",
@@ -2697,7 +2697,7 @@
           "range": {
             "byteLength": 42,
             "byteStart": 1863,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L68",
             "lineEnd": 68,
             "lineStart": 68,
             "snippetSha256": "sha256:9a17a827bff8c17040bb47d618a1e2de80f2228d4de1059317e679a9bd1bce49",
@@ -2709,7 +2709,7 @@
           "valueRange": {
             "byteLength": 15,
             "byteStart": 1890,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L68",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L68",
             "lineEnd": 68,
             "lineStart": 68,
             "snippetSha256": "sha256:893584be3369b3c475f72b63e41886c5a275653e2fcac2e6f352aed06b1c9700",
@@ -2727,7 +2727,7 @@
           "range": {
             "byteLength": 46,
             "byteStart": 1911,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L69",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L69",
             "lineEnd": 69,
             "lineStart": 69,
             "snippetSha256": "sha256:758c8aa7dd668a2aa94cccc90715e3760e6c9b40be0d26226155d86ecdfbdc37",
@@ -2749,7 +2749,7 @@
           "range": {
             "byteLength": 34,
             "byteStart": 1963,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L70",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L70",
             "lineEnd": 70,
             "lineStart": 70,
             "snippetSha256": "sha256:08a027d6604217e42682eebfc6716564e2faeb4db68495cf58899d06d6ac3b85",
@@ -2771,7 +2771,7 @@
           "range": {
             "byteLength": 26,
             "byteStart": 2003,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L71",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L71",
             "lineEnd": 71,
             "lineStart": 71,
             "snippetSha256": "sha256:a166cccee00130c60f7b476144b87ec87caffa1749e99b4c3801b0f4746ded96",
@@ -2793,7 +2793,7 @@
           "range": {
             "byteLength": 28,
             "byteStart": 2035,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L72",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L72",
             "lineEnd": 72,
             "lineStart": 72,
             "snippetSha256": "sha256:0d367c10ffccccd3d865776d488a301c23b2b3b2e77f0ba048ddf3e34dcf66b7",
@@ -2815,7 +2815,7 @@
           "range": {
             "byteLength": 29,
             "byteStart": 2069,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L73",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L73",
             "lineEnd": 73,
             "lineStart": 73,
             "snippetSha256": "sha256:5955fb6b72719eccb1b27c60c3c4e27c886da9be2e959c3c926beb3f56fdf66d",
@@ -2837,7 +2837,7 @@
           "range": {
             "byteLength": 29,
             "byteStart": 2104,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L74",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L74",
             "lineEnd": 74,
             "lineStart": 74,
             "snippetSha256": "sha256:4bd57f7b12447735b79b34900c64dd16079ee8119ea7698d0007183287ac6f28",
@@ -2859,7 +2859,7 @@
           "range": {
             "byteLength": 32,
             "byteStart": 2139,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L75",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L75",
             "lineEnd": 75,
             "lineStart": 75,
             "snippetSha256": "sha256:6b2248cb0b22375f6b3124f7e7186a24741cc0fb2b95c45b7075c046fd64c280",
@@ -2881,7 +2881,7 @@
           "range": {
             "byteLength": 32,
             "byteStart": 2177,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L76",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L76",
             "lineEnd": 76,
             "lineStart": 76,
             "snippetSha256": "sha256:ecca048bb68c3b6aadcf3f324c8d353002c5b77ec2aee1e0615e2a92c1fca499",
@@ -2903,7 +2903,7 @@
           "range": {
             "byteLength": 63,
             "byteStart": 2216,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L78",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L78",
             "lineEnd": 78,
             "lineStart": 78,
             "snippetSha256": "sha256:57d0102a02f2762308fdd7ee5591590c9b3a921082db680be90888b79b7d71da",
@@ -2915,7 +2915,7 @@
           "valueRange": {
             "byteLength": 10,
             "byteStart": 2269,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L78",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L78",
             "lineEnd": 78,
             "lineStart": 78,
             "snippetSha256": "sha256:83320ac9348a8645e777c216f8b27a9c451bcd7edac7e371e59ea802b0417bc6",
@@ -2933,7 +2933,7 @@
           "range": {
             "byteLength": 104,
             "byteStart": 2285,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L79-L80",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L79-L80",
             "lineEnd": 80,
             "lineStart": 79,
             "snippetSha256": "sha256:1d8b78bf699fad757f895592f26e9187802bacd6bb569da7a2c3368e097202ae",
@@ -2945,7 +2945,7 @@
           "valueRange": {
             "byteLength": 46,
             "byteStart": 2343,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L80",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L80",
             "lineEnd": 80,
             "lineStart": 80,
             "snippetSha256": "sha256:71a90a9061dda938a770ccf3f60f5ae315497cafa04f1dd575e585d87220100d",
@@ -2963,7 +2963,7 @@
           "range": {
             "byteLength": 104,
             "byteStart": 2395,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L81-L82",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L81-L82",
             "lineEnd": 82,
             "lineStart": 81,
             "snippetSha256": "sha256:f1719694fcf3c7f313591e027279c068fa138baec55d42b86d92bb228e99f3cf",
@@ -2975,7 +2975,7 @@
           "valueRange": {
             "byteLength": 46,
             "byteStart": 2453,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L82",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L82",
             "lineEnd": 82,
             "lineStart": 82,
             "snippetSha256": "sha256:d92336a8ad8a36709caacdd3127215ccdc67382f0f8c8a6f3a9291bf50e1cb06",
@@ -2993,7 +2993,7 @@
           "range": {
             "byteLength": 91,
             "byteStart": 2505,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L83",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L83",
             "lineEnd": 83,
             "lineStart": 83,
             "snippetSha256": "sha256:a7655a53bb91f424a224570d460515a98aac8cc3206b832ec664a157acd4bf8d",
@@ -3005,7 +3005,7 @@
           "valueRange": {
             "byteLength": 40,
             "byteStart": 2556,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L83",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L83",
             "lineEnd": 83,
             "lineStart": 83,
             "snippetSha256": "sha256:3c4b9ad14e72055035c93e04aac68b383860f8a14f62b2d9327705b7cb0de74b",
@@ -3023,7 +3023,7 @@
           "range": {
             "byteLength": 113,
             "byteStart": 2602,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L84-L85",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L84-L85",
             "lineEnd": 85,
             "lineStart": 84,
             "snippetSha256": "sha256:6c3b3538e100750300fd768b5f651a91b78a4df22fb92a9a70dbc9cb722f4282",
@@ -3035,7 +3035,7 @@
           "valueRange": {
             "byteLength": 47,
             "byteStart": 2668,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L85",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L85",
             "lineEnd": 85,
             "lineStart": 85,
             "snippetSha256": "sha256:edc353ccfaec5aaa190937fac7a1a7c1f244811e84f102b71efcf48dac902f19",
@@ -3053,7 +3053,7 @@
           "range": {
             "byteLength": 104,
             "byteStart": 2721,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L86-L87",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L86-L87",
             "lineEnd": 87,
             "lineStart": 86,
             "snippetSha256": "sha256:08d5c5f0a6f69abc71567f4bea13466da22177aafc3668c072ec0233063d8028",
@@ -3065,7 +3065,7 @@
           "valueRange": {
             "byteLength": 46,
             "byteStart": 2779,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L87",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L87",
             "lineEnd": 87,
             "lineStart": 87,
             "snippetSha256": "sha256:8879a833fda0f1e62c3fdddb6543a02d8578523543c8a58cb30f516a09812a85",
@@ -3083,7 +3083,7 @@
           "range": {
             "byteLength": 116,
             "byteStart": 2831,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L88-L89",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L88-L89",
             "lineEnd": 89,
             "lineStart": 88,
             "snippetSha256": "sha256:1c9bfb8d1f98a57941e2382821620b926e97f33ace849ab80f2c8e8c918127cf",
@@ -3095,7 +3095,7 @@
           "valueRange": {
             "byteLength": 52,
             "byteStart": 2895,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L89",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L89",
             "lineEnd": 89,
             "lineStart": 89,
             "snippetSha256": "sha256:c1db0446143f5c925aa05b50f0219fb15ce11b219751bcd524d5b5af0fad5479",
@@ -3113,7 +3113,7 @@
           "range": {
             "byteLength": 122,
             "byteStart": 2953,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L90-L91",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L90-L91",
             "lineEnd": 91,
             "lineStart": 90,
             "snippetSha256": "sha256:6ed91d513be100574f21d7365e459b41bfaa36538015ecb83480bf3a23755748",
@@ -3125,7 +3125,7 @@
           "valueRange": {
             "byteLength": 55,
             "byteStart": 3020,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L91",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L91",
             "lineEnd": 91,
             "lineStart": 91,
             "snippetSha256": "sha256:ab7894e2db1ca6013bfd62b935d265e2845036c5ca606d117f7dd109a0026f31",
@@ -3143,7 +3143,7 @@
           "range": {
             "byteLength": 137,
             "byteStart": 3081,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L92-L93",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L92-L93",
             "lineEnd": 93,
             "lineStart": 92,
             "snippetSha256": "sha256:ad93c2443c0474a88aea6098cca851c7e403ea9c39a1dcf22514ed53597b1fad",
@@ -3155,7 +3155,7 @@
           "valueRange": {
             "byteLength": 76,
             "byteStart": 3142,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L93",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L93",
             "lineEnd": 93,
             "lineStart": 93,
             "snippetSha256": "sha256:bcf5202d25607ccec3a0781e9a9ef64bf79ec9bc27e9121b52cef72f0f071e20",
@@ -3173,7 +3173,7 @@
           "range": {
             "byteLength": 137,
             "byteStart": 3224,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L94-L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L94-L95",
             "lineEnd": 95,
             "lineStart": 94,
             "snippetSha256": "sha256:7e1e5ec584906227b2c130e0667d800d4330b7e00d04ead5d711a1d09a23374b",
@@ -3185,7 +3185,7 @@
           "valueRange": {
             "byteLength": 76,
             "byteStart": 3285,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L95",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L95",
             "lineEnd": 95,
             "lineStart": 95,
             "snippetSha256": "sha256:4f32606e2c63a778ba6595b5484d6f59fc4a9ad536b4aa76294cf40a66854438",
@@ -3203,7 +3203,7 @@
           "range": {
             "byteLength": 145,
             "byteStart": 3367,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L96-L97",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L96-L97",
             "lineEnd": 97,
             "lineStart": 96,
             "snippetSha256": "sha256:20b597e9b8320e0314c3c268ea1e41ebba4967edd5a25c1bfec4f673e55273e5",
@@ -3215,7 +3215,7 @@
           "valueRange": {
             "byteLength": 83,
             "byteStart": 3429,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L97",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L97",
             "lineEnd": 97,
             "lineStart": 97,
             "snippetSha256": "sha256:f7db3eaab3c159ec576b3408cfc0408bee76d941c7d434e5e5ced0267e44b87e",
@@ -3233,7 +3233,7 @@
           "range": {
             "byteLength": 172,
             "byteStart": 3518,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L98-L100",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L98-L100",
             "lineEnd": 100,
             "lineStart": 98,
             "snippetSha256": "sha256:7a405dc667ff4eaa3a97a4d09e1c3bac786fb8d5ae73d1b62192da89ef13714c",
@@ -3245,7 +3245,7 @@
           "valueRange": {
             "byteLength": 115,
             "byteStart": 3575,
-            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L98-L100",
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L98-L100",
             "lineEnd": 100,
             "lineStart": 98,
             "snippetSha256": "sha256:b0b53d3313d1c1d69bdcdc54507200a28e490e30f090668a3e67aa6e58c76f66",
@@ -3287,7 +3287,7 @@
     "range": {
       "byteLength": 49305,
       "byteStart": 487,
-      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/test/StreamRoleRegistry.t.sol#L17-L1214",
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRoleRegistry.t.sol#L17-L1214",
       "lineEnd": 1214,
       "lineStart": 17,
       "snippetSha256": "sha256:74f5fb5aa4ce52a5accbba8ee43919e61368ad83bd8e5b0ac3ba3214a0ffa4ff",
