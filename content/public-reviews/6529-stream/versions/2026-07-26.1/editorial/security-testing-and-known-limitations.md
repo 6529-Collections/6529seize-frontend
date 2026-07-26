@@ -4,8 +4,9 @@ Stream is pre-audit and is not production-ready. This page records the evidence
 that exists and the evidence that does not. It is not a security certification.
 
 The candidate under review is the exact Git commit
-[`2c666e16294401ab8f874a23d784dac074ecab73`](https://github.com/6529-Collections/6529Stream/tree/2c666e16294401ab8f874a23d784dac074ecab73).
-Claims about a later commit require a new review version.
+[`513bd7e079eafe109df6ae1ae21bfbca6fec6786`](https://github.com/6529-Collections/6529Stream/tree/513bd7e079eafe109df6ae1ae21bfbca6fec6786).
+Its Git tree is `b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100`. Claims about a
+later commit require a new review version.
 
 ## Threat model
 
@@ -48,6 +49,24 @@ is no fallback validator and no bypass. Recovery requires a new resolver, a
 continuity proof, a new Registry V2 registration, and a governed Core-pointer
 replacement.
 
+## Proposed artist-registry adapter boundary
+
+### PROPOSED - NOT IMPLEMENTED
+
+ADR 0022 proposes a separate artist-registry validation adapter, but remains
+`Proposed` and explicitly authorizes no implementation. The proposed registry
+would remain the sole authority, state owner, writer, and normative event
+emitter. The immutable, stateless, unregistered adapter would return typed
+validation data only. Acceptance, an independently approved interface freeze,
+implementation, generated evidence, and deployment remain separate gates. See
+[`ADR 0022`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0022-immutable-artist-registry-validation-adapter.md#L3-L20)
+and the proposed
+[`authority boundary`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0022-immutable-artist-registry-validation-adapter.md#L75-L129).
+
+There is no current adapter contract, accepted interface transcript, deployment
+row, runtime code hash, or candidate evidence to audit. Reviewers must not
+credit the proposal as a mitigation for current artist-registry gaps.
+
 ## Test evidence
 
 ### TESTED
@@ -80,7 +99,7 @@ absence of:
 ### KNOWN LIMITATION
 
 The pinned
-[`SLITHER_BASELINE.json`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/ops/SLITHER_BASELINE.json)
+[`SLITHER_BASELINE.json`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/ops/SLITHER_BASELINE.json)
 contains 30 open High or Medium findings: 3 High and 27 Medium. A count alone
 does not establish severity or exploitability, and tools can produce false
 positives. It does establish that the release cannot honestly be described as
@@ -101,7 +120,7 @@ normalization rules, source commit, and disposition evidence.
 ### KNOWN LIMITATION
 
 The pinned
-[`bytecode release proof`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/latest/bytecode-release-proof.json)
+[`bytecode release proof`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/release-artifacts/latest/bytecode-release-proof.json)
 records `StreamCore` deployed bytecode at 24,152 bytes. That is 424 bytes below
 the EIP-170 maximum of 24,576 bytes.
 
@@ -151,7 +170,7 @@ not resolve them unless every effective path is covered.
 
 The current risk-register title for RISK-GOV-002 still describes the historical
 whole-module problem. Reviewers should use the
-[`record-family source catalog`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/record-family-authorization-source-catalog.json)
+[`record-family source catalog`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/release-artifacts/record-family-authorization-source-catalog.json)
 for current source behavior and the risk register for the still-open release
 gate.
 

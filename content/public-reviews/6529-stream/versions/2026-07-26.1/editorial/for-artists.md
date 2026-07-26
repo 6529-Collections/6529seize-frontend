@@ -26,7 +26,7 @@ evidence and there is no dormant per-collection facade in this launch Core.
 ### IMPLEMENTED
 
 The current mechanism in
-[`StreamArtistApprovals.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtistApprovals.sol#L8-L21)
+[`StreamArtistApprovals.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtistApprovals.sol#L8-L21)
 computes a collection-state hash and verifies an artist signature over that
 state. The EIP-712 domain binds the chain and Core contract. The signed state
 binds exactly:
@@ -78,9 +78,33 @@ record in that family. It is evidence from that address, not endorsement by the
 artist, 6529, or the protocol.
 
 See the
-[`family/class matrix`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L143)
+[`family/class matrix`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L143)
 and
-[`remaining candidate blockers`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/record-family-authorization-source-catalog.json#L197-L205).
+[`remaining candidate blockers`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/release-artifacts/record-family-authorization-source-catalog.json#L197-L205).
+
+## Proposed artist-registry validation adapter
+
+### PROPOSED - NOT IMPLEMENTED
+
+ADR 0022 proposes a size-feasible future architecture for the full artist
+registry. One registered `StreamArtistRegistry` would remain the only authority,
+state owner, event emitter, and source of permanent artist reads. A separate
+immutable, stateless, implementation-private adapter would perform only exact
+typed validation calls. It would not be a registered module, hold authority,
+store artist state, emit normative artist events, or be replaceable through a
+setter.
+
+This is a proposal, not current contract behavior. The ADR explicitly says it
+does not authorize implementation. Acceptance, a frozen normative interface,
+specification reconciliation, implementation, generated evidence, and
+deployment are separate gates. See
+[`ADR 0022`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0022-immutable-artist-registry-validation-adapter.md#L3-L18)
+and its proposed
+[`registry/adapter boundary`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0022-immutable-artist-registry-validation-adapter.md#L75-L129).
+
+Artists should review whether this separation is understandable and whether an
+immutable validation dependency is acceptable when replacing it would require
+a new registry and the protocol's successor process.
 
 ## Artwork files, scripts, and token data
 
@@ -135,7 +159,13 @@ collection, quantity, price, deadline, and sale mode.
 These are not currently one path. The signed Drop uses the legacy minter. The
 newer manager/ledger lane supplies phases, gates, and durable counters but is not
 called by `StreamDrops`. An artist-facing sale screen must name which lane it
-uses.
+uses. In the current Drop lane, the signed `quantity` must equal exactly `1`
+and one authorization mints one token. Stream can still support a many-token
+edition through multiple authorizations or another configured mint lane; the
+Drop payload is not currently a batch mint. See
+[`StreamDrops._validateAuthorization`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L561-L581)
+and
+[`_executeFixedPriceDrop`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L609-L632).
 
 ### IMPORTANT DISTINCTION
 
@@ -185,10 +215,10 @@ receiver and 690 basis points for every token. It does not use a token or
 collection resolver profile.
 
 See the current
-[`Drop proceeds lookup`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol#L542-L558),
-[`Auction proceeds credits`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/AuctionContract.sol#L471-L508),
+[`Drop proceeds lookup`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L542-L558),
+[`Auction proceeds credits`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L471-L508),
 and
-[`Core royalty read`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol#L1013-L1027).
+[`Core royalty read`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L1013-L1027).
 
 ### SEPARATELY DEPLOYED FOUNDATION
 

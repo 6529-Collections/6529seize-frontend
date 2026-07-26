@@ -11,10 +11,10 @@ interchangeable.
   remaining artwork mutation paths.
 
 The relevant implementations include
-[`StreamCore.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol),
-[`StreamPreservationRecords.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamPreservationRecords.sol),
+[`StreamCore.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol),
+[`StreamPreservationRecords.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol),
 and
-[`StreamArtworkFinalityRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamArtworkFinalityRegistry.sol).
+[`StreamArtworkFinalityRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityRegistry.sol).
 
 The Core and preservation contracts are part of the current rehearsal.
 `StreamArtworkFinalityRegistry` is **SOURCE IMPLEMENTED**, but it is not in the
@@ -73,19 +73,19 @@ writers.
 |                                                  | Global module, successor, or governance actions unless a separate terminal-finality rule blocks them |
 
 Core freeze finalizes supply and stores a freeze-manifest hash
-([`freezeCollection`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol#L826-L841)).
+([`freezeCollection`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L826-L841)).
 Minting, burn, artist approval, and live-token metadata mutation check that
 freeze
-([`mint entries`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol#L445-L503),
-[`burn`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol#L628-L640),
-[`artist approval`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol#L734-L761)).
+([`mint entries`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L445-L503),
+[`burn`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L628-L640),
+[`artist approval`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L734-L761)).
 Normal ERC-721 transfer behavior remains open
-([`transfer posture`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol#L1008-L1011)).
+([`transfer posture`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L1008-L1011)).
 
 Collection-metadata record revisions check Core freeze, but snapshot publication
 does not. Reserved lock changes are blocked after freeze; nonreserved
 record-specific locks remain available
-([`metadata mutation checks`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCollectionMetadata.sol#L363-L397)).
+([`metadata mutation checks`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCollectionMetadata.sol#L363-L397)).
 
 Core freeze is therefore not the same as terminal artwork finality. It closes a
 defined collection boundary; it does not automatically freeze every shared or
@@ -126,7 +126,7 @@ not verify a signature. A reader must distinguish:
 - a signature hash from a signature that another verifier has actually checked.
 
 These semantics are explicit in
-[`IStreamPreservationRecords`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamPreservationRecords.sol#L106-L126).
+[`IStreamPreservationRecords`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamPreservationRecords.sol#L106-L126).
 
 ### IMPORTANT LIMIT
 
@@ -268,9 +268,9 @@ guardian veto, objection time, stale competing recoveries, and whether any
 byte-changing recovery should exist.
 
 See
-[`ADR 0020 status and blockers`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/adr/0020-executor-only-finality-recovery.md#L3-L24)
+[`ADR 0020 status and blockers`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0020-executor-only-finality-recovery.md#L3-L24)
 and its
-[`proposed decision`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/adr/0020-executor-only-finality-recovery.md#L75-L138).
+[`proposed decision`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0020-executor-only-finality-recovery.md#L75-L138).
 
 ## Separate ceremonies
 

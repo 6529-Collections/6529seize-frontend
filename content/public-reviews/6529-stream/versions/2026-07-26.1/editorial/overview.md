@@ -6,10 +6,11 @@ why possible vulnerabilities belong in this public review: the useful time to
 find them is before the design is fixed.
 
 The source under review is
-[`2c666e16294401ab8f874a23d784dac074ecab73`](https://github.com/6529-Collections/6529Stream/tree/2c666e16294401ab8f874a23d784dac074ecab73).
-Every code link in this review points to that commit. When the reviewed commit
-changes, the old review will remain available and a new version will show the
-diff.
+[`513bd7e079eafe109df6ae1ae21bfbca6fec6786`](https://github.com/6529-Collections/6529Stream/tree/513bd7e079eafe109df6ae1ae21bfbca6fec6786).
+Its exact Git tree is
+`b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100`. Every code link in this review
+points to that commit. When the reviewed commit changes, the old review will
+remain available and a new version will show the diff.
 
 ## The short answer
 
@@ -52,13 +53,13 @@ libraries, functions, events, errors, and source ranges.
 
 The current release artifacts describe a multi-contract protocol rather than a
 single mint contract. The permanent token surface is centered on
-[`StreamCore.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamCore.sol).
+[`StreamCore.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol).
 The repository also contains
-[`StreamMintManager.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamMintManager.sol)
+[`StreamMintManager.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMintManager.sol)
 and
-[`StreamMintLedger.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamMintLedger.sol).
+[`StreamMintLedger.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMintLedger.sol).
 They form a manager-and-ledger mint lane. Signed drop execution is handled by
-[`StreamDrops.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol).
+[`StreamDrops.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol).
 The current rehearsal connects that contract to the separate legacy
 `StreamMinter`, not to `StreamMintManager`. Other source modules cover auctions,
 revenue resolution, split wallets, metadata, dependencies, randomness,
@@ -82,15 +83,16 @@ current signed-sale path.
 | Thirty-seven-role genesis inventory                                           | **GENESIS TARGET**                         | The target profile is an architecture requirement, not a concrete deployment manifest.                                                                            |
 | Raise-only parameter governance                                               | **SOURCE IMPLEMENTED - CANDIDATE UNBOUND** | The source enforces the one-way policy, but the complete candidate parameter binding is unavailable.                                                              |
 | Resolver validation adapter                                                   | **ACCEPTED TARGET - NOT IMPLEMENTED**      | The architecture is accepted, but complete conforming source and candidate evidence are not present.                                                              |
+| Artist-registry validation adapter                                            | **PROPOSED - NOT IMPLEMENTED**             | ADR 0022 proposes the boundary but explicitly authorizes no implementation and changes no contract, profile, or readiness state.                                  |
 | Batch operation-root, payer-bound ERC-20 orchestration, and finality recovery | **PROPOSED**                               | These documents are community-review material, not accepted or implemented behavior.                                                                              |
 | Provider, marketplace, public-RPC, retrieval, deployment, and audit proof     | **NONLOCAL EVIDENCE PENDING**              | Local source and tests cannot supply this evidence.                                                                                                               |
 
 The current wiring is visible in the pinned
-[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/script/RehearseDeployment.s.sol#L169-L270).
+[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeployment.s.sol#L169-L270).
 The wider target is visible in the
-[`genesis deployment profile`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/release-artifacts/genesis-deployment-profile.json)
+[`genesis deployment profile`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/release-artifacts/genesis-deployment-profile.json)
 and is explicitly described as incomplete in
-[`release-readiness.md`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/release-readiness.md#L8-L20).
+[`release-readiness.md`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/release-readiness.md#L8-L20).
 
 ### TESTED
 
@@ -102,7 +104,7 @@ the full protocol is secure or that the same assumptions hold in production.
 ### AUDIT PENDING
 
 The repository's own
-[`status.md`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/status.md)
+[`status.md`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/status.md)
 describes the protocol as pre-audit and not production-ready. There is no
 completed external audit or audit-remediation record for this candidate.
 

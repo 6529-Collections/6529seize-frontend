@@ -6,11 +6,11 @@ defined domains, and record successors. This avoids silently replacing the
 Core's bytecode, but it does not remove governance risk.
 
 The main components are
-[`StreamModuleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamModuleRegistry.sol),
-[`StreamGovernanceExecutor.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernanceExecutor.sol),
-[`StreamRoleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamRoleRegistry.sol),
+[`StreamModuleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamModuleRegistry.sol),
+[`StreamGovernanceExecutor.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGovernanceExecutor.sol),
+[`StreamRoleRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRoleRegistry.sol),
 and
-[`StreamAdmins.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamAdmins.sol).
+[`StreamAdmins.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAdmins.sol).
 
 `StreamAdmins` is in the current rehearsal. The Governance V2 executor, role
 registry, and module registry are **SOURCE IMPLEMENTED**, but they are not part
@@ -102,10 +102,10 @@ published onchain. Authorized actors schedule or cancel; execution is
 permissionless inside the committed window.
 
 See the
-[`action-class constants`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/IStreamGovernanceExecutor.sol#L69-L79),
-[`delay function`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernanceBootstrap.sol#L299-L311),
+[`action-class constants`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L69-L79),
+[`delay function`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGovernanceBootstrap.sol#L299-L311),
 and
-[`scheduled-call binding`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernanceExecutor.sol#L305-L403).
+[`scheduled-call binding`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGovernanceExecutor.sol#L305-L403).
 
 ## Native-value authority
 
@@ -165,9 +165,9 @@ one-way:
 This trades recovery flexibility for a smaller, auditable authority surface.
 The source hosts implement the rule, but complete candidate parameter bindings
 are not available. See
-[`ADR 0017`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/adr/0017-raise-only-parameter-governance.md#L48-L71)
+[`ADR 0017`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0017-raise-only-parameter-governance.md#L48-L71)
 and its
-[`governance-loss consequence`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/docs/adr/0017-raise-only-parameter-governance.md#L140-L153).
+[`governance-loss consequence`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0017-raise-only-parameter-governance.md#L140-L153).
 
 ## One-way system-manifest cutover
 
@@ -182,9 +182,9 @@ state and transfers executor ownership to the Governance Root.
 After sealing, the temporary bootstrap authority is not an alternate governor.
 This ceremony is security-critical because a wrong address or code hash would be
 made authoritative at the cutover. The source lifecycle is in
-[`StreamGovernanceManifest`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernanceManifest.sol#L12-L54)
+[`StreamGovernanceManifest`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGovernanceManifest.sol#L12-L54)
 and
-[`bindSystemManifestBootstrap` / `sealSystemManifestBootstrap`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamGovernanceExecutor.sol#L807-L893).
+[`bindSystemManifestBootstrap` / `sealSystemManifestBootstrap`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGovernanceExecutor.sol#L807-L893).
 
 ## Guardian
 
@@ -218,11 +218,11 @@ guardian can pause. The owner or a registered unpause admin can resume.
 | Randomness request | New requests in the current randomizer adapters                                                            | Existing request reads and provider callbacks governed by their own checks |
 
 The exact domain identifiers are in
-[`StreamPauseDomains`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamPauseDomains.sol#L5-L12).
+[`StreamPauseDomains`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L5-L12).
 Pause and resume authority are in
-[`StreamAdmins.setPaused`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamAdmins.sol#L137-L157)
+[`StreamAdmins.setPaused`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAdmins.sol#L137-L157)
 and its
-[`authority checks`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamAdmins.sol#L223-L229).
+[`authority checks`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAdmins.sol#L223-L229).
 
 `StreamMintManager` has a separate per-phase pause. It does not consult the
 global `MINT` domain. A future cutover must decide whether that distinction is

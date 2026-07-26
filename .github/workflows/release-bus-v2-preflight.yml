@@ -300,9 +300,12 @@ jobs:
         run: ./bin/6529 run build:env-schema
       - name: Build exact environment profile once
         run: |
+          set -euo pipefail
           if [ "$BUILD_ENVIRONMENT" = staging ]; then
             unset ANNOUNCED_VERSION_ENDPOINT
           fi
+          ./bin/6529 run help-index:sync
+          ./bin/6529 run agent-files:sync
           ./bin/6529 run base-build
       - name: Package immutable environment profile
         run: |

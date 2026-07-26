@@ -10,7 +10,7 @@ import type {
 export const STREAM_REVIEW_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
 export const STREAM_REVIEW_SOURCE_COMMIT =
-  "2c666e16294401ab8f874a23d784dac074ecab73";
+  "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
 
 type PageMessageStem =
   | "overview"
@@ -69,18 +69,6 @@ const IMPLEMENTED_OPEN_AUDIT = [
   "OPEN_FOR_FEEDBACK",
   "AUDIT_PENDING",
 ] as const;
-const IMPLEMENTED_PROPOSED_OPEN_AUDIT = [
-  "IMPLEMENTED",
-  "PROPOSED",
-  "OPEN_FOR_FEEDBACK",
-  "AUDIT_PENDING",
-] as const;
-const IMPLEMENTED_TESTED_OPEN_AUDIT = [
-  "IMPLEMENTED",
-  "TESTED",
-  "OPEN_FOR_FEEDBACK",
-  "AUDIT_PENDING",
-] as const;
 const IMPLEMENTED_OPEN_AUDIT_LIMITATION = [
   ...IMPLEMENTED_OPEN_AUDIT,
   "KNOWN_LIMITATION",
@@ -90,21 +78,36 @@ export const STREAM_REVIEW_PAGES = [
   definePage("overview", "overview", ALL_AUDIENCES, [
     "IMPLEMENTED",
     "TESTED",
+    "PROPOSED",
     "OPEN_FOR_FEEDBACK",
     "AUDIT_PENDING",
+    "DEFERRED",
     "KNOWN_LIMITATION",
   ]),
   definePage(
     "artwork-lifecycle",
     "artworkLifecycle",
     COMMUNITY_ARTIST_TECHNICAL,
-    IMPLEMENTED_OPEN_AUDIT
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
   ),
   definePage(
     "for-artists",
     "forArtists",
     ARTIST_COMMUNITY,
-    IMPLEMENTED_PROPOSED_OPEN_AUDIT
+    [
+      "IMPLEMENTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "DEFERRED",
+      "KNOWN_LIMITATION",
+    ]
   ),
   definePage(
     "roles-and-trust",
@@ -116,43 +119,90 @@ export const STREAM_REVIEW_PAGES = [
     "curation-and-tdh-authorization",
     "curationAndTdhAuthorization",
     ALL_AUDIENCES,
-    IMPLEMENTED_PROPOSED_OPEN_AUDIT
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+    ]
   ),
   definePage(
     "tokens-collections-and-minting",
     "tokensCollectionsAndMinting",
     ALL_AUDIENCES,
-    ["IMPLEMENTED", "TESTED", "AUDIT_PENDING"]
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
   ),
   definePage(
     "fixed-price-sales-and-auctions",
     "fixedPriceSalesAndAuctions",
     ALL_AUDIENCES,
-    IMPLEMENTED_TESTED_OPEN_AUDIT
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "DEFERRED",
+    ]
   ),
   definePage(
     "revenue-splits-and-royalties",
     "revenueSplitsAndRoyalties",
     ALL_AUDIENCES,
-    IMPLEMENTED_TESTED_OPEN_AUDIT
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
   ),
   definePage(
     "randomness",
     "randomness",
     ARTIST_TECHNICAL_AUDITOR,
-    IMPLEMENTED_TESTED_OPEN_AUDIT
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
   ),
   definePage(
     "metadata-scripts-and-dependencies",
     "metadataScriptsAndDependencies",
     ALL_AUDIENCES,
-    IMPLEMENTED_PROPOSED_OPEN_AUDIT
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
   ),
   definePage(
     "freezing-preservation-and-artwork-finality",
     "freezingPreservationAndArtworkFinality",
     ALL_AUDIENCES,
-    IMPLEMENTED_PROPOSED_OPEN_AUDIT
+    [
+      "IMPLEMENTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
   ),
   definePage(
     "governance-pausing-and-successors",
@@ -164,11 +214,19 @@ export const STREAM_REVIEW_PAGES = [
     "security-testing-and-known-limitations",
     "securityTestingAndKnownLimitations",
     COMMUNITY_TECHNICAL_AUDITOR,
-    ["TESTED", "OPEN_FOR_FEEDBACK", "AUDIT_PENDING", "KNOWN_LIMITATION"]
+    [
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "KNOWN_LIMITATION",
+    ]
   ),
   definePage("community-review", "communityReview", ALL_AUDIENCES, [
+    "IMPLEMENTED",
     "OPEN_FOR_FEEDBACK",
     "AUDIT_PENDING",
+    "KNOWN_LIMITATION",
   ]),
 ] as const;
 

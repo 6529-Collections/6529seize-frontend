@@ -28,7 +28,7 @@ cryptographic and contractual.
 ### IMPLEMENTED
 
 The signed drop path in
-[`StreamDrops.sol`](https://github.com/6529-Collections/6529Stream/blob/2c666e16294401ab8f874a23d784dac074ecab73/smart-contracts/StreamDrops.sol#L24-L60)
+[`StreamDrops.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L24-L60)
 uses EIP-712 typed data. Its domain binds the chain ID and verifying contract.
 The signed `DropAuthorization` has exactly these fields:
 
@@ -75,7 +75,10 @@ changing the intended beneficiary.
 
 ### Collection and quantity
 
-An authorization for one collection or quantity must not mint another.
+An authorization for one collection must not mint into another. Although the
+signed structure includes `quantity`, the current Drop validator requires
+`quantity == 1`; one authorization cannot currently mint a batch. See
+[`StreamDrops._validateAuthorization`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L561-L581).
 
 ### Price and sale mode
 

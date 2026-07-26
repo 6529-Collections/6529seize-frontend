@@ -1,7 +1,35 @@
-import type { PublicReviewSectionDefinition } from "@/lib/public-review/publicReviewTypes";
+import {
+  PUBLIC_REVIEW_EVIDENCE_STATES,
+  type PublicReviewEvidenceState,
+  type PublicReviewSectionDefinition,
+} from "@/lib/public-review/publicReviewTypes";
 
 const MARKDOWN_DECORATION = new Set(["`", "*", "_", "~"]);
 const LETTER_OR_NUMBER = /[\p{Letter}\p{Number}]/u;
+const EVIDENCE_STATE_RULES: readonly {
+  readonly state: PublicReviewEvidenceState;
+  readonly pattern: RegExp;
+  readonly excludedPattern?: RegExp;
+}[] = [
+  {
+    state: "IMPLEMENTED",
+    pattern: /\bIMPLEMENTED\b/,
+    excludedPattern: /\bNOT IMPLEMENTED\b/,
+  },
+  { state: "TESTED", pattern: /\bTESTED\b/ },
+  {
+    state: "PROPOSED",
+    pattern: /\b(?:PROPOSED|ACCEPTED TARGET\s*-\s*NOT IMPLEMENTED)\b/,
+  },
+  { state: "OPEN_FOR_FEEDBACK", pattern: /\bOPEN FOR FEEDBACK\b/ },
+  { state: "AUDIT_PENDING", pattern: /\bAUDIT PENDING\b/ },
+  { state: "DEFERRED", pattern: /\bDEFERRED\b/ },
+  {
+    state: "KNOWN_LIMITATION",
+    pattern:
+      /\b(?:KNOWN LIMITATION|IMPORTANT LIMITATION|IMPORTANT LIMIT|EVIDENCE PENDING|CANDIDATE UNBOUND)\b/,
+  },
+] as const;
 
 function isAsciiDigit(character: string | undefined): boolean {
   return character !== undefined && character >= "0" && character <= "9";
@@ -82,4 +110,45 @@ export function extractPublicReviewSections(
   }
 
   return sections;
+}
+
+function normalizeEvidenceMarker(value: string): string {
+  return value
+    .normalize("NFKC")
+    .replaceAll("—", "-")
+    .replaceAll("–", "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
+function extractEvidenceMarkers(markdown: string): string[] {
+  const headings = Array.from(
+    markdown.matchAll(/^###\s+(.+)$/gm),
+    (match) => match[1] ?? ""
+  );
+  const emphasizedLabels = Array.from(
+    markdown.matchAll(/\*\*([\s\S]*?)\*\*/g),
+    (match) => match[1] ?? ""
+  );
+
+  return [...headings, ...emphasizedLabels].map(normalizeEvidenceMarker);
+}
+
+export function extractPublicReviewEvidenceStates(
+  markdown: string
+): PublicReviewEvidenceState[] {
+  const markers = extractEvidenceMarkers(markdown);
+  const detected = new Set<PublicReviewEvidenceState>();
+
+  for (const marker of markers) {
+    for (const rule of EVIDENCE_STATE_RULES) {
+      const excluded = rule.excludedPattern?.test(marker) ?? false;
+      if (!excluded && rule.pattern.test(marker)) {
+        detected.add(rule.state);
+      }
+    }
+  }
+
+  return PUBLIC_REVIEW_EVIDENCE_STATES.filter((state) => detected.has(state));
 }
