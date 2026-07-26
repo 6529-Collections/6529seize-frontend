@@ -293,7 +293,7 @@ function buildFeedbackBody({
     sections.push(`**Section:** ${page.sectionTitle}`);
   }
   if (reference?.kind === "documentation" && reference.quote) {
-    sections.push(`> ${reference.quote.replace(/\n/g, "\n> ")}`);
+    sections.push(`> ${reference.quote.replaceAll("\n", "\n> ")}`);
   }
   if (reference?.kind === "code") {
     const lineLabel =
@@ -509,7 +509,7 @@ function decodeCodeReference({
     typeof value["lineStart"] !== "number" ||
     typeof value["lineEnd"] !== "number"
   ) {
-    throw new Error("Invalid code reference.");
+    throw new TypeError("Invalid code reference.");
   }
   validateOptionalCodeReferenceStrings(value);
 

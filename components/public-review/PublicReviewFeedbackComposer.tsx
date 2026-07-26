@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -112,6 +112,20 @@ function getConnectButtonLabel({
     connected
       ? "publicReview.feedback.reconnect"
       : "publicReview.feedback.connect"
+  );
+}
+
+function ReviewFeedbackConnectionStatus({
+  connecting,
+  locale,
+}: {
+  readonly connecting: boolean;
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
+      {connecting ? t(locale, "publicReview.feedback.connecting") : ""}
+    </output>
   );
 }
 
@@ -251,9 +265,9 @@ function useFeedbackComposerState({
     }
   };
 
-  const handleSubmit = async (): Promise<void> => {
+  const handleSubmit = async (): Promise<boolean> => {
     if (isSubmitting || !authenticated || !waveCanAcceptFeedback) {
-      return;
+      return false;
     }
     setFormError(null);
     setSuccessPath(null);
@@ -262,7 +276,7 @@ function useFeedbackComposerState({
       payload = createPayload();
     } catch {
       setFormError(t(locale, "publicReview.feedback.validationError"));
-      return;
+      return false;
     }
 
     setIsSubmitting(true);
@@ -283,8 +297,10 @@ function useFeedbackComposerState({
       await queryClient.invalidateQueries({
         queryKey: getPublicReviewLedgerQueryKey({ config, destination }),
       });
+      return true;
     } catch {
       setFormError(t(locale, "publicReview.feedback.submitError"));
+      return false;
     } finally {
       setIsSubmitting(false);
     }
@@ -326,6 +342,7 @@ export default function PublicReviewFeedbackComposer({
   submitter = submitPublicReviewFeedback,
 }: PublicReviewFeedbackComposerProps) {
   const formId = useId();
+  const successRef = useRef<HTMLOutputElement>(null);
   const {
     authenticated,
     busy,
@@ -351,6 +368,12 @@ export default function PublicReviewFeedbackComposer({
     submitter,
   });
 
+  const submitAndFocusConfirmation = async () => {
+    if (await handleSubmit()) {
+      window.setTimeout(() => successRef.current?.focus(), 0);
+    }
+  };
+
   return (
     <section
       aria-labelledby={`${formId}-title`}
@@ -373,15 +396,21 @@ export default function PublicReviewFeedbackComposer({
       />
 
       {!authenticated && config.submissionsOpen ? (
-        <button
-          type="button"
-          aria-busy={connecting}
-          disabled={busy}
-          onClick={() => void handleConnect()}
-          className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-60"
-        >
-          {getConnectButtonLabel({ connected, connecting, locale })}
-        </button>
+        <>
+          <button
+            type="button"
+            aria-busy={connecting}
+            disabled={busy}
+            onClick={() => void handleConnect()}
+            className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-60"
+          >
+            {getConnectButtonLabel({ connected, connecting, locale })}
+          </button>
+          <ReviewFeedbackConnectionStatus
+            connecting={connecting}
+            locale={locale}
+          />
+        </>
       ) : null}
 
       {authenticated && config.submissionsOpen ? (
@@ -390,7 +419,7 @@ export default function PublicReviewFeedbackComposer({
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
-            void handleSubmit();
+            void submitAndFocusConfirmation();
           }}
         >
           <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
@@ -524,9 +553,9 @@ export default function PublicReviewFeedbackComposer({
               >
                 {t(locale, "publicReview.feedback.previewHeading")}
               </h3>
-              <pre className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-font-sans tw-text-sm tw-leading-6 tw-text-iron-300">
+              <div className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-font-sans tw-text-sm tw-leading-6 tw-text-iron-300">
                 {preview}
-              </pre>
+              </div>
             </section>
           ) : null}
 
@@ -553,34 +582,39 @@ export default function PublicReviewFeedbackComposer({
       ) : null}
 
       {feedbackGate ? (
-        <p
-          className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300"
-          role="status"
+        <output
+          className="tw-mb-0 tw-mt-4 tw-block tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300"
+          aria-live="polite"
+          aria-atomic="true"
         >
           {feedbackGate}
+        </output>
+      ) : null}
+      {formError ? (
+        <p
+          className="tw-border-red-500/40 tw-bg-red-950/30 tw-text-red-200 tw-mb-0 tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm"
+          role="alert"
+        >
+          {formError}
         </p>
       ) : null}
-      <div aria-live="polite" aria-atomic="true">
-        {formError ? (
-          <p
-            className="tw-border-red-500/40 tw-bg-red-950/30 tw-text-red-200 tw-mb-0 tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm"
-            role="alert"
+      {successPath ? (
+        <output
+          ref={successRef}
+          tabIndex={-1}
+          aria-live="polite"
+          aria-atomic="true"
+          className="tw-border-green-500/40 tw-bg-green-950/30 tw-text-green-100 tw-mb-0 tw-mt-4 tw-block tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-green-300"
+        >
+          {t(locale, "publicReview.feedback.success")}{" "}
+          <Link
+            className="tw-text-green-100 focus-visible:tw-ring-green-300 tw-font-semibold tw-underline focus:tw-outline-none focus-visible:tw-ring-2"
+            href={successPath}
           >
-            {formError}
-          </p>
-        ) : null}
-        {successPath ? (
-          <p className="tw-border-green-500/40 tw-bg-green-950/30 tw-text-green-100 tw-mb-0 tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm">
-            {t(locale, "publicReview.feedback.success")}{" "}
-            <Link
-              className="tw-text-green-100 focus-visible:tw-ring-green-300 tw-font-semibold tw-underline focus:tw-outline-none focus-visible:tw-ring-2"
-              href={successPath}
-            >
-              {t(locale, "publicReview.feedback.viewWave")}
-            </Link>
-          </p>
-        ) : null}
-      </div>
+            {t(locale, "publicReview.feedback.viewWave")}
+          </Link>
+        </output>
+      ) : null}
     </section>
   );
 }

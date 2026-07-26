@@ -14,11 +14,11 @@ export { PUBLIC_REVIEW_DESTINATIONS_ENV };
 const LOGICAL_KEY_SEGMENT_PATTERN = /^[a-z0-9]+$/;
 const WAVE_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const ENVIRONMENTS: readonly PublicReviewEnvironment[] = [
+const ENVIRONMENTS = new Set<PublicReviewEnvironment>([
   "local",
   "staging",
   "production",
-];
+]);
 
 type DestinationMap = Readonly<
   Partial<Record<PublicReviewEnvironment, Readonly<Record<string, string>>>>
@@ -116,7 +116,7 @@ function parseDestinationMap(raw: string | undefined): DestinationMap {
   }
 
   const unknownEnvironments = Object.keys(parsed).filter(
-    (key) => !ENVIRONMENTS.includes(key as PublicReviewEnvironment)
+    (key) => !ENVIRONMENTS.has(key as PublicReviewEnvironment)
   );
   if (unknownEnvironments.length > 0) {
     throw new Error(
