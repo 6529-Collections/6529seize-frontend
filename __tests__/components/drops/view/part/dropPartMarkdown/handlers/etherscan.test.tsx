@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 import { createEtherscanHandler } from "@/components/drops/view/part/dropPartMarkdown/handlers/etherscan";
 

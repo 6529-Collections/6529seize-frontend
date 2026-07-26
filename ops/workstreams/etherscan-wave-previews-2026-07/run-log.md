@@ -101,3 +101,15 @@
   that chat layouts retain the keyboard-operable open-link action.
 - The expanded focused matrix passes 9 suites and 235 assertions. Targeted
   lint, changed-file TypeScript, Knip, and React Doctor 100/100 also pass.
+
+## 2026-07-26 — Final-head build and CI ratchet iteration
+
+- Passed the complete production build again on the post-review head: lint,
+  compile, full TypeScript, 265-page static generation, and sitemap output.
+- Fresh Sonar analysis reports zero open issues. CodeQL, Snyk, DCO, secret
+  scanning, and the debt ratchet are green on the same head.
+- The installed-app job identified two obsolete `React` imports in new Jest
+  suites. Removed them and committed the earlier ENS test cleanup as a
+  one-diagnostic reduction in the repository's Jest typecheck baseline.
+- The exact `typecheck:tests` gate now passes, including the Jest ratchet and
+  Playwright TypeScript; both affected suites pass 7 assertions.
