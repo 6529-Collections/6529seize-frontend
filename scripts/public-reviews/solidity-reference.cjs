@@ -22,6 +22,7 @@ const {
   validateBundle,
   validateConfig,
   validateDefinitionShards,
+  validateRetainedSourceRanges,
 } = require("./solidity-reference-lib.cjs");
 
 const REPOSITORY_ROOT = path.resolve(__dirname, "..", "..");
@@ -701,6 +702,31 @@ function validateCheckedSources(config, bundle) {
       sourceLineCount(buffer) === file.lineCount,
       `${file.path}: checked source line count drifted.`
     );
+    validateRetainedSourceRanges(
+      file.topLevelDeclarations,
+      file.path,
+      file,
+      buffer,
+      `${file.path}: top-level declarations`
+    );
+    validateRetainedSourceRanges(
+      bundle.definitionIndex.filter(
+        (definition) => definition.sourcePath === file.path
+      ),
+      file.path,
+      file,
+      buffer,
+      `${file.path}: definition index`
+    );
+    validateRetainedSourceRanges(
+      bundle.declarationIndex?.filter(
+        (declaration) => declaration.sourcePath === file.path
+      ) ?? [],
+      file.path,
+      file,
+      buffer,
+      `${file.path}: declaration index`
+    );
   }
 }
 
@@ -742,6 +768,23 @@ function validateCheckedDefinitionShards(config, bundle) {
       );
     }
     definitionShards.set(entry.key, { buffer, shard });
+    const sourceRecord = bundle.files.find(
+      (file) => file.path === shard.definition.sourcePath
+    );
+    invariant(
+      sourceRecord,
+      `${shard.definition.id}: checked definition source is missing.`
+    );
+    const sourceBuffer = fs.readFileSync(
+      path.join(bundlePaths(config).sources, ...sourceRecord.path.split("/"))
+    );
+    validateRetainedSourceRanges(
+      shard.definition,
+      sourceRecord.path,
+      sourceRecord,
+      sourceBuffer,
+      `${shard.definition.id}: definition shard`
+    );
   }
   validateDefinitionShards(bundle, definitionShards);
 }
@@ -796,15 +839,17 @@ function readCheckedIndex(config) {
   return index;
 }
 
-function check(configRecord) {
+function check(configRecord, dependencies = {}) {
   validateConfig(configRecord.json);
-  const index = readCheckedIndex(configRecord.json);
+  const index = (dependencies.readIndex ?? readCheckedIndex)(configRecord.json);
   let activeBundle;
   for (const entry of index.versions) {
     const versionConfig = configForVersion(configRecord.json, entry.version);
-    const { bundle: bundlePath } = bundlePaths(versionConfig);
-    const bundle = JSON.parse(fs.readFileSync(bundlePath, "utf8"));
-    validateBundle(bundle);
+    const bundle = dependencies.readBundle
+      ? dependencies.readBundle(versionConfig, entry)
+      : JSON.parse(fs.readFileSync(bundlePaths(versionConfig).bundle, "utf8"));
+    const active = entry.version === configRecord.json.reviewVersion;
+    validateBundle(bundle, { requireCurrentIdentity: active });
     invariant(
       bundle.reviewId === configRecord.json.reviewId &&
         bundle.reviewVersion === entry.version,
@@ -815,10 +860,22 @@ function check(configRecord) {
         stableJson(createIndexEntry(bundle, bundlePublicPath(versionConfig))),
       `${entry.version}: checked public review reference index entry drifted.`
     );
-    validateCheckedDefinitionShards(versionConfig, bundle);
-    validateCheckedSources(versionConfig, bundle);
-    validateCheckedSnapshotFileSet(versionConfig, bundle);
-    if (entry.version === configRecord.json.reviewVersion) {
+    (dependencies.validateDefinitionShards ?? validateCheckedDefinitionShards)(
+      versionConfig,
+      bundle,
+      entry
+    );
+    (dependencies.validateSources ?? validateCheckedSources)(
+      versionConfig,
+      bundle,
+      entry
+    );
+    (dependencies.validateSnapshotFileSet ?? validateCheckedSnapshotFileSet)(
+      versionConfig,
+      bundle,
+      entry
+    );
+    if (active) {
       activeBundle = bundle;
     }
   }
@@ -836,7 +893,7 @@ function check(configRecord) {
     activeBundle.generator.sourceSha256 === generatorSourceSha256(),
     "Checked active bundle generator checksum drifted; regenerate the active snapshot."
   );
-  process.stdout.write(
+  (dependencies.writeOutput ?? process.stdout.write.bind(process.stdout))(
     `Verified ${index.versions.length} retained review version(s), including ${activeBundle.summary.definitionCount} active definitions and ${activeBundle.summary.fileCount} active source files, offline.\n`
   );
 }

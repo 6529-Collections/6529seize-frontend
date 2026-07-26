@@ -38,6 +38,10 @@
       "schemaVersion": "6529stream.genesis-deployment-profile.v2"
     },
     {
+      "path": "release-artifacts/governed-parameter-inventory.json",
+      "schemaVersion": "6529stream.governed-parameter-inventory.v1"
+    },
+    {
       "path": "release-artifacts/latest/abi-checksums.json",
       "schemaVersion": "6529stream.abi-checksums.v1"
     },
@@ -60,6 +64,18 @@
     {
       "path": "release-artifacts/latest/release-artifact-manifest.json",
       "schemaVersion": "6529stream.release-artifact-manifest.v1"
+    },
+    {
+      "path": "release-artifacts/latest/release-manifest.json",
+      "schemaVersion": "6529stream.release-manifest.v1"
+    },
+    {
+      "path": "release-artifacts/latest/public-beta-evidence.json",
+      "schemaVersion": "6529stream.public-beta-evidence.v1"
+    },
+    {
+      "path": "release-artifacts/latest/risk-register.json",
+      "schemaVersion": "6529stream.risk-register.v1"
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",

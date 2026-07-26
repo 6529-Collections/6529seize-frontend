@@ -16,6 +16,7 @@ const {
   reconcileDeclarationWithAbi,
   selectorForSignature,
   sha256Urn,
+  stateVariableRecord,
   stableJson,
   topicForSignature,
   topLevelDeclarationRecord,
@@ -24,7 +25,10 @@ const {
   validateConfig,
   validateCustomErrorCatalog,
   validateNatSpecBaseline,
+  validateNatSpecEvidence,
+  validateRetainedSourceRanges,
   validateReleaseArtifactManifest,
+  validateReleaseManifest,
 } = require("../../scripts/public-reviews/solidity-reference-lib.cjs") as {
   BUNDLE_SCHEMA_VERSION: string;
   DEFINITION_SHARD_SCHEMA_VERSION: string;
@@ -62,6 +66,12 @@ const {
   ) => Declaration;
   selectorForSignature: (value: string) => string;
   sha256Urn: (value: Buffer) => string;
+  stateVariableRecord: (
+    node: Record<string, unknown>,
+    definitionId: string,
+    sourceRecord: Record<string, unknown>,
+    source: Record<string, unknown>
+  ) => Record<string, unknown>;
   stableJson: (value: unknown) => string;
   topicForSignature: (value: string) => string;
   topLevelDeclarationRecord: (
@@ -81,7 +91,27 @@ const {
   ) => void;
   validateNatSpecBaseline: (
     sources: Map<string, Record<string, unknown>>,
-    artifacts: Record<string, { json: Record<string, unknown> }>
+    artifacts: Record<
+      string,
+      { json: Record<string, unknown>; sha256: string }
+    >
+  ) => {
+    baseline: Record<string, unknown>;
+    gapCount: number;
+    counts: {
+      byGapType: Record<string, number>;
+      byKind: Record<string, number>;
+      byStatus: Record<string, number>;
+    };
+    gaps: Array<Record<string, unknown>>;
+  };
+  validateNatSpecEvidence: (evidence: Record<string, unknown>) => void;
+  validateRetainedSourceRanges: (
+    value: unknown,
+    sourcePath: string,
+    sourceRecord: Record<string, unknown>,
+    sourceBuffer: Buffer,
+    label?: string
   ) => void;
   validateReleaseArtifactManifest: (
     artifacts: Record<
@@ -89,6 +119,16 @@ const {
       { json: Record<string, unknown>; sha256?: string }
     >
   ) => void;
+  validateReleaseManifest: (
+    artifacts: Record<
+      string,
+      {
+        buffer: Buffer;
+        json: Record<string, unknown>;
+        sha256: string;
+      }
+    >
+  ) => Record<string, unknown>;
 };
 
 type Declaration = {
@@ -184,6 +224,11 @@ describe("Solidity public-review reference generator", () => {
           schemaVersion: "contracts.v1",
         },
       ],
+      classification: {
+        vendoredSourcePaths: [],
+        legacySourcePaths: [],
+        excludedDefinitions: [],
+      },
       output: {
         directory: "public/review-data/stream/versions/v1",
         retainedVersions: ["v1"],
@@ -223,6 +268,81 @@ describe("Solidity public-review reference generator", () => {
         sources: { "smart-contracts/A.sol": {} },
       })
     ).toThrow("missing: smart-contracts/B.sol");
+  });
+
+  it("recomputes retained source lines and snippet digests for nested ranges", () => {
+    const sourcePath = "smart-contracts/T.sol";
+    const sourceBuffer = Buffer.from("first\nsecond\nthird\n");
+    const sourceSha256 = sha256Urn(sourceBuffer);
+    const sourceRecord = {
+      path: sourcePath,
+      byteLength: sourceBuffer.length,
+      sha256: sourceSha256,
+      githubUrl:
+        "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/T.sol",
+    };
+    const value = {
+      definition: {
+        declarations: {
+          modifiers: [
+            {
+              range: {
+                byteStart: 6,
+                byteLength: 6,
+                lineStart: 2,
+                lineEnd: 2,
+                sourceSha256,
+                snippetSha256: sha256Urn(Buffer.from("second")),
+                githubUrl:
+                  "https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/T.sol#L2",
+              },
+            },
+          ],
+        },
+      },
+    };
+    expect(() =>
+      validateRetainedSourceRanges(
+        value,
+        sourcePath,
+        sourceRecord,
+        sourceBuffer
+      )
+    ).not.toThrow();
+
+    const lineTamper = JSON.parse(JSON.stringify(value));
+    lineTamper.definition.declarations.modifiers[0].range.lineStart = 1;
+    expect(() =>
+      validateRetainedSourceRanges(
+        lineTamper,
+        sourcePath,
+        sourceRecord,
+        sourceBuffer
+      )
+    ).toThrow("line, snippet digest, or GitHub URL drifted");
+
+    const digestTamper = JSON.parse(JSON.stringify(value));
+    digestTamper.definition.declarations.modifiers[0].range.snippetSha256 = `sha256:${"0".repeat(64)}`;
+    expect(() =>
+      validateRetainedSourceRanges(
+        digestTamper,
+        sourcePath,
+        sourceRecord,
+        sourceBuffer
+      )
+    ).toThrow("line, snippet digest, or GitHub URL drifted");
+
+    const urlTamper = JSON.parse(JSON.stringify(value));
+    urlTamper.definition.declarations.modifiers[0].range.githubUrl =
+      "https://github.com/6529-Collections/6529Stream/blob/wrong/T.sol#L2";
+    expect(() =>
+      validateRetainedSourceRanges(
+        urlTamper,
+        sourcePath,
+        sourceRecord,
+        sourceBuffer
+      )
+    ).toThrow("line, snippet digest, or GitHub URL drifted");
   });
 
   it("preserves full pinned governance/finality-style file-scope type details", () => {
@@ -328,6 +448,74 @@ describe("Solidity public-review reference generator", () => {
       constant: true,
       valueSource: "42",
       valueRange: { byteStart: valueStart, byteLength: 2 },
+    });
+  });
+
+  it("retains contract constant and immutable initializer values losslessly", () => {
+    const text = "uint256 constant LIMIT = 42;\nuint256 immutable FLOOR = 7;\n";
+    const buffer = Buffer.from(text);
+    const sourceRecord = {
+      path: "smart-contracts/Config.sol",
+      buffer,
+      lineStarts: [0, text.indexOf("\n") + 1],
+      lineCount: 2,
+      sha256: sha256Urn(buffer),
+    };
+    const source = {
+      repository: "6529-Collections/6529Stream",
+      commit: "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8",
+    };
+    const record = (
+      name: string,
+      initializer: string,
+      declaration: string,
+      constant: boolean,
+      mutability: string
+    ) => {
+      const declarationStart = text.indexOf(declaration);
+      const valueStart = text.indexOf(initializer, declarationStart);
+      return stateVariableRecord(
+        {
+          nodeType: "VariableDeclaration",
+          name,
+          typeName: { nodeType: "ElementaryTypeName", name: "uint256" },
+          typeDescriptions: { typeString: "uint256" },
+          visibility: "internal",
+          constant,
+          mutability,
+          src: `${declarationStart}:${Buffer.byteLength(declaration)}:0`,
+          value: {
+            nodeType: "Literal",
+            src: `${valueStart}:${Buffer.byteLength(initializer)}:0`,
+          },
+        },
+        "smart-contracts/Config.sol:Config",
+        sourceRecord,
+        source
+      );
+    };
+
+    expect(
+      record("LIMIT", "42", "uint256 constant LIMIT = 42;", true, "constant")
+    ).toMatchObject({
+      constant: true,
+      immutable: false,
+      valueSource: "42",
+      valueRange: {
+        byteStart: text.indexOf("42"),
+        byteLength: 2,
+      },
+    });
+    expect(
+      record("FLOOR", "7", "uint256 immutable FLOOR = 7;", false, "immutable")
+    ).toMatchObject({
+      constant: false,
+      immutable: true,
+      valueSource: "7",
+      valueRange: {
+        byteStart: text.lastIndexOf("7"),
+        byteLength: 1,
+      },
     });
   });
 
@@ -470,6 +658,203 @@ describe("Solidity public-review reference generator", () => {
     );
   });
 
+  it("reconciles release readiness, risks, and governed-parameter digests", () => {
+    type Artifact = {
+      buffer: Buffer;
+      json: Record<string, unknown>;
+      sha256: string;
+    };
+    const artifact = (
+      schemaVersion: string,
+      fields: Record<string, unknown> = {}
+    ): Artifact => {
+      const json = { schema_version: schemaVersion, ...fields };
+      const buffer = Buffer.from(stableJson(json));
+      return { buffer, json, sha256: sha256Urn(buffer) };
+    };
+    const artifacts: Record<string, Artifact> = {};
+    const schemasByPath: Record<string, string> = {
+      "release-artifacts/contracts.json": "contracts.v1",
+      "release-artifacts/genesis-deployment-profile.json": "genesis.v1",
+      "release-artifacts/latest/abi-checksums.json": "abi.v1",
+      "release-artifacts/latest/event-topic-catalog.json": "events.v1",
+      "release-artifacts/latest/interface-ids.json": "interfaces.v1",
+      "release-artifacts/latest/protocol-surface-report.json": "surface.v1",
+      "release-artifacts/latest/custom-error-catalog.json": "errors.v1",
+      "release-artifacts/latest/release-artifact-manifest.json":
+        "artifact-manifest.v1",
+      "release-artifacts/latest/source-verification-inputs.json":
+        "verification.v1",
+      "release-artifacts/baselines/v0.1.0/natspec-coverage.json": "natspec.v1",
+    };
+    for (const [artifactPath, schemaVersion] of Object.entries(schemasByPath)) {
+      artifacts[artifactPath] = artifact(schemaVersion);
+    }
+    const genesisSha = artifacts[
+      "release-artifacts/genesis-deployment-profile.json"
+    ]!.sha256.replace(/^sha256:/, "");
+    const parameterPreimage = "6529STREAM_GGP_TEST";
+    const domainPreimage = "6529STREAM_GAS_PARAMETER_SCOPE_V2";
+    artifacts["release-artifacts/governed-parameter-inventory.json"] = artifact(
+      "6529stream.governed-parameter-inventory.v1",
+      {
+        status: "planning",
+        genesis_profile: { sha256: genesisSha },
+        inventory_summary: {
+          ggp_count: 1,
+          gtp_count: 0,
+          logical_parameter_count: 1,
+          expected_host_binding_count: 1,
+        },
+        candidate_binding: {
+          status: "not_available",
+          candidate_id: null,
+          candidate_commit: null,
+          candidate_artifact_path: null,
+          candidate_artifact_sha256: null,
+          host_bindings: [],
+        },
+        governance_policy: {
+          domains: {
+            gas_scope: {
+              preimage: domainPreimage,
+              keccak256: keccak256(domainPreimage),
+            },
+          },
+        },
+        parameters: [
+          {
+            family: "GGP",
+            name: "TEST",
+            preimage: parameterPreimage,
+            parameter_id: keccak256(parameterPreimage),
+            expected_hosts: { count: 1 },
+          },
+        ],
+      }
+    );
+    artifacts["release-artifacts/latest/public-beta-evidence.json"] = artifact(
+      "6529stream.public-beta-evidence.v1",
+      {
+        release_version: "v0.1.0-local",
+        status: {
+          public_beta: "blocked",
+          production_release: "blocked",
+        },
+        requirements: [
+          { id: "audit", phase: "public_beta", status: "missing" },
+          { id: "signatures", phase: "production_release", status: "missing" },
+        ],
+      }
+    );
+    artifacts["release-artifacts/latest/risk-register.json"] = artifact(
+      "6529stream.risk-register.v1",
+      {
+        maturity: "pre_audit_local_baseline",
+        risks: [
+          {
+            id: "RISK-AUD-001",
+            area: "audit",
+            status: "open_blocker",
+          },
+        ],
+      }
+    );
+
+    const manifestKeysByPath: Record<string, string> = {
+      "release-artifacts/contracts.json": "contract_config",
+      "release-artifacts/genesis-deployment-profile.json":
+        "genesis_deployment_profile",
+      "release-artifacts/governed-parameter-inventory.json":
+        "governed_parameter_inventory",
+      "release-artifacts/latest/abi-checksums.json": "abi_checksums",
+      "release-artifacts/latest/event-topic-catalog.json":
+        "event_topic_catalog",
+      "release-artifacts/latest/interface-ids.json": "interface_ids",
+      "release-artifacts/latest/protocol-surface-report.json":
+        "protocol_surface_report",
+      "release-artifacts/latest/custom-error-catalog.json":
+        "custom_error_catalog",
+      "release-artifacts/latest/release-artifact-manifest.json":
+        "artifact_manifest",
+      "release-artifacts/latest/source-verification-inputs.json":
+        "source_verification_inputs",
+      "release-artifacts/latest/public-beta-evidence.json":
+        "public_beta_evidence",
+      "release-artifacts/latest/risk-register.json": "risk_register",
+      "release-artifacts/baselines/v0.1.0/natspec-coverage.json":
+        "natspec_coverage_baseline",
+    };
+    const releaseArtifacts: Record<string, Record<string, unknown>> = {};
+    for (const [artifactPath, manifestKey] of Object.entries(
+      manifestKeysByPath
+    )) {
+      const bound = artifacts[artifactPath]!;
+      releaseArtifacts[manifestKey] = {
+        path: artifactPath,
+        sha256: bound.sha256,
+        size_bytes: bound.buffer.length,
+        schema_version: bound.json["schema_version"],
+      };
+    }
+    Object.assign(releaseArtifacts["public_beta_evidence"]!, {
+      status: {
+        public_beta: "blocked",
+        production_release: "blocked",
+      },
+      blocking_counts: { public_beta: 1, production_release: 1 },
+    });
+    Object.assign(releaseArtifacts["risk_register"]!, {
+      maturity: "pre_audit_local_baseline",
+      risk_count: 1,
+      open_blocker_count: 1,
+      planned_mitigation_count: 0,
+      accepted_local_baseline_count: 0,
+      areas: ["audit"],
+    });
+    releaseArtifacts["public_beta_blocker_report"] = {
+      path: "release-artifacts/latest/public-beta-blockers.md",
+      sha256: `sha256:${"1".repeat(64)}`,
+      size_bytes: 1,
+    };
+    releaseArtifacts["production_release_blocker_report"] = {
+      path: "release-artifacts/latest/production-release-blockers.md",
+      sha256: `sha256:${"2".repeat(64)}`,
+      size_bytes: 1,
+    };
+    const releaseManifestJson = {
+      schema_version: "6529stream.release-manifest.v1",
+      release: {
+        project: "6529Stream",
+        status: "pre_audit_local_baseline",
+      },
+      release_artifacts: releaseArtifacts,
+      checksum_bundle: {
+        coverage_expectation: {
+          release_manifest_path:
+            "release-artifacts/latest/release-manifest.json",
+          covered_by_checksum_bundle: true,
+        },
+      },
+      unavailable_release_ceremony: {},
+    };
+    artifacts["release-artifacts/latest/release-manifest.json"] = artifact(
+      "6529stream.release-manifest.v1",
+      releaseManifestJson
+    );
+
+    expect(() => validateReleaseManifest(artifacts)).not.toThrow();
+    (
+      releaseArtifacts["public_beta_evidence"]!["blocking_counts"] as Record<
+        string,
+        number
+      >
+    )["public_beta"] = 2;
+    expect(() => validateReleaseManifest(artifacts)).toThrow(
+      "readiness blocker counts drifted"
+    );
+  });
+
   it("rejects a same-count custom-error catalog mutation", () => {
     const error = {
       name: "BadInput",
@@ -546,7 +931,11 @@ describe("Solidity public-review reference generator", () => {
         },
       },
       "release-artifacts/baselines/v0.1.0/natspec-coverage.json": {
+        sha256: `sha256:${"b".repeat(64)}`,
         json: {
+          schema_version: "1",
+          policy: "Every public surface gap must be explicitly tracked.",
+          scope: "Pinned public protocol surface.",
           exclusions: [
             {
               id: "T:function:read(uint256)",
@@ -563,7 +952,35 @@ describe("Solidity public-review reference generator", () => {
         },
       },
     };
-    expect(() => validateNatSpecBaseline(sources, artifacts)).not.toThrow();
+    expect(validateNatSpecBaseline(sources, artifacts)).toEqual({
+      baseline: {
+        path: "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
+        schemaVersion: "1",
+        sha256: `sha256:${"b".repeat(64)}`,
+        policy: "Every public surface gap must be explicitly tracked.",
+        scope: "Pinned public protocol surface.",
+      },
+      gapCount: 1,
+      counts: {
+        byGapType: { function: 1 },
+        byKind: { function: 1 },
+        byStatus: { missing_natspec: 1 },
+      },
+      gaps: [
+        {
+          id: "T:function:read(uint256)",
+          contract: "T",
+          source,
+          kind: "function",
+          signature: "read(uint256)",
+          status: "missing_natspec",
+          line: 2,
+          gapType: "function",
+          reason: "Document this function.",
+          follow_up: "Documentation review.",
+        },
+      ],
+    });
     artifacts[
       "release-artifacts/baselines/v0.1.0/natspec-coverage.json"
     ].json.exclusions[0]!.status = "declaration_not_in_source";
@@ -665,6 +1082,24 @@ describe("Solidity public-review reference generator", () => {
         totalCount: 0,
         byCategory: {},
         byCode: {},
+      },
+      auditorEvidence: {
+        natSpecGaps: {
+          baseline: {
+            path: "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
+            schemaVersion: "1",
+            sha256: `sha256:${"b".repeat(64)}`,
+            policy: "Every public surface gap must be explicitly tracked.",
+            scope: "Pinned public protocol surface.",
+          },
+          gapCount: 0,
+          counts: {
+            byGapType: {},
+            byKind: {},
+            byStatus: {},
+          },
+          gaps: [],
+        },
       },
     };
     bundle.generator.outputSha256 = bundleOutputSha256(bundle);
@@ -871,6 +1306,7 @@ describe("Solidity public-review reference generator", () => {
     };
     const buffer = Buffer.from(stableJson(shard));
     const bundle = {
+      bundleSchemaVersion: BUNDLE_SCHEMA_VERSION,
       reviewId: "stream",
       reviewVersion: "v1",
       summary: { warningCount: 0 },

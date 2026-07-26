@@ -5,6 +5,10 @@ const path = require("node:path");
 const { TextDecoder } = require("node:util");
 
 const BUNDLE_SCHEMA_VERSION = "public-review.solidity-reference.v3";
+const HISTORICAL_BUNDLE_SCHEMA_VERSION_V2 =
+  "public-review.solidity-reference.v2";
+const HISTORICAL_DEFINITION_SHARD_SCHEMA_VERSION_V1 =
+  "public-review.solidity-definition-shard.v1";
 const DEFINITION_SHARD_SCHEMA_VERSION =
   "public-review.solidity-definition-shard.v1";
 const INDEX_SCHEMA_VERSION = "public-review.solidity-reference-index.v1";
@@ -466,6 +470,78 @@ function astRange(node, sourceRecord, source) {
   };
 }
 
+function validateRetainedSourceRanges(
+  value,
+  sourcePath,
+  sourceRecord,
+  sourceBuffer,
+  label = sourcePath
+) {
+  const lineStarts = sourceLineStarts(sourceBuffer);
+  const seen = new Set();
+
+  function validateRange(range, rangeLabel) {
+    invariant(
+      Number.isSafeInteger(range?.byteStart) &&
+        range.byteStart >= 0 &&
+        Number.isSafeInteger(range.byteLength) &&
+        range.byteLength >= 0 &&
+        range.byteStart + range.byteLength <= sourceBuffer.length,
+      `${rangeLabel}: retained source byte range drifted.`
+    );
+    const inclusiveEnd =
+      range.byteLength === 0
+        ? range.byteStart
+        : range.byteStart + range.byteLength - 1;
+    const expectedLineStart = lineForOffset(lineStarts, range.byteStart);
+    const expectedLineEnd = lineForOffset(lineStarts, inclusiveEnd);
+    const snippet = sourceBuffer.subarray(
+      range.byteStart,
+      range.byteStart + range.byteLength
+    );
+    const expectedGithubUrl = `${sourceRecord.githubUrl}#L${expectedLineStart}${
+      expectedLineEnd > expectedLineStart ? `-L${expectedLineEnd}` : ""
+    }`;
+    invariant(
+      range.sourceSha256 === sourceRecord.sha256 &&
+        range.lineStart === expectedLineStart &&
+        range.lineEnd === expectedLineEnd &&
+        range.snippetSha256 === sha256Urn(snippet) &&
+        range.githubUrl === expectedGithubUrl,
+      `${rangeLabel}: retained source line, snippet digest, or GitHub URL drifted.`
+    );
+  }
+
+  function walk(node, nodeLabel) {
+    if (!node || typeof node !== "object") {
+      return;
+    }
+    if (seen.has(node)) {
+      return;
+    }
+    seen.add(node);
+    if (Array.isArray(node)) {
+      node.forEach((entry, index) => walk(entry, `${nodeLabel}[${index}]`));
+      return;
+    }
+    for (const [key, entry] of Object.entries(node)) {
+      if ((key === "range" || key === "valueRange") && entry !== null) {
+        validateRange(entry, `${nodeLabel}.${key}`);
+      } else {
+        walk(entry, `${nodeLabel}.${key}`);
+      }
+    }
+  }
+
+  invariant(
+    sourceRecord.path === sourcePath &&
+      sourceBuffer.length === sourceRecord.byteLength &&
+      sha256Urn(sourceBuffer) === sourceRecord.sha256,
+    `${label}: retained source identity drifted before range validation.`
+  );
+  walk(value, label);
+}
+
 function displayType(typeName) {
   if (!typeName || typeof typeName !== "object") {
     return "unknown";
@@ -619,6 +695,9 @@ function stateVariableRecord(node, definitionId, sourceRecord, source) {
     typeof node.functionSelector === "string"
       ? `0x${node.functionSelector}`
       : null;
+  const valueRange = node.value
+    ? astRange(node.value, sourceRecord, source)
+    : null;
   return {
     name: node.name,
     type: displayType(node.typeName),
@@ -626,6 +705,15 @@ function stateVariableRecord(node, definitionId, sourceRecord, source) {
     visibility: node.visibility,
     constant: Boolean(node.constant),
     immutable: node.mutability === "immutable",
+    valueRange,
+    valueSource: valueRange
+      ? sourceRecord.buffer
+          .subarray(
+            valueRange.byteStart,
+            valueRange.byteStart + valueRange.byteLength
+          )
+          .toString("utf8")
+      : null,
     natspec: readDocumentation(node.documentation),
     range: astRange(node, sourceRecord, source),
     getterDeclarationId: selector
@@ -1374,6 +1462,24 @@ function prepareDefinitions(config, sources, compilerOutput, artifacts) {
       sourceRecord.definitionIds.push(semanticId);
     }
   }
+  for (const sourcePath of [
+    ...(config.classification.vendoredSourcePaths ?? []),
+    ...(config.classification.legacySourcePaths ?? []),
+  ]) {
+    invariant(
+      sources.has(sourcePath),
+      `Classification references missing source: ${sourcePath}`
+    );
+  }
+  const semanticIds = new Set(
+    [...rawDefinitions.values()].map((definition) => definition.semanticId)
+  );
+  for (const excluded of config.classification.excludedDefinitions ?? []) {
+    invariant(
+      semanticIds.has(excluded.id),
+      `Classification references missing definition: ${excluded.id}`
+    );
+  }
   return { rawDefinitions, classificationContext };
 }
 
@@ -1560,6 +1666,43 @@ function validateConfig(config) {
       `${artifact.path}: schemaVersion is required.`
     );
   }
+  const vendoredPaths = config.classification?.vendoredSourcePaths;
+  const legacyPaths = config.classification?.legacySourcePaths;
+  const excludedDefinitions = config.classification?.excludedDefinitions;
+  invariant(
+    Array.isArray(vendoredPaths) &&
+      Array.isArray(legacyPaths) &&
+      Array.isArray(excludedDefinitions),
+    "classification must contain vendored, legacy, and excluded arrays."
+  );
+  for (const [label, paths] of [
+    ["vendored", vendoredPaths],
+    ["legacy", legacyPaths],
+  ]) {
+    invariant(
+      paths.every((sourcePath) => isSafeRepositoryPath(sourcePath)) &&
+        new Set(paths).size === paths.length,
+      `classification.${label}SourcePaths must be safe and unique.`
+    );
+  }
+  invariant(
+    vendoredPaths.every((sourcePath) => !legacyPaths.includes(sourcePath)),
+    "classification vendored and legacy source paths must be disjoint."
+  );
+  const excludedIds = new Set();
+  for (const excluded of excludedDefinitions) {
+    const separator = excluded?.id?.lastIndexOf(":") ?? -1;
+    invariant(
+      separator > 0 &&
+        isSafeRepositoryPath(excluded.id.slice(0, separator)) &&
+        excluded.id.slice(separator + 1).length > 0 &&
+        typeof excluded.reason === "string" &&
+        excluded.reason.length > 0 &&
+        !excludedIds.has(excluded.id),
+      "classification excluded definitions must have unique safe IDs and reasons."
+    );
+    excludedIds.add(excluded.id);
+  }
   invariant(
     isSafeRepositoryPath(config.output.directory),
     "output.directory must be repository-relative."
@@ -1649,6 +1792,204 @@ function validateReleaseArtifactManifest(artifacts) {
   }
 }
 
+function validateReleaseManifest(artifacts) {
+  const manifestArtifact =
+    artifacts["release-artifacts/latest/release-manifest.json"];
+  const manifest = manifestArtifact.json;
+  invariant(
+    manifest.schema_version === "6529stream.release-manifest.v1" &&
+      manifest.release?.project === "6529Stream" &&
+      typeof manifest.release?.status === "string",
+    "Release manifest release identity or status drifted."
+  );
+  const bindings = [
+    ["contract_config", "release-artifacts/contracts.json"],
+    [
+      "genesis_deployment_profile",
+      "release-artifacts/genesis-deployment-profile.json",
+    ],
+    [
+      "governed_parameter_inventory",
+      "release-artifacts/governed-parameter-inventory.json",
+    ],
+    ["abi_checksums", "release-artifacts/latest/abi-checksums.json"],
+    [
+      "event_topic_catalog",
+      "release-artifacts/latest/event-topic-catalog.json",
+    ],
+    ["interface_ids", "release-artifacts/latest/interface-ids.json"],
+    [
+      "protocol_surface_report",
+      "release-artifacts/latest/protocol-surface-report.json",
+    ],
+    [
+      "custom_error_catalog",
+      "release-artifacts/latest/custom-error-catalog.json",
+    ],
+    [
+      "artifact_manifest",
+      "release-artifacts/latest/release-artifact-manifest.json",
+    ],
+    [
+      "source_verification_inputs",
+      "release-artifacts/latest/source-verification-inputs.json",
+    ],
+    [
+      "public_beta_evidence",
+      "release-artifacts/latest/public-beta-evidence.json",
+    ],
+    ["risk_register", "release-artifacts/latest/risk-register.json"],
+    [
+      "natspec_coverage_baseline",
+      "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
+    ],
+  ];
+  const boundArtifactDigests = {};
+  for (const [manifestKey, artifactPath] of bindings) {
+    const record = manifest.release_artifacts?.[manifestKey];
+    const artifact = artifacts[artifactPath];
+    invariant(
+      record?.path === artifactPath &&
+        record.sha256 === artifact?.sha256 &&
+        record.size_bytes === artifact?.buffer.length &&
+        (!record.schema_version ||
+          record.schema_version === artifact?.json?.schema_version),
+      `${artifactPath}: release manifest artifact binding drifted.`
+    );
+    boundArtifactDigests[artifactPath] = {
+      sha256: record.sha256,
+      sizeBytes: record.size_bytes,
+      schemaVersion: record.schema_version ?? null,
+    };
+  }
+
+  const readiness =
+    artifacts["release-artifacts/latest/public-beta-evidence.json"].json;
+  invariant(
+    stableJson(manifest.release_artifacts.public_beta_evidence.status) ===
+      stableJson(readiness.status),
+    "Release manifest readiness state drifted."
+  );
+  const blockingCounts = {};
+  for (const phase of ["public_beta", "production_release"]) {
+    blockingCounts[phase] = (readiness.requirements ?? []).filter(
+      (requirement) =>
+        requirement.phase === phase && requirement.status !== "complete"
+    ).length;
+  }
+  invariant(
+    stableJson(
+      manifest.release_artifacts.public_beta_evidence.blocking_counts
+    ) === stableJson(blockingCounts),
+    "Release manifest readiness blocker counts drifted."
+  );
+
+  const riskRegister =
+    artifacts["release-artifacts/latest/risk-register.json"].json;
+  const risks = riskRegister.risks ?? [];
+  const riskSummary = {
+    maturity: riskRegister.maturity,
+    risk_count: risks.length,
+    open_blocker_count: risks.filter((risk) => risk.status === "open_blocker")
+      .length,
+    planned_mitigation_count: risks.filter(
+      (risk) => risk.status === "planned_mitigation"
+    ).length,
+    accepted_local_baseline_count: risks.filter(
+      (risk) => risk.status === "accepted_local_baseline"
+    ).length,
+    areas: [...new Set(risks.map((risk) => risk.area))].sort(compareStrings),
+  };
+  const manifestRisk = manifest.release_artifacts.risk_register;
+  invariant(
+    stableJson({
+      maturity: manifestRisk.maturity,
+      risk_count: manifestRisk.risk_count,
+      open_blocker_count: manifestRisk.open_blocker_count,
+      planned_mitigation_count: manifestRisk.planned_mitigation_count,
+      accepted_local_baseline_count: manifestRisk.accepted_local_baseline_count,
+      areas: manifestRisk.areas,
+    }) === stableJson(riskSummary),
+    "Release manifest risk register summary drifted."
+  );
+
+  const governedParameters =
+    artifacts["release-artifacts/governed-parameter-inventory.json"].json;
+  const parameters = governedParameters.parameters ?? [];
+  const inventorySummary = {
+    ggp_count: parameters.filter((parameter) => parameter.family === "GGP")
+      .length,
+    gtp_count: parameters.filter((parameter) => parameter.family === "GTP")
+      .length,
+    logical_parameter_count: parameters.length,
+    expected_host_binding_count: parameters.reduce(
+      (count, parameter) => count + (parameter.expected_hosts?.count ?? 0),
+      0
+    ),
+  };
+  invariant(
+    stableJson(governedParameters.inventory_summary) ===
+      stableJson(inventorySummary),
+    "Governed parameter inventory summary drifted."
+  );
+  for (const parameter of parameters) {
+    invariant(
+      parameter.parameter_id === keccak256(parameter.preimage),
+      `${parameter.name}: governed parameter identifier digest drifted.`
+    );
+  }
+  for (const [domain, binding] of Object.entries(
+    governedParameters.governance_policy?.domains ?? {}
+  )) {
+    invariant(
+      binding.keccak256 === keccak256(binding.preimage),
+      `${domain}: governed parameter domain digest drifted.`
+    );
+  }
+  const genesisProfile =
+    artifacts["release-artifacts/genesis-deployment-profile.json"];
+  invariant(
+    governedParameters.genesis_profile?.sha256 ===
+      genesisProfile.sha256.replace(/^sha256:/, ""),
+    "Governed parameter genesis profile digest drifted."
+  );
+  const candidateBinding = governedParameters.candidate_binding;
+  invariant(
+    candidateBinding?.status !== "not_available" ||
+      (candidateBinding.candidate_id === null &&
+        candidateBinding.candidate_commit === null &&
+        candidateBinding.candidate_artifact_path === null &&
+        candidateBinding.candidate_artifact_sha256 === null &&
+        (candidateBinding.host_bindings ?? []).length === 0),
+    "Unavailable governed parameter candidate binding contains bound values."
+  );
+
+  invariant(
+    manifest.checksum_bundle?.coverage_expectation
+      ?.covered_by_checksum_bundle === true &&
+      manifest.checksum_bundle.coverage_expectation.release_manifest_path ===
+        "release-artifacts/latest/release-manifest.json",
+    "Release manifest checksum bundle coverage drifted."
+  );
+
+  return {
+    schemaVersion: manifest.schema_version,
+    sha256: manifestArtifact.sha256,
+    release: manifest.release,
+    readiness,
+    blockerReports: {
+      publicBeta: manifest.release_artifacts.public_beta_blocker_report,
+      productionRelease:
+        manifest.release_artifacts.production_release_blocker_report,
+    },
+    riskRegister,
+    governedParameterInventory: governedParameters,
+    boundArtifactDigests,
+    checksumBundle: manifest.checksum_bundle,
+    unavailableReleaseCeremony: manifest.unavailable_release_ceremony,
+  };
+}
+
 function validateArtifacts(config, artifacts) {
   for (const expected of config.releaseArtifacts) {
     const artifact = artifacts[expected.path];
@@ -1692,6 +2033,7 @@ function validateArtifacts(config, artifacts) {
   );
 
   validateReleaseArtifactManifest(artifacts);
+  return validateReleaseManifest(artifacts);
 }
 
 function validateSourceVerification(sources, artifacts, config) {
@@ -2441,11 +2783,98 @@ function natspecDeclarationForItem(declarationsBySource, item) {
   return sameKind.length === 1 ? sameKind[0] : null;
 }
 
+function natSpecGapCounts(gaps) {
+  const countBy = (field) =>
+    Object.fromEntries(
+      Object.entries(
+        gaps.reduce((counts, gap) => {
+          counts[gap[field]] = (counts[gap[field]] ?? 0) + 1;
+          return counts;
+        }, {})
+      ).sort(([left], [right]) => compareStrings(left, right))
+    );
+  return {
+    byGapType: countBy("gapType"),
+    byKind: countBy("kind"),
+    byStatus: countBy("status"),
+  };
+}
+
+function validateNatSpecEvidence(evidence) {
+  invariant(
+    evidence?.baseline?.path ===
+      "release-artifacts/baselines/v0.1.0/natspec-coverage.json" &&
+      typeof evidence.baseline.schemaVersion === "string" &&
+      /^sha256:[0-9a-f]{64}$/.test(evidence.baseline.sha256) &&
+      typeof evidence.baseline.policy === "string" &&
+      evidence.baseline.policy.length > 0 &&
+      typeof evidence.baseline.scope === "string" &&
+      evidence.baseline.scope.length > 0 &&
+      Array.isArray(evidence.gaps),
+    "Generated NatSpec auditor evidence provenance is invalid."
+  );
+  const ids = new Set();
+  for (const gap of evidence.gaps) {
+    invariant(
+      typeof gap.id === "string" &&
+        gap.id.length > 0 &&
+        !ids.has(gap.id) &&
+        typeof gap.contract === "string" &&
+        typeof gap.source === "string" &&
+        ["function", "event", "custom_error"].includes(gap.kind) &&
+        [
+          "function",
+          "public_variable_getter",
+          "event",
+          "custom_error",
+          "declaration",
+        ].includes(gap.gapType) &&
+        typeof gap.signature === "string" &&
+        [
+          "missing_natspec",
+          "public_variable_getter_missing_natspec",
+          "declaration_not_in_source",
+        ].includes(gap.status) &&
+        (gap.line === null ||
+          (Number.isInteger(gap.line) && gap.line > 0)) &&
+        typeof gap.reason === "string" &&
+        gap.reason.length > 0 &&
+        typeof gap.follow_up === "string" &&
+        gap.follow_up.length > 0,
+      `${gap?.id ?? "unknown"}: generated NatSpec auditor evidence gap is invalid.`
+    );
+    ids.add(gap.id);
+    const expectedGapType =
+      gap.status === "declaration_not_in_source"
+        ? "declaration"
+        : gap.status === "public_variable_getter_missing_natspec"
+          ? "public_variable_getter"
+          : gap.kind;
+    invariant(
+      gap.gapType === expectedGapType,
+      `${gap.id}: generated NatSpec auditor evidence gap type drifted.`
+    );
+  }
+  invariant(
+    stableJson(evidence.gaps.map((gap) => gap.id)) ===
+      stableJson(evidence.gaps.map((gap) => gap.id).sort(compareStrings)),
+    "Generated NatSpec auditor evidence gaps are not deterministically ordered."
+  );
+  invariant(
+    evidence.gapCount === evidence.gaps.length &&
+      stableJson(evidence.counts) ===
+        stableJson(natSpecGapCounts(evidence.gaps)),
+    "Generated NatSpec auditor evidence counts drifted."
+  );
+}
+
 function validateNatSpecBaseline(sources, artifacts) {
   const surface =
     artifacts["release-artifacts/latest/protocol-surface-report.json"].json;
-  const baseline =
-    artifacts["release-artifacts/baselines/v0.1.0/natspec-coverage.json"].json;
+  const baselinePath =
+    "release-artifacts/baselines/v0.1.0/natspec-coverage.json";
+  const baselineArtifact = artifacts[baselinePath];
+  const baseline = baselineArtifact.json;
   const exclusions = baseline.exclusions ?? [];
   const exclusionsById = new Map();
   for (const exclusion of exclusions) {
@@ -2549,6 +2978,36 @@ function validateNatSpecBaseline(sources, artifacts) {
       );
     }
   }
+
+  const normalizedGaps = gaps.map((gap) => {
+    const exclusion = exclusionsById.get(gap.id);
+    const gapType =
+      gap.status === "declaration_not_in_source"
+        ? "declaration"
+        : gap.status === "public_variable_getter_missing_natspec"
+          ? "public_variable_getter"
+          : gap.kind;
+    return {
+      ...gap,
+      gapType,
+      reason: exclusion.reason,
+      follow_up: exclusion.follow_up,
+    };
+  });
+  const evidence = {
+    baseline: {
+      path: baselinePath,
+      schemaVersion: baseline.schema_version,
+      sha256: baselineArtifact.sha256,
+      policy: baseline.policy,
+      scope: baseline.scope,
+    },
+    gapCount: normalizedGaps.length,
+    counts: natSpecGapCounts(normalizedGaps),
+    gaps: normalizedGaps,
+  };
+  validateNatSpecEvidence(evidence);
+  return evidence;
 }
 
 function warningRecords(definitions) {
@@ -2778,7 +3237,7 @@ function buildBundle({
   commitTimestamp,
 }) {
   validateConfig(config);
-  validateArtifacts(config, artifacts);
+  const auditorEvidence = validateArtifacts(config, artifacts);
   const publicBasePath = `/${normalizePath(config.output.directory).replace(
     /^public\//,
     ""
@@ -2829,7 +3288,7 @@ function buildBundle({
   const files = [...sources.values()]
     .map(publicSourceRecord)
     .sort((left, right) => compareStrings(left.path, right.path));
-  validateNatSpecBaseline(sources, artifacts);
+  auditorEvidence.natSpecGaps = validateNatSpecBaseline(sources, artifacts);
   const artifactChecksums = Object.fromEntries(
     Object.entries(artifacts)
       .sort(([left], [right]) => compareStrings(left, right))
@@ -2875,6 +3334,7 @@ function buildBundle({
       sourceSha256: generatorSha256,
       outputSha256: null,
     },
+    auditorEvidence,
     summary: {
       fileCount: files.length,
       topLevelDeclarationCount: files.reduce(
@@ -2948,16 +3408,50 @@ function validateAbiSurfaceDeclaration(surface, declaration) {
   }
 }
 
-function validateBundle(bundle) {
+function validateBundleV2(bundle) {
   invariant(
-    bundle?.bundleSchemaVersion === BUNDLE_SCHEMA_VERSION,
-    "Generated bundle schema is unsupported."
+    bundle.generator.outputSha256 === bundleOutputSha256(bundle),
+    "Generated bundle output checksum is invalid."
   );
   invariant(
-    bundle.generator?.name === GENERATOR_NAME &&
-      bundle.generator?.version === GENERATOR_VERSION,
-    "Generated bundle generator identity is unsupported."
+    bundle.summary.fileCount === bundle.files.length,
+    "Generated bundle file summary is invalid."
   );
+  invariant(
+    bundle.summary.definitionCount === bundle.definitionIndex.length,
+    "Generated bundle definition summary is invalid."
+  );
+  const definitionIds = new Set();
+  const shardPaths = new Set();
+  for (const definition of bundle.definitionIndex) {
+    invariant(
+      !definitionIds.has(definition.id),
+      `Duplicate generated definition ID: ${definition.id}`
+    );
+    definitionIds.add(definition.id);
+    invariant(
+      definition.key === encodeSemanticKey(definition.id),
+      `${definition.id}: definition key is not lossless base64url.`
+    );
+    invariant(
+      typeof definition.shardPath === "string" &&
+        definition.shardPath.startsWith("/") &&
+        !shardPaths.has(definition.shardPath),
+      `${definition.id}: definition shard path is invalid or duplicated.`
+    );
+    shardPaths.add(definition.shardPath);
+    invariant(
+      /^sha256:[0-9a-f]{64}$/.test(definition.shardSha256),
+      `${definition.id}: definition shard checksum is invalid.`
+    );
+  }
+  invariant(
+    bundle.summary.warningCount === bundle.warningSummary.totalCount,
+    "Generated bundle warning summary is invalid."
+  );
+}
+
+function validateBundleV3(bundle) {
   invariant(
     SAFE_REVIEW_VALUE_PATTERN.test(bundle.reviewId) &&
       SAFE_REVIEW_VALUE_PATTERN.test(bundle.reviewVersion) &&
@@ -2969,6 +3463,7 @@ function validateBundle(bundle) {
     bundle.generator.outputSha256 === bundleOutputSha256(bundle),
     "Generated bundle output checksum is invalid."
   );
+  validateNatSpecEvidence(bundle.auditorEvidence?.natSpecGaps);
   invariant(
     bundle.summary.fileCount === bundle.files.length,
     "Generated bundle file summary is invalid."
@@ -3214,6 +3709,115 @@ function validateBundle(bundle) {
   );
 }
 
+function bundleSchemaValidator(bundle) {
+  if (bundle?.bundleSchemaVersion === HISTORICAL_BUNDLE_SCHEMA_VERSION_V2) {
+    invariant(
+      bundle.generator?.name === GENERATOR_NAME &&
+        bundle.generator?.version === "1",
+      "Generated historical v2 bundle generator identity is unsupported."
+    );
+    return validateBundleV2;
+  }
+  if (bundle?.bundleSchemaVersion === BUNDLE_SCHEMA_VERSION) {
+    invariant(
+      bundle.generator?.name === GENERATOR_NAME &&
+        bundle.generator?.version === "2",
+      "Generated v3 bundle generator identity is unsupported."
+    );
+    return validateBundleV3;
+  }
+  throw new Error("Generated bundle schema is unsupported.");
+}
+
+function validateBundle(bundle, options = {}) {
+  const validator = bundleSchemaValidator(bundle);
+  if (options.requireCurrentIdentity !== false) {
+    invariant(
+      bundle.bundleSchemaVersion === BUNDLE_SCHEMA_VERSION &&
+        bundle.generator.version === GENERATOR_VERSION,
+      "Generated active bundle must use the current schema and generator."
+    );
+  }
+  validator(bundle);
+}
+
+function validateAbiSurfaceDeclarationV2(surface, declaration) {
+  invariant(
+    declaration.canonicalSignature === surface.signature,
+    `${surface.declarationId}: ABI surface canonical signature drifted.`
+  );
+  if (declaration.kind === "event") {
+    invariant(
+      declaration.topic0 === surface.topic0 &&
+        surface.topic0 === topicForSignature(surface.signature),
+      `${surface.declarationId}: ABI surface event topic drifted.`
+    );
+    return;
+  }
+  const selectorMatchesSignature =
+    surface.selectorSource === "compiler_ast_library" ||
+    surface.selector === selectorForSignature(surface.signature);
+  invariant(
+    declaration.selector === surface.selector && selectorMatchesSignature,
+    `${surface.declarationId}: ABI surface selector drifted.`
+  );
+  if (surface.selectorSource === "compiler_ast_library") {
+    invariant(
+      surface.canonicalAbiSelector === selectorForSignature(surface.signature),
+      `${surface.declarationId}: library ABI selector provenance drifted.`
+    );
+  }
+}
+
+function validateDefinitionRecordsV2(definitions) {
+  const definitionIds = new Set();
+  const declarationIds = new Set();
+  for (const definition of definitions) {
+    invariant(
+      !definitionIds.has(definition.id),
+      `Duplicate generated definition ID: ${definition.id}`
+    );
+    definitionIds.add(definition.id);
+    invariant(
+      definition.key === encodeSemanticKey(definition.id),
+      `${definition.id}: definition key is not lossless base64url.`
+    );
+    for (const kind of ["functions", "events", "errors"]) {
+      for (const declaration of definition.declarations[kind] ?? []) {
+        invariant(
+          !declarationIds.has(declaration.id),
+          `Duplicate generated declaration ID: ${declaration.id}`
+        );
+        declarationIds.add(declaration.id);
+        invariant(
+          declaration.key === encodeSemanticKey(declaration.id),
+          `${declaration.id}: declaration key is not lossless base64url.`
+        );
+      }
+    }
+  }
+  const declarationById = new Map();
+  for (const definition of definitions) {
+    for (const kind of ["functions", "events", "errors"]) {
+      for (const declaration of definition.declarations[kind] ?? []) {
+        declarationById.set(declaration.id, declaration);
+      }
+    }
+  }
+  for (const definition of definitions) {
+    for (const kind of ["functions", "events", "errors"]) {
+      for (const surface of definition.abiSurface[kind] ?? []) {
+        const declaration = declarationById.get(surface.declarationId);
+        invariant(
+          declaration,
+          `${definition.id}: ABI surface ${surface.signature} points to a missing declaration.`
+        );
+        validateAbiSurfaceDeclarationV2(surface, declaration);
+      }
+    }
+  }
+}
+
 function validateDefinitionRecords(definitions) {
   const definitionIds = new Set();
   const declarationIds = new Set();
@@ -3263,7 +3867,78 @@ function validateDefinitionRecords(definitions) {
   }
 }
 
-function validateDefinitionShards(bundle, definitionShards) {
+function validateDefinitionShardsV2(bundle, definitionShards) {
+  const indexedDefinitions = new Map(
+    bundle.definitionIndex.map((entry) => [entry.id, entry])
+  );
+  const definitions = [];
+  let warningCount = 0;
+  const seenDefinitions = new Set();
+  for (const value of definitionShards.values()) {
+    const shard = value.shard ?? value;
+    const buffer = value.buffer ?? Buffer.from(stableJson(shard));
+    invariant(
+      shard.shardSchemaVersion ===
+        HISTORICAL_DEFINITION_SHARD_SCHEMA_VERSION_V1,
+      "Generated definition shard schema is unsupported."
+    );
+    invariant(
+      shard.reviewId === bundle.reviewId &&
+        shard.reviewVersion === bundle.reviewVersion,
+      `${shard.definition?.id ?? "unknown"}: definition shard review identity drifted.`
+    );
+    const indexEntry = indexedDefinitions.get(shard.definition?.id);
+    invariant(
+      indexEntry,
+      `${shard.definition?.id ?? "unknown"}: definition shard is not indexed.`
+    );
+    invariant(
+      !seenDefinitions.has(shard.definition.id),
+      `${shard.definition.id}: duplicate definition shard.`
+    );
+    seenDefinitions.add(shard.definition.id);
+    invariant(
+      sha256Urn(buffer) === indexEntry.shardSha256,
+      `${shard.definition.id}: definition shard checksum drifted.`
+    );
+    for (const field of [
+      "key",
+      "name",
+      "sourcePath",
+      "scope",
+      "kind",
+      "classification",
+    ]) {
+      invariant(
+        indexEntry[field] === shard.definition[field],
+        `${shard.definition.id}: definition index ${field} drifted.`
+      );
+    }
+    invariant(
+      stableJson(summarizeWarnings(shard.warnings)) ===
+        stableJson(shard.warningSummary),
+      `${shard.definition.id}: definition warning summary drifted.`
+    );
+    invariant(
+      stableJson(indexEntry.warningSummary) ===
+        stableJson(shard.warningSummary),
+      `${shard.definition.id}: indexed warning summary drifted.`
+    );
+    warningCount += shard.warnings.length;
+    definitions.push(shard.definition);
+  }
+  invariant(
+    seenDefinitions.size === indexedDefinitions.size,
+    "Generated definition shard set is incomplete."
+  );
+  invariant(
+    warningCount === bundle.summary.warningCount,
+    "Generated definition shard warning total drifted."
+  );
+  validateDefinitionRecordsV2(definitions);
+}
+
+function validateDefinitionShardsV3(bundle, definitionShards) {
   const indexedDefinitions = new Map(
     bundle.definitionIndex.map((entry) => [entry.id, entry])
   );
@@ -3349,6 +4024,18 @@ function validateDefinitionShards(bundle, definitionShards) {
   );
 }
 
+function validateDefinitionShards(bundle, definitionShards) {
+  if (bundle?.bundleSchemaVersion === HISTORICAL_BUNDLE_SCHEMA_VERSION_V2) {
+    validateDefinitionShardsV2(bundle, definitionShards);
+    return;
+  }
+  if (bundle?.bundleSchemaVersion === BUNDLE_SCHEMA_VERSION) {
+    validateDefinitionShardsV3(bundle, definitionShards);
+    return;
+  }
+  throw new Error("Generated bundle schema is unsupported.");
+}
+
 function createIndexEntry(bundle, bundlePublicPath) {
   return {
     version: bundle.reviewVersion,
@@ -3393,6 +4080,7 @@ module.exports = {
   sha256Hex,
   sha256Urn,
   sourceLineCount,
+  stateVariableRecord,
   stableJson,
   topicForSignature,
   topLevelDeclarationRecord,
@@ -3402,7 +4090,10 @@ module.exports = {
   validateDefinitionShards,
   validateArtifacts,
   validateNatSpecBaseline,
+  validateNatSpecEvidence,
   validateProtocolSurface,
+  validateRetainedSourceRanges,
   validateReleaseArtifactManifest,
+  validateReleaseManifest,
   assertCanonicalSurfaceEqual,
 };

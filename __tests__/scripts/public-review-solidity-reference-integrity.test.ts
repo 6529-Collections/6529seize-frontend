@@ -5,15 +5,34 @@ import path from "node:path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
+  BUNDLE_SCHEMA_VERSION,
   DEFINITION_SHARD_SCHEMA_VERSION,
+  GENERATOR_NAME,
+  GENERATOR_VERSION,
+  INDEX_SCHEMA_VERSION,
+  bundleOutputSha256,
   compareReviewVersions,
+  createIndexEntry,
   encodeSemanticKey,
   sha256Urn,
   stableJson,
   validateDefinitionShards,
 } = require("../../scripts/public-reviews/solidity-reference-lib.cjs") as {
+  BUNDLE_SCHEMA_VERSION: string;
   DEFINITION_SHARD_SCHEMA_VERSION: string;
+  GENERATOR_NAME: string;
+  GENERATOR_VERSION: string;
+  INDEX_SCHEMA_VERSION: string;
+  bundleOutputSha256: (bundle: Record<string, unknown>) => string;
   compareReviewVersions: (left: string, right: string) => number;
+  createIndexEntry: (
+    bundle: {
+      reviewVersion: string;
+      source: { commit: string; tree: string };
+      generator: { outputSha256: string };
+    },
+    bundlePublicPath: string
+  ) => Record<string, unknown>;
   encodeSemanticKey: (value: string) => string;
   sha256Urn: (value: Buffer) => string;
   stableJson: (value: unknown) => string;
@@ -26,11 +45,20 @@ const {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
   acquireGenerationLock,
+  check,
+  configSha256,
+  generatorSourceSha256,
   loadPinnedInputs,
   resolveContainedPath,
   validateRetainedVersionRegistry,
 } = require("../../scripts/public-reviews/solidity-reference.cjs") as {
   acquireGenerationLock: (lockPath: string) => () => void;
+  check: (
+    configRecord: { json: Record<string, unknown>; text: string },
+    dependencies?: Record<string, unknown>
+  ) => void;
+  configSha256: (configText: string) => string;
+  generatorSourceSha256: () => string;
   loadPinnedInputs: (
     sourceRepo: string,
     config: {
@@ -102,6 +130,7 @@ function historicalShardFixture(reviewVersion: string) {
   };
   const buffer = Buffer.from(stableJson(shard));
   const bundle = {
+    bundleSchemaVersion: BUNDLE_SCHEMA_VERSION,
     reviewId: "6529-stream",
     reviewVersion,
     summary: { warningCount: 0 },
@@ -205,6 +234,212 @@ describe("Solidity public-review generator trust boundaries", () => {
         retained
       )
     ).toThrow();
+  });
+
+  it("checks historical v2/gen1 shards alongside an active v3/gen2 bundle", () => {
+    const reviewId = "stream-history";
+    const historicalVersion = "2026-07-25.1";
+    const activeVersion = "2026-07-26.1";
+    const commit = "e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8";
+    const tree = "3a8e3cb8102e891a73972282026d2811e7591852";
+    const config = {
+      schemaVersion: "public-review.solidity-source.v1",
+      reviewId,
+      reviewVersion: activeVersion,
+      source: {
+        repository: "6529-Collections/6529Stream",
+        commit,
+        tree,
+        compilerVersion: "0.8.19+commit.7dd6d404",
+        evmVersion: "paris",
+        viaIR: true,
+        optimizer: { enabled: true, runs: 200 },
+        roots: [{ path: "smart-contracts", scope: "protocol" }],
+      },
+      releaseArtifacts: [
+        {
+          path: "release-artifacts/contracts.json",
+          schemaVersion: "contracts.v1",
+        },
+      ],
+      classification: {
+        vendoredSourcePaths: [],
+        legacySourcePaths: [],
+        excludedDefinitions: [],
+      },
+      output: {
+        directory: `public/review-data/${reviewId}/versions/${activeVersion}`,
+        retainedVersions: [historicalVersion, activeVersion],
+        bundleFile: "reference-manifest.json",
+        definitionsDirectory: "definitions",
+        sourcesDirectory: "sources",
+        indexFile: `public/review-data/${reviewId}/index.json`,
+      },
+    };
+    const configText = `${JSON.stringify(config, null, 2)}\n`;
+
+    const definitionId = "smart-contracts/Legacy.sol:Legacy";
+    const definitionKey = encodeSemanticKey(definitionId);
+    const definition = {
+      id: definitionId,
+      key: definitionKey,
+      name: "Legacy",
+      sourcePath: "smart-contracts/Legacy.sol",
+      scope: "protocol",
+      kind: "contract",
+      classification: "production_release_contract",
+      declarations: { functions: [], events: [], errors: [] },
+      abiSurface: { functions: [], events: [], errors: [] },
+    };
+    const warningSummary = { totalCount: 0, byCategory: {}, byCode: {} };
+    const historicalShard = {
+      shardSchemaVersion: "public-review.solidity-definition-shard.v1",
+      reviewId,
+      reviewVersion: historicalVersion,
+      definition,
+      warnings: [],
+      warningSummary,
+    };
+    const historicalShardBuffer = Buffer.from(stableJson(historicalShard));
+    const historicalBundle = {
+      bundleSchemaVersion: "public-review.solidity-reference.v2",
+      reviewId,
+      reviewVersion: historicalVersion,
+      source: { commit, tree },
+      generator: {
+        name: GENERATOR_NAME,
+        version: "1",
+        outputSha256: "",
+      },
+      summary: {
+        fileCount: 0,
+        definitionCount: 1,
+        warningCount: 0,
+      },
+      definitionIndex: [
+        {
+          id: definitionId,
+          key: definitionKey,
+          name: definition.name,
+          sourcePath: definition.sourcePath,
+          scope: definition.scope,
+          kind: definition.kind,
+          classification: definition.classification,
+          shardPath: `/review-data/${reviewId}/versions/${historicalVersion}/definitions/${definitionKey}.json`,
+          shardSha256: sha256Urn(historicalShardBuffer),
+          warningSummary,
+        },
+      ],
+      files: [],
+      warningSummary,
+    };
+    historicalBundle.generator.outputSha256 =
+      bundleOutputSha256(historicalBundle);
+
+    const activeBundle = {
+      bundleSchemaVersion: BUNDLE_SCHEMA_VERSION,
+      reviewId,
+      reviewVersion: activeVersion,
+      source: {
+        repository: config.source.repository,
+        commit,
+        tree,
+        sourceChecksums: {},
+      },
+      generator: {
+        name: GENERATOR_NAME,
+        version: GENERATOR_VERSION,
+        configSha256: configSha256(configText),
+        sourceSha256: generatorSourceSha256(),
+        outputSha256: "",
+      },
+      summary: {
+        fileCount: 0,
+        topLevelDeclarationCount: 0,
+        declarationCount: 0,
+        definitionCount: 0,
+        contractCount: 0,
+        interfaceCount: 0,
+        libraryCount: 0,
+        classifications: {},
+        warningCount: 0,
+      },
+      declarationIndex: [],
+      definitionIndex: [],
+      files: [],
+      warningSummary,
+      auditorEvidence: {
+        natSpecGaps: {
+          baseline: {
+            path: "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
+            schemaVersion: "1",
+            sha256: `sha256:${"b".repeat(64)}`,
+            policy: "Every public surface gap must be explicitly tracked.",
+            scope: "Pinned public protocol surface.",
+          },
+          gapCount: 0,
+          counts: {
+            byGapType: {},
+            byKind: {},
+            byStatus: {},
+          },
+          gaps: [],
+        },
+      },
+    };
+    activeBundle.generator.outputSha256 = bundleOutputSha256(activeBundle);
+
+    const bundles = new Map([
+      [historicalVersion, historicalBundle],
+      [activeVersion, activeBundle],
+    ]);
+    const index = {
+      schemaVersion: INDEX_SCHEMA_VERSION,
+      reviewId,
+      activeVersion,
+      versions: [
+        createIndexEntry(
+          historicalBundle,
+          `/review-data/${reviewId}/versions/${historicalVersion}/reference-manifest.json`
+        ),
+        createIndexEntry(
+          activeBundle,
+          `/review-data/${reviewId}/versions/${activeVersion}/reference-manifest.json`
+        ),
+      ],
+    };
+
+    expect(() =>
+      check(
+        { json: config, text: configText },
+        {
+          readIndex: () => index,
+          readBundle: (_versionConfig: unknown, entry: { version: string }) =>
+            bundles.get(entry.version),
+          validateDefinitionShards: (
+            _versionConfig: unknown,
+            bundle: { reviewVersion: string }
+          ) =>
+            validateDefinitionShards(
+              bundle,
+              bundle.reviewVersion === historicalVersion
+                ? new Map([
+                    [
+                      definitionKey,
+                      {
+                        buffer: historicalShardBuffer,
+                        shard: historicalShard,
+                      },
+                    ],
+                  ])
+                : new Map()
+            ),
+          validateSources: () => undefined,
+          validateSnapshotFileSet: () => undefined,
+          writeOutput: () => undefined,
+        }
+      )
+    ).not.toThrow();
   });
 
   it("rejects checksum tampering in a retained historical definition shard", () => {
