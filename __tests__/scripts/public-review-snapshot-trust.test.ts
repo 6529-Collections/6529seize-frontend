@@ -159,6 +159,12 @@ function loadConfig(): Config {
   ) as Config;
 }
 
+function loadInitialConfig(): Config {
+  const config = loadConfig();
+  config.output.retainedVersions = [config.reviewVersion];
+  return config;
+}
+
 function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config;
 }
@@ -495,7 +501,7 @@ describe("public-review snapshot trust change policy", () => {
 
 describe("public-review snapshot trust immutable history", () => {
   it("permits only the initial pin fields on an initial snapshot", () => {
-    const base = loadConfig();
+    const base = loadInitialConfig();
     const candidate = cloneConfig(base);
     candidate.source.commit = shaA;
     candidate.source.tree = shaB;
@@ -516,29 +522,39 @@ describe("public-review snapshot trust immutable history", () => {
   it("requires a future version to append exact immutable history", () => {
     const base = loadConfig();
     const candidate = cloneConfig(base);
-    candidate.reviewVersion = "2026-07-26.2";
+    candidate.reviewVersion = "2026-07-27.2";
     candidate.source.commit = shaA;
     candidate.source.tree = shaB;
     candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-26.2";
+      "public/review-data/6529-stream/versions/2026-07-27.2";
     candidate.output.retainedVersions = [
       "2026-07-26.1",
-      "2026-07-26.2",
+      "2026-07-27.1",
+      "2026-07-27.2",
     ];
 
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, ["2026-07-26.1"])
+      validateTrustedConfigPolicy(base, candidate, [
+        "2026-07-26.1",
+        "2026-07-27.1",
+      ])
     ).not.toThrow();
-    candidate.output.retainedVersions = ["2026-07-26.2"];
+    candidate.output.retainedVersions = ["2026-07-27.2"];
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, ["2026-07-26.1"])
+      validateTrustedConfigPolicy(base, candidate, [
+        "2026-07-26.1",
+        "2026-07-27.1",
+      ])
     ).toThrow("append to exact base history");
-    candidate.reviewVersion = "2026-07-26.1";
+    candidate.reviewVersion = "2026-07-27.1";
     candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-26.1";
-    candidate.output.retainedVersions = ["2026-07-26.1"];
+      "public/review-data/6529-stream/versions/2026-07-27.1";
+    candidate.output.retainedVersions = ["2026-07-26.1", "2026-07-27.1"];
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, ["2026-07-26.1"])
+      validateTrustedConfigPolicy(base, candidate, [
+        "2026-07-26.1",
+        "2026-07-27.1",
+      ])
     ).toThrow("strictly greater");
   });
 });
@@ -744,7 +760,7 @@ describe("public-review snapshot trust orchestration", () => {
     const repositoryRoot = fs.mkdtempSync(
       path.join(os.tmpdir(), "snapshot-trust-orchestration-")
     );
-    const baseConfig = loadConfig();
+    const baseConfig = loadInitialConfig();
     const configPath = path.join(repositoryRoot, ...CONFIG_PATH.split("/"));
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     fs.writeFileSync(configPath, `${JSON.stringify(baseConfig, null, 2)}\n`);

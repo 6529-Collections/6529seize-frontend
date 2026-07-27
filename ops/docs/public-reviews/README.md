@@ -3,12 +3,16 @@
 ## Overview
 
 Public Contract Reviews are source-pinned, versioned reading rooms for proposed
-6529 contracts. They combine plain-language editorial pages with visible
-evidence labels and exact source links so artists, community members, technical
+6529 contracts. They combine plain-language editorial pages with exact source
+links and a canonical readiness ledger so artists, community members, technical
 reviewers, and auditors can examine the same candidate before deployment.
 
-The first review covers 6529 Stream. Stream is not deployed, is pre-audit, and
-is not presented as final or production-ready.
+The first review covers 6529 Stream, an attempt to build a complete,
+artist-centered contract system for serious one-of-one digital art. Stream is
+not deployed and is pre-audit. Its overview makes the case for the protocol's
+requirement-driven sophistication; **Current Implementation and Readiness**
+records exactly what is connected, implemented, proposed, evidenced, and still
+required.
 
 ## Availability
 
@@ -57,13 +61,11 @@ Every page includes:
 - a persistent status area showing the lifecycle, deployment, and audit states;
   Stream currently shows **Public review**, **Not deployed**, and **Pre-audit**
 - the review version and a link to the exact source snapshot
-- page-level evidence labels
 - navigation across the fourteen pages in the current version snapshot
 - an on-page contents list generated from the editorial headings
 - previous and next page controls
-- an evidence-label glossary
-- a collapsible page-comments rail that reads and submits feedback for the
-  immutable displayed review version
+- a collapsible page-feedback rail that reads existing comments and includes a
+  structured feedback form bound to the immutable displayed review version
 
 The overview also provides reading paths for community members, artists,
 technical reviewers, and auditors. The generated technical reference lets
@@ -73,18 +75,22 @@ queries the server with the active text, kind, scope, and location filters and
 loads up to 100 matching records at a time, rather than sending the complete
 declaration inventory to the browser.
 
-## Evidence Labels
+## Implementation and Evidence Status
 
-- **Implemented** means the behavior is present in the pinned Solidity source.
-- **Tested** means retained automated tests exercise it; this is not a security
-  guarantee.
-- **Proposed** means a design or specification describes it but the pinned
-  implementation does not fully provide it.
-- **Open for feedback** identifies an active review decision.
-- **Audit pending** means no completed external audit covers the candidate.
-- **Deferred** identifies work intentionally outside the current target.
-- **Known limitation** identifies a recorded constraint, gap, or unresolved
-  risk.
+The active review centralizes detailed implementation and evidence status on
+**Current Implementation and Readiness**. It separates five implementation
+states:
+
+- current candidate path
+- connected foundation
+- source implemented, not connected
+- accepted target, not implemented
+- proposed or deferred
+
+Testing and audit remain a separate evidence dimension. Topical pages use
+precise verbs next to each claim and link to the canonical ledger rather than
+repeating wiring matrices, release blockers, and badge taxonomies throughout
+the reading experience.
 
 ## Editorial Content
 

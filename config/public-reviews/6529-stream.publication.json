@@ -5,6 +5,10 @@
   "versions": [
     {
       "version": "2026-07-26.1",
+      "lifecycleState": "REVIEW_CLOSED"
+    },
+    {
+      "version": "2026-07-27.1",
       "lifecycleState": "PUBLIC_REVIEW"
     }
   ]

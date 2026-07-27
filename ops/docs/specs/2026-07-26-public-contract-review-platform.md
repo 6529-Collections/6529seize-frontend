@@ -167,8 +167,9 @@ The Stream instance contains fourteen editorial pages:
     manifests, archival evidence, reconstruction, and terminal actions
 12. **Governance, Pausing, and Successors** - roles, schedules, action classes,
     emergency controls, replacement, and succession
-13. **Security, Testing, and Known Limitations** - invariants, tests, analysis,
-    blockers, bytecode limits, audits, and explicit non-guarantees
+13. **Current Implementation and Readiness** - current wiring, source-only
+    foundations, accepted targets, proposals, evidence, tests, blockers,
+    bytecode limits, and audits
 14. **Community Review** - open questions, all feedback, dispositions, changes,
     exports, and review closeout
 
@@ -1027,7 +1028,8 @@ This PR is merged before implementation PRs.
 ### PR 5: Stream Editorial Corpus
 
 - fourteen complete editorial pages
-- diagrams, examples, open questions, limitations, and evidence labels
+- diagrams, examples, open questions, and one centralized implementation and
+  evidence ledger
 - links to generated truth
 
 ### PR 6: Integration, Documentation, and Staging Evidence

@@ -1,0 +1,503 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0x150b7a02",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "name": "onERC721Received",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x150b7a02",
+          "signature": "onERC721Received(address,address,uint256,bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0x28a35261",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+          "inherited": false,
+          "inputs": [],
+          "name": "reentryRejected",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x28a35261",
+          "signature": "reentryRejected()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0xa28b7f14",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+          "inherited": false,
+          "inputs": [],
+          "name": "reentrySelector",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0xa28b7f14",
+          "signature": "reentrySelector()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "reentryRejected()",
+          "displaySignature": "reentryRejected()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0x28a35261",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZWVudHJhbnRNaW50TWFuYWdlclJlY2VpdmVyI2Z1bmN0aW9uOjB4MjhhMzUyNjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "reentryRejected",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 27,
+            "byteStart": 1290,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:190ae390049dd6f221f4652b5a54793abf81282891287481861f192b65c35ccb",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x28a35261",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "reentrySelector()",
+          "displaySignature": "reentrySelector()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0xa28b7f14",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZWVudHJhbnRNaW50TWFuYWdlclJlY2VpdmVyI2Z1bmN0aW9uOjB4YTI4YjdmMTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "reentrySelector",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 29,
+            "byteStart": 1323,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:23c1c440abd527b9c98057f6860f420843bfaee5de6da965e47942986656fdc2",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xa28b7f14",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(StreamMintManager,uint256,bytes32)",
+          "functionKind": "constructor",
+          "id": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:constructor(StreamMintManager,uint256,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager_",
+              "type": "StreamMintManager"
+            },
+            {
+              "index": 1,
+              "name": "collectionId_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "phaseId_",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZWVudHJhbnRNaW50TWFuYWdlclJlY2VpdmVyI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKFN0cmVhbU1pbnRNYW5hZ2VyLHVpbnQyNTYsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 182,
+            "byteStart": 1359,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L41-L45",
+            "lineEnd": 45,
+            "lineStart": 41,
+            "snippetSha256": "sha256:ec1f8f84055106e643fe159b88f7176e256797432d3ea07fc7dbf7179927a258",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "onERC721Received(address,address,uint256,bytes)",
+          "displaySignature": "onERC721Received(address,address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0x150b7a02",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZWVudHJhbnRNaW50TWFuYWdlclJlY2VpdmVyI2Z1bmN0aW9uOjB4MTUwYjdhMDI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "onERC721Received",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 599,
+            "byteStart": 1547,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L47-L61",
+            "lineEnd": 61,
+            "lineStart": 47,
+            "snippetSha256": "sha256:50fa1bcd182117e888645b40f201a2be37793124e6a8ff6323c523f777f73b5b",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x150b7a02",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_request()",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:_request()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZWVudHJhbnRNaW50TWFuYWdlclJlY2VpdmVyI2Z1bmN0aW9uOl9yZXF1ZXN0KCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_request",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "request",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintRequest"
+            }
+          ],
+          "range": {
+            "byteLength": 1030,
+            "byteStart": 2152,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L63-L86",
+            "lineEnd": 86,
+            "lineStart": 63,
+            "snippetSha256": "sha256:b2198806e4367fca37360129f4bbb838ee8840deb0ab4e101183cdf1b6f77848",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "manager",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 1157,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:6848a460a3dfa1e9f5647c75ce15596173d306ff85819243e1717086259fb865",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": null,
+          "type": "StreamMintManager",
+          "typeString": "contract StreamMintManager",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "collectionId",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 1206,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:a2bcdd8fe090c3b0599e14f53cc3fcb2c79fb50dca06d9f7b458e3b7736105f8",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "phaseId",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 1250,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:5b6ab408e8afd5ad0a57a24464d4f0affc28e4f2cbc984f639edb6d34d8a142a",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0x28a35261",
+          "immutable": false,
+          "name": "reentryRejected",
+          "natspec": "",
+          "range": {
+            "byteLength": 27,
+            "byteStart": 1290,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:190ae390049dd6f221f4652b5a54793abf81282891287481861f192b65c35ccb",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x28a35261",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0xa28b7f14",
+          "immutable": false,
+          "name": "reentrySelector",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 1323,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:23c1c440abd527b9c98057f6860f420843bfaee5de6da965e47942986656fdc2",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xa28b7f14",
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC721Receiver.sol:IERC721Receiver",
+        "name": "IERC721Receiver"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZWVudHJhbnRNaW50TWFuYWdlclJlY2VpdmVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+      "smart-contracts/IERC721Receiver.sol:IERC721Receiver"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ReentrantMintManagerReceiver",
+    "natspec": "",
+    "range": {
+      "byteLength": 2090,
+      "byteStart": 1094,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L33-L87",
+      "lineEnd": 87,
+      "lineStart": 33,
+      "snippetSha256": "sha256:2c70e2e8c4de602e5411e85b64814f4a9afbf9f0024b8521471ee6a8834f2b0c",
+      "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManager.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0x150b7a02",
+      "definitionId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0x28a35261",
+      "definitionId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:0xa28b7f14",
+      "definitionId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver#function:constructor(StreamMintManager,uint256,bytes32)",
+      "definitionId": "test/StreamMintManager.t.sol:ReentrantMintManagerReceiver",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -13,7 +13,8 @@ import {
   STREAM_REVIEW_LIFECYCLE_STATE,
 } from "@/lib/public-review/streamReviewPublication";
 
-export const STREAM_REVIEW_VERSION = "2026-07-26.1";
+export const STREAM_REVIEW_VERSION = "2026-07-27.1";
+export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
 export const STREAM_REVIEW_SOURCE_COMMIT =
   "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
@@ -28,6 +29,7 @@ if (STREAM_REVIEW_VERSION_LIFECYCLE_STATE !== STREAM_REVIEW_LIFECYCLE_STATE) {
 
 type PageMessageStem =
   | "overview"
+  | "overviewNarrative"
   | "artworkLifecycle"
   | "forArtists"
   | "rolesAndTrust"
@@ -40,6 +42,7 @@ type PageMessageStem =
   | "freezingPreservationAndArtworkFinality"
   | "governancePausingAndSuccessors"
   | "securityTestingAndKnownLimitations"
+  | "currentImplementationAndReadiness"
   | "communityReview";
 
 function definePage(
@@ -88,7 +91,7 @@ const IMPLEMENTED_OPEN_AUDIT_LIMITATION = [
   "KNOWN_LIMITATION",
 ] as const;
 
-export const STREAM_REVIEW_PAGES = [
+const STREAM_REVIEW_2026_07_26_PAGES = [
   definePage("overview", "overview", ALL_AUDIENCES, [
     "IMPLEMENTED",
     "TESTED",
@@ -228,13 +231,83 @@ export const STREAM_REVIEW_PAGES = [
   ]),
 ] as const;
 
+export const STREAM_REVIEW_PAGES = [
+  definePage("overview", "overviewNarrative", ALL_AUDIENCES, []),
+  definePage(
+    "artwork-lifecycle",
+    "artworkLifecycle",
+    COMMUNITY_ARTIST_TECHNICAL,
+    []
+  ),
+  definePage("for-artists", "forArtists", ARTIST_COMMUNITY, []),
+  definePage("roles-and-trust", "rolesAndTrust", ALL_AUDIENCES, []),
+  definePage(
+    "curation-and-tdh-authorization",
+    "curationAndTdhAuthorization",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "tokens-collections-and-minting",
+    "tokensCollectionsAndMinting",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "fixed-price-sales-and-auctions",
+    "fixedPriceSalesAndAuctions",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "revenue-splits-and-royalties",
+    "revenueSplitsAndRoyalties",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage("randomness", "randomness", ARTIST_TECHNICAL_AUDITOR, []),
+  definePage(
+    "metadata-scripts-and-dependencies",
+    "metadataScriptsAndDependencies",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "freezing-preservation-and-artwork-finality",
+    "freezingPreservationAndArtworkFinality",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "governance-pausing-and-successors",
+    "governancePausingAndSuccessors",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "security-testing-and-known-limitations",
+    "currentImplementationAndReadiness",
+    COMMUNITY_TECHNICAL_AUDITOR,
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "DEFERRED",
+      "KNOWN_LIMITATION",
+    ]
+  ),
+  definePage("community-review", "communityReview", ALL_AUDIENCES, []),
+] as const;
+
 export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   id: "stream",
   slug: STREAM_REVIEW_SLUG,
   contractName: "6529 Stream",
   title: "6529 Stream Contract Review",
   description:
-    "A source-grounded public review of the proposed 6529 Stream protocol before finalization and deployment.",
+    "A source-grounded public review of an artist-centered contract system for serious 1/1 digital art.",
   activeVersion: STREAM_REVIEW_VERSION,
   versions: [
     {
@@ -247,6 +320,19 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
         commit: STREAM_REVIEW_SOURCE_COMMIT,
       },
       pages: STREAM_REVIEW_PAGES,
+    },
+    {
+      version: STREAM_REVIEW_PREVIOUS_VERSION,
+      status: getStreamReviewVersionLifecycleState(
+        STREAM_REVIEW_PREVIOUS_VERSION
+      ),
+      deploymentStatus: "NOT_DEPLOYED",
+      auditStatus: "PRE_AUDIT",
+      source: {
+        repository: "6529-Collections/6529Stream",
+        commit: STREAM_REVIEW_SOURCE_COMMIT,
+      },
+      pages: STREAM_REVIEW_2026_07_26_PAGES,
     },
   ],
   status: STREAM_REVIEW_LIFECYCLE_STATE,
