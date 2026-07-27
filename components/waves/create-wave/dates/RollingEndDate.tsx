@@ -3,15 +3,13 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarAlt,
-  faInfoCircle,
   faTriangleExclamation,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
-import DateAccordion from "@/components/common/DateAccordion";
+import CollapsibleCard from "@/components/common/CollapsibleCard";
 import TimePicker from "@/components/common/TimePicker";
-import TooltipIconButton from "@/components/common/TooltipIconButton";
 import {
   countTotalDecisions,
   formatDate,
@@ -36,18 +34,20 @@ function RollingEndDateCollapsedContent({
   endDate,
 }: RollingEndDateCollapsedContentProps) {
   return (
-    <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
+    <span className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
       <FontAwesomeIcon
         icon={faCalendarAlt}
         className="tw-mr-2 tw-size-4 tw-text-primary-400"
       />
-      <div>
-        <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Wave End Date</p>
-        <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
+      <span className="tw-block">
+        <span className="tw-block tw-text-xs tw-text-iron-300/70">
+          Wave End Date
+        </span>
+        <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-50">
           {endDate === null ? "No end date" : formatDate(endDate)}
-        </p>
-      </div>
-    </div>
+        </span>
+      </span>
+    </span>
   );
 }
 
@@ -124,16 +124,8 @@ export default function RollingEndDate({
 
   return (
     <div className="tw-relative">
-      <DateAccordion
+      <CollapsibleCard
         title="Optional Wave End Date"
-        titleActions={
-          <TooltipIconButton
-            icon={faInfoCircle}
-            tooltipText="Set when your wave will officially end. Leave it blank for no end date."
-            tooltipPosition="bottom"
-            tooltipWidth="tw-w-80"
-          />
-        }
         isExpanded={shouldShowExpandedContent}
         onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
         collapsedContent={collapsedContent}
@@ -299,7 +291,7 @@ export default function RollingEndDate({
             )}
           </div>
         </div>
-      </DateAccordion>
+      </CollapsibleCard>
     </div>
   );
 }

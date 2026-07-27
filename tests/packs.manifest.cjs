@@ -487,6 +487,7 @@ const PACKS = [
     "readonly",
     "Combined production-safe release validation.",
     [
+      "tests/home/home.spec.ts",
       ...READONLY_SPECS.social,
       ...READONLY_SPECS.media,
       ...READONLY_SPECS.delegation,

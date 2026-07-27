@@ -114,6 +114,10 @@ function createFixture(): {
   const bundleRoot = path.join(repoRoot, "artifact", "bundle");
   fs.mkdirSync(bundleRoot, { recursive: true });
   writeFile(bundleRoot, "server.js", "console.log('fixture');\n");
+  writeJson(bundleRoot, ".next/PUBLIC_RUNTIME.json", {
+    BASE_ENDPOINT: "https://6529.io",
+    GIPHY_API_KEY: "test-giphy-client-key",
+  });
   writeFile(repoRoot, "public/favicon.svg", "<svg />\n");
   writeFile(repoRoot, "public/agents.md", "staging agent corpus\n");
 
@@ -322,6 +326,54 @@ describe("profile-aware public-review artifact packaging", () => {
         profile: "production",
       })
     ).toThrow("Production bundle contains public-review evidence");
+  });
+
+  it("rejects a production bundle built for a non-production endpoint", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    writeJson(fixture.bundleRoot, ".next/PUBLIC_RUNTIME.json", {
+      BASE_ENDPOINT: "http://localhost:3001",
+      GIPHY_API_KEY: "test-giphy-client-key",
+    });
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow("Production bundle BASE_ENDPOINT must equal https://6529.io.");
+  });
+
+  it("rejects a production bundle without GIPHY client configuration", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    writeJson(fixture.bundleRoot, ".next/PUBLIC_RUNTIME.json", {
+      BASE_ENDPOINT: "https://6529.io",
+      GIPHY_API_KEY: " ",
+    });
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow("Production bundle GIPHY_API_KEY must be configured.");
+  });
+
+  it("rejects a production bundle with missing runtime configuration", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    fs.rmSync(path.join(fixture.bundleRoot, ".next/PUBLIC_RUNTIME.json"));
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow("Production bundle is missing .next/PUBLIC_RUNTIME.json.");
   });
 
   it.each([

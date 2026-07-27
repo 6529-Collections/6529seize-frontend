@@ -15,6 +15,10 @@ const mockEnsPreviewCard = jest.fn(({ preview }: any) => (
   <div data-testid="ens-card" data-type={preview?.type ?? "none"} />
 ));
 
+const mockEtherscanCard = jest.fn(({ preview }: any) => (
+  <div data-testid="etherscan-card" data-type={preview?.type ?? "none"} />
+));
+
 jest.mock("@/components/waves/OpenGraphPreview", () => {
   const actual = jest.requireActual(
     "../../../components/waves/OpenGraphPreview"
@@ -29,6 +33,11 @@ jest.mock("@/components/waves/OpenGraphPreview", () => {
 jest.mock("@/components/waves/ens/EnsPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockEnsPreviewCard(props),
+}));
+
+jest.mock("@/components/waves/etherscan/EtherscanCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockEtherscanCard(props),
 }));
 
 jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
@@ -267,6 +276,48 @@ describe("LinkPreviewCard", () => {
 
     expect(screen.queryByTestId("fallback")).toBeNull();
     assertStableFrame();
+  });
+
+  it("renders Etherscan address previews before ENS-shaped metadata", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      provider: "etherscan",
+      type: "etherscan.address",
+      address: {
+        input: "0x0000000000000000000000000000000000000001",
+        subtype: "eoa",
+      },
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://etherscan.io/address/0x0000000000000000000000000000000000000001"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockEtherscanCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({
+            provider: "etherscan",
+            type: "etherscan.address",
+          }),
+        })
+      );
+    });
+
+    expect(mockEnsPreviewCard).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("fallback")).toBeNull();
+    expect(screen.getByTestId("href-buttons")).toBeInTheDocument();
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-h-[14rem]",
+      "tw-min-h-[14rem]",
+      "tw-max-h-[14rem]",
+      "sm:tw-h-[12rem]",
+      "sm:tw-min-h-[12rem]",
+      "sm:tw-max-h-[12rem]"
+    );
   });
 
   it("uses a fixed 6529 collection frame before and after preview resolution", async () => {
