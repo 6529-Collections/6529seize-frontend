@@ -357,6 +357,7 @@ export const EN_GB_MESSAGES = {
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
   "waves.loadingStatus": "Loading waves",
+  "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",
   "waves.gifPicker.noResults": "No GIFs found.",

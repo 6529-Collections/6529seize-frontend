@@ -377,6 +377,7 @@ export const FR_FR_MESSAGES = {
     "Zone d'envoi de fichiers du chat de wave",
   ...stormComposerFrMessages,
   "waves.loadingStatus": "Chargement des waves",
+  "waves.gifPicker.open": "Ajouter un GIF",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
   "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",
   "waves.gifPicker.noResults": "Aucun GIF trouvé.",
