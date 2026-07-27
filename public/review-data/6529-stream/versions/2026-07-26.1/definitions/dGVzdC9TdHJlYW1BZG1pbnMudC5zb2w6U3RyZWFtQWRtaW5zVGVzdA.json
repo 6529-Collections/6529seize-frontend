@@ -1,0 +1,1080 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#event:FunctionAdminUpdated(address,address,bytes4,bool,address)",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "FunctionAdminUpdated",
+          "signature": "FunctionAdminUpdated(address,address,bytes4,bool,address)",
+          "topic0": "0x3461786944225de8cc849c302bebf0425a4cd695c03ad61acb07131c3960e1bb"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#event:GlobalAdminUpdated(address,bool,address)",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "GlobalAdminUpdated",
+          "signature": "GlobalAdminUpdated(address,bool,address)",
+          "topic0": "0x16debb77644999724cf3499d2c3fd8ac65383bc44cc1bf5303185410bc5254ef"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#event:SignerLifecycleTargetUpdated(address,bool,address)",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "SignerLifecycleTargetUpdated",
+          "signature": "SignerLifecycleTargetUpdated(address,bool,address)",
+          "topic0": "0xdcdb9a658a53bd78a90653ac5ee29db1e12f35a1c4a28f060b53b6615ad85d21"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#event:SignerManagerUpdated(address,bool,address)",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "SignerManagerUpdated",
+          "signature": "SignerManagerUpdated(address,bool,address)",
+          "topic0": "0xe5d872b77edd25a2fd807931354c6190b8716c647db98623ff27ff4f93f77759"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x13a6a336",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionAdminSupportIsExplicitlyDeferred",
+          "outputs": [],
+          "selector": "0x13a6a336",
+          "signature": "testCollectionAdminSupportIsExplicitlyDeferred()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x4484e74f",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRecordsSignerWithoutAdminGrant",
+          "outputs": [],
+          "selector": "0x4484e74f",
+          "signature": "testConstructorRecordsSignerWithoutAdminGrant()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x43157c19",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDropSignerCannotRegisterGlobalAdmin",
+          "outputs": [],
+          "selector": "0x43157c19",
+          "signature": "testDropSignerCannotRegisterGlobalAdmin()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xcff3d344",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOnlyOwnerCanRegisterGlobalAdmin",
+          "outputs": [],
+          "selector": "0xcff3d344",
+          "signature": "testOnlyOwnerCanRegisterGlobalAdmin()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xd0ef99d5",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOwnerCanBatchRegisterFunctionAdmins",
+          "outputs": [],
+          "selector": "0xd0ef99d5",
+          "signature": "testOwnerCanBatchRegisterFunctionAdmins()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xbcfd875b",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOwnerCanRegisterAndRevokeSignerLifecycleTarget",
+          "outputs": [],
+          "selector": "0xbcfd875b",
+          "signature": "testOwnerCanRegisterAndRevokeSignerLifecycleTarget()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x1b3b7917",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOwnerCanRegisterAndRevokeSignerManager",
+          "outputs": [],
+          "selector": "0x1b3b7917",
+          "signature": "testOwnerCanRegisterAndRevokeSignerManager()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x16f7ac2b",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOwnerCanRegisterFunctionAdmin",
+          "outputs": [],
+          "selector": "0x16f7ac2b",
+          "signature": "testOwnerCanRegisterFunctionAdmin()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x1d67f50d",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOwnerCanRegisterGlobalAdminAsRootRecoveryPath",
+          "outputs": [],
+          "selector": "0x1d67f50d",
+          "signature": "testOwnerCanRegisterGlobalAdminAsRootRecoveryPath()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xc00fa7a3",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOwnerCanRevokeFunctionAdmin",
+          "outputs": [],
+          "selector": "0xc00fa7a3",
+          "signature": "testOwnerCanRevokeFunctionAdmin()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x22ff55c0",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRevokedSignerManagerCannotGrantSignerLifecycleSelectors",
+          "outputs": [],
+          "selector": "0x22ff55c0",
+          "signature": "testRevokedSignerManagerCannotGrantSignerLifecycleSelectors()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x8fd5a9d0",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSignerManagerCanGrantOnlySignerLifecycleSelectors",
+          "outputs": [],
+          "selector": "0x8fd5a9d0",
+          "signature": "testSignerManagerCanGrantOnlySignerLifecycleSelectors()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x57efbb80",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSignerManagerCannotGrantUnregisteredLifecycleTarget",
+          "outputs": [],
+          "selector": "0x57efbb80",
+          "signature": "testSignerManagerCannotGrantUnregisteredLifecycleTarget()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x95d576b7",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testZeroAddressRoleAssignmentsFail",
+          "outputs": [],
+          "selector": "0x95d576b7",
+          "signature": "testZeroAddressRoleAssignmentsFail()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x75fd1ed3",
+          "declaringDefinitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testZeroTdhSignerConstructorFails",
+          "outputs": [],
+          "selector": "0x75fd1ed3",
+          "signature": "testZeroTdhSignerConstructorFails()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 89806,
+          "canonicalSignature": "GlobalAdminUpdated(address,bool,address)",
+          "displaySignature": "GlobalAdminUpdated(address,bool,address)",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#event:GlobalAdminUpdated(address,bool,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNldmVudDpHbG9iYWxBZG1pblVwZGF0ZWQoYWRkcmVzcyxib29sLGFkZHJlc3Mp",
+          "kind": "event",
+          "name": "GlobalAdminUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 315,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:4d71427825cf242e72a18c835f3092c62fb0b2d9d3cf57a432e3e9330ade02c9",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "topic0": "0x16debb77644999724cf3499d2c3fd8ac65383bc44cc1bf5303185410bc5254ef"
+        },
+        {
+          "anonymous": false,
+          "astId": 89818,
+          "canonicalSignature": "FunctionAdminUpdated(address,address,bytes4,bool,address)",
+          "displaySignature": "FunctionAdminUpdated(address,address,bytes4,bool,address)",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#event:FunctionAdminUpdated(address,address,bytes4,bool,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNldmVudDpGdW5jdGlvbkFkbWluVXBkYXRlZChhZGRyZXNzLGFkZHJlc3MsYnl0ZXM0LGJvb2wsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "FunctionAdminUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 176,
+            "byteStart": 407,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L13-L19",
+            "lineEnd": 19,
+            "lineStart": 13,
+            "snippetSha256": "sha256:a0ec3b6462874056c4d545239054e27c78943474830eae889fec9097ccaaae16",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "topic0": "0x3461786944225de8cc849c302bebf0425a4cd695c03ad61acb07131c3960e1bb"
+        },
+        {
+          "anonymous": false,
+          "astId": 89826,
+          "canonicalSignature": "SignerManagerUpdated(address,bool,address)",
+          "displaySignature": "SignerManagerUpdated(address,bool,address)",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#event:SignerManagerUpdated(address,bool,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNldmVudDpTaWduZXJNYW5hZ2VyVXBkYXRlZChhZGRyZXNzLGJvb2wsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "SignerManagerUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 89,
+            "byteStart": 588,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:3766109b9f65d066c6fd358ae1819815c9361bdfd7de57e2eb70e08ef4fc7316",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "topic0": "0xe5d872b77edd25a2fd807931354c6190b8716c647db98623ff27ff4f93f77759"
+        },
+        {
+          "anonymous": false,
+          "astId": 89834,
+          "canonicalSignature": "SignerLifecycleTargetUpdated(address,bool,address)",
+          "displaySignature": "SignerLifecycleTargetUpdated(address,bool,address)",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#event:SignerLifecycleTargetUpdated(address,bool,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNldmVudDpTaWduZXJMaWZlY3ljbGVUYXJnZXRVcGRhdGVkKGFkZHJlc3MsYm9vbCxhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "SignerLifecycleTargetUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 96,
+            "byteStart": 682,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:99fc5559d2a0139ed685bbd9f5afa26e4d403b97aeb69a6f29a80167d120d8ba",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "topic0": "0xdcdb9a658a53bd78a90653ac5ee29db1e12f35a1c4a28f060b53b6615ad85d21"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "testConstructorRecordsSignerWithoutAdminGrant()",
+          "displaySignature": "testConstructorRecordsSignerWithoutAdminGrant()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x4484e74f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDQ0ODRlNzRm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRecordsSignerWithoutAdminGrant",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 308,
+            "byteStart": 784,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L23-L28",
+            "lineEnd": 28,
+            "lineStart": 23,
+            "snippetSha256": "sha256:90e529fc06c17c7b72bb94761a94a067f224b55b8a1939eb3defdf9b010dc74a",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x4484e74f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testZeroTdhSignerConstructorFails()",
+          "displaySignature": "testZeroTdhSignerConstructorFails()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x75fd1ed3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDc1ZmQxZWQz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testZeroTdhSignerConstructorFails",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 141,
+            "byteStart": 1098,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L30-L33",
+            "lineEnd": 33,
+            "lineStart": 30,
+            "snippetSha256": "sha256:73d4304ec1c1c486886f1128fb27012101db9ac13d2eeb2b9fbad4b75ac90dd9",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x75fd1ed3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOnlyOwnerCanRegisterGlobalAdmin()",
+          "displaySignature": "testOnlyOwnerCanRegisterGlobalAdmin()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xcff3d344",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweGNmZjNkMzQ0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOnlyOwnerCanRegisterGlobalAdmin",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 457,
+            "byteStart": 1245,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L35-L44",
+            "lineEnd": 44,
+            "lineStart": 35,
+            "snippetSha256": "sha256:432edcd9d9d64e05069488f1ffe56a4e471acd49a7902b0abd872bc5b7e5636f",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0xcff3d344",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOwnerCanRegisterGlobalAdminAsRootRecoveryPath()",
+          "displaySignature": "testOwnerCanRegisterGlobalAdminAsRootRecoveryPath()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x1d67f50d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDFkNjdmNTBk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOwnerCanRegisterGlobalAdminAsRootRecoveryPath",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 430,
+            "byteStart": 1708,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L46-L55",
+            "lineEnd": 55,
+            "lineStart": 46,
+            "snippetSha256": "sha256:76aa3305d6f43e8439d083eebb6a01849940483d5dc3327568b0cc02122a733c",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x1d67f50d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDropSignerCannotRegisterGlobalAdmin()",
+          "displaySignature": "testDropSignerCannotRegisterGlobalAdmin()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x43157c19",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDQzMTU3YzE5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDropSignerCannotRegisterGlobalAdmin",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 487,
+            "byteStart": 2144,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L57-L67",
+            "lineEnd": 67,
+            "lineStart": 57,
+            "snippetSha256": "sha256:9fa29f1b14e78ce1bd51778639467cc8db6d0dc0a81bc52fc9b7eafc884f8303",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x43157c19",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOwnerCanRegisterFunctionAdmin()",
+          "displaySignature": "testOwnerCanRegisterFunctionAdmin()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x16f7ac2b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDE2ZjdhYzJi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOwnerCanRegisterFunctionAdmin",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 569,
+            "byteStart": 2637,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L69-L80",
+            "lineEnd": 80,
+            "lineStart": 69,
+            "snippetSha256": "sha256:4be187ae9b69d9e6cb70952508f1bc88963e7960c9e843e11cca7dd1c2cd9a51",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x16f7ac2b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOwnerCanRevokeFunctionAdmin()",
+          "displaySignature": "testOwnerCanRevokeFunctionAdmin()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xc00fa7a3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweGMwMGZhN2Ez",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOwnerCanRevokeFunctionAdmin",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 695,
+            "byteStart": 3212,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L82-L96",
+            "lineEnd": 96,
+            "lineStart": 82,
+            "snippetSha256": "sha256:27fab544588467e3c49ae07d59f0979de4237065afbc10426ba9f6dca0fc3490",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0xc00fa7a3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOwnerCanBatchRegisterFunctionAdmins()",
+          "displaySignature": "testOwnerCanBatchRegisterFunctionAdmins()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xd0ef99d5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweGQwZWY5OWQ1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOwnerCanBatchRegisterFunctionAdmins",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 885,
+            "byteStart": 3913,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L98-L114",
+            "lineEnd": 114,
+            "lineStart": 98,
+            "snippetSha256": "sha256:21dc1412b3387c5d48dd3127e1fb189626bee5c504bda011b70bfb28882b3ed6",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0xd0ef99d5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOwnerCanRegisterAndRevokeSignerManager()",
+          "displaySignature": "testOwnerCanRegisterAndRevokeSignerManager()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x1b3b7917",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDFiM2I3OTE3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOwnerCanRegisterAndRevokeSignerManager",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 711,
+            "byteStart": 4804,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L116-L129",
+            "lineEnd": 129,
+            "lineStart": 116,
+            "snippetSha256": "sha256:f248a8e015877afbd56e7c7171c9ae6f052cf80d8d6f34fd75a4ad497562a46f",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x1b3b7917",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOwnerCanRegisterAndRevokeSignerLifecycleTarget()",
+          "displaySignature": "testOwnerCanRegisterAndRevokeSignerLifecycleTarget()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xbcfd875b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweGJjZmQ4NzVi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOwnerCanRegisterAndRevokeSignerLifecycleTarget",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 751,
+            "byteStart": 5521,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L131-L144",
+            "lineEnd": 144,
+            "lineStart": 131,
+            "snippetSha256": "sha256:4ff66793980cd9b923b0b7586fbdbf15305fd18c953d9b01c1c43be9f64a4f43",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0xbcfd875b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSignerManagerCanGrantOnlySignerLifecycleSelectors()",
+          "displaySignature": "testSignerManagerCanGrantOnlySignerLifecycleSelectors()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x8fd5a9d0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDhmZDVhOWQw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSignerManagerCanGrantOnlySignerLifecycleSelectors",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2003,
+            "byteStart": 6278,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L146-L190",
+            "lineEnd": 190,
+            "lineStart": 146,
+            "snippetSha256": "sha256:a5552826658292938b035b57e63c3764776a8577e6f591a941fd1090b9409355",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x8fd5a9d0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSignerManagerCannotGrantUnregisteredLifecycleTarget()",
+          "displaySignature": "testSignerManagerCannotGrantUnregisteredLifecycleTarget()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x57efbb80",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDU3ZWZiYjgw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSignerManagerCannotGrantUnregisteredLifecycleTarget",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1007,
+            "byteStart": 8287,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L192-L216",
+            "lineEnd": 216,
+            "lineStart": 192,
+            "snippetSha256": "sha256:0fca8ca8f8f74e61de21e9229d18a1bb8b22f4b19201b0b56d7e2bbcd4f15800",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x57efbb80",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRevokedSignerManagerCannotGrantSignerLifecycleSelectors()",
+          "displaySignature": "testRevokedSignerManagerCannotGrantSignerLifecycleSelectors()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x22ff55c0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDIyZmY1NWMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRevokedSignerManagerCannotGrantSignerLifecycleSelectors",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1056,
+            "byteStart": 9300,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L218-L243",
+            "lineEnd": 243,
+            "lineStart": 218,
+            "snippetSha256": "sha256:a431cb878cbaffc0a729071015cdc35b5de5f4e46c79bcf05349151511964631",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x22ff55c0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testZeroAddressRoleAssignmentsFail()",
+          "displaySignature": "testZeroAddressRoleAssignmentsFail()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x95d576b7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDk1ZDU3NmI3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testZeroAddressRoleAssignmentsFail",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1622,
+            "byteStart": 10362,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L245-L287",
+            "lineEnd": 287,
+            "lineStart": 245,
+            "snippetSha256": "sha256:f3c04ab339038f1594446afd48bd6802b1855dc69ea7b60a76d99f49d7ca369f",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x95d576b7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionAdminSupportIsExplicitlyDeferred()",
+          "displaySignature": "testCollectionAdminSupportIsExplicitlyDeferred()",
+          "functionKind": "function",
+          "id": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x13a6a336",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdCNmdW5jdGlvbjoweDEzYTZhMzM2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionAdminSupportIsExplicitlyDeferred",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 258,
+            "byteStart": 11990,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L289-L294",
+            "lineEnd": 294,
+            "lineStart": 289,
+            "snippetSha256": "sha256:0b911a32e7036c9cc3d1726ce5bbaacc803f856171510241b8b04088a0b07710",
+            "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+          },
+          "selector": "0x13a6a336",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAdmins.t.sol:StreamAdminsTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BZG1pbnMudC5zb2w6U3RyZWFtQWRtaW5zVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamAdminsTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 12061,
+      "byteStart": 189,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdmins.t.sol#L8-L295",
+      "lineEnd": 295,
+      "lineStart": 8,
+      "snippetSha256": "sha256:8b47eb3aed912fa54bc62ac5a556b63ca5a0f6d4a60cecffc0280e637ea14897",
+      "sourceSha256": "sha256:e605e01d6cfc1b1802c1933ef5c65efe5e0781ee2f618270eae36e7fa63ca53f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAdmins.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 16
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 15
+    },
+    "totalCount": 16
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x13a6a336",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x16f7ac2b",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x1b3b7917",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x1d67f50d",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x22ff55c0",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x43157c19",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x4484e74f",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x57efbb80",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x75fd1ed3",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x8fd5a9d0",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0x95d576b7",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xbcfd875b",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xc00fa7a3",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xcff3d344",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdmins.t.sol:StreamAdminsTest#function:0xd0ef99d5",
+      "definitionId": "test/StreamAdmins.t.sol:StreamAdminsTest",
+      "severity": "advisory"
+    }
+  ]
+}

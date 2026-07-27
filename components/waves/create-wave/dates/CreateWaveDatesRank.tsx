@@ -10,6 +10,7 @@ import {
   adjustDatesAfterSubmissionChange,
   calculateEndDate,
   clampRollingEndDate,
+  ensureSafeFirstDecisionTime,
   validateDateSequence,
 } from "../services/waveDecisionService";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
@@ -38,7 +39,6 @@ export default function CreateWaveDatesRank({
     decisions: true,
     rolling: dates.isRolling,
   });
-  const [hasAutoCollapsedStart, setHasAutoCollapsedStart] = useState(false);
   const rankFutureDateError =
     CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE;
   const endDateBeforeVotingStartError =
@@ -111,6 +111,13 @@ export default function CreateWaveDatesRank({
       };
     }
 
+    // Reseed the first decision to the safe one-week default whenever voting
+    // start has caught up to (or past) it, before any end-date math reads it.
+    // Perpetual ranking has no decision schedule, so it is left untouched.
+    if (!normalizedDates.ongoingRanking) {
+      normalizedDates = ensureSafeFirstDecisionTime(normalizedDates);
+    }
+
     if (normalizedDates.ongoingRanking) {
       // Perpetual ranking: no decision schedule and no end date.
       normalizedDates = {
@@ -135,16 +142,6 @@ export default function CreateWaveDatesRank({
     }
 
     setDates(normalizedDates);
-  };
-
-  const handleDecisionsInteraction = () => {
-    if (!hasAutoCollapsedStart) {
-      setExpandedSections((prev) => ({
-        ...prev,
-        start: false,
-      }));
-      setHasAutoCollapsedStart(true);
-    }
   };
 
   const handleRollingEnabled = () => {
@@ -177,7 +174,6 @@ export default function CreateWaveDatesRank({
             onRollingEnabled={handleRollingEnabled}
             isExpanded={expandedSections.decisions}
             setIsExpanded={() => toggleSection("decisions")}
-            onInteraction={handleDecisionsInteraction}
           />
 
           {dates.subsequentDecisions.length > 0 && isRollingMode && (

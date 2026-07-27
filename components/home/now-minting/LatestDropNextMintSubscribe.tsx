@@ -9,6 +9,13 @@ import {
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptions/useProfileSubscriptionsNavigation";
+import {
+  getSubscriptionCoverageActionLabel,
+  getSubscriptionCoverageAnchor,
+  getSubscriptionCoverageCompactLine,
+  getSubscriptionCoveragePresentation,
+} from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
+import { useSubscriptionCoverage } from "@/components/user/subscriptions/coverage/useSubscriptionCoverage";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiUpcomingMemeSubscriptionStatus } from "@/generated/models/ApiUpcomingMemeSubscriptionStatus";
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
@@ -132,7 +139,7 @@ function getToggleTooltipLabel({
 
 export default function LatestDropNextMintSubscribe(
   props: Readonly<{
-    appearance?: "default" | "quiet";
+    appearance?: "default" | "featured" | "quiet";
     tokenId?: number;
     statusSource?: SubscriptionStatusSource;
   }> = {}
@@ -175,6 +182,10 @@ export default function LatestDropNextMintSubscribe(
       hasTokenId &&
       shouldQueryUpcomingStatus,
     retry: false,
+  });
+  const coverageQuery = useSubscriptionCoverage({
+    enabled: !hideSubscriptions && !activeProfileProxy,
+    profileKey,
   });
 
   const { data: finalStatus } = useQuery<NFTFinalSubscription>({
@@ -228,6 +239,25 @@ export default function LatestDropNextMintSubscribe(
     subscribed,
     subscribedCount,
   });
+  const coveragePresentation = coverageQuery.data
+    ? getSubscriptionCoveragePresentation(locale, coverageQuery.data.status)
+    : null;
+  const coverageActionLabel = coveragePresentation
+    ? getSubscriptionCoverageActionLabel(
+        locale,
+        coveragePresentation.action,
+        true
+      )
+    : undefined;
+  const coverageHref =
+    profileSubscriptionsHref && coveragePresentation
+      ? `${profileSubscriptionsHref}${getSubscriptionCoverageAnchor(
+          coveragePresentation.action
+        )}`
+      : profileSubscriptionsHref;
+  const coverageSummary = coverageQuery.data
+    ? getSubscriptionCoverageCompactLine(locale, coverageQuery.data)
+    : undefined;
 
   if (hideSubscriptions || !hasTokenId) {
     return null;
@@ -239,10 +269,10 @@ export default function LatestDropNextMintSubscribe(
       onProfileSubscriptionsAction={openProfileSubscriptions}
       profileSubscriptionsActionPending={isConnecting}
       profileSubscriptionsHref={
-        canNavigateToProfileSubscriptionsDirectly
-          ? profileSubscriptionsHref
-          : undefined
+        canNavigateToProfileSubscriptionsDirectly ? coverageHref : undefined
       }
+      profileCoverageSummary={coverageSummary}
+      profileSubscriptionsActionLabel={coverageActionLabel}
       subscribed={subscribed}
       subscribedCount={subscribedCount}
       subscribersCount={subscribersCount}

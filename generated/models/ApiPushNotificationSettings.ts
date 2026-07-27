@@ -54,6 +54,10 @@ export class ApiPushNotificationSettings {
     * Notify when you are invited to a wave
     */
     'wave_created': boolean;
+    /**
+    * Notify when The Memes subscription coverage becomes low
+    */
+    'subscription_coverage': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -117,6 +121,12 @@ export class ApiPushNotificationSettings {
         {
             "name": "wave_created",
             "baseName": "wave_created",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "subscription_coverage",
+            "baseName": "subscription_coverage",
             "type": "boolean",
             "format": ""
         }    ];

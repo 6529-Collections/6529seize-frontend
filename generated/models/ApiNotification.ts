@@ -21,7 +21,7 @@ export class ApiNotification {
     'cause': ApiNotificationCause;
     'created_at': number;
     'read_at': number | null;
-    'related_identity': ApiProfileMin;
+    'related_identity': ApiProfileMin | null;
     'related_drops': Array<ApiDrop>;
     'additional_context': any;
 

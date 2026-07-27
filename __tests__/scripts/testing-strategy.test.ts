@@ -153,7 +153,7 @@ function artifactPointer(overrides: Record<string, unknown> = {}) {
 describe("testing strategy risk floor", () => {
   it("keeps docs and tests in the fast lane", () => {
     const result = classifyChangedFiles([
-      "ops/workstreams/frontend-a11y-i18n/testing-improvement-plan.md",
+      "ops/workstreams/README.md",
       "__tests__/components/example.test.tsx",
     ]);
 
@@ -293,7 +293,7 @@ describe("testing strategy risk floor", () => {
 describe("testing strategy CI plan", () => {
   it("keeps docs-only PRs in the no-install fast lane", () => {
     const plan = createCiPlan([
-      "ops/workstreams/frontend-a11y-i18n/testing-improvement-plan.md",
+      "ops/workstreams/README.md",
     ]);
 
     expect(plan.schema_version).toBe(CI_PLAN_SCHEMA_VERSION);
@@ -320,6 +320,9 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.lint_changed.required).toBe(true);
     expect(plan.checks.typecheck_changed.required).toBe(true);
     expect(plan.checks.test_typecheck.required).toBe(true);
+    expect(plan.checks["test_typecheck"]?.reason).toContain(
+      "Jest diagnostic ratchet"
+    );
     expect(plan.checks.jest_changed.required).toBe(true);
     expect(plan.checks.playwright_smoke.required).toBe(true);
     expect(plan.checks.playwright_critical_shell.required).toBe(false);
@@ -337,6 +340,18 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.dependency_governance.required).toBe(true);
     expect(plan.checks.build.required).toBe(true);
     expect(plan.checks.playwright_critical_shell.required).toBe(true);
+  });
+
+  it.each([
+    "config/public-reviews/6529-stream.reference.json",
+    "public/review-data/6529-stream/index.json",
+    "scripts/public-reviews/solidity-reference.cjs",
+  ])("treats public review reference input %s as build-sensitive", (file) => {
+    const plan = createCiPlan([file]);
+
+    expect(plan.checks["build"]!.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
+    expect(plan.checks["build"]!.reason).toContain("build-sensitive");
   });
 
   it("requires build coverage for deleted runtime source", () => {
@@ -544,6 +559,145 @@ describe("testing strategy CI security checks", () => {
       checked_files: [".github/workflows/safe.yml"],
       findings: [],
     });
+  });
+
+  it("flags ordinary pull_request_target workflows", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "target.yml"),
+      [
+        "name: Unsafe target",
+        "on:",
+        "  pull_request_target:",
+        "permissions:",
+        "  contents: read",
+        "jobs:",
+        "  inspect:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - run: echo ok",
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/target.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toContain(
+      "pull_request_target"
+    );
+  });
+
+  it.each([
+    "on: { pull_request_target: {} }",
+    "on:\n  'pull_request_target':",
+    'on: "pull_request_target"',
+  ])("flags alternate pull_request_target syntax: %s", (trigger) => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "alternate-target.yml"),
+      [
+        "name: Alternate target",
+        trigger,
+        "permissions:",
+        "  contents: write",
+        "jobs:",
+        "  inspect:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        '      - run: echo "${{ secrets.STAGING_AUTH }}"',
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/alternate-target.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining([
+        "pull_request_target",
+        "pull_request-secrets",
+        "pull_request-write-permission",
+      ])
+    );
+  });
+
+  it("accepts only the exact base-owned public-review trust workflow", () => {
+    const workflowPath = path.join(
+      ".github",
+      "workflows",
+      "public-review-snapshot-trust.yml"
+    );
+    const source = fs
+      .readFileSync(path.join(process.cwd(), workflowPath), "utf8")
+      .replaceAll("\r\n", "\n");
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(path.join(tempDir, workflowPath), source);
+
+    const result = validateWorkflowSecurityFiles(
+      [workflowPath.replaceAll("\\", "/")],
+      tempDir
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.findings).toEqual([]);
+  });
+
+  it("rejects any privilege or candidate-execution drift in the trusted workflow", () => {
+    const workflowPath = path.join(
+      ".github",
+      "workflows",
+      "public-review-snapshot-trust.yml"
+    );
+    const source = fs
+      .readFileSync(path.join(process.cwd(), workflowPath), "utf8")
+      .replaceAll("\r\n", "\n");
+    const mutations = [
+      source.replace(
+        "permissions:\n  contents: read",
+        "permissions:\n  contents: write"
+      ),
+      source.replace(
+        '          git checkout --detach "$SNAPSHOT_BASE_SHA"',
+        '          git checkout --detach "$SNAPSHOT_HEAD_SHA"'
+      ),
+      source.replace(
+        "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "actions/setup-node@v4"
+      ),
+      source.replace(
+        "      - name: Verify candidate snapshot from Git objects",
+        [
+          '      - run: echo "${{ secrets.STAGING_AUTH }}"',
+          "      - name: Verify candidate snapshot from Git objects",
+        ].join("\n")
+      ),
+    ];
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+
+    for (const mutation of mutations) {
+      fs.writeFileSync(path.join(tempDir, workflowPath), mutation);
+      const result = validateWorkflowSecurityFiles(
+        [workflowPath.replaceAll("\\", "/")],
+        tempDir
+      );
+      expect(result.ok).toBe(false);
+      expect(result.findings.map((finding) => finding.pattern)).toContain(
+        "pull_request_target"
+      );
+    }
   });
 
   it("flags pull_request workflows that expose secrets or write permissions", () => {
