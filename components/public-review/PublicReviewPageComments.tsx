@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -115,17 +116,21 @@ export function PublicReviewPageComments({
 
       {ledgerQuery.isError ? (
         <div
-          className="tw-border-red-500/30 tw-bg-red-950/20 tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-p-3"
+          className="tw-mt-3 tw-rounded-r-lg tw-border-y-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.025] tw-px-3 tw-py-2.5"
           role="alert"
         >
-          <p className="tw-text-red-200 tw-m-0 tw-text-sm tw-leading-5">
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "publicReview.comments.loadError")}
           </p>
           <button
             type="button"
             onClick={() => void ledgerQuery.refetch()}
-            className="tw-border-red-300/40 tw-text-red-100 focus-visible:tw-outline-red-200 tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2"
+            className="tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-pr-2 tw-text-xs tw-font-medium tw-text-primary-300 tw-transition-colors hover:tw-text-primary-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           >
+            <ArrowPathIcon
+              className="tw-size-3.5 tw-flex-none"
+              aria-hidden="true"
+            />
             {t(locale, "publicReview.ledger.retry")}
           </button>
         </div>
