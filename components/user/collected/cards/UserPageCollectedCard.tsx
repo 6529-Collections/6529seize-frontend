@@ -89,7 +89,15 @@ export default function UserPageCollectedCard({
     if (card.collection === CollectedCollectionType.MEMELAB) {
       return "N/A";
     } else {
-      return card.tdh && card.rank ? formatInteger(locale, card.rank) : "-";
+      const hasTdh =
+        typeof card.tdh === "number" &&
+        Number.isFinite(card.tdh) &&
+        card.tdh !== 0;
+      const hasRank =
+        typeof card.rank === "number" &&
+        Number.isFinite(card.rank) &&
+        card.rank !== 0;
+      return hasTdh && hasRank ? formatInteger(locale, card.rank) : "-";
     }
   };
 

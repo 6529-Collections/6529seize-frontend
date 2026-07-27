@@ -5,8 +5,9 @@ import Image from "next/image";
 
 type TransferModalPfpSize = 40 | 56;
 
-const PFP_SIZE_CLASSES: Record<TransferModalPfpSize, string> = {
-  40: "tw-size-10",
+const DEFAULT_PFP_SIZE_CLASS = "tw-size-10";
+const PFP_SIZE_CLASSES: Partial<Record<TransferModalPfpSize, string>> = {
+  40: DEFAULT_PFP_SIZE_CLASS,
   56: "tw-size-14",
 };
 
@@ -30,7 +31,7 @@ export default function TransferModalPfp({
   const { data: resolved } = useResolvedIpfsUrl(src);
 
   const levelColor = getLevelBgColor(level);
-  const sizeClass = PFP_SIZE_CLASSES[size] ?? PFP_SIZE_CLASSES[40];
+  const sizeClass = PFP_SIZE_CLASSES[size] ?? DEFAULT_PFP_SIZE_CLASS;
 
   if (!resolved) {
     return (

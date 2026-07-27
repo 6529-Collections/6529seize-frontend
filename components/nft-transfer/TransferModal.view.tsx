@@ -120,9 +120,11 @@ export function FlowTitle({
   return (
     <span className="tw-flex tw-items-center tw-gap-1.5">
       <span>{label}</span>
-      <img
+      <Image
         src={icon}
         alt={translate(locale, "transfer.modal.statusIconAlt")}
+        width={24}
+        height={24}
         className="tw-h-6 tw-w-6"
       />
     </span>
@@ -292,8 +294,12 @@ function TxStatusList({
               <span>
                 {translate(locale, "transfer.modal.status.error", {
                   message:
-                    t.error ||
-                    translate(locale, "transfer.modal.status.failedFallback"),
+                    typeof t.error === "string" && t.error.length > 0
+                      ? t.error
+                      : translate(
+                          locale,
+                          "transfer.modal.status.failedFallback"
+                        ),
                 })}
                 {t.hash && txLink(t.hash)}
               </span>

@@ -83,6 +83,14 @@ function RecipientSelectedDisplay({
   readonly disableSingleWalletSelection: boolean;
   readonly locale: SupportedLocale;
 }) {
+  const selectedProfileLabel =
+    [
+      selectedProfile.display,
+      selectedProfile.handle,
+      selectedProfile.wallet,
+    ].find((value) => typeof value === "string" && value.trim().length > 0) ??
+    "";
+
   const getWallets = () => {
     if (profile?.wallets && profile.wallets.length > 0) {
       return profile.wallets;
@@ -91,10 +99,7 @@ function RecipientSelectedDisplay({
       return [
         {
           wallet: selectedProfile.wallet,
-          display:
-            selectedProfile.display ||
-            selectedProfile.handle ||
-            selectedProfile.wallet,
+          display: selectedProfileLabel,
           tdh: 0,
         },
       ];
@@ -113,10 +118,7 @@ function RecipientSelectedDisplay({
     walletsContent = (
       <div className="tw-text-xs tw-opacity-60">
         {translate(locale, "recipientSelector.wallets.noneFound", {
-          profile:
-            selectedProfile.display ||
-            selectedProfile.handle ||
-            selectedProfile.wallet,
+          profile: selectedProfileLabel,
         })}
       </div>
     );
