@@ -42,4 +42,17 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(healthLink).toBeVisible();
     await expect(healthLink).toHaveAttribute("href", "/network/health");
   });
+
+  test("does not render an environment badge in production", async ({
+    page,
+  }) => {
+    test.skip(
+      process.env["PLAYWRIGHT_ENV"] !== "production",
+      "Production-only deployment identity assertion."
+    );
+
+    await expect(
+      page.locator('[aria-label^="Environment:"]')
+    ).toHaveCount(0);
+  });
 });

@@ -403,14 +403,19 @@ describe("CreateDropActions", () => {
     });
   });
 
-  it("does not show GIF button when API key is not available", () => {
+  it("keeps the GIF action visible when API configuration is unavailable", async () => {
     const { publicEnv } = require("@/config/env");
-    const prevKey = publicEnv.GIPHY_API_KEY;
     publicEnv.GIPHY_API_KEY = undefined;
     render(<CreateDropActions {...defaultProps} />);
 
-    expect(screen.queryByLabelText("Add GIF")).not.toBeInTheDocument();
-    publicEnv.GIPHY_API_KEY = prevKey;
+    const gifButtons = screen.getAllByLabelText("Add GIF");
+    expect(gifButtons).not.toHaveLength(0);
+
+    await userEvent.click(gifButtons[0]);
+
+    expect(screen.getByTestId("gif-picker")).not.toHaveAttribute(
+      "data-api-key"
+    );
   });
 
   it("highlights metadata button when metadata is missing", () => {
