@@ -2,14 +2,21 @@
 
 ## Current goal
 
-Finish latest-head review and CI iteration for scanner PR #3444. The scanner
-uses the TypeScript AST to count `AnyKeyword` occurrences inside generic type
-arguments without counting comments, prose, strings, or identifiers.
+Burn the scanner-visible production generic-argument `any` inventory from 23 to
+zero, then burn the separate test inventory from 135 to zero. The parser-backed
+scanner shipped in PR #3444; this active workstream now owns the cleanup slices
+and keeps their baseline and per-file inventory current.
 
-## Current branch
+## Current state
 
-`codex/generic-any-scanner`, based on `origin/main` at
-`52192bf48da7cbd813324413f9eeae50fe0488ef`.
+- PR #3444 merged to `main` as
+  `63fa7edafa699a509baae6a8344e92c66065e76e`.
+- The scanner counts `AnyKeyword` occurrences inside generic type arguments
+  without counting comments, prose, strings, identifiers, or generic parameter
+  defaults.
+- The checked-in baseline remains the authoritative machine-enforced floor.
+- Cleanup branches must be refreshed from current `origin/main`; the former
+  scanner branch is historical evidence, not the active execution branch.
 
 ## Constraints
 
@@ -35,7 +42,7 @@ arguments without counting comments, prose, strings, or identifiers.
 - Production: 23 occurrences across 11 files.
 - Tests: 135 occurrences across 46 files.
 - The complete per-file inventory is recorded in
-  `ops/workstreams/repo-health-2026-07/any-exceptions.md`.
+  `ops/workstreams/generic-any-ratchet-2026-07/any-exceptions.md`.
 
 ## Open decisions
 
@@ -43,5 +50,10 @@ arguments without counting comments, prose, strings, or identifiers.
 
 ## Next actions
 
-1. Track every latest-head review bot and required check to terminal state.
-2. Obtain current-head maintainer approval and merge.
+1. Publish and review the production cleanup slices from current `origin/main`.
+2. Reduce the production baseline from 23 to zero without runtime behavior
+   changes.
+3. Publish the test cleanup slices and reduce `test_generic_any` from 135 to
+   zero.
+4. Keep `any-exceptions.md`, the baseline, and scanner detail output aligned
+   after every slice.

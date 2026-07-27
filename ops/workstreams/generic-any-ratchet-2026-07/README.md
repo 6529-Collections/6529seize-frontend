@@ -13,7 +13,7 @@ the burn-down.
 2. This file
 3. `active-context.md`
 4. `run-log.md`
-5. `ops/workstreams/repo-health-2026-07/any-exceptions.md`
+5. `any-exceptions.md`
 6. `scripts/debt-ratchet.cjs`
 7. `__tests__/scripts/debt-ratchet.test.ts`
 
@@ -23,7 +23,7 @@ the burn-down.
 - `scripts/debt-ratchet-baseline.json`
 - `__tests__/scripts/debt-ratchet.test.ts`
 - Generic-`any` sites identified by the parser-backed inventory
-- `ops/workstreams/repo-health-2026-07/any-exceptions.md`
+- `any-exceptions.md`
 - This workstream folder
 
 ## Boundaries

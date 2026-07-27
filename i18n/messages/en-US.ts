@@ -24,6 +24,7 @@ import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -255,16 +256,27 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
   "rep.categories.validation",
   {
     errorTitle: "That category name won't work",
+    required: "Rep category is required.",
     tooShort: "Use at least {min} characters.",
     tooLong: "It's {length} characters long — the maximum is {max}.",
-    leadingDash: "A category can't start with a dash.",
     disallowedChars:
-      "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces and , . ? ! ' ( )",
     aiFilterDetails:
       "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
     closeErrorLabel: "Dismiss error",
   } as const
 );
+
+const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
+  heading: "Saved Drafts",
+  description:
+    "Saved on this device as you work. Tap one to pick up where you left off — the wave picture and description aren't kept, everything else is.",
+  savedAt: "Saved {timeAgo}",
+  untitled: "Untitled wave",
+  deleteLabel: 'Delete draft "{name}"',
+  newWave: "New Wave",
+  count: "{count} saved drafts",
+} as const);
 
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
@@ -863,7 +875,22 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
+  "empty.title": "No outcomes yet — add at least one to continue",
+  "empty.description":
+    "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
 } as const);
+
+const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
+  step: "Step {current} of {total}",
+  label: "Wave setup progress",
+} as const);
+
+const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
+  "waves.create.description",
+  {
+    placeholder: "Describe your wave",
+  } as const
+);
 
 const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
   "waves.leaderboard.phase",
@@ -1637,6 +1664,115 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
+  "subscriptions.coverage.title": "Subscription coverage",
+  "subscriptions.coverage.loading": "Loading subscription coverage",
+  "subscriptions.coverage.unavailable":
+    "Coverage is temporarily unavailable. Your subscription settings have not changed.",
+  "subscriptions.coverage.stale":
+    "Last known coverage is shown and may be out of date.",
+  "subscriptions.coverage.refresh": "Refresh coverage",
+  "subscriptions.coverage.status.covered": "Covered",
+  "subscriptions.coverage.status.planTopUp": "Plan a top up",
+  "subscriptions.coverage.status.runningLow": "Running low",
+  "subscriptions.coverage.status.actionRequired": "Action required",
+  "subscriptions.coverage.status.notSetUp": "Not set up",
+  "subscriptions.coverage.status.noEligibility": "No current eligibility",
+  "subscriptions.coverage.status.noSelections": "No upcoming drops selected",
+  "subscriptions.coverage.status.unknown": "Coverage unavailable",
+  "subscriptions.coverage.action.setUp": "Set up",
+  "subscriptions.coverage.action.chooseDrops": "Choose drops",
+  "subscriptions.coverage.action.topUp": "Top up",
+  "subscriptions.coverage.action.topUpSubscriptions": "Top up subscriptions",
+  "subscriptions.coverage.action.manage": "Manage",
+  "subscriptions.coverage.action.reviewSettings": "Review settings",
+  "subscriptions.coverage.mode.automatic": "Automatic",
+  "subscriptions.coverage.mode.manual": "Manual",
+  "subscriptions.coverage.mode.notConfigured": "Not configured",
+  "subscriptions.coverage.balanceEth": "{amount} ETH",
+  "subscriptions.coverage.dropsFunded.one": "{count} drop funded",
+  "subscriptions.coverage.dropsFunded.many": "{count} drops funded",
+  "subscriptions.coverage.eligibility": "Eligibility ×{count}",
+  "subscriptions.coverage.eligibilityUnknown": "Eligibility unavailable",
+  "subscriptions.coverage.editions.one": "One edition",
+  "subscriptions.coverage.editions.all": "All eligible editions",
+  "subscriptions.coverage.capacity": "Balance capacity",
+  "subscriptions.coverage.capacityUnit": "mints",
+  "subscriptions.coverage.allocated": "Forecast use",
+  "subscriptions.coverage.allocatedUnit": "allocated",
+  "subscriptions.coverage.basis":
+    "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+  "subscriptions.coverage.fundedThrough": "Funded through",
+  "subscriptions.coverage.nextUnfunded": "Next unfunded",
+  "subscriptions.coverage.projected": "Projected",
+  "subscriptions.coverage.memeToken": "The Memes #{token}",
+  "subscriptions.coverage.topUpBy":
+    "Top up by {deadline} to receive The Memes #{token}.",
+  "subscriptions.coverage.noDeadline":
+    "No authoritative top-up deadline is available yet.",
+  "subscriptions.coverage.recommended":
+    "Recommended: add {amount} ETH for {count} funded drops.",
+  "subscriptions.coverage.recommendedThrough":
+    "Recommended: add {amount} ETH for {count} funded drops through The Memes #{token}.",
+  "subscriptions.coverage.notSetUp.description":
+    "Set up subscription minting so eligible Meme drops can be handled automatically or one at a time.",
+  "subscriptions.coverage.noEligibility.description":
+    "This profile is not currently eligible for an upcoming Meme mint. Subscription balance does not create eligibility.",
+  "subscriptions.coverage.noSelections.description":
+    "Manual mode has no upcoming drops selected. Choose a drop to see how long the balance will last.",
+  "subscriptions.coverage.unknown.description":
+    "The forecast inputs are incomplete. Review settings or refresh when the schedule is available.",
+  "subscriptions.coverage.covered.description":
+    "Your immediate intended drops are fully funded.",
+  "subscriptions.coverage.earlyWarning.description":
+    "You are covered for now. Plan a top up before the funded runway ends.",
+  "subscriptions.coverage.runningLow.description":
+    "Only a few intended drops remain fully funded.",
+  "subscriptions.coverage.actionRequired.description":
+    "The immediate next intended drop is not fully funded.",
+  "subscriptions.coverage.header.through":
+    "{status} · through The Memes #{token}, {date}",
+  "subscriptions.coverage.header.noFundedThrough": "{status}",
+  "subscriptions.page.title": "Subscription minting",
+  "subscriptions.page.settingsTitle": "Minting settings",
+  "subscriptions.page.learnMore": "Learn more",
+  "subscriptions.page.topUpTitle": "Top up",
+  "subscriptions.balance.title": "Subscription balance",
+  "subscriptions.balance.ethUnit": "ETH",
+  "subscriptions.balance.mintCapacity.one": "{count} mint available",
+  "subscriptions.balance.mintCapacity.many": "{count} mints available",
+  "subscriptions.balance.mintCapacity.unknown": "mint capacity unavailable",
+  "subscriptions.topUp.recommended": "Recommended",
+  "subscriptions.topUp.minimum": "Minimum for next drop",
+  "subscriptions.topUp.coversDrops.one":
+    "Funds {count} intended drop through The Memes #{token}",
+  "subscriptions.topUp.coversDrops.many":
+    "Funds {count} intended drops through The Memes #{token}",
+  "subscriptions.topUp.chooseAmount": "Choose a top-up amount",
+  "subscriptions.topUp.submit": "Top up {amount} ETH",
+  "subscriptions.topUp.cardCount.one": "{count} Card",
+  "subscriptions.topUp.cardCount.many": "{count} Cards",
+  "subscriptions.topUp.cardOption.one": "{label} - {count} Card",
+  "subscriptions.topUp.cardOption.many": "{label} - {count} Cards",
+  "subscriptions.topUp.modalSubtitle.one": "{count} Card - {amount} ETH",
+  "subscriptions.topUp.modalSubtitle.many": "{count} Cards - {amount} ETH",
+  "subscriptions.topUp.validation.selectOption": "Select a top-up option",
+  "subscriptions.topUp.validation.wallet":
+    "You must have an active wallet connection to top up",
+  "subscriptions.topUp.sendingTo": "Sending to",
+  "subscriptions.notification.title": "Subscription coverage",
+  "subscriptions.notification.earlyWarning":
+    "Your subscription balance is getting low.",
+  "subscriptions.notification.runningLow":
+    "Only a few intended drops remain fully funded.",
+  "subscriptions.notification.actionRequired":
+    "Your immediate next intended drop is not fully funded.",
+  "subscriptions.notification.through":
+    "{count} · funded through The Memes #{token}, {date}",
+  "subscriptions.notification.noRunway": "{count}",
+  "subscriptions.notification.topUpBy":
+    "Top up by {deadline} to receive The Memes #{token}.",
+  "subscriptions.notification.nextUnfunded":
+    "Next unfunded: The Memes #{token}, {date}.",
   "home.nextMint.status": "Next mint",
   "home.nextMint.noImage": "No image",
   "home.nextMint.untitled": "Untitled",
@@ -2189,6 +2325,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_CREATE_PROGRESS_MESSAGES,
+  ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,
   ...GROUP_NFT_OWNERSHIP_MESSAGES,
@@ -2208,6 +2346,7 @@ export const EN_US_MESSAGES = {
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
   ...REP_CATEGORY_VALIDATION_MESSAGES,
+  ...CREATE_WAVE_DRAFTS_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
@@ -2216,6 +2355,7 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...PUBLIC_REVIEW_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,

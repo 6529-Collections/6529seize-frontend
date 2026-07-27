@@ -1,0 +1,1699 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x9a60113b",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TimeParameterActionAlreadyApplied",
+          "selector": "0x9a60113b",
+          "signature": "TimeParameterActionAlreadyApplied(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0xd4a5cc5a",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "expectedClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "actualClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "TimeParameterActionClassMismatch",
+          "selector": "0xd4a5cc5a",
+          "signature": "TimeParameterActionClassMismatch(uint8,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0xd9a70197",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "TimeParameterActionContextInvalid",
+          "selector": "0xd9a70197",
+          "signature": "TimeParameterActionContextInvalid()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0xe13353ba",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "TimeParameterActionIdZero",
+          "selector": "0xe13353ba",
+          "signature": "TimeParameterActionIdZero()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x8628fe55",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "TimeParameterActionNotExecuting",
+          "selector": "0x8628fe55",
+          "signature": "TimeParameterActionNotExecuting()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x9a2ffe18",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TimeParameterAlreadyRegistered",
+          "selector": "0x9a2ffe18",
+          "signature": "TimeParameterAlreadyRegistered(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x34a23553",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "TimeParameterInvalidAuthority",
+          "selector": "0x34a23553",
+          "signature": "TimeParameterInvalidAuthority(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x0ae6feae",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TimeParameterInvalidConfig",
+          "selector": "0x0ae6feae",
+          "signature": "TimeParameterInvalidConfig(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x3fa97623",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TimeParameterNewStateHashMismatch",
+          "selector": "0x3fa97623",
+          "signature": "TimeParameterNewStateHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0xa9a67825",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "currentValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "TimeParameterNotARaise",
+          "selector": "0xa9a67825",
+          "signature": "TimeParameterNotARaise(bytes32,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0xb8de8785",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "TimeParameterNotAuthority",
+          "selector": "0xb8de8785",
+          "signature": "TimeParameterNotAuthority(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x8271d5d0",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TimeParameterOldStateHashMismatch",
+          "selector": "0x8271d5d0",
+          "signature": "TimeParameterOldStateHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0xcf9e28e7",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "currentValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "TimeParameterRaiseBoundExceeded",
+          "selector": "0xcf9e28e7",
+          "signature": "TimeParameterRaiseBoundExceeded(bytes32,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x0530568f",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TimeParameterRevisionOverflow",
+          "selector": "0x0530568f",
+          "signature": "TimeParameterRevisionOverflow(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0xb1abd72c",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TimeParameterScopeHashMismatch",
+          "selector": "0xb1abd72c",
+          "signature": "TimeParameterScopeHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#error:0x7c0276f8",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "TimeParameterUnknown",
+          "selector": "0x7c0276f8",
+          "signature": "TimeParameterUnknown(bytes32)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#event:TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "genesisValue",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floorBlocks",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "wallClockFloorSeconds",
+              "type": "uint64"
+            }
+          ],
+          "name": "TimeParameterRegistered",
+          "signature": "TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+          "topic0": "0x5353879504550bbe5b296dd41cc6f26f3470a34651d423e4b9d6acf5889c5421"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost#event:TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "declaringDefinitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "host",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "oldValue",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floorBlocks",
+              "type": "uint256"
+            }
+          ],
+          "name": "TimeParameterUpdated",
+          "signature": "TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "topic0": "0x503882277086575edc26a1c92db8b562bc44167d8639e30451d231226f1170c0"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x24818e11",
+          "declaringDefinitionId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+          "inherited": false,
+          "inputs": [],
+          "name": "TIME_PARAMETER_SCHEMA_VERSION",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x24818e11",
+          "signature": "TIME_PARAMETER_SCHEMA_VERSION()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0xc81dbbe8",
+          "declaringDefinitionId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+          "inherited": false,
+          "inputs": [],
+          "name": "governanceAuthority",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xc81dbbe8",
+          "signature": "governanceAuthority()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x046e1fd5",
+          "declaringDefinitionId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "raiseTimeParameter",
+          "outputs": [],
+          "selector": "0x046e1fd5",
+          "signature": "raiseTimeParameter(bytes32,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x4e92a03f",
+          "declaringDefinitionId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "timeParameter",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x4e92a03f",
+          "signature": "timeParameter(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x1c404390",
+          "declaringDefinitionId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+          "inherited": false,
+          "inputs": [],
+          "name": "timeParameterIds",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32[]",
+              "name": "",
+              "type": "bytes32[]"
+            }
+          ],
+          "selector": "0x1c404390",
+          "signature": "timeParameterIds()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x5f2463b8",
+          "declaringDefinitionId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "timeParameterInfo",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "floorBlocks",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "wallClockFloorSeconds",
+              "type": "uint64"
+            },
+            {
+              "index": 3,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x5f2463b8",
+          "signature": "timeParameterInfo(bytes32)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": true,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "TIME_PARAMETER_SCHEMA_VERSION()",
+          "displaySignature": "TIME_PARAMETER_SCHEMA_VERSION()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x24818e11",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjoweDI0ODE4ZTEx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "TIME_PARAMETER_SCHEMA_VERSION",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 56,
+            "byteStart": 501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:f43ff9ea3df6b7da29d9f7607b54f674f97f563f893b5ed317fa2b845989d31a",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": "0x24818e11",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "governanceAuthority()",
+          "displaySignature": "governanceAuthority()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0xc81dbbe8",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjoweGM4MWRiYmU4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "governanceAuthority",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 53,
+            "byteStart": 1177,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:9e26df1a82d2e34873ecc2b608d4927bf1a8560004225e672b44890d3937107d",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": "0xc81dbbe8",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:constructor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpjb25zdHJ1Y3RvcihhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "@param authority Canonical Governance-V2 executor, or zero to make every\n        parameter immutable after construction.",
+          "outputs": [],
+          "range": {
+            "byteLength": 395,
+            "byteStart": 1483,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L37-L47",
+            "lineEnd": 47,
+            "lineStart": 37,
+            "snippetSha256": "sha256:a069effb8e372fd7ae1b7566341e9ed7beed10c110affb74b1faf148624b80ff",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_registerTimeParameter(TimeParameterConfig)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_registerTimeParameter(TimeParameterConfig)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "config",
+              "storageLocation": "memory",
+              "type": "TimeParameterConfig"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfcmVnaXN0ZXJUaW1lUGFyYW1ldGVyKFRpbWVQYXJhbWV0ZXJDb25maWcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_registerTimeParameter",
+          "natspec": "@dev Constructor-only registration hook for embedding hosts.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1247,
+            "byteStart": 1953,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L50-L84",
+            "lineEnd": 84,
+            "lineStart": 50,
+            "snippetSha256": "sha256:b313838bee63a6f54c51de0252155f0bbd2fdd0a4af2d7c42764f03bf8e124c7",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": "timeParameterInfo(bytes32)",
+          "displaySignature": "timeParameterInfo(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x5f2463b8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjoweDVmMjQ2M2I4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "timeParameterInfo",
+          "natspec": "@inheritdoc IStreamTimeParameterHost",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "floorBlocks",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "wallClockFloorSeconds",
+              "type": "uint64"
+            },
+            {
+              "index": 3,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 450,
+            "byteStart": 3251,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L87-L100",
+            "lineEnd": 100,
+            "lineStart": 87,
+            "snippetSha256": "sha256:44ea27be1238eba88b2dc8a3b9f9e6e995ac397861b7fb9af8b98dcdbefa2f20",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": "0x5f2463b8",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "timeParameter(bytes32)",
+          "displaySignature": "timeParameter(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x4e92a03f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjoweDRlOTJhMDNm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "timeParameter",
+          "natspec": "@inheritdoc IStreamTimeParameterHost",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 207,
+            "byteStart": 3752,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L103-L106",
+            "lineEnd": 106,
+            "lineStart": 103,
+            "snippetSha256": "sha256:caae157988907b2c1d56a7cc39cefc3562eb95ae371a3eaa6081748d42e9d279",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": "0x4e92a03f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "timeParameterIds()",
+          "displaySignature": "timeParameterIds()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x1c404390",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjoweDFjNDA0Mzkw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "timeParameterIds",
+          "natspec": "@inheritdoc IStreamTimeParameterHost",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 119,
+            "byteStart": 4010,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L109-L111",
+            "lineEnd": 111,
+            "lineStart": 109,
+            "snippetSha256": "sha256:22561b3785ed1e17906f3f4e7dc0aed072e1dfd6d38b08a2c8cb08fff784f59e",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": "0x1c404390",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "raiseTimeParameter(bytes32,uint256)",
+          "displaySignature": "raiseTimeParameter(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x046e1fd5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjoweDA0NmUxZmQ1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "raiseTimeParameter",
+          "natspec": "@inheritdoc IStreamTimeParameterHost",
+          "outputs": [],
+          "range": {
+            "byteLength": 1423,
+            "byteStart": 4180,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L114-L146",
+            "lineEnd": 146,
+            "lineStart": 114,
+            "snippetSha256": "sha256:6d73584337f29e3a10066d04669df8144c443bbcc48350f410f91e76e4ebf8ec",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": "0x046e1fd5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_timeParameterValue(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_timeParameterValue(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfdGltZVBhcmFtZXRlclZhbHVlKGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_timeParameterValue",
+          "natspec": "@dev Live storage value for embedding hosts.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 132,
+            "byteStart": 5662,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L149-L151",
+            "lineEnd": 151,
+            "lineStart": 149,
+            "snippetSha256": "sha256:fa643cf56728b544dab5949b5209f9aa0a383a678d0a9a6feceb3b34606fdb50",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireAuthorityCaller()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_requireAuthorityCaller()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfcmVxdWlyZUF1dGhvcml0eUNhbGxlcigp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireAuthorityCaller",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 209,
+            "byteStart": 5800,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L153-L157",
+            "lineEnd": 157,
+            "lineStart": 153,
+            "snippetSha256": "sha256:8d0cab9e78c1aee080b45813b3e51b778cfab6c3859036f28a58512abaddbef4",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireRegistered(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_requireRegistered(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfcmVxdWlyZVJlZ2lzdGVyZWQoYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireRegistered",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "parameter",
+              "storageLocation": "storage",
+              "type": "TimeParameterData"
+            }
+          ],
+          "range": {
+            "byteLength": 272,
+            "byteStart": 6015,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L159-L166",
+            "lineEnd": 166,
+            "lineStart": 159,
+            "snippetSha256": "sha256:1d40621318a51d69aff874e3e6a0c93f6e90e561d2e951e006af7d2fad415da4",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_scopeHash(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_scopeHash(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfc2NvcGVIYXNoKGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_scopeHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 215,
+            "byteStart": 6293,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L168-L172",
+            "lineEnd": 172,
+            "lineStart": 168,
+            "snippetSha256": "sha256:ae029353fc181998e84e62f96e374035f4b78e848cabe6ca14c2b215528e4cc1",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_stateHash(bytes32,TimeParameterData,uint256,uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_stateHash(bytes32,TimeParameterData,uint256,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "parameter",
+              "storageLocation": "storage",
+              "type": "TimeParameterData"
+            },
+            {
+              "index": 2,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfc3RhdGVIYXNoKGJ5dGVzMzIsVGltZVBhcmFtZXRlckRhdGEsdWludDI1Nix1aW50NjQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_stateHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 471,
+            "byteStart": 6514,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L174-L190",
+            "lineEnd": 190,
+            "lineStart": 174,
+            "snippetSha256": "sha256:a3ff176e7011aff86289df01b95becf66d1fb9f85219da219f32e616a8796214",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_nextRevision(bytes32,uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_nextRevision(bytes32,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfbmV4dFJldmlzaW9uKGJ5dGVzMzIsdWludDY0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_nextRevision",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 254,
+            "byteStart": 6991,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L192-L197",
+            "lineEnd": 197,
+            "lineStart": 192,
+            "snippetSha256": "sha256:8843b45e86129a8b5f67a9daebfaeef26679c34ee8f6814675596e1d455b41a2",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireGovernanceContext(bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_requireGovernanceContext(bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedScopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "expectedOldStateHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "expectedNewStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfcmVxdWlyZUdvdmVybmFuY2VDb250ZXh0KGJ5dGVzMzIsYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireGovernanceContext",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1226,
+            "byteStart": 7251,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L199-L227",
+            "lineEnd": 227,
+            "lineStart": 199,
+            "snippetSha256": "sha256:943db200efe2ddfb632dc785d93413dedf24d685dfc5e75c5975f5b72ae805df",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_readCurrentAction()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_readCurrentAction()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfcmVhZEN1cnJlbnRBY3Rpb24oKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_readCurrentAction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "oldStateHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "newStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1463,
+            "byteStart": 8483,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L229-L266",
+            "lineEnd": 266,
+            "lineStart": 229,
+            "snippetSha256": "sha256:3e15c46ffadcd46ba6a29df6a8f52ae68b84ad1646325362095119738ac70d1c",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_hasCanonicalAuthorityMarker(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_hasCanonicalAuthorityMarker(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfaGFzQ2Fub25pY2FsQXV0aG9yaXR5TWFya2VyKGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_hasCanonicalAuthorityMarker",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "valid",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 647,
+            "byteStart": 9952,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L268-L282",
+            "lineEnd": 282,
+            "lineStart": 268,
+            "snippetSha256": "sha256:04e8f6821e1bb39fbdab9965fd775c3d21d56ba6834e1caf2a1803ec6ebf3f33",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_hasCanonicalAuthorityContext(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_hasCanonicalAuthorityContext(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfaGFzQ2Fub25pY2FsQXV0aG9yaXR5Q29udGV4dChhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_hasCanonicalAuthorityContext",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "valid",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 752,
+            "byteStart": 10605,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L284-L299",
+            "lineEnd": 299,
+            "lineStart": 284,
+            "snippetSha256": "sha256:0615a34daaf2916469124a444580ff66e59c7652ae8ab514300c228f1d2e2112",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isEip7702DelegatedEOA(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:_isEip7702DelegatedEOA(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdCNmdW5jdGlvbjpfaXNFaXA3NzAyRGVsZWdhdGVkRU9BKGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isEip7702DelegatedEOA",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "delegated",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 328,
+            "byteStart": 11363,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L301-L309",
+            "lineEnd": 309,
+            "lineStart": 301,
+            "snippetSha256": "sha256:590c354f71881401de814a708f60adb018725ae0898ce94585f70cd229f2fed7",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x24818e11",
+          "immutable": false,
+          "name": "TIME_PARAMETER_SCHEMA_VERSION",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:f43ff9ea3df6b7da29d9f7607b54f674f97f563f893b5ed317fa2b845989d31a",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": "0x24818e11",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 556,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "valueSource": "2",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_TIME_PARAMETER_SCOPE_DOMAIN_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 133,
+            "byteStart": 564,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L14-L15",
+            "lineEnd": 15,
+            "lineStart": 14,
+            "snippetSha256": "sha256:518aee1177c909bfad4ecc099fc1e1d901a21978dd7205eb89e80fb22a47f90d",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 631,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:a538427d5fec319f5e2ca9c9fa4890014e40683049ce35453e2603dc88ca3045",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "valueSource": "0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_TIME_PARAMETER_STATE_DOMAIN_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 133,
+            "byteStart": 703,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L16-L17",
+            "lineEnd": 17,
+            "lineStart": 16,
+            "snippetSha256": "sha256:74121e67d7733e07ac3d27a7db48513e748278fe52ff455be64231a4ab5cd715",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 770,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:124169f8f81fbd8f809a008b36ec6c15695ccee2ff07a09e232806e9c43c2e8e",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "valueSource": "0x26290762a61f3dda3fad05a62e5a95dcb1c59db2eaf506cb363c2aa2ab7b8384",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_ACTION_CLASS_DELAYED_LOOSENING",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 843,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:190f8106a21f827276b0b7c9aae1830e58a1cb38859b22086913b3774ceb0f87",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 900,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0xc81dbbe8",
+          "immutable": true,
+          "name": "governanceAuthority",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 1177,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:9e26df1a82d2e34873ecc2b608d4927bf1a8560004225e672b44890d3937107d",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": "0xc81dbbe8",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_timeParameters",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 1237,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:a0afdc6584530a75a18bb100ce1a7dfd690a900d0178b9d3db4e649e0873038f",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => TimeParameterData)",
+          "typeString": "mapping(bytes32 => struct StreamTimeParameterHost.TimeParameterData)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_timeParameterIds",
+          "natspec": "",
+          "range": {
+            "byteLength": 35,
+            "byteStart": 1305,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:5130457602cbccf953112e3d6027b4f3b8c5d23005c314aa0037b2b68f4e7cd3",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          },
+          "selector": null,
+          "type": "bytes32[]",
+          "typeString": "bytes32[]",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "value",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 943,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L22",
+                "lineEnd": 22,
+                "lineStart": 22,
+                "snippetSha256": "sha256:f251b35835dd1fe589dcb9d8cdeac9754987cddf40112ffa4d4c7584e82dc4a6",
+                "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "floorBlocks",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 966,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L23",
+                "lineEnd": 23,
+                "lineStart": 23,
+                "snippetSha256": "sha256:6fef156d2441bbaed90cdda88a05ef9604123a0142f418004a83798712f703c8",
+                "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "wallClockFloorSeconds",
+              "natspec": "",
+              "range": {
+                "byteLength": 28,
+                "byteStart": 995,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L24",
+                "lineEnd": 24,
+                "lineStart": 24,
+                "snippetSha256": "sha256:7764040cc02ecebf2062fb95709ffda0efa14d2895f8efa22ea01ee2b90b8326",
+                "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 3,
+              "name": "revision",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 1033,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L25",
+                "lineEnd": 25,
+                "lineStart": 25,
+                "snippetSha256": "sha256:07b4a1587c2ed4fd064eb7c3608572e27aded7a3fc956985ec46c91667eb9cfa",
+                "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 4,
+              "name": "lastActionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 1144,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L27",
+                "lineEnd": 27,
+                "lineStart": 27,
+                "snippetSha256": "sha256:a227d72e9d4e2e710fbc28bc8d729bf4715dd0b4b1921d7654c0ddc714bab3b7",
+                "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "TimeParameterData",
+          "natspec": "",
+          "range": {
+            "byteLength": 263,
+            "byteStart": 908,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L21-L28",
+            "lineEnd": 28,
+            "lineStart": 21,
+            "snippetSha256": "sha256:b9a39fda8dd1ac204504e51515d0763f46fce27044ee3acb379784c29da43e88",
+            "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost",
+        "name": "IStreamTimeParameterHost"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVRpbWVQYXJhbWV0ZXJIb3N0LnNvbDpTdHJlYW1UaW1lUGFyYW1ldGVySG9zdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+      "smart-contracts/IStreamTimeParameterHost.sol:IStreamTimeParameterHost"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamTimeParameterHost",
+    "natspec": "@notice Reusable launch-v1 Governed Time Parameter host.\n @dev The parameter inventory is fixed during construction. Values may only\n      increase through an exact delayed Governance-V2 context and each step\n      is bounded to at most twice the current value.",
+    "range": {
+      "byteLength": 11268,
+      "byteStart": 425,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamTimeParameterHost.sol#L11-L310",
+      "lineEnd": 310,
+      "lineStart": 11,
+      "snippetSha256": "sha256:936235b5af69c5e14a07f1018bf756c041f579ae2d52bc1b16694b3804effcd7",
+      "sourceSha256": "sha256:804213d9e88ce816dd24f90083447d7c49116b01d63c208eccf96367ab146614"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamTimeParameterHost.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0x24818e11",
+      "definitionId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost#function:0xc81dbbe8",
+      "definitionId": "smart-contracts/StreamTimeParameterHost.sol:StreamTimeParameterHost",
+      "severity": "advisory"
+    }
+  ]
+}
