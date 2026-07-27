@@ -50,16 +50,30 @@ register backend first and declare it as the frontend prerequisite.
 3. A single exact PR merge-tree artifact is reused when eligible. Otherwise,
    each application runs one combined sharded preflight and one immutable build.
    Frontend staging/production profiles build concurrently into one checksummed
-   dual-profile artifact.
+   dual-profile artifact. For an affected repository, the staging release
+   commit has the recorded current `1a-staging` SHA as its first parent and the
+   dependency-closed composition as its second parent.
 4. Preparation may finish while another train owns staging.
-5. The train acquires the staging lock only for deployment plus E2E.
-6. Independent backend DAG frontier units deploy concurrently; dependency edges
+5. The train acquires the staging lock and repeats the idle/ref snapshot.
+6. Before deployment, every affected `1a-staging` ref advances to the immutable
+   release commit through a non-force compare-and-swap from its recorded base.
+   Unaffected repositories do not move. A stale or moved ref starts no train
+   deployment and pauses only staging for serialized recovery.
+7. Independent backend DAG frontier units deploy concurrently; dependency edges
    serialize only required units. Dependent frontend deploys after backend.
-7. The controller persists `STAGING_DEPLOYED` with exact SHAs, artifact digests,
+8. The controller persists `STAGING_DEPLOYED` with exact SHAs, artifact digests,
    services, operation runs, and timings.
-8. E2E receives and authorizes against that manifest identity. Staging remains
-   locked until E2E is terminal.
-9. Only E2E success produces `STAGING_VALIDATED`.
+9. E2E runs from an immutable ref at the exact frontend release SHA and receives
+   the paired manifest identity. Staging remains locked until E2E is terminal.
+10. Only E2E success plus exact agreement among both `1a-staging` refs, runtime
+    evidence, the manifest, and E2E produces `STAGING_VALIDATED`.
+
+Ref advances are durable and retry-safe. A crash after CAS resumes by observing
+the exact target and continues with the same deployment idempotency keys. A
+post-CAS deployment or E2E failure cannot validate; rollback creates a new
+forward-only restore commit with the last validated tree, advances
+`1a-staging` by non-force CAS, deploys that exact commit, and requires rollback
+E2E. Recovery never force-pushes a shared ref backward.
 
 `STAGING_DEPLOYED` and `STAGING_VALIDATED` are separate milestones.
 `STAGING_VALIDATED` is historical certification; it is not a current-presence
@@ -103,13 +117,13 @@ V2 does not publish release notes.
 
 ## Failure behavior
 
-| Class                | Behavior                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------ |
-| Candidate merge/test | Before shared mutation, fail closed and leave the last validated admitted manifest live; mark only the new direct candidate `NEEDS_REBASE` as applicable |
-| Infrastructure       | Bounded idempotent retry; no candidate isolation                                     |
-| Retryable deployment | Retry only the failed operation; preserve successful sibling evidence                |
-| Control plane        | Fail the train, requeue candidates, pause automated claiming, retain manual fallback |
-| E2E                  | Keep the failed manifest unvalidated and restore, deploy, and E2E the exact last validated live manifest under the same staging lock before committing any membership change |
+| Class                | Behavior                                                                                                                                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Candidate merge/test | Before shared mutation, fail closed and leave the last validated admitted manifest live; mark only the new direct candidate `NEEDS_REBASE` as applicable                                                 |
+| Infrastructure       | Bounded idempotent retry; no candidate isolation                                                                                                                                                         |
+| Retryable deployment | Retry only the failed operation at the same release SHA and idempotency key; preserve successful sibling evidence                                                                                        |
+| Control plane        | Fail the train, requeue candidates, pause automated claiming, retain manual fallback                                                                                                                     |
+| E2E                  | Keep the failed manifest unvalidated and forward-CAS, deploy, and E2E an immutable restore commit with the exact last validated tree under the same staging lock before committing any membership change |
 
 Every pending GitHub status must map to a visible candidate/train/operation state
 and recovery message. Duplicate callbacks and worker invocations reuse immutable
