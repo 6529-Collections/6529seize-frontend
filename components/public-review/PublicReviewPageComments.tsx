@@ -116,7 +116,7 @@ export function PublicReviewPageComments({
 
       {ledgerQuery.isError ? (
         <div
-          className="tw-mt-3 tw-rounded-r-lg tw-border-y-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.025] tw-px-3 tw-py-2.5"
+          className="tw-mt-3 tw-rounded-lg tw-bg-primary-400/[0.025] tw-px-3 tw-py-2.5"
           role="alert"
         >
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
