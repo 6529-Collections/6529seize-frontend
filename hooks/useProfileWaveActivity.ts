@@ -10,6 +10,11 @@ import { commonApiFetch } from "@/services/api/common-api";
 
 const PROFILE_WAVE_ACTIVITY_STALE_TIME_MS = 5 * 60_000;
 
+const combineProfileWaveActivityTimestamps = (
+  results: readonly { readonly data?: ApiDrop[] | undefined }[]
+): readonly (number | null)[] =>
+  results.map(({ data }) => data?.[0]?.created_at ?? null);
+
 const getDesktopViewportSnapshot = (): boolean => {
   if (typeof globalThis.window === "undefined") {
     return false;
@@ -91,7 +96,7 @@ export function useProfileWaveActivity({
 
   // Favourite waves include the rank, but not the viewed profile's latest
   // post timestamp. Fetch one drop per wave only after the desktop UI settles.
-  const queries = useQueries({
+  const activityTimestamps = useQueries({
     queries: uniqueWaveIds.map((waveId) => ({
       queryKey: [
         QueryKey.PROFILE_DROPS,
@@ -123,16 +128,19 @@ export function useProfileWaveActivity({
       retry: false,
       refetchOnWindowFocus: false,
     })),
+    combine: combineProfileWaveActivityTimestamps,
   });
 
-  const activityByWaveId = new Map<string, number>();
+  return useMemo(() => {
+    const activityByWaveId = new Map<string, number>();
 
-  uniqueWaveIds.forEach((waveId, index) => {
-    const timestamp = queries[index]?.data?.[0]?.created_at;
-    if (timestamp !== undefined && timestamp > 0) {
-      activityByWaveId.set(waveId, timestamp);
-    }
-  });
+    uniqueWaveIds.forEach((waveId, index) => {
+      const timestamp = activityTimestamps[index];
+      if (timestamp !== null && timestamp !== undefined && timestamp > 0) {
+        activityByWaveId.set(waveId, timestamp);
+      }
+    });
 
-  return activityByWaveId;
+    return activityByWaveId;
+  }, [activityTimestamps, uniqueWaveIds]);
 }

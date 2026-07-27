@@ -26,7 +26,9 @@ export default function UserPageBrainSidebarCreated({
     0
   );
   const showMoreLabel = getUserPageBrainSidebarMessage(
-    "user.brain.sidebar.showMore",
+    remainingWavesCount === 1
+      ? "user.brain.sidebar.showMore.one"
+      : "user.brain.sidebar.showMore.other",
     { count: remainingWavesCount }
   );
   if (waves.length === 0) {
