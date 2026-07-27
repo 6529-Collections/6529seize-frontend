@@ -9,7 +9,7 @@ import {
 import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { SidebarWave } from "@/types/waves.types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -19,6 +19,8 @@ export interface MinimalWaveNewDropsCount {
   readonly latestDropTimestamp: number | null;
   readonly firstUnreadSerialNo: number | null;
 }
+
+type NewDropsCounts = Record<string, MinimalWaveNewDropsCount>;
 
 interface UseNewDropCounterOptions {
   readonly enabled?: boolean | undefined;
@@ -124,6 +126,41 @@ const addUnreadDropCount = ({
   };
 };
 
+const reconcileNewDropsCounts = ({
+  newDropsCounts,
+  waves,
+}: {
+  readonly newDropsCounts: NewDropsCounts;
+  readonly waves: readonly SidebarWave[];
+}): NewDropsCounts => {
+  let next = newDropsCounts;
+
+  waves.forEach((wave) => {
+    const localCount = newDropsCounts[wave.id];
+    const serverLatestDropTimestamp = wave.latestDropTimestamp;
+    if (
+      !localCount ||
+      localCount.count <= 0 ||
+      localCount.latestDropTimestamp === null ||
+      typeof serverLatestDropTimestamp !== "number" ||
+      serverLatestDropTimestamp < localCount.latestDropTimestamp
+    ) {
+      return;
+    }
+
+    if (next === newDropsCounts) {
+      next = { ...newDropsCounts };
+    }
+    next[wave.id] = {
+      count: 0,
+      latestDropTimestamp: serverLatestDropTimestamp,
+      firstUnreadSerialNo: null,
+    };
+  });
+
+  return next;
+};
+
 /**
  * Hook to manage new drop counts via WebSockets
  *
@@ -150,81 +187,16 @@ function useNewDropCounter(
     Record<string, MinimalWaveNewDropsCount>
   >({});
   const wavesRef = useRef(waves);
-  const serverSnapshotTimestampsRef = useRef<Map<string, number>>(new Map());
-  const serverSnapshotProfileIdRef = useRef<string | null>(
-    connectedProfile?.id ?? null
-  );
   const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
   const wasEnabledRef = useRef(enabled);
-  const connectedProfileId = connectedProfile?.id ?? null;
 
   useEffect(() => {
-    if (serverSnapshotProfileIdRef.current !== connectedProfileId) {
-      serverSnapshotProfileIdRef.current = connectedProfileId;
-      serverSnapshotTimestampsRef.current.clear();
-    }
-
     if (!enabled) {
       wavesRef.current = [];
-      serverSnapshotTimestampsRef.current.clear();
       return;
     }
 
     wavesRef.current = waves;
-    waves.forEach((wave) => {
-      const serverLatestDropTimestamp = wave.latestDropTimestamp;
-      if (typeof serverLatestDropTimestamp !== "number") {
-        return;
-      }
-
-      const previousTimestamp = serverSnapshotTimestampsRef.current.get(
-        wave.id
-      );
-      if (
-        previousTimestamp === undefined ||
-        serverLatestDropTimestamp > previousTimestamp
-      ) {
-        serverSnapshotTimestampsRef.current.set(
-          wave.id,
-          serverLatestDropTimestamp
-        );
-      }
-    });
-  }, [connectedProfileId, enabled, waves]);
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    setNewDropsCounts((prev) => {
-      let next = prev;
-
-      waves.forEach((wave) => {
-        const localCount = prev[wave.id];
-        const serverLatestDropTimestamp = wave.latestDropTimestamp;
-        if (
-          !localCount ||
-          localCount.count <= 0 ||
-          localCount.latestDropTimestamp === null ||
-          typeof serverLatestDropTimestamp !== "number" ||
-          serverLatestDropTimestamp < localCount.latestDropTimestamp
-        ) {
-          return;
-        }
-
-        if (next === prev) {
-          next = { ...prev };
-        }
-        next[wave.id] = {
-          count: 0,
-          latestDropTimestamp: serverLatestDropTimestamp,
-          firstUnreadSerialNo: null,
-        };
-      });
-
-      return next;
-    });
   }, [enabled, waves]);
 
   useEffect(() => {
@@ -235,6 +207,41 @@ function useNewDropCounter(
 
     wasEnabledRef.current = enabled;
   }, [enabled]);
+
+  const reconciledNewDropsCounts = useMemo(
+    () =>
+      reconcileNewDropsCounts({
+        newDropsCounts,
+        waves,
+      }),
+    [newDropsCounts, waves]
+  );
+
+  const updateNewDropsCountsForMessage = useCallback(
+    (
+      waveId: string,
+      createdAt: number,
+      update: (current: NewDropsCounts) => NewDropsCounts
+    ) => {
+      setNewDropsCounts((previous) => {
+        const current = reconcileNewDropsCounts({
+          newDropsCounts: previous,
+          waves,
+        });
+        const currentWave = current[waveId];
+        if (
+          currentWave?.count === 0 &&
+          currentWave.latestDropTimestamp !== null &&
+          createdAt <= currentWave.latestDropTimestamp
+        ) {
+          return current;
+        }
+
+        return update(current);
+      });
+    },
+    [waves]
+  );
 
   // Reset counts for a specific wave
   const resetWaveNewDropsCount = useCallback(
@@ -351,16 +358,19 @@ function useNewDropCounter(
         if (isPollResponseDropUpdate(message)) return;
 
         const waveId = message.wave.id;
-        const serverSnapshotTimestamp =
-          serverSnapshotTimestampsRef.current.get(waveId);
+        const wave = waves.find((w) => w.id === waveId);
+        const serverSnapshotTimestamp = wave?.latestDropTimestamp;
         if (
-          serverSnapshotTimestamp !== undefined &&
+          typeof serverSnapshotTimestamp === "number" &&
           message.created_at <= serverSnapshotTimestamp
         ) {
+          updateNewDropsCountsForMessage(
+            waveId,
+            message.created_at,
+            (current) => current
+          );
           return;
         }
-
-        const wave = waves.find((w) => w.id === waveId);
 
         if (!wave) {
           // If the opposite list already knows this wave, skip refetch for this list.
@@ -375,35 +385,45 @@ function useNewDropCounter(
             waveId === activeWaveId && document.visibilityState === "visible";
 
           if (isOwnDrop) {
-            setNewDropsCounts((prev) =>
-              updateLatestDropTimestamp({
-                createdAt: message.created_at,
-                newDropsCounts: prev,
-                waveId,
-              })
+            updateNewDropsCountsForMessage(
+              waveId,
+              message.created_at,
+              (current) =>
+                updateLatestDropTimestamp({
+                  createdAt: message.created_at,
+                  newDropsCounts: current,
+                  waveId,
+                })
             );
             return;
           }
 
           if (isVisibleActiveWave) {
-            setNewDropsCounts((prev) =>
-              updateLatestDropTimestamp({
-                createdAt: message.created_at,
-                newDropsCounts: prev,
-                waveId,
-              })
+            updateNewDropsCountsForMessage(
+              waveId,
+              message.created_at,
+              (current) =>
+                updateLatestDropTimestamp({
+                  createdAt: message.created_at,
+                  newDropsCounts: current,
+                  waveId,
+                })
             );
             return;
           }
 
-          setNewDropsCounts((prev) => {
-            return addUnreadDropCount({
-              createdAt: message.created_at,
-              newDropsCounts: prev,
-              serialNo: message.serial_no,
-              waveId,
-            });
-          });
+          updateNewDropsCountsForMessage(
+            waveId,
+            message.created_at,
+            (current) => {
+              return addUnreadDropCount({
+                createdAt: message.created_at,
+                newDropsCounts: current,
+                serialNo: message.serial_no,
+                waveId,
+              });
+            }
+          );
 
           // Prevent refetch storms on bursts of unknown-wave websocket events.
           const now = Date.now();
@@ -420,14 +440,17 @@ function useNewDropCounter(
         }
 
         if (wave.muted) {
-          setNewDropsCounts((prev) =>
-            updateLatestDropTimestamp({
-              createdAt: message.created_at,
-              firstUnreadSerialNo: null,
-              newDropsCounts: prev,
-              unreadCount: 0,
-              waveId,
-            })
+          updateNewDropsCountsForMessage(
+            waveId,
+            message.created_at,
+            (current) =>
+              updateLatestDropTimestamp({
+                createdAt: message.created_at,
+                firstUnreadSerialNo: null,
+                newDropsCounts: current,
+                unreadCount: 0,
+                waveId,
+              })
           );
           return;
         }
@@ -436,36 +459,48 @@ function useNewDropCounter(
           connectedProfile?.handle?.toLowerCase() ===
           message.author.handle?.toLowerCase()
         ) {
-          setNewDropsCounts((prev) => {
-            return updateLatestDropTimestamp({
-              createdAt: message.created_at,
-              newDropsCounts: prev,
-              waveId,
-            });
-          });
+          updateNewDropsCountsForMessage(
+            waveId,
+            message.created_at,
+            (current) => {
+              return updateLatestDropTimestamp({
+                createdAt: message.created_at,
+                newDropsCounts: current,
+                waveId,
+              });
+            }
+          );
           return;
         }
 
         // Skip incrementing if this is the active wave AND the document is visible
         if (waveId === activeWaveId && document.visibilityState === "visible") {
-          setNewDropsCounts((prev) => {
-            return updateLatestDropTimestamp({
-              createdAt: message.created_at,
-              newDropsCounts: prev,
-              waveId,
-            });
-          });
+          updateNewDropsCountsForMessage(
+            waveId,
+            message.created_at,
+            (current) => {
+              return updateLatestDropTimestamp({
+                createdAt: message.created_at,
+                newDropsCounts: current,
+                waveId,
+              });
+            }
+          );
           return;
         }
 
-        setNewDropsCounts((prev) => {
-          return addUnreadDropCount({
-            createdAt: message.created_at,
-            newDropsCounts: prev,
-            serialNo: message.serial_no,
-            waveId,
-          });
-        });
+        updateNewDropsCountsForMessage(
+          waveId,
+          message.created_at,
+          (current) => {
+            return addUnreadDropCount({
+              createdAt: message.created_at,
+              newDropsCounts: current,
+              serialNo: message.serial_no,
+              waveId,
+            });
+          }
+        );
       },
       [
         activeWaveId,
@@ -475,12 +510,13 @@ function useNewDropCounter(
         refetchWaves,
         otherListWaveIds,
         unknownWaveRefetchCooldownMs,
+        updateNewDropsCountsForMessage,
       ]
     ) // Make sure to include activeWaveId as a dependency
   );
 
   return {
-    newDropsCounts: enabled ? newDropsCounts : EMPTY_NEW_DROPS_COUNTS,
+    newDropsCounts: enabled ? reconciledNewDropsCounts : EMPTY_NEW_DROPS_COUNTS,
     resetWaveNewDropsCount,
     // Reset counts for all tracked waves
     resetAllWavesNewDropsCount,

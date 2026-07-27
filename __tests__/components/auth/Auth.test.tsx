@@ -59,6 +59,7 @@ const createReactQueryWrapperContextValue = (
   invalidateAll: jest.fn(),
   invalidateAuthSensitiveQueries: jest.fn(),
   invalidateNotifications: jest.fn(),
+  invalidateWaveReadState: jest.fn(),
   invalidateIdentityTdhStats: jest.fn(),
   ...overrides,
 });
