@@ -44,6 +44,7 @@ export default function CreateWaveDraftsSection({
       }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded((previous) => !previous)}
+      fullHeaderToggle
     >
       <div className="tw-px-5 tw-pb-5">
         <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-normal tw-text-iron-400">
@@ -60,7 +61,12 @@ export default function CreateWaveDraftsSection({
             >
               <button
                 type="button"
-                onClick={() => onLoad(draft)}
+                onClick={() => {
+                  onLoad(draft);
+                  // Loading immediately applies the draft, so fold the list
+                  // away to reveal the now-populated form below.
+                  setIsExpanded(false);
+                }}
                 className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start tw-gap-y-0.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
               >
                 <span className="tw-w-full tw-truncate tw-text-sm tw-font-medium tw-text-white">
