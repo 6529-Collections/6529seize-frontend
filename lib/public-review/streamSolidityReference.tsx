@@ -72,10 +72,21 @@ if (!activeStreamReviewVersion) {
   throw new Error("The active Stream review version is unavailable.");
 }
 
+const publiclyAvailableStreamReviewVersions =
+  STREAM_REVIEW_DEFINITION.versions.filter((candidate) =>
+    isStreamReviewVersionPubliclyAvailable(candidate.version)
+  );
+const referenceActiveStreamReviewVersion =
+  publiclyAvailableStreamReviewVersions.find(
+    (candidate) => candidate.version === STREAM_REVIEW_DEFINITION.activeVersion
+  ) ??
+  publiclyAvailableStreamReviewVersions.at(-1) ??
+  activeStreamReviewVersion;
+
 const STREAM_SOLIDITY_REFERENCE_IDENTITY: SolidityReferenceReviewIdentity = {
-  activeSourceCommit: activeStreamReviewVersion.source.commit,
-  activeVersion: STREAM_REVIEW_DEFINITION.activeVersion,
-  availableVersions: STREAM_REVIEW_DEFINITION.versions.map(
+  activeSourceCommit: referenceActiveStreamReviewVersion.source.commit,
+  activeVersion: referenceActiveStreamReviewVersion.version,
+  availableVersions: publiclyAvailableStreamReviewVersions.map(
     (candidate) => candidate.version
   ),
   reviewId: STREAM_REVIEW_SLUG,
@@ -177,7 +188,7 @@ async function getReferenceFeedback({
       manifest,
       sourcePaths,
     }),
-    destination: resolveStreamReviewFeedbackDestination(
+    destination: await resolveStreamReviewFeedbackDestination(
       publicEnv.BASE_ENDPOINT
     ),
     page: createStreamTechnicalFeedbackPageContext({

@@ -1,5 +1,7 @@
 import "next/dist/compiled/server-only";
 
+import { connection } from "next/server";
+
 import { getPublicReviewEnvironment } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -257,9 +259,10 @@ export async function createStreamReviewFeedbackConfig({
   };
 }
 
-export function resolveStreamReviewFeedbackDestination(
+export async function resolveStreamReviewFeedbackDestination(
   baseEndpoint: string
-): PublicReviewDiscussionDestination {
+): Promise<PublicReviewDiscussionDestination> {
+  await connection();
   const environment = getPublicReviewEnvironment(baseEndpoint);
   if (environment === "disabled") {
     throw new Error(

@@ -1,9 +1,14 @@
 jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+jest.mock("next/server", () => ({
+  connection: jest.fn(async () => undefined),
+}));
 
+import { connection } from "next/server";
 import {
   createStreamEditorialFeedbackPageContext,
   createStreamReviewFeedbackConfig,
   createStreamTechnicalFeedbackPageContext,
+  resolveStreamReviewFeedbackDestination,
 } from "@/lib/public-review/streamReviewFeedback.server";
 import type { SolidityReferenceManifest } from "@/lib/public-review/solidityReferenceTypes";
 import {
@@ -22,6 +27,8 @@ jest.mock("@/lib/public-review/editorialContent", () => ({
 const SOURCE_PATH = "src/StreamCore.sol";
 const SOURCE_COMMIT = "0123456789abcdef0123456789abcdef01234567";
 const SOURCE_SHA256 = "a".repeat(64);
+const DESTINATIONS_ENV = "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS";
+const STAGING_WAVE_ID = "22222222-2222-4222-8222-222222222222";
 
 function makeManifest(): SolidityReferenceManifest {
   return {
@@ -47,6 +54,17 @@ function makeManifest(): SolidityReferenceManifest {
 }
 
 describe("Stream review feedback manifest binding", () => {
+  const originalDestinations = process.env[DESTINATIONS_ENV];
+
+  afterEach(() => {
+    jest.mocked(connection).mockClear();
+    if (originalDestinations === undefined) {
+      delete process.env[DESTINATIONS_ENV];
+    } else {
+      process.env[DESTINATIONS_ENV] = originalDestinations;
+    }
+  });
+
   it("derives source identity and the selected file from the requested manifest", async () => {
     const config = await createStreamReviewFeedbackConfig({
       manifest: makeManifest(),
@@ -155,5 +173,20 @@ describe("Stream review feedback manifest binding", () => {
         pageTitle: "Technical reference",
       })
     ).toThrow("immutable");
+  });
+
+  it("defers destination resolution until an incoming request exists", async () => {
+    process.env[DESTINATIONS_ENV] = JSON.stringify({
+      staging: { "stream-review": STAGING_WAVE_ID },
+    });
+
+    await expect(
+      resolveStreamReviewFeedbackDestination("https://staging.6529.io")
+    ).resolves.toEqual({
+      environment: "staging",
+      logicalKey: "stream-review",
+      waveId: STAGING_WAVE_ID,
+    });
+    expect(connection).toHaveBeenCalledTimes(1);
   });
 });

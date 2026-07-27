@@ -123,7 +123,8 @@ export async function renderStreamReviewFeedbackPage({
     manifest,
     sourcePaths: "all",
   });
-  const destination = resolveStreamReviewFeedbackDestination(baseEndpoint);
+  const destination =
+    await resolveStreamReviewFeedbackDestination(baseEndpoint);
 
   return (
     <FeedbackPageShell

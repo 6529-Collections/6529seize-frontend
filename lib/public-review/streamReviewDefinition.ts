@@ -8,12 +8,25 @@ import type {
 } from "@/lib/public-review/publicReviewTypes";
 import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import { createPublicReviewRouteBuilder } from "@/lib/public-review/publicReviewRoutes";
-import { STREAM_REVIEW_LIFECYCLE_STATE } from "@/lib/public-review/streamReviewPublication";
+import {
+  getStreamReviewVersionLifecycleState,
+  STREAM_REVIEW_LIFECYCLE_STATE,
+} from "@/lib/public-review/streamReviewPublication";
 
 export const STREAM_REVIEW_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
 export const STREAM_REVIEW_SOURCE_COMMIT =
   "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
+const STREAM_REVIEW_VERSION_LIFECYCLE_STATE =
+  getStreamReviewVersionLifecycleState(STREAM_REVIEW_VERSION);
+
+if (
+  STREAM_REVIEW_VERSION_LIFECYCLE_STATE !== STREAM_REVIEW_LIFECYCLE_STATE
+) {
+  throw new Error(
+    "The active Stream review lifecycle does not match its version."
+  );
+}
 
 type PageMessageStem =
   | "overview"
@@ -228,7 +241,7 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   versions: [
     {
       version: STREAM_REVIEW_VERSION,
-      status: STREAM_REVIEW_LIFECYCLE_STATE,
+      status: STREAM_REVIEW_VERSION_LIFECYCLE_STATE,
       deploymentStatus: "NOT_DEPLOYED",
       auditStatus: "PRE_AUDIT",
       source: {

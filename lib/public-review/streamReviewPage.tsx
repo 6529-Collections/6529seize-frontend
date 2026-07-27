@@ -76,7 +76,7 @@ async function renderStreamReviewRoute(
   const { manifest } =
     await getStreamSolidityReferenceReader().loadManifest(contentVersion);
   const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
-  const feedbackDestination = resolveStreamReviewFeedbackDestination(
+  const feedbackDestination = await resolveStreamReviewFeedbackDestination(
     route.baseEndpoint
   );
 
