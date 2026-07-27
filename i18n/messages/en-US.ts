@@ -274,7 +274,7 @@ const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
   savedAt: "Saved {timeAgo}",
   untitled: "Untitled wave",
   deleteLabel: 'Delete draft "{name}"',
-  newWave: "New Wave",
+  newWave: "Create a Wave",
   count: "{count} saved drafts",
 } as const);
 

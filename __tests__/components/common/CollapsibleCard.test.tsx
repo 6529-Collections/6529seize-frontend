@@ -26,20 +26,20 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <span data-testid="icon" />,
 }));
 
-import DateAccordion from "@/components/common/DateAccordion";
+import CollapsibleCard from "@/components/common/CollapsibleCard";
 
-describe("DateAccordion", () => {
+describe("CollapsibleCard", () => {
   it("shows collapsed content when not expanded, exposes aria attributes, and toggles from the visible title", () => {
     const toggle = jest.fn();
     render(
-      <DateAccordion
+      <CollapsibleCard
         title="Title"
         isExpanded={false}
         onToggle={toggle}
         collapsedContent={<span>info</span>}
       >
         <div data-testid="child" />
-      </DateAccordion>
+      </CollapsibleCard>
     );
     expect(screen.getByText("info")).toBeInTheDocument();
     expect(screen.queryByTestId("child")).not.toBeInTheDocument();
@@ -52,14 +52,14 @@ describe("DateAccordion", () => {
 
   it("renders children when expanded and links aria-controls to the content region", () => {
     render(
-      <DateAccordion
+      <CollapsibleCard
         title="Title"
         isExpanded={true}
         onToggle={() => {}}
         collapsedContent={<span>info</span>}
       >
         <div data-testid="child" />
-      </DateAccordion>
+      </CollapsibleCard>
     );
     const button = screen.getByRole("button", { name: /Title/ });
     expect(button).toHaveAttribute("aria-expanded", "true");
@@ -72,31 +72,25 @@ describe("DateAccordion", () => {
     expect(region).toContainElement(screen.getByTestId("child"));
   });
 
-  it("keeps title actions outside the toggle button", () => {
+  it("renders presentational title actions inside the single toggle button", () => {
     const toggle = jest.fn();
-    const action = jest.fn();
     render(
-      <DateAccordion
+      <CollapsibleCard
         title="Title"
-        titleActions={
-          <button type="button" onClick={action}>
-            Help
-          </button>
-        }
+        titleActions={<span>Badge</span>}
         isExpanded={false}
         onToggle={toggle}
       >
         <div />
-      </DateAccordion>
+      </CollapsibleCard>
     );
 
-    const toggleButton = screen.getByRole("button", { name: /Title/ });
-    const actionButton = screen.getByRole("button", { name: "Help" });
+    const button = screen.getByRole("button", { name: /Title/ });
+    const badge = screen.getByText("Badge");
 
-    expect(toggleButton).not.toContainElement(actionButton);
-
-    fireEvent.click(actionButton);
-    expect(action).toHaveBeenCalled();
-    expect(toggle).not.toHaveBeenCalled();
+    // The whole header — badge included — is one toggle target.
+    expect(button).toContainElement(badge);
+    fireEvent.click(badge);
+    expect(toggle).toHaveBeenCalled();
   });
 });

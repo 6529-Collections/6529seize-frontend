@@ -59,6 +59,39 @@ export const ES_ES_MESSAGES = {
   "linkPreview.github.fact.mime": "MIME",
   "linkPreview.github.fact.type": "Tipo",
   "linkPreview.github.fileKind": "Archivo {kind}",
+  "linkPreview.etherscan.provider": "Etherscan",
+  "linkPreview.etherscan.previewLabel":
+    "Vista previa de {kind} de Etherscan en {network}",
+  "linkPreview.etherscan.open": "Abrir en Etherscan",
+  "linkPreview.etherscan.copy": "Copiar {kind}",
+  "linkPreview.etherscan.copied": "{kind} copiado",
+  "linkPreview.etherscan.copyFailed": "No se pudo copiar {kind}",
+  "linkPreview.etherscan.retry": "Reintentar",
+  "linkPreview.etherscan.loading": "Cargando vista previa de Etherscan",
+  "linkPreview.etherscan.partial":
+    "Algunos datos en directo no están disponibles",
+  "linkPreview.etherscan.liveUnavailable": "Datos en directo no disponibles",
+  "linkPreview.etherscan.legacy":
+    "Red histórica: los datos en directo no están disponibles para este explorador archivado.",
+  "linkPreview.etherscan.status.success": "Correcta",
+  "linkPreview.etherscan.status.pending": "Pendiente",
+  "linkPreview.etherscan.status.reverted": "Revertida",
+  "linkPreview.etherscan.status.finalized": "Finalizado",
+  "linkPreview.etherscan.status.proposed": "Propuesto",
+  "linkPreview.etherscan.status.future": "Bloque futuro",
+  "linkPreview.etherscan.status.unknown": "Estado no disponible",
+  "linkPreview.etherscan.action.nativeTransfer": "{value} ETH enviados",
+  "linkPreview.etherscan.action.tokenTransfer": "Transferencia de token",
+  "linkPreview.etherscan.action.contractCreation": "Contrato creado",
+  "linkPreview.etherscan.action.contractInteraction":
+    "Interacción con contrato",
+  "linkPreview.etherscan.action.transaction": "Transacción de Ethereum",
+  "linkPreview.etherscan.action.compound":
+    "Compound {action}: {amount} {token}",
+  "linkPreview.etherscan.description.tool":
+    "Enlace de solo lectura a una herramienta de Etherscan. 6529 no envía su formulario.",
+  "linkPreview.etherscan.description.unknown":
+    "Una página de Etherscan. Ábrela para consultar la ruta completa.",
   "profileCms.block.audioUnavailable": "Audio no disponible",
   "profileCms.block.collectionFallback": "Colección",
   "profileCms.block.galleryUnavailable": "Galería no disponible",

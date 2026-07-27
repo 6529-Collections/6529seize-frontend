@@ -57,10 +57,8 @@ describe("CreateWaveLayout", () => {
     const footer = screen.getByTestId("create-wave-actions").parentElement;
 
     expect(footer?.className).toContain(
-      "tw-pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
+      "tw-pb-[max(calc(env(safe-area-inset-bottom,0px)_-_0.5rem),0.5rem)]"
     );
-    expect(footer?.className).toContain(
-      "lg:tw-pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
-    );
+    expect(footer?.className).toContain("lg:tw-pb-5");
   });
 });
