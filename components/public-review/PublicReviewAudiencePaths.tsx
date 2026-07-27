@@ -44,7 +44,7 @@ export function PublicReviewAudiencePaths({
   return (
     <section
       aria-labelledby="review-audiences-heading"
-      className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-0 tw-py-6 sm:tw-px-6"
+      className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.018] tw-p-5 sm:tw-p-6"
     >
       <h2
         id="review-audiences-heading"
@@ -66,7 +66,7 @@ export function PublicReviewAudiencePaths({
           return (
             <article
               key={audience}
-              className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/30 tw-p-4"
+              className="tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-[#070708] tw-p-4"
             >
               <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
                 {t(DEFAULT_LOCALE, copy.title)}
@@ -78,13 +78,13 @@ export function PublicReviewAudiencePaths({
                 <>
                   <Link
                     href={routes.getPageHref(firstPage, version)}
-                    className="tw-text-primary-100 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/[0.07] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                    className="tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.06] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-100 tw-no-underline tw-transition-colors hover:tw-border-primary-300/50 hover:tw-bg-primary-400/[0.1] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
                   >
                     {t(DEFAULT_LOCALE, "publicReview.audiences.startPath", {
                       audience: t(DEFAULT_LOCALE, copy.title),
                     })}
                   </Link>
-                  <details className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.02] tw-p-3">
+                  <details className="tw-mt-3 tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.015] tw-p-3">
                     <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 marker:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
                       {t(DEFAULT_LOCALE, "publicReview.audiences.showPath", {
                         count: formatInteger(

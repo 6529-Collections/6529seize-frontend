@@ -114,7 +114,7 @@ function getFeedbackContextFingerprint({
 }
 
 const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
+  "tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-[#050506] tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
 
 function getFeedbackGate({
   authenticated,
@@ -158,7 +158,7 @@ function ReviewFeedbackContext({
   readonly referenceSelection: PublicReviewReferenceSelection | undefined;
 }) {
   return (
-    <div className="tw-mt-4 tw-rounded-lg tw-bg-iron-950/70 tw-p-3 tw-text-sm tw-text-iron-300">
+    <div className="tw-mt-4 tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.018] tw-p-3 tw-text-xs tw-leading-5 tw-text-iron-400">
       <p className="tw-m-0">
         {t(locale, "publicReview.feedback.pageContext", {
           page: page.pageTitle,
@@ -460,15 +460,15 @@ export default function PublicReviewFeedbackComposer({
   return (
     <section
       aria-labelledby={`${formId}-title`}
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-4 tw-@container @md:tw-p-5"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5 tw-@container"
     >
       <h2
         id={`${formId}-title`}
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50"
+        className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50"
       >
         {t(locale, "publicReview.feedback.title")}
       </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "publicReview.feedback.intro")}
       </p>
 
@@ -590,7 +590,7 @@ export default function PublicReviewFeedbackComposer({
             ) : null}
           </div>
 
-          <details className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/40 tw-p-3">
+          <details className="tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.015] tw-p-3">
             <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40">
               {t(locale, "publicReview.feedback.advanced")}
             </summary>
@@ -637,14 +637,14 @@ export default function PublicReviewFeedbackComposer({
               type="button"
               disabled={busy || !referenceReady}
               onClick={previewAndFocusError}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-opacity-60"
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-bg-white/[0.025] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-opacity-60"
             >
               {t(locale, "publicReview.feedback.preview")}
             </button>
             <button
               type="submit"
               disabled={busy || !referenceReady || Boolean(feedbackGate)}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white hover:tw-bg-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
             >
               {isSubmitting
                 ? t(locale, "publicReview.feedback.submitting")

@@ -28,15 +28,17 @@ function ReviewPageLinks({
             <Link
               href={routes.getPageHref(page, version)}
               aria-current={isCurrent ? "page" : undefined}
-              className={`tw-flex tw-gap-3 tw-border-y-0 tw-border-b-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white ${
+              className={`tw-flex tw-gap-3 tw-border-y-0 tw-border-b-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-px-3 tw-py-2.5 tw-text-[0.8125rem] tw-leading-5 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white ${
                 isCurrent
-                  ? "tw-border-amber-300 tw-bg-white/[0.045] tw-font-semibold tw-text-white"
-                  : "tw-border-transparent tw-text-iron-400 hover:tw-border-white/20 hover:tw-bg-white/[0.025] hover:tw-text-white"
+                  ? "tw-border-primary-300 tw-bg-primary-400/[0.07] tw-font-semibold tw-text-white"
+                  : "tw-border-transparent tw-text-iron-400 hover:tw-border-white/15 hover:tw-bg-white/[0.025] hover:tw-text-iron-100"
               }`}
             >
               <span
                 aria-hidden="true"
-                className="tw-w-6 tw-flex-none tw-font-mono tw-text-xs tw-text-iron-500"
+                className={`tw-w-6 tw-flex-none tw-font-mono tw-text-[0.65rem] ${
+                  isCurrent ? "tw-text-primary-300" : "tw-text-iron-600"
+                }`}
               >
                 {String(index + 1).padStart(2, "0")}
               </span>
@@ -55,12 +57,12 @@ function ReviewSectionLinks({
   readonly sections: readonly PublicReviewSectionDefinition[];
 }) {
   return (
-    <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-border-y-0 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-700 tw-p-0 tw-pl-4">
+    <ul className="tw-m-0 tw-list-none tw-space-y-2.5 tw-border-y-0 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/10 tw-p-0 tw-pl-4">
       {sections.map((section) => (
         <li key={section.id}>
           <a
             href={`#${section.id}`}
-            className="tw-text-sm tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="tw-text-xs tw-leading-5 tw-text-iron-500 tw-no-underline tw-transition-colors hover:tw-text-primary-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           >
             {section.title}
           </a>
@@ -89,7 +91,7 @@ export function PublicReviewNavigation({
   );
   return (
     <>
-      <details className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.025] tw-p-4 lg:tw-hidden">
+      <details className="tw-m-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#08080a] tw-px-4 tw-py-3 sm:tw-mx-7 lg:tw-hidden">
         <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-semibold tw-text-white marker:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
           {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}
         </summary>
@@ -117,15 +119,15 @@ export function PublicReviewNavigation({
         )}
       </details>
 
-      <aside className="tw-hidden lg:tw-block">
-        <div className="tw-sticky tw-top-28 tw-max-h-[calc(100vh-8rem)] tw-space-y-6 tw-overflow-y-auto tw-pr-2">
+      <aside className="tw-hidden tw-min-w-0 tw-border-y-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-white/[0.08] tw-bg-[#050506] lg:tw-block">
+        <div className="tw-sticky tw-top-0 tw-h-screen tw-space-y-7 tw-overflow-y-auto tw-px-5 tw-pb-8 tw-pt-7">
           <nav
             aria-label={t(
               DEFAULT_LOCALE,
               "publicReview.navigation.contentsLabel"
             )}
           >
-            <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
+            <p className="tw-mb-4 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
               {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}
             </p>
             <ReviewPageLinks
@@ -137,7 +139,7 @@ export function PublicReviewNavigation({
           </nav>
           {sections.length > 0 && (
             <nav aria-label={onThisPageLabel}>
-              <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
+              <p className="tw-mb-3 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
                 {onThisPageLabel}
               </p>
               <ReviewSectionLinks sections={sections} />

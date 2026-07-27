@@ -40,18 +40,18 @@ export function PublicReviewEditorialFeedback({
   );
 
   return (
-    <div className="tw-space-y-5">
+    <div className="tw-space-y-6">
       <PublicReviewPageComments
         config={config}
         destination={destination}
         locale={DEFAULT_LOCALE}
         page={page}
       />
-      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
+      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5">
         <label
           id="public-review-editorial-feedback-context"
           htmlFor="public-review-feedback-section"
-          className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100"
+          className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300"
         >
           {t(DEFAULT_LOCALE, "publicReview.feedback.sectionSelector")}
         </label>
@@ -59,7 +59,7 @@ export function PublicReviewEditorialFeedback({
           id="public-review-feedback-section"
           value={sectionId}
           onChange={(event) => setSectionId(event.target.value)}
-          className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+          className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-[#050506] tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
         >
           <option value="">
             {t(DEFAULT_LOCALE, "publicReview.feedback.wholePage")}

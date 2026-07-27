@@ -59,7 +59,7 @@ export function PublicReviewEvidenceBadge({
   const presentation = EVIDENCE_PRESENTATION[state];
   return (
     <span
-      className={`tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-font-mono tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] ${presentation.className}`}
+      className={`tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[0.67rem] tw-font-semibold tw-uppercase tw-tracking-[0.07em] ${presentation.className}`}
     >
       {t(DEFAULT_LOCALE, presentation.labelKey)}
     </span>
@@ -68,7 +68,7 @@ export function PublicReviewEvidenceBadge({
 
 export function PublicReviewEvidenceLegend() {
   return (
-    <details className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.025] tw-p-4">
+    <details className="tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.018] tw-p-4">
       <summary className="tw-cursor-pointer tw-rounded tw-text-sm tw-font-semibold tw-text-iron-100 marker:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
         {t(DEFAULT_LOCALE, "publicReview.evidence.summary")}
       </summary>

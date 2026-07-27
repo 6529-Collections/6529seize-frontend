@@ -9,7 +9,7 @@ import type {
 } from "@/lib/public-review/publicReviewTypes";
 
 const STATUS_CHIP =
-  "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-font-mono tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-[0.08em]";
+  "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[0.67rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em]";
 
 const LIFECYCLE_COPY: Record<
   PublicReviewLifecycleState,
@@ -94,25 +94,25 @@ export function PublicReviewStatusBanner({
   return (
     <section
       aria-label={t(DEFAULT_LOCALE, "publicReview.status.heading")}
-      className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-[#070708]/95 tw-px-4 tw-py-3 tw-backdrop-blur-xl lg:tw-sticky lg:tw-top-0 lg:tw-z-30"
+      className="tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/20 tw-bg-amber-400/[0.035] tw-px-4 tw-py-4"
     >
-      <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-[88rem] tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
+      <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 xl:tw-flex-row xl:tw-items-center xl:tw-justify-between">
         <div>
-          <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
             {t(DEFAULT_LOCALE, "publicReview.status.heading")}
           </p>
-          <p className="tw-mb-0 tw-mt-1 tw-max-w-3xl tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1 tw-max-w-2xl tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(DEFAULT_LOCALE, lifecycleCopy.explanation)}
           </p>
         </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
           <span
-            className={`${STATUS_CHIP} tw-border-amber-400/30 tw-bg-amber-400/[0.07] tw-text-amber-100`}
+            className={`${STATUS_CHIP} tw-border-amber-400/25 tw-bg-amber-400/[0.06] tw-text-amber-100`}
           >
             {t(DEFAULT_LOCALE, lifecycleCopy.label)}
           </span>
           <span
-            className={`${STATUS_CHIP} tw-border-sky-400/30 tw-bg-sky-400/[0.07] tw-text-sky-100`}
+            className={`${STATUS_CHIP} tw-border-sky-400/25 tw-bg-sky-400/[0.05] tw-text-sky-100`}
           >
             {t(
               DEFAULT_LOCALE,
@@ -120,7 +120,7 @@ export function PublicReviewStatusBanner({
             )}
           </span>
           <span
-            className={`${STATUS_CHIP} tw-border-orange-400/30 tw-bg-orange-400/[0.07] tw-text-orange-100`}
+            className={`${STATUS_CHIP} tw-border-orange-400/25 tw-bg-orange-400/[0.05] tw-text-orange-100`}
           >
             {t(
               DEFAULT_LOCALE,
@@ -128,7 +128,7 @@ export function PublicReviewStatusBanner({
             )}
           </span>
           <span
-            className={`${STATUS_CHIP} tw-border-white/10 tw-text-iron-300`}
+            className={`${STATUS_CHIP} tw-border-white/[0.08] tw-text-iron-400`}
           >
             {t(DEFAULT_LOCALE, "publicReview.status.version", {
               version: displayedVersion,
@@ -137,7 +137,7 @@ export function PublicReviewStatusBanner({
           {isHistoricalVersion ? (
             <Link
               href={`/reviews/${review.slug}`}
-              className={`${STATUS_CHIP} tw-border-violet-400/30 tw-bg-violet-400/[0.07] tw-text-violet-100 tw-no-underline hover:tw-border-violet-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
+              className={`${STATUS_CHIP} tw-border-violet-400/25 tw-bg-violet-400/[0.05] tw-text-violet-100 tw-no-underline hover:tw-border-violet-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
             >
               {t(DEFAULT_LOCALE, "publicReview.status.viewCurrentVersion")}
             </Link>
@@ -154,7 +154,7 @@ export function PublicReviewStatusBanner({
                 contract: review.contractName,
               }
             )}
-            className={`${STATUS_CHIP} tw-border-white/10 tw-text-iron-300 tw-no-underline hover:tw-border-white/25 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
+            className={`${STATUS_CHIP} tw-border-white/[0.08] tw-text-iron-400 tw-no-underline hover:tw-border-white/25 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
           >
             {t(DEFAULT_LOCALE, "publicReview.status.source", {
               commit: shortCommit,

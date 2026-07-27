@@ -84,12 +84,12 @@ export function PublicReviewPageComments({
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <h3
           id={commentsTitleId}
-          className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+          className="tw-m-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400"
         >
           {t(locale, "publicReview.comments.listTitle")}
         </h3>
         {!ledgerQuery.isPending && !ledgerQuery.isError ? (
-          <span className="tw-flex-none tw-font-mono tw-text-xs tw-text-iron-500">
+          <span className="tw-flex-none tw-font-mono tw-text-[0.65rem] tw-text-iron-500">
             {formatInteger(locale, records.length)}
           </span>
         ) : null}
@@ -114,7 +114,7 @@ export function PublicReviewPageComments({
       {ledgerQuery.isPending ? (
         <div
           aria-hidden="true"
-          className="tw-mt-3 tw-space-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-3"
+          className="tw-mt-3 tw-space-y-2 tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.018] tw-p-3"
         >
           <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800" />
           <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800" />
@@ -146,7 +146,7 @@ export function PublicReviewPageComments({
       {!ledgerQuery.isPending &&
       !ledgerQuery.isError &&
       records.length === 0 ? (
-        <p className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-p-4 tw-text-sm tw-leading-5 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-3 tw-rounded-md tw-border tw-border-dashed tw-border-white/10 tw-bg-white/[0.015] tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(
             locale,
             ledgerQuery.hasNextPage
@@ -157,7 +157,7 @@ export function PublicReviewPageComments({
       ) : null}
 
       {records.length > 0 ? (
-        <ol className="tw-mb-0 tw-mt-3 tw-list-none tw-space-y-3 tw-p-0">
+        <ol className="tw-mb-0 tw-mt-3 tw-list-none tw-divide-y tw-divide-white/[0.08] tw-p-0">
           {records.map((record) => {
             const author =
               record.author.handle ??
@@ -178,20 +178,20 @@ export function PublicReviewPageComments({
                   aria-label={t(locale, "publicReview.ledger.itemLabel", {
                     author,
                   })}
-                  className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-3"
+                  className="tw-py-4"
                 >
                   <div className="tw-flex tw-flex-wrap tw-gap-1.5">
-                    <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/10 tw-px-2 tw-py-0.5 tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-wide">
+                    <span className="tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.07] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-200">
                       {categoryLabel}
                     </span>
-                    <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-2 tw-py-0.5 tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300">
+                    <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
                       {severityLabel}
                     </span>
                   </div>
-                  <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-100">
+                  <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-200">
                     {primaryComment || record.body}
                   </p>
-                  <p className="tw-mb-0 tw-mt-3 tw-font-mono tw-text-[0.65rem] tw-leading-4 tw-text-iron-500">
+                  <p className="tw-mb-0 tw-mt-3 tw-text-[0.68rem] tw-leading-4 tw-text-iron-500">
                     {t(locale, "publicReview.comments.byline", {
                       author,
                       date: formatDate(locale, record.createdAt),
@@ -200,7 +200,7 @@ export function PublicReviewPageComments({
                   </p>
                   <Link
                     href={record.discussionPath}
-                    className="hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-400/40 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                    className="hover:tw-text-primary-200 tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-400/40 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
                   >
                     {t(locale, "publicReview.ledger.openDiscussion")}
                   </Link>
@@ -216,8 +216,8 @@ export function PublicReviewPageComments({
           type="button"
           aria-busy={ledgerQuery.isFetchingNextPage}
           disabled={ledgerQuery.isFetchingNextPage}
-          onClick={() => void ledgerQuery.fetchNextPage()}
-          className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-border-white/20 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-wait disabled:tw-opacity-60"
+        onClick={() => void ledgerQuery.fetchNextPage()}
+          className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-border-white/20 hover:tw-bg-white/[0.025] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-wait disabled:tw-opacity-60"
         >
           {t(
             locale,

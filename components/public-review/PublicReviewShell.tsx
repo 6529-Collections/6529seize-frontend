@@ -46,17 +46,17 @@ function PublicReviewPageStepper({
   return (
     <nav
       aria-label={t(DEFAULT_LOCALE, "publicReview.navigation.sequenceLabel")}
-      className="tw-mt-12 tw-grid tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-6 sm:tw-grid-cols-2"
+      className="tw-mt-14 tw-grid tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-6 sm:tw-grid-cols-2"
     >
       {previousPage ? (
         <Link
           href={routes.getPageHref(previousPage, version)}
-          className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-white/[0.025] tw-p-4 tw-text-left tw-no-underline tw-transition-colors hover:tw-border-white/10 hover:tw-bg-white/[0.045] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+          className="tw-group tw-rounded-md tw-border tw-border-solid tw-border-transparent tw-bg-white/[0.018] tw-px-4 tw-py-3.5 tw-text-left tw-no-underline tw-transition-colors hover:tw-border-white/10 hover:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
         >
-          <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+          <span className="tw-block tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.previous")}
           </span>
-          <span className="tw-mt-1 tw-block tw-font-semibold tw-text-iron-200 group-hover:tw-text-white">
+          <span className="tw-mt-1 tw-block tw-text-sm tw-font-semibold tw-text-iron-200 group-hover:tw-text-white">
             {t(DEFAULT_LOCALE, previousPage.titleKey)}
           </span>
         </Link>
@@ -66,12 +66,12 @@ function PublicReviewPageStepper({
       {nextPage && (
         <Link
           href={routes.getPageHref(nextPage, version)}
-          className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-white/[0.025] tw-p-4 tw-text-left tw-no-underline tw-transition-colors hover:tw-border-white/10 hover:tw-bg-white/[0.045] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white sm:tw-text-right"
+          className="tw-group tw-rounded-md tw-border tw-border-solid tw-border-transparent tw-bg-white/[0.018] tw-px-4 tw-py-3.5 tw-text-left tw-no-underline tw-transition-colors hover:tw-border-white/10 hover:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white sm:tw-text-right"
         >
-          <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+          <span className="tw-block tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "publicReview.navigation.next")}
           </span>
-          <span className="tw-mt-1 tw-block tw-font-semibold tw-text-iron-200 group-hover:tw-text-white">
+          <span className="tw-mt-1 tw-block tw-text-sm tw-font-semibold tw-text-iron-200 group-hover:tw-text-white">
             {t(DEFAULT_LOCALE, nextPage.titleKey)}
           </span>
         </Link>
@@ -114,108 +114,124 @@ export function PublicReviewShell({
 
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-[#030303] tw-text-white">
-      <PublicReviewStatusBanner
-        review={review}
-        displayedVersion={displayedVersion}
-        source={source}
-      />
-      <div className="tw-mx-auto tw-w-full tw-max-w-[88rem] tw-px-4 tw-pb-20 tw-pt-8 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-12">
-        <header className="tw-max-w-5xl">
-          <p className="tw-m-0 tw-font-mono tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-amber-300">
-            {t(DEFAULT_LOCALE, "publicReview.eyebrow", {
-              contract: review.contractName,
-            })}
-          </p>
-          <p className="tw-mb-0 tw-mt-5 tw-font-mono tw-text-xs tw-text-iron-500">
-            {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
-              current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
-              total: formatInteger(DEFAULT_LOCALE, reviewVersion.pages.length),
-            })}
-          </p>
-          <h1 className="tw-mb-0 tw-mt-3 tw-max-w-4xl tw-text-4xl tw-font-semibold tw-tracking-[-0.03em] tw-text-white sm:tw-text-5xl lg:tw-text-[3.5rem] lg:tw-leading-[1.05]">
-            {t(DEFAULT_LOCALE, page.titleKey)}
-          </h1>
-          <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-lg tw-leading-8 tw-text-iron-400">
-            {t(DEFAULT_LOCALE, page.summaryKey)}
-          </p>
-          <div
-            aria-label={t(DEFAULT_LOCALE, "publicReview.evidence.heading")}
-            className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2"
-          >
-            {page.evidenceStates.map((state) => (
-              <PublicReviewEvidenceBadge key={state} state={state} />
-            ))}
-          </div>
-          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2.5">
-            <Link
-              href={getSolidityReferenceRootHref({
-                reviewSlug: review.slug,
-                version: routeVersion,
-              })}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-sky-300/50 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-            >
-              {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
-            </Link>
-            {review.feedbackAvailable ? (
-              <Link
-                href={routes.getFeedbackHref(routeVersion)}
-                className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-primary-300/50 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-              >
-                {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
-              </Link>
-            ) : null}
-            {feedbackSubmissionsAvailable ? (
-              <a
-                href="#public-review-feedback"
-                className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/30 tw-bg-amber-400/[0.08] tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-amber-100 tw-no-underline tw-transition-colors hover:tw-border-amber-300/60 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-              >
-                {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
-              </a>
-            ) : null}
-          </div>
-        </header>
+      <div className="tw-mx-auto tw-w-full tw-max-w-[100rem] lg:tw-grid lg:tw-grid-cols-[17.5rem_minmax(0,1fr)] lg:tw-items-start">
+        <PublicReviewNavigation
+          currentPage={page}
+          pages={reviewVersion.pages}
+          routes={routes}
+          sections={sections}
+          version={routeVersion}
+        />
 
-        {page.id === "overview" && (
-          <div className="tw-mt-8">
-            <PublicReviewAudiencePaths
-              pages={reviewVersion.pages}
-              routes={routes}
-              version={routeVersion}
-            />
-          </div>
-        )}
-
-        <div className="tw-mt-10 tw-grid tw-gap-8 lg:tw-grid-cols-[15rem_minmax(0,1fr)] lg:tw-items-start">
-          <PublicReviewNavigation
-            currentPage={page}
-            pages={reviewVersion.pages}
-            routes={routes}
-            sections={sections}
-            version={routeVersion}
-          />
-
+        <div className="tw-min-w-0">
           <PublicReviewReadingLayout
             feedbackAvailable={review.feedbackAvailable}
             ledgerHref={routes.getFeedbackHref(routeVersion)}
             panel={feedbackSlot}
             reviewVersion={displayedVersion}
+            toolbar={
+              <p className="tw-m-0 tw-font-mono tw-text-[0.68rem] tw-font-medium tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+                {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
+                  current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
+                  total: formatInteger(
+                    DEFAULT_LOCALE,
+                    reviewVersion.pages.length
+                  ),
+                })}
+              </p>
+            }
             content={
-              <>
-                <article className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-1 tw-pb-8 tw-pt-1 sm:tw-px-5 lg:tw-px-7">
-                  <PublicReviewMarkdown markdown={editorialMarkdown} />
-                </article>
-
-                <div className="tw-mt-8">
-                  <PublicReviewEvidenceLegend />
+              <div className="tw-mx-auto tw-w-full tw-max-w-[72rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10">
+                <div className="tw-pt-6 sm:tw-pt-8">
+                  <PublicReviewStatusBanner
+                    review={review}
+                    displayedVersion={displayedVersion}
+                    source={source}
+                  />
                 </div>
 
-                <PublicReviewPageStepper
-                  currentPage={page}
-                  pages={reviewVersion.pages}
-                  routes={routes}
-                  version={routeVersion}
-                />
-              </>
+                <header className="tw-mx-auto tw-mt-12 tw-max-w-3xl sm:tw-mt-14">
+                  <p className="tw-m-0 tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300">
+                    {t(DEFAULT_LOCALE, "publicReview.eyebrow", {
+                      contract: review.contractName,
+                    })}
+                  </p>
+                  <h1 className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-[2.15rem] tw-font-semibold tw-leading-[1.12] tw-tracking-[-0.03em] tw-text-white sm:tw-text-[2.75rem]">
+                    {t(DEFAULT_LOCALE, page.titleKey)}
+                  </h1>
+                  <p className="tw-mb-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-400">
+                    {t(DEFAULT_LOCALE, page.summaryKey)}
+                  </p>
+                  <div
+                    aria-label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.evidence.heading"
+                    )}
+                    className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2"
+                  >
+                    {page.evidenceStates.map((state) => (
+                      <PublicReviewEvidenceBadge key={state} state={state} />
+                    ))}
+                  </div>
+                  <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2.5">
+                    <Link
+                      href={getSolidityReferenceRootHref({
+                        reviewSlug: review.slug,
+                        version: routeVersion,
+                      })}
+                      className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.025] tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-primary-300/40 hover:tw-bg-white/[0.045] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                    >
+                      {t(
+                        DEFAULT_LOCALE,
+                        "publicReview.reference.openReference"
+                      )}
+                    </Link>
+                    {review.feedbackAvailable ? (
+                      <Link
+                        href={routes.getFeedbackHref(routeVersion)}
+                        className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.025] tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-primary-300/40 hover:tw-bg-white/[0.045] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                      >
+                        {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
+                      </Link>
+                    ) : null}
+                    {feedbackSubmissionsAvailable ? (
+                      <a
+                        href="#public-review-feedback"
+                        className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.07] tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-100 tw-no-underline tw-transition-colors hover:tw-border-primary-300/50 hover:tw-bg-primary-400/[0.11] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                      >
+                        {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
+                      </a>
+                    ) : null}
+                  </div>
+                </header>
+
+                {page.id === "overview" && (
+                  <div className="tw-mx-auto tw-mt-10 tw-max-w-3xl">
+                    <PublicReviewAudiencePaths
+                      pages={reviewVersion.pages}
+                      routes={routes}
+                      version={routeVersion}
+                    />
+                  </div>
+                )}
+
+                <div className="tw-mx-auto tw-mt-12 tw-max-w-3xl">
+                  <article className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pb-8 tw-pt-1">
+                    <PublicReviewMarkdown markdown={editorialMarkdown} />
+                  </article>
+
+                  <div className="tw-mt-8">
+                    <PublicReviewEvidenceLegend />
+                  </div>
+
+                  <PublicReviewPageStepper
+                    currentPage={page}
+                    pages={reviewVersion.pages}
+                    routes={routes}
+                    version={routeVersion}
+                  />
+                </div>
+              </div>
             }
           />
         </div>

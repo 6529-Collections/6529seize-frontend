@@ -32,28 +32,28 @@ function createMarkdownComponents(): Components {
           getHeadingText(children),
           headingCounts
         )}
-        className="tw-mb-0 tw-mt-14 tw-scroll-mt-24 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-3 tw-text-2xl tw-font-semibold tw-tracking-[-0.02em] tw-text-white"
+        className="tw-mb-0 tw-mt-14 tw-scroll-mt-24 tw-text-[1.45rem] tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-white"
       >
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="tw-mb-0 tw-mt-9 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100">
+      <h3 className="tw-mb-0 tw-mt-9 tw-text-[1.05rem] tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-100">
         {children}
       </h3>
     ),
     p: ({ children }) => (
-      <p className="tw-mb-0 tw-mt-5 tw-text-base tw-leading-8 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-4 tw-text-[0.9375rem] tw-leading-7 tw-text-iron-300">
         {children}
       </p>
     ),
     ul: ({ children }) => (
-      <ul className="tw-mb-0 tw-mt-5 tw-space-y-2 tw-pl-6 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-500">
+      <ul className="tw-mb-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-[0.9375rem] tw-leading-7 tw-text-iron-300 marker:tw-text-primary-400">
         {children}
       </ul>
     ),
     ol: ({ children }) => (
-      <ol className="tw-mb-0 tw-mt-5 tw-space-y-2 tw-pl-6 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-500">
+      <ol className="tw-mb-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-[0.9375rem] tw-leading-7 tw-text-iron-300 marker:tw-text-iron-500">
         {children}
       </ol>
     ),
@@ -63,7 +63,7 @@ function createMarkdownComponents(): Components {
     ),
     em: ({ children }) => <em className="tw-text-iron-100">{children}</em>,
     blockquote: ({ children }) => (
-      <blockquote className="tw-my-7 tw-border-y-0 tw-border-b-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-border-amber-400/70 tw-bg-amber-400/[0.035] tw-px-5 tw-py-1">
+      <blockquote className="tw-my-7 tw-border-y-0 tw-border-b-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-border-primary-400/60 tw-bg-primary-400/[0.035] tw-px-5 tw-py-1">
         {children}
       </blockquote>
     ),
@@ -88,14 +88,14 @@ function createMarkdownComponents(): Components {
       );
     },
     code: ({ children }) => (
-      <code className="tw-break-all tw-rounded tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.045] tw-px-1.5 tw-py-0.5 tw-font-mono tw-text-[0.9em] tw-text-iron-100">
+      <code className="tw-break-all tw-rounded tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.04] tw-px-1.5 tw-py-0.5 tw-font-mono tw-text-[0.88em] tw-text-iron-100">
         {children}
       </code>
     ),
     pre: ({ children }) => (
       <pre
         aria-label={t(DEFAULT_LOCALE, "publicReview.markdown.codeRegion")}
-        className="tw-my-7 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#08080a] tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-100 tw-shadow-inner focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        className="tw-my-7 tw-overflow-x-auto tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#070708] tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-100 tw-shadow-inner focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
         tabIndex={0}
       >
         {children}
@@ -104,7 +104,7 @@ function createMarkdownComponents(): Components {
     table: ({ children }) => (
       <div
         aria-label={t(DEFAULT_LOCALE, "publicReview.markdown.tableRegion")}
-        className="tw-my-7 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        className="tw-my-7 tw-overflow-x-auto tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#070708] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
         role="region"
         tabIndex={0}
       >
@@ -114,17 +114,17 @@ function createMarkdownComponents(): Components {
       </div>
     ),
     th: ({ children }) => (
-      <th className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-white/[0.045] tw-p-3 tw-font-mono tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-100">
+      <th className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.035] tw-p-3 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-200">
         {children}
       </th>
     ),
     td: ({ children }) => (
-      <td className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-p-3 tw-align-top">
+      <td className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-p-3 tw-align-top tw-text-[0.8125rem] tw-leading-6">
         {children}
       </td>
     ),
     hr: () => (
-      <hr className="tw-my-12 tw-border-0 tw-border-t tw-border-solid tw-border-white/10" />
+      <hr className="tw-my-12 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08]" />
     ),
   };
 }
