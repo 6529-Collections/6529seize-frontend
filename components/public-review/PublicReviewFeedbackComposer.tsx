@@ -496,7 +496,9 @@ export default function PublicReviewFeedbackComposer({
       {authenticated && config.submissionsOpen ? (
         <form
           aria-describedby={!referenceReady ? referenceStatusId : undefined}
-          className="tw-mt-4 tw-space-y-3"
+          className={`tw-space-y-3 ${
+            referenceReady ? "tw-mt-0" : "tw-mt-4"
+          }`}
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
