@@ -8,46 +8,28 @@ export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
     [ApiDropGroupMention.Devs6529]: "@devs6529",
   };
 
-const createGroupMentionPattern = (group: ApiDropGroupMention) =>
-  new RegExp(
-    String.raw`(^|[^\p{L}\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\p{L}\p{N}_@])`,
-    "iu"
-  );
-
-const createGroupMentionMarkPattern = (group: ApiDropGroupMention) =>
-  new RegExp(
-    String.raw`(?<![\p{L}\p{N}_@])(${GROUP_MENTION_TEXT[group]})(?![\p{L}\p{N}_@])`,
-    "giu"
-  );
-
 const GROUP_MENTION_PATTERNS: Readonly<Record<ApiDropGroupMention, RegExp>> = {
-  [ApiDropGroupMention.All]: createGroupMentionPattern(ApiDropGroupMention.All),
-  [ApiDropGroupMention.Contributors]: createGroupMentionPattern(
-    ApiDropGroupMention.Contributors
-  ),
-  [ApiDropGroupMention.Admins]: createGroupMentionPattern(
-    ApiDropGroupMention.Admins
-  ),
-  [ApiDropGroupMention.Devs6529]: createGroupMentionPattern(
-    ApiDropGroupMention.Devs6529
-  ),
+  [ApiDropGroupMention.All]:
+    /(^|[^\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/iu,
+  [ApiDropGroupMention.Contributors]:
+    /(^|[^\p{L}\p{N}_@])(@contributors)(?![\p{L}\p{N}_@])/iu,
+  [ApiDropGroupMention.Admins]:
+    /(^|[^\p{L}\p{N}_@])(@admins)(?![\p{L}\p{N}_@])/iu,
+  [ApiDropGroupMention.Devs6529]:
+    /(^|[^\p{L}\p{N}_@])(@devs6529)(?![\p{L}\p{N}_@])/iu,
 };
 
 const GROUP_MENTION_MARK_PATTERNS: Readonly<
   Record<ApiDropGroupMention, RegExp>
 > = {
-  [ApiDropGroupMention.All]: createGroupMentionMarkPattern(
-    ApiDropGroupMention.All
-  ),
-  [ApiDropGroupMention.Contributors]: createGroupMentionMarkPattern(
-    ApiDropGroupMention.Contributors
-  ),
-  [ApiDropGroupMention.Admins]: createGroupMentionMarkPattern(
-    ApiDropGroupMention.Admins
-  ),
-  [ApiDropGroupMention.Devs6529]: createGroupMentionMarkPattern(
-    ApiDropGroupMention.Devs6529
-  ),
+  [ApiDropGroupMention.All]:
+    /(?<![\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/giu,
+  [ApiDropGroupMention.Contributors]:
+    /(?<![\p{L}\p{N}_@])(@contributors)(?![\p{L}\p{N}_@])/giu,
+  [ApiDropGroupMention.Admins]:
+    /(?<![\p{L}\p{N}_@])(@admins)(?![\p{L}\p{N}_@])/giu,
+  [ApiDropGroupMention.Devs6529]:
+    /(?<![\p{L}\p{N}_@])(@devs6529)(?![\p{L}\p{N}_@])/giu,
 };
 
 export const getMentionedGroupsFromText = (

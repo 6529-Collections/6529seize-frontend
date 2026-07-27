@@ -38,7 +38,7 @@ export const GROUP_MENTION_TRANSFORMER: TextMatchTransformer = {
     }
 
     const [group] = getMentionedGroupsFromText(token, true);
-    if (!group) return;
+    if (group === undefined) return;
     const groupMentionNode = $createGroupMentionNode(GROUP_MENTION_TEXT[group]);
     nodeToReplace.replace(groupMentionNode);
   },
